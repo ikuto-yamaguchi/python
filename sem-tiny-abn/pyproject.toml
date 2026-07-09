@@ -1,0 +1,16 @@
+[project]
+name = "sem-tiny-abn"
+version = "0.1.0"
+description = "TinyCNN + lightweight ABN for fast SEM/design OK-NG inspection"
+requires-python = ">=3.9"
+dependencies = [
+  "torch>=2.1",
+  "numpy>=1.24",
+  "pillow>=10.0",
+  "PyYAML>=6.0",
+  "tqdm>=4.66",
+  "scikit-learn>=1.3"
+]
+
+[tool.setuptools]
+packages = ["sem_tiny_abn"]
