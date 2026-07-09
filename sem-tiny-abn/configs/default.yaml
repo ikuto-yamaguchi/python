@@ -1,0 +1,15 @@
+classes: [OK, NG]
+task: multiclass
+model: tiny_abn
+input_mode: sem_design_posneg
+image_size: 128
+design_blur_radius: 1.2
+batch_size: 32
+epochs: 30
+lr: 0.001
+weight_decay: 0.0001
+aux_weight: 0.35
+focal_gamma: 1.5
+val_ratio: 0.2
+num_workers: 0
+seed: 42
