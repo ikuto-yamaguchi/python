@@ -110,11 +110,11 @@ class SEMPairDataset(Dataset):
 
     crop_mode:
       resize      : 画像全体を image_size x image_size にして使う。
-      center_crop : image_sizeにしたあと、中央 tile_size だけを切る。
-      random_tile : image_sizeにしたあと、ランダムに tile_size だけを切る。
+      center_crop : image_sizeにしたあと、中央 tile_size だけを切る。確認用。
 
-    微小パターンを見る場合は、まず image_size=512 か 1024 を推奨。
-    128固定は軽いが、細かい差分が潰れる可能性が高い。
+    OK/NGの画像単位ラベルだけでランダムタイル学習をすると、NG画像内の正常領域までNG扱いになり、
+    ラベルノイズで精度が落ちる可能性があるため、このDatasetからは外しています。
+    タイルは推論時の探索用 `tile_predict.py` または、将来パッチ単位ラベルがある場合に使います。
     """
 
     def __init__(
@@ -143,8 +143,8 @@ class SEMPairDataset(Dataset):
         self.tile_size = int(tile_size)
         if self.task not in {"multiclass", "multilabel"}:
             raise ValueError("task must be 'multiclass' or 'multilabel'")
-        if self.crop_mode not in {"resize", "center_crop", "random_tile"}:
-            raise ValueError("crop_mode must be resize, center_crop, or random_tile")
+        if self.crop_mode not in {"resize", "center_crop"}:
+            raise ValueError("crop_mode must be resize or center_crop")
 
     def __len__(self) -> int:
         return len(self.rows)
@@ -161,7 +161,7 @@ class SEMPairDataset(Dataset):
 
     @property
     def model_input_size(self) -> int:
-        return self.tile_size if self.crop_mode in {"center_crop", "random_tile"} else self.image_size
+        return self.tile_size if self.crop_mode == "center_crop" else self.image_size
 
     def _resolve(self, rel: str) -> Path:
         p = Path(rel)
@@ -191,12 +191,8 @@ class SEMPairDataset(Dataset):
         _, h, w = x.shape
         max_top = max(0, h - self.tile_size)
         max_left = max(0, w - self.tile_size)
-        if self.crop_mode == "center_crop":
-            top = max_top // 2
-            left = max_left // 2
-        else:
-            top = random.randint(0, max_top) if max_top > 0 else 0
-            left = random.randint(0, max_left) if max_left > 0 else 0
+        top = max_top // 2
+        left = max_left // 2
         return _crop_tensor(x, top, left, self.tile_size)
 
     def _make_input(self, sem_img: Image.Image, design_img: Image.Image) -> torch.Tensor:
