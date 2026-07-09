@@ -4,6 +4,54 @@ CD-SEM画像と設計パターン画像のペアを見て、`OK` / `NG` を高�
 
 社内の弱めCPU環境でも試しやすいように、モデルはかなり小さめにしています。差分画像はファイルとして保存せず、学習・推論時にメモリ上で作ります。
 
+## まず最初に読むところ
+
+この実装は、次のようなデータを想定しています。
+
+```text
+任意のフォルダ/
+  sem_0001.png
+  design_0001.png
+  sem_0002.png
+  design_0002.png
+  annotations.csv
+```
+
+CSVはこうです。
+
+```csv
+sem,design,label
+sem_0001.png,design_0001.png,OK
+sem_0002.png,design_0002.png,NG
+```
+
+最初に実行するコマンドはこれです。
+
+```bash
+cd sem-tiny-abn
+pip install -r requirements.txt
+
+python -m sem_tiny_abn.train \
+  --data-root /path/to/画像フォルダ \
+  --csv /path/to/annotations.csv \
+  --out runs/sem_tiny_abn \
+  --model tiny_abn \
+  --image-size 128 \
+  --epochs 30 \
+  --batch-size 32 \
+  --device cpu
+```
+
+学習が終わったら、評価します。
+
+```bash
+python -m sem_tiny_abn.evaluate \
+  --data-root /path/to/画像フォルダ \
+  --csv /path/to/annotations.csv \
+  --checkpoint runs/sem_tiny_abn/best.pt \
+  --device cpu
+```
+
 ## 何をするもの？
 
 1サンプルにつき、次の2枚の画像を使います。
@@ -96,7 +144,7 @@ Design画像:
 
 画像パスは `--data-root` からの相対パスでOKです。
 
-## まず使う手順
+## 使う手順
 
 ```bash
 cd sem-tiny-abn
@@ -127,7 +175,7 @@ pip install -r requirements.txt
 
 ```bash
 python -m sem_tiny_abn.train \
-  --data-root /path/to/folder \
+  --data-root /path/to/画像フォルダ \
   --csv /path/to/annotations.csv \
   --out runs/sem_tiny_abn \
   --model tiny_abn \
@@ -164,7 +212,7 @@ python -m sem_tiny_abn.train \
 
 ```bash
 python -m sem_tiny_abn.evaluate \
-  --data-root /path/to/folder \
+  --data-root /path/to/画像フォルダ \
   --csv /path/to/annotations.csv \
   --checkpoint runs/sem_tiny_abn/best.pt \
   --device cpu
@@ -186,7 +234,7 @@ false_ng:
 
 ```bash
 python -m sem_tiny_abn.predict \
-  --data-root /path/to/folder \
+  --data-root /path/to/画像フォルダ \
   --csv /path/to/annotations.csv \
   --checkpoint runs/sem_tiny_abn/best.pt \
   --out-csv runs/sem_tiny_abn/predictions.csv \
@@ -197,7 +245,7 @@ Attention画像も保存したい場合:
 
 ```bash
 python -m sem_tiny_abn.predict \
-  --data-root /path/to/folder \
+  --data-root /path/to/画像フォルダ \
   --csv /path/to/annotations.csv \
   --checkpoint runs/sem_tiny_abn/best.pt \
   --out-csv runs/sem_tiny_abn/predictions.csv \
