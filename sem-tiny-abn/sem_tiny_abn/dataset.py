@@ -13,20 +13,26 @@ from .utils import parse_classes
 
 
 def _load_gray(path: Path) -> Image.Image:
+    """画像をモノクロで読み込む。SEMもDesignも1ch画像として扱う。"""
     return Image.open(path).convert("L")
 
 
 def _pil_to_tensor(img: Image.Image) -> torch.Tensor:
+    """PIL画像を 0.0〜1.0 の PyTorch Tensor に変換する。"""
     arr = np.asarray(img, dtype=np.float32) / 255.0
     return torch.from_numpy(arr).unsqueeze(0)
 
 
 def _resize(img: Image.Image, size: int) -> Image.Image:
+    """512/1024画像を学習用サイズへ縮小する。"""
     return img.resize((size, size), Image.BILINEAR)
 
 
 def _paired_augment(sem: Image.Image, design: Image.Image) -> Tuple[Image.Image, Image.Image]:
-    # Same transform for both images. This preserves alignment while removing direction bias.
+    """SEMとDesignに同じ回転・反転をかける。
+
+    片方だけ変換すると位置合わせ関係が壊れるので、必ず同じ変換にする。
+    """
     if random.random() < 0.5:
         sem = sem.transpose(Image.FLIP_LEFT_RIGHT)
         design = design.transpose(Image.FLIP_LEFT_RIGHT)
@@ -41,9 +47,10 @@ def _paired_augment(sem: Image.Image, design: Image.Image) -> Tuple[Image.Image,
 
 
 class SEMPairDataset(Dataset):
-    """Dataset for paired SEM/design images.
+    """SEM画像とDesign画像のペアを読むDataset。
 
-    Difference channels are generated in memory, not saved to disk.
+    差分画像はPNGなどに保存しない。
+    __getitem__ の中でメモリ上に pos_diff / neg_diff を作る。
     """
 
     def __init__(
@@ -74,6 +81,7 @@ class SEMPairDataset(Dataset):
 
     @property
     def in_channels(self) -> int:
+        """input_modeごとの入力チャンネル数。"""
         return {
             "sem_design": 2,
             "posneg": 2,
@@ -108,7 +116,9 @@ class SEMPairDataset(Dataset):
         sem_img = _resize(sem_img, self.image_size)
         design_img = _resize(design_img, self.image_size)
 
-        # Soft design reduces over-sensitivity to tiny edge shifts.
+        # Designを少しぼかす。
+        # 理由: Designの硬いエッジとSEMのぼけたエッジを直接比べると、
+        # 小さなエッジ位置ずれに過敏になりやすいから。
         if self.design_blur_radius > 0:
             design_soft_img = design_img.filter(ImageFilter.GaussianBlur(radius=self.design_blur_radius))
         else:
@@ -116,7 +126,11 @@ class SEMPairDataset(Dataset):
 
         sem = _pil_to_tensor(sem_img)
         design = _pil_to_tensor(design_soft_img)
+
+        # SEM側に余計に出ている差分。太り・余計な接続・bridge寄り。
         pos = torch.clamp(sem - design, min=0.0)
+
+        # DesignにはあるのにSEM側で足りない差分。細り・欠け・break寄り。
         neg = torch.clamp(design - sem, min=0.0)
         abs_diff = pos + neg
 
