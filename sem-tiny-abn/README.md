@@ -2,11 +2,68 @@
 
 CD-SEM画像と設計パターン画像のペアを見て、`OK` / `NG` を高速に判定するための **TinyCNN + 軽量ABN** 実装です。
 
-社内の弱めCPU環境でも試しやすいように、モデルはかなり小さめにしています。差分画像はファイルとして保存せず、学習・推論時にメモリ上で作ります。
+実装は **PyTorch** です。学習はPyTorchで行い、推論高速化用にONNX出力もできます。
 
-## まず最初に読むところ
+## 重要な方針
 
-この実装は、次のようなデータを想定しています。
+128×128固定は使いません。
+
+微小なパターンや細いbridge/breakを見る用途では、128×128まで潰すと情報が消えます。現在のデフォルトは `image_size: 512` です。余裕があれば `1024` も使えます。
+
+```text
+軽さ優先:
+  image_size: 256
+
+まずの推奨:
+  image_size: 512
+
+微細差分重視:
+  image_size: 1024
+```
+
+学習は、基本的に画像全体を見る `crop_mode: resize` だけを使います。
+
+```text
+学習:
+  crop_mode: resize
+
+確認用:
+  crop_mode: center_crop
+
+推論時の補助探索:
+  python -m sem_tiny_abn.tile_predict
+```
+
+注意: OK/NGの画像単位ラベルだけでランダムタイル学習はしません。NG画像の中に正常領域があると、その正常パッチまでNGとして学習してしまい、精度が落ちる可能性があるからです。
+
+## まず最初にやること
+
+`configs/default.yaml` を開いて、次の2つを書き換えてください。
+
+```yaml
+data_root: /path/to/画像フォルダ
+csv: /path/to/annotations.csv
+```
+
+その後は、長いコマンドを書かずにこれで学習できます。
+
+```bash
+cd sem-tiny-abn
+pip install -r requirements.txt
+python -m sem_tiny_abn.train --config configs/default.yaml
+```
+
+評価はこれです。
+
+```bash
+python -m sem_tiny_abn.evaluate \
+  --data-root /path/to/画像フォルダ \
+  --csv /path/to/annotations.csv \
+  --checkpoint runs/sem_tiny_abn/best.pt \
+  --device cpu
+```
+
+## データ形式
 
 ```text
 任意のフォルダ/
@@ -25,40 +82,7 @@ sem_0001.png,design_0001.png,OK
 sem_0002.png,design_0002.png,NG
 ```
 
-最初に実行するコマンドはこれです。
-
-```bash
-cd sem-tiny-abn
-pip install -r requirements.txt
-
-python -m sem_tiny_abn.train \
-  --data-root /path/to/画像フォルダ \
-  --csv /path/to/annotations.csv \
-  --out runs/sem_tiny_abn \
-  --model tiny_abn \
-  --image-size 128 \
-  --epochs 30 \
-  --batch-size 32 \
-  --device cpu
-```
-
-学習が終わったら、評価します。
-
-```bash
-python -m sem_tiny_abn.evaluate \
-  --data-root /path/to/画像フォルダ \
-  --csv /path/to/annotations.csv \
-  --checkpoint runs/sem_tiny_abn/best.pt \
-  --device cpu
-```
-
-## 何をするもの？
-
-1サンプルにつき、次の2枚の画像を使います。
-
-- SEM画像: 512×512 または 1024×1024 などのモノクロ画像
-- Design画像: SEM画像と位置合わせ済みの設計パターン画像
-- CSV: `OK` / `NG` のアノテーション
+## モデル入力
 
 デフォルトでは、内部的に次の4チャンネルを作ってモデルに渡します。
 
@@ -78,36 +102,14 @@ python -m sem_tiny_abn.evaluate \
    細り・欠け・break寄りの情報
 ```
 
-計算式はこうです。
+差分画像は保存しません。学習・推論時にメモリ上で作ります。
 
 ```text
 pos_diff = max(SEM_norm - soft_design, 0)
 neg_diff = max(soft_design - SEM_norm, 0)
 ```
 
-`soft_design` を使う理由は、設計画像の硬いエッジとSEM画像のぼやけたエッジをそのまま比較すると、少しのエッジ位置ずれでも過剰にNG寄りになりやすいからです。
-
-## なぜ差分画像を保存しないの？
-
-保存しません。
-
-```text
-悪い案:
-  差分画像をPNGなどで保存する
-  → ディスクI/Oが増える
-  → ファイル管理が面倒
-  → 学習前の前処理も重い
-
-今回の案:
-  学習・推論時にメモリ上で差分を作る
-  → 速い
-  → 管理が楽
-  → SEM/Designへの回転・反転augmentationとも合わせやすい
-```
-
-そのため、差分画像を作ること自体による大きなタイムロスは避けています。
-
-## 画像の回転・反転について
+## 画像の回転・反転
 
 水平反転、垂直反転、90度回転は、SEM画像とDesign画像に **必ず同じ変換** をかけます。
 
@@ -117,161 +119,7 @@ Design画像   ├─ 同じ回転・同じ反転
 差分チャンネル ┘
 ```
 
-これにより、方向依存性を減らしながら、SEMとDesignの対応関係は壊さないようにしています。
-
-## CSV形式
-
-基本形はこれです。
-
-```csv
-sem,design,label
-sem_0001.png,design_0001.png,OK
-sem_0002.png,design_0002.png,NG
-```
-
-列名は次の別名にも対応しています。
-
-```text
-SEM画像:
-  sem, sem_path, sem_image, image_sem
-
-Design画像:
-  design, design_path, pattern, design_image, image_design
-
-ラベル:
-  label, target, class
-```
-
-画像パスは `--data-root` からの相対パスでOKです。
-
-## 使う手順
-
-```bash
-cd sem-tiny-abn
-python -m venv .venv
-```
-
-Linux / WSL の場合:
-
-```bash
-source .venv/bin/activate
-```
-
-Windows の場合:
-
-```bash
-.venv\Scripts\activate
-```
-
-必要ライブラリを入れます。
-
-```bash
-pip install -r requirements.txt
-```
-
-## 学習する
-
-まずはこれで十分です。
-
-```bash
-python -m sem_tiny_abn.train \
-  --data-root /path/to/画像フォルダ \
-  --csv /path/to/annotations.csv \
-  --out runs/sem_tiny_abn \
-  --model tiny_abn \
-  --image-size 128 \
-  --epochs 30 \
-  --batch-size 32 \
-  --device cpu
-```
-
-意味はこうです。
-
-```text
---data-root
-  SEM画像とDesign画像が入っているフォルダ
-
---csv
-  sem, design, label が書かれたCSV
-
---out
-  学習結果の保存先
-
---model tiny_abn
-  TinyCNN + 軽量ABNを使う
-
---image-size 128
-  512/1024画像を128×128に縮小して学習する
-  速度優先なら128から開始
-
---device cpu
-  CPUで実行する
-```
-
-## 評価する
-
-```bash
-python -m sem_tiny_abn.evaluate \
-  --data-root /path/to/画像フォルダ \
-  --csv /path/to/annotations.csv \
-  --checkpoint runs/sem_tiny_abn/best.pt \
-  --device cpu
-```
-
-評価では、通常の正解率だけでなく、検査用途で重要な次の数も出します。
-
-```text
-false_ok:
-  本当はNGなのにOKと判定した数
-  一番危険
-
-false_ng:
-  本当はOKなのにNGと判定した数
-  過検出
-```
-
-## 推論する
-
-```bash
-python -m sem_tiny_abn.predict \
-  --data-root /path/to/画像フォルダ \
-  --csv /path/to/annotations.csv \
-  --checkpoint runs/sem_tiny_abn/best.pt \
-  --out-csv runs/sem_tiny_abn/predictions.csv \
-  --device cpu
-```
-
-Attention画像も保存したい場合:
-
-```bash
-python -m sem_tiny_abn.predict \
-  --data-root /path/to/画像フォルダ \
-  --csv /path/to/annotations.csv \
-  --checkpoint runs/sem_tiny_abn/best.pt \
-  --out-csv runs/sem_tiny_abn/predictions.csv \
-  --save-attention runs/sem_tiny_abn/attention \
-  --device cpu
-```
-
-## CPU速度を測る
-
-```bash
-python -m sem_tiny_abn.benchmark \
-  --checkpoint runs/sem_tiny_abn/best.pt \
-  --batch-size 1 \
-  --iters 300 \
-  --device cpu
-```
-
-## ONNXに変換する
-
-```bash
-python -m sem_tiny_abn.export_onnx \
-  --checkpoint runs/sem_tiny_abn/best.pt \
-  --out runs/sem_tiny_abn/model.onnx
-```
-
-ONNX化しておくと、あとでONNX RuntimeやOpenVINOでCPU推論を高速化しやすくなります。
+片方だけ回すことはありません。
 
 ## モデルの種類
 
@@ -307,48 +155,152 @@ attention_high:
   細かいエッジ・局所差分を見る想定
 ```
 
-形態差とエッジ位置ずれを分けて見たい場合の実験用です。
+## 設定ファイルで管理する
 
-## OK/NGだけで始める場合
+毎回コマンドでパラメータを書く必要はありません。
 
-デフォルトはこれです。
+`configs/default.yaml` を編集します。
+
+```yaml
+model: tiny_abn
+image_size: 512
+crop_mode: resize
+tile_size: 256
+width: 1.0
+batch_size: 8
+device: cpu
+```
+
+精度が足りなければ、段階的にこう増やします。
+
+```yaml
+width: 1.25
+```
+
+さらに強くするなら、
+
+```yaml
+width: 1.5
+```
+
+または、
+
+```yaml
+model: tiny_freq_abn
+```
+
+へ変更します。
+
+## 誤判定を可視化する
+
+OKなのにNG、NGなのにOKの画像を、SEM/Design/差分/Attentionで俯瞰するPNGとして保存できます。
 
 ```bash
---classes OK,NG --task multiclass
+python -m sem_tiny_abn.visualize_errors \
+  --data-root /path/to/画像フォルダ \
+  --csv /path/to/annotations.csv \
+  --checkpoint runs/sem_tiny_abn/best.pt \
+  --out runs/sem_tiny_abn/error_report \
+  --device cpu
 ```
 
-つまり、今のアノテーションがOK/NGだけでも使えます。
-
-## あとから分類を増やす場合
-
-コードを直さずに、クラス指定だけ変えられます。
-
-例:
-
-```bash
---classes OK,NG,EDGE_SHIFT,REVIEW
-```
-
-ただし、CSVの `label` にも同じラベルを書く必要があります。
-
-例:
-
-```csv
-sem,design,label
-sem_0001.png,design_0001.png,OK
-sem_0002.png,design_0002.png,NG
-sem_0003.png,design_0003.png,EDGE_SHIFT
-sem_0004.png,design_0004.png,REVIEW
-```
-
-いきなり8分類にしなくても、まずは次の4分類くらいが現実的です。
+出力はこういう構成です。
 
 ```text
-OK
-NG
-EDGE_SHIFT
-REVIEW
+runs/sem_tiny_abn/error_report/
+  false_ok/
+    000001_NG_to_OK.png
+  false_ng/
+    000002_OK_to_NG.png
 ```
+
+1枚のPNGに次を並べます。
+
+```text
+SEM
+Design/soft_design
+pos_diff
+neg_diff
+abs_diff
+Attention
+```
+
+これで、単なる枚数だけでなく、どこを見て間違えたのかを確認できます。
+
+## 高解像度タイル推論
+
+512/1024全体を縮小せず、タイルで細かく見たい場合はこちらです。
+
+これは **学習ではなく推論時の補助探索** です。画像単位OK/NGラベルしかない状態でランダムタイル学習はしません。
+
+```bash
+python -m sem_tiny_abn.tile_predict \
+  --data-root /path/to/画像フォルダ \
+  --csv /path/to/annotations.csv \
+  --checkpoint runs/sem_tiny_abn/best.pt \
+  --out-csv runs/sem_tiny_abn/tile_predictions.csv \
+  --tile-size 256 \
+  --stride 128 \
+  --device cpu
+```
+
+各画像を256×256タイルで走査し、最もNGっぽいタイルを画像全体の判定に反映します。微小なNGを拾いたい場合の安全寄り推論です。
+
+ただし、モデルを全体画像でしか学習していない場合、タイル推論は分布が変わるので、評価用・分析用として慎重に使ってください。将来的にパッチ単位ラベルが作れるなら、タイル学習を別途入れるのが本筋です。
+
+## CPU速度を測る
+
+```bash
+python -m sem_tiny_abn.benchmark \
+  --checkpoint runs/sem_tiny_abn/best.pt \
+  --batch-size 1 \
+  --iters 300 \
+  --device cpu
+```
+
+## モデル規模を確認する
+
+```bash
+python -m sem_tiny_abn.model_summary \
+  --model tiny_abn \
+  --image-size 512 \
+  --width 1.0
+```
+
+`width` を変えることで、軽量版から少し大きめのモデルまで段階的に調整できます。
+
+## ONNXに変換する
+
+```bash
+python -m sem_tiny_abn.export_onnx \
+  --checkpoint runs/sem_tiny_abn/best.pt \
+  --out runs/sem_tiny_abn/model.onnx
+```
+
+ONNX化しておくと、あとでONNX RuntimeやOpenVINOでCPU推論を高速化しやすくなります。
+
+## 藤吉研究室のABNとの軽量性イメージ
+
+本家ABNはResNetなどの通常backboneにAttention branchを足す構成です。今回のTinyABNは、最初からdepthwise separable convolution中心の小型backboneにしています。
+
+ざっくりした想定はこうです。
+
+```text
+本家ABN + ResNet18級:
+  数千万パラメータ級になりやすい
+  精度は出やすいがCPUでは重い
+
+今回の TinyABN width=1.0:
+  かなり小さい
+  CPUで試しやすい
+  ただし軽すぎる場合は width を上げる
+
+今回の TinyFreqABN:
+  TinyABNより少し重い
+  形態差と細部Attentionを分けて見たい場合に使う
+```
+
+正確なパラメータ数は `model_summary.py` で確認してください。
 
 ## 100%精度について
 
@@ -356,88 +308,42 @@ REVIEW
 
 量産・検査用途で本当に大事なのは、単純な正解率よりも **false_okをどれだけ減らすか** です。
 
-そのため、推論スクリプトには `--ok-threshold` を入れています。
+そのため、推論スクリプトには `--ok-threshold` やタイル推論の `--ng-threshold` を入れています。
 
-例:
+## 推奨の試し方
 
-```bash
---ok-threshold 0.98
+最初:
+
+```yaml
+model: tiny_abn
+image_size: 512
+crop_mode: resize
+width: 1.0
+batch_size: 8
 ```
 
-これは、OK確率が98%以上のときだけOKにする、という意味です。
+微細差分が見えない場合:
 
-```text
-OK確率が高い:
-  OK
-
-OK確率が微妙:
-  NG または REVIEW 側に倒す
+```yaml
+image_size: 1024
+batch_size: 1
 ```
 
-OK/NGだけのラベル運用でも、この閾値を使うことで、危険な false OK を減らしやすくしています。
+速度が厳しい場合:
 
-## 最初に試すおすすめ順
-
-### 1. tiny_cnn
-
-```bash
---model tiny_cnn
+```yaml
+image_size: 512
+batch_size: 4
 ```
 
-ABNなしの速度と精度を見る基準です。
+精度が足りない場合:
 
-### 2. tiny_abn
-
-```bash
---model tiny_abn
+```yaml
+width: 1.5
 ```
 
-まず使う本命です。
+形態差と細部を分けて見たい場合:
 
-### 3. tiny_freq_abn
-
-```bash
---model tiny_freq_abn
+```yaml
+model: tiny_freq_abn
 ```
-
-形態差と細かいエッジ反応を分けて見たい場合に試します。
-
-## 実運用で見るべき指標
-
-正解率だけでは危ないです。
-
-必ず次を見てください。
-
-```text
-accuracy:
-  全体正解率
-
-false_ok:
-  NGをOKにしてしまった数
-  最重要
-
-false_ng:
-  OKをNGにしてしまった数
-  過検出
-
-attention:
-  モデルが差分領域や形態差を見ているか
-```
-
-## 重要な注意
-
-このモデルは、512×512や1024×1024の画像全体をそのまま重いResNetに入れるのではなく、128×128などへ縮小して軽量判定する設計です。
-
-微小なbridge/breakを絶対に見たい場合は、将来的には次の構成が必要になるかもしれません。
-
-```text
-512/1024全体
-  ↓
-差分component抽出
-  ↓
-怪しい場所だけ128×128 patchに切り出し
-  ↓
-TinyABNでpatch判定
-```
-
-今回の実装は、その前段階として、まず全体縮小版で高速に試せるようにしています。
