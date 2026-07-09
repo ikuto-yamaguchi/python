@@ -17,7 +17,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--data-root", required=True)
     p.add_argument("--csv", required=True)
     p.add_argument("--checkpoint", required=True)
-    p.add_argument("--batch-size", type=int, default=64)
+    p.add_argument("--batch-size", type=int, default=16)
     p.add_argument("--num-workers", type=int, default=0)
     p.add_argument("--device", default="cpu")
     return p.parse_args()
@@ -37,7 +37,19 @@ def main() -> None:
     model, ckpt = load_model(args.checkpoint, device)
     classes: List[str] = ckpt["classes"]
     rows = read_annotations(args.csv)
-    ds = SEMPairDataset(rows, args.data_root, classes=classes, task=ckpt["task"], image_size=ckpt["image_size"], input_mode=ckpt["input_mode"], design_blur_radius=ckpt["design_blur_radius"], augment=False)
+    eval_crop_mode = "center_crop" if ckpt.get("crop_mode") == "random_tile" else ckpt.get("crop_mode", "resize")
+    ds = SEMPairDataset(
+        rows,
+        args.data_root,
+        classes=classes,
+        task=ckpt["task"],
+        image_size=ckpt["image_size"],
+        input_mode=ckpt["input_mode"],
+        design_blur_radius=ckpt["design_blur_radius"],
+        augment=False,
+        crop_mode=eval_crop_mode,
+        tile_size=ckpt.get("tile_size", ckpt.get("image_size", 512)),
+    )
     loader = DataLoader(ds, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
     y_true, y_pred = [], []
     ok_idx = classes.index("OK") if "OK" in classes else 0
