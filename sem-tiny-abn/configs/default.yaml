@@ -1,11 +1,17 @@
 # SEM Tiny ABN デフォルト設定
 #
+# 基本はこの設定ファイルを編集して使います。
+# 毎回長いコマンドにパラメータを書く必要はありません。
+
+# 画像フォルダとCSV。手元環境に合わせて書き換えてください。
+data_root: /path/to/画像フォルダ
+csv: /path/to/annotations.csv
+out: runs/sem_tiny_abn
+
 # まずはOK/NGの2分類で開始します。
 # あとから OK,NG,EDGE_SHIFT,REVIEW のように増やせます。
-classes: [OK, NG]
+classes: OK,NG
 
-# multiclass: 1枚につき1ラベル
-# multilabel: 1枚に複数ラベルを許す場合
 task: multiclass
 
 # tiny_cnn: Attentionなし最速
@@ -16,13 +22,29 @@ model: tiny_abn
 # SEM, soft_design, pos_diff, neg_diff の4chを使う
 input_mode: sem_design_posneg
 
-# 512/1024画像をこのサイズに縮小して学習する
-image_size: 128
+# 微小パターンを見るなら128は潰れやすいです。
+# まず512を推奨。余裕があれば1024。
+image_size: 512
 
-# design画像を少しぼかして、エッジ位置ずれに過敏になりすぎないようにする
+# resize:
+#   画像全体を image_size x image_size で見る。
+# random_tile:
+#   image_sizeにした後、tile_sizeのランダムパッチで学習する。
+#   微小欠陥には強くなるが、OK/NG画像ラベルだけだとNG画像内の正常パッチもNG扱いになり得るので注意。
+# center_crop:
+#   中央パッチだけを見る。確認用。
+crop_mode: resize
+
+tile_size: 256
+
+# Design画像を少しぼかして、エッジ位置ずれに過敏になりすぎないようにする
 design_blur_radius: 1.2
 
-batch_size: 32
+# モデル幅。軽すぎて精度が出なければ 1.25, 1.5, 2.0 と増やす。
+width: 1.0
+
+# 512以上はメモリを食うので、まず小さめbatchを推奨
+batch_size: 8
 epochs: 30
 lr: 0.001
 weight_decay: 0.0001
@@ -37,4 +59,12 @@ val_ratio: 0.2
 
 # 社内PC想定では0が安全。余裕があれば2,4などへ
 num_workers: 0
+
+device: cpu
 seed: 42
+
+# CUDA環境ならtrueを試す。CPUではfalse推奨。
+amp: false
+
+# PyTorch 2系のtorch.compile。CPUでは環境により逆に遅くなる場合があります。
+compile_model: false
