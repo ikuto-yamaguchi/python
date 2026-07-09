@@ -1,15 +1,40 @@
+# SEM Tiny ABN デフォルト設定
+#
+# まずはOK/NGの2分類で開始します。
+# あとから OK,NG,EDGE_SHIFT,REVIEW のように増やせます。
 classes: [OK, NG]
+
+# multiclass: 1枚につき1ラベル
+# multilabel: 1枚に複数ラベルを許す場合
 task: multiclass
+
+# tiny_cnn: Attentionなし最速
+# tiny_abn: 軽量ABNあり。まずはこれがおすすめ
+# tiny_freq_abn: low/high Attentionあり。検証用
 model: tiny_abn
+
+# SEM, soft_design, pos_diff, neg_diff の4chを使う
 input_mode: sem_design_posneg
+
+# 512/1024画像をこのサイズに縮小して学習する
 image_size: 128
+
+# design画像を少しぼかして、エッジ位置ずれに過敏になりすぎないようにする
 design_blur_radius: 1.2
+
 batch_size: 32
 epochs: 30
 lr: 0.001
 weight_decay: 0.0001
+
+# ABNの補助分類headのloss重み
 aux_weight: 0.35
+
+# 少数派や難例を少し重視する。0にすると通常のCrossEntropy寄り
 focal_gamma: 1.5
+
 val_ratio: 0.2
+
+# 社内PC想定では0が安全。余裕があれば2,4などへ
 num_workers: 0
 seed: 42
