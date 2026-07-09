@@ -6,6 +6,7 @@ from typing import Dict, Sequence, Tuple
 
 import numpy as np
 import torch
+import torch.nn.functional as F
 from PIL import Image, ImageFilter
 from torch.utils.data import Dataset
 
@@ -24,7 +25,7 @@ def _pil_to_tensor(img: Image.Image) -> torch.Tensor:
 
 
 def _resize(img: Image.Image, size: int) -> Image.Image:
-    """512/1024画像を学習用サイズへ縮小する。"""
+    """画像を学習/推論用サイズへ縮小または拡大する。"""
     return img.resize((size, size), Image.BILINEAR)
 
 
@@ -46,11 +47,74 @@ def _paired_augment(sem: Image.Image, design: Image.Image) -> Tuple[Image.Image,
     return sem, design
 
 
+def _pad_to_min_size(x: torch.Tensor, min_size: int) -> torch.Tensor:
+    """画像Tensorを最低 min_size x min_size まで右下方向へゼロパディングする。"""
+    _, h, w = x.shape
+    pad_h = max(0, min_size - h)
+    pad_w = max(0, min_size - w)
+    if pad_h == 0 and pad_w == 0:
+        return x
+    return F.pad(x, (0, pad_w, 0, pad_h), mode="constant", value=0.0)
+
+
+def _crop_tensor(x: torch.Tensor, top: int, left: int, size: int) -> torch.Tensor:
+    x = _pad_to_min_size(x, size)
+    return x[:, top : top + size, left : left + size]
+
+
+def make_input_tensor(
+    sem_img: Image.Image,
+    design_img: Image.Image,
+    image_size: int = 512,
+    input_mode: str = "sem_design_posneg",
+    design_blur_radius: float = 1.2,
+) -> torch.Tensor:
+    """SEM/Designからモデル入力チャンネルを作る。
+
+    差分画像は保存せず、この関数内でメモリ上に作る。
+    """
+    sem_img = _resize(sem_img, image_size)
+    design_img = _resize(design_img, image_size)
+
+    # Designを少しぼかす。
+    # 理由: Designの硬いエッジとSEMのぼけたエッジを直接比べると、
+    # 小さなエッジ位置ずれに過敏になりやすいから。
+    if design_blur_radius > 0:
+        design_soft_img = design_img.filter(ImageFilter.GaussianBlur(radius=design_blur_radius))
+    else:
+        design_soft_img = design_img
+
+    sem = _pil_to_tensor(sem_img)
+    design = _pil_to_tensor(design_soft_img)
+
+    # SEM側に余計に出ている差分。太り・余計な接続・bridge寄り。
+    pos = torch.clamp(sem - design, min=0.0)
+
+    # DesignにはあるのにSEM側で足りない差分。細り・欠け・break寄り。
+    neg = torch.clamp(design - sem, min=0.0)
+    abs_diff = pos + neg
+
+    if input_mode == "sem_design":
+        return torch.cat([sem, design], dim=0)
+    if input_mode == "posneg":
+        return torch.cat([pos, neg], dim=0)
+    if input_mode == "sem_design_posneg":
+        return torch.cat([sem, design, pos, neg], dim=0)
+    if input_mode == "sem_design_abs_posneg":
+        return torch.cat([sem, design, abs_diff, pos, neg], dim=0)
+    raise ValueError(f"Unknown input_mode: {input_mode}")
+
+
 class SEMPairDataset(Dataset):
     """SEM画像とDesign画像のペアを読むDataset。
 
-    差分画像はPNGなどに保存しない。
-    __getitem__ の中でメモリ上に pos_diff / neg_diff を作る。
+    crop_mode:
+      resize      : 画像全体を image_size x image_size にして使う。
+      center_crop : image_sizeにしたあと、中央 tile_size だけを切る。
+      random_tile : image_sizeにしたあと、ランダムに tile_size だけを切る。
+
+    微小パターンを見る場合は、まず image_size=512 か 1024 を推奨。
+    128固定は軽いが、細かい差分が潰れる可能性が高い。
     """
 
     def __init__(
@@ -59,10 +123,12 @@ class SEMPairDataset(Dataset):
         data_root: str | Path,
         classes: Sequence[str] | str = ("OK", "NG"),
         task: str = "multiclass",
-        image_size: int = 128,
+        image_size: int = 512,
         input_mode: str = "sem_design_posneg",
         design_blur_radius: float = 1.2,
         augment: bool = False,
+        crop_mode: str = "resize",
+        tile_size: int = 256,
     ) -> None:
         self.rows = list(rows)
         self.data_root = Path(data_root)
@@ -73,8 +139,12 @@ class SEMPairDataset(Dataset):
         self.input_mode = input_mode
         self.design_blur_radius = float(design_blur_radius)
         self.augment = augment
+        self.crop_mode = crop_mode
+        self.tile_size = int(tile_size)
         if self.task not in {"multiclass", "multilabel"}:
             raise ValueError("task must be 'multiclass' or 'multilabel'")
+        if self.crop_mode not in {"resize", "center_crop", "random_tile"}:
+            raise ValueError("crop_mode must be resize, center_crop, or random_tile")
 
     def __len__(self) -> int:
         return len(self.rows)
@@ -88,6 +158,10 @@ class SEMPairDataset(Dataset):
             "sem_design_posneg": 4,
             "sem_design_abs_posneg": 5,
         }[self.input_mode]
+
+    @property
+    def model_input_size(self) -> int:
+        return self.tile_size if self.crop_mode in {"center_crop", "random_tile"} else self.image_size
 
     def _resolve(self, rel: str) -> Path:
         p = Path(rel)
@@ -110,39 +184,32 @@ class SEMPairDataset(Dataset):
             out[self.class_to_idx[part]] = 1.0
         return out
 
+    def _apply_crop(self, x: torch.Tensor) -> torch.Tensor:
+        if self.crop_mode == "resize":
+            return x
+        x = _pad_to_min_size(x, self.tile_size)
+        _, h, w = x.shape
+        max_top = max(0, h - self.tile_size)
+        max_left = max(0, w - self.tile_size)
+        if self.crop_mode == "center_crop":
+            top = max_top // 2
+            left = max_left // 2
+        else:
+            top = random.randint(0, max_top) if max_top > 0 else 0
+            left = random.randint(0, max_left) if max_left > 0 else 0
+        return _crop_tensor(x, top, left, self.tile_size)
+
     def _make_input(self, sem_img: Image.Image, design_img: Image.Image) -> torch.Tensor:
         if self.augment:
             sem_img, design_img = _paired_augment(sem_img, design_img)
-        sem_img = _resize(sem_img, self.image_size)
-        design_img = _resize(design_img, self.image_size)
-
-        # Designを少しぼかす。
-        # 理由: Designの硬いエッジとSEMのぼけたエッジを直接比べると、
-        # 小さなエッジ位置ずれに過敏になりやすいから。
-        if self.design_blur_radius > 0:
-            design_soft_img = design_img.filter(ImageFilter.GaussianBlur(radius=self.design_blur_radius))
-        else:
-            design_soft_img = design_img
-
-        sem = _pil_to_tensor(sem_img)
-        design = _pil_to_tensor(design_soft_img)
-
-        # SEM側に余計に出ている差分。太り・余計な接続・bridge寄り。
-        pos = torch.clamp(sem - design, min=0.0)
-
-        # DesignにはあるのにSEM側で足りない差分。細り・欠け・break寄り。
-        neg = torch.clamp(design - sem, min=0.0)
-        abs_diff = pos + neg
-
-        if self.input_mode == "sem_design":
-            return torch.cat([sem, design], dim=0)
-        if self.input_mode == "posneg":
-            return torch.cat([pos, neg], dim=0)
-        if self.input_mode == "sem_design_posneg":
-            return torch.cat([sem, design, pos, neg], dim=0)
-        if self.input_mode == "sem_design_abs_posneg":
-            return torch.cat([sem, design, abs_diff, pos, neg], dim=0)
-        raise ValueError(f"Unknown input_mode: {self.input_mode}")
+        x = make_input_tensor(
+            sem_img=sem_img,
+            design_img=design_img,
+            image_size=self.image_size,
+            input_mode=self.input_mode,
+            design_blur_radius=self.design_blur_radius,
+        )
+        return self._apply_crop(x)
 
     def __getitem__(self, idx: int):
         row = self.rows[idx]
