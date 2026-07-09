@@ -63,7 +63,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--model", default=None, choices=["tiny_cnn", "tiny_abn", "tiny_freq_abn"])
     p.add_argument("--input-mode", default=None, choices=["sem_design", "posneg", "sem_design_posneg", "sem_design_abs_posneg"])
     p.add_argument("--image-size", type=int, default=None)
-    p.add_argument("--crop-mode", default=None, choices=["resize", "center_crop", "random_tile"])
+    p.add_argument("--crop-mode", default=None, choices=["resize", "center_crop"])
     p.add_argument("--tile-size", type=int, default=None)
     p.add_argument("--design-blur-radius", type=float, default=None)
     p.add_argument("--width", type=float, default=None)
@@ -144,7 +144,7 @@ def main() -> None:
         input_mode=args.input_mode,
         design_blur_radius=args.design_blur_radius,
         augment=False,
-        crop_mode="center_crop" if args.crop_mode == "random_tile" else args.crop_mode,
+        crop_mode=args.crop_mode,
         tile_size=args.tile_size,
     )
     train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, pin_memory=device.type == "cuda")
