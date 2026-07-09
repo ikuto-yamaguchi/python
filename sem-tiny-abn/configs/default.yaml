@@ -27,14 +27,17 @@ input_mode: sem_design_posneg
 image_size: 512
 
 # resize:
-#   画像全体を image_size x image_size で見る。
-# random_tile:
-#   image_sizeにした後、tile_sizeのランダムパッチで学習する。
-#   微小欠陥には強くなるが、OK/NG画像ラベルだけだとNG画像内の正常パッチもNG扱いになり得るので注意。
+#   画像全体を image_size x image_size で見る。通常はこれ。
 # center_crop:
-#   中央パッチだけを見る。確認用。
+#   中央だけを見る確認用。基本は使わない。
+#
+# 注意:
+#   OK/NGの画像単位ラベルだけでランダムタイル学習は危険です。
+#   NG画像の中に正常領域があると、その正常パッチまでNGとして学習してしまうためです。
+#   そのため、ランダムタイル学習は実装から外しています。
 crop_mode: resize
 
+# center_crop確認やtile_predictで使うサイズ
 tile_size: 256
 
 # Design画像を少しぼかして、エッジ位置ずれに過敏になりすぎないようにする
