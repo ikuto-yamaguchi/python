@@ -1,0 +1,82 @@
+{
+  "selected_min_ngram": 2,
+  "selected_validation_objective": 901,
+  "model_bits": {
+    "exact_surface": 2010,
+    "slot_template": 1474,
+    "induced_feature_program": 389,
+    "induced_after_residuals": 554
+  },
+  "rule_counts": {
+    "induced": 7,
+    "after_residuals": 10
+  },
+  "base_evaluation": {
+    "exact_compositional_targets": {
+      "correct": 0,
+      "total": 9,
+      "accuracy": 0.0,
+      "failures": [
+        {"text": "予備部品は机上にある", "expected": "remember", "predicted": "other"},
+        {"text": "赤い箱、棚Aに置いてある", "expected": "remember", "predicted": "other"},
+        {"text": "予備部品は机上だよ", "expected": "remember", "predicted": "other"},
+        {"text": "予備部品を机上に移して", "expected": "move", "predicted": "other"},
+        {"text": "赤い箱、棚Aにお願い", "expected": "move", "predicted": "other"},
+        {"text": "予備部品を机上へ運んで", "expected": "move", "predicted": "other"},
+        {"text": "予備部品はどこ?", "expected": "query", "predicted": "other"},
+        {"text": "赤い箱、どこにある?", "expected": "query", "predicted": "other"},
+        {"text": "予備部品の場所を教えて", "expected": "query", "predicted": "other"}
+      ]
+    },
+    "slot_compositional_targets": {"correct": 9, "total": 9, "accuracy": 1.0, "failures": []},
+    "induced_compositional_targets": {"correct": 9, "total": 9, "accuracy": 1.0, "failures": []},
+    "exact_distractors": {"correct": 8, "total": 8, "accuracy": 1.0, "failures": []},
+    "slot_distractors": {"correct": 8, "total": 8, "accuracy": 1.0, "failures": []},
+    "induced_distractors": {
+      "correct": 7,
+      "total": 8,
+      "accuracy": 0.875,
+      "failures": [
+        {"text": "どこでもいい", "expected": "other", "predicted": "query"}
+      ]
+    },
+    "induced_lexical_shift": {
+      "correct": 2,
+      "total": 6,
+      "accuracy": 0.3333333333333333,
+      "failures": [
+        {"text": "青い箱って倉庫だったよね", "expected": "remember", "predicted": "other"},
+        {"text": "倉庫に青い箱がある", "expected": "remember", "predicted": "other"},
+        {"text": "試作品を検査室の方にやっといて", "expected": "move", "predicted": "other"},
+        {"text": "棚Bへ工具を持っていって", "expected": "move", "predicted": "other"}
+      ]
+    }
+  },
+  "residual_round": {
+    "probe_count": 4,
+    "transfer_same_constructions": {"correct": 6, "total": 6, "accuracy": 1.0, "failures": []},
+    "second_lexical_shift": {
+      "correct": 1,
+      "total": 6,
+      "accuracy": 0.16666666666666666,
+      "failures": [
+        {"text": "青い箱は倉庫に保管中", "expected": "remember", "predicted": "other"},
+        {"text": "試作品の置き場所は検査室", "expected": "remember", "predicted": "other"},
+        {"text": "設計書、机上へ頼む", "expected": "move", "predicted": "other"},
+        {"text": "鍵束の所在は?", "expected": "query", "predicted": "other"},
+        {"text": "センサー見当たらないけど?", "expected": "query", "predicted": "other"}
+      ]
+    }
+  },
+  "scaling": [
+    {"entities": 8, "locations": 8, "exact_surface_utterances": 408, "exact_surface_bits": 83120, "induced_program_plus_symbols_bits": 1093, "ratio": 76.04757548032937},
+    {"entities": 32, "locations": 32, "exact_surface_utterances": 6240, "exact_surface_bits": 1349840, "induced_program_plus_symbols_bits": 3557, "ratio": 379.48833286477367},
+    {"entities": 128, "locations": 128, "exact_surface_utterances": 98688, "exact_surface_bits": 22112432, "induced_program_plus_symbols_bits": 13989, "ratio": 1580.7014082493388}
+  ],
+  "limitations": [
+    "typed entity/location inventories are supplied externally",
+    "candidate feature language is restricted to slots and short character conjunctions",
+    "residual probes require supervised target intents",
+    "a second lexical-family shift remains largely unsolved"
+  ]
+}
