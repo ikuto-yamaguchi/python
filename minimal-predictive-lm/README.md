@@ -1,105 +1,99 @@
 # Minimum Predictive Machine
 
-Transformerを小さくするのではなく、系列予測に必要な**最小記憶**と**最小計算**を数学的な下限から逆算する研究用ディレクトリです。
+Transformerを小さくするのではなく、系列予測・意味処理・仕事実行に必要な**最小記憶**と**最小計算**を、数学的下限と実測コストから逆算する研究です。
 
-## 中心仮説
+最終目標は、コーディング、文章作成、ツール利用を伴うエージェント処理までを、一つの最小実行基盤で扱うことです。
 
-過去全文を保持する必要はない。同じ未来分布を与える履歴は、予測上は同一状態へ圧縮できる。
+## 中心原理
 
-\[
-h \sim h' \iff P(X_{future}\mid h)=P(X_{future}\mid h')
-\]
+過去全文を保持する必要はありません。同じ未来分布を与える履歴は、予測上は同一状態へ圧縮できます。
 
-ただし、最小状態数だけでは十分ではありません。状態をKビットへ圧縮できても、遷移表が `2^K` に膨張すればモデル記憶は最小になりません。
+```text
+h ~ h'  iff  P(future | h) = P(future | h')
+```
 
-したがって、最終的な目的関数は少なくとも次を同時に最小化します。
+ただし、最小状態数だけでは不十分です。状態をKビットへ圧縮しても、遷移表が `2^K` に膨張すればモデル本体は最小になりません。
 
-\[
-J = L_{prediction}
-+ \lambda_s B(state)
-+ \lambda_p L(transition\ program)
-+ \lambda_r E[bits\ read]
-+ \lambda_w E[bits\ written]
-+ \lambda_o E[operations]
-\]
+さらに、能力ごとに別の内部表現を追加すると、同じ事実・目標・進捗が複数モジュールへ重複し、変換・コピー・同期処理が増えます。
 
-- `B(state)`: 実行時の予測状態ビット数
-- `L(transition program)`: 状態遷移法則そのものの記述長
-- `bits read / written`: 動的メモリ通信量
-- `operations`: 実際の演算量
+そのため、次を同時に最小化します。
 
-## Phase 1: 最小予測状態の復元
+```text
+prediction / task loss
++ static program bits
++ static knowledge bits
++ dynamic state bits
++ bits read / written
++ primitive operations
++ external effects
++ training and compiler cost / expected deployments
++ representation-boundary cost
+```
 
-真の最小状態数が既知の確率過程を使い、次を検証しました。
+## ランタイム方針
 
-1. Hankel行列の階数から最小線形予測次元を復元できるか
-2. 密な線形状態を離散的な因果状態へ「結晶化」できるか
-3. 最小状態IDとテーブル参照だけで同じ確率分布を再現できるか
-4. 有限サンプルのノイズ下で状態数をどう選ぶべきか
+- semantic understandingをdense neural residualへ丸投げしない
+- 最終バイナリにニューラル重みを残さない研究経路を優先する
+- 記憶、推論、計画、創造、文章、コード編集を別ランタイムにしない
+- 一つの正準シンボル表、一つの疎な事実状態、一つの書換え原理を共有する
+- 汎用IRは最後に部分評価・規則融合・状態最小化し、抽象化overheadを消す
+- 新命令は、生涯MDLで導入費用を上回る削減が確認できた場合だけ採用する
+
+## Phase 1: 最小予測状態
+
+既知の確率過程からHankel行列を作り、最小線形予測次元と離散因果状態を復元しました。
 
 結果:
 
-- IID過程はHankel rank 1、因果状態1、実行時状態メモリ0 bitとして復元
-- 2〜8状態のmodulo過程で、既知の最小状態数を正確に復元
-- SVDで得る最小次元表現は密で、1記号あたり `r^2` MACを要する
-- 同じ予測を離散因果状態へ変換すると、0 MAC・2テーブル参照/記号になる
-- 最大特異値ギャップによる次数選択は、真のrank 5をrank 1と誤判定
-- 2分割データのHankel差分から演算子ノイズ床を推定するとrank 5を復元
+- IID過程: Hankel rank 1、因果状態1、実行時状態0 bit
+- 2〜8状態のmodulo過程で真の最小状態数を復元
+- 8状態の密なSVD表現: 576 bytes、64 MAC/記号
+- 同じ予測を離散因果状態へ結晶化: 48 bytes、0 MAC/記号
+- 最大特異値ギャップは真のrank 5をrank 1と誤判定
+- 2分割データから推定した演算子ノイズ床ではrank 5を復元
 
 詳細: [`results/phase1.md`](results/phase1.md)
 
 ## Phase 2: 遷移法則の因数分解
 
-K個の独立ビットを持つkey-value予測言語を構築しました。異なる2つの記憶割当ては、必ずあるkeyへのQUERYで異なる次トークンを返すため、厳密予測には最低Kビット必要です。
+K個の独立ビットを持つkey-value予測言語を使い、状態情報量と遷移プログラム記述長を分離しました。
 
 結果:
 
-- 因数分解レジスタ機械はデータ記憶Kビットで下限に一致
+- 厳密予測には最低Kビット必要
 - 平坦な因果状態表はready状態だけで `2^K` 個
-- K=32では疎な平坦遷移表でも約5.6TB
-- 因数分解モデルは10 bytes相当の確率パラメータとKビット記憶で実現
-- dense FP32状態と比べたデータ書込み量はK=32で約6656分の1
+- K=32の疎な平坦表でも約5.6TB
+- 因数分解レジスタ機械はKビット＋定数規則で同じ予測を実現
+- dense FP32状態よりデータ書込み量を約6656分の1へ削減
 
 詳細: [`results/phase2.md`](results/phase2.md)
 
-## Phase 3a: MDLによる予測プログラム探索
+## Phase 3a: MDLによる構造探索
 
-人間が必要なレジスタ数を指定せず、0〜16スロットと書込みアドレス規則を列挙し、次を最小化しました。
+必要なレジスタ数を与えず、0〜16スロットと書込み規則を探索しました。
 
-```text
-query NLL
-+ runtime data bits
-+ self-delimiting program bits
-```
+結果:
 
-8-key言語から100,000トークンを生成して探索した結果:
-
-- 最良構造は **8スロット・write offset 0**
-- 15,486回のQUERYを0誤りで再現
+- 100,000トークンの8-key言語から8スロット・offset 0を自動選択
+- 15,486回のQUERYを0誤り
 - 7スロットは940誤り、6スロットは1,902誤り
-- 9〜16スロットも正確だが、余分な状態・プログラム記述長で敗北
-- 必要な記憶量とsame-keyアドレス規則を予測圧力だけから再発見
+- 9〜16スロットは正確だが、余分な状態・プログラムbitで敗北
 
 詳細: [`results/phase3a.md`](results/phase3a.md)
 
-## Phase 4a: 最初のコンパイル済み超軽量LM
+## Phase 4a: コンパイル済み超軽量バイトLM
 
-予測残差を減らす文脈規則だけを追加し、held-out NLLの改善量が規則自身の記述長を上回る場合だけ残すバイトLMを実装しました。
+held-out NLL改善が規則自身の記述長を上回る文脈だけを残し、failure-link状態機械へコンパイルしました。
 
-選択された疎な規則をfailure-link状態機械へコンパイルし、頻出するfallback遷移だけを、保存bitあたりの計算削減量が大きい順にshortcut化します。
+決定的micro-corpusでの結果:
 
-日本語会話・コード・ログ・数値・key-value系列を混ぜた決定的micro-corpusでの結果:
-
-- 学習: 625,748 bytes、別seedテスト: 155,073 bytes
-- 選択規則: **608**
-- コンパイル状態: **696**
-- 実行時状態: **10 bit**
-- 独自バイナリの実ファイル: **10,999 bytes**
-- テスト: **0.468469605 BPB**
-- 平均遷移確認: **1.015644回/byte**
-- 保存→再読込後もBPB完全一致
-
-固定order比較:
+- 学習625,748 bytes、別seedテスト155,073 bytes
+- 選択規則608、コンパイル状態696
+- 実行時状態10 bit
+- 独自 `.mplm` バイナリ10,999 bytes
+- 0.468469605 BPB
+- 平均1.015644遷移確認/byte
+- 保存・再読込後もBPB完全一致
 
 | model | BPB | compact bytes |
 |---|---:|---:|
@@ -108,9 +102,115 @@ query NLL
 | fixed 8-gram | 0.727351516 | 399,426 |
 | **compiled residual LM** | **0.468469605** | **10,999** |
 
-UTF-8の正当性は確率モデルに再学習させず、数bitの決定的UTF-8状態機械として分離しました。現在の生成は局所的には文章らしいものの、意味理解や長期的整合性はまだ弱く、open-domain LMではありません。
+これは局所表層予測の橋渡し実験であり、open-domain意味理解の主張ではありません。
 
 詳細: [`results/phase4a.md`](results/phase4a.md)
+
+## Phase 4b〜4c: 意味と創造性のno-neural設計
+
+意味理解、長期記憶、質問応答、推論を、明示的なシンボル・疎な関係・実行可能な規則へ分解します。
+
+- 未知固有名詞は正確なsymbol tableへ一度だけ保存
+- 世界状態はtimestamp付き疎関係として更新・撤回
+- 質問はqueryへコンパイルし、到達可能な規則だけ実行
+- 回答はproof traceから生成
+- 創造性は意味プログラムの変形、候補生成、criticへ分離
+- 外部知識量・検索量・候補探索量も総コストに含める
+
+設計:
+
+- [`docs/phase4b_minimal_semantic_machine.md`](docs/phase4b_minimal_semantic_machine.md)
+- [`docs/phase4c_creative_semantic_machine.md`](docs/phase4c_creative_semantic_machine.md)
+
+## Phase 5a: coding / writing / agentの統一基盤
+
+能力ごとに部品を継ぎ足すのではなく、次の5命令だけを共有する最小実験を作りました。
+
+```text
+MATCH
+DELETE
+ADD
+EMIT
+CHOOSE_MIN
+```
+
+一つの `SymbolTable`、`State`、`Rule`、疎規則index、最小記述長探索器で、三種類のmicro-taskを解きます。
+
+| task | result | objective | rule checks |
+|---|---|---:|---:|
+| coding | `f(x)=3*x+1` の全テスト通過patch | 6 bit | 81 |
+| writing | goal / method / caveatを満たす3文 | 25 bit | 6 |
+| agent | lab→hall→vault→pickup | 3 bit | 5 |
+
+共有シンボルは117個で、IDは7bitです。
+
+この結果の意味は、問題が難しいことではありません。**コード編集、文章構成、行動計画が別々の内部世界や別々の実行器を必須としない**ことを、最小コードで確認した点にあります。
+
+詳細:
+
+- [`results/phase5a.md`](results/phase5a.md)
+- [`docs/phase5_unified_work_machine.md`](docs/phase5_unified_work_machine.md)
+
+## 後付け肥大化を防ぐ規則
+
+`memory`、`stack`、`counter`、`planner`、`creativity operator`、`AST editor`、`tool caller` は、最初から独立モジュールにしません。
+
+まず既存命令のマクロとして表現し、対象ワークロードへ部分評価します。新しいネイティブ命令は、次の差が正になる場合だけ採用します。
+
+```text
+existing lifetime cost
+- new primitive lifetime cost
+- opcode bits
+- compiler / serializer bits
+- representation-conversion cost
+- verification cost
+```
+
+一つのベンチマークだけ速くなる専用部品は、原則としてマクロのまま残します。
+
+## 最終用途を最初から評価する
+
+後から機能を足さないため、研究評価には初期段階から次を含めます。
+
+### Coding
+
+- 未知リポジトリの局所修正
+- 複数ファイル依存
+- テスト・型・ビルド失敗からの修正
+- 読んだコードbit、patch bit、テスト実行数、tool effect数
+
+### Writing
+
+- 要件・事実・文体制約
+- 長文の論旨・参照一貫性
+- 差分推敲
+- 新規性と適切さ
+- 読んだ知識bit、談話状態bit、候補数
+
+### Agent
+
+- 部分観測
+- 長期タスク
+- 失敗復旧
+- 外部操作と副作用確認
+- 観測bit、行動数、再計画数、動的状態bit
+
+## 次の実験
+
+Phase 5bでは、別々のデモではなく一つのepisodeで次を連続実行します。
+
+```text
+仕様文を読む
+-> 同じ正準状態へ要件を保存
+-> コードを修正
+-> test toolを実行
+-> 失敗なら同じ状態上で再計画
+-> 結果報告を書く
+```
+
+文章理解、コード状態、テスト結果、計画、報告内容を一度だけ保持し、モジュール境界のコピーを発生させないことを検証します。
+
+その後、外部作用を一つの `EFFECT` 境界として追加し、汎用IRをタスク専用状態機械へ自動コンパイルします。
 
 ## 実行
 
@@ -119,31 +219,13 @@ cd minimal-predictive-lm
 python -m venv .venv
 source .venv/bin/activate
 pip install -e .
+
 mpm-phase1
 mpm-phase2
 mpm-phase3a
 mpm-phase4a
+mpm-phase5a
 python -m unittest discover -s tests -v
 ```
 
-`mpm-phase4a` は `results/phase4a.mplm` として実際のモデルバイナリも生成します。
-
-## 次の研究段階
-
-Phase 4aは文字列の局所規則を自動選択できましたが、候補は連続バイト文脈に限定されています。次は、予測残差の構造から必要な演算候補そのものを生成します。
-
-```text
-観測系列
-  ↓
-予測誤差が分岐する履歴対を抽出
-  ↓
-区別に必要な最小情報を探索
-  ↓
-context rule / register / counter / stack / sparse map候補を生成
-  ↓
-予測損失 + 状態bit + プログラム記述長 + memory trafficで選択
-  ↓
-頻出経路だけ直接コンパイルし、surprise時だけ高コスト処理
-```
-
-さらにPhase 4aの確率分布テーブルを、共有可能な形態素・意味特徴や低rank残差関数へ因数分解し、**数十KB〜数MB級で会話能力を持つモデル**へ段階的に伸ばします。
+`mpm-phase4a` は実モデル `results/phase4a.mplm` も生成します。GitHub Actionsで全テストと全実験をゼロから再現します。
