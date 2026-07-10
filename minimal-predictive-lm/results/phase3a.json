@@ -1,0 +1,20 @@
+{
+  "true_key_count": 8,
+  "token_count": 100000,
+  "best": {"slots":8,"write_offset":0,"query_count":15486,"errors":0,"nll_bits":0.022341586574644173,"runtime_data_bits":8,"program_bits":12,"objective_bits":20.022341586574644},
+  "top_candidates": [
+    {"slots":8,"write_offset":0,"query_count":15486,"errors":0,"nll_bits":0.022341586574644173,"runtime_data_bits":8,"program_bits":12,"objective_bits":20.022341586574644},
+    {"slots":9,"write_offset":0,"query_count":15486,"errors":0,"nll_bits":0.022341586574644173,"runtime_data_bits":9,"program_bits":13,"objective_bits":22.022341586574644},
+    {"slots":10,"write_offset":0,"query_count":15486,"errors":0,"nll_bits":0.022341586574644173,"runtime_data_bits":10,"program_bits":13,"objective_bits":23.022341586574644},
+    {"slots":11,"write_offset":0,"query_count":15486,"errors":0,"nll_bits":0.022341586574644173,"runtime_data_bits":11,"program_bits":13,"objective_bits":24.022341586574644},
+    {"slots":12,"write_offset":0,"query_count":15486,"errors":0,"nll_bits":0.022341586574644173,"runtime_data_bits":12,"program_bits":13,"objective_bits":25.022341586574644},
+    {"slots":13,"write_offset":0,"query_count":15486,"errors":0,"nll_bits":0.022341586574644173,"runtime_data_bits":13,"program_bits":13,"objective_bits":26.022341586574644},
+    {"slots":14,"write_offset":0,"query_count":15486,"errors":0,"nll_bits":0.022341586574644173,"runtime_data_bits":14,"program_bits":13,"objective_bits":27.022341586574644},
+    {"slots":15,"write_offset":0,"query_count":15486,"errors":0,"nll_bits":0.022341586574644173,"runtime_data_bits":15,"program_bits":13,"objective_bits":28.022341586574644},
+    {"slots":16,"write_offset":0,"query_count":15486,"errors":0,"nll_bits":0.022341586574644173,"runtime_data_bits":16,"program_bits":15,"objective_bits":31.022341586574644},
+    {"slots":0,"write_offset":0,"query_count":15486,"errors":null,"nll_bits":15486.0,"runtime_data_bits":0,"program_bits":1,"objective_bits":15487.0},
+    {"slots":7,"write_offset":0,"query_count":15486,"errors":940,"nll_bits":18735.695440612533,"runtime_data_bits":7,"program_bits":10,"objective_bits":18752.695440612533},
+    {"slots":6,"write_offset":0,"query_count":15486,"errors":1902,"nll_bits":37909.8630164337,"runtime_data_bits":6,"program_bits":10,"objective_bits":37925.8630164337}
+  ],
+  "zero_memory": {"slots":0,"write_offset":0,"query_count":15486,"errors":null,"nll_bits":15486.0,"runtime_data_bits":0,"program_bits":1,"objective_bits":15487.0}
+}
