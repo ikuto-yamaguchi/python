@@ -1,0 +1,33 @@
+name: minimal-predictive-lm
+
+on:
+  push:
+    paths:
+      - "minimal-predictive-lm/**"
+      - ".github/workflows/minimal-predictive-lm.yml"
+  pull_request:
+    paths:
+      - "minimal-predictive-lm/**"
+      - ".github/workflows/minimal-predictive-lm.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: minimal-predictive-lm/pyproject.toml
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm
+      - name: Unit tests
+        run: python -m unittest discover -s minimal-predictive-lm/tests -v
+      - name: Reproduce experiments
+        working-directory: minimal-predictive-lm
+        run: |
+          mpm-phase1
+          mpm-phase2
+          mpm-phase3a
