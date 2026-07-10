@@ -82,6 +82,36 @@ query NLL
 
 詳細: [`results/phase3a.md`](results/phase3a.md)
 
+## Phase 4a: 最初のコンパイル済み超軽量LM
+
+予測残差を減らす文脈規則だけを追加し、held-out NLLの改善量が規則自身の記述長を上回る場合だけ残すバイトLMを実装しました。
+
+選択された疎な規則をfailure-link状態機械へコンパイルし、頻出するfallback遷移だけを、保存bitあたりの計算削減量が大きい順にshortcut化します。
+
+日本語会話・コード・ログ・数値・key-value系列を混ぜた決定的micro-corpusでの結果:
+
+- 学習: 625,748 bytes、別seedテスト: 155,073 bytes
+- 選択規則: **608**
+- コンパイル状態: **696**
+- 実行時状態: **10 bit**
+- 独自バイナリの実ファイル: **10,999 bytes**
+- テスト: **0.468469605 BPB**
+- 平均遷移確認: **1.015644回/byte**
+- 保存→再読込後もBPB完全一致
+
+固定order比較:
+
+| model | BPB | compact bytes |
+|---|---:|---:|
+| fixed 3-gram | 0.557296466 | 16,294 |
+| fixed 4-gram | 0.531891477 | 33,383 |
+| fixed 8-gram | 0.727351516 | 399,426 |
+| **compiled residual LM** | **0.468469605** | **10,999** |
+
+UTF-8の正当性は確率モデルに再学習させず、数bitの決定的UTF-8状態機械として分離しました。現在の生成は局所的には文章らしいものの、意味理解や長期的整合性はまだ弱く、open-domain LMではありません。
+
+詳細: [`results/phase4a.md`](results/phase4a.md)
+
 ## 実行
 
 ```bash
@@ -92,25 +122,28 @@ pip install -e .
 mpm-phase1
 mpm-phase2
 mpm-phase3a
+mpm-phase4a
 python -m unittest discover -s tests -v
 ```
 
+`mpm-phase4a` は `results/phase4a.mplm` として実際のモデルバイナリも生成します。
+
 ## 次の研究段階
 
-現在のPhase 3aは、候補DSLを人間が限定しています。次は、予測残差の構造から必要な演算候補そのものを生成します。
+Phase 4aは文字列の局所規則を自動選択できましたが、候補は連続バイト文脈に限定されています。次は、予測残差の構造から必要な演算候補そのものを生成します。
 
 ```text
 観測系列
   ↓
 予測誤差が分岐する履歴対を抽出
   ↓
-区別に必要な情報ビットを同定
+区別に必要な最小情報を探索
   ↓
-register / counter / stack / sparse map候補を生成
+context rule / register / counter / stack / sparse map候補を生成
   ↓
 予測損失 + 状態bit + プログラム記述長 + memory trafficで選択
   ↓
-surpriseが発生したイベントだけ疎に更新
+頻出経路だけ直接コンパイルし、surprise時だけ高コスト処理
 ```
 
-目標は、密な隠れベクトルを毎記号更新するのではなく、**新しい情報が発生したときだけ状態構造を変化させるLM**です。
+さらにPhase 4aの確率分布テーブルを、共有可能な形態素・意味特徴や低rank残差関数へ因数分解し、**数十KB〜数MB級で会話能力を持つモデル**へ段階的に伸ばします。
