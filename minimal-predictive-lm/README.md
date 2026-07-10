@@ -62,6 +62,26 @@ K個の独立ビットを持つkey-value予測言語を構築しました。異�
 
 詳細: [`results/phase2.md`](results/phase2.md)
 
+## Phase 3a: MDLによる予測プログラム探索
+
+人間が必要なレジスタ数を指定せず、0〜16スロットと書込みアドレス規則を列挙し、次を最小化しました。
+
+```text
+query NLL
++ runtime data bits
++ self-delimiting program bits
+```
+
+8-key言語から100,000トークンを生成して探索した結果:
+
+- 最良構造は **8スロット・write offset 0**
+- 15,486回のQUERYを0誤りで再現
+- 7スロットは940誤り、6スロットは1,902誤り
+- 9〜16スロットも正確だが、余分な状態・プログラム記述長で敗北
+- 必要な記憶量とsame-keyアドレス規則を予測圧力だけから再発見
+
+詳細: [`results/phase3a.md`](results/phase3a.md)
+
 ## 実行
 
 ```bash
@@ -71,19 +91,22 @@ source .venv/bin/activate
 pip install -e .
 mpm-phase1
 mpm-phase2
+mpm-phase3a
 python -m unittest discover -s tests -v
 ```
 
 ## 次の研究段階
 
-現在は規則を人間が与えています。次は、系列データから次を自動発見する**予測プログラム合成器**へ進めます。
+現在のPhase 3aは、候補DSLを人間が限定しています。次は、予測残差の構造から必要な演算候補そのものを生成します。
 
 ```text
 観測系列
   ↓
-予測誤差の原因となる履歴対を抽出
+予測誤差が分岐する履歴対を抽出
   ↓
-必要な状態ビット・レジスタ・スタック候補を生成
+区別に必要な情報ビットを同定
+  ↓
+register / counter / stack / sparse map候補を生成
   ↓
 予測損失 + 状態bit + プログラム記述長 + memory trafficで選択
   ↓
