@@ -26,6 +26,18 @@ jobs:
       - name: Install dependencies
         run: pip install -q -r requirements-dev.txt
       - name: Run tests
-        run: pytest -vv --tb=short
+        shell: bash
+        run: |
+          set +e
+          pytest -vv --tb=short > pytest.log 2>&1
+          status=$?
+          cat pytest.log
+          exit $status
+      - name: Upload pytest log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sem-tiny-abn-pytest-log
+          path: sem-tiny-abn/pytest.log
       - name: Smoke benchmark
         run: python -m sem_tiny_abn.model_summary --model tiny_abn --image-size 128 --iterations 2
