@@ -12,6 +12,7 @@ dependencies = ["numpy>=1.26"]
 [project.scripts]
 mpm-phase1 = "minimal_predictive_lm.experiment:main"
 mpm-phase2 = "minimal_predictive_lm.phase2_experiment:main"
+mpm-phase3a = "minimal_predictive_lm.phase3_experiment:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
