@@ -43,8 +43,6 @@ prediction / task loss
 
 既知の確率過程からHankel行列を作り、最小線形予測次元と離散因果状態を復元しました。
 
-結果:
-
 - IID過程: Hankel rank 1、因果状態1、実行時状態0 bit
 - 2〜8状態のmodulo過程で真の最小状態数を復元
 - 8状態の密なSVD表現: 576 bytes、64 MAC/記号
@@ -58,8 +56,6 @@ prediction / task loss
 
 K個の独立ビットを持つkey-value予測言語を使い、状態情報量と遷移プログラム記述長を分離しました。
 
-結果:
-
 - 厳密予測には最低Kビット必要
 - 平坦な因果状態表はready状態だけで `2^K` 個
 - K=32の疎な平坦表でも約5.6TB
@@ -72,8 +68,6 @@ K個の独立ビットを持つkey-value予測言語を使い、状態情報量�
 
 必要なレジスタ数を与えず、0〜16スロットと書込み規則を探索しました。
 
-結果:
-
 - 100,000トークンの8-key言語から8スロット・offset 0を自動選択
 - 15,486回のQUERYを0誤り
 - 7スロットは940誤り、6スロットは1,902誤り
@@ -85,8 +79,6 @@ K個の独立ビットを持つkey-value予測言語を使い、状態情報量�
 
 held-out NLL改善が規則自身の記述長を上回る文脈だけを残し、failure-link状態機械へコンパイルしました。
 
-決定的micro-corpusでの結果:
-
 - 学習625,748 bytes、別seedテスト155,073 bytes
 - 選択規則608、コンパイル状態696
 - 実行時状態10 bit
@@ -94,13 +86,6 @@ held-out NLL改善が規則自身の記述長を上回る文脈だけを残し�
 - 0.468469605 BPB
 - 平均1.015644遷移確認/byte
 - 保存・再読込後もBPB完全一致
-
-| model | BPB | compact bytes |
-|---|---:|---:|
-| fixed 3-gram | 0.557296466 | 16,294 |
-| fixed 4-gram | 0.531891477 | 33,383 |
-| fixed 8-gram | 0.727351516 | 399,426 |
-| **compiled residual LM** | **0.468469605** | **10,999** |
 
 これは局所表層予測の橋渡し実験であり、open-domain意味理解の主張ではありません。
 
@@ -134,83 +119,70 @@ EMIT
 CHOOSE_MIN
 ```
 
-一つの `SymbolTable`、`State`、`Rule`、疎規則index、最小記述長探索器で、三種類のmicro-taskを解きます。
-
-| task | result | objective | rule checks |
-|---|---|---:|---:|
-| coding | `f(x)=3*x+1` の全テスト通過patch | 6 bit | 81 |
-| writing | goal / method / caveatを満たす3文 | 25 bit | 6 |
-| agent | lab→hall→vault→pickup | 3 bit | 5 |
-
-共有シンボルは117個で、IDは7bitです。
-
-この結果の意味は、問題が難しいことではありません。**コード編集、文章構成、行動計画が別々の内部世界や別々の実行器を必須としない**ことを、最小コードで確認した点にあります。
+一つの `SymbolTable`、`State`、`Rule`、疎規則index、最小記述長探索器で、コード編集、文章構成、行動計画を同じ基盤上で解きます。
 
 詳細:
 
 - [`results/phase5a.md`](results/phase5a.md)
 - [`docs/phase5_unified_work_machine.md`](docs/phase5_unified_work_machine.md)
 
-## 後付け肥大化を防ぐ規則
+## Phase 6: 下限、スケーリング、生涯大域最適
 
-`memory`、`stack`、`counter`、`planner`、`creativity operator`、`AST editor`、`tool caller` は、最初から独立モジュールにしません。
+- 256段chain: 平坦規則5,376bitから因数分解43bit、位置状態は下限9bit
+- 20bit parity: 任意表1,048,576bitから規則27bit＋状態1bit
+- Value of Computationにより、判断を変える期待値が計算費用を上回る場合だけ追加思考
+- 16-query workloadで局所commit 16,384に対し大域選択4,032
 
-まず既存命令のマクロとして表現し、対象ワークロードへ部分評価します。新しいネイティブ命令は、次の差が正になる場合だけ採用します。
+詳細:
 
-```text
-existing lifetime cost
-- new primitive lifetime cost
-- opcode bits
-- compiler / serializer bits
-- representation-conversion cost
-- verification cost
-```
+- [`docs/phase6_scaling_and_open_ended_intelligence.md`](docs/phase6_scaling_and_open_ended_intelligence.md)
+- [`docs/phase6b_minimal_choice_machine.md`](docs/phase6b_minimal_choice_machine.md)
+- [`docs/phase6c_global_optimization.md`](docs/phase6c_global_optimization.md)
+- [`results/phase6a.md`](results/phase6a.md)
+- [`results/phase6c.md`](results/phase6c.md)
 
-一つのベンチマークだけ速くなる専用部品は、原則としてマクロのまま残します。
+## Phase 7a: 会話・指示追従・失敗後の再試行
 
-## 最終用途を最初から評価する
+- 制御grammar: 35.3%から82.4%、100%へ改善
+- 砕けた別表現: 50%まで低下
+- 10,000回の反復質問でもpersistent state量は増加なし
+- 4,096事実でもindexed lookupは1 read
+- test失敗から証拠保存、再試行、最終検証までの小さなtask loopを実装
+- コード候補探索は候補数に比例し、実リポジトリには未達
 
-後から機能を足さないため、研究評価には初期段階から次を含めます。
+詳細:
 
-### Coding
+- [`docs/phase7_scaling_to_conversation.md`](docs/phase7_scaling_to_conversation.md)
+- [`results/phase7a.md`](results/phase7a.md)
 
-- 未知リポジトリの局所修正
-- 複数ファイル依存
-- テスト・型・ビルド失敗からの修正
-- 読んだコードbit、patch bit、テスト実行数、tool effect数
+## Phase 8a: 残差駆動の意味プログラム誘導
 
-### Writing
+固有名詞と場所を型付きslotへ置き換え、1〜2個の構造・文字特徴からなる最小規則をMDLで選びました。
 
-- 要件・事実・文体制約
-- 長文の論旨・参照一貫性
-- 差分推敲
-- 新規性と適切さ
-- 読んだ知識bit、談話状態bit、候補数
+| parser | 未知組合せ | distractor拒否 | 未知言い換え |
+|---|---:|---:|---:|
+| exact surface | 0.0% | 100.0% | 0.0% |
+| typed slot templates | 100.0% | 100.0% | 0.0% |
+| induced feature program | 100.0% | 87.5% | 33.3% |
 
-### Agent
+失敗した4構文を残差例として再学習すると、同じ構文を別の固有名詞へ適用する精度は100%になりましたが、別の言い換え系列では16.7%でした。表面パターンを超えた型・述語・目的の自動発見は未達です。
 
-- 部分観測
-- 長期タスク
-- 失敗復旧
-- 外部操作と副作用確認
-- 観測bit、行動数、再計画数、動的状態bit
+表面文を全列挙する場合と比較すると、entity/locationが各128個のとき:
+
+- exact surface: 22,112,432 bit
+- induced program＋symbol: 13,989 bit
+- 約1,580.7倍の削減
+
+詳細:
+
+- [`docs/phase8_residual_semantic_program_induction.md`](docs/phase8_residual_semantic_program_induction.md)
+- [`results/phase8a.md`](results/phase8a.md)
 
 ## 次の実験
 
-Phase 5bでは、別々のデモではなく一つのepisodeで次を連続実行します。
+Phase 8bではentity/location型やintent labelを外から与えません。同じ内部状態から異なる正解行動が要求された衝突を集め、衝突を分離する最小の型、predicate、relation、parameterized programを提案します。
 
-```text
-仕様文を読む
--> 同じ正準状態へ要件を保存
--> コードを修正
--> test toolを実行
--> 失敗なら同じ状態上で再計画
--> 結果報告を書く
-```
-
-文章理解、コード状態、テスト結果、計画、報告内容を一度だけ保持し、モジュール境界のコピーを発生させないことを検証します。
-
-その後、外部作用を一つの `EFFECT` 境界として追加し、汎用IRをタスク専用状態機械へ自動コンパイルします。
+採用条件は、held-outの会話・文章・コード・tool taskで減るregretが、program bit、動的状態、読書き、探索、検証、移行費用を上回ることです。
 
 ## 実行
 
@@ -225,6 +197,10 @@ mpm-phase2
 mpm-phase3a
 mpm-phase4a
 mpm-phase5a
+mpm-phase6a
+mpm-phase6c
+mpm-phase7a
+mpm-phase8a
 python -m unittest discover -s tests -v
 ```
 
