@@ -1,0 +1,69 @@
+{
+  "trace_count": 9,
+  "operation_inference": {
+    "inferred": 9,
+    "accuracy_against_hidden_trace_generator": 1.0,
+    "operation_set": ["get", "set"]
+  },
+  "discovered_roles": {
+    "keys": ["センサー", "工具", "設計書", "試作品", "鍵束", "青い箱"],
+    "values": ["作業室", "保管庫", "倉庫", "実験台", "棚B", "検査室"],
+    "purity": {"key_role": 1.0, "value_role": 1.0},
+    "assignment_bits": 14,
+    "symbol_string_bits": 776
+  },
+  "hypotheses": {
+    "exact_surface": {
+      "program_bits": 2082,
+      "validation": {
+        "correct": 4,
+        "total": 8,
+        "accuracy": 0.5,
+        "failures": [
+          {"text": "青い箱を作業室に移して", "expected": "set", "predicted": "other"},
+          {"text": "センサーは倉庫にある", "expected": "set", "predicted": "other"},
+          {"text": "設計書はどこ?", "expected": "get", "predicted": "other"},
+          {"text": "鍵束の場所を教えて", "expected": "get", "predicted": "other"}
+        ]
+      },
+      "lifetime_objective": 4130
+    },
+    "untyped_symbols": {
+      "program_bits": 163,
+      "validation": {
+        "correct": 6,
+        "total": 8,
+        "accuracy": 0.75,
+        "failures": [
+          {"text": "倉庫を青い箱に移して", "expected": "other", "predicted": "set"},
+          {"text": "検査室は試作品にある", "expected": "other", "predicted": "set"}
+        ]
+      },
+      "lifetime_objective": 1964
+    },
+    "two_latent_roles": {
+      "program_bits": 163,
+      "validation": {"correct": 8, "total": 8, "accuracy": 1.0, "failures": []},
+      "lifetime_objective": 953
+    }
+  },
+  "selected_hypothesis": "two_latent_roles",
+  "operation_factorization": {
+    "surface_intent_program_bits": 202,
+    "state_operation_program_bits": 163,
+    "surface_intent_validation": {"correct": 8, "total": 8, "accuracy": 1.0, "failures": []},
+    "state_operation_validation": {"correct": 8, "total": 8, "accuracy": 1.0, "failures": []}
+  },
+  "new_symbol_bootstrap": {
+    "inferred_operation": {"operation": "set", "key": "予備部品", "value": "棚A"},
+    "added_symbol_bits": 130,
+    "rule_bits_added": 0,
+    "evaluation": {"correct": 3, "total": 3, "accuracy": 1.0, "failures": []}
+  },
+  "limitations": [
+    "state transitions and responses are observed during induction",
+    "the world relation is a single key-value map",
+    "the candidate surface-rule language remains restricted",
+    "operation induction is deterministic and not robust to noisy traces"
+  ]
+}
