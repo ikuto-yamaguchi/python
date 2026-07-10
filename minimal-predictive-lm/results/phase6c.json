@@ -1,0 +1,80 @@
+{
+  "workload": {
+    "tasks": 64,
+    "affine_tasks": 56,
+    "exception_tasks": 8,
+    "entry_bits": 16,
+    "schema_bits": 24,
+    "parameter_bits_per_affine_task": 10
+  },
+  "horizon_frontier": [
+    {
+      "queries_per_task": 2,
+      "costs": {
+        "exact_cache": 2048,
+        "duplicated_program": 2672,
+        "shared_hybrid": 2240
+      },
+      "winner": "exact_cache"
+    },
+    {
+      "queries_per_task": 4,
+      "costs": {
+        "exact_cache": 4096,
+        "duplicated_program": 2928,
+        "shared_hybrid": 2496
+      },
+      "winner": "shared_hybrid"
+    },
+    {
+      "queries_per_task": 8,
+      "costs": {
+        "exact_cache": 8192,
+        "duplicated_program": 3440,
+        "shared_hybrid": 3008
+      },
+      "winner": "shared_hybrid"
+    },
+    {
+      "queries_per_task": 16,
+      "costs": {
+        "exact_cache": 16384,
+        "duplicated_program": 4464,
+        "shared_hybrid": 4032
+      },
+      "winner": "shared_hybrid"
+    },
+    {
+      "queries_per_task": 32,
+      "costs": {
+        "exact_cache": 32768,
+        "duplicated_program": 6512,
+        "shared_hybrid": 6080
+      },
+      "winner": "shared_hybrid"
+    },
+    {
+      "queries_per_task": 64,
+      "costs": {
+        "exact_cache": 65536,
+        "duplicated_program": 10608,
+        "shared_hybrid": 10176
+      },
+      "winner": "shared_hybrid"
+    }
+  ],
+  "actual_horizon": 16,
+  "policy_lifetime_costs": {
+    "local_commit": 16384,
+    "rolling_reoptimization": 7152,
+    "global_lifetime_selection": 4032
+  },
+  "global_vs_local_ratio": 4.063492063492063,
+  "heldout_affine_tasks": 32,
+  "heldout_costs": {
+    "exact_cache": 8192,
+    "shared_schema": 320
+  },
+  "heldout_ratio": 25.6,
+  "principle": "Choose representation and policy over the task distribution and deployment lifetime; permit local compilation only when it lowers the global constrained objective."
+}
