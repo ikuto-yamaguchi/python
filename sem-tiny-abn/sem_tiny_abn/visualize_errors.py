@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import argparse
+import csv
+import html
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 import torch
@@ -10,142 +12,162 @@ import torch.nn.functional as F
 from PIL import Image, ImageDraw
 from torch.utils.data import DataLoader
 
-from .dataset import SEMPairDataset
-from .models import build_model
-from .utils import ensure_dir, read_annotations
+from .dataset import build_input_tensor, load_gray
+from .runtime import checkpoint_dataset_kwargs, load_checkpoint_model, make_dataset
+from .utils import ensure_dir, load_yaml, read_annotations
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="誤判定をSEM/Design/差分/Attentionの俯瞰画像として保存する")
-    p.add_argument("--data-root", required=True)
-    p.add_argument("--csv", required=True)
-    p.add_argument("--checkpoint", required=True)
-    p.add_argument("--out", default="runs/sem_tiny_abn/error_report")
-    p.add_argument("--batch-size", type=int, default=8)
-    p.add_argument("--device", default="cpu")
-    p.add_argument("--max-save", type=int, default=200)
-    return p.parse_args()
+    parser = argparse.ArgumentParser(description="誤判定を画像とHTMLギャラリーで可視化する")
+    parser.add_argument("--config", default="configs/default.yaml")
+    parser.add_argument("--data-root", default=None)
+    parser.add_argument("--csv", default=None)
+    parser.add_argument("--checkpoint", default=None)
+    parser.add_argument("--out", default=None)
+    parser.add_argument("--device", default=None)
+    parser.add_argument("--max-save", type=int, default=500)
+    args = parser.parse_args()
+    config = load_yaml(args.config)
+    for key in ("data_root", "csv", "checkpoint", "device"):
+        value = getattr(args, key)
+        if value is not None:
+            config[key] = value
+    if not config.get("checkpoint"):
+        config["checkpoint"] = str(Path(config.get("out", "runs/sem_tiny_abn")) / "best.pt")
+    if not config.get("data_root") or not config.get("csv"):
+        raise ValueError("data_root と csv を設定してください")
+    args.values = config
+    return args
 
 
-def load_model(path: str, device: torch.device):
-    ckpt = torch.load(path, map_location=device)
-    model = build_model(ckpt["model"], ckpt["in_channels"], ckpt["num_classes"], ckpt.get("width", 1.0))
-    model.load_state_dict(ckpt["model_state"])
-    model.to(device).eval()
-    return model, ckpt
+def gray_image(tensor: torch.Tensor, size: int = 320, fixed_scale: bool = True) -> Image.Image:
+    array = tensor.detach().cpu().float().squeeze().numpy()
+    if fixed_scale:
+        array = np.clip(array, 0.0, 1.0)
+    else:
+        array = array - array.min()
+        array = array / (array.max() + 1e-8)
+    return Image.fromarray((array * 255).astype(np.uint8), mode="L").resize((size, size), Image.Resampling.NEAREST)
 
 
-def to_u8(t: torch.Tensor) -> Image.Image:
-    arr = t.detach().cpu().float().squeeze().numpy()
-    arr = arr - arr.min()
-    arr = arr / (arr.max() + 1e-8)
-    return Image.fromarray((arr * 255).astype(np.uint8), mode="L")
+def attention_overlay(sem: torch.Tensor, attention: Optional[torch.Tensor], size: int = 320) -> Image.Image:
+    base = gray_image(sem, size=size).convert("RGB")
+    if attention is None:
+        return base
+    att = F.interpolate(attention.unsqueeze(0), size=sem.shape[-2:], mode="bilinear", align_corners=False).squeeze()
+    att_array = np.clip(att.detach().cpu().numpy(), 0.0, 1.0)
+    att_image = Image.fromarray((att_array * 255).astype(np.uint8), mode="L").resize((size, size), Image.Resampling.BILINEAR)
+    red = Image.new("RGB", (size, size), (255, 0, 0))
+    return Image.composite(red, base, att_image.point(lambda value: int(value * 0.55)))
 
 
-def tile_with_label(img: Image.Image, label: str, size: int = 256) -> Image.Image:
-    img = img.resize((size, size), Image.BILINEAR).convert("L")
-    canvas = Image.new("RGB", (size, size + 24), "white")
-    canvas.paste(img.convert("RGB"), (0, 24))
-    draw = ImageDraw.Draw(canvas)
-    draw.text((6, 5), label, fill=(0, 0, 0))
+def labeled_panel(image: Image.Image, label: str) -> Image.Image:
+    width, height = image.size
+    canvas = Image.new("RGB", (width, height + 28), "white")
+    canvas.paste(image.convert("RGB"), (0, 28))
+    ImageDraw.Draw(canvas).text((6, 7), label, fill=(0, 0, 0))
     return canvas
 
 
-def make_montage(x: torch.Tensor, attention: Optional[torch.Tensor], title: str, out_path: Path) -> None:
-    channels = [x[i] if i < x.shape[0] else torch.zeros_like(x[0]) for i in range(max(5, x.shape[0]))]
-    sem = channels[0]
-    design = channels[1] if x.shape[0] >= 2 else torch.zeros_like(sem)
-    if x.shape[0] >= 4:
-        pos = channels[2]
-        neg = channels[3]
-        abs_diff = torch.clamp(pos + neg, 0, 1)
-    elif x.shape[0] >= 2:
-        pos = torch.clamp(sem - design, min=0)
-        neg = torch.clamp(design - sem, min=0)
-        abs_diff = torch.clamp(pos + neg, 0, 1)
-    else:
-        pos = neg = abs_diff = torch.zeros_like(sem)
-
-    if attention is not None:
-        attn = F.interpolate(attention.unsqueeze(0), size=sem.shape[-2:], mode="bilinear", align_corners=False).squeeze(0).squeeze(0)
-    else:
-        attn = torch.zeros_like(sem)
-
+def make_montage(panel_input: torch.Tensor, attention: Optional[torch.Tensor], title: str, output: Path) -> None:
+    sem, design, abs_diff, pos, neg = panel_input
     panels = [
-        tile_with_label(to_u8(sem), "SEM"),
-        tile_with_label(to_u8(design), "Design/soft_design"),
-        tile_with_label(to_u8(pos), "pos_diff: SEM側に余計"),
-        tile_with_label(to_u8(neg), "neg_diff: SEM側で不足"),
-        tile_with_label(to_u8(abs_diff), "abs_diff"),
-        tile_with_label(to_u8(attn), "Attention"),
+        labeled_panel(gray_image(sem), "SEM (normalized)"),
+        labeled_panel(gray_image(design), "Design (soft)"),
+        labeled_panel(gray_image(abs_diff), "abs diff (fixed scale)"),
+        labeled_panel(gray_image(pos), "pos diff: SEM excess"),
+        labeled_panel(gray_image(neg), "neg diff: SEM missing"),
+        labeled_panel(attention_overlay(sem, attention), "Attention overlay"),
     ]
-    w, h = panels[0].size
-    title_h = 34
-    canvas = Image.new("RGB", (w * 3, h * 2 + title_h), "white")
+    panel_width, panel_height = panels[0].size
+    title_height = 52
+    canvas = Image.new("RGB", (panel_width * 3, panel_height * 2 + title_height), "white")
     draw = ImageDraw.Draw(canvas)
-    draw.text((8, 9), title, fill=(0, 0, 0))
-    for i, panel in enumerate(panels):
-        x0 = (i % 3) * w
-        y0 = title_h + (i // 3) * h
-        canvas.paste(panel, (x0, y0))
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    canvas.save(out_path)
+    draw.text((8, 8), title[:180], fill=(0, 0, 0))
+    for index, panel in enumerate(panels):
+        canvas.paste(panel, ((index % 3) * panel_width, title_height + (index // 3) * panel_height))
+    output.parent.mkdir(parents=True, exist_ok=True)
+    canvas.save(output, quality=95)
+
+
+def write_gallery(entries: List[Dict[str, str]], output_dir: Path) -> None:
+    rows = []
+    for entry in entries:
+        relative = entry["image"]
+        rows.append(
+            f'<article><img src="{html.escape(relative)}" alt="誤判定可視化">'
+            f'<p><b>{html.escape(entry["kind"])}</b> true={html.escape(entry["true"])} '
+            f'pred={html.escape(entry["pred"])} OK確率={html.escape(entry["ok_prob"])}</p>'
+            f'<p>{html.escape(entry["sem"])}</p></article>'
+        )
+    document = f"""<!doctype html>
+<meta charset="utf-8">
+<title>SEM Tiny ABN 誤判定レポート</title>
+<style>
+body{{font-family:sans-serif;margin:20px;background:#f5f5f5}}main{{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:18px}}
+article{{background:white;border:1px solid #ccc;padding:10px}}img{{width:100%;height:auto}}p{{overflow-wrap:anywhere}}
+</style>
+<h1>SEM Tiny ABN 誤判定レポート</h1><p>合計 {len(entries)} 件</p><main>{''.join(rows)}</main>"""
+    (output_dir / "index.html").write_text(document, encoding="utf-8")
 
 
 def main() -> None:
     args = parse_args()
-    out_dir = ensure_dir(args.out)
-    device = torch.device(args.device)
-    model, ckpt = load_model(args.checkpoint, device)
-    classes: List[str] = ckpt["classes"]
-    rows = read_annotations(args.csv)
-    eval_crop_mode = "center_crop" if ckpt.get("crop_mode") == "random_tile" else ckpt.get("crop_mode", "resize")
-    ds = SEMPairDataset(
-        rows,
-        args.data_root,
-        classes=classes,
-        task=ckpt["task"],
-        image_size=ckpt["image_size"],
-        input_mode=ckpt["input_mode"],
-        design_blur_radius=ckpt["design_blur_radius"],
-        augment=False,
-        crop_mode=eval_crop_mode,
-        tile_size=ckpt.get("tile_size", ckpt.get("image_size", 512)),
-    )
-    loader = DataLoader(ds, batch_size=args.batch_size, shuffle=False, num_workers=0)
-    ok_idx = classes.index("OK") if "OK" in classes else 0
-    saved = false_ok = false_ng = 0
-    index = 0
+    config: Dict[str, Any] = args.values
+    output_dir = ensure_dir(args.out or Path(config.get("out", "runs/sem_tiny_abn")) / "error_report")
+    device = torch.device(config.get("device", "cpu"))
+    model, checkpoint = load_checkpoint_model(config["checkpoint"], device)
+    classes: List[str] = checkpoint["classes"]
+    ok_index = classes.index("OK") if "OK" in classes else 0
+    threshold = float(checkpoint.get("decision_threshold", 0.5))
+    non_ok_indices = [i for i in range(len(classes)) if i != ok_index]
+    rows = read_annotations(config["csv"])
+    dataset = make_dataset(rows, config["data_root"], checkpoint, augment=False)
+    loader = DataLoader(dataset, batch_size=int(config.get("eval_batch_size", config.get("batch_size", 4))), shuffle=False, num_workers=0)
+    preprocess = checkpoint_dataset_kwargs(checkpoint)
+    root = Path(config["data_root"])
+    entries: List[Dict[str, str]] = []
+    global_index = 0
     with torch.no_grad():
         for batch in loader:
-            x = batch["x"].to(device)
-            out = model(x)
-            prob = torch.softmax(out["logits"], dim=1).cpu()
-            pred = prob.argmax(dim=1).cpu()
-            y = batch["y"].cpu()
-            attn = out.get("attention")
-            if attn is not None:
-                attn = attn.cpu()
-            for b in range(x.size(0)):
-                t = int(y[b].item())
-                p = int(pred[b].item())
-                if t == p:
-                    index += 1
+            output = model(batch["x"].to(device))
+            probabilities = torch.softmax(output["logits"], dim=1).cpu()
+            attention_batch = output.get("attention")
+            if attention_batch is not None:
+                attention_batch = attention_batch.cpu()
+            for i in range(probabilities.shape[0]):
+                probability = probabilities[i]
+                pred_index = ok_index if float(probability[ok_index]) >= threshold else (
+                    non_ok_indices[int(torch.argmax(probability[non_ok_indices]))] if non_ok_indices else int(torch.argmax(probability))
+                )
+                true_index = int(batch["y"][i])
+                if pred_index == true_index:
+                    global_index += 1
                     continue
-                kind = "false_ok" if (t != ok_idx and p == ok_idx) else "false_ng" if (t == ok_idx and p != ok_idx) else "wrong"
-                false_ok += int(kind == "false_ok")
-                false_ng += int(kind == "false_ng")
-                if saved < args.max_save:
-                    title = f"{kind} | true={classes[t]} pred={classes[p]} conf={float(prob[b, p]):.4f} | sem={batch['sem'][b]}"
-                    make_montage(
-                        x=batch["x"][b].cpu(),
-                        attention=attn[b] if attn is not None else None,
-                        title=title,
-                        out_path=out_dir / kind / f"{index:06d}_{classes[t]}_to_{classes[p]}.png",
-                    )
-                    saved += 1
-                index += 1
-    print({"saved": saved, "false_ok": false_ok, "false_ng": false_ng, "out": str(out_dir)})
+                kind = "false_ok" if true_index != ok_index and pred_index == ok_index else "false_ng" if true_index == ok_index else "wrong_class"
+                if len(entries) >= args.max_save:
+                    global_index += 1
+                    continue
+                sem_path = Path(batch["sem"][i]); design_path = Path(batch["design"][i])
+                sem_path = sem_path if sem_path.is_absolute() else root / sem_path
+                design_path = design_path if design_path.is_absolute() else root / design_path
+                panel_input = build_input_tensor(
+                    load_gray(sem_path), load_gray(design_path), image_size=int(preprocess.get("image_size", 512)),
+                    input_mode="sem_design_abs_posneg", normalize_mode=str(preprocess.get("normalize_mode", "percentile")),
+                    sem_invert=str(preprocess.get("sem_invert", "auto")), design_invert=bool(preprocess.get("design_invert", False)),
+                    design_blur_radius=float(preprocess.get("design_blur_radius", 1.0)), diff_tolerance_px=int(preprocess.get("diff_tolerance_px", 2)),
+                )
+                filename = f"{global_index:06d}_{classes[true_index]}_to_{classes[pred_index]}.png"
+                relative = f"{kind}/{filename}"
+                title = f"{kind} | true={classes[true_index]} pred={classes[pred_index]} OK_prob={float(probability[ok_index]):.6f} threshold={threshold:.6f} | {batch['sem'][i]}"
+                make_montage(panel_input, attention_batch[i] if attention_batch is not None else None, title, output_dir / relative)
+                entries.append({"kind": kind, "true": classes[true_index], "pred": classes[pred_index], "ok_prob": f"{float(probability[ok_index]):.8f}", "sem": batch["sem"][i], "design": batch["design"][i], "image": relative})
+                global_index += 1
+    write_gallery(entries, output_dir)
+    with (output_dir / "errors.csv").open("w", encoding="utf-8", newline="") as handle:
+        fieldnames = ["kind", "true", "pred", "ok_prob", "sem", "design", "image"]
+        writer = csv.DictWriter(handle, fieldnames=fieldnames); writer.writeheader(); writer.writerows(entries)
+    print({"errors": len(entries), "html": str(output_dir / "index.html")})
 
 
 if __name__ == "__main__":

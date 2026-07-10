@@ -1,73 +1,83 @@
-# SEM Tiny ABN デフォルト設定
-#
-# 基本はこの設定ファイルを編集して使います。
-# 毎回長いコマンドにパラメータを書く必要はありません。
+# SEM Tiny ABN 厳密レビュー後の推奨設定
+# 基本的にはこのファイルだけを編集して実行します。
 
-# 画像フォルダとCSV。手元環境に合わせて書き換えてください。
 data_root: /path/to/画像フォルダ
 csv: /path/to/annotations.csv
 out: runs/sem_tiny_abn
 
-# まずはOK/NGの2分類で開始します。
-# あとから OK,NG,EDGE_SHIFT,REVIEW のように増やせます。
 classes: OK,NG
-
 task: multiclass
 
-# tiny_cnn: Attentionなし最速
-# tiny_abn: 軽量ABNあり。まずはこれがおすすめ
-# tiny_freq_abn: low/high Attentionあり。検証用
+# tiny_cnn / tiny_abn / tiny_freq_abn
 model: tiny_abn
 
-# SEM, soft_design, pos_diff, neg_diff の4chを使う
+# SEM, soft design, 許容帯付きpos/neg差分
 input_mode: sem_design_posneg
-
-# 微小パターンを見るなら128は潰れやすいです。
-# まず512を推奨。余裕があれば1024。
 image_size: 512
+normalize_mode: percentile
 
-# resize:
-#   画像全体を image_size x image_size で見る。通常はこれ。
-# center_crop:
-#   中央だけを見る確認用。基本は使わない。
-#
-# 注意:
-#   OK/NGの画像単位ラベルだけでランダムタイル学習は危険です。
-#   NG画像の中に正常領域があると、その正常パッチまでNGとして学習してしまうためです。
-#   そのため、ランダムタイル学習は実装から外しています。
-crop_mode: resize
+# SEMの白黒極性が全データで一定なら true/false に固定する方が安全です。
+# 不明な初回検証だけ auto を使えます。
+sem_invert: auto
+design_invert: false
 
-# center_crop確認やtile_predictで使うサイズ
-tile_size: 256
+# DesignをSEMの見え方へ少し寄せる。
+design_blur_radius: 1.0
 
-# Design画像を少しぼかして、エッジ位置ずれに過敏になりすぎないようにする
-design_blur_radius: 1.2
+# このピクセル以内の位置ずれは差分チャンネルで許容する。
+# 512画像で2pxを初期値とし、実データで1/2/3pxを比較してください。
+diff_tolerance_px: 2
 
-# モデル幅。軽すぎて精度が出なければ 1.25, 1.5, 2.0 と増やす。
+# 0ならキャッシュなし。画像数が少なくRAMに余裕があれば増やせます。
+cache_size: 0
+
+# モデル規模。精度不足なら width → depth の順で増やす。
 width: 1.0
+depth: 1
 
-# 512以上はメモリを食うので、まず小さめbatchを推奨
-batch_size: 8
-epochs: 30
+# batch size 1でも安定するGroupNormを標準にする。
+norm: group
+
+# standardはCPU実測で速い場合が多い通常Residual Conv。
+# mobileはパラメータを減らせるが、CPUで必ず速いとは限りません。
+block_type: standard
+expansion: 2.0
+pooling: avgmax
+dropout: 0.1
+
+# 学習
+epochs: 60
+batch_size: 4
 lr: 0.001
 weight_decay: 0.0001
+optimizer: adamw
+momentum: 0.9
+warmup_epochs: 3
 
-# ABNの補助分類headのloss重み
-aux_weight: 0.35
+# 本家ABNと同様、Attention branchとPerception branchを同時に学習する。
+aux_weight: 1.0
 
-# 少数派や難例を少し重視する。0にすると通常のCrossEntropy寄り
-focal_gamma: 1.5
+# 最初は通常CrossEntropyを推奨。難例不足を確認してから変更する。
+focal_gamma: 0.0
+label_smoothing: 0.0
+class_weight_mode: none
+grad_clip_norm: 5.0
 
+# CSVにsplit列またはgroup/pattern_id/wafer列がない場合のみ使われる。
 val_ratio: 0.2
 
-# 社内PC想定では0が安全。余裕があれば2,4などへ
+# 検証データ上で許容するFalse OK率。0.0はFalse OKゼロを優先。
+target_false_ok_rate: 0.0
+early_stopping_patience: 15
+
 num_workers: 0
-
 device: cpu
+cpu_threads: 0
 seed: 42
-
-# CUDA環境ならtrueを試す。CPUではfalse推奨。
+deterministic: false
 amp: false
+channels_last: false
+resume: null
 
-# PyTorch 2系のtorch.compile。CPUでは環境により逆に遅くなる場合があります。
-compile_model: false
+# 評価・推論時のbatch size
+eval_batch_size: 4

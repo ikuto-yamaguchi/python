@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import random
+from collections import OrderedDict
 from pathlib import Path
-from typing import Dict, Sequence, Tuple
+from typing import Dict, Sequence
 
 import numpy as np
 import torch
@@ -13,109 +14,120 @@ from torch.utils.data import Dataset
 from .utils import parse_classes
 
 
-def _load_gray(path: Path) -> Image.Image:
-    """画像をモノクロで読み込む。SEMもDesignも1ch画像として扱う。"""
-    return Image.open(path).convert("L")
+def load_gray(path: Path) -> Image.Image:
+    with Image.open(path) as image:
+        return image.convert("L").copy()
 
 
-def _pil_to_tensor(img: Image.Image) -> torch.Tensor:
-    """PIL画像を 0.0〜1.0 の PyTorch Tensor に変換する。"""
-    arr = np.asarray(img, dtype=np.float32) / 255.0
-    return torch.from_numpy(arr).unsqueeze(0)
+def resize_square(image: Image.Image, size: int) -> Image.Image:
+    if image.size == (size, size):
+        return image
+    return image.resize((size, size), Image.Resampling.BILINEAR)
 
 
-def _resize(img: Image.Image, size: int) -> Image.Image:
-    """画像を学習/推論用サイズへ縮小または拡大する。"""
-    return img.resize((size, size), Image.BILINEAR)
+def robust_normalize(array: np.ndarray, mode: str = "percentile", low: float = 1.0, high: float = 99.0) -> np.ndarray:
+    array = array.astype(np.float32)
+    if mode == "none":
+        return np.clip(array / 255.0, 0.0, 1.0)
+    if mode == "minmax":
+        lo = float(array.min())
+        hi = float(array.max())
+    elif mode == "percentile":
+        lo, hi = np.percentile(array, [low, high]).astype(np.float32)
+    else:
+        raise ValueError(f"Unknown normalize_mode: {mode}")
+    if hi <= lo + 1e-6:
+        return np.zeros_like(array, dtype=np.float32)
+    return np.clip((array - lo) / (hi - lo), 0.0, 1.0)
 
 
-def _paired_augment(sem: Image.Image, design: Image.Image) -> Tuple[Image.Image, Image.Image]:
-    """SEMとDesignに同じ回転・反転をかける。
-
-    片方だけ変換すると位置合わせ関係が壊れるので、必ず同じ変換にする。
-    """
-    if random.random() < 0.5:
-        sem = sem.transpose(Image.FLIP_LEFT_RIGHT)
-        design = design.transpose(Image.FLIP_LEFT_RIGHT)
-    if random.random() < 0.5:
-        sem = sem.transpose(Image.FLIP_TOP_BOTTOM)
-        design = design.transpose(Image.FLIP_TOP_BOTTOM)
-    k = random.randint(0, 3)
-    if k:
-        sem = sem.rotate(90 * k, expand=True)
-        design = design.rotate(90 * k, expand=True)
-    return sem, design
+def parse_bool_or_auto(value: object) -> str:
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    text = str(value).strip().lower()
+    if text in {"true", "1", "yes", "on"}:
+        return "true"
+    if text in {"false", "0", "no", "off"}:
+        return "false"
+    if text == "auto":
+        return "auto"
+    raise ValueError(f"Expected true/false/auto, got: {value}")
 
 
-def _pad_to_min_size(x: torch.Tensor, min_size: int) -> torch.Tensor:
-    """画像Tensorを最低 min_size x min_size まで右下方向へゼロパディングする。"""
-    _, h, w = x.shape
-    pad_h = max(0, min_size - h)
-    pad_w = max(0, min_size - w)
-    if pad_h == 0 and pad_w == 0:
-        return x
-    return F.pad(x, (0, pad_w, 0, pad_h), mode="constant", value=0.0)
+def maybe_invert_sem(sem: torch.Tensor, design: torch.Tensor, mode: str) -> torch.Tensor:
+    mode = parse_bool_or_auto(mode)
+    if mode == "true":
+        return 1.0 - sem
+    if mode == "false":
+        return sem
+    sem_centered = sem - sem.mean()
+    design_centered = design - design.mean()
+    correlation = torch.mean(sem_centered * design_centered)
+    return 1.0 - sem if float(correlation) < 0.0 else sem
 
 
-def _crop_tensor(x: torch.Tensor, top: int, left: int, size: int) -> torch.Tensor:
-    x = _pad_to_min_size(x, size)
-    return x[:, top : top + size, left : left + size]
-
-
-def make_input_tensor(
-    sem_img: Image.Image,
-    design_img: Image.Image,
+def build_input_tensor(
+    sem_image: Image.Image,
+    design_image: Image.Image,
     image_size: int = 512,
     input_mode: str = "sem_design_posneg",
-    design_blur_radius: float = 1.2,
+    normalize_mode: str = "percentile",
+    sem_invert: str = "auto",
+    design_invert: bool = False,
+    design_blur_radius: float = 1.0,
+    diff_tolerance_px: int = 2,
 ) -> torch.Tensor:
-    """SEM/Designからモデル入力チャンネルを作る。
-
-    差分画像は保存せず、この関数内でメモリ上に作る。
-    """
-    sem_img = _resize(sem_img, image_size)
-    design_img = _resize(design_img, image_size)
-
-    # Designを少しぼかす。
-    # 理由: Designの硬いエッジとSEMのぼけたエッジを直接比べると、
-    # 小さなエッジ位置ずれに過敏になりやすいから。
+    """SEM/Designを正規化し、許容幅付き差分をメモリ上で作る。"""
+    sem_image = resize_square(sem_image, image_size)
+    design_image = resize_square(design_image, image_size)
     if design_blur_radius > 0:
-        design_soft_img = design_img.filter(ImageFilter.GaussianBlur(radius=design_blur_radius))
+        design_image = design_image.filter(ImageFilter.GaussianBlur(radius=design_blur_radius))
+
+    sem_np = robust_normalize(np.asarray(sem_image), normalize_mode)
+    design_np = robust_normalize(np.asarray(design_image), "minmax")
+    sem = torch.from_numpy(sem_np).unsqueeze(0)
+    design = torch.from_numpy(design_np).unsqueeze(0)
+    if design_invert:
+        design = 1.0 - design
+    sem = maybe_invert_sem(sem, design, sem_invert)
+
+    radius = max(0, int(diff_tolerance_px))
+    if radius > 0:
+        kernel = radius * 2 + 1
+        upper = F.max_pool2d(design.unsqueeze(0), kernel, stride=1, padding=radius).squeeze(0)
+        lower = -F.max_pool2d((-design).unsqueeze(0), kernel, stride=1, padding=radius).squeeze(0)
     else:
-        design_soft_img = design_img
+        upper = lower = design
 
-    sem = _pil_to_tensor(sem_img)
-    design = _pil_to_tensor(design_soft_img)
+    pos = torch.clamp(sem - upper, min=0.0, max=1.0)
+    neg = torch.clamp(lower - sem, min=0.0, max=1.0)
+    abs_diff = torch.clamp(pos + neg, 0.0, 1.0)
 
-    # SEM側に余計に出ている差分。太り・余計な接続・bridge寄り。
-    pos = torch.clamp(sem - design, min=0.0)
+    channels = {
+        "sem_design": [sem, design],
+        "posneg": [pos, neg],
+        "sem_design_posneg": [sem, design, pos, neg],
+        "sem_design_abs_posneg": [sem, design, abs_diff, pos, neg],
+    }
+    if input_mode not in channels:
+        raise ValueError(f"Unknown input_mode: {input_mode}")
+    return torch.cat(channels[input_mode], dim=0).float()
 
-    # DesignにはあるのにSEM側で足りない差分。細り・欠け・break寄り。
-    neg = torch.clamp(design - sem, min=0.0)
-    abs_diff = pos + neg
 
-    if input_mode == "sem_design":
-        return torch.cat([sem, design], dim=0)
-    if input_mode == "posneg":
-        return torch.cat([pos, neg], dim=0)
-    if input_mode == "sem_design_posneg":
-        return torch.cat([sem, design, pos, neg], dim=0)
-    if input_mode == "sem_design_abs_posneg":
-        return torch.cat([sem, design, abs_diff, pos, neg], dim=0)
-    raise ValueError(f"Unknown input_mode: {input_mode}")
+def paired_tensor_augment(x: torch.Tensor) -> torch.Tensor:
+    """全チャンネルへ同じ反転・90度回転を適用する。補間は発生しない。"""
+    if random.random() < 0.5:
+        x = torch.flip(x, dims=(-1,))
+    if random.random() < 0.5:
+        x = torch.flip(x, dims=(-2,))
+    k = random.randint(0, 3)
+    if k:
+        x = torch.rot90(x, k, dims=(-2, -1))
+    return x.contiguous()
 
 
 class SEMPairDataset(Dataset):
-    """SEM画像とDesign画像のペアを読むDataset。
-
-    crop_mode:
-      resize      : 画像全体を image_size x image_size にして使う。
-      center_crop : image_sizeにしたあと、中央 tile_size だけを切る。確認用。
-
-    OK/NGの画像単位ラベルだけでランダムタイル学習をすると、NG画像内の正常領域までNG扱いになり、
-    ラベルノイズで精度が落ちる可能性があるため、このDatasetからは外しています。
-    タイルは推論時の探索用 `tile_predict.py` または、将来パッチ単位ラベルがある場合に使います。
-    """
+    """位置合わせ済みSEM/Designペアの画像単位分類Dataset。"""
 
     def __init__(
         self,
@@ -125,33 +137,37 @@ class SEMPairDataset(Dataset):
         task: str = "multiclass",
         image_size: int = 512,
         input_mode: str = "sem_design_posneg",
-        design_blur_radius: float = 1.2,
+        normalize_mode: str = "percentile",
+        sem_invert: str = "auto",
+        design_invert: bool = False,
+        design_blur_radius: float = 1.0,
+        diff_tolerance_px: int = 2,
         augment: bool = False,
-        crop_mode: str = "resize",
-        tile_size: int = 256,
+        cache_size: int = 0,
     ) -> None:
         self.rows = list(rows)
         self.data_root = Path(data_root)
         self.classes = parse_classes(classes)
-        self.class_to_idx = {c: i for i, c in enumerate(self.classes)}
+        self.class_to_idx = {name: i for i, name in enumerate(self.classes)}
         self.task = task
         self.image_size = int(image_size)
         self.input_mode = input_mode
+        self.normalize_mode = normalize_mode
+        self.sem_invert = sem_invert
+        self.design_invert = bool(design_invert)
         self.design_blur_radius = float(design_blur_radius)
+        self.diff_tolerance_px = int(diff_tolerance_px)
         self.augment = augment
-        self.crop_mode = crop_mode
-        self.tile_size = int(tile_size)
+        self.cache_size = max(0, int(cache_size))
+        self.cache: OrderedDict[int, torch.Tensor] = OrderedDict()
         if self.task not in {"multiclass", "multilabel"}:
-            raise ValueError("task must be 'multiclass' or 'multilabel'")
-        if self.crop_mode not in {"resize", "center_crop"}:
-            raise ValueError("crop_mode must be resize or center_crop")
+            raise ValueError("task must be multiclass or multilabel")
 
     def __len__(self) -> int:
         return len(self.rows)
 
     @property
     def in_channels(self) -> int:
-        """input_modeごとの入力チャンネル数。"""
         return {
             "sem_design": 2,
             "posneg": 2,
@@ -159,58 +175,57 @@ class SEMPairDataset(Dataset):
             "sem_design_abs_posneg": 5,
         }[self.input_mode]
 
-    @property
-    def model_input_size(self) -> int:
-        return self.tile_size if self.crop_mode == "center_crop" else self.image_size
+    def resolve(self, relative: str) -> Path:
+        path = Path(relative)
+        return path if path.is_absolute() else self.data_root / path
 
-    def _resolve(self, rel: str) -> Path:
-        p = Path(rel)
-        if p.is_absolute():
-            return p
-        return self.data_root / p
-
-    def _label(self, raw: str) -> torch.Tensor:
+    def encode_label(self, raw: str) -> torch.Tensor:
         if self.task == "multiclass":
             if raw not in self.class_to_idx:
-                raise ValueError(f"Unknown label '{raw}'. classes={self.classes}")
+                raise ValueError(f"Unknown label '{raw}', classes={self.classes}")
             return torch.tensor(self.class_to_idx[raw], dtype=torch.long)
-        out = torch.zeros(len(self.classes), dtype=torch.float32)
+        result = torch.zeros(len(self.classes), dtype=torch.float32)
         for part in raw.replace(";", "|").split("|"):
-            part = part.strip()
-            if not part:
+            label = part.strip()
+            if not label:
                 continue
-            if part not in self.class_to_idx:
-                raise ValueError(f"Unknown label '{part}'. classes={self.classes}")
-            out[self.class_to_idx[part]] = 1.0
-        return out
+            if label not in self.class_to_idx:
+                raise ValueError(f"Unknown label '{label}', classes={self.classes}")
+            result[self.class_to_idx[label]] = 1.0
+        return result
 
-    def _apply_crop(self, x: torch.Tensor) -> torch.Tensor:
-        if self.crop_mode == "resize":
-            return x
-        x = _pad_to_min_size(x, self.tile_size)
-        _, h, w = x.shape
-        max_top = max(0, h - self.tile_size)
-        max_left = max(0, w - self.tile_size)
-        top = max_top // 2
-        left = max_left // 2
-        return _crop_tensor(x, top, left, self.tile_size)
-
-    def _make_input(self, sem_img: Image.Image, design_img: Image.Image) -> torch.Tensor:
-        if self.augment:
-            sem_img, design_img = _paired_augment(sem_img, design_img)
-        x = make_input_tensor(
-            sem_img=sem_img,
-            design_img=design_img,
+    def load_input(self, index: int) -> torch.Tensor:
+        if index in self.cache:
+            value = self.cache.pop(index)
+            self.cache[index] = value
+            return value.clone()
+        row = self.rows[index]
+        value = build_input_tensor(
+            load_gray(self.resolve(row["sem"])),
+            load_gray(self.resolve(row["design"])),
             image_size=self.image_size,
             input_mode=self.input_mode,
+            normalize_mode=self.normalize_mode,
+            sem_invert=self.sem_invert,
+            design_invert=self.design_invert,
             design_blur_radius=self.design_blur_radius,
+            diff_tolerance_px=self.diff_tolerance_px,
         )
-        return self._apply_crop(x)
+        if self.cache_size > 0:
+            self.cache[index] = value.clone()
+            while len(self.cache) > self.cache_size:
+                self.cache.popitem(last=False)
+        return value
 
-    def __getitem__(self, idx: int):
-        row = self.rows[idx]
-        sem_img = _load_gray(self._resolve(row["sem"]))
-        design_img = _load_gray(self._resolve(row["design"]))
-        x = self._make_input(sem_img, design_img)
-        y = self._label(row["label"])
-        return {"x": x, "y": y, "sem": row["sem"], "design": row["design"], "label": row["label"]}
+    def __getitem__(self, index: int) -> Dict[str, object]:
+        row = self.rows[index]
+        x = self.load_input(index)
+        if self.augment:
+            x = paired_tensor_augment(x)
+        return {
+            "x": x,
+            "y": self.encode_label(row["label"]),
+            "sem": row["sem"],
+            "design": row["design"],
+            "label": row["label"],
+        }
