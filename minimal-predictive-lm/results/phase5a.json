@@ -1,0 +1,61 @@
+{
+  "core_primitives": [
+    "MATCH",
+    "DELETE",
+    "ADD",
+    "EMIT",
+    "CHOOSE_MIN"
+  ],
+  "shared_symbol_count": 117,
+  "runtime_bits_per_symbol": 7,
+  "tasks": {
+    "coding": {
+      "objective_bits": 6,
+      "expanded_states": 21,
+      "generated_states": 81,
+      "rule_checks": 81,
+      "rule_applications": 81,
+      "peak_frontier": 81,
+      "trace": [
+        "patch:a=3,b=1"
+      ],
+      "output": [
+        "def f(x): return 3 * x + 1"
+      ],
+      "tests": 6,
+      "candidate_patches": 81
+    },
+    "writing": {
+      "objective_bits": 25,
+      "expanded_states": 5,
+      "generated_states": 6,
+      "rule_checks": 6,
+      "rule_applications": 6,
+      "peak_frontier": 2,
+      "trace": [
+        "write:intro-concise",
+        "write:method",
+        "write:caveat"
+      ],
+      "output": [
+        "本研究は、言語処理に必要な記憶量と演算量の下限を明らかにする。",
+        "予測誤差から必要な状態と書換え規則だけを追加し、すべてのコストをビット単位で測定する。",
+        "ただし、新しい知識が持つ情報量そのものは削減できない。"
+      ]
+    },
+    "agent": {
+      "objective_bits": 3,
+      "expanded_states": 3,
+      "generated_states": 3,
+      "rule_checks": 5,
+      "rule_applications": 5,
+      "peak_frontier": 1,
+      "trace": [
+        "move:lab->hall",
+        "move:hall->vault",
+        "pickup:key"
+      ],
+      "output": []
+    }
+  }
+}
