@@ -1,0 +1,133 @@
+{
+  "chain": [
+    {
+      "length": 8,
+      "state_lower_bound_bits": 4,
+      "flat_ground_program_bits": 88,
+      "factorized_program_bits": 33,
+      "factorized_runtime_state_bits": 4,
+      "required_steps": 8,
+      "program_compression_ratio": 2.6666666666666665
+    },
+    {
+      "length": 16,
+      "state_lower_bound_bits": 5,
+      "flat_ground_program_bits": 208,
+      "factorized_program_bits": 35,
+      "factorized_runtime_state_bits": 5,
+      "required_steps": 16,
+      "program_compression_ratio": 5.942857142857143
+    },
+    {
+      "length": 32,
+      "state_lower_bound_bits": 6,
+      "flat_ground_program_bits": 480,
+      "factorized_program_bits": 37,
+      "factorized_runtime_state_bits": 6,
+      "required_steps": 32,
+      "program_compression_ratio": 12.972972972972974
+    },
+    {
+      "length": 64,
+      "state_lower_bound_bits": 7,
+      "flat_ground_program_bits": 1088,
+      "factorized_program_bits": 39,
+      "factorized_runtime_state_bits": 7,
+      "required_steps": 64,
+      "program_compression_ratio": 27.897435897435898
+    },
+    {
+      "length": 128,
+      "state_lower_bound_bits": 8,
+      "flat_ground_program_bits": 2432,
+      "factorized_program_bits": 41,
+      "factorized_runtime_state_bits": 8,
+      "required_steps": 128,
+      "program_compression_ratio": 59.31707317073171
+    },
+    {
+      "length": 256,
+      "state_lower_bound_bits": 9,
+      "flat_ground_program_bits": 5376,
+      "factorized_program_bits": 43,
+      "factorized_runtime_state_bits": 9,
+      "required_steps": 256,
+      "program_compression_ratio": 125.02325581395348
+    }
+  ],
+  "parity": [
+    {
+      "input_bits": 8,
+      "arbitrary_boolean_map_lower_bits": 256,
+      "parity_program_bits": 25,
+      "parity_runtime_state_bits": 1,
+      "required_input_reads": 8,
+      "description_compression_ratio": 10.24
+    },
+    {
+      "input_bits": 12,
+      "arbitrary_boolean_map_lower_bits": 4096,
+      "parity_program_bits": 25,
+      "parity_runtime_state_bits": 1,
+      "required_input_reads": 12,
+      "description_compression_ratio": 163.84
+    },
+    {
+      "input_bits": 16,
+      "arbitrary_boolean_map_lower_bits": 65536,
+      "parity_program_bits": 27,
+      "parity_runtime_state_bits": 1,
+      "required_input_reads": 16,
+      "description_compression_ratio": 2427.259259259259
+    },
+    {
+      "input_bits": 20,
+      "arbitrary_boolean_map_lower_bits": 1048576,
+      "parity_program_bits": 27,
+      "parity_runtime_state_bits": 1,
+      "required_input_reads": 20,
+      "description_compression_ratio": 38836.148148148146
+    }
+  ],
+  "repeated_query": [
+    {
+      "length": 64,
+      "queries": 1,
+      "edge_store_bits": 896,
+      "on_demand_total_bit_accesses": 1792,
+      "single_query_memo_total_bit_accesses": 1793,
+      "full_closure_total_bit_accesses": 2977
+    },
+    {
+      "length": 64,
+      "queries": 4,
+      "edge_store_bits": 896,
+      "on_demand_total_bit_accesses": 4480,
+      "single_query_memo_total_bit_accesses": 1796,
+      "full_closure_total_bit_accesses": 2980
+    },
+    {
+      "length": 64,
+      "queries": 16,
+      "edge_store_bits": 896,
+      "on_demand_total_bit_accesses": 15232,
+      "single_query_memo_total_bit_accesses": 1808,
+      "full_closure_total_bit_accesses": 2992
+    },
+    {
+      "length": 64,
+      "queries": 100,
+      "edge_store_bits": 896,
+      "on_demand_total_bit_accesses": 90496,
+      "single_query_memo_total_bit_accesses": 1892,
+      "full_closure_total_bit_accesses": 3076
+    }
+  ],
+  "interpretation": {
+    "structured_programs": "short generative laws can avoid flat table growth",
+    "unstructured_information": "arbitrary mappings retain exponential description lower bounds",
+    "working_state": "factorized chain state meets the log2(number of positions) lower bound",
+    "read_cost": "parity still reads every independent input bit",
+    "workload_specificity": "memoization beats generic closure when one query repeats"
+  }
+}
