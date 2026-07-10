@@ -1,0 +1,62 @@
+{
+  "corpus": {
+    "training_bytes": 625748,
+    "test_bytes": 155073,
+    "description": "deterministic Japanese/English/code micro-corpus; test uses a different seed"
+  },
+  "residual_lm": {
+    "selected_rules": 608,
+    "compiled_states": 696,
+    "runtime_state_bits": 10,
+    "serialized_model_bytes": 10999,
+    "bpb": 0.468469605121925,
+    "nll_bits": 72646.98707507228,
+    "average_transition_checks": 1.0156442449684988,
+    "roundtrip_bpb": 0.468469605121925
+  },
+  "fixed_ngram_baselines": [
+    {
+      "order": 0,
+      "bpb": 5.820242116971525,
+      "serialized_size_estimate_bytes": 365,
+      "rule_count": 1
+    },
+    {
+      "order": 1,
+      "bpb": 2.1463074164249587,
+      "serialized_size_estimate_bytes": 2218,
+      "rule_count": 120
+    },
+    {
+      "order": 2,
+      "bpb": 1.0342654921540784,
+      "serialized_size_estimate_bytes": 7020,
+      "rule_count": 653
+    },
+    {
+      "order": 3,
+      "bpb": 0.5572964661111344,
+      "serialized_size_estimate_bytes": 16294,
+      "rule_count": 1667
+    },
+    {
+      "order": 4,
+      "bpb": 0.5318914772792595,
+      "serialized_size_estimate_bytes": 33383,
+      "rule_count": 3370
+    },
+    {
+      "order": 6,
+      "bpb": 0.6056885759504446,
+      "serialized_size_estimate_bytes": 131484,
+      "rule_count": 12104
+    },
+    {
+      "order": 8,
+      "bpb": 0.7273515158231727,
+      "serialized_size_estimate_bytes": 399426,
+      "rule_count": 33591
+    }
+  ],
+  "generation_sample": "ユーザー: 山口さん、推論です。次に言語モデルネットについて教えてください。\nAI: 数学では、プログラムが小さいほど効率的です。次にプログラムが小さいほど効率的です。次にプログラムが小さいほど効さいほど効ルネット | status=ok\ndef calc_11(x: int) -> int:\n    return x * 9 + 4\n\nAI: 数孁"
+}
