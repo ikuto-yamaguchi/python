@@ -2,46 +2,59 @@ from __future__ import annotations
 
 import argparse
 import time
+from pathlib import Path
 
 import torch
 
-from .models import build_model
-
-
-def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Benchmark SEM Tiny ABN latency")
-    p.add_argument("--checkpoint", required=True)
-    p.add_argument("--batch-size", type=int, default=1)
-    p.add_argument("--iters", type=int, default=300)
-    p.add_argument("--warmup", type=int, default=30)
-    p.add_argument("--device", default="cpu")
-    return p.parse_args()
+from .dataset import build_input_tensor, load_gray
+from .runtime import checkpoint_dataset_kwargs, load_checkpoint_model
+from .utils import load_yaml, read_annotations
 
 
 def main() -> None:
-    args = parse_args()
-    device = torch.device(args.device)
-    ckpt = torch.load(args.checkpoint, map_location=device)
-    model = build_model(ckpt["model"], ckpt["in_channels"], ckpt["num_classes"], ckpt.get("width", 1.0))
-    model.load_state_dict(ckpt["model_state"])
-    model.to(device).eval()
-    x = torch.randn(args.batch_size, ckpt["in_channels"], ckpt["image_size"], ckpt["image_size"], device=device)
+    parser = argparse.ArgumentParser(description="PyTorch推論と前処理の時間を測る")
+    parser.add_argument("--config", default="configs/default.yaml")
+    parser.add_argument("--checkpoint", default=None)
+    parser.add_argument("--device", default=None)
+    parser.add_argument("--threads", type=int, default=1)
+    parser.add_argument("--iterations", type=int, default=100)
+    parser.add_argument("--warmup", type=int, default=20)
+    parser.add_argument("--with-preprocess", action="store_true")
+    args = parser.parse_args()
+    config = load_yaml(args.config)
+    checkpoint_path = args.checkpoint or config.get("checkpoint") or str(Path(config.get("out", "runs/sem_tiny_abn")) / "best.pt")
+    device = torch.device(args.device or config.get("device", "cpu"))
+    if device.type == "cpu": torch.set_num_threads(max(1, args.threads))
+    model, checkpoint = load_checkpoint_model(checkpoint_path, device)
+    preprocess = checkpoint_dataset_kwargs(checkpoint)
+    image_size = int(preprocess.get("image_size", 512))
+    x = torch.randn(1, checkpoint["in_channels"], image_size, image_size, device=device)
     with torch.no_grad():
-        for _ in range(args.warmup):
-            _ = model(x)["logits"]
-        if device.type == "cuda":
-            torch.cuda.synchronize()
-        t0 = time.perf_counter()
-        for _ in range(args.iters):
-            _ = model(x)["logits"]
-        if device.type == "cuda":
-            torch.cuda.synchronize()
-        t1 = time.perf_counter()
-    total_ms = (t1 - t0) * 1000.0
-    per_batch = total_ms / args.iters
-    per_image = per_batch / args.batch_size
-    print({"per_batch_ms": per_batch, "per_image_ms": per_image, "batch_size": args.batch_size})
+        for _ in range(args.warmup): model(x)
+        if device.type == "cuda": torch.cuda.synchronize()
+        start = time.perf_counter()
+        for _ in range(args.iterations): model(x)
+        if device.type == "cuda": torch.cuda.synchronize()
+        model_ms = (time.perf_counter() - start) * 1000 / args.iterations
+    result = {"model_ms_per_image": model_ms, "device": str(device), "threads": args.threads}
+    if args.with_preprocess:
+        rows = read_annotations(config["csv"])
+        root = Path(config["data_root"]); row = rows[0]
+        sem_path = Path(row["sem"]); design_path = Path(row["design"])
+        sem_path = sem_path if sem_path.is_absolute() else root / sem_path
+        design_path = design_path if design_path.is_absolute() else root / design_path
+        sem = load_gray(sem_path); design = load_gray(design_path)
+        count = min(args.iterations, 20); start = time.perf_counter()
+        for _ in range(count):
+            build_input_tensor(
+                sem, design, image_size=image_size, input_mode=str(preprocess.get("input_mode", "sem_design_posneg")),
+                normalize_mode=str(preprocess.get("normalize_mode", "percentile")), sem_invert=str(preprocess.get("sem_invert", "auto")),
+                design_invert=bool(preprocess.get("design_invert", False)), design_blur_radius=float(preprocess.get("design_blur_radius", 1.0)),
+                diff_tolerance_px=int(preprocess.get("diff_tolerance_px", 2)),
+            )
+        result["preprocess_ms_per_pair"] = (time.perf_counter() - start) * 1000 / count
+        result["estimated_end_to_end_ms"] = result["model_ms_per_image"] + result["preprocess_ms_per_pair"]
+    print(result)
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__": main()

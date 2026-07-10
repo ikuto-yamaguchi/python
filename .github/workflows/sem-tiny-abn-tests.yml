@@ -1,0 +1,43 @@
+name: SEM Tiny ABN tests
+
+on:
+  pull_request:
+    paths:
+      - "sem-tiny-abn/**"
+      - ".github/workflows/sem-tiny-abn-tests.yml"
+  push:
+    paths:
+      - "sem-tiny-abn/**"
+      - ".github/workflows/sem-tiny-abn-tests.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sem-tiny-abn
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: sem-tiny-abn/pyproject.toml
+      - name: Install package and test dependencies
+        run: pip install -q -e ".[dev]"
+      - name: Run tests
+        shell: bash
+        run: |
+          set +e
+          pytest -vv --tb=short > pytest.log 2>&1
+          status=$?
+          cat pytest.log
+          exit $status
+      - name: Upload pytest log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sem-tiny-abn-pytest-log
+          path: sem-tiny-abn/pytest.log
+      - name: Smoke benchmark
+        run: python -m sem_tiny_abn.model_summary --model tiny_abn --image-size 128 --iterations 2
