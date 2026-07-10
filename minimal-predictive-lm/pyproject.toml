@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "minimal-predictive-lm"
+version = "0.1.0"
+description = "Experiments toward minimum-memory, minimum-compute predictive sequence models"
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.26"]
+
+[project.scripts]
+mpm-phase1 = "minimal_predictive_lm.experiment:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
