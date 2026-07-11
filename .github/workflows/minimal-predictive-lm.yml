@@ -21,6 +21,8 @@ jobs:
           python-version: "3.11"
           cache: pip
           cache-dependency-path: minimal-predictive-lm/pyproject.toml
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm
       - name: Phase 9 and Stage C tests
         run: |
           python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase9a_raw_event_program.py' -v
