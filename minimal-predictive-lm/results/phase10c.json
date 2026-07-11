@@ -1,0 +1,87 @@
+{
+  "world_concept_induction": {
+    "interactions": 48,
+    "opaque_surface_actions": 12,
+    "induced_concepts": 4,
+    "pairwise_partition_recovery": 1.0,
+    "experience_bits": 147176,
+    "concept_machine_bits": 4208,
+    "experience_to_machine_ratio": 34.97528517110266,
+    "schemas": [
+      {
+        "id": "C0",
+        "relation": "location",
+        "subject_argument": 0,
+        "value_argument": 1
+      },
+      {
+        "id": "C1",
+        "relation": "message",
+        "subject_argument": 0,
+        "value_argument": 1
+      },
+      {
+        "id": "C2",
+        "relation": "owner",
+        "subject_argument": 0,
+        "value_argument": 1
+      },
+      {
+        "id": "C3",
+        "relation": "status",
+        "subject_argument": 0,
+        "value_argument": 1
+      }
+    ]
+  },
+  "language_as_codec": {
+    "training_examples": 24,
+    "selected_rules": 12,
+    "heldout_examples": 12,
+    "heldout_accuracy": 1.0,
+    "codec_bits": 13608,
+    "rendered_same_concept": {
+      "ja": "box_Aをwarehouseへ移動する",
+      "en": "move box_A to warehouse",
+      "tool": "set_location(box_A,warehouse)",
+      "luma": "nava box_A warehouse"
+    }
+  },
+  "language_first_comparison": {
+    "concept_first_total_bits": 17816,
+    "language_first_total_bits": 29160,
+    "language_first_to_concept_first_ratio": 1.6367310282891783,
+    "note": "the language-first payload repeats transition schema and output template for every surface program; the concept-first payload stores world schemas once and language bindings separately"
+  },
+  "new_language": {
+    "calibration_interactions": 8,
+    "heldout_examples": 4,
+    "heldout_accuracy": 1.0,
+    "additional_bits": 4256
+  },
+  "language_free_planning": {
+    "trials": 1024,
+    "accuracy": 1.0,
+    "language_feature_reads": 0
+  },
+  "identifiability": {
+    "concepts": 4,
+    "equivalent_text_only_groundings": 24,
+    "minimum_external_grounding_bits": 4.584962500721156,
+    "interpretation": "text-only statistics are invariant under a permutation of latent concept names; interaction, perception, reward, or trusted demonstration must break the symmetry"
+  },
+  "stage_c": {
+    "readiness_points": 7,
+    "maximum_points": 24,
+    "changed_by_this_phase": 0,
+    "reason": "this is a synthetic architecture experiment, not a public open-domain benchmark"
+  },
+  "limitations": [
+    "the experiment supplies a finite state relation vocabulary",
+    "each interaction changes exactly one fact",
+    "arguments are already segmented before language grounding",
+    "near held-out language shares lexical roots with calibration examples",
+    "language carries abstract and social knowledge that cannot always be recovered from local physical interaction",
+    "no finite learner can eliminate unavoidable identification, observation, and search costs"
+  ]
+}
