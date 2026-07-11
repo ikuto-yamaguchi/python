@@ -194,8 +194,11 @@ def _consistent_type(values: Iterable[Scalar]) -> str | None:
 
 
 def _freeze(value: object) -> object:
-    if isinstance(value, Fraction):
-        return ("fraction", value.numerator, value.denominator)
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, Fraction)):
+        normalized = Fraction(value)
+        return ("fraction", normalized.numerator, normalized.denominator)
     return value
 
 
