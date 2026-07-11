@@ -1,0 +1,30 @@
+{
+  "definition": "Stage C requires public open-domain evidence and matched-input resource measurement for conversation, knowledge, mathematics, code, long context, and creative writing",
+  "scorecard": {
+    "points": 5,
+    "maximum_points": 24,
+    "normalized_level": 0.20833333333333334,
+    "minimum_quality": 0.0,
+    "stage_c_ready": false,
+    "pareto_claim_allowed": false,
+    "description_bits": 4405,
+    "weakest_axes": ["mathematics", "creative_writing"],
+    "axes": [
+      {"axis": "conversation", "level": 2, "quality": 0.0625, "resource_bits": 7204, "evidence": "synthetic event graphs plus interaction-induced unseen connectors; distant lexical shift remains weak", "matched_inputs": false, "public_benchmark": false},
+      {"axis": "knowledge", "level": 1, "quality": 1.0, "resource_bits": 36864, "evidence": "closed-world indexed fact retrieval up to 1024 facts; no open-domain knowledge benchmark", "matched_inputs": false, "public_benchmark": false},
+      {"axis": "mathematics", "level": 0, "quality": 0.0, "resource_bits": 0, "evidence": "no natural-language mathematics benchmark or general solver", "matched_inputs": false, "public_benchmark": false},
+      {"axis": "code", "level": 1, "quality": 1.0, "resource_bits": 7204, "evidence": "synthetic one-function repair with test, rollback, second patch, and report", "matched_inputs": false, "public_benchmark": false},
+      {"axis": "long_context", "level": 1, "quality": 1.0, "resource_bits": 6, "evidence": "synthetic 10000-query state-retention test without open long-document understanding", "matched_inputs": false, "public_benchmark": false},
+      {"axis": "creative_writing", "level": 0, "quality": 0.0, "resource_bits": 0, "evidence": "no open-ended creative-writing quality evidence", "matched_inputs": false, "public_benchmark": false}
+    ]
+  },
+  "next_experiment_axis": "mathematics",
+  "anti_overclaim_gate": "no open-model parity or efficiency claim is allowed until every axis uses the same public inputs, quality metric, context, tools, and measured model/RSS/compute/energy accounting",
+  "phase10b_plan": [
+    "add a natural-language exact-math substrate with generated and public held-out tasks",
+    "add retrieval over external documents with provenance and abstention",
+    "replace synthetic code repair with a small real repository",
+    "add constrained and open creative-writing evaluation with blinded preference scoring",
+    "run matched comparisons against 135M and 0.5-0.6B open models"
+  ]
+}
