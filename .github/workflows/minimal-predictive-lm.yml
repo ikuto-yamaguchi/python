@@ -23,7 +23,7 @@ jobs:
           cache-dependency-path: minimal-predictive-lm/pyproject.toml
       - name: Install
         run: python -m pip install -e minimal-predictive-lm
-      - name: Phase 9 and Stage C tests
+      - name: Phase 9, Stage C, and universal induction tests
         run: |
           python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase9a_raw_event_program.py' -v
           python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase9b_event_graph.py' -v
@@ -36,6 +36,7 @@ jobs:
           python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase10f_benchmark_harness.py' -v
           python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase10g_public_benchmark.py' -v
           python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase10h_bigbench_arithmetic.py' -v
+          python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase11a_universal_program_induction.py' -v
       - name: Unit tests
         run: python -m unittest discover -s minimal-predictive-lm/tests -v
       - name: Reproduce experiments
@@ -67,7 +68,8 @@ jobs:
           mpm-phase10f
           mpm-phase10g
           mpm-phase10h
-      - name: Upload Phase 9 and Stage C results
+          mpm-phase11a
+      - name: Upload Phase 9, Stage C, and Phase 11 results
         uses: actions/upload-artifact@v4
         with:
           name: phase9-stage-c-results
@@ -94,3 +96,5 @@ jobs:
             minimal-predictive-lm/results/phase10g.md
             minimal-predictive-lm/results/phase10h.json
             minimal-predictive-lm/results/phase10h.md
+            minimal-predictive-lm/results/phase11a.json
+            minimal-predictive-lm/results/phase11a.md
