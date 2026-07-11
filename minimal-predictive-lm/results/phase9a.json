@@ -1,0 +1,82 @@
+{
+  "training": {
+    "examples": 34,
+    "operations": 4,
+    "selected_rules": 15,
+    "description_bits": 1412,
+    "rules": [
+      {"operation": "EMIT", "feature": "a3:umm", "support": 3},
+      {"operation": "EMIT", "feature": "j2:出力", "support": 2},
+      {"operation": "EMIT", "feature": "j2:報告", "support": 2},
+      {"operation": "EMIT", "feature": "j2:送信", "support": 2},
+      {"operation": "RETRACT", "feature": "a3:tor", "support": 4},
+      {"operation": "RETRACT", "feature": "j2:に戻", "support": 2},
+      {"operation": "RETRACT", "feature": "j2:取り", "support": 2},
+      {"operation": "SET", "feature": "a3:urn", "support": 2},
+      {"operation": "SET", "feature": "j2:を修", "support": 2},
+      {"operation": "SET", "feature": "j2:を追", "support": 2},
+      {"operation": "SET", "feature": "j2:更新", "support": 2},
+      {"operation": "VERIFY", "feature": "a3:tes", "support": 4},
+      {"operation": "VERIFY", "feature": "j2:テス", "support": 2},
+      {"operation": "VERIFY", "feature": "j2:検証", "support": 2},
+      {"operation": "VERIFY", "feature": "j2:照合", "support": 2}
+    ]
+  },
+  "raw_grounding": {
+    "near_examples": 18,
+    "exact_surface_accuracy": 0.0,
+    "shared_grounder_accuracy": 1.0,
+    "distant_examples": 16,
+    "distant_lexical_shift_accuracy": 0.0625
+  },
+  "domain_separated": {
+    "sources": ["ast", "text", "tool", "writing"],
+    "models": 4,
+    "description_bits": 1881,
+    "accuracy": 0.9444444444444444,
+    "errors": 1
+  },
+  "shared_vs_separated": {
+    "shared_description_bits": 1412,
+    "separated_description_bits": 1881,
+    "description_ratio": 1.3321529745042493,
+    "shared_near_accuracy": 1.0,
+    "separated_near_accuracy": 0.9444444444444444
+  },
+  "residual_calibration": {
+    "calibration_examples": 8,
+    "followup_examples": 8,
+    "accuracy_before": 0.0,
+    "accuracy_after": 0.875,
+    "added_description_bits": 387,
+    "retention_gate": "retain only when future avoided grounding loss and handoff cost exceed the added program bits"
+  },
+  "workflow": {
+    "plan": ["SET", "VERIFY", "RETRACT", "SET", "VERIFY", "EMIT"],
+    "events": [
+      {"operation": "SET", "request": "transform関数を修正して", "artifact": "Return(value=x + 1)", "artifact_operation": "SET", "expression": "x + 1", "test": "UNKNOWN"},
+      {"operation": "VERIFY", "request": "テストを実行して", "artifact": "FAILED test_transform expected=5 got=3", "artifact_operation": "VERIFY", "expression": "x + 1", "test": "FAIL"},
+      {"operation": "RETRACT", "request": "失敗した場合は変更を元に戻して", "artifact": "git restore module.py", "artifact_operation": "RETRACT", "expression": "x", "test": "FAIL"},
+      {"operation": "SET", "request": "別の修正を追加して", "artifact": "Return(value=x * x + 1)", "artifact_operation": "SET", "expression": "x * x + 1", "test": "FAIL"},
+      {"operation": "VERIFY", "request": "もう一度テストを実行して", "artifact": "PASSED 2 tests", "artifact_operation": "VERIFY", "expression": "x * x + 1", "test": "PASS"},
+      {"operation": "EMIT", "request": "最後に結果を報告して", "artifact": "作業結果を報告します。最初の修正は失敗したため戻し、x * x + 1へ修正して全テストに成功しました。", "artifact_operation": null, "expression": "x * x + 1", "test": "PASS"}
+    ],
+    "request_grounding": 1.0,
+    "artifact_grounding": 0.8333333333333334,
+    "final_expression": "x * x + 1",
+    "final_test": "PASS",
+    "report": "作業結果を報告します。最初の修正は失敗したため戻し、x * x + 1へ修正して全テストに成功しました。",
+    "tool_actions": 5,
+    "rollback_actions": 1,
+    "shared_internal_conversions": 0,
+    "separate_internal_conversions": 12,
+    "separate_serialized_copy_bits": 6704
+  },
+  "limitations": [
+    "effect traces still identify whether an event wrote, observed, restored, or emitted",
+    "near paraphrases share subword evidence with training",
+    "distant lexical shifts remain mostly unresolved without new interaction evidence",
+    "the workflow is a synthetic one-function repair rather than a real repository",
+    "the feature learner does not yet discover morphology, syntax, or world knowledge"
+  ]
+}
