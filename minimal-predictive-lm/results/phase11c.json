@@ -1,0 +1,102 @@
+{
+  "fixed_grammar": {
+    "unexpressible_detected": true,
+    "message": "no expression found within depth=3, candidates=1182"
+  },
+  "proposal_generation": {
+    "proposal_count": 3,
+    "proposals": [
+      {
+        "kind": "conditional_character_offset",
+        "description_bits": 760,
+        "training_accuracy": 1.0,
+        "validation_accuracy": 1.0,
+        "render": {
+          "kind": "conditional_character_offset",
+          "lower_codepoint": 97,
+          "upper_codepoint": 122,
+          "offset": -32
+        }
+      },
+      {
+        "kind": "character_map",
+        "description_bits": 2176,
+        "training_accuracy": 1.0,
+        "validation_accuracy": 1.0,
+        "render": {
+          "kind": "character_map",
+          "rows": [[32,32],[97,65],[98,66],[99,67],[100,68],[101,69],[102,70],[103,71],[104,72],[105,73],[106,74],[107,75],[108,76],[109,77],[110,78],[111,79],[112,80],[113,81],[114,82],[115,83],[116,84],[117,85],[118,86],[119,87],[120,88],[121,89],[122,90]]
+        }
+      },
+      {
+        "kind": "lookup",
+        "description_bits": 2784,
+        "training_accuracy": 1.0,
+        "validation_accuracy": 0.0,
+        "render": {
+          "kind": "lookup",
+          "rows": [
+            ["how vexingly quick daft zebras jump","HOW VEXINGLY QUICK DAFT ZEBRAS JUMP"],
+            ["pack my box with five dozen liquor jugs","PACK MY BOX WITH FIVE DOZEN LIQUOR JUGS"],
+            ["sphinx of black quartz judge my vow","SPHINX OF BLACK QUARTZ JUDGE MY VOW"],
+            ["the five boxing wizards jump quickly","THE FIVE BOXING WIZARDS JUMP QUICKLY"]
+          ]
+        }
+      }
+    ],
+    "task_specific_uppercase_candidate_supplied": false,
+    "candidate_families": ["whole-string lookup","aligned character map","conditional codepoint offset"]
+  },
+  "selected_primitive": {
+    "kind": "conditional_character_offset",
+    "render": {
+      "kind": "conditional_character_offset",
+      "lower_codepoint": 97,
+      "upper_codepoint": 122,
+      "offset": -32
+    },
+    "description_bits": 760,
+    "training_accuracy": 1.0,
+    "validation_accuracy": 1.0,
+    "validation_families": ["dialogue_output","inventory_labels","tool_commands"],
+    "program_bits": 1280,
+    "novel_domain_accuracy": 1.0,
+    "unicode_shift_accuracy": 0.0
+  },
+  "lifetime_adoption": {
+    "one_call": {
+      "adopted": false,
+      "primitive_bits": 760,
+      "validation_bits": 2896,
+      "migration_bits": 128,
+      "expected_future_calls": 1,
+      "error_reduction": 1.0,
+      "error_cost_bits": 64,
+      "normalized_lifetime_gain_bits": -3720
+    },
+    "one_hundred_calls": {
+      "adopted": true,
+      "primitive_bits": 760,
+      "validation_bits": 2896,
+      "migration_bits": 128,
+      "expected_future_calls": 100,
+      "error_reduction": 1.0,
+      "error_cost_bits": 64,
+      "normalized_lifetime_gain_bits": 2616
+    }
+  },
+  "verdict": {
+    "phase11c_success": true,
+    "new_engine_code_for_each_application_domain": 0,
+    "representation_invention_is_open_ended": false,
+    "stage_c_score_changed": false
+  },
+  "limitations": [
+    "the proposal language is a fixed meta-grammar rather than an unrestricted primitive generator",
+    "training strings collectively expose the complete ASCII lowercase interval",
+    "the learned codepoint offset does not handle accented letters or one-to-many Unicode case mappings",
+    "task boundaries and aligned input/output demonstrations are supplied",
+    "cross-family validation is small and synthetic",
+    "the normalized lifetime objective uses an explicit experimental error price rather than measured physical energy"
+  ]
+}
