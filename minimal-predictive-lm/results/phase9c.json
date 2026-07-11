@@ -1,0 +1,44 @@
+{
+  "base_induction": {
+    "connectors": 5,
+    "observations": 10,
+    "mapping_accuracy": 1.0,
+    "candidate_evaluations": 25,
+    "description_bits": 579,
+    "data_bits": 1.2824392090187264
+  },
+  "shifted_induction": {
+    "connectors": 5,
+    "observations": 10,
+    "exact_surface_accuracy": 0.0,
+    "interaction_induced_accuracy": 1.0,
+    "candidate_evaluations": 25,
+    "description_bits": 555
+  },
+  "graph_transfer": {
+    "cases": 6,
+    "event_recall": 1.0,
+    "edge_recall": 1.0,
+    "unresolved": 0,
+    "details": [
+      {"raw": "transform関数を修正して。その変更を元に戻して。", "event_recall": 1.0, "edge_recall": 1.0, "unresolved": 0, "graph_bits": 444, "feature_reads": 73},
+      {"raw": "テストが失敗なら変更を元に戻して。", "event_recall": 1.0, "edge_recall": 1.0, "unresolved": 0, "graph_bits": 583, "feature_reads": 23},
+      {"raw": "transform関数を修正して、その後テストを実行して。", "event_recall": 1.0, "edge_recall": 1.0, "unresolved": 0, "graph_bits": 303, "feature_reads": 65},
+      {"raw": "「全テストに成功」という内容で結果を報告して。", "event_recall": 1.0, "edge_recall": 1.0, "unresolved": 0, "graph_bits": 551, "feature_reads": 19},
+      {"raw": "テストが成功ときは結果を報告して。", "event_recall": 1.0, "edge_recall": 1.0, "unresolved": 0, "graph_bits": 519, "feature_reads": 19},
+      {"raw": "transform関数を修正して、続いてテストを実行して。", "event_recall": 1.0, "edge_recall": 1.0, "unresolved": 0, "graph_bits": 303, "feature_reads": 65}
+    ]
+  },
+  "combined": {
+    "connectors": 10,
+    "observations": 20,
+    "description_bits": 1144,
+    "candidate_evaluations": 50
+  },
+  "limitations": [
+    "candidate relation types are still supplied even though connector-to-role mappings are induced",
+    "interaction traces expose execution, reference, content, and temporal effects",
+    "the connector benchmark is synthetic and Japanese-only",
+    "open-ended syntax and long-distance discourse relations are not solved"
+  ]
+}
