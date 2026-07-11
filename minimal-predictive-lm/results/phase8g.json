@@ -1,0 +1,90 @@
+{
+  "mixed_domain_induction": {
+    "oracle_templates": 8,
+    "oracle_partitions": 4140,
+    "oracle_gap": 0.0,
+    "oracle_partition_exact": true,
+    "templates": 16,
+    "observations": 640,
+    "hidden_operations": 4,
+    "evaluated_partitions": 31652,
+    "partition_exact": true,
+    "unified_clusters": 4,
+    "unified_objective": 1192.9481486929053,
+    "domain_separated_clusters": 16,
+    "domain_separated_objective": 2118.3463590651963,
+    "objective_ratio": 1.7757237490885378,
+    "sufficient_stat_bits": 560,
+    "raw_event_bits": 8320,
+    "event_to_stat_ratio": 14.857142857142858,
+    "avoided_representation_conversions": 1280
+  },
+  "new_domain_transfer": {
+    "new_domain": "tool",
+    "templates": 4,
+    "calibration_events_per_template": 6,
+    "assignment_accuracy": 1.0,
+    "pooled_brier": 0.13157435628427616,
+    "calibration_only_brier": 0.1340945820532514,
+    "effect_accuracy": 0.9919354838709677,
+    "modal_lag_accuracy": 0.8555555555555555
+  },
+  "change_point": {
+    "episodes": 400,
+    "true_change_point": 200,
+    "detected_change_point": 201,
+    "absolute_error": 1,
+    "mdl_gain_bits": 35.23406439651933,
+    "stationary_probability": 0.7089552238805971,
+    "adaptive_probability": 0.527363184079602,
+    "stationary_brier": 0.2802891512586323,
+    "adaptive_brier": 0.24899750006187965,
+    "raw_history_bits": 400,
+    "two_segment_summary_bits": 45,
+    "history_summary_ratio": 8.88888888888889
+  },
+  "bounded_information": {
+    "priors": 9,
+    "sensors": 3,
+    "policies": {
+      "none": {
+        "mean_total_cost": 17.77777777777778,
+        "mean_error_probability": 0.2777777777777778,
+        "mean_probes": 0.0
+      },
+      "one_probe": {
+        "mean_total_cost": 10.726222222222221,
+        "mean_error_probability": 0.10683333333333331,
+        "mean_probes": 0.7777777777777778
+      },
+      "exact_bounded": {
+        "mean_total_cost": 9.759697626666664,
+        "mean_error_probability": 0.09213563999999998,
+        "mean_probes": 1.01322
+      },
+      "always": {
+        "mean_total_cost": 13.642491818666667,
+        "mean_error_probability": 0.07253893466666667,
+        "mean_probes": 3.0
+      }
+    },
+    "exact_policy_dynamic_states": 576,
+    "oracle_gap": 0.0,
+    "exact_dominates_available_baselines": true
+  },
+  "conclusion": {
+    "oracle_gap_zero": true,
+    "cross_domain_partition_exact": true,
+    "new_domain_assignment_exact": true,
+    "pooling_improves_brier": true,
+    "change_point_improves_brier": true,
+    "bounded_policy_is_optimal": true
+  },
+  "limitations": [
+    "surface templates are persistent IDs; free-form language grounding is not solved",
+    "observable effect categories still anchor the latent operation",
+    "the change-point experiment permits only one abrupt Bernoulli shift",
+    "the exact POMDP has one binary hidden variable and three probes",
+    "mixed-domain workflows are synthetic micro-tasks, not real repositories or open conversation"
+  ]
+}
