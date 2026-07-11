@@ -24,6 +24,7 @@ mpm-phase8c = "minimal_predictive_lm.phase8c_experiment:main"
 mpm-phase8d = "minimal_predictive_lm.phase8d_experiment:main"
 mpm-phase8e = "minimal_predictive_lm.phase8e_experiment:main"
 mpm-phase8f = "minimal_predictive_lm.phase8f_experiment:main"
+mpm-phase8g = "minimal_predictive_lm.phase8g_experiment:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
