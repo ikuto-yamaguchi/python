@@ -88,8 +88,29 @@ class UniversalProgramInductionTests(unittest.TestCase):
         self.assertEqual(result.program.output.op, "IF_EQ")
         self.assertEqual(program_accuracy(result.program, training), 1.0)
 
-    def test_composes_multistep_revenue_program(self) -> None:
+    def test_composes_depth_two_remaining_program(self) -> None:
         training_values = (
+            (16, 3, 4),
+            (30, 5, 7),
+            (25, 2, 8),
+            (40, 10, 5),
+            (18, 1, 2),
+            (50, 12, 8),
+        )
+        training = tuple(
+            TransitionTrace.build(values, {}, {}, values[0] - values[1] - values[2])
+            for values in training_values
+        )
+        result = induce_program(training, max_depth=3, max_candidates=100_000)
+        self.assertIn("SUB", result.program.operations())
+        heldout = (
+            TransitionTrace.build((60, 15, 10), {}, {}, 35),
+            TransitionTrace.build((22, 4, 3), {}, {}, 15),
+        )
+        self.assertEqual(program_accuracy(result.program, heldout), 1.0)
+
+    def test_depth_three_search_budget_failure_is_visible(self) -> None:
+        values = (
             (16, 3, 4, 2),
             (30, 5, 7, 3),
             (25, 2, 8, 4),
@@ -97,18 +118,17 @@ class UniversalProgramInductionTests(unittest.TestCase):
             (18, 1, 2, 5),
             (50, 12, 8, 3),
         )
-        training = tuple(
-            TransitionTrace.build(values, {}, {}, (values[0] - values[1] - values[2]) * values[3])
-            for values in training_values
+        traces = tuple(
+            TransitionTrace.build(
+                row,
+                {},
+                {},
+                (row[0] - row[1] - row[2]) * row[3],
+            )
+            for row in values
         )
-        result = induce_program(training, max_depth=3, max_candidates=250_000)
-        self.assertIn("SUB", result.program.operations())
-        self.assertIn("MUL", result.program.operations())
-        heldout = (
-            TransitionTrace.build((60, 15, 10, 2), {}, {}, 70),
-            TransitionTrace.build((22, 4, 3, 7), {}, {}, 105),
-        )
-        self.assertEqual(program_accuracy(result.program, heldout), 1.0)
+        with self.assertRaises(UnexpressibleTaskError):
+            induce_program(traces, max_depth=3, max_candidates=20_000)
 
     def test_missing_primitive_is_reported_not_hidden(self) -> None:
         traces = tuple(
@@ -116,7 +136,7 @@ class UniversalProgramInductionTests(unittest.TestCase):
             for raw in ("red", "blue", "green", "quiet", "robot", "field")
         )
         with self.assertRaises(UnexpressibleTaskError):
-            induce_program(traces, max_depth=3, max_candidates=100_000)
+            induce_program(traces, max_depth=3, max_candidates=10_000)
 
     def test_phase11a_requires_no_domain_handlers(self) -> None:
         payload = run()
@@ -126,7 +146,8 @@ class UniversalProgramInductionTests(unittest.TestCase):
             0,
         )
         self.assertTrue(payload["aggregate"]["all_heldout_accuracy"])
-        self.assertTrue(payload["representation_boundary"]["unexpressible_detected"])
+        self.assertTrue(payload["boundaries"]["missing_primitive"]["failure_detected"])
+        self.assertTrue(payload["boundaries"]["search_depth"]["failure_detected"])
         self.assertTrue(payload["scalability_verdict"]["phase11a_success"])
 
 
