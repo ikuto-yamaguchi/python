@@ -98,124 +98,58 @@ prediction / task loss
 
 結果・設計: [`9a`](results/phase9a.md) / [`9b`](results/phase9b.md) / [`9c`](results/phase9c.md) / [`raw`](docs/phase9a_raw_event_grounding.md) / [`graph`](docs/phase9b_hierarchical_event_graph.md) / [`connector`](docs/phase9c_connector_induction.md)
 
-## Phase 10a: Stage-C readiness gate
+## Phase 10: Stage-C・concept-first・公開比較
 
-会話、知識、数学、コード、長文、創作の6軸を証拠level 0〜4で管理します。
+- 会話、知識、数学、コード、長文、創作を証拠level 0〜4で管理
+- 非言語interactionから概念を先に獲得し、言語を後付けcodec化
+- provenance・矛盾・source trust・棄権・VOIを持つ外部知識
+- 公開BIG-bench直接算術200問で100%
+- SmolLM2-135M-Instruct matched runは9%
+- GSM8Kは0/1,319で、多段文章題parityは不成立
 
-| level | 必要な証拠 |
-|---:|---|
-| 0 | 未測定・能力なし |
-| 1 | closed-world synthetic |
-| 2 | held-out shift・interaction適応 |
-| 3 | 公開open-domain benchmark |
-| 4 | 同一入力・tool・metricで対象open model以上 |
+結果: [`10a`](results/phase10a.md) / [`10b`](results/phase10b.md) / [`10c`](results/phase10c.md) / [`10d`](results/phase10d.md) / [`10e`](results/phase10e.md) / [`10f`](results/phase10f.md) / [`10g`](results/phase10g.md) / [`10h`](results/phase10h.md) / [`10i`](results/phase10i.md)
 
-全軸level 4、matched input、公開benchmark、peak RSS・時間・energyなどの実測が揃うまで、open model parity/Pareto claimを許可しません。
+## Phase 11a: ジャンル中立program induction
 
-結果・設計: [`phase10a`](results/phase10a.md) / [`Stage-C bridge`](docs/phase10_stage_c_bridge.md)
+一つのtyped MDL program synthesizerへ共通transition traceを渡し、ジャンル別handlerなしでprogramを誘導します。
 
-## Phase 10b: 最小自然言語数学program
+- domain-specific handlers: 0
+- expressible tasks: 8、held-out 8/8
+- 新規task 2件をengine変更0・trace追加だけで獲得
+- learned programs 4,616bit、trace丸暗記22,984bit、4.98倍圧縮
+- depth-three targetは20,000候補で失敗
+- `uppercase`はprimitive不足で表現不能
 
-- 問題文と答えから演算labelなしで `ADD / SUB / MUL / DIV / PERCENT_OF` を逆同定
-- training 20例、5 programs、6 feature rules、642bit
-- exact-surface held-out 0% → program held-out 100%
-- 未見数値1,000問: 100%
-- 遠い数学語彙20% → 10 interaction後100%
+結果・設計: [`phase11a`](results/phase11a.md) / [`theory`](docs/phase11a_domain_neutral_program_induction.md)
 
-一段二項算術のみで、文章題、複数step、証明、幾何、公開benchmarkは未達です。
+## Phase 11b: 再利用可能macro library
 
-結果・設計: [`phase10b`](results/phase10b.md) / [`theory`](docs/phase10b_minimal_math_program.md)
+異なる2つの検証済みprogramに繰り返し現れた部分木だけを、引数番号をalpha-normalizeしてtyped macroへ昇格します。一度しか現れない部分式は保存しません。
 
-## Phase 10c: concept-first知能と言語codec
+- source programs: 2、held-outとも100%
+- discovered macro: `a - (b + c)`、984bit
+- primitive-only: `(a-b-c)*d` が20,000候補で失敗
+- macro library: 3,275候補・探索深さ1で発見
+- training / held-out: 100% / 100%
+- compact call 488bit、expanded 504bit
+- 正規化生涯利得15,757bitで採用
 
-世界の状態変化・行動・引数から概念を先に獲得し、言語を後付けの双方向codecに分離しました。
+macroはジャンル専用solverを追加せず、過去に検証された計算を次のtaskの探索primitiveとして再利用します。ただしraw grounding、stateful/recursive macro、library競合、forgetting、primitive発明は未解決です。
 
-- 非言語interaction 48件
-- opaque actions 12種 → 因果概念4種を100%復元
-- 経験147,176bit → concept machine 4,208bit、34.98倍圧縮
-- 言語を読まない未見target計画1,024/1,024、language read 0
-- 日本語・英語・tool 24 calibration → near held-out 12/12
-- concept-first総表現17,816bit
-- phraseごとに世界規則を重複する比較29,160bit、1.64倍
-- 新言語8 calibration・追加4,256bitでheld-out 4/4
-- 4概念のtext-only groundingには24通りの置換対称性があり、外部anchorが不可欠
+結果・設計: [`phase11b`](results/phase11b.md) / [`theory`](docs/phase11b_macro_library_induction.md)
 
-言語は単なる出力ではなく、歴史・科学・数学・社会規範を圧縮して運ぶ観測チャネルでもあるため、廃棄せず世界モデルから分離します。
+## 次の段階
 
-結果・設計: [`phase10c`](results/phase10c.md) / [`theory`](docs/phase10c_concept_first_intelligence.md)
+Phase 11cでは、現在のgrammarで表現不能な残差から新primitiveやstate distinctionを提案し、複数taskのheld-outで再利用できる場合だけ採用します。研究者が失敗を見て専用primitiveを手書きする方式には戻しません。
 
-## Phase 10d: grounded外部知識・矛盾・棄権
-
-外部言語知識をraw tokenのまま知能状態へ混ぜず、`subject / relation / value / source / provenance`へ変換し、source trustと分離して保持します。
-
-- source calibration 400件
-- held-out claims 4,000件、known subjects 1,000、unknown queries 100
-- conflicting subjects 700
-- always answer: 98.0% accuracy、90.9% coverage、4,000 reads
-- indexed exhaustive＋abstain: 100% selective accuracy、89.1% coverage、4,000 reads
-- adaptive confidence＋abstain: 同じ100% / 89.1%で2,120 reads
-- naive full scan 4,400,000 readsに対し99.95%削減
-- indexed exhaustiveに対して47%削減
-- Stage-C knowledge level 1→2、総score 7→8 / 24
-
-claimsは既に命題化され、corpusもsyntheticなので公開知識benchmarkには未到達です。
-
-結果・設計: [`phase10d`](results/phase10d.md) / [`theory`](docs/phase10d_grounded_external_knowledge.md)
-
-## 人類を超える知能への条件
-
-「人類超え」は万能性ではなく、同じ情報・道具・期限の下で、品質、信頼性、速度、資源のPareto frontierが熟練人間を上回ることとして定義します。
-
-必要な機構:
-
-1. decision-sufficient stateと正確なprovenance
-2. causal modelとcounterfactual simulation
-3. candidate generationとrepresentation invention
-4. VOI/VOCで停止するbounded search
-5. external memoryとcross-domain reuse
-6. held-out・shift・adversarial検証付き自己改善
-7. rollback可能なcompiler・planner・index更新
-8. 人間・open modelとの同条件比較
-
-固定有限機械が無限知識を持つことはできません。目標は、観測・概念・知識・探索・コンパイル技能を増やせるopen-ended familyです。
-
-理論: [`superhuman scaling`](docs/phase10_superhuman_intelligence_scaling.md)
-
-## 次の実験
-
-Phase 10eではraw文書から命題・出典spanを抽出してconcept graphへ接続し、topic/time依存のsource trust、コピー元相関、追加検索VOIを扱います。その後、複数step数学、実repository、公開benchmarkへ移行します。
-
-## 実行
+## 再現
 
 ```bash
 cd minimal-predictive-lm
-python -m venv .venv
-source .venv/bin/activate
 pip install -e .
 python -m unittest discover -s tests -v
-
-mpm-phase1
-mpm-phase2
-mpm-phase3a
-mpm-phase4a
-mpm-phase5a
-mpm-phase6a
-mpm-phase6c
-mpm-phase7a
-mpm-phase8a
-mpm-phase8b
-mpm-phase8c
-mpm-phase8d
-mpm-phase8e
-mpm-phase8f
-mpm-phase8g
-mpm-phase9a
-mpm-phase9b
-mpm-phase9c
-mpm-phase10a
-mpm-phase10b
-mpm-phase10c
-mpm-phase10d
+mpm-phase11a
+mpm-phase11b
 ```
 
-GitHub ActionsでPhase 1〜10dの全unit test・全実験をゼロから再現します。
+GitHub ActionsではPhase 1から最新Phaseまで全unit test・全再現実験を実行します。
