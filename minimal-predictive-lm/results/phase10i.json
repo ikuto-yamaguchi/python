@@ -1,0 +1,114 @@
+{
+  "benchmark": {
+    "name": "bigbench-arithmetic",
+    "split": "first-10-per-subtask",
+    "source": "https://github.com/google/BIG-bench/tree/main/bigbench/benchmark_tasks/arithmetic",
+    "license": "Apache-2.0",
+    "manifest_sha256": "cfd8bd98c597f5482df9724eb2750d293a443a1c6526630d4b0510a30723626d",
+    "examples": 200,
+    "public": true
+  },
+  "policy": {
+    "max_output_chars": 64,
+    "stop_sequences": [
+      "\n\n"
+    ],
+    "tools_allowed": [],
+    "temperature": 0.0,
+    "seed": 0
+  },
+  "calibration_protocol": {
+    "examples": 10,
+    "benchmark_examples_used": 0,
+    "mpm_usage": "compiled once into the induced arithmetic grounder",
+    "smollm2_usage": "same examples included as few-shot chat demonstrations",
+    "evidence_matched": true
+  },
+  "mpm": {
+    "score": {
+      "examples": 200,
+      "answered": 200,
+      "correct": 200,
+      "overall_accuracy": 1.0,
+      "selective_accuracy": 1.0,
+      "coverage": 1.0
+    },
+    "resources": {
+      "model_bytes": 53,
+      "peak_rss_bytes": 41754624,
+      "wall_ns": 131392609,
+      "cpu_ns": 423699999,
+      "operations": 4200,
+      "reads": 3800,
+      "writes": 200,
+      "energy_joules": null
+    },
+    "metadata": {}
+  },
+  "smollm2": {
+    "model_id": "HuggingFaceTB/SmolLM2-135M-Instruct",
+    "score": {
+      "examples": 200,
+      "answered": 200,
+      "correct": 18,
+      "overall_accuracy": 0.09,
+      "selective_accuracy": 0.09,
+      "coverage": 1.0
+    },
+    "resources": {
+      "model_bytes": 538060032,
+      "peak_rss_bytes": 1423654912,
+      "wall_ns": 114790750304,
+      "cpu_ns": 362729851000,
+      "operations": 0,
+      "reads": 53595,
+      "writes": 649,
+      "energy_joules": null
+    },
+    "metadata": {
+      "model_id": "HuggingFaceTB/SmolLM2-135M-Instruct",
+      "requested_revision": "12fd25f77366fa6b3b4b768ec3050bf629380bac",
+      "resolved_revision": "12fd25f77366fa6b3b4b768ec3050bf629380bac",
+      "max_new_tokens": 16,
+      "batch_size": 16,
+      "torch_version": "2.7.1+cpu",
+      "same_calibration_examples": 10,
+      "total_input_tokens": 53595,
+      "total_output_tokens": 649
+    }
+  },
+  "matched_comparison": {
+    "fairness_violations": [],
+    "narrow_quality_parity_allowed": true,
+    "narrow_runtime_pareto_allowed": true,
+    "lifetime_pareto_allowed": false,
+    "general_llm_parity_allowed": false,
+    "strictly_better_runtime_resources": [
+      "model_bytes",
+      "peak_rss_bytes",
+      "wall_ns",
+      "cpu_ns"
+    ],
+    "accuracy_delta_mpm_minus_smollm2": 0.91,
+    "model_bytes_ratio_smollm2_over_mpm": 10152076.075471697,
+    "peak_rss_ratio_smollm2_over_mpm": 34.09574259368256,
+    "wall_time_ratio_smollm2_over_mpm": 873.6469362900009
+  },
+  "stage_c": {
+    "readiness_points_before": 9,
+    "readiness_points_after": 9,
+    "mathematics_level": 3,
+    "reason": "one narrow direct-arithmetic benchmark cannot establish broad mathematics or language-model level 4 while GSM8K remains 0%"
+  },
+  "limitations": [
+    "the comparison covers direct binary arithmetic rather than broad language intelligence",
+    "both systems receive the same ten independent operator-grounding examples, but MPM compiles them once while SmolLM2 rereads them in context",
+    "SmolLM2 runtime parameter bytes are measured after float32 loading, not compressed on-disk checkpoint bytes",
+    "MPM model bytes count the induced executable program while peak RSS includes the Python runtime for both systems",
+    "operation counts are unavailable for SmolLM2 and are excluded from the runtime Pareto gate",
+    "training and induction costs are not available in one comparable lifetime ledger",
+    "the reference SmolLM2 runner does not implement shared-prefix KV-cache reuse across independent benchmark questions",
+    "energy is not measured",
+    "the 0% GSM8K result remains the relevant evidence for multi-step word-problem reasoning"
+  ]
+}
