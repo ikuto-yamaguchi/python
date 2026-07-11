@@ -1,0 +1,60 @@
+name: minimal-predictive-lm-open-model
+
+on:
+  push:
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/benchmark_harness.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/public_benchmarks.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/phase10h_worker.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/phase10i_*.py"
+      - "minimal-predictive-lm/pyproject.toml"
+      - ".github/workflows/minimal-predictive-lm-open-model.yml"
+  pull_request:
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/benchmark_harness.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/public_benchmarks.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/phase10h_worker.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/phase10i_*.py"
+      - "minimal-predictive-lm/pyproject.toml"
+      - ".github/workflows/minimal-predictive-lm-open-model.yml"
+
+jobs:
+  compare-smollm2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      HF_HUB_DISABLE_XET: "1"
+      TOKENIZERS_PARALLELISM: "false"
+      MPM_OPEN_MODEL_ID: "HuggingFaceTB/SmolLM2-135M-Instruct"
+      MPM_OPEN_MODEL_REVISION: "main"
+      MPM_MAX_NEW_TOKENS: "16"
+      MPM_OPEN_MODEL_BATCH: "16"
+      MPM_TORCH_THREADS: "4"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: minimal-predictive-lm/pyproject.toml
+      - name: Cache Hugging Face model
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: smollm2-135m-instruct-v1
+      - name: Install core package
+        run: python -m pip install -e minimal-predictive-lm
+      - name: Install pinned CPU inference dependencies
+        run: |
+          python -m pip install "torch==2.7.1" --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install "transformers==4.53.2" "safetensors==0.5.3"
+      - name: Run matched BIG-bench arithmetic comparison
+        working-directory: minimal-predictive-lm
+        run: mpm-phase10i
+      - name: Upload matched comparison
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase10i-smollm2-comparison
+          path: |
+            minimal-predictive-lm/results/phase10i.json
+            minimal-predictive-lm/results/phase10i.md
