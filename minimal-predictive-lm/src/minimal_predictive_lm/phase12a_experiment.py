@@ -25,18 +25,18 @@ def calibration_interactions() -> tuple[MixedInteraction, ...]:
     rows: list[MixedInteraction] = []
 
     arithmetic = (
-        ("100001 + 230004", 330005),
-        ("410007 + 520009", 930016),
-        ("730011 + 140013", 870024),
-        ("900031 - 210017", 690014),
-        ("810019 - 300007", 510012),
-        ("700021 - 120009", 580012),
-        ("1003 * 17", 17051),
-        ("2009 * 23", 46207),
-        ("3011 * 31", 93341),
-        ("840084 / 12", 70007),
-        ("990099 / 9", 110011),
-        ("720072 / 8", 90009),
+        ("What is 100001 plus 230004?", 330005),
+        ("What is 410007 plus 520009?", 930016),
+        ("What is 730011 plus 140013?", 870024),
+        ("What is 900031 minus 210017?", 690014),
+        ("What is 810019 minus 300007?", 510012),
+        ("What is 700021 minus 120009?", 580012),
+        ("What is 1003 times 17?", 17051),
+        ("What is 2009 times 23?", 46207),
+        ("What is 3011 times 31?", 93341),
+        ("What is 840084 divided by 12?", 70007),
+        ("What is 990099 divided by 9?", 110011),
+        ("What is 720072 divided by 8?", 90009),
     )
     rows.extend(
         interaction_from_observation(prompt, output=answer)
@@ -140,15 +140,22 @@ def synthetic_examples() -> tuple[BenchmarkExample, ...]:
                 "numeric",
             )
         )
-    for index, status in enumerate(
-        ("ready", "busy", "blocked", "ready", "paused", "ready")
+    for index, (status, yes_value, no_value) in enumerate(
+        (
+            ("ready", "PROCEED", "HOLD"),
+            ("busy", "OPEN", "CLOSED"),
+            ("blocked", "RUN", "STOP"),
+            ("ready", "ACCEPT", "REJECT"),
+            ("paused", "ON", "OFF"),
+            ("ready", "LEFT", "RIGHT"),
+        )
     ):
         rows.append(
             BenchmarkExample(
                 f"phase12a_condition_{index:02d}",
                 "conditional_execution",
-                f"choose status={status} yes=GO no=WAIT",
-                "GO" if status == "ready" else "WAIT",
+                f"choose status={status} yes={yes_value} no={no_value}",
+                yes_value if status == "ready" else no_value,
             )
         )
     for index, (source, target) in enumerate(
@@ -315,6 +322,10 @@ def run() -> dict[str, object]:
     benchmark_overlap = sum(
         example.prompt in calibration_prompts for example in manifest.examples
     )
+    public_overlap = sum(
+        example.prompt in calibration_prompts
+        for example in manifest.examples[:public_count]
+    )
     all_axis_perfect = all(float(row["accuracy"]) == 1.0 for row in axes.values())
     return {
         "suite": {
@@ -328,6 +339,7 @@ def run() -> dict[str, object]:
             "public_arithmetic_source_sha256": public_manifest.sha256,
             "calibration_examples": len(calibration),
             "calibration_prompt_overlap": benchmark_overlap,
+            "public_calibration_prompt_overlap": public_overlap,
         },
         "model": {
             "rules": len(model.rules),
