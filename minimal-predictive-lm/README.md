@@ -2,7 +2,7 @@
 
 Transformerを単純に小型化するのではなく、会話・知識・数学・コード・長文・創作に必要な**最小記憶・最小読書き・最小計算**を、数学的下限と再現実験から構成する研究です。
 
-最終目標は、高性能LLMと同等以上、さらに明確に定義された課題分布では熟練人間を上回る能力を、より小さい生涯総資源で実現することです。現時点では未達です。成功だけでなく、自由言語、公開benchmark、実repository、長文理解、創作、探索費用の失敗もCIへ固定します。
+最終目標は、高性能LLMと同等以上、さらに明確に定義された課題分布では熟練人間を上回る能力を、より小さい生涯総資源で実現することです。現時点では未達です。自由言語、公開benchmark、実repository、長文理解、創作、探索費用の失敗もCIへ固定します。
 
 ## 生涯目的
 
@@ -29,7 +29,7 @@ prediction / task loss
 - 判断を変える期待値が費用を上回る場合だけ追加思考・観測する
 - 現在の表現では最善行動を区別できないときだけ、新しいrelation・role・graphを発明する
 - 新規則・新表現・自己変更は、生涯目的を改善し、検証とrollbackが可能な場合だけ採用する
-- 言語は知能本体へ直結した唯一の表現ではなく、共有概念への観測・出力codecとして扱う
+- 言語は唯一の知能表現ではなく、共有概念への観測・出力codecとして扱う
 
 ## Phase 1〜3: 最小因果状態と構造探索
 
@@ -117,12 +117,10 @@ prediction / task loss
 ## Phase 10b: 最小自然言語数学program
 
 - 問題文と答えから演算labelなしで `ADD / SUB / MUL / DIV / PERCENT_OF` を逆同定
-- training 20例、5 programs、6 feature rules
-- program description 642bit
+- training 20例、5 programs、6 feature rules、642bit
 - exact-surface held-out 0% → program held-out 100%
 - 未見数値1,000問: 100%
 - 遠い数学語彙20% → 10 interaction後100%
-- Stage-C score 7 / 24、29.2%
 
 一段二項算術のみで、文章題、複数step、証明、幾何、公開benchmarkは未達です。
 
@@ -133,18 +131,36 @@ prediction / task loss
 世界の状態変化・行動・引数から概念を先に獲得し、言語を後付けの双方向codecに分離しました。
 
 - 非言語interaction 48件
-- 不透明なsurface action 12種 → 因果概念4種を100%復元
+- opaque actions 12種 → 因果概念4種を100%復元
 - 経験147,176bit → concept machine 4,208bit、34.98倍圧縮
 - 言語を読まない未見target計画1,024/1,024、language read 0
 - 日本語・英語・tool 24 calibration → near held-out 12/12
 - concept-first総表現17,816bit
 - phraseごとに世界規則を重複する比較29,160bit、1.64倍
-- 新言語は8 calibration・追加4,256bitでheld-out 4/4
-- 4概念のtext-only groundingは24通りの置換対称性を持ち、外部anchorが不可欠
+- 新言語8 calibration・追加4,256bitでheld-out 4/4
+- 4概念のtext-only groundingには24通りの置換対称性があり、外部anchorが不可欠
 
-これは有限・単一effectのsynthetic実験なのでStage-C点は増やしません。言語は単なる出力ではなく、人類の経験・抽象知識を運ぶ観測チャネルでもあるため、廃棄せず世界モデルから分離します。
+言語は単なる出力ではなく、歴史・科学・数学・社会規範を圧縮して運ぶ観測チャネルでもあるため、廃棄せず世界モデルから分離します。
 
 結果・設計: [`phase10c`](results/phase10c.md) / [`theory`](docs/phase10c_concept_first_intelligence.md)
+
+## Phase 10d: grounded外部知識・矛盾・棄権
+
+外部言語知識をraw tokenのまま知能状態へ混ぜず、`subject / relation / value / source / provenance`へ変換し、source trustと分離して保持します。
+
+- source calibration 400件
+- held-out claims 4,000件、known subjects 1,000、unknown queries 100
+- conflicting subjects 700
+- always answer: 98.0% accuracy、90.9% coverage、4,000 reads
+- indexed exhaustive＋abstain: 100% selective accuracy、89.1% coverage、4,000 reads
+- adaptive confidence＋abstain: 同じ100% / 89.1%で2,120 reads
+- naive full scan 4,400,000 readsに対し99.95%削減
+- indexed exhaustiveに対して47%削減
+- Stage-C knowledge level 1→2、総score 7→8 / 24
+
+claimsは既に命題化され、corpusもsyntheticなので公開知識benchmarkには未到達です。
+
+結果・設計: [`phase10d`](results/phase10d.md) / [`theory`](docs/phase10d_grounded_external_knowledge.md)
 
 ## 人類を超える知能への条件
 
@@ -167,7 +183,7 @@ prediction / task loss
 
 ## 次の実験
 
-Phase 10dでは、concept-first workspaceへ外部文書retrieval、provenance、矛盾検出、confidence、abstentionを追加します。その後、数学を複数step・方程式・公開benchmarkへ、コードを小さな実repositoryへ移行します。
+Phase 10eではraw文書から命題・出典spanを抽出してconcept graphへ接続し、topic/time依存のsource trust、コピー元相関、追加検索VOIを扱います。その後、複数step数学、実repository、公開benchmarkへ移行します。
 
 ## 実行
 
@@ -176,8 +192,8 @@ cd minimal-predictive-lm
 python -m venv .venv
 source .venv/bin/activate
 pip install -e .
-
 python -m unittest discover -s tests -v
+
 mpm-phase1
 mpm-phase2
 mpm-phase3a
@@ -199,6 +215,7 @@ mpm-phase9c
 mpm-phase10a
 mpm-phase10b
 mpm-phase10c
+mpm-phase10d
 ```
 
-GitHub ActionsでPhase 1〜10cの全unit test・全実験をゼロから再現します。
+GitHub ActionsでPhase 1〜10dの全unit test・全実験をゼロから再現します。
