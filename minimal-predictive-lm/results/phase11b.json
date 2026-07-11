@@ -1,0 +1,127 @@
+{
+  "library_induction": {
+    "source_programs": 2,
+    "source_heldout_accuracy": {
+      "inventory": 1.0,
+      "budget": 1.0
+    },
+    "macros_discovered": 1,
+    "minimum_distinct_program_support": 2,
+    "library_bits": 984,
+    "macro": {
+      "identifier": "M0",
+      "support_programs": 2,
+      "arity": 3,
+      "parameter_types": [
+        "num",
+        "num",
+        "num"
+      ],
+      "body": [
+        "SUB",
+        [
+          "ARG",
+          0
+        ],
+        [
+          "ADD",
+          [
+            "ARG",
+            1
+          ],
+          [
+            "ARG",
+            2
+          ]
+        ]
+      ],
+      "description_bits": 984
+    },
+    "one_off_subtrees_retained": 0
+  },
+  "target_task": {
+    "name": "remaining_revenue",
+    "baseline_without_library_failed": true,
+    "baseline_candidate_budget": 20000,
+    "baseline_message": "candidate budget exhausted",
+    "library_search_depth": 1,
+    "library_candidate_evaluations": 3275,
+    "library_unique_signatures": 2014,
+    "macro_calls": 1,
+    "compact_program": [
+      "MUL",
+      [
+        "CALL",
+        "M0",
+        [
+          "ARG",
+          0
+        ],
+        [
+          "ARG",
+          1
+        ],
+        [
+          "ARG",
+          2
+        ]
+      ],
+      [
+        "ARG",
+        3
+      ]
+    ],
+    "expanded_program": [
+      "MUL",
+      [
+        "SUB",
+        [
+          "ARG",
+          0
+        ],
+        [
+          "ADD",
+          [
+            "ARG",
+            1
+          ],
+          [
+            "ARG",
+            2
+          ]
+        ]
+      ],
+      [
+        "ARG",
+        3
+      ]
+    ],
+    "training_accuracy": 1.0,
+    "heldout_accuracy": 1.0
+  },
+  "adoption": {
+    "adopted": true,
+    "macro_bits": 984,
+    "compact_program_bits": 488,
+    "expanded_program_bits": 504,
+    "per_call_program_saving_bits": 16,
+    "search_saving_evaluations": 16725,
+    "normalized_lifetime_gain_bits": 15757,
+    "break_even_calls_from_storage_only": 62
+  },
+  "scalability_verdict": {
+    "target_solved_without_engine_code_change": true,
+    "target_solved_with_depth_one_search": true,
+    "baseline_budget_failure_removed": true,
+    "macro_adopted_under_normalized_lifetime_objective": true,
+    "phase11b_success": true
+  },
+  "limitations": [
+    "macro candidates come from already induced and verified programs rather than raw language",
+    "only argument-parametric expression subtrees are abstracted; stateful and recursive macros are excluded",
+    "the normalized lifetime objective assigns one bit to one candidate evaluation for this experiment",
+    "macro argument instantiation is still enumerative and can grow with arity",
+    "library dispatch, versioning, forgetting, and conflicting macro semantics remain incomplete",
+    "the task is synthetic and does not establish broad language-model scalability"
+  ]
+}
