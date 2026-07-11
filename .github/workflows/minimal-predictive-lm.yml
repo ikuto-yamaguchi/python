@@ -38,6 +38,7 @@ jobs:
           python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase11b_macro_library.py' -v 2>&1 | tee minimal-predictive-lm/results/phase11b-test.log
           python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase11c_primitive_invention.py' -v 2>&1 | tee minimal-predictive-lm/results/phase11c-test.log
           python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase11d_raw_primitive_grounding.py' -v 2>&1 | tee minimal-predictive-lm/results/phase11d-test.log
+          python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase11e_continuous_stream.py' -v 2>&1 | tee minimal-predictive-lm/results/phase11e-test.log
       - name: Upload Phase 11 diagnostics
         if: always()
         uses: actions/upload-artifact@v4
@@ -49,6 +50,7 @@ jobs:
             minimal-predictive-lm/results/phase11b-test.log
             minimal-predictive-lm/results/phase11c-test.log
             minimal-predictive-lm/results/phase11d-test.log
+            minimal-predictive-lm/results/phase11e-test.log
       - name: Phase 9 and Stage C tests
         run: |
           python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase9a_raw_event_program.py' -v
@@ -97,6 +99,7 @@ jobs:
           mpm-phase11b
           mpm-phase11c
           mpm-phase11d
+          mpm-phase11e
       - name: Upload Phase 9, Stage C, and Phase 11 results
         uses: actions/upload-artifact@v4
         with:
@@ -133,3 +136,5 @@ jobs:
             minimal-predictive-lm/results/phase11c.md
             minimal-predictive-lm/results/phase11d.json
             minimal-predictive-lm/results/phase11d.md
+            minimal-predictive-lm/results/phase11e.json
+            minimal-predictive-lm/results/phase11e.md
