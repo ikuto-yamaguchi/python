@@ -1,0 +1,184 @@
+{
+  "architecture": {
+    "learner": "one bounded typed MDL program synthesizer",
+    "domain_specific_handlers": 0,
+    "fixed_primitive_inventory": ["ADD", "ARG", "CONCAT", "CONST", "IF_EQ", "MUL", "STATE", "SUB"],
+    "primitive_count": 8,
+    "engine_source_bytes": 17518,
+    "human_engine_code_changes_for_novel_tasks": 0,
+    "novel_tasks_added_by_traces_only": 2
+  },
+  "tasks": [
+    {
+      "name": "addition",
+      "group": "base",
+      "training_examples": 5,
+      "heldout_examples": 3,
+      "training_accuracy": 1.0,
+      "heldout_accuracy": 1.0,
+      "program_bits": 408,
+      "surface_memorization_bits": 2240,
+      "compression_ratio": 5.490196078431373,
+      "candidate_evaluations": 222,
+      "hypothesis_id_lower_bound_bits": 7.794415866350106,
+      "operations": ["ADD", "ARG"],
+      "program": {"output": ["ADD", ["ARG", 0], ["ARG", 1]], "updates": []}
+    },
+    {
+      "name": "subtraction",
+      "group": "base",
+      "training_examples": 5,
+      "heldout_examples": 3,
+      "training_accuracy": 1.0,
+      "heldout_accuracy": 1.0,
+      "program_bits": 408,
+      "surface_memorization_bits": 2264,
+      "compression_ratio": 5.549019607843137,
+      "candidate_evaluations": 222,
+      "hypothesis_id_lower_bound_bits": 7.794415866350106,
+      "operations": ["ARG", "SUB"],
+      "program": {"output": ["SUB", ["ARG", 0], ["ARG", 1]], "updates": []}
+    },
+    {
+      "name": "multiplication",
+      "group": "base",
+      "training_examples": 5,
+      "heldout_examples": 3,
+      "training_accuracy": 1.0,
+      "heldout_accuracy": 1.0,
+      "program_bits": 408,
+      "surface_memorization_bits": 2224,
+      "compression_ratio": 5.450980392156863,
+      "candidate_evaluations": 222,
+      "hypothesis_id_lower_bound_bits": 7.794415866350106,
+      "operations": ["ARG", "MUL"],
+      "program": {"output": ["MUL", ["ARG", 0], ["ARG", 1]], "updates": []}
+    },
+    {
+      "name": "concatenate",
+      "group": "base",
+      "training_examples": 5,
+      "heldout_examples": 3,
+      "training_accuracy": 1.0,
+      "heldout_accuracy": 1.0,
+      "program_bits": 432,
+      "surface_memorization_bits": 2960,
+      "compression_ratio": 6.851851851851852,
+      "candidate_evaluations": 357,
+      "hypothesis_id_lower_bound_bits": 8.479780264029099,
+      "operations": ["ARG", "CONCAT"],
+      "program": {"output": ["CONCAT", ["ARG", 0], ["ARG", 1]], "updates": []}
+    },
+    {
+      "name": "set_location",
+      "group": "base",
+      "training_examples": 4,
+      "heldout_examples": 3,
+      "training_accuracy": 1.0,
+      "heldout_accuracy": 1.0,
+      "program_bits": 696,
+      "surface_memorization_bits": 4312,
+      "compression_ratio": 6.195402298850575,
+      "candidate_evaluations": 338,
+      "hypothesis_id_lower_bound_bits": 8.400879436282183,
+      "operations": ["ARG", "CONCAT", "CONST"],
+      "program": {
+        "output": ["ARG", 1],
+        "updates": [[["CONCAT", ["CONST", "location:"], ["ARG", 0]], ["ARG", 1]]]
+      }
+    },
+    {
+      "name": "conditional_decision",
+      "group": "base",
+      "training_examples": 6,
+      "heldout_examples": 4,
+      "training_accuracy": 1.0,
+      "heldout_accuracy": 1.0,
+      "program_bits": 800,
+      "surface_memorization_bits": 3128,
+      "compression_ratio": 3.91,
+      "candidate_evaluations": 88,
+      "hypothesis_id_lower_bound_bits": 6.459431618637297,
+      "operations": ["ARG", "CONST", "IF_EQ"],
+      "program": {
+        "output": ["IF_EQ", ["ARG", 0], ["CONST", "FAIL"], ["CONST", "ROLLBACK"], ["CONST", "REPORT"]],
+        "updates": []
+      }
+    },
+    {
+      "name": "increment_state",
+      "group": "novel",
+      "training_examples": 5,
+      "heldout_examples": 4,
+      "training_accuracy": 1.0,
+      "heldout_accuracy": 1.0,
+      "program_bits": 912,
+      "surface_memorization_bits": 3056,
+      "compression_ratio": 3.3508771929824563,
+      "candidate_evaluations": 1237,
+      "hypothesis_id_lower_bound_bits": 10.27262978497637,
+      "operations": ["ADD", "ARG", "CONST", "STATE"],
+      "program": {
+        "output": ["ADD", ["ARG", 0], ["STATE", "count"]],
+        "updates": [[["CONST", "count"], ["ADD", ["ARG", 0], ["STATE", "count"]]]]
+      }
+    },
+    {
+      "name": "remaining_inventory",
+      "group": "novel",
+      "training_examples": 6,
+      "heldout_examples": 4,
+      "training_accuracy": 1.0,
+      "heldout_accuracy": 1.0,
+      "program_bits": 552,
+      "surface_memorization_bits": 2800,
+      "compression_ratio": 5.072463768115942,
+      "candidate_evaluations": 29965,
+      "hypothesis_id_lower_bound_bits": 14.870990753457793,
+      "operations": ["ADD", "ARG", "SUB"],
+      "program": {"output": ["SUB", ["ARG", 0], ["ADD", ["ARG", 1], ["ARG", 2]]], "updates": []}
+    }
+  ],
+  "aggregate": {
+    "expressible_tasks": 8,
+    "all_training_accuracy": true,
+    "all_heldout_accuracy": true,
+    "total_program_bits": 4616,
+    "total_surface_memorization_bits": 22984,
+    "aggregate_compression_ratio": 4.979202772963605,
+    "total_candidate_evaluations": 32651,
+    "average_program_bytes": 72.125,
+    "amortized_engine_plus_program_bytes_per_task": 2261.875
+  },
+  "boundaries": {
+    "missing_primitive": {
+      "task": "uppercase text transformation",
+      "failure_detected": true,
+      "message": "no expression found within depth=3, candidates=1182",
+      "automatic_primitive_invention_available": false
+    },
+    "search_depth": {
+      "task": "(a - b - c) * d",
+      "candidate_budget": 20000,
+      "failure_detected": true,
+      "message": "candidate budget exhausted",
+      "library_macro_induction_available": false
+    }
+  },
+  "scalability_verdict": {
+    "per_domain_manual_algorithm_required_for_expressible_tasks": false,
+    "new_domain_data_or_grounding_still_required": true,
+    "search_cost_eliminated": false,
+    "fixed_grammar_is_open_ended": false,
+    "phase11a_success": true
+  },
+  "limitations": [
+    "the learner receives already structured arguments and before/after states",
+    "task boundaries are supplied rather than discovered",
+    "the grammar cannot invent a missing primitive such as uppercase",
+    "a depth-three revenue program exhausts the bounded search budget",
+    "balanced expression trees and reusable learned macros are not yet supported",
+    "the experiment is synthetic and does not establish broad language-model scalability",
+    "human effort moved from task algorithms toward data, grounding, and primitive design; it did not become zero"
+  ]
+}
