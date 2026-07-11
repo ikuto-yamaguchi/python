@@ -1,0 +1,75 @@
+{
+  "continuous_stream": {
+    "record_boundaries_supplied": false,
+    "channel_metadata_supplied": false,
+    "quotes_or_backticks_used": false,
+    "generic_punctuation_boundary_cues_used": true,
+    "training_stream_bits": 2848,
+    "inferred_events": 6,
+    "expected_events": 6,
+    "event_precision": 1.0,
+    "event_recall": 1.0,
+    "candidate_pair_evaluations": 31,
+    "distractor_ignored": true
+  },
+  "shared_primitives": {
+    "cluster_count": 2,
+    "cluster_coverage": 1.0,
+    "clusters": [
+      {
+        "identifier": "S0",
+        "primitive": {
+          "kind": "conditional_character_offset",
+          "lower_codepoint": 65,
+          "upper_codepoint": 90,
+          "offset": 32
+        },
+        "support_events": 3,
+        "description_bits": 744,
+        "normalized_gain_bits": 408
+      },
+      {
+        "identifier": "S1",
+        "primitive": {
+          "kind": "conditional_character_offset",
+          "lower_codepoint": 97,
+          "upper_codepoint": 122,
+          "offset": -32
+        },
+        "support_events": 3,
+        "description_bits": 760,
+        "normalized_gain_bits": 392
+      }
+    ],
+    "domain_specific_parsers_added": 0
+  },
+  "unseen_stream": {
+    "events": 3,
+    "event_precision": 1.0,
+    "event_recall": 1.0,
+    "cluster_assignment_accuracy": 1.0,
+    "engine_code_changes": 0
+  },
+  "comparison_readiness": {
+    "narrow_open_model_comparison_already_available": true,
+    "multi_domain_llm_parity_ready": false,
+    "remaining_hard_gates": [
+      "public multi-domain benchmark from raw inputs",
+      "candidate generation beyond bounded transformation meta-grammar",
+      "long-form language generation and semantic preference evaluation"
+    ],
+    "stage_c_score_changed": false
+  },
+  "verdict": {
+    "phase11e_success": true,
+    "open_ended_stream_grounding_achieved": false
+  },
+  "limitations": [
+    "generic punctuation and line breaks still act as strong event-boundary cues",
+    "role induction uses a bounded multilingual cue inventory for result, condition, and provenance",
+    "candidate source and target values are restricted to nearby ASCII identifier-like tokens",
+    "the transformation family remains constant codepoint offsets",
+    "streams are synthetic and short",
+    "the experiment does not establish public multi-domain or general LLM parity"
+  ]
+}
