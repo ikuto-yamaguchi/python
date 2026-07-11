@@ -26,10 +26,11 @@ jobs:
       HF_HUB_DISABLE_XET: "1"
       TOKENIZERS_PARALLELISM: "false"
       MPM_OPEN_MODEL_ID: "HuggingFaceTB/SmolLM2-135M-Instruct"
-      MPM_OPEN_MODEL_REVISION: "main"
+      MPM_OPEN_MODEL_REVISION: "12fd25f77366fa6b3b4b768ec3050bf629380bac"
       MPM_MAX_NEW_TOKENS: "16"
       MPM_OPEN_MODEL_BATCH: "16"
       MPM_TORCH_THREADS: "4"
+      MPM_SMOLLM_FEWSHOT: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -41,7 +42,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/huggingface
-          key: smollm2-135m-instruct-v1
+          key: smollm2-135m-instruct-12fd25f-v2
       - name: Install core package
         run: python -m pip install -e minimal-predictive-lm
       - name: Install pinned CPU inference dependencies
