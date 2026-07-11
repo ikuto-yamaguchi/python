@@ -1,0 +1,38 @@
+{
+  "training": {
+    "examples": 20,
+    "programs": 5,
+    "rules": 6,
+    "description_bits": 642
+  },
+  "heldout": {
+    "examples": 10,
+    "exact_surface_accuracy": 0.0,
+    "program_accuracy": 1.0
+  },
+  "numeric_generalization": {
+    "examples": 1000,
+    "accuracy": 1.0,
+    "programs": 5
+  },
+  "lexical_shift": {
+    "calibration_examples": 10,
+    "shifted_examples": 5,
+    "accuracy_before": 0.2,
+    "accuracy_after": 1.0,
+    "added_description_bits": 282
+  },
+  "stage_c_after_math": {
+    "points": 7,
+    "maximum_points": 24,
+    "normalized_level": 0.2916666666666667,
+    "stage_c_ready": false,
+    "weakest_axes": ["creative_writing"]
+  },
+  "limitations": [
+    "only five binary arithmetic programs are available",
+    "word problems, equations, proofs, geometry, and multi-step reasoning are not solved",
+    "the benchmark is generated rather than a public mathematics benchmark",
+    "lexical grounding still uses sparse surface features"
+  ]
+}
