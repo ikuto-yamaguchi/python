@@ -23,18 +23,21 @@ jobs:
           cache-dependency-path: minimal-predictive-lm/pyproject.toml
       - name: Install
         run: python -m pip install -e minimal-predictive-lm
-      - name: Phase 11a universal induction tests
+      - name: Phase 11 universal induction tests
         shell: bash
         run: |
           set -o pipefail
           mkdir -p minimal-predictive-lm/results
           python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase11a_universal_program_induction.py' -v 2>&1 | tee minimal-predictive-lm/results/phase11a-test.log
-      - name: Upload Phase 11a diagnostic
+          python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase11b_macro_library.py' -v 2>&1 | tee minimal-predictive-lm/results/phase11b-test.log
+      - name: Upload Phase 11 diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: phase11a-test-log
-          path: minimal-predictive-lm/results/phase11a-test.log
+          name: phase11-test-logs
+          path: |
+            minimal-predictive-lm/results/phase11a-test.log
+            minimal-predictive-lm/results/phase11b-test.log
       - name: Phase 9 and Stage C tests
         run: |
           python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase9a_raw_event_program.py' -v
@@ -80,6 +83,7 @@ jobs:
           mpm-phase10g
           mpm-phase10h
           mpm-phase11a
+          mpm-phase11b
       - name: Upload Phase 9, Stage C, and Phase 11 results
         uses: actions/upload-artifact@v4
         with:
@@ -109,3 +113,5 @@ jobs:
             minimal-predictive-lm/results/phase10h.md
             minimal-predictive-lm/results/phase11a.json
             minimal-predictive-lm/results/phase11a.md
+            minimal-predictive-lm/results/phase11b.json
+            minimal-predictive-lm/results/phase11b.md
