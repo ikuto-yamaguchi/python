@@ -1,0 +1,130 @@
+{
+  "training_traces": 16,
+  "templates": [
+    "{K}の場所を{V}にする",
+    "{K}の担当を{V}にする",
+    "{K}を{V}に渡す",
+    "{K}を{V}に移動"
+  ],
+  "effect_candidate_recall": 1.0,
+  "ambiguous_traces": 1,
+  "ambiguous_trace_resolved": true,
+  "partition_search": {
+    "evaluated_partitions": 15,
+    "selected_cluster_count": 2,
+    "selected_partition_exact": true,
+    "selected_relations": [
+      {
+        "cluster": 0,
+        "templates": [
+          "{K}の場所を{V}にする",
+          "{K}を{V}に移動"
+        ],
+        "lag": 2
+      },
+      {
+        "cluster": 1,
+        "templates": [
+          "{K}の担当を{V}にする",
+          "{K}を{V}に渡す"
+        ],
+        "lag": 1
+      }
+    ],
+    "selected_train_errors": 0,
+    "new_entity_validation_accuracy": 1.0
+  },
+  "representative_hypotheses": {
+    "selected_two_relation": {
+      "partition": [
+        [0, 3],
+        [1, 2]
+      ],
+      "cluster_count": 2,
+      "train_errors": 0,
+      "description_bits": 66,
+      "validation_accuracy": 1.0,
+      "objective": 66
+    },
+    "merged_one_relation": {
+      "partition": [
+        [0, 1, 2, 3]
+      ],
+      "cluster_count": 1,
+      "train_errors": 7,
+      "description_bits": 35,
+      "validation_accuracy": 0.5,
+      "objective": 5667
+    },
+    "flat_four_relation": {
+      "partition": [
+        [0],
+        [1],
+        [2],
+        [3]
+      ],
+      "cluster_count": 4,
+      "train_errors": 0,
+      "description_bits": 132,
+      "validation_accuracy": 0.0,
+      "objective": 4228
+    },
+    "best_three_relation": {
+      "partition": [
+        [0, 3],
+        [1],
+        [2]
+      ],
+      "cluster_count": 3,
+      "train_errors": 0,
+      "description_bits": 101,
+      "validation_accuracy": 0.5,
+      "objective": 2149
+    }
+  },
+  "partition_search_scaling": [
+    {"templates": 4, "set_partitions": 15},
+    {"templates": 6, "set_partitions": 203},
+    {"templates": 8, "set_partitions": 4140},
+    {"templates": 10, "set_partitions": 115975},
+    {"templates": 12, "set_partitions": 4213597}
+  ],
+  "representation_scaling": [
+    {
+      "entities": 8,
+      "templates": 32,
+      "flat_assignment_bits": 256,
+      "latent_partition_bits": 102,
+      "ratio": 2.5098039215686274
+    },
+    {
+      "entities": 32,
+      "templates": 32,
+      "flat_assignment_bits": 1024,
+      "latent_partition_bits": 150,
+      "ratio": 6.826666666666667
+    },
+    {
+      "entities": 128,
+      "templates": 32,
+      "flat_assignment_bits": 4096,
+      "latent_partition_bits": 342,
+      "ratio": 11.976608187134502
+    },
+    {
+      "entities": 512,
+      "templates": 32,
+      "flat_assignment_bits": 16384,
+      "latent_partition_bits": 1110,
+      "ratio": 14.76036036036036
+    }
+  ],
+  "limitations": [
+    "entity-to-sensor-cell grouping is supplied by the interface",
+    "the micro-world has exactly two deterministic relations per entity",
+    "each latent relation has a fixed lag shared across entities",
+    "the acted-on value is visible in both the utterance and sensor stream",
+    "only four templates are searched exhaustively",
+    "Bell-number partition growth makes the current search non-scalable"
+  ]
+}
