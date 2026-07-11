@@ -1,0 +1,92 @@
+{
+  "source_trust": {
+    "calibration_observations": 400,
+    "sources": {
+      "blog": {
+        "successes": 70,
+        "failures": 30,
+        "posterior_reliability": 0.696078431372549,
+        "evidence_weight": 0.8286926725561691
+      },
+      "lab": {
+        "successes": 90,
+        "failures": 10,
+        "posterior_reliability": 0.8921568627450981,
+        "evidence_weight": 2.11296423371848
+      },
+      "official": {
+        "successes": 98,
+        "failures": 2,
+        "posterior_reliability": 0.9705882352941176,
+        "evidence_weight": 3.4965075614664802
+      },
+      "rumor": {
+        "successes": 55,
+        "failures": 45,
+        "posterior_reliability": 0.5490196078431373,
+        "evidence_weight": 0.1967102942460545
+      }
+    }
+  },
+  "knowledge_corpus": {
+    "claims": 4000,
+    "known_subjects": 1000,
+    "unknown_queries": 100,
+    "conflicting_subjects": 700,
+    "index_bits": 3354640
+  },
+  "policies": {
+    "full_scan_claim_reads": 4400000,
+    "indexed_exhaustive": {
+      "queries": 1100,
+      "answered": 980,
+      "correct": 980,
+      "selective_accuracy": 1.0,
+      "coverage": 0.8909090909090909,
+      "abstained": 120,
+      "claim_reads": 4000,
+      "mean_claim_reads": 3.6363636363636362,
+      "mean_provenance_entries": 3.6363636363636362
+    },
+    "adaptive_confidence": {
+      "queries": 1100,
+      "answered": 980,
+      "correct": 980,
+      "selective_accuracy": 1.0,
+      "coverage": 0.8909090909090909,
+      "abstained": 120,
+      "claim_reads": 2120,
+      "mean_claim_reads": 1.9272727272727272,
+      "mean_provenance_entries": 1.9272727272727272
+    },
+    "always_answer": {
+      "queries": 1100,
+      "answered": 1000,
+      "correct": 980,
+      "selective_accuracy": 0.98,
+      "coverage": 0.9090909090909091,
+      "abstained": 100,
+      "claim_reads": 4000,
+      "mean_claim_reads": 3.6363636363636362,
+      "mean_provenance_entries": 3.6363636363636362
+    },
+    "adaptive_vs_full_scan_read_reduction": 0.9995181818181819,
+    "adaptive_vs_indexed_exhaustive_read_reduction": 0.47
+  },
+  "stage_c": {
+    "readiness_points_before": 7,
+    "readiness_points_after": 8,
+    "knowledge_level_before": 1,
+    "knowledge_level_after": 2,
+    "stage_c_ready": false,
+    "pareto_claim_allowed": false,
+    "reason": "held-out contradiction and abstention evidence is synthetic; no public open-domain QA benchmark has been run"
+  },
+  "limitations": [
+    "claims are already parsed into subject-relation-value propositions",
+    "source observations are supervised by known truth during calibration",
+    "source reliability is stationary and independent across claims",
+    "the corpus is synthetic and contains one relation",
+    "adaptive stopping optimizes this bounded evidence model, not arbitrary web retrieval"
+  ]
+}
