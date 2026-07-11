@@ -1,15 +1,14 @@
 # Minimum Predictive Machine
 
-Transformerを単純に小型化するのではなく、会話・文章・コード・ツール利用に必要な**最小記憶・最小読書き・最小計算**を数学的下限と実測から構成する研究です。
+Transformerを単純に小型化するのではなく、会話・文章・コード・ツール利用に必要な**最小記憶・最小読書き・最小計算**を、数学的下限と実測から構成する研究です。
 
-最終目標は、高性能LLMと同等以上の総合能力を、より小さい生涯総資源で実現することです。現時点では未達です。成功値だけでなく、自由言語、分布外、探索爆発、学習・検証費用の失敗も結果とCIへ固定します。
+最終目標は、高性能LLMと同等以上、さらに明確に定義された課題分布では熟練人間を上回る能力を、より小さい生涯総資源で実現することです。現時点では未達です。成功値だけでなく、自由言語、分布外、探索爆発、学習・検証費用の失敗も結果とCIへ固定します。
 
 ## 最小化する目的
 
 ```text
 prediction / task loss
-+ static program bits
-+ static knowledge bits
++ static program and knowledge bits
 + dynamic state bits
 + bits read / written
 + primitive operations
@@ -28,8 +27,9 @@ prediction / task loss
 - 記憶、推論、計画、文章、コード編集を別ランタイムにしない
 - 正準symbol、疎なfact/event状態、同じ書換え・選択原理を共有する
 - 汎用IRは部分評価・規則融合・状態最小化し、実行時overheadを消す
-- 新しい規則、cache、index、命令は、生涯目的を改善した場合だけ採用する
-- 判断を変える期待値が費用を上回る場合だけ追加思考・観測を行う
+- 判断を変える期待値が費用を上回る場合だけ追加思考・観測する
+- 現在の表現が異なる最善行動を区別できないときだけ表現を発明する
+- 新規則・新表現・自己変更は、生涯目的を改善しrollback可能な場合だけ採用する
 
 ## Phase 1〜3: 最小状態と構造探索
 
@@ -41,30 +41,24 @@ prediction / task loss
 
 結果: [`phase1`](results/phase1.md) / [`phase2`](results/phase2.md) / [`phase3a`](results/phase3a.md)
 
-## Phase 4: 実バイトLMと意味・創造設計
+## Phase 4〜5: 実LMと統一仕事基盤
+
+実バイトLM:
 
 - 学習625,748bytes、別seed test 155,073bytes
 - 選択規則608、コンパイル状態696
 - 実行時状態10bit、`.mplm` 10,999bytes
 - 0.468469605 BPB、平均1.015644遷移確認/byte
 
-これは表層予測の橋渡しであり、open-domain意味理解ではありません。
-
-結果・設計: [`phase4a`](results/phase4a.md) / [`semantic machine`](docs/phase4b_minimal_semantic_machine.md) / [`creative machine`](docs/phase4c_creative_semantic_machine.md)
-
-## Phase 5: coding / writing / agentの統一基盤
+一つのsymbol table、state、rule、疎index、MDL探索器と、
 
 ```text
-MATCH
-DELETE
-ADD
-EMIT
-CHOOSE_MIN
+MATCH / DELETE / ADD / EMIT / CHOOSE_MIN
 ```
 
-一つのsymbol table、state、rule、疎index、MDL探索器で、コード編集、文章構成、行動計画のmicro-taskを処理しました。
+で、コード編集、文章構成、行動計画のmicro-taskを処理しました。
 
-結果: [`phase5a`](results/phase5a.md)
+結果・設計: [`phase4a`](results/phase4a.md) / [`semantic`](docs/phase4b_minimal_semantic_machine.md) / [`creative`](docs/phase4c_creative_semantic_machine.md) / [`phase5a`](results/phase5a.md)
 
 ## Phase 6: 下限・Value of Computation・生涯大域最適
 
@@ -73,7 +67,7 @@ CHOOSE_MIN
 - 必要な20bit読取りと256依存stepは不可避として残す
 - 16-query workload: 局所commit 16,384、生涯大域選択4,032
 
-設計・結果: [`scaling`](docs/phase6_scaling_and_open_ended_intelligence.md) / [`choice`](docs/phase6b_minimal_choice_machine.md) / [`global optimization`](docs/phase6c_global_optimization.md)
+設計: [`scaling`](docs/phase6_scaling_and_open_ended_intelligence.md) / [`choice`](docs/phase6b_minimal_choice_machine.md) / [`global`](docs/phase6c_global_optimization.md)
 
 ## Phase 7: 会話・指示追従・失敗後の再試行
 
@@ -87,90 +81,72 @@ CHOOSE_MIN
 
 結果: [`phase7a`](results/phase7a.md)
 
-## Phase 8a〜8b: 表面記憶から潜在操作へ
+## Phase 8: 潜在意味・確率・探索削減
 
-- typed slotは未知symbol組合せ100%
-- entity/location各128: 表面列挙22,112,432bit → program＋symbol 13,989bit
-- intent/type labelを与えずinteraction traceから `SET / GET` を9/9復元
-- key/value latent role purity 100% / 100%
-- exact surface objective 4,130、untyped 1,964、latent roles 953
-- 別の言い換え系列では16.7%で、自由言語理解は未達
-
-結果: [`phase8a`](results/phase8a.md) / [`phase8b`](results/phase8b.md)
-
-## Phase 8c〜8e: 複数relation発見と探索削減
-
-- 部分観測、noise、遅延effectを処理
-- relation channelを外し、anonymous sensorからrelation partitionとlagを復元
-- 正しい因数分解だけが新entityの未観測paraphraseへ100%転移
+- intent/type labelなしでinteraction traceから `SET / GET` とlatent roleを誘導
+- 部分観測、noise、遅延effectから複数relationを復元
 - Bell数の全partition探索を残差split＋bounded beamへ置換
-
-| templates | Bell partitions | evaluated | exact partition | oracle gap |
-|---:|---:|---:|---:|---:|
-| 4 | 15 | 13 | yes | 0 |
-| 8 | 4,140 | 35 | yes | 0 |
-| 12 | 4,213,597 | 55 | yes | n/a |
-| 32 | 128,064,670,049,908,713,818,925,644 | 101 | yes | n/a |
-
-結果: [`phase8c`](results/phase8c.md) / [`phase8d`](results/phase8d.md) / [`phase8e`](results/phase8e.md)
-
-## Phase 8f: 確率effect・欠測・Value of Information
-
-- 1,200 episodesを126bitの十分統計へ圧縮
-- compact raw event 10,800bit、圧縮比85.71x
-- learned Brier 0.157493、uniform 0.25
+- 32 templatesの約1.28×10^26 partitionに対し101候補でhidden構造を復元
+- 1,200 probabilistic episodesを126bitの十分統計へ圧縮
 - VOIは常時観測と同じ87.9%で、3,000回中1,127 sensor readを削減
-- provenance ledgerとresolved active viewを分離
+- 会話・文章・コード・toolの16 surface actionsを4 shared operationsへ統合
+- 新しいtool領域を各surface 6 eventsで既存operationへ100%接続
 
-| policy | accuracy | probes | objective |
-|---|---:|---:|---:|
-| none | 77.6% | 0 | 43,072 |
-| always | 87.9% | 3,000 | 35,232 |
-| VOI | 87.9% | 1,873 | 30,724 |
+結果: [`8a`](results/phase8a.md) / [`8b`](results/phase8b.md) / [`8c`](results/phase8c.md) / [`8d`](results/phase8d.md) / [`8e`](results/phase8e.md) / [`8f`](results/phase8f.md) / [`8g`](results/phase8g.md)
 
-結果: [`phase8f`](results/phase8f.md)
+## Phase 9a: template IDなしのraw grounding
 
-## Phase 8g: 会話・文章・コード・ツールの共有確率eventモデル
+raw Japanese、AST-like text、test output、tool traceを一つの `SET / VERIFY / RETRACT / EMIT` programへgroundingしました。
 
-16個の領域別surface actionを、結果・成功率・遅延分布から4つの共有操作 `SET / VERIFY / RETRACT / EMIT` へ統合しました。隠れたoperation名はlearnerへ渡していません。
+- training 34例、selected rules 15、共有program 1,412bit
+- exact surfaceのnear-heldout 0% → 共有sparse grounder 100%
+- 4つの領域別モデル1,881bit・94.4%に対し、共有モデル1,412bit・100%
+- 遠い語彙転換は6.25%で未達
+- 8 interactionで新語follow-up 0% → 87.5%、追加387bit
+- repair workflowで `SET → VERIFY → RETRACT → SET → VERIFY → EMIT`
+- domain-separated JSON handoffは6,704bit/workflow
 
-- 8-template oracle: 全4,140 partitionと同じ解、gap 0
-- 16 templates: 31,652 merge候補を評価し、4 latent operationsを完全復元
-- 領域別16 schema objective 2,118.346 → 共有4 schema 1,192.948
-- 十分統計560bit、compact event stream 8,320bit
-- 新しいtool領域は各surface 6 eventsで既存operationへ100%接続
-- pooled Brier 0.131574、6-shot単独0.134095
+結果・設計: [`phase9a`](results/phase9a.md) / [`theory`](docs/phase9a_raw_event_grounding.md)
 
-非定常operationでは真のchange point 200に対し201を検出し、stationary Brier 0.280289 → adaptive 0.248998。400bit履歴を45bitの2区間summaryへ圧縮しました。
+## Phase 9b: 階層的疎event graph
 
-3種類のsensorを持つ有限binary POMDPでは、全action・全outcomeを動的計画で厳密列挙しました。
+単一ラベルでは表現できない、条件、否定、引用、照応、発話行為と埋め込み命題を疎グラフへ分解しました。
 
-| policy | mean total cost | mean error | mean probes |
-|---|---:|---:|---:|
-| none | 17.777778 | 0.277778 | 0.000000 |
-| one probe | 10.726222 | 0.106833 | 0.777778 |
-| exact bounded | 9.759698 | 0.092136 | 1.013220 |
-| always | 13.642492 | 0.072539 | 3.000000 |
+- benchmark 5ケース
+- single-label event recall 3.3%
+- graph event recall 100%
+- graph edge recall 100%
+- unresolved clause 0
+- active graph 3,388bit
+- raw provenanceを残した合計7,204bit
+- flat JSON handoff 22,328bit
+- failure → rollback → repair → PASSをgraphから実行
+- event graphの表現発明は今回の損失尺度で5回再利用時にbreak-even
 
-結果・設計: [`phase8g`](results/phase8g.md) / [`theory`](docs/phase8g_shared_stochastic_event_intelligence.md)
+結果・設計: [`phase9b`](results/phase9b.md) / [`event graph`](docs/phase9b_hierarchical_event_graph.md)
 
-### Phase 8gの限界
+## 人類を超える知能への条件
 
-- 自由文ではなくpersistent surface template IDを使う
-- effect categoryが潜在operationのanchorとして観測可能
-- change pointは1回の急変のみ
-- exact POMDPはbinary state・3 probesのみ
-- 実repository、長文執筆、自由会話ではなくsynthetic micro-world
+「人類超え」は万能性ではなく、同じ情報・道具・期限の下で、品質、信頼性、速度、資源のPareto frontierが熟練人間を上回ることとして定義します。
+
+必要な機構:
+
+1. decision-sufficient stateと正確なprovenance
+2. causal modelとcounterfactual simulation
+3. candidate generationとrepresentation invention
+4. VOI/VOCで停止するbounded search
+5. external memoryとcross-domain reuse
+6. held-out・shift・adversarial検証付き自己改善
+7. rollback可能なcompiler・planner・index更新
+8. 人間・強いLLMとの同条件比較
+
+固定有限機械が無限知識を持つことはできません。目標は、知識・観測・探索・コンパイル技能を増やせるopen-ended familyです。
+
+理論: [`superhuman scaling`](docs/phase10_superhuman_intelligence_scaling.md)
 
 ## 次の実験
 
-Phase 9aではpersistent template IDを外し、raw text / AST / test output / tool traceから共通のevent programを誘導します。
-
-1. 自由な言い換えとAST差分を同じeffectへgrounding
-2. 会話依頼 → コード編集 → test → rollback → 修正 → 報告を一つのstateで実行
-3. domain別pipelineとのbit・copy・conversion・tool・失敗率比較
-4. unknown paraphrase、unknown repository symbol、hidden testsで評価
-5. 汎用IRを部分評価し、最終runtimeからparser・unifier・search overheadを削除
+Phase 9cでは、Phase 9bで一部手書きだったconnector・condition・reference構造をinteraction traceから誘導します。その後、小さな実repositoryで、会話依頼 → file read → patch → test → rollback → fix → reportを同じevent graphで実行します。
 
 ## 実行
 
@@ -196,6 +172,8 @@ mpm-phase8d
 mpm-phase8e
 mpm-phase8f
 mpm-phase8g
+mpm-phase9a
+mpm-phase9b
 ```
 
-`mpm-phase4a` は実モデル `results/phase4a.mplm` も生成します。GitHub ActionsでPhase 1〜8gの全テスト・全実験をゼロから再現します。
+GitHub ActionsでPhase 1〜9bの全unit test・全実験をゼロから再現します。
