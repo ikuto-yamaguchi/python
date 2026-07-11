@@ -23,9 +23,9 @@ BIGBENCH_ARITHMETIC_TASKS = tuple(
     for digits in range(1, 6)
     for operation in ("addition", "subtraction", "multiplication", "division")
 )
-# Filled after the first independently reproduced download. The loader can receive
-# an explicit expected checksum and Phase 10h records the observed manifest hash.
-BIGBENCH_ARITHMETIC_SUBSET_SHA256: str | None = None
+BIGBENCH_ARITHMETIC_SUBSET_SHA256 = (
+    "cfd8bd98c597f5482df9724eb2750d293a443a1c6526630d4b0510a30723626d"
+)
 
 
 def git_blob_sha1(payload: bytes) -> str:
