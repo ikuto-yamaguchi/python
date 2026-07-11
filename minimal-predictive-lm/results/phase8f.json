@@ -1,0 +1,121 @@
+{
+  "training": {
+    "episodes": 1200,
+    "missing_outcome": 389,
+    "missing_lag": 154,
+    "observed_success": 626,
+    "observed_failure": 185,
+    "beliefs": {
+      "location": {
+        "true_success_probability": 0.9,
+        "learned_success_probability": 0.9469964664310954,
+        "true_lag_distribution": {
+          "2": 0.7,
+          "4": 0.3
+        },
+        "learned_observed_lag_bins": {
+          "2": 0.6898148148148148,
+          "4": 0.24537037037037038
+        },
+        "successes": 267,
+        "failures": 14,
+        "sufficient_stat_bits": 41
+      },
+      "owner": {
+        "true_success_probability": 0.75,
+        "learned_success_probability": 0.7528089887640449,
+        "true_lag_distribution": {
+          "1": 0.5,
+          "3": 0.5
+        },
+        "learned_observed_lag_bins": {
+          "1": 0.43373493975903615,
+          "3": 0.4819277108433735
+        },
+        "successes": 200,
+        "failures": 65,
+        "sufficient_stat_bits": 43
+      },
+      "status": {
+        "true_success_probability": 0.6,
+        "learned_success_probability": 0.599250936329588,
+        "true_lag_distribution": {
+          "5": 0.4,
+          "8": 0.6
+        },
+        "learned_observed_lag_bins": {
+          "5": 0.391304347826087,
+          "8": 0.5072463768115942
+        },
+        "successes": 159,
+        "failures": 106,
+        "sufficient_stat_bits": 42
+      }
+    },
+    "sufficient_stat_bits": 126,
+    "compact_raw_event_code_bits": 10800,
+    "history_to_sufficient_stat_ratio": 85.71428571428571
+  },
+  "prediction": {
+    "heldout_episodes": 3000,
+    "learned_brier": 0.15749346256914026,
+    "uniform_brier": 0.25
+  },
+  "policies": {
+    "none": {
+      "errors": 673,
+      "accuracy": 0.7756666666666667,
+      "probes": 0,
+      "probe_rate": 0.0,
+      "missing_probes": 0,
+      "total_objective": 43072.0
+    },
+    "always": {
+      "errors": 363,
+      "accuracy": 0.879,
+      "probes": 3000,
+      "probe_rate": 1.0,
+      "missing_probes": 738,
+      "total_objective": 35232.0
+    },
+    "voi": {
+      "errors": 363,
+      "accuracy": 0.879,
+      "probes": 1873,
+      "probe_rate": 0.6243333333333333,
+      "missing_probes": 454,
+      "total_objective": 30724.0
+    }
+  },
+  "voi_exactness": {
+    "priors_checked": 21,
+    "matches_full_two-action_enumeration": true,
+    "probe_outcomes_enumerated": 3
+  },
+  "contradiction_and_retraction": {
+    "retraction_restores_previous_claim": true,
+    "before_retraction": "保管庫",
+    "after_retraction": "棚A",
+    "claims": 512,
+    "resolved_keys": 32,
+    "active_contradictions": 192,
+    "provenance_ledger_bits": 86272,
+    "finalized_snapshot_bits": 2992,
+    "finalized_compaction_ratio": 28.834224598930483,
+    "scope": "snapshot compaction is valid only after the retraction horizon is finalized"
+  },
+  "conclusion": {
+    "voi_lower_objective_than_no_probe": true,
+    "voi_lower_objective_than_always_probe": true,
+    "voi_matches_always_probe_accuracy": true,
+    "voi_uses_fewer_probes": true
+  },
+  "limitations": [
+    "the effect family and relation identity are supplied during this phase",
+    "Beta and Dirichlet sufficient statistics assume stationary exchangeable episodes",
+    "the VOI theorem is exact only for one optional binary/missing probe and a binary terminal decision",
+    "sensor reliability is known rather than jointly induced",
+    "snapshot compaction requires a finalized retraction horizon",
+    "this is not open-domain conversation, writing, or repository-scale coding"
+  ]
+}
