@@ -1,0 +1,62 @@
+{
+  "harness": {
+    "manifest_name": "phase10f-math-smoke",
+    "manifest_sha256": "d5321a5c951ac59aecbceb84eeeadff24baacd03e79392edc837e71898be0cdc",
+    "examples": 15,
+    "model_request_contains_targets": false,
+    "fresh_subprocess": true,
+    "instrumentation_version": "mpm-bench-v1"
+  },
+  "mpm_smoke": {
+    "score": {
+      "examples": 15,
+      "answered": 15,
+      "correct": 15,
+      "overall_accuracy": 1.0,
+      "selective_accuracy": 1.0,
+      "coverage": 1.0
+    },
+    "resources": {
+      "model_bytes": 116,
+      "peak_rss_bytes": 33816576,
+      "wall_ns": 104841333,
+      "cpu_ns": 302762000,
+      "operations": 314,
+      "reads": 284,
+      "writes": 15,
+      "energy_joules": null
+    }
+  },
+  "anti_overclaim": {
+    "non_public_fairness_violations": [
+      "benchmark_not_public"
+    ],
+    "non_public_parity_allowed": false,
+    "non_public_pareto_allowed": false,
+    "policy_mismatch_violations": [
+      "benchmark_not_public",
+      "run_policy_mismatch"
+    ],
+    "policy_mismatch_parity_allowed": false
+  },
+  "comparison_readiness": {
+    "harness_schema_complete": true,
+    "target_free_model_request": true,
+    "fresh_process_resource_measurement": true,
+    "matched_policy_gate": true,
+    "public_benchmark_executed": false,
+    "open_model_executed": false,
+    "first_narrow_comparison_ready": false,
+    "stage_c_points_before": 8,
+    "stage_c_points_after": 8,
+    "remaining_mandatory_evidence_runs": 2
+  },
+  "limitations": [
+    "the smoke benchmark is synthetic and is used only to validate the harness",
+    "no open model is downloaded or executed in Phase 10f",
+    "peak RSS includes the Python runtime and imported modules",
+    "operation and read counters are model-specific and are not yet cross-model comparable",
+    "energy is absent unless an external runner supplies a measured value",
+    "a public benchmark and a matched open-model run are still required before comparison claims"
+  ]
+}
