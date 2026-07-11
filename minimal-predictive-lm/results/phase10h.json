@@ -1,0 +1,72 @@
+{
+  "benchmark": {
+    "name": "bigbench-arithmetic",
+    "split": "first-10-per-subtask",
+    "source": "https://github.com/google/BIG-bench/tree/main/bigbench/benchmark_tasks/arithmetic",
+    "license": "Apache-2.0",
+    "manifest_sha256": "cfd8bd98c597f5482df9724eb2750d293a443a1c6526630d4b0510a30723626d",
+    "examples": 200,
+    "subtasks": 20,
+    "examples_per_subtask": 10,
+    "public": true
+  },
+  "calibration": {
+    "examples": 10,
+    "operators": [
+      "plus",
+      "minus",
+      "times",
+      "divided by",
+      "percent of"
+    ],
+    "benchmark_examples_used": 0
+  },
+  "mpm": {
+    "score": {
+      "examples": 200,
+      "answered": 200,
+      "correct": 200,
+      "overall_accuracy": 1.0,
+      "selective_accuracy": 1.0,
+      "coverage": 1.0
+    },
+    "resources": {
+      "model_bytes": 53,
+      "peak_rss_bytes": 41672704,
+      "wall_ns": 134091465,
+      "cpu_ns": 432388000,
+      "operations": 4200,
+      "reads": 3800,
+      "writes": 200,
+      "energy_joules": null
+    },
+    "policy": {
+      "max_output_chars": 64,
+      "stop_sequences": [
+        "\n\n"
+      ],
+      "tools_allowed": [],
+      "temperature": 0.0,
+      "seed": 0
+    },
+    "execution_mode": "fresh_subprocess"
+  },
+  "comparison": {
+    "matched_open_model_executed": false,
+    "parity_claim_allowed": false,
+    "pareto_claim_allowed": false,
+    "reason": "the public MPM run is complete but the matched open-model subprocess has not yet been executed"
+  },
+  "stage_c": {
+    "readiness_points_before": 9,
+    "readiness_points_after": 9,
+    "mathematics_level": 3
+  },
+  "limitations": [
+    "the subset is the first ten examples from each of twenty public arithmetic subtasks",
+    "the English operator grounding uses ten independent calibration interactions",
+    "the benchmark measures direct binary arithmetic rather than natural-language word-problem reasoning",
+    "no matched open model has been executed yet",
+    "energy is not measured"
+  ]
+}
