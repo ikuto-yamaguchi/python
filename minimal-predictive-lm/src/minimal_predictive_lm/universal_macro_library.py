@@ -20,6 +20,7 @@ from .universal_program_induction import (
 
 
 _LEAF_OPS = frozenset({"ARG", "CONST", "STATE"})
+_DYNAMIC_BINDING_OPS = frozenset({"ARG", "STATE"})
 
 
 @dataclass(frozen=True)
@@ -267,9 +268,17 @@ def _macro_candidates(
     library: MacroLibrary,
     atoms: Sequence[Expr],
 ) -> Iterable[LibraryCandidate]:
+    # Macro parameters stand for dynamic values.  Constants discovered from the
+    # training outputs remain inside macro bodies and are not enumerated as call
+    # arguments; otherwise arity-k calls grow with every observed literal^k.
+    dynamic_atoms = tuple(atom for atom in atoms if atom.op in _DYNAMIC_BINDING_OPS)
     for macro in library.macros:
         typed_choices = [
-            tuple(atom for atom in atoms if atom.value_type == parameter_type)
+            tuple(
+                atom
+                for atom in dynamic_atoms
+                if atom.value_type == parameter_type
+            )
             for parameter_type in macro.parameter_types
         ]
         if any(not choices for choices in typed_choices):
