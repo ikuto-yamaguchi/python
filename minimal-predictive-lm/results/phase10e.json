@@ -1,0 +1,100 @@
+{
+  "raw_extraction": {
+    "documents": 3700,
+    "noise_documents": 100,
+    "expected_claims": 3600,
+    "extracted_claims": 3600,
+    "precision": 1.0,
+    "recall": 1.0,
+    "provenance_spans_preserved": true
+  },
+  "trust_and_correlation": {
+    "calibration_observations": 800,
+    "contextual_trust_cells": 16,
+    "copied_documents": 2000,
+    "independent_origins": 1600,
+    "duplicate_claims_collapsed": 2000,
+    "index_bits": 5006392
+  },
+  "policies": {
+    "global_independent": {
+      "queries": 450,
+      "answered": 352,
+      "correct": 328,
+      "selective_accuracy": 0.9318181818181818,
+      "coverage": 0.7822222222222223,
+      "abstained": 98,
+      "claim_reads": 3184,
+      "mean_claim_reads": 7.075555555555556,
+      "mean_provenance_entries": 7.075555555555556
+    },
+    "contextual_independent": {
+      "queries": 450,
+      "answered": 344,
+      "correct": 332,
+      "selective_accuracy": 0.9651162790697675,
+      "coverage": 0.7644444444444445,
+      "abstained": 106,
+      "claim_reads": 3184,
+      "mean_claim_reads": 7.075555555555556,
+      "mean_provenance_entries": 7.075555555555556
+    },
+    "contextual_correlated_exhaustive": {
+      "queries": 450,
+      "answered": 316,
+      "correct": 316,
+      "selective_accuracy": 1.0,
+      "coverage": 0.7022222222222222,
+      "abstained": 134,
+      "claim_reads": 1444,
+      "mean_claim_reads": 3.2088888888888887,
+      "mean_provenance_entries": 7.075555555555556
+    },
+    "contextual_correlated_voi": {
+      "queries": 450,
+      "answered": 308,
+      "correct": 308,
+      "selective_accuracy": 1.0,
+      "coverage": 0.6844444444444444,
+      "abstained": 142,
+      "claim_reads": 748,
+      "mean_claim_reads": 1.6622222222222223,
+      "mean_provenance_entries": 1.6622222222222223
+    },
+    "raw_full_scan_reads": 1665000,
+    "voi_reduction_vs_full_scan": 0.9995507507507507,
+    "voi_reduction_vs_correlated_exhaustive": 0.48199445983379496
+  },
+  "stage_c": {
+    "readiness_points_before": 8,
+    "readiness_points_after": 8,
+    "knowledge_level": 2,
+    "stage_c_ready": false,
+    "pareto_claim_allowed": false,
+    "reason": "raw spans, contextual trust, copy correlation, and bounded retrieval VOI are tested on a synthetic corpus rather than a public open-domain retrieval benchmark"
+  },
+  "remaining_comparison_gates": {
+    "first_narrow_open_model_comparison": [
+      "run a public raw-text QA or retrieval benchmark",
+      "measure peak RSS, wall time, operations, and energy",
+      "run at least one small open model with matched inputs and tools"
+    ],
+    "full_stage_c": [
+      "conversation public benchmark",
+      "knowledge public benchmark",
+      "mathematics public benchmark",
+      "real repository code benchmark",
+      "open long-context benchmark",
+      "blind creative-writing evaluation",
+      "matched resource accounting on every axis"
+    ]
+  },
+  "limitations": [
+    "the raw parser supports two bounded sentence forms",
+    "entities, relations, and values use simple token boundaries",
+    "source correctness is supervised during calibration",
+    "copy lineage is supplied as metadata",
+    "the evidence model is binary and conditionally independent across origins",
+    "the corpus is synthetic and does not justify Stage-C level 3"
+  ]
+}
