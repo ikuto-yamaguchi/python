@@ -35,6 +35,7 @@ jobs:
           python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase10e_raw_document_knowledge.py' -v
           python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase10f_benchmark_harness.py' -v
           python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase10g_public_benchmark.py' -v
+          python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase10h_bigbench_arithmetic.py' -v
       - name: Unit tests
         run: python -m unittest discover -s minimal-predictive-lm/tests -v
       - name: Reproduce experiments
@@ -65,6 +66,7 @@ jobs:
           mpm-phase10e
           mpm-phase10f
           mpm-phase10g
+          mpm-phase10h
       - name: Upload Phase 9 and Stage C results
         uses: actions/upload-artifact@v4
         with:
@@ -90,3 +92,5 @@ jobs:
             minimal-predictive-lm/results/phase10f.md
             minimal-predictive-lm/results/phase10g.json
             minimal-predictive-lm/results/phase10g.md
+            minimal-predictive-lm/results/phase10h.json
+            minimal-predictive-lm/results/phase10h.md
