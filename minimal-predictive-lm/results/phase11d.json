@@ -1,0 +1,229 @@
+{
+  "raw_grounding": {
+    "observations": 8,
+    "channels": 5,
+    "task_family_labels_supplied": false,
+    "aligned_examples_supplied": false,
+    "message_record_boundaries_supplied": true,
+    "clusters": [
+      {
+        "identifier": "P0",
+        "primitive": {
+          "kind": "conditional_character_offset",
+          "lower_codepoint": 97,
+          "upper_codepoint": 122,
+          "offset": -32
+        },
+        "support_observations": [
+          "upper-code",
+          "upper-ja",
+          "upper-test",
+          "upper-tool"
+        ],
+        "support_channels": [
+          "code_diff",
+          "japanese",
+          "test_log",
+          "tool_trace"
+        ],
+        "description_bits": 760,
+        "false_matching_pairs": 0,
+        "normalized_gain_bits": 264
+      },
+      {
+        "identifier": "P1",
+        "primitive": {
+          "kind": "conditional_character_offset",
+          "lower_codepoint": 65,
+          "upper_codepoint": 90,
+          "offset": 32
+        },
+        "support_observations": [
+          "lower-code",
+          "lower-dialogue",
+          "lower-tool"
+        ],
+        "support_channels": [
+          "code_diff",
+          "dialogue",
+          "tool_trace"
+        ],
+        "description_bits": 744,
+        "false_matching_pairs": 0,
+        "normalized_gain_bits": 24
+      }
+    ],
+    "cluster_count": 2,
+    "cluster_assignment_accuracy": 1.0,
+    "noise_observation_clustered": false,
+    "novel_modality_accuracy": 1.0
+  },
+  "versioning": {
+    "unicode_accuracy_before_extension": 0.0,
+    "extension": {
+      "accepted": true,
+      "rolled_back": false,
+      "old_accuracy": 0.6666666666666666,
+      "new_accuracy": 1.0,
+      "candidate_bits": 1584,
+      "migration_bits": 128,
+      "expected_future_calls": 100,
+      "normalized_lifetime_gain_bits": 1181,
+      "active_version": 2
+    },
+    "extension_replacements": [
+      [
+        "ß",
+        "SS"
+      ],
+      [
+        "à",
+        "À"
+      ],
+      [
+        "é",
+        "É"
+      ]
+    ],
+    "overbroad_update": {
+      "accepted": false,
+      "rolled_back": true,
+      "old_accuracy": 0.75,
+      "new_accuracy": 0.25,
+      "candidate_bits": 152,
+      "migration_bits": 128,
+      "expected_future_calls": 100,
+      "normalized_lifetime_gain_bits": -128,
+      "active_version": 2
+    },
+    "learned_bypass_token": "verbatim",
+    "context_split": {
+      "accepted": true,
+      "rolled_back": false,
+      "old_accuracy": 0.75,
+      "new_accuracy": 1.0,
+      "candidate_bits": 2080,
+      "migration_bits": 128,
+      "expected_future_calls": 100,
+      "normalized_lifetime_gain_bits": 976,
+      "active_version": 3
+    },
+    "versions": [
+      {
+        "version": 1,
+        "parent_version": null,
+        "reason": "cross-channel raw residual cluster",
+        "kind": "conditional_character_offset",
+        "description_bits": 760,
+        "evidence_ids": [],
+        "render": {
+          "kind": "conditional_character_offset",
+          "lower_codepoint": 97,
+          "upper_codepoint": 122,
+          "offset": -32
+        }
+      },
+      {
+        "version": 2,
+        "parent_version": 1,
+        "reason": "Unicode residual extension",
+        "kind": "base_with_residual_replacements",
+        "description_bits": 1584,
+        "evidence_ids": [
+          "upper-ja",
+          "upper-code",
+          "upper-tool",
+          "upper-test",
+          "unicode-sensor",
+          "unicode-tool"
+        ],
+        "render": {
+          "kind": "base_with_residual_replacements",
+          "base": {
+            "kind": "conditional_character_offset",
+            "lower_codepoint": 97,
+            "upper_codepoint": 122,
+            "offset": -32
+          },
+          "replacements": [
+            [
+              "ß",
+              "SS"
+            ],
+            [
+              "à",
+              "À"
+            ],
+            [
+              "é",
+              "É"
+            ]
+          ]
+        }
+      },
+      {
+        "version": 3,
+        "parent_version": 2,
+        "reason": "context-conditioned representation split",
+        "kind": "contextual_bypass",
+        "description_bits": 2080,
+        "evidence_ids": [
+          "upper-ja",
+          "upper-code",
+          "upper-tool",
+          "upper-test",
+          "unicode-sensor",
+          "unicode-tool",
+          "literal-ja",
+          "literal-tool"
+        ],
+        "render": {
+          "kind": "contextual_bypass",
+          "bypass_token": "verbatim",
+          "base": {
+            "kind": "base_with_residual_replacements",
+            "base": {
+              "kind": "conditional_character_offset",
+              "lower_codepoint": 97,
+              "upper_codepoint": 122,
+              "offset": -32
+            },
+            "replacements": [
+              [
+                "ß",
+                "SS"
+              ],
+              [
+                "à",
+                "À"
+              ],
+              [
+                "é",
+                "É"
+              ]
+            ]
+          }
+        }
+      }
+    ],
+    "active_version": 3,
+    "rejected_update_count": 1,
+    "final_combined_accuracy": 1.0
+  },
+  "verdict": {
+    "phase11d_success": true,
+    "new_domain_specific_solver_code": 0,
+    "raw_task_family_boundaries_removed": true,
+    "open_ended_grounding_achieved": false,
+    "stage_c_score_changed": false
+  },
+  "limitations": [
+    "individual message/log record boundaries and channel metadata are still supplied",
+    "quoted or backticked spans provide a strong generic extraction cue",
+    "the latent candidate language is limited to aligned codepoint offsets, residual replacements, and one lexical context guard",
+    "the experiment contains only two reusable transformation clusters and one distractor",
+    "Unicode residual corrections are exact replacements rather than a learned general Unicode case theory",
+    "the context split relies on a repeated verbatim token and does not solve arbitrary pragmatic scope",
+    "all evidence is synthetic and does not establish open-domain language grounding"
+  ]
+}
