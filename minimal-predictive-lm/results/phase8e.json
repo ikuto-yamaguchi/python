@@ -1,0 +1,130 @@
+{
+  "cases": [
+    {
+      "templates": 4,
+      "hidden_relations": 2,
+      "training_traces": 24,
+      "validation_traces": 4,
+      "bell_partitions": 15,
+      "residual_search": {
+        "evaluated_partitions": 13,
+        "proposed_partitions": 13,
+        "fit_candidate_checks": 1404,
+        "rounds": 3,
+        "beam_width": 8,
+        "selected_clusters": 2,
+        "selected_exact": true,
+        "selected_train_errors": 0,
+        "selected_description_bits": 70,
+        "selected_validation_accuracy": 1.0,
+        "selected_objective": 70,
+        "amortized_fit_checks": {
+          "1": 1404.0,
+          "100": 14.04,
+          "10000": 0.1404
+        }
+      },
+      "oracle": {
+        "evaluated_partitions": 15,
+        "selected_objective": 70,
+        "selected_exact": true,
+        "residual_objective_gap": 0
+      }
+    },
+    {
+      "templates": 8,
+      "hidden_relations": 3,
+      "training_traces": 48,
+      "validation_traces": 10,
+      "bell_partitions": 4140,
+      "residual_search": {
+        "evaluated_partitions": 35,
+        "proposed_partitions": 35,
+        "fit_candidate_checks": 15995,
+        "rounds": 4,
+        "beam_width": 8,
+        "selected_clusters": 3,
+        "selected_exact": true,
+        "selected_train_errors": 0,
+        "selected_description_bits": 115,
+        "selected_validation_accuracy": 1.0,
+        "selected_objective": 115,
+        "amortized_fit_checks": {
+          "1": 15995.0,
+          "100": 159.95,
+          "10000": 1.5995
+        }
+      },
+      "oracle": {
+        "evaluated_partitions": 4140,
+        "selected_objective": 115,
+        "selected_exact": true,
+        "residual_objective_gap": 0
+      }
+    },
+    {
+      "templates": 12,
+      "hidden_relations": 3,
+      "training_traces": 72,
+      "validation_traces": 18,
+      "bell_partitions": 4213597,
+      "residual_search": {
+        "evaluated_partitions": 55,
+        "proposed_partitions": 55,
+        "fit_candidate_checks": 37455,
+        "rounds": 4,
+        "beam_width": 8,
+        "selected_clusters": 3,
+        "selected_exact": true,
+        "selected_train_errors": 0,
+        "selected_description_bits": 123,
+        "selected_validation_accuracy": 1.0,
+        "selected_objective": 123,
+        "amortized_fit_checks": {
+          "1": 37455.0,
+          "100": 374.55,
+          "10000": 3.7455
+        }
+      },
+      "oracle": null
+    },
+    {
+      "templates": 32,
+      "hidden_relations": 4,
+      "training_traces": 192,
+      "validation_traces": 56,
+      "bell_partitions": 128064670049908713818925644,
+      "residual_search": {
+        "evaluated_partitions": 101,
+        "proposed_partitions": 101,
+        "fit_candidate_checks": 318352,
+        "rounds": 4,
+        "beam_width": 8,
+        "selected_clusters": 4,
+        "selected_exact": true,
+        "selected_train_errors": 0,
+        "selected_description_bits": 196,
+        "selected_validation_accuracy": 1.0,
+        "selected_objective": 196,
+        "amortized_fit_checks": {
+          "1": 318352.0,
+          "100": 3183.52,
+          "10000": 31.8352
+        }
+      },
+      "oracle": null
+    }
+  ],
+  "conclusion": {
+    "oracle_gap_zero_for_exhaustive_cases": true,
+    "all_hidden_partitions_recovered": true,
+    "all_validation_exact": true
+  },
+  "limitations": [
+    "residual signatures are derived from a restricted anonymous-cell timeline interface",
+    "beam search is not a proof of the global optimum outside oracle-sized worlds",
+    "relations are deterministic and each has one shared lag",
+    "the acted-on value is directly visible in the sensor stream",
+    "candidate generation is polynomial only under fixed beam width and round budget"
+  ]
+}
