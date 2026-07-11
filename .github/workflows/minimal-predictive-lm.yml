@@ -32,6 +32,7 @@ jobs:
           python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase10b_math_program.py' -v
           python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase10c_concept_first.py' -v
           python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase10d_grounded_knowledge.py' -v
+          python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase10e_raw_document_knowledge.py' -v
       - name: Unit tests
         run: python -m unittest discover -s minimal-predictive-lm/tests -v
       - name: Reproduce experiments
@@ -59,6 +60,7 @@ jobs:
           mpm-phase10b
           mpm-phase10c
           mpm-phase10d
+          mpm-phase10e
       - name: Upload Phase 9 and Stage C results
         uses: actions/upload-artifact@v4
         with:
@@ -78,3 +80,5 @@ jobs:
             minimal-predictive-lm/results/phase10c.md
             minimal-predictive-lm/results/phase10d.json
             minimal-predictive-lm/results/phase10d.md
+            minimal-predictive-lm/results/phase10e.json
+            minimal-predictive-lm/results/phase10e.md
