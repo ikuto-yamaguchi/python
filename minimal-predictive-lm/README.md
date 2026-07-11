@@ -134,13 +134,42 @@ prediction / task loss
 - compact call 488bit、expanded 504bit
 - 正規化生涯利得15,757bitで採用
 
-macroはジャンル専用solverを追加せず、過去に検証された計算を次のtaskの探索primitiveとして再利用します。ただしraw grounding、stateful/recursive macro、library競合、forgetting、primitive発明は未解決です。
-
 結果・設計: [`phase11b`](results/phase11b.md) / [`theory`](docs/phase11b_macro_library_induction.md)
+
+## Phase 11c: residual-driven primitive invention
+
+固定grammarで表現不能な文字変換から、丸暗記・文字map・条件付きcodepoint offsetを提案し、複数familyのheld-outと生涯目的で選択します。
+
+- fixed grammar: 1,182候補で表現不能
+- selected primitive: ASCII 97〜122へoffset −32、760bit
+- whole-string lookupはtraining 100% / validation 0%で棄却
+- unseen application domain: 100%
+- Unicode shift: 0%
+- expected use 1回では不採用、100回では採用
+
+結果・設計: [`phase11c`](results/phase11c.md) / [`theory`](docs/phase11c_residual_primitive_invention.md)
+
+## Phase 11d: raw cross-modal grounding・versioning・rollback
+
+task-family labelと整列済み例を外し、日本語、code diff、tool trace、dialogue、test logから同じ潜在primitiveを共同誘導します。
+
+- raw records: 8、channels: 5
+- discovered clusters: 2
+- 大文字化cluster: 4 records / 4 channels / 760bit
+- 小文字化cluster: 3 records / 3 channels / 744bit
+- cluster assignment: 100%、無関係な置換は未cluster
+- unseen sensor/repository channels: 100%
+- Unicode shift: 0% → residual extension後100%
+- overbroad identity update: 75% → 25%のためrollback
+- `verbatim` context splitを採用し、v3でcombined 100%
+
+task別solver追加は0ですが、record境界、channel metadata、quote構造、bounded meta-grammarはまだ与えています。
+
+結果・設計: [`phase11d`](results/phase11d.md) / [`theory`](docs/phase11d_raw_primitive_grounding_and_versioning.md)
 
 ## 次の段階
 
-Phase 11cでは、現在のgrammarで表現不能な残差から新primitiveやstate distinctionを提案し、複数taskのheld-outで再利用できる場合だけ採用します。研究者が失敗を見て専用primitiveを手書きする方式には戻しません。
+Phase 11eでは、連続した混合streamからevent境界・source・result・condition・provenance roleを共同推定し、quoteやchannel metadataへの依存を弱めます。別々のchannel parserを増やさず、追加domainあたりのengine変更0と候補探索量のスケーリングを主要指標にします。
 
 ## 再現
 
@@ -150,6 +179,8 @@ pip install -e .
 python -m unittest discover -s tests -v
 mpm-phase11a
 mpm-phase11b
+mpm-phase11c
+mpm-phase11d
 ```
 
-GitHub ActionsではPhase 1から最新Phaseまで全unit test・全再現実験を実行します。
+GitHub ActionsではPhase 1から最新Phaseまで全unit test・全再現実験を実行します。PR中の古いrunは新commitで自動キャンセルし、open-model比較は比較コード・benchmark変更時または手動実行時だけ走ります。
