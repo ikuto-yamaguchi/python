@@ -1,0 +1,251 @@
+{
+  "trace_count": 27,
+  "expected_operation_count": 24,
+  "raw_operation_inference": {
+    "inferred_count": 25,
+    "true_positive": 24,
+    "false_positive": 1,
+    "precision": 0.96,
+    "recall": 1.0,
+    "recovery_by_kind": {
+      "set_full": {
+        "correct": 6,
+        "total": 6
+      },
+      "set_partial": {
+        "correct": 3,
+        "total": 3
+      },
+      "set_delayed": {
+        "correct": 3,
+        "total": 3
+      },
+      "get": {
+        "correct": 12,
+        "total": 12
+      },
+      "noise_accidental": {
+        "correct": 0,
+        "total": 1
+      },
+      "noise_response": {
+        "correct": 1,
+        "total": 1
+      },
+      "noise_multi_effect": {
+        "correct": 1,
+        "total": 1
+      }
+    }
+  },
+  "hypotheses": {
+    "exact_surface": {
+      "description_bits": 6400,
+      "validation": {
+        "correct": 7,
+        "total": 19,
+        "accuracy": 0.3684210526315789,
+        "failures": [
+          {
+            "text": "青い箱を作業室に移して",
+            "expected": {
+              "operation": "set",
+              "relation": "c0",
+              "key": "青い箱",
+              "value": "作業室"
+            },
+            "predicted": null
+          },
+          {
+            "text": "工具は検査室にある",
+            "expected": {
+              "operation": "set",
+              "relation": "c0",
+              "key": "工具",
+              "value": "検査室"
+            },
+            "predicted": null
+          },
+          {
+            "text": "試作品はどこ?",
+            "expected": {
+              "operation": "get",
+              "relation": "c0",
+              "key": "試作品",
+              "value": null
+            },
+            "predicted": null
+          },
+          {
+            "text": "工具の場所を教えて",
+            "expected": {
+              "operation": "get",
+              "relation": "c0",
+              "key": "工具",
+              "value": null
+            },
+            "predicted": null
+          },
+          {
+            "text": "工具を田中に渡して",
+            "expected": {
+              "operation": "set",
+              "relation": "c1",
+              "key": "工具",
+              "value": "田中"
+            },
+            "predicted": null
+          },
+          {
+            "text": "センサーは佐藤のもの",
+            "expected": {
+              "operation": "set",
+              "relation": "c1",
+              "key": "センサー",
+              "value": "佐藤"
+            },
+            "predicted": null
+          },
+          {
+            "text": "センサーの持ち主は?",
+            "expected": {
+              "operation": "get",
+              "relation": "c1",
+              "key": "センサー",
+              "value": null
+            },
+            "predicted": null
+          },
+          {
+            "text": "工具は誰のもの?",
+            "expected": {
+              "operation": "get",
+              "relation": "c1",
+              "key": "工具",
+              "value": null
+            },
+            "predicted": null
+          },
+          {
+            "text": "ui.pyの依存先をredisに変更して",
+            "expected": {
+              "operation": "set",
+              "relation": "c2",
+              "key": "ui.py",
+              "value": "redis"
+            },
+            "predicted": null
+          },
+          {
+            "text": "cache.pyはcoreに依存する",
+            "expected": {
+              "operation": "set",
+              "relation": "c2",
+              "key": "cache.py",
+              "value": "core"
+            },
+            "predicted": null
+          },
+          {
+            "text": "cache.pyの依存先は?",
+            "expected": {
+              "operation": "get",
+              "relation": "c2",
+              "key": "cache.py",
+              "value": null
+            },
+            "predicted": null
+          },
+          {
+            "text": "api.pyは何に依存してる?",
+            "expected": {
+              "operation": "get",
+              "relation": "c2",
+              "key": "api.py",
+              "value": null
+            },
+            "predicted": null
+          }
+        ],
+        "average_rule_checks": 1.0,
+        "average_symbol_checks": 1.0
+      },
+      "lifetime_objective": 18688
+    },
+    "support_1_schema": {
+      "description_bits": 3983,
+      "rule_count": 13,
+      "validation": {
+        "correct": 18,
+        "total": 19,
+        "accuracy": 0.9473684210526315,
+        "failures": [
+          {
+            "text": "工具と棚Bについて雑談した",
+            "expected": null,
+            "predicted": {
+              "operation": "set",
+              "relation": "c0",
+              "key": "工具",
+              "value": "棚B"
+            }
+          }
+        ],
+        "average_rule_checks": 0.9473684210526315,
+        "average_symbol_checks": 4.7894736842105265
+      },
+      "lifetime_objective": 5007
+    },
+    "robust_multi_relation_schema": {
+      "description_bits": 3703,
+      "relation_count": 3,
+      "rule_count": 12,
+      "index_bits": 48,
+      "validation": {
+        "correct": 19,
+        "total": 19,
+        "accuracy": 1.0,
+        "failures": [],
+        "average_rule_checks": 0.7894736842105263,
+        "average_symbol_checks": 3.736842105263158
+      },
+      "lifetime_objective": 3703
+    }
+  },
+  "selected_hypothesis": "robust_multi_relation_schema",
+  "noise_filtering": {
+    "raw_false_positive_templates": [
+      "{K}と{V}について雑談した"
+    ],
+    "support_1_retains_accidental_rule": true,
+    "robust_rejects_accidental_rule": true
+  },
+  "routing_efficiency": {
+    "total_rules": 12,
+    "linear_scan_rule_checks_per_input": 12,
+    "indexed_average_rule_checks": 0.7894736842105263,
+    "indexed_average_symbol_checks": 3.736842105263158
+  },
+  "new_relation_bootstrap": {
+    "consistent_traces": 2,
+    "relation_count_before": 3,
+    "relation_count_after": 4,
+    "rules_added": 1,
+    "description_bits_added": 357,
+    "heldout_cross_combination": {
+      "correct": 1,
+      "total": 1,
+      "accuracy": 1.0,
+      "failures": [],
+      "average_rule_checks": 1.0,
+      "average_symbol_checks": 2.0
+    }
+  },
+  "limitations": [
+    "opaque effect-channel identifiers are observable even though their semantics are not named",
+    "surface-rule candidates remain a restricted template language",
+    "noise handling is support-based and does not model adversarial or correlated noise",
+    "delayed effects span one step only",
+    "the experiment does not yet infer arbitrary goals or repository-scale programs"
+  ]
+}
