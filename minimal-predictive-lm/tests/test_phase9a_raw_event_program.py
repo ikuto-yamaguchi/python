@@ -94,7 +94,11 @@ class Phase9aRawEventProgramTests(unittest.TestCase):
             ("SET", "VERIFY", "RETRACT", "SET", "VERIFY", "EMIT"),
         )
         self.assertEqual(result.request_grounding_correct, 6)
-        self.assertEqual(result.artifact_grounding_correct, 6)
+        # Five single-effect artifacts are recovered. The final report contains
+        # both an EMIT speech act and VERIFY content ("全テスト"), so the
+        # current single-label grounder correctly exposes an unresolved tie.
+        self.assertEqual(result.artifact_grounding_correct, 5)
+        self.assertIsNone(result.events[-1].artifact_operation)
         self.assertEqual(result.final_state.expression, "x * x + 1")
         self.assertEqual(result.final_state.last_test, "PASS")
         self.assertIn("全テストに成功", result.final_state.report)
