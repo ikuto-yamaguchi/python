@@ -4,6 +4,8 @@ Transformerを小さくするのではなく、系列予測・意味処理・仕
 
 最終目標は、会話、文章作成、コーディング、ツール利用を伴うエージェント処理で、高性能LLMと同等以上の能力を、より小さい生涯総資源で実現することです。
 
+現時点で高性能LLM級の能力を達成したという主張はしません。成功だけでなく、自由言語への失敗、候補探索の線形増加、Bell数の探索爆発も結果とCIへ固定します。
+
 ## 中心原理
 
 過去全文を保持する必要はありません。同じ未来分布、または同じ将来意思決定価値を与える履歴は、同一状態へ圧縮できます。
@@ -12,9 +14,7 @@ Transformerを小さくするのではなく、系列予測・意味処理・仕
 h ~ h'  iff  P(future | h) = P(future | h')
 ```
 
-ただし、状態だけ小さくしても、遷移表、検索、学習、検証、外部知識が巨大なら最小機械ではありません。能力ごとに別表現を追加すれば、同じ事実や目標のコピーと変換も増えます。
-
-そのため、次を同時に会計します。
+ただし状態だけ小さくしても、遷移表、検索、学習、検証、外部知識が巨大なら最小機械ではありません。次を同時に会計します。
 
 ```text
 prediction / task loss
@@ -38,36 +38,30 @@ prediction / task loss
 - 正準symbol、疎な事実状態、同じ書換え原理を共有する
 - 汎用IRは部分評価、規則融合、状態最小化し、実行時overheadを消す
 - cache、index、新命令は、生涯目的を改善した場合だけ採用する
-- 成功値だけでなく、held-out失敗と探索爆発もCIへ固定する
+- 探索・学習コストもモデル外へ隠さず、利用回数で償却する
 
 ## Phase 1: 最小予測状態
 
-Hankel行列から最小線形予測次元と離散因果状態を復元しました。
-
 - IID過程: Hankel rank 1、因果状態1、実行時状態0bit
 - 2〜8状態のmodulo過程で真の最小状態数を復元
-- 8状態の密なSVD表現: 576bytes、64 MAC/記号
+- 8状態dense SVD: 576bytes、64 MAC/記号
 - 離散因果状態: 48bytes、0 MAC/記号
-- 最大特異値gapの誤判定を、分割データ由来のnoise floorで修正
+- 特異値gapの誤判定を、分割data由来のnoise floorで修正
 
 詳細: [`results/phase1.md`](results/phase1.md)
 
 ## Phase 2: 遷移法則の因数分解
 
-K個の独立bitを持つ予測言語で、状態情報量と遷移program記述長を分離しました。
-
-- 厳密予測には最低K bit必要
-- 平坦な因果状態表はready状態だけで `2^K`
-- K=32の疎な平坦表でも約5.6TB
-- 因数分解レジスタ機械はK bit＋定数規則
+- K個の独立bitを厳密予測するには最低K bit必要
+- K=32の疎な平坦状態表でも約5.6TB
+- 因数分解レジスタ機械は32bit＋定数規則
 - dense FP32状態よりdata書込み量を約6656分の1へ削減
 
 詳細: [`results/phase2.md`](results/phase2.md)
 
-## Phase 3a: MDLによる構造探索
+## Phase 3a: MDL構造探索
 
-必要slot数を与えず、0〜16slotと書込み規則を探索しました。
-
+- 必要slot数を与えず0〜16slotを探索
 - 100,000 tokenの8-key言語から8slot・offset 0を選択
 - 15,486 QUERYを0誤り
 - 少ないslotは誤り、多いslotは余分な記述bitで敗北
@@ -76,8 +70,6 @@ K個の独立bitを持つ予測言語で、状態情報量と遷移program記述
 
 ## Phase 4a: コンパイル済み超軽量バイトLM
 
-held-out NLL改善が規則自身の記述長を上回る文脈だけを残し、failure-link状態機械へコンパイルしました。
-
 - 学習625,748bytes、別seed test 155,073bytes
 - 選択規則608、コンパイル状態696
 - 実行時状態10bit
@@ -85,17 +77,15 @@ held-out NLL改善が規則自身の記述長を上回る文脈だけを残し�
 - 0.468469605 BPB
 - 平均1.015644遷移確認/byte
 
-これは表層予測の橋渡し実験であり、open-domain意味理解の主張ではありません。
+これは表層予測の橋渡しであり、open-domain意味理解の主張ではありません。
 
 詳細: [`results/phase4a.md`](results/phase4a.md)
 
 ## Phase 4b〜4c: no-neural意味・創造機械
 
-- 未知固有名詞はexact symbol tableへ一度だけ保存
-- 世界状態はtimestamp付き疎関係として更新・撤回
-- 質問はqueryへコンパイルし、関連規則だけ実行
-- 回答はproof traceから生成
-- 創造性は意味program変形、候補生成、criticへ分解
+- 未知固有名詞をexact symbol tableへ一度だけ保存
+- timestamp付き疎関係、更新、撤回、proof trace
+- 創造性を意味program変形、候補生成、criticへ分解
 - 外部知識、検索、候補探索も総コストへ含める
 
 設計:
@@ -105,7 +95,7 @@ held-out NLL改善が規則自身の記述長を上回る文脈だけを残し�
 
 ## Phase 5a: coding / writing / agentの統一基盤
 
-能力ごとに部品を継ぎ足さず、次の5命令を共有します。
+次の5命令と一つのsymbol/state/rule/indexで、コード編集、文章構成、行動計画を処理しました。
 
 ```text
 MATCH
@@ -115,19 +105,17 @@ EMIT
 CHOOSE_MIN
 ```
 
-一つのsymbol table、state、rule、疎index、MDL探索器で、コード編集、文章構成、行動計画を処理しました。
-
 詳細:
 
 - [`results/phase5a.md`](results/phase5a.md)
 - [`docs/phase5_unified_work_machine.md`](docs/phase5_unified_work_machine.md)
 
-## Phase 6: 下限、スケーリング、生涯大域最適
+## Phase 6: 数学的下限、スケーリング、生涯大域最適
 
 - 256段chain: 平坦規則5,376bit → 因数分解43bit
 - 位置状態は理論下限9bit
 - 20bit parity: 任意表1,048,576bit → 規則27bit＋状態1bit
-- 必要な20bit読取りや256依存stepは不可避として残す
+- 必要な20bit読取りと256依存stepは不可避として残す
 - Value of Computationで、判断を変える期待値が費用を上回る場合だけ追加思考
 - 16-query workload: 局所commit 16,384、生涯大域選択4,032
 
@@ -143,7 +131,7 @@ CHOOSE_MIN
 
 - 制御grammar: 35.3% → 82.4% → 100%
 - 砕けたheld-out表現: 50%
-- 観測失敗表現を個別rewriteすると、別系列で再び50%
+- 個別rewrite追加後も別系列で再び50%
 - 10,000回の反復質問でもpersistent state量は増加なし
 - 4,096事実でもindexed lookupは1 read
 - test失敗 → 証拠保存 → 再試行 → 最終検証のtask loopを実装
@@ -156,8 +144,6 @@ CHOOSE_MIN
 
 ## Phase 8a: 残差駆動の意味program誘導
 
-固有名詞と場所をtyped slotへ置換し、1〜2個の構造・文字特徴からなる最小規則をMDLで選びました。
-
 | parser | 未知組合せ | distractor拒否 | 未知言い換え |
 |---|---:|---:|---:|
 | exact surface | 0.0% | 100.0% | 0.0% |
@@ -166,7 +152,7 @@ CHOOSE_MIN
 
 - entity/location各128: 表面列挙22,112,432bit → program＋symbol 13,989bit
 - 約1,580.7倍削減
-- 別の言い換え系列では16.7%で、open-domain意味理解は未達
+- 別の言い換え系列では16.7%で、open-domain理解は未達
 
 詳細:
 
@@ -175,16 +161,14 @@ CHOOSE_MIN
 
 ## Phase 8b: interaction traceから潜在操作・役割を誘導
 
-intent名やentity/location型を与えず、`pre-state / utterance / post-state / response`から操作を逆算しました。
-
-- 9/9 interactionから操作を復元
+- intent名やentity/location型を与えず9/9 operationを復元
 - `SET(key,value) / GET(key)` を誘導
 - key/value latent role purity 100% / 100%
 - exact surface objective 4,130
 - untyped symbols objective 1,964
 - 2 latent roles objective 953、held-out 100%
 - surface intent 202bit → state effect 163bit
-- 新symbolは文字列bitだけを払い、追加rule 0bitで再利用
+- 新symbolは文字列bitだけを払い、追加rule 0bit
 
 詳細:
 
@@ -193,27 +177,14 @@ intent名やentity/location型を与えず、`pre-state / utterance / post-state
 
 ## Phase 8c: 複数relation・部分観測・noise・遅延effect
 
-意味名を持たない3つのopaque effect channelへ言語を接地しました。
-
 - 27 traces、正解operation 24
 - full SET 6/6、partial SET 3/3、delayed SET 3/3、GET 12/12
-- raw operation推定: recall 100%、precision 96%
-- 偶然のexogenous changeを1本だけ誤相関
-- support 1 schemaは誤規則を保存し、held-out 94.7%
-- support 2＋confidence schemaは誤規則を除去し、held-out 19/19
-
-| hypothesis | bits | validation | lifetime objective |
-|---|---:|---:|---:|
-| exact surface | 6,400 | 36.8% | 18,688 |
-| support 1 schema | 3,983 | 94.7% | 5,007 |
-| robust multi-relation schema | 3,703 | 100.0% | 3,703 |
-
-- 12-rule線形走査: 12 checks/input
-- cue index: 平均0.789 checks/input
+- raw recall 100%、precision 96%
+- 偶然のexogenous changeを1本誤相関
+- support 1 schema: held-out 94.7%、objective 5,007
+- support 2＋confidence: held-out 19/19、objective 3,703
+- 12-rule線形走査12 checks/input → cue index平均0.789 checks/input
 - index pointer 48bitもdescription lengthへ含む
-- 新opaque relation: 2 traces、1 rule、357bit、held-out recombination 100%
-
-ただしeffect channel IDは観測可能でした。
 
 詳細:
 
@@ -222,25 +193,7 @@ intent名やentity/location型を与えず、`pre-state / utterance / post-state
 
 ## Phase 8d: anonymous sensorからrelation partitionを発見
 
-relation channelを与えず、entityごとに割り当てが異なる2つのanonymous sensor cell、utterance、value、4-step timelineだけを与えました。
-
-hidden world:
-
-```text
-location relation: lag 2
-owner relation:    lag 1
-```
-
-4 surface templatesの全set partition 15通りをoracleとして比較しました。
-
-- training traces: 16
-- true effect candidate recall: 100%
-- ambiguous noise trace: 1、共有構造で正しいcell/lagへ解決
-- hidden relation partition: exact recovery
-- recovered relation数: 2
-- recovered lag: 1 / 2
-- training error: 0
-- 新entityでrelationごと1回calibration後、未観測paraphrase: 100%
+relation channelを与えず、entity-local anonymous sensor、utterance、value、短いtimelineだけから2 relationとlag 1/2を復元しました。
 
 | hypothesis | clusters | train errors | bits | new-entity validation | objective |
 |---|---:|---:|---:|---:|---:|
@@ -249,49 +202,67 @@ owner relation:    lag 1
 | flat four relation | 4 | 0 | 132 | 0% | 4,228 |
 | selected two relation | 2 | 0 | 66 | 100% | 66 |
 
-4-cluster modelは訓練誤り0でも、新entityではcalibration templateから同relationのparaphraseへ転移できません。正しい2-relation因数分解だけが100%転移しました。
+正しい因数分解だけが、relationごと1回のcalibrationから未観測paraphraseへ100%転移しました。
 
-### 表現スケーリング
-
-32 surface templatesが2 latent relationsから生成される例:
-
-| entities | flat assignment bits | latent partition bits | ratio |
-|---:|---:|---:|---:|
-| 8 | 256 | 102 | 2.51x |
-| 32 | 1,024 | 150 | 6.83x |
-| 128 | 4,096 | 342 | 11.98x |
-| 512 | 16,384 | 1,110 | 14.76x |
-
-### 探索スケーリングの失敗
-
-全partition探索はBell numberで爆発します。
+ただし全partition探索はBell numberで爆発します。
 
 | templates | partitions |
 |---:|---:|
 | 4 | 15 |
-| 6 | 203 |
 | 8 | 4,140 |
-| 10 | 115,975 |
 | 12 | 4,213,597 |
-
-したがって、この全探索は小世界のoracle・下限比較用であり、そのまま汎用learnerにはなりません。
+| 32 | 128,064,670,049,908,713,818,925,644 |
 
 詳細:
 
 - [`docs/phase8d_latent_relation_partition.md`](docs/phase8d_latent_relation_partition.md)
 - [`results/phase8d.md`](results/phase8d.md)
 
+## Phase 8e: 残差衝突だけからrelationをsplit
+
+全partition列挙を廃止し、各templateの最小残差署名から次だけを提案します。
+
+```text
+lag split
+anonymous-cell-rank split
+lag + cell-rank split
+高残差templateの少数isolation
+cluster merge
+```
+
+最初のsplitへ局所commitせず、bounded beamで複数仮説を保持します。4・8 templateでは全探索oracleも実行し、大域目的gapを測りました。
+
+| templates | hidden relations | Bell partitions | evaluated | fit checks | exact partition | held-out | oracle gap |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 4 | 2 | 15 | 13 | 1,404 | yes | 100% | 0 |
+| 8 | 3 | 4,140 | 35 | 15,995 | yes | 100% | 0 |
+| 12 | 3 | 4,213,597 | 55 | 37,455 | yes | 100% | n/a |
+| 32 | 4 | 128,064,670,049,908,713,818,925,644 | 101 | 318,352 | yes | 100% | n/a |
+
+8 templateでは全探索の約118分の1のpartition評価で同じ大域解へ到達しました。12・32 templateはhidden generatorを評価にだけ使い、oracle列挙は実行していません。
+
+探索はcompile時に一度だけ支払い、実行時modelから消します。ただし検索費用を隠さず、1・100・10,000 deploymentでの償却値も保存しています。32 templateの318,352 checksは10,000利用なら平均31.8352 checks/useです。
+
+これはBell爆発を回避する明確な前進ですが、固定beamが一般に大域解を保証するわけではありません。
+
+詳細:
+
+- [`docs/phase8e_residual_partition_search.md`](docs/phase8e_residual_partition_search.md)
+- [`results/phase8e.md`](results/phase8e.md)
+
 ## 次の実験
 
-Phase 8eではBell全探索を廃止し、現在のclusterで予測できない**残差衝突**だけから必要なsplitを提案します。
+Phase 8fでは、残差署名が一意に定まる決定論的世界を外します。
 
-1. 同じ内部状態なのに異なるeffectを要求するtraceを検出
-2. cell、lag、resultの最小差分を抽出
-3. cluster split候補を局所生成
-4. held-out regret削減が追加bit、探索、検証、移行費用を上回る場合だけ採用
-5. 不要clusterはmerge / delete
+1. effect成功率を100%から60〜95%へ変化
+2. sensor欠測と誤観測
+3. 2〜16 stepの可変遅延
+4. contradiction、retraction、時間変化
+5. 追加観測のValue of Informationを計算
+6. 観測費用が期待regret削減を上回る場合だけtool / sensorを読む
+7. 小世界oracleとのgap、search/state/read/write/operationを同時計測
 
-さらに、固定relation数、固定lag、value完全一致、deterministic effectを順に外し、会話、文章、コード、tool actionを同じ評価へ混在させます。
+その後、会話だけでなく文章、コード、tool actionのtraceを同じ潜在relation探索へ混在させます。
 
 ## 実行
 
@@ -313,6 +284,7 @@ mpm-phase8a
 mpm-phase8b
 mpm-phase8c
 mpm-phase8d
+mpm-phase8e
 python -m unittest discover -s tests -v
 ```
 
