@@ -23,10 +23,12 @@ jobs:
           cache-dependency-path: minimal-predictive-lm/pyproject.toml
       - name: Install
         run: python -m pip install -e minimal-predictive-lm
-      - name: Phase 9 grounding tests
+      - name: Phase 9 and Stage C tests
         run: |
           python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase9a_raw_event_program.py' -v
           python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase9b_event_graph.py' -v
+          python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase9c_connector_induction.py' -v
+          python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase10a_stage_c_readiness.py' -v
       - name: Unit tests
         run: python -m unittest discover -s minimal-predictive-lm/tests -v
       - name: Reproduce experiments
@@ -49,12 +51,18 @@ jobs:
           mpm-phase8g
           mpm-phase9a
           mpm-phase9b
-      - name: Upload Phase 9 results
+          mpm-phase9c
+          mpm-phase10a
+      - name: Upload Phase 9 and Stage C results
         uses: actions/upload-artifact@v4
         with:
-          name: phase9-results
+          name: phase9-stage-c-results
           path: |
             minimal-predictive-lm/results/phase9a.json
             minimal-predictive-lm/results/phase9a.md
             minimal-predictive-lm/results/phase9b.json
             minimal-predictive-lm/results/phase9b.md
+            minimal-predictive-lm/results/phase9c.json
+            minimal-predictive-lm/results/phase9c.md
+            minimal-predictive-lm/results/phase10a.json
+            minimal-predictive-lm/results/phase10a.md
