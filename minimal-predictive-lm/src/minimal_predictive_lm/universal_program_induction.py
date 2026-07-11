@@ -12,12 +12,7 @@ Scalar = int | Fraction | str | bool
 
 @dataclass(frozen=True)
 class TransitionTrace:
-    """One domain-neutral transition observation.
-
-    The learner receives only arguments, a sparse before/after state, and an
-    observed output.  No domain name, operation label, or handwritten handler is
-    supplied to the synthesizer.
-    """
+    """A domain-neutral observation of arguments, state transition, and output."""
 
     arguments: tuple[Scalar, ...]
     before: tuple[tuple[str, Scalar], ...]
@@ -68,9 +63,10 @@ class Expr:
 
     @property
     def description_bits(self) -> int:
-        return len(
-            json.dumps(self.render(), ensure_ascii=False, separators=(",", ":")).encode("utf-8")
-        ) * 8
+        payload = json.dumps(
+            self.render(), ensure_ascii=False, separators=(",", ":")
+        ).encode("utf-8")
+        return len(payload) * 8
 
     def evaluate(self, trace: TransitionTrace) -> Scalar:
         if self.op == "ARG":
@@ -130,7 +126,7 @@ class InducedProgram:
         for key_expr, value_expr in self.updates:
             key = key_expr.evaluate(probe)
             if not isinstance(key, str):
-                raise TypeError("state update key must evaluate to a string")
+                raise TypeError("state update key must be a string")
             after[key] = value_expr.evaluate(probe)
         return after, self.output.evaluate(probe)
 
@@ -141,7 +137,9 @@ class InducedProgram:
             "updates": [[key.render(), value.render()] for key, value in self.updates],
         }
         return len(
-            json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+            json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode(
+                "utf-8"
+            )
         ) * 8
 
     def operations(self) -> frozenset[str]:
@@ -224,8 +222,8 @@ def _repeated_constants(traces: Sequence[TransitionTrace]) -> tuple[Scalar, ...]
     constants: set[Scalar] = {0, 1, 100}
     constants.update(value for value, count in counts.items() if count >= 2)
 
-    # Generic affix discovery lets the same learner infer keys such as
-    # ``location:<entity>`` without being told what a location domain is.
+    # Generic affix discovery: infer reusable key pieces such as ``location:``
+    # from changed strings and their arguments, without a location-specific rule.
     for text in strings:
         for argument in argument_strings:
             if not argument or argument not in text or text == argument:
@@ -242,11 +240,11 @@ def _repeated_constants(traces: Sequence[TransitionTrace]) -> tuple[Scalar, ...]
 
 def _atoms(traces: Sequence[TransitionTrace]) -> tuple[Expr, ...]:
     atoms: list[Expr] = []
-    argument_count = len(traces[0].arguments)
-    if any(len(trace.arguments) != argument_count for trace in traces):
-        raise ValueError("all traces for one task must have the same argument arity")
+    arity = len(traces[0].arguments)
+    if any(len(trace.arguments) != arity for trace in traces):
+        raise ValueError("all traces for one task must have the same arity")
 
-    for index in range(argument_count):
+    for index in range(arity):
         value_type = _consistent_type(trace.arguments[index] for trace in traces)
         if value_type is not None:
             atoms.append(Expr("ARG", index, (), value_type))
@@ -265,20 +263,26 @@ def _atoms(traces: Sequence[TransitionTrace]) -> tuple[Expr, ...]:
     unique: dict[tuple[object, ...], Expr] = {}
     for atom in atoms:
         key = (atom.op, _freeze(atom.value), atom.value_type)
-        current = unique.get(key)
-        if current is None or atom.description_bits < current.description_bits:
+        incumbent = unique.get(key)
+        if incumbent is None or atom.description_bits < incumbent.description_bits:
             unique[key] = atom
-    return tuple(sorted(unique.values(), key=lambda expr: (expr.description_bits, repr(expr.render()))))
+    return tuple(
+        sorted(unique.values(), key=lambda expr: (expr.description_bits, repr(expr.render())))
+    )
 
 
-def _signature(expr: Expr, traces: Sequence[TransitionTrace]) -> tuple[object, ...] | None:
-    values: list[object] = []
+def _signature(
+    expr: Expr, traces: Sequence[TransitionTrace]
+) -> tuple[object, ...] | None:
     try:
-        for trace in traces:
-            values.append(_freeze(expr.evaluate(trace)))
+        return tuple(_freeze(expr.evaluate(trace)) for trace in traces)
     except (KeyError, TypeError, ValueError, ZeroDivisionError, OverflowError):
         return None
-    return tuple(values)
+
+
+def _small_classification_target(signature: tuple[object, ...]) -> bool:
+    distinct = set(signature)
+    return len(distinct) <= 4 and len(distinct) < len(signature)
 
 
 def synthesize_expression(
@@ -302,17 +306,17 @@ def synthesize_expression(
     candidate_evaluations = 0
     best_match: Expr | None = None
 
-    def consider(expr: Expr) -> None:
+    def consider(expr: Expr) -> bool:
         nonlocal candidate_evaluations, best_match
         if candidate_evaluations >= max_candidates:
             raise UnexpressibleTaskError("candidate budget exhausted")
-        signature = _signature(expr, items)
         candidate_evaluations += 1
+        signature = _signature(expr, items)
         if signature is None:
-            return
+            return False
         key = (expr.value_type, signature)
         incumbent = representatives.get(key)
-        if incumbent is None or (
+        improved = incumbent is None or (
             expr.description_bits,
             expr.node_count,
             repr(expr.render()),
@@ -320,7 +324,8 @@ def synthesize_expression(
             incumbent.description_bits,
             incumbent.node_count,
             repr(incumbent.render()),
-        ):
+        )
+        if improved:
             representatives[key] = expr
         if expr.value_type == target_type and signature == target_signature:
             if best_match is None or (
@@ -333,45 +338,48 @@ def synthesize_expression(
                 repr(best_match.render()),
             ):
                 best_match = expr
+        return improved
 
     atoms = _atoms(items)
+    layer: list[Expr] = []
     for atom in atoms:
-        consider(atom)
+        if consider(atom):
+            layer.append(atom)
     if best_match is not None:
         return ExpressionSearchResult(
             best_match,
             SearchStats(candidate_evaluations, len(representatives), 0),
         )
 
-    # A domain-neutral conditional schema.  Conditions are grounded from atomic
-    # observations; branches may be any atomic value.  This is deliberately
-    # bounded rather than pretending to solve unrestricted program synthesis.
-    nonconstant_atoms = [atom for atom in atoms if atom.op != "CONST"]
-    constant_atoms = [atom for atom in atoms if atom.op == "CONST"]
-    branch_atoms = [atom for atom in atoms if atom.value_type == target_type]
-    for left in nonconstant_atoms:
-        for right in constant_atoms:
-            if left.value_type != right.value_type:
-                continue
-            for when_true in branch_atoms:
-                for when_false in branch_atoms:
-                    if when_true == when_false:
-                        continue
-                    consider(
-                        Expr(
-                            "IF_EQ",
-                            None,
-                            (left, right, when_true, when_false),
-                            target_type,
+    # Only classification-like targets justify enumerating conditionals.  This
+    # prevents irrelevant IF candidates from dominating continuous arithmetic.
+    if _small_classification_target(target_signature):
+        nonconstants = [atom for atom in atoms if atom.op != "CONST"]
+        constants = [atom for atom in atoms if atom.op == "CONST"]
+        branches = [atom for atom in atoms if atom.value_type == target_type]
+        for left in nonconstants:
+            for right in constants:
+                if left.value_type != right.value_type:
+                    continue
+                for when_true in branches:
+                    for when_false in branches:
+                        if when_true == when_false:
+                            continue
+                        consider(
+                            Expr(
+                                "IF_EQ",
+                                None,
+                                (left, right, when_true, when_false),
+                                target_type,
+                            )
                         )
-                    )
-    if best_match is not None:
-        return ExpressionSearchResult(
-            best_match,
-            SearchStats(candidate_evaluations, len(representatives), 1),
-        )
+        if best_match is not None:
+            return ExpressionSearchResult(
+                best_match,
+                SearchStats(candidate_evaluations, len(representatives), 1),
+            )
 
-    binary_specs = (
+    specs = (
         ("ADD", "num", "num"),
         ("SUB", "num", "num"),
         ("MUL", "num", "num"),
@@ -380,22 +388,31 @@ def synthesize_expression(
     )
     commutative = {"ADD", "MUL"}
 
+    # Typed chain search composes one previously discovered expression with one
+    # atom.  It covers common straight-line programs while avoiding all-pairs
+    # combinations of deep expressions.  Balanced trees remain a known limit.
     for depth in range(1, max_depth + 1):
-        snapshot = tuple(representatives.values())
-        for op, input_type, output_type in binary_specs:
-            candidates = [expr for expr in snapshot if expr.value_type == input_type]
-            for left in candidates:
-                for right in candidates:
-                    if max(left.depth, right.depth) != depth - 1:
-                        continue
-                    if op in commutative and repr(left.render()) > repr(right.render()):
-                        continue
-                    consider(Expr(op, None, (left, right), output_type))
+        next_layer: list[Expr] = []
+        parents = tuple(layer)
+        for op, input_type, output_type in specs:
+            typed_parents = [expr for expr in parents if expr.value_type == input_type]
+            typed_atoms = [expr for expr in atoms if expr.value_type == input_type]
+            for parent in typed_parents:
+                for atom in typed_atoms:
+                    candidates = [Expr(op, None, (parent, atom), output_type)]
+                    if op not in commutative:
+                        candidates.append(Expr(op, None, (atom, parent), output_type))
+                    for candidate in candidates:
+                        if consider(candidate):
+                            next_layer.append(candidate)
         if best_match is not None:
             return ExpressionSearchResult(
                 best_match,
                 SearchStats(candidate_evaluations, len(representatives), depth),
             )
+        layer = next_layer
+        if not layer:
+            break
 
     raise UnexpressibleTaskError(
         f"no expression found within depth={max_depth}, candidates={candidate_evaluations}"
@@ -408,7 +425,9 @@ def _state_updates(trace: TransitionTrace) -> tuple[tuple[str, Scalar], ...]:
     removed = sorted(set(before) - set(after))
     if removed:
         raise UnexpressibleTaskError("state deletion is not in the Phase 11a grammar")
-    return tuple(sorted((key, value) for key, value in after.items() if before.get(key) != value))
+    return tuple(
+        sorted((key, value) for key, value in after.items() if before.get(key) != value)
+    )
 
 
 def induce_program(
@@ -427,43 +446,35 @@ def induce_program(
         max_depth=max_depth,
         max_candidates=max_candidates,
     )
-
-    update_rows = tuple(_state_updates(trace) for trace in items)
-    update_count = len(update_rows[0])
-    if any(len(row) != update_count for row in update_rows):
+    rows = tuple(_state_updates(trace) for trace in items)
+    update_count = len(rows[0])
+    if any(len(row) != update_count for row in rows):
         raise UnexpressibleTaskError("the number of state updates is not stable")
 
     updates: list[tuple[Expr, Expr]] = []
-    update_stats: list[tuple[SearchStats, SearchStats]] = []
-    candidate_evaluations = output_search.stats.candidate_evaluations
-    unique_signatures = output_search.stats.unique_signatures
+    stats: list[tuple[SearchStats, SearchStats]] = []
+    evaluations = output_search.stats.candidate_evaluations
+    signatures = output_search.stats.unique_signatures
     for index in range(update_count):
         key_search = synthesize_expression(
             items,
-            tuple(row[index][0] for row in update_rows),
+            tuple(row[index][0] for row in rows),
             max_depth=max_depth,
             max_candidates=max_candidates,
         )
         value_search = synthesize_expression(
             items,
-            tuple(row[index][1] for row in update_rows),
+            tuple(row[index][1] for row in rows),
             max_depth=max_depth,
             max_candidates=max_candidates,
         )
         updates.append((key_search.expression, value_search.expression))
-        update_stats.append((key_search.stats, value_search.stats))
-        candidate_evaluations += (
-            key_search.stats.candidate_evaluations + value_search.stats.candidate_evaluations
-        )
-        unique_signatures += key_search.stats.unique_signatures + value_search.stats.unique_signatures
+        stats.append((key_search.stats, value_search.stats))
+        evaluations += key_search.stats.candidate_evaluations + value_search.stats.candidate_evaluations
+        signatures += key_search.stats.unique_signatures + value_search.stats.unique_signatures
 
-    program = InducedProgram(
-        output_search.expression,
-        tuple(updates),
-        candidate_evaluations,
-        unique_signatures,
-    )
-    return ProgramInductionResult(program, output_search.stats, tuple(update_stats))
+    program = InducedProgram(output_search.expression, tuple(updates), evaluations, signatures)
+    return ProgramInductionResult(program, output_search.stats, tuple(stats))
 
 
 def program_accuracy(program: InducedProgram, traces: Iterable[TransitionTrace]) -> float:
@@ -491,6 +502,4 @@ def surface_memorization_bits(traces: Iterable[TransitionTrace]) -> int:
 
 
 def hypothesis_information_lower_bound(candidate_evaluations: int) -> float:
-    """Minimum bits needed merely to identify one candidate among those tried."""
-
     return math.log2(max(1, candidate_evaluations))
