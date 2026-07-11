@@ -11,16 +11,9 @@ on:
       - "minimal-predictive-lm/src/minimal_predictive_lm/phase10h_worker.py"
       - "minimal-predictive-lm/src/minimal_predictive_lm/phase10i_*.py"
       - ".github/workflows/minimal-predictive-lm-open-model.yml"
-  pull_request:
-    paths:
-      - "minimal-predictive-lm/src/minimal_predictive_lm/benchmark_harness.py"
-      - "minimal-predictive-lm/src/minimal_predictive_lm/public_benchmarks.py"
-      - "minimal-predictive-lm/src/minimal_predictive_lm/phase10h_worker.py"
-      - "minimal-predictive-lm/src/minimal_predictive_lm/phase10i_*.py"
-      - ".github/workflows/minimal-predictive-lm-open-model.yml"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
