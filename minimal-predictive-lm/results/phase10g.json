@@ -1,0 +1,60 @@
+{
+  "benchmark": {
+    "name": "gsm8k",
+    "split": "test",
+    "source": "https://raw.githubusercontent.com/openai/grade-school-math/master/grade_school_math/data/test.jsonl",
+    "source_git_blob_sha1": "e4c2ff4942b9a78bd74f04141224c11e28d12dc9",
+    "manifest_sha256": "b5491642f1c55e30fb3b15053b0fd944f3a88bf4b6d5fc6af40c1b2a553e9b0f",
+    "license": "MIT",
+    "examples": 1319,
+    "public": true
+  },
+  "mpm": {
+    "score": {
+      "examples": 1319,
+      "answered": 30,
+      "correct": 0,
+      "overall_accuracy": 0.0,
+      "selective_accuracy": 0.0,
+      "coverage": 0.022744503411675512
+    },
+    "resources": {
+      "model_bytes": 116,
+      "peak_rss_bytes": 43495424,
+      "wall_ns": 279509050,
+      "cpu_ns": 584662000,
+      "operations": 272035,
+      "reads": 270553,
+      "writes": 1319,
+      "energy_joules": null
+    },
+    "policy": {
+      "max_output_chars": 128,
+      "stop_sequences": [
+        "\n\n"
+      ],
+      "tools_allowed": [],
+      "temperature": 0.0,
+      "seed": 0
+    },
+    "execution_mode": "fresh_subprocess"
+  },
+  "stage_c": {
+    "readiness_points_before": 8,
+    "readiness_points_after": 9,
+    "mathematics_level_before": 2,
+    "mathematics_level_after": 3,
+    "matched_open_model_executed": false,
+    "parity_claim_allowed": false,
+    "pareto_claim_allowed": false,
+    "reason": "a public raw-input benchmark was executed with resource measurement, but no matched open-model baseline has been run"
+  },
+  "limitations": [
+    "the current MPM math system only induces five one-step binary arithmetic programs",
+    "GSM8K requires multi-step linguistic and arithmetic reasoning",
+    "the system is evaluated zero-shot without benchmark-specific training",
+    "no calculator or external tool is allowed in this run",
+    "energy is not measured",
+    "public evidence maturity increases even if task accuracy is low; this is not a capability claim"
+  ]
+}
