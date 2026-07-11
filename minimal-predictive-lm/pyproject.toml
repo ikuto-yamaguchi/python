@@ -36,6 +36,7 @@ mpm-phase10e = "minimal_predictive_lm.phase10e_experiment:main"
 mpm-phase10f = "minimal_predictive_lm.phase10f_experiment:main"
 mpm-phase10g = "minimal_predictive_lm.phase10g_experiment:main"
 mpm-phase10h = "minimal_predictive_lm.phase10h_experiment:main"
+mpm-phase10i = "minimal_predictive_lm.phase10i_experiment:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
