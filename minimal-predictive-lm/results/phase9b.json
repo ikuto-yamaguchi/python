@@ -1,0 +1,129 @@
+{
+  "benchmark": {
+    "cases": 5,
+    "single_label_event_recall": 0.03333333333333333,
+    "graph_event_recall": 1.0,
+    "graph_edge_recall": 1.0,
+    "unresolved_clauses": 0,
+    "details": [
+      {
+        "name": "conditional_repair",
+        "event_recall": 1.0,
+        "edge_recall": 1.0,
+        "unresolved": 0,
+        "nodes": 8,
+        "edges": 8,
+        "active_graph_bits": 1264,
+        "provenance_bits": 1512,
+        "flat_json_bits": 10664,
+        "feature_reads": 177
+      },
+      {
+        "name": "mixed_report",
+        "event_recall": 1.0,
+        "edge_recall": 1.0,
+        "unresolved": 0,
+        "nodes": 2,
+        "edges": 1,
+        "active_graph_bits": 463,
+        "provenance_bits": 552,
+        "flat_json_bits": 2448,
+        "feature_reads": 66
+      },
+      {
+        "name": "negative_condition",
+        "event_recall": 1.0,
+        "edge_recall": 1.0,
+        "unresolved": 0,
+        "nodes": 3,
+        "edges": 2,
+        "active_graph_bits": 754,
+        "provenance_bits": 792,
+        "flat_json_bits": 3712,
+        "feature_reads": 58
+      },
+      {
+        "name": "quotation",
+        "event_recall": 1.0,
+        "edge_recall": 1.0,
+        "unresolved": 0,
+        "nodes": 2,
+        "edges": 1,
+        "active_graph_bits": 463,
+        "provenance_bits": 432,
+        "flat_json_bits": 2760,
+        "feature_reads": 42
+      },
+      {
+        "name": "reference",
+        "event_recall": 1.0,
+        "edge_recall": 1.0,
+        "unresolved": 0,
+        "nodes": 2,
+        "edges": 2,
+        "active_graph_bits": 444,
+        "provenance_bits": 528,
+        "flat_json_bits": 2744,
+        "feature_reads": 73
+      }
+    ]
+  },
+  "memory": {
+    "active_graph_bits": 3388,
+    "provenance_ledger_bits": 3816,
+    "graph_plus_provenance_bits": 7204,
+    "flat_json_handoff_bits": 22328,
+    "flat_to_active_ratio": 6.590318772136954,
+    "flat_to_graph_plus_provenance_ratio": 3.099389228206552,
+    "note": "active decisions use the graph; raw utterances remain in a separate provenance ledger until retraction/audit expiry"
+  },
+  "workflow": {
+    "executed": [
+      "SET",
+      "VERIFY",
+      "RETRACT",
+      "SET",
+      "VERIFY",
+      "EMIT"
+    ],
+    "skipped": [],
+    "final_expression": "x * x + 1",
+    "final_test": "PASS",
+    "report": "最終式はx * x + 1です。テスト結果はPASSです。",
+    "rollbacks": 1,
+    "tests": 2
+  },
+  "representation_invention": {
+    "graph_schema_bits": 576,
+    "active_graph_bits": 3388,
+    "additional_representation_bits": 3964,
+    "avoided_loss_per_workload": 989.8666666666667,
+    "break_even_reuses": 5,
+    "workloads": {
+      "1": {
+        "single_objective": 989.8666666666667,
+        "graph_objective": 3964.0
+      },
+      "4": {
+        "single_objective": 3959.4666666666667,
+        "graph_objective": 3964.0
+      },
+      "16": {
+        "single_objective": 15837.866666666667,
+        "graph_objective": 3964.0
+      },
+      "64": {
+        "single_objective": 63351.46666666667,
+        "graph_objective": 3964.0
+      }
+    },
+    "gate": "invent the richer representation only when expected avoided decision loss exceeds schema, migration, parsing, and verification cost"
+  },
+  "limitations": [
+    "the clause and connector inventory is still small and partly hand-specified",
+    "raw grounding still depends on Phase 9a subword evidence",
+    "world knowledge and open-ended reference resolution are not solved",
+    "the benchmark is synthetic rather than an actual repository or open conversation",
+    "global graph induction is not proven optimal outside the finite benchmark"
+  ]
+}
