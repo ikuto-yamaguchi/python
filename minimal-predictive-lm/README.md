@@ -77,7 +77,6 @@ MATCH / DELETE / ADD / EMIT / CHOOSE_MIN
 - 10,000回の反復質問でも不要なpersistent stateは増加なし
 - 4,096事実でもindexed lookup 1 read
 - test失敗 → 証拠保存 → 再試行 → 最終検証を実装
-- コード候補探索は候補数に比例し、実repositoryには未達
 
 結果: [`phase7a`](results/phase7a.md)
 
@@ -90,40 +89,63 @@ MATCH / DELETE / ADD / EMIT / CHOOSE_MIN
 - 1,200 probabilistic episodesを126bitの十分統計へ圧縮
 - VOIは常時観測と同じ87.9%で、3,000回中1,127 sensor readを削減
 - 会話・文章・コード・toolの16 surface actionsを4 shared operationsへ統合
-- 新しいtool領域を各surface 6 eventsで既存operationへ100%接続
 
 結果: [`8a`](results/phase8a.md) / [`8b`](results/phase8b.md) / [`8c`](results/phase8c.md) / [`8d`](results/phase8d.md) / [`8e`](results/phase8e.md) / [`8f`](results/phase8f.md) / [`8g`](results/phase8g.md)
 
-## Phase 9a: template IDなしのraw grounding
+## Phase 9a〜9b: raw groundingと階層event graph
 
-raw Japanese、AST-like text、test output、tool traceを一つの `SET / VERIFY / RETRACT / EMIT` programへgroundingしました。
-
+- raw Japanese、AST-like text、test output、tool traceを共有programへgrounding
 - training 34例、selected rules 15、共有program 1,412bit
-- exact surfaceのnear-heldout 0% → 共有sparse grounder 100%
-- 4つの領域別モデル1,881bit・94.4%に対し、共有モデル1,412bit・100%
+- exact surface near-heldout 0% → sparse grounder 100%
 - 遠い語彙転換は6.25%で未達
-- 8 interactionで新語follow-up 0% → 87.5%、追加387bit
-- repair workflowで `SET → VERIFY → RETRACT → SET → VERIFY → EMIT`
-- domain-separated JSON handoffは6,704bit/workflow
-
-結果・設計: [`phase9a`](results/phase9a.md) / [`theory`](docs/phase9a_raw_event_grounding.md)
-
-## Phase 9b: 階層的疎event graph
-
-単一ラベルでは表現できない、条件、否定、引用、照応、発話行為と埋め込み命題を疎グラフへ分解しました。
-
-- benchmark 5ケース
-- single-label event recall 3.3%
-- graph event recall 100%
-- graph edge recall 100%
-- unresolved clause 0
-- active graph 3,388bit
-- raw provenanceを残した合計7,204bit
-- flat JSON handoff 22,328bit
+- 条件、否定、引用、照応、発話行為、埋め込み命題を疎グラフへ分解
+- single-label event recall 3.3% → graph event/edge recall 100%
+- active graph 3,388bit、provenance込み7,204bit、flat JSON 22,328bit
 - failure → rollback → repair → PASSをgraphから実行
-- event graphの表現発明は今回の損失尺度で5回再利用時にbreak-even
 
-結果・設計: [`phase9b`](results/phase9b.md) / [`event graph`](docs/phase9b_hierarchical_event_graph.md)
+結果・設計: [`9a`](results/phase9a.md) / [`9b`](results/phase9b.md) / [`raw grounding`](docs/phase9a_raw_event_grounding.md) / [`event graph`](docs/phase9b_hierarchical_event_graph.md)
+
+## Phase 9c: interaction effectからのconnector意味誘導
+
+connector文字列へrelation labelを直接与えず、action実行、参照、内容、時間順序の観測からMDLでroleを選択しました。
+
+- 基本connector 5種、10 interaction: 100%
+- 新connector 5種、表面一致0% → interaction誘導100%
+- connector 10種のlexicon 1,144bit
+- event graph 6ケース: event/edge recall 100%、unresolved 0
+
+候補relation inventory自体はまだ与えており、open-ended構文・長距離談話は未達です。
+
+結果・設計: [`phase9c`](results/phase9c.md) / [`theory`](docs/phase9c_connector_induction.md)
+
+## Phase 10a: Stage-C readiness gate
+
+会話、知識、数学、コード、長文、創作の6軸を、証拠level 0〜4で管理します。Stage Cは全軸で公開open-domain benchmark、matched input、実測resource、対象open model以上を満たした場合だけ成立します。
+
+初期scorecard:
+
+- 5 / 24点、20.8%
+- Stage C ready: false
+- parity/Pareto claim allowed: false
+- syntheticで100%でも公開比較へ昇格させない
+
+結果・設計: [`phase10a`](results/phase10a.md) / [`Stage-C bridge`](docs/phase10_stage_c_bridge.md)
+
+## Phase 10b: 最小自然言語数学program
+
+問題文と答えから演算labelなしで `ADD / SUB / MUL / DIV / PERCENT_OF` を逆同定し、数値を規則へ保存せず引数としてbindingします。
+
+- training 20例、5 programs、6 feature rules
+- program description 642bit
+- exact-surface held-out 0% → program held-out 100%
+- 未見数値1,000問: 100%
+- 遠い数学語彙20% → 10 interaction後100%
+- 追加program 282bit
+- Stage-C score 7 / 24、29.2%
+
+一段二項算術のみで、文章題、複数step、式変形、証明、幾何、公開benchmarkは未達です。
+
+結果・設計: [`phase10b`](results/phase10b.md) / [`theory`](docs/phase10b_minimal_math_program.md)
 
 ## 人類を超える知能への条件
 
@@ -146,7 +168,7 @@ raw Japanese、AST-like text、test output、tool traceを一つの `SET / VERIF
 
 ## 次の実験
 
-Phase 9cでは、Phase 9bで一部手書きだったconnector・condition・reference構造をinteraction traceから誘導します。その後、小さな実repositoryで、会話依頼 → file read → patch → test → rollback → fix → reportを同じevent graphで実行します。
+Phase 10cでは、外部文書から必要な事実だけを取得し、provenance、矛盾検出、confidence、abstentionを同じ疎workspaceへ追加します。その後、数学を複数step・方程式・公開benchmarkへ、コードを小さな実repositoryへ移行します。
 
 ## 実行
 
@@ -174,6 +196,9 @@ mpm-phase8f
 mpm-phase8g
 mpm-phase9a
 mpm-phase9b
+mpm-phase9c
+mpm-phase10a
+mpm-phase10b
 ```
 
-GitHub ActionsでPhase 1〜9bの全unit test・全実験をゼロから再現します。
+GitHub ActionsでPhase 1〜10bの全unit test・全実験をゼロから再現します。
