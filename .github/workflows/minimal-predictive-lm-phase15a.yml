@@ -1,0 +1,54 @@
+name: minimal-predictive-lm-phase15a
+
+on:
+  pull_request:
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/phase15a_*.py"
+      - "minimal-predictive-lm/tests/test_phase15a_*.py"
+      - "minimal-predictive-lm/pyproject.toml"
+      - ".github/workflows/minimal-predictive-lm-phase15a.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  phase15a:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: minimal-predictive-lm/pyproject.toml
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm
+      - name: Frozen transfer regression tests
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p minimal-predictive-lm/results
+          python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase15a_unseen_public_baseline.py' -v 2>&1 | tee minimal-predictive-lm/results/phase15a-test.log
+      - name: Upload Phase 15a diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase15a-diagnostics
+          retention-days: 7
+          path: minimal-predictive-lm/results/phase15a-test.log
+      - name: Run frozen unseen public baseline
+        working-directory: minimal-predictive-lm
+        run: mpm-phase15a
+      - name: Upload Phase 15a result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase15a-results
+          retention-days: 7
+          if-no-files-found: ignore
+          path: |
+            minimal-predictive-lm/results/phase15a.json
+            minimal-predictive-lm/results/phase15a.md
