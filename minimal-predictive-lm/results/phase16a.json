@@ -1,0 +1,54 @@
+{
+  "suite": {
+    "name": "phase16a-frozen-third-public-capability-slice",
+    "examples": 200,
+    "axes": 5,
+    "exact_prompt_overlap_with_first_two_public_slices": 0,
+    "benchmark_examples_used_for_training": 0,
+    "benchmark_targets_used_for_training": 0
+  },
+  "frozen_model": {
+    "fingerprint_before": "a2b80caa8b72990cb69162f8769e34034bd2c6cb76904ba6636464f5313bf089",
+    "fingerprint_after": "a2b80caa8b72990cb69162f8769e34034bd2c6cb76904ba6636464f5313bf089",
+    "unchanged": true,
+    "wordnet_sha256": "38b16326159f51853626b7d24a44c453fa88ab33f06fce5ec8fc5996d1c2be93",
+    "benchmark_specific_handlers_added": 0,
+    "benchmark_specific_primitives_added": 0,
+    "benchmark_specific_documents_added": 0,
+    "benchmark_examples_used_for_calibration": 0,
+    "surface_compilers_added": 0
+  },
+  "score": {
+    "examples": 200,
+    "answered": 1,
+    "correct": 0,
+    "overall_accuracy": 0.0,
+    "selective_accuracy": 0.0,
+    "coverage": 0.005
+  },
+  "axis_scores": {
+    "adjective_order": {"examples": 40, "answered": 0, "correct": 0, "wrong": 0, "abstained": 40, "accuracy": 0.0, "coverage": 0.0, "selective_accuracy": 0.0},
+    "belief_propagation": {"examples": 40, "answered": 0, "correct": 0, "wrong": 0, "abstained": 40, "accuracy": 0.0, "coverage": 0.0, "selective_accuracy": 0.0},
+    "causal_judgement": {"examples": 40, "answered": 0, "correct": 0, "wrong": 0, "abstained": 40, "accuracy": 0.0, "coverage": 0.0, "selective_accuracy": 0.0},
+    "formal_validity": {"examples": 40, "answered": 1, "correct": 0, "wrong": 1, "abstained": 39, "accuracy": 0.0, "coverage": 0.025, "selective_accuracy": 0.0},
+    "reference_resolution": {"examples": 40, "answered": 0, "correct": 0, "wrong": 0, "abstained": 40, "accuracy": 0.0, "coverage": 0.0, "selective_accuracy": 0.0}
+  },
+  "resources": {
+    "model_bytes": 9620879,
+    "peak_rss_bytes": 127275008,
+    "wall_ns": 8300083194,
+    "cpu_ns": 8627532000,
+    "operations": 91601,
+    "reads": 426,
+    "writes": 1,
+    "energy_joules": null
+  },
+  "gates": {
+    "frozen_public_baseline_valid": true,
+    "benchmark_specialization_used": false,
+    "new_surface_compiler_used": false,
+    "third_slice_capability_claim_allowed": false,
+    "runtime_pareto_allowed": false,
+    "general_llm_parity_allowed": false
+  }
+}
