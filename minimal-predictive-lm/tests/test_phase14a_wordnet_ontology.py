@@ -73,7 +73,11 @@ def _quantifier():
 class Phase14aWordNetOntologyTests(unittest.TestCase):
     def setUp(self) -> None:
         self.payload = _fixture_zip()
-        self.ontology = WordNetNounOntology.from_zip_bytes(self.payload)
+        fixture_sha256 = hashlib.sha256(self.payload).hexdigest()
+        self.ontology = WordNetNounOntology.from_zip_bytes(
+            self.payload,
+            expected_sha256=fixture_sha256,
+        )
 
     def test_parses_noun_hypernym_graph_and_returns_proof(self) -> None:
         decision = self.ontology.is_a("dogs", "animals")
