@@ -109,67 +109,53 @@ prediction / task loss
 
 結果: [`10a`](results/phase10a.md) / [`10b`](results/phase10b.md) / [`10c`](results/phase10c.md) / [`10d`](results/phase10d.md) / [`10e`](results/phase10e.md) / [`10f`](results/phase10f.md) / [`10g`](results/phase10g.md) / [`10h`](results/phase10h.md) / [`10i`](results/phase10i.md)
 
-## Phase 11a: ジャンル中立program induction
+## Phase 11: ジャンル別手設計からの脱出
 
-一つのtyped MDL program synthesizerへ共通transition traceを渡し、ジャンル別handlerなしでprogramを誘導します。
+- 共通typed MDL synthesizerが8 taskをheld-out 8/8で誘導
+- 新規task 2件はengine変更0・trace追加だけで獲得
+- 2 taskの共通部分から `a-(b+c)` をmacro化
+- 20,000候補で失敗したtargetをmacro込み3,275候補・深さ1で解決
+- 固定grammarで表現不能な文字変換からASCII offset primitiveを発明
+- raw Japanese、code diff、tool trace、dialogue、test logから2 primitive clusterを誘導
+- Unicode residual extension、過剰更新rollback、context splitをversioned libraryで管理
+- record/channel labelなしのcontinuous streamでevent・primitiveを100%復元
 
+ただしbounded meta-grammar、短いsynthetic stream、ASCII中心の候補表現は残っています。
+
+結果・設計: [`11a`](results/phase11a.md) / [`11b`](results/phase11b.md) / [`11c`](results/phase11c.md) / [`11d`](results/phase11d.md) / [`11e`](results/phase11e.md)
+
+## Phase 12: mixed multi-axis learnerと探索的open-model比較
+
+同じlearnerへ算術、state更新、条件分岐、文字変換、composition、provenance、event抽出を混在させました。
+
+### Phase 12a
+
+- calibration interactions: 40
+- routing rules: 11
+- compiled payload: 7,136bit / 892bytes
+- induction candidate evaluations: 108,238
 - domain-specific handlers: 0
-- expressible tasks: 8、held-out 8/8
-- 新規task 2件をengine変更0・trace追加だけで獲得
-- learned programs 4,616bit、trace丸暗記22,984bit、4.98倍圧縮
-- depth-three targetは20,000候補で失敗
-- `uppercase`はprimitive不足で表現不能
+- public arithmetic 40/40
+- synthetic 6軸30/30
+- 全7軸70/70
+- calibrationとbenchmarkのexact prompt overlap: 0
 
-結果・設計: [`phase11a`](results/phase11a.md) / [`theory`](docs/phase11a_domain_neutral_program_induction.md)
+### Phase 12b exploratory comparison
 
-## Phase 11b: 再利用可能macro library
+同じ70問と40 prompt-output demonstrationsをSmolLM2-135M-Instructにも与えました。
 
-異なる2つの検証済みprogramに繰り返し現れた部分木だけを、引数番号をalpha-normalizeしてtyped macroへ昇格します。一度しか現れない部分式は保存しません。
+| system | accuracy | model bytes | peak RSS | wall time |
+|---|---:|---:|---:|---:|
+| MPM | 100.0% | 892 | 50,737,152 | 4.329s |
+| SmolLM2 | 35.7% | 538,060,032 | 1,856,081,920 | 174.368s |
 
-- source programs: 2、held-outとも100%
-- discovered macro: `a - (b + c)`、984bit
-- primitive-only: `(a-b-c)*d` が20,000候補で失敗
-- macro library: 3,275候補・探索深さ1で発見
-- training / held-out: 100% / 100%
-- compact call 488bit、expanded 504bit
-- 正規化生涯利得15,757bitで採用
+これは厳密なmulti-domain parityではありません。6軸がsyntheticであり、state calibrationの構造化evidenceも一致しないため、strict quality / runtime Pareto / general LLM claimはすべて不許可です。
 
-結果・設計: [`phase11b`](results/phase11b.md) / [`theory`](docs/phase11b_macro_library_induction.md)
-
-## Phase 11c: residual-driven primitive invention
-
-固定grammarで表現不能な文字変換から、丸暗記・文字map・条件付きcodepoint offsetを提案し、複数familyのheld-outと生涯目的で選択します。
-
-- fixed grammar: 1,182候補で表現不能
-- selected primitive: ASCII 97〜122へoffset −32、760bit
-- whole-string lookupはtraining 100% / validation 0%で棄却
-- unseen application domain: 100%
-- Unicode shift: 0%
-- expected use 1回では不採用、100回では採用
-
-結果・設計: [`phase11c`](results/phase11c.md) / [`theory`](docs/phase11c_residual_primitive_invention.md)
-
-## Phase 11d: raw cross-modal grounding・versioning・rollback
-
-task-family labelと整列済み例を外し、日本語、code diff、tool trace、dialogue、test logから同じ潜在primitiveを共同誘導します。
-
-- raw records: 8、channels: 5
-- discovered clusters: 2
-- 大文字化cluster: 4 records / 4 channels / 760bit
-- 小文字化cluster: 3 records / 3 channels / 744bit
-- cluster assignment: 100%、無関係な置換は未cluster
-- unseen sensor/repository channels: 100%
-- Unicode shift: 0% → residual extension後100%
-- overbroad identity update: 75% → 25%のためrollback
-- `verbatim` context splitを採用し、v3でcombined 100%
-
-task別solver追加は0ですが、record境界、channel metadata、quote構造、bounded meta-grammarはまだ与えています。
-
-結果・設計: [`phase11d`](results/phase11d.md) / [`theory`](docs/phase11d_raw_primitive_grounding_and_versioning.md)
+結果・設計: [`12a`](results/phase12a.md) / [`12b`](results/phase12b.md) / [`12a theory`](docs/phase12a_mixed_multi_axis_learner.md) / [`12b theory`](docs/phase12b_exploratory_mixed_open_model_comparison.md)
 
 ## 次の段階
 
-Phase 11eでは、連続した混合streamからevent境界・source・result・condition・provenance roleを共同推定し、quoteやchannel metadataへの依存を弱めます。別々のchannel parserを増やさず、追加domainあたりのengine変更0と候補探索量のスケーリングを主要指標にします。
+次はsynthetic軸を増やさず、公開raw benchmarkへ移ります。boolean expression、multi-step arithmetic、object counting、sequence/string reasoningなどを、修正前の固定モデルへ入力して失敗境界を測ります。その後、個別solverではなく共通表現・program libraryの拡張だけで改善できるかを検証します。
 
 ## 再現
 
@@ -177,10 +163,7 @@ Phase 11eでは、連続した混合streamからevent境界・source・result・
 cd minimal-predictive-lm
 pip install -e .
 python -m unittest discover -s tests -v
-mpm-phase11a
-mpm-phase11b
-mpm-phase11c
-mpm-phase11d
+mpm-phase12a
 ```
 
-GitHub ActionsではPhase 1から最新Phaseまで全unit test・全再現実験を実行します。PR中の古いrunは新commitで自動キャンセルし、open-model比較は比較コード・benchmark変更時または手動実行時だけ走ります。
+GitHub ActionsではPhase 1から最新の軽量Phaseまで全unit test・全再現実験を実行します。重いSmolLM2比較は手動またはmain上の比較コード変更時だけ走ります。
