@@ -41,6 +41,7 @@ jobs:
           python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase11e_continuous_stream.py' -v 2>&1 | tee minimal-predictive-lm/results/phase11e-test.log
           python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase12a_mixed_task_learner.py' -v 2>&1 | tee minimal-predictive-lm/results/phase12a-test.log
           python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase13a_public_multi_domain_baseline.py' -v 2>&1 | tee minimal-predictive-lm/results/phase13a-test.log
+          python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase13b_generic_algebra.py' -v 2>&1 | tee minimal-predictive-lm/results/phase13b-test.log
       - name: Upload Phase 11 to 13 diagnostics
         if: always()
         uses: actions/upload-artifact@v4
@@ -55,6 +56,7 @@ jobs:
             minimal-predictive-lm/results/phase11e-test.log
             minimal-predictive-lm/results/phase12a-test.log
             minimal-predictive-lm/results/phase13a-test.log
+            minimal-predictive-lm/results/phase13b-test.log
       - name: Phase 9 and Stage C tests
         run: |
           python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase9a_raw_event_program.py' -v
@@ -106,6 +108,7 @@ jobs:
           mpm-phase11e
           mpm-phase12a
           mpm-phase13a
+          mpm-phase13b
       - name: Upload Phase 9, Stage C, Phase 11, Phase 12, and Phase 13 results
         uses: actions/upload-artifact@v4
         with:
@@ -148,3 +151,5 @@ jobs:
             minimal-predictive-lm/results/phase12a.md
             minimal-predictive-lm/results/phase13a.json
             minimal-predictive-lm/results/phase13a.md
+            minimal-predictive-lm/results/phase13b.json
+            minimal-predictive-lm/results/phase13b.md
