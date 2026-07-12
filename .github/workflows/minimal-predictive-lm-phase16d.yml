@@ -1,0 +1,50 @@
+name: minimal-predictive-lm-phase16d
+
+on:
+  pull_request:
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/signed_claim_graph.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/queue_signed_claim_runtime.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/corrected_proposition_machine.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/phase16d_*.py"
+      - "minimal-predictive-lm/tests/test_phase16d_*.py"
+      - ".github/workflows/minimal-predictive-lm-phase16d.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  phase16d:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: minimal-predictive-lm/pyproject.toml
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm
+      - name: Queue runtime regression tests
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p minimal-predictive-lm/results
+          python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase16d_*.py' -v 2>&1 | tee minimal-predictive-lm/results/phase16d-test.log
+      - name: Run benchmark-free scaling and shift audit
+        working-directory: minimal-predictive-lm
+        run: python -m minimal_predictive_lm.phase16d_experiment
+      - name: Upload Phase 16d diagnostics and results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase16d-results
+          retention-days: 7
+          if-no-files-found: warn
+          path: |
+            minimal-predictive-lm/results/phase16d-test.log
+            minimal-predictive-lm/results/phase16d.json
+            minimal-predictive-lm/results/phase16d.md
