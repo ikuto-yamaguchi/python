@@ -1,0 +1,50 @@
+{
+  "suite": {
+    "name": "phase13a-frozen-public-multi-domain",
+    "manifest_sha256": "e54edfb0054f950f1752be7d9738249fbf75874738f69966051816a66614f8db",
+    "public": true,
+    "examples": 200,
+    "axes": 5,
+    "exact_calibration_prompt_overlap": 0,
+    "benchmark_examples_used_for_calibration": 0
+  },
+  "quantifier": {
+    "quantity_groundings": 12,
+    "universal_concepts": ["objects"],
+    "membership_entries": 0,
+    "description_bits": 1824,
+    "description_bytes": 228,
+    "domain_specific_handlers": 0,
+    "benchmark_specific_handlers_added": 0,
+    "benchmark_specific_item_lexicon_entries": 0,
+    "answered_public_query_concepts": ["objects"],
+    "identifiability_demo": {
+      "unknown_category": {"answer": null, "minimum": 0, "maximum": 6, "identifiable": false},
+      "grounded_category": {"answer": 6, "expected": 6}
+    }
+  },
+  "before": {
+    "score": {"examples": 200, "answered": 160, "correct": 160, "overall_accuracy": 0.8, "selective_accuracy": 1.0, "coverage": 0.8}
+  },
+  "after": {
+    "score": {"examples": 200, "answered": 172, "correct": 172, "overall_accuracy": 0.86, "selective_accuracy": 1.0, "coverage": 0.86},
+    "axis_scores": {
+      "boolean_expressions": {"examples": 40, "answered": 40, "correct": 40, "wrong": 0, "accuracy": 1.0, "coverage": 1.0},
+      "direct_arithmetic": {"examples": 40, "answered": 40, "correct": 40, "wrong": 0, "accuracy": 1.0, "coverage": 1.0},
+      "multistep_arithmetic": {"examples": 40, "answered": 40, "correct": 40, "wrong": 0, "accuracy": 1.0, "coverage": 1.0},
+      "object_counting": {"examples": 40, "answered": 12, "correct": 12, "wrong": 0, "accuracy": 0.3, "coverage": 0.3},
+      "word_sorting": {"examples": 40, "answered": 40, "correct": 40, "wrong": 0, "accuracy": 1.0, "coverage": 1.0}
+    },
+    "resources": {"model_bytes": 2269, "peak_rss_bytes": 50954240, "wall_ns": 6010717601, "cpu_ns": 6337959000, "operations": 13009, "reads": 300, "writes": 172, "energy_joules": null}
+  },
+  "delta": {"correct": 12, "accuracy_points": 6.0, "coverage_points": 6.0},
+  "gates": {
+    "generic_quantity_reduction_demonstrated": true,
+    "unknown_semantics_abstain": true,
+    "benchmark_specialization_used": false,
+    "public_multi_domain_quality_parity_allowed": false,
+    "public_multi_domain_runtime_pareto_allowed": false,
+    "general_llm_parity_allowed": false,
+    "stage_c_score_changed": false
+  }
+}
