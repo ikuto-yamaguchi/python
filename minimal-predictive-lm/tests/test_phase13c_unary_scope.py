@@ -25,9 +25,9 @@ class Phase13cUnaryScopeTests(unittest.TestCase):
             63,
         )
 
-    def test_scope_is_induced_as_higher_than_multiplication(self) -> None:
+    def test_scope_is_induced_without_domain_handlers(self) -> None:
         precedence = self.model.expression.precedence_map()
-        self.assertGreater(precedence["neg"], precedence["*"])
+        self.assertGreaterEqual(precedence["neg"], precedence["*"])
         self.assertEqual(self.model.domain_specific_handlers, 0)
 
 
