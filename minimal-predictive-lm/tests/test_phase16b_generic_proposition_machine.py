@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import unittest
 
+from minimal_predictive_lm.corrected_proposition_machine import CorrectedPropositionMachine
 from minimal_predictive_lm.generic_proposition_machine import (
     GenericPropositionMachine,
     MonadicSentence,
@@ -81,8 +82,18 @@ class Phase16bGenericPropositionMachineTests(unittest.TestCase):
         self.assertEqual(machine.predict(valid_prompt).output, "valid")
         self.assertEqual(machine.predict(invalid_prompt).output, "invalid")
 
+    def test_none_of_disjunction_has_negation_over_full_scope(self) -> None:
+        prompt = (
+            '"First premise: Every person who is calm is focused. '
+            "Second premise: Whoever is neither noisy nor hurried is calm. "
+            "Therefore, whoever is none of this: noisy or hurried, is focused.\"\n"
+            "Is the argument, given the explicitly stated premises, "
+            "deductively valid or invalid?\nOptions:\n- valid \n- invalid"
+        )
+        self.assertEqual(CorrectedPropositionMachine().predict(prompt).output, "valid")
+
     def test_machine_has_no_benchmark_task_name_branch(self) -> None:
-        machine = GenericPropositionMachine()
+        machine = CorrectedPropositionMachine()
         self.assertEqual(machine.benchmark_task_name_branches, 0)
         self.assertEqual(machine.human_designed_surface_compilers, 2)
 
