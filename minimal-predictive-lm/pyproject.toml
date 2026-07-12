@@ -53,6 +53,7 @@ mpm-phase14b = "minimal_predictive_lm.phase14b_experiment:main"
 mpm-phase15a = "minimal_predictive_lm.phase15a_experiment:main"
 mpm-phase15b = "minimal_predictive_lm.phase15b_experiment:main"
 mpm-phase15c = "minimal_predictive_lm.phase15c_experiment:main"
+mpm-phase15d = "minimal_predictive_lm.phase15d_experiment:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
