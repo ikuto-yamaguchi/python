@@ -1,0 +1,61 @@
+{
+  "suite": {
+    "name": "phase15a-frozen-unseen-public-capabilities",
+    "manifest_sha256": "571132e48105bc59221674d52fcafb40e131afd32ae5d830b4687a60651e8967",
+    "examples": 200,
+    "axes": 5,
+    "benchmark_examples_used_for_training": 0,
+    "benchmark_targets_used_for_training": 0,
+    "task_blob_sha1": {
+      "date_understanding": "a577c0c4335aeda00997df7438f133a448d7562e",
+      "logical_deduction_three_objects": "8de29eba01188e46784a4b1ec63ade9b50a4548c",
+      "tracking_shuffled_objects_three_objects": "116054a16e2f7148365a2ff6ee5e00e9206d2c52",
+      "navigate": "b806905501d90c4fc17f9305bd146e0666c0eb67",
+      "dyck_languages": "2a507b4d952dd18e6af54e9e38509584b47f08cf"
+    }
+  },
+  "frozen_model": {
+    "fingerprint": "18a662b95f4eda5741a34a527d5859db23e9d2d63ba7b5e5ad675041a9aad999",
+    "unchanged": true,
+    "benchmark_specific_handlers_added": 0,
+    "benchmark_specific_primitives_added": 0,
+    "benchmark_specific_documents_added": 0
+  },
+  "score": {
+    "examples": 200,
+    "answered": 40,
+    "correct": 0,
+    "accuracy": 0.0,
+    "coverage": 0.2,
+    "selective_accuracy": 0.0
+  },
+  "axis_scores": {
+    "date_understanding": {"correct": 0, "wrong": 0, "abstained": 40, "examples": 40},
+    "logical_ordering": {"correct": 0, "wrong": 0, "abstained": 40, "examples": 40},
+    "state_permutation_tracking": {"correct": 0, "wrong": 0, "abstained": 40, "examples": 40},
+    "spatial_navigation": {"correct": 0, "wrong": 40, "abstained": 0, "examples": 40},
+    "stack_completion": {"correct": 0, "wrong": 0, "abstained": 40, "examples": 40}
+  },
+  "routing_failure": {
+    "axis": "spatial_navigation",
+    "prediction": "- - No Yes",
+    "cause": "sequence ordering accepted the broad cue 'these' and sorted the final Options section",
+    "affected_examples": 40,
+    "benchmark_specific_fix_planned": false
+  },
+  "resources": {
+    "model_bytes": 9620463,
+    "peak_rss_bytes": 127356928,
+    "wall_ns": 7746114167,
+    "cpu_ns": 8031711999,
+    "operations": 57406,
+    "reads": 400,
+    "writes": 40
+  },
+  "gates": {
+    "frozen_public_baseline_valid": true,
+    "benchmark_specialization_used": false,
+    "new_public_capability_parity_allowed": false,
+    "general_llm_parity_allowed": false
+  }
+}
