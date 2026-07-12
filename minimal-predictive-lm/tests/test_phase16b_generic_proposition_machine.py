@@ -55,14 +55,52 @@ class Phase16bGenericPropositionMachineTests(unittest.TestCase):
         conclusion = MonadicSentence("some", all_of(awake, neg(traveler)))
         self.assertTrue(MonadicTheory(premises).entails(conclusion))
 
-    def test_independent_truth_chain_uses_shared_parity_runtime(self) -> None:
+    def test_public_style_truth_chain_uses_shared_signed_runtime(self) -> None:
         prompt = (
             "Question: Ada tells the truth. Bea says Ada lies. "
             "Cy says Bea tells the truth. Does Cy tell the truth?"
         )
-        prediction = GenericPropositionMachine().predict(prompt)
+        prediction = CorrectedPropositionMachine().predict(prompt)
         self.assertEqual(prediction.output, "No")
-        self.assertEqual(prediction.family, "proposition-parity")
+        self.assertEqual(prediction.family, "proposition-signed-claim")
+
+    def test_signed_claim_language_transfers_across_domains(self) -> None:
+        cases = (
+            (
+                "Question: Mira is reliable. Sol reports Mira is reliable. "
+                "Taro reports Sol is unreliable. Does Taro tell the truth?",
+                "No",
+            ),
+            (
+                "Question: SensorA is accurate. SensorB claims SensorA is inaccurate. "
+                "SensorC reports SensorB is correct. Does SensorC tell the truth?",
+                "No",
+            ),
+            (
+                "Question: PatchA is valid. ReviewerB says PatchA is invalid. "
+                "ReviewerC claims ReviewerB is wrong. Does ReviewerC tell the truth?",
+                "Yes",
+            ),
+        )
+        machine = CorrectedPropositionMachine()
+        for prompt, expected in cases:
+            with self.subTest(prompt=prompt):
+                prediction = machine.predict(prompt)
+                self.assertEqual(prediction.output, expected)
+                self.assertEqual(prediction.family, "proposition-signed-claim")
+
+    def test_signed_claim_conflict_and_unanchored_cycle_abstain(self) -> None:
+        machine = CorrectedPropositionMachine()
+        contradiction = machine.predict(
+            "Question: BaseA is reliable. JudgeB says BaseA is reliable. "
+            "JudgeB says BaseA is unreliable. Does JudgeB tell the truth?"
+        )
+        unanchored = machine.predict(
+            "Question: AnchorA is reliable. NodeB says NodeC is reliable. "
+            "NodeC says NodeB is reliable. Does NodeB tell the truth?"
+        )
+        self.assertIsNone(contradiction.output)
+        self.assertIsNone(unanchored.output)
 
     def test_independent_controlled_argument_uses_model_search(self) -> None:
         valid_prompt = (
@@ -78,7 +116,7 @@ class Phase16bGenericPropositionMachineTests(unittest.TestCase):
             "Is the argument, given the explicitly stated premises, "
             "deductively valid or invalid?\nOptions:\n- valid \n- invalid"
         )
-        machine = GenericPropositionMachine()
+        machine = CorrectedPropositionMachine()
         self.assertEqual(machine.predict(valid_prompt).output, "valid")
         self.assertEqual(machine.predict(invalid_prompt).output, "invalid")
 
@@ -93,9 +131,12 @@ class Phase16bGenericPropositionMachineTests(unittest.TestCase):
         self.assertEqual(CorrectedPropositionMachine().predict(prompt).output, "valid")
 
     def test_machine_has_no_benchmark_task_name_branch(self) -> None:
+        generic = GenericPropositionMachine()
         machine = CorrectedPropositionMachine()
         self.assertEqual(machine.benchmark_task_name_branches, 0)
         self.assertEqual(machine.human_designed_surface_compilers, 2)
+        self.assertGreater(machine.description_bits, generic.description_bits)
+        self.assertGreater(len(machine.claim_machine.truth_phrases), 4)
 
 
 if __name__ == "__main__":
