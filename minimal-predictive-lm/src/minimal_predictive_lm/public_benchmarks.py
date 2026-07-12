@@ -139,7 +139,7 @@ def parse_bigbench_arithmetic_task(
     return tuple(
         BenchmarkExample(
             f"bigbench_{task_name}_{index:03d}",
-            "direct_arithmetic",
+            "mathematics",
             str(item["input"]),
             str(item["target"]),
             "numeric",
