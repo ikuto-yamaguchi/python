@@ -1,12 +1,21 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 import re
 import unicodedata
 
 
 _KEY_VALUE = re.compile(r"\b[A-Za-z_][A-Za-z0-9_.-]*\s*=\s*[^\s,]+")
 _NUMBER = re.compile(r"[-+]?\d+(?:/\d+|\.\d+)?")
+_ROUTING_SPEC = {
+    "structured_record": "explicit key=value",
+    "compact_numeric": {
+        "maximum_characters": 160,
+        "minimum_numbers": 2,
+        "multiline_allowed": False,
+    },
+}
 
 
 @dataclass(frozen=True)
@@ -36,3 +45,14 @@ def phase12_prompt_eligibility(prompt: str) -> EligibilityDecision:
     if len(numbers) < 2:
         return EligibilityDecision(False, "insufficient_numeric_arguments", len(numbers), len(normalized))
     return EligibilityDecision(True, "compact_multi_argument_text", len(numbers), len(normalized))
+
+
+def routing_guard_description_bits() -> int:
+    return len(
+        json.dumps(
+            _ROUTING_SPEC,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    ) * 8
