@@ -1,0 +1,76 @@
+{
+  "suite": {
+    "name": "phase13a-frozen-public-multi-domain",
+    "manifest_sha256": "e54edfb0054f950f1752be7d9738249fbf75874738f69966051816a66614f8db",
+    "examples": 200,
+    "axes": 5,
+    "benchmark_examples_used_for_training": 0
+  },
+  "ontology": {
+    "source": "https://en-word.net/static/english-wordnet-2025.zip",
+    "license_id": "CC-BY-4.0",
+    "source_sha256": "38b16326159f51853626b7d24a44c453fa88ab33f06fce5ec8fc5996d1c2be93",
+    "source_bytes": 9616299,
+    "noun_synsets": 71864,
+    "lemmas": 97419,
+    "hypernym_edges": 74224,
+    "query_cache_entries": 82,
+    "query_cache_bytes": 15089,
+    "cache_to_source_ratio": 0.0015691067842212476,
+    "cross_domain_checks": {"correct": 6, "examples": 6, "accuracy": 1.0},
+    "benchmark_specific_handlers_added": 0,
+    "benchmark_specific_item_lexicon_entries": 0
+  },
+  "before": {
+    "examples": 200,
+    "answered": 172,
+    "correct": 172,
+    "accuracy": 0.86,
+    "coverage": 0.86,
+    "selective_accuracy": 1.0
+  },
+  "after": {
+    "examples": 200,
+    "answered": 200,
+    "correct": 196,
+    "accuracy": 0.98,
+    "coverage": 1.0,
+    "selective_accuracy": 0.98,
+    "axis_accuracy": {
+      "boolean_expressions": 1.0,
+      "direct_arithmetic": 1.0,
+      "multistep_arithmetic": 1.0,
+      "object_counting": 0.9,
+      "word_sorting": 1.0
+    },
+    "resources": {
+      "model_bytes": 9632641,
+      "peak_rss_bytes": 126853120,
+      "wall_ns": 7119889983,
+      "cpu_ns": 7446255999,
+      "operations": 14289,
+      "reads": 1577,
+      "writes": 200
+    }
+  },
+  "residual": {
+    "wrong_example_ids": [
+      "bbh_object_counting_008",
+      "bbh_object_counting_023",
+      "bbh_object_counting_027",
+      "bbh_object_counting_028"
+    ],
+    "shared_cause": "Open English WordNet 2025 has no garlic-to-vegetable hypernym path",
+    "error_per_example": -1,
+    "benchmark_item_exception_added": false
+  },
+  "gates": {
+    "source_checksum_pinned": true,
+    "cross_domain_transfer_passed": true,
+    "object_counting_fully_resolved": false,
+    "all_answered_predictions_correct": false,
+    "benchmark_specialization_used": false,
+    "public_multi_domain_quality_parity_allowed": false,
+    "general_llm_parity_allowed": false
+  }
+}
