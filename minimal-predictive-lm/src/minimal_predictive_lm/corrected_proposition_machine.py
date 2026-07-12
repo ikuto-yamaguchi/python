@@ -10,6 +10,7 @@ from .generic_proposition_machine import (
     any_of,
     neg,
 )
+from .queue_signed_claim_runtime import QueueSignedClaimRuntime
 from .signed_claim_graph import (
     AttributionObservation,
     SignedClaimMachine,
@@ -32,7 +33,7 @@ def _bits(payload: object) -> int:
 def build_default_signed_claim_machine() -> SignedClaimMachine:
     """Ground shared truth-report language from independent phrase observations."""
 
-    return induce_signed_claim_machine(
+    induced = induce_signed_claim_machine(
         (
             TruthPhraseObservation("tells the truth", True),
             TruthPhraseObservation("tell the truth", True),
@@ -53,6 +54,11 @@ def build_default_signed_claim_machine() -> SignedClaimMachine:
             AttributionObservation("claims"),
         ),
     )
+    return SignedClaimMachine(
+        truth_phrases=induced.truth_phrases,
+        attribution_phrases=induced.attribution_phrases,
+        runtime=QueueSignedClaimRuntime(),
+    )
 
 
 class CorrectedPropositionMachine(GenericPropositionMachine):
@@ -60,9 +66,10 @@ class CorrectedPropositionMachine(GenericPropositionMachine):
 
     The belief component is no longer tied to one benchmark surface. Phrase
     meanings are grounded by independent observations and compile testimony,
-    sensor reports, incident logs, and code-review claims into the same signed
-    fixed-point graph. The controlled monadic formal-language compiler and its
-    finite-model entailment runtime remain shared with the previous machine.
+    sensor reports, incident logs, and code-review claims into one signed graph.
+    A queue work-list propagates each discovered signed value once. The
+    controlled monadic formal-language compiler and finite-model entailment
+    runtime remain shared with the previous machine.
     """
 
     def __init__(self) -> None:
@@ -74,6 +81,7 @@ class CorrectedPropositionMachine(GenericPropositionMachine):
             "maximum_predicate_atoms": 14,
             "none_of_scope": "negate-full-disjunction",
             "outside_fragment": "abstain",
+            "signed_claim_schedule": "linear-queue-worklist",
         }
         self.description_bits = self.claim_machine.description_bits + _bits(formal_spec)
         self.human_designed_surface_compilers = 2
