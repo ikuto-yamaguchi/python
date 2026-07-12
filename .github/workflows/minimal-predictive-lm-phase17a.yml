@@ -1,0 +1,48 @@
+name: minimal-predictive-lm-phase17a
+
+on:
+  pull_request:
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/phase17a_*.py"
+      - "minimal-predictive-lm/tests/test_phase17a_*.py"
+      - "minimal-predictive-lm/docs/phase17_*.md"
+      - ".github/workflows/minimal-predictive-lm-phase17a.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  phase17a:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: minimal-predictive-lm/pyproject.toml
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm
+      - name: Resource-scaling regression tests
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p minimal-predictive-lm/results
+          python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase17a_resource_scaling.py' -v 2>&1 | tee minimal-predictive-lm/results/phase17a-test.log
+      - name: Run fixed-budget CPU pilot
+        working-directory: minimal-predictive-lm
+        run: python -m minimal_predictive_lm.phase17a_resource_scaling
+      - name: Upload Phase 17a diagnostics and results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase17a-results
+          retention-days: 7
+          if-no-files-found: warn
+          path: |
+            minimal-predictive-lm/results/phase17a-test.log
+            minimal-predictive-lm/results/phase17a.json
+            minimal-predictive-lm/results/phase17a.md
