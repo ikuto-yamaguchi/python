@@ -1,0 +1,55 @@
+{
+  "adaptation_protocol": {
+    "failure_analyzed_before_negative_calibration": true,
+    "strict_zero_shot_claim": false,
+    "benchmark_examples_used_for_calibration": 0,
+    "benchmark_targets_used_for_calibration": 0,
+    "negative_calibration_examples": 4,
+    "exact_navigation_prompt_overlap": 0,
+    "benchmark_specific_handler_added": 0,
+    "benchmark_specific_solver_added": false
+  },
+  "router": {
+    "selected_required_cues": ["sort"],
+    "candidate_cue_sets_evaluated": 7,
+    "positive_examples": 4,
+    "negative_examples": 4,
+    "description_bits": 824,
+    "description_bytes": 103
+  },
+  "unseen_before": {
+    "examples": 200,
+    "answered": 40,
+    "correct": 0,
+    "accuracy": 0.0,
+    "coverage": 0.2,
+    "selective_accuracy": 0.0
+  },
+  "unseen_after": {
+    "examples": 200,
+    "answered": 0,
+    "correct": 0,
+    "accuracy": 0.0,
+    "coverage": 0.0,
+    "selective_accuracy": 0.0
+  },
+  "original_public_regression": {
+    "examples": 200,
+    "answered": 200,
+    "correct": 200,
+    "accuracy": 1.0
+  },
+  "delta": {
+    "wrong_answers_removed": 40,
+    "coverage_points": -20.0,
+    "accuracy_points": 0.0
+  },
+  "gates": {
+    "navigation_false_positive_removed": true,
+    "all_unsupported_unseen_examples_abstain": true,
+    "original_public_200_of_200_retained": true,
+    "benchmark_specialization_used": false,
+    "new_capability_gained": false,
+    "general_llm_parity_allowed": false
+  }
+}
