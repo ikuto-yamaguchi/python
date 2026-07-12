@@ -1,0 +1,70 @@
+{
+  "suite": {
+    "name": "phase13a-frozen-public-multi-domain",
+    "manifest_sha256": "e54edfb0054f950f1752be7d9738249fbf75874738f69966051816a66614f8db",
+    "source_hashes": {
+      "bigbench_arithmetic_sha256": "6d12670a3d2e71dd5603810c8c940220c4898c467692200979515d4dcbc67d37",
+      "bbh_multi_domain_sha256": "8834713c42d428884465157e89c8c79b4178982d50469fa0a912071299cd9839"
+    },
+    "public": true,
+    "examples": 200,
+    "axes": 5,
+    "examples_per_axis": {
+      "boolean_expressions": 40,
+      "direct_arithmetic": 40,
+      "multistep_arithmetic": 40,
+      "object_counting": 40,
+      "word_sorting": 40
+    },
+    "calibration_examples": 40,
+    "exact_calibration_prompt_overlap": 0
+  },
+  "frozen_model": {
+    "fingerprint_before": "1d242210ac8c11caf17326a7e2f8f2c0fc5887ab3a5ac2b10ebdb9a778d863aa",
+    "fingerprint_after": "1d242210ac8c11caf17326a7e2f8f2c0fc5887ab3a5ac2b10ebdb9a778d863aa",
+    "unchanged": true,
+    "rules": 11,
+    "description_bits": 7136,
+    "description_bytes": 892,
+    "induction_candidate_evaluations": 108238,
+    "domain_specific_handlers": 0,
+    "benchmark_specific_handlers_added": 0,
+    "benchmark_specific_primitives_added": 0,
+    "benchmark_examples_used_for_calibration": 0
+  },
+  "score": {
+    "examples": 200,
+    "answered": 40,
+    "correct": 40,
+    "overall_accuracy": 0.2,
+    "selective_accuracy": 1.0,
+    "coverage": 0.2
+  },
+  "axis_scores": {
+    "boolean_expressions": {"examples": 40, "answered": 0, "correct": 0, "accuracy": 0.0, "coverage": 0.0, "selective_accuracy": 0.0},
+    "direct_arithmetic": {"examples": 40, "answered": 40, "correct": 40, "accuracy": 1.0, "coverage": 1.0, "selective_accuracy": 1.0},
+    "multistep_arithmetic": {"examples": 40, "answered": 0, "correct": 0, "accuracy": 0.0, "coverage": 0.0, "selective_accuracy": 0.0},
+    "object_counting": {"examples": 40, "answered": 0, "correct": 0, "accuracy": 0.0, "coverage": 0.0, "selective_accuracy": 0.0},
+    "word_sorting": {"examples": 40, "answered": 0, "correct": 0, "accuracy": 0.0, "coverage": 0.0, "selective_accuracy": 0.0}
+  },
+  "non_arithmetic": {"correct": 0, "examples": 160, "accuracy": 0.0},
+  "failure_summary": {"correct": 40, "wrong": 0, "abstained": 160},
+  "resources": {
+    "model_bytes": 892,
+    "peak_rss_bytes": 50487296,
+    "wall_ns": 5499036468,
+    "cpu_ns": 5807577000,
+    "operations": 260,
+    "reads": 100,
+    "writes": 40,
+    "energy_joules": null
+  },
+  "gates": {
+    "frozen_public_baseline_valid": true,
+    "benchmark_specialization_used": false,
+    "public_multi_domain_quality_parity_allowed": false,
+    "public_multi_domain_runtime_pareto_allowed": false,
+    "general_llm_parity_allowed": false,
+    "stage_c_score_changed": false
+  }
+}
