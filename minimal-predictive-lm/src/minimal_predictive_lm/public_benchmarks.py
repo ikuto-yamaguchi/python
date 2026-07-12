@@ -27,6 +27,32 @@ BIGBENCH_ARITHMETIC_SUBSET_SHA256 = (
     "cfd8bd98c597f5482df9724eb2750d293a443a1c6526630d4b0510a30723626d"
 )
 
+BBH_BASE_URL = (
+    "https://raw.githubusercontent.com/suzgunmirac/BIG-Bench-Hard/main/bbh"
+)
+BBH_TASKS = {
+    "boolean_expressions": {
+        "blob_sha1": "dd7b27ce8a8d36933abe1fd21a2cae6d94945e65",
+        "axis": "boolean_expressions",
+        "answer_type": "exact",
+    },
+    "multistep_arithmetic_two": {
+        "blob_sha1": "5d961d60f818c2df15342f4d20a3f07cf60caba1",
+        "axis": "multistep_arithmetic",
+        "answer_type": "numeric",
+    },
+    "object_counting": {
+        "blob_sha1": "f94e49dd473e2e6a5b6be7da4cc9c9cf8c9da693",
+        "axis": "object_counting",
+        "answer_type": "numeric",
+    },
+    "word_sorting": {
+        "blob_sha1": "989074a25d153530fa5cce34c5d9a1d5080d644d",
+        "axis": "word_sorting",
+        "answer_type": "exact",
+    },
+}
+
 
 def git_blob_sha1(payload: bytes) -> str:
     header = f"blob {len(payload)}\0".encode("ascii")
@@ -113,7 +139,7 @@ def parse_bigbench_arithmetic_task(
     return tuple(
         BenchmarkExample(
             f"bigbench_{task_name}_{index:03d}",
-            "mathematics",
+            "direct_arithmetic",
             str(item["input"]),
             str(item["target"]),
             "numeric",
@@ -151,6 +177,64 @@ def load_bigbench_arithmetic_subset(
     if expected_manifest_sha256 is not None and manifest.sha256 != expected_manifest_sha256:
         raise ValueError(
             "BIG-bench arithmetic manifest mismatch: "
+            f"expected {expected_manifest_sha256}, got {manifest.sha256}"
+        )
+    return manifest
+
+
+def parse_bbh_task(
+    payload: bytes,
+    *,
+    task_name: str,
+    axis: str,
+    answer_type: str,
+    limit: int,
+) -> tuple[BenchmarkExample, ...]:
+    document = json.loads(payload.decode("utf-8"))
+    raw_examples = document.get("examples")
+    if not isinstance(raw_examples, list) or len(raw_examples) < limit:
+        raise ValueError(f"BBH task {task_name!r} has fewer than {limit} examples")
+    return tuple(
+        BenchmarkExample(
+            f"bbh_{task_name}_{index:03d}",
+            axis,
+            str(item["input"]),
+            str(item["target"]),
+            answer_type,
+        )
+        for index, item in enumerate(raw_examples[:limit])
+    )
+
+
+def load_bbh_multi_domain_subset(
+    *,
+    examples_per_task: int = 40,
+    expected_manifest_sha256: str | None = None,
+) -> BenchmarkManifest:
+    examples: list[BenchmarkExample] = []
+    for task_name, config in BBH_TASKS.items():
+        url = f"{BBH_BASE_URL}/{task_name}.json"
+        payload = download_verified_git_blob(url, str(config["blob_sha1"]))
+        examples.extend(
+            parse_bbh_task(
+                payload,
+                task_name=task_name,
+                axis=str(config["axis"]),
+                answer_type=str(config["answer_type"]),
+                limit=examples_per_task,
+            )
+        )
+    manifest = build_manifest(
+        name="bbh-public-multi-domain",
+        split=f"first-{examples_per_task}-per-task",
+        source="https://github.com/suzgunmirac/BIG-Bench-Hard/tree/main/bbh",
+        license_id="MIT",
+        public=True,
+        examples=examples,
+    )
+    if expected_manifest_sha256 is not None and manifest.sha256 != expected_manifest_sha256:
+        raise ValueError(
+            "BBH multi-domain manifest mismatch: "
             f"expected {expected_manifest_sha256}, got {manifest.sha256}"
         )
     return manifest
