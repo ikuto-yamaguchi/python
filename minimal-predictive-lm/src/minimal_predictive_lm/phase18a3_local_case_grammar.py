@@ -2,17 +2,18 @@ from __future__ import annotations
 
 from collections import Counter, defaultdict
 from dataclasses import dataclass
-from itertools import product
 import json
 from math import exp
 from pathlib import Path
 from typing import Iterable, Mapping, Sequence
 
 from ._phase18a2_continuous_japanese_core import (
-    ContinuousJapaneseModel,
     ContinuousJapaneseObservation,
+    action_candidate_lexemes,
+    complete_semantic_rows,
     entity_spans,
-    induce_continuous_japanese,
+    exact_cover_action_lexicons,
+    induce_entity_grounding,
     infer_transition_roles,
     non_overlapping_occurrences,
 )
@@ -23,22 +24,17 @@ from .phase17f_linear_semantic_induction import (
     induce_linear_factorization,
 )
 
+State = tuple[int, ...]
+Order = tuple[str, str, str]
 
-AnonymousState = tuple[int, ...]
-OrderPattern = tuple[str, str, str]
-
-ENTITY_LEXEMES = ("アキ", "ボブ", "チカ", "ダイ")
-ACTION_LEXEMES = ("渡す", "受ける", "写す", "移す")
+ENTITIES = ("アキ", "ボブ", "チカ", "ダイ")
+ACTIONS = ("渡す", "受ける", "写す", "移す")
 ACTION_BITS = {"渡す": True, "受ける": False, "写す": True, "移す": False}
 PARTICLE_BITS = {
-    "が": False,
-    "から": False,
-    "より": False,
-    "に": True,
-    "へ": True,
-    "まで": True,
+    "が": False, "から": False, "より": False,
+    "に": True, "へ": True, "まで": True,
 }
-ORDER_PATTERNS: dict[int, OrderPattern] = {
+ORDERS: dict[int, Order] = {
     0: ("E0", "E1", "A"),
     1: ("A", "E0", "E1"),
     2: ("E0", "A", "E1"),
@@ -55,7 +51,7 @@ TRAINING_SPECS = (
     ("移す", "より", "まで", 2),
 )
 REPETITIONS = 19
-FLIPS_PER_GROUP = 1
+FLIPS = 1
 
 
 class NonIdentifiableLocalGrammarError(ValueError):
@@ -63,983 +59,630 @@ class NonIdentifiableLocalGrammarError(ValueError):
 
 
 @dataclass(frozen=True)
-class LocalGrammarFactor:
+class Factor:
     action: str
     first_particle: str
     second_particle: str
-    order: OrderPattern
-    effective_forward: bool
+    order: Order
+    forward: bool
 
 
 @dataclass(frozen=True)
-class LocalGrammarFit:
+class Fit:
     particle_index: tuple[tuple[str, int], ...]
-    order_patterns: tuple[OrderPattern, ...]
-    factorization: LinearFactorizationModel
-    training_errors: int
-    semantic_rows: int
-    skipped_rows: int
+    orders: tuple[Order, ...]
+    xor: LinearFactorizationModel
+    errors: int
+    rows: int
+    skipped: int
+    action_candidates: int = 0
+    action_covers: int = 0
+    valid_action_models: int = 0
+    best_action_models: int = 0
 
 
 @dataclass(frozen=True)
-class LocalCaseGrammarModel:
+class LocalModel:
     entity_lexicon: tuple[tuple[str, int], ...]
     action_lexicon: tuple[str, ...]
     particle_index: tuple[tuple[str, int], ...]
-    order_patterns: tuple[OrderPattern, ...]
-    factorization: LinearFactorizationModel
-    training_rows: int
+    orders: tuple[Order, ...]
+    xor: LinearFactorizationModel
 
-    def particle_map(self) -> dict[str, int]:
-        return dict(self.particle_index)
+    @property
+    def order_patterns(self) -> tuple[Order, ...]:
+        return self.orders
 
     @property
     def description_bits(self) -> int:
         payload = {
-            "entity_lexicon": [list(row) for row in self.entity_lexicon],
-            "action_lexicon": list(self.action_lexicon),
-            "particle_index": [list(row) for row in self.particle_index],
-            "order_patterns": [list(row) for row in self.order_patterns],
-            "factorization": self.factorization.render(),
+            "entities": self.entity_lexicon,
+            "actions": self.action_lexicon,
+            "particles": self.particle_index,
+            "orders": self.orders,
+            "xor": self.xor.render(),
         }
-        return len(
-            json.dumps(
-                payload,
-                ensure_ascii=False,
-                sort_keys=True,
-                separators=(",", ":"),
-            ).encode("utf-8")
-        ) * 8
+        return len(json.dumps(
+            payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+        ).encode()) * 8
 
-    def predict(
-        self,
-        sentence: str,
-        before: Sequence[int],
-    ) -> AnonymousState | None:
-        before_row = tuple(int(value) for value in before)
+    def predict(self, sentence: str, before: Sequence[int]) -> State | None:
+        row = ContinuousJapaneseObservation.build(sentence, before, before)
         try:
-            factor, coordinates = extract_local_factor(
-                ContinuousJapaneseObservation.build(
-                    sentence,
-                    before_row,
-                    before_row,
-                ),
-                entity_grounding=self.entity_lexicon,
-                action_lexicon=self.action_lexicon,
-                require_transition=False,
+            factor, coords = extract_factor(
+                row, self.entity_lexicon, self.action_lexicon, transition=False
             )
         except ValueError:
             return None
-
-        if factor.order not in set(self.order_patterns):
+        pmap = dict(self.particle_index)
+        p0 = pmap.get(factor.first_particle)
+        p1 = pmap.get(factor.second_particle)
+        if factor.order not in self.orders or p0 is None or p1 is None:
             return None
-        particle_map = self.particle_map()
-        first_id = particle_map.get(factor.first_particle)
-        second_id = particle_map.get(factor.second_particle)
-        if first_id is None or second_id is None:
+        bits = dict(self.xor.template_bits)
+        if bits[p0] == bits[p1]:
             return None
-        particle_bits = dict(self.factorization.template_bits)
-        if particle_bits[first_id] == particle_bits[second_id]:
-            return None
-
-        direction = self.factorization.effective_forward(
-            factor.action,
-            first_id,
-        )
+        direction = self.xor.effective_forward(factor.action, p0)
         if direction is None:
             return None
-        first_coordinate, second_coordinate = coordinates
-        if max(first_coordinate, second_coordinate) >= len(before_row):
+        source, destination = coords if direction else (coords[1], coords[0])
+        state = list(before)
+        state[destination] = before[source]
+        return tuple(state)
+
+
+@dataclass(frozen=True)
+class LiteralBaseline:
+    entity_lexicon: tuple[tuple[str, int], ...]
+    action_lexicon: tuple[str, ...]
+    table: tuple[tuple[str, str, str, Order, bool], ...]
+
+    def predict(self, sentence: str, before: Sequence[int]) -> State | None:
+        row = ContinuousJapaneseObservation.build(sentence, before, before)
+        try:
+            factor, coords = extract_factor(
+                row, self.entity_lexicon, self.action_lexicon, transition=False
+            )
+        except ValueError:
             return None
-        source, destination = (
-            (first_coordinate, second_coordinate)
-            if direction
-            else (second_coordinate, first_coordinate)
-        )
-        after = list(before_row)
-        after[destination] = before_row[source]
-        return tuple(after)
+        lookup = {
+            (a, p0, p1, order): value
+            for a, p0, p1, order, value in self.table
+        }
+        direction = lookup.get((
+            factor.action, factor.first_particle, factor.second_particle, factor.order
+        ))
+        if direction is None:
+            return None
+        source, destination = coords if direction else (coords[1], coords[0])
+        state = list(before)
+        state[destination] = before[source]
+        return tuple(state)
 
 
-def render_sentence(
-    action: str,
-    first_particle: str,
-    second_particle: str,
-    order: int,
-    first_entity: str,
-    second_entity: str,
-    *,
-    index: int,
-    evaluation: bool = False,
+def render(
+    action: str, p0: str, p1: str, order: int,
+    e0: str, e1: str, *, index: int, evaluation: bool = False,
 ) -> str:
-    items = {
-        "E0": first_entity + first_particle,
-        "E1": second_entity + second_particle,
-        "A": action,
-    }
-    prefixes = (
-        ("", "今日は", "記録では", "その後")
-        if not evaluation
-        else ("念のため", "報告では", "あとで")
-    )
-    return (
-        prefixes[index % len(prefixes)]
-        + "".join(items[label] for label in ORDER_PATTERNS[order])
-        + "。"
-    )
+    atoms = {"E0": e0 + p0, "E1": e1 + p1, "A": action}
+    prefixes = ("", "今日は", "記録では", "その後")
+    if evaluation:
+        prefixes = ("念のため", "報告では", "あとで")
+    return prefixes[index % len(prefixes)] + "".join(
+        atoms[label] for label in ORDERS[order]
+    ) + "。"
 
 
-def participant_pair(group_index: int, repetition: int) -> tuple[int, int]:
-    first = (group_index + repetition) % len(ENTITY_LEXEMES)
-    second = (group_index + 2 * repetition + 1) % len(ENTITY_LEXEMES)
-    if first == second:
-        second = (second + 1) % len(ENTITY_LEXEMES)
-    return first, second
-
-
-def build_observation(
-    *,
-    action: str,
-    first_particle: str,
-    second_particle: str,
-    order: int,
-    first_coordinate: int,
-    second_coordinate: int,
-    index: int,
-    flip_label: bool = False,
-    sentence: str | None = None,
-    evaluation: bool = False,
+def build(
+    spec: tuple[str, str, str, int], first: int, second: int, index: int,
+    *, flip: bool = False, sentence: str | None = None, evaluation: bool = False,
 ) -> ContinuousJapaneseObservation:
+    action, p0, p1, order = spec
     before = tuple(index * 100 + coordinate + 1 for coordinate in range(4))
-    effective_forward = ACTION_BITS[action] ^ PARTICLE_BITS[first_particle]
-    if flip_label:
-        effective_forward = not effective_forward
-    source, destination = (
-        (first_coordinate, second_coordinate)
-        if effective_forward
-        else (second_coordinate, first_coordinate)
-    )
+    forward = ACTION_BITS[action] ^ PARTICLE_BITS[p0] ^ flip
+    source, destination = (first, second) if forward else (second, first)
     after = list(before)
     after[destination] = before[source]
-    rendered = sentence or render_sentence(
-        action,
-        first_particle,
-        second_particle,
-        order,
-        ENTITY_LEXEMES[first_coordinate],
-        ENTITY_LEXEMES[second_coordinate],
-        index=index,
-        evaluation=evaluation,
-    )
-    return ContinuousJapaneseObservation.build(rendered, before, after)
-
-
-def semantic_training_observations(
-) -> tuple[ContinuousJapaneseObservation, ...]:
-    rows: list[ContinuousJapaneseObservation] = []
-    for group_index, spec in enumerate(TRAINING_SPECS):
-        action, first_particle, second_particle, order = spec
-        for repetition in range(REPETITIONS):
-            first, second = participant_pair(group_index, repetition)
-            rows.append(
-                build_observation(
-                    action=action,
-                    first_particle=first_particle,
-                    second_particle=second_particle,
-                    order=order,
-                    first_coordinate=first,
-                    second_coordinate=second,
-                    index=group_index * REPETITIONS + repetition,
-                    flip_label=repetition < FLIPS_PER_GROUP,
-                )
-            )
-    return tuple(rows)
-
-
-def auxiliary_noise_observations(
-) -> tuple[ContinuousJapaneseObservation, ...]:
-    return (
-        build_observation(
-            action="渡す",
-            first_particle="が",
-            second_particle="に",
-            order=0,
-            first_coordinate=0,
-            second_coordinate=1,
-            index=10_000,
-            sentence="今日はアキが渡す。",
+    return ContinuousJapaneseObservation.build(
+        sentence or render(
+            action, p0, p1, order, ENTITIES[first], ENTITIES[second],
+            index=index, evaluation=evaluation,
         ),
-        build_observation(
-            action="写す",
-            first_particle="から",
-            second_particle="へ",
-            order=1,
-            first_coordinate=2,
-            second_coordinate=3,
-            index=10_001,
+        before,
+        after,
+    )
+
+
+def participant_pair(group: int, repetition: int) -> tuple[int, int]:
+    first = (group + repetition) % 4
+    second = (group + 2 * repetition + 1) % 4
+    return (first, (second + (second == first)) % 4)
+
+
+def semantic_training_observations() -> tuple[ContinuousJapaneseObservation, ...]:
+    return tuple(
+        build(
+            spec,
+            *participant_pair(group, repetition),
+            group * REPETITIONS + repetition,
+            flip=repetition < FLIPS,
+        )
+        for group, spec in enumerate(TRAINING_SPECS)
+        for repetition in range(REPETITIONS)
+    )
+
+
+def training_observations() -> tuple[ContinuousJapaneseObservation, ...]:
+    noise = (
+        build(TRAINING_SPECS[0], 0, 1, 10_000, sentence="今日はアキが渡す。"),
+        build(
+            TRAINING_SPECS[7], 2, 3, 10_001,
             sentence="アキを見ながら写すチカからダイへ。",
         ),
     )
-
-
-def training_observations(
-) -> tuple[ContinuousJapaneseObservation, ...]:
-    return (
-        *semantic_training_observations(),
-        *auxiliary_noise_observations(),
-    )
+    return (*semantic_training_observations(), *noise)
 
 
 def heldout_specs() -> tuple[tuple[str, str, str, int], ...]:
-    seen_action_particle = {
-        (action, first_particle)
-        for action, first_particle, _, _ in TRAINING_SPECS
-    }
-    seen_particle_pairs = {
-        (first_particle, second_particle)
-        for _, first_particle, second_particle, _ in TRAINING_SPECS
-    }
-    seen_particle_orders = {
-        (first_particle, order)
-        for _, first_particle, _, order in TRAINING_SPECS
-    }
-    non_anchor_actions = ("受ける", "写す", "移す")
-    source_particles = tuple(
-        particle for particle, bit in PARTICLE_BITS.items() if not bit
-    )
-    destination_particles = tuple(
-        particle for particle, bit in PARTICLE_BITS.items() if bit
-    )
-    rows: list[tuple[str, str, str, int]] = []
-    for first_particle, bit in PARTICLE_BITS.items():
-        opposite = source_particles if bit else destination_particles
-        for order in ORDER_PATTERNS:
-            if (first_particle, order) in seen_particle_orders:
+    seen_ap = {(a, p0) for a, p0, _, _ in TRAINING_SPECS}
+    seen_pairs = {(p0, p1) for _, p0, p1, _ in TRAINING_SPECS}
+    seen_po = {(p0, order) for _, p0, _, order in TRAINING_SPECS}
+    source = tuple(p for p, bit in PARTICLE_BITS.items() if not bit)
+    destination = tuple(p for p, bit in PARTICLE_BITS.items() if bit)
+    result: list[tuple[str, str, str, int]] = []
+    for p0, bit in PARTICLE_BITS.items():
+        for order in ORDERS:
+            if (p0, order) in seen_po:
                 continue
-            selected: tuple[str, str, str, int] | None = None
-            for action in non_anchor_actions:
-                if (action, first_particle) in seen_action_particle:
-                    continue
-                for second_particle in opposite:
-                    if (first_particle, second_particle) in seen_particle_pairs:
-                        continue
-                    selected = (
-                        action,
-                        first_particle,
-                        second_particle,
-                        order,
-                    )
-                    break
-                if selected is not None:
-                    break
-            if selected is None:
-                raise RuntimeError("unable to construct frozen held-out local grammar")
-            rows.append(selected)
-    return tuple(rows)
-
-
-def heldout_unseen_local_compositions(
-) -> tuple[ContinuousJapaneseObservation, ...]:
-    rows: list[ContinuousJapaneseObservation] = []
-    for spec_index, spec in enumerate(heldout_specs()):
-        action, first_particle, second_particle, order = spec
-        first = spec_index % len(ENTITY_LEXEMES)
-        second = (spec_index + 2) % len(ENTITY_LEXEMES)
-        state_index = 20_000 + spec_index
-        for surface_first, surface_second in (
-            (first, second),
-            (second, first),
-        ):
-            rows.append(
-                build_observation(
-                    action=action,
-                    first_particle=first_particle,
-                    second_particle=second_particle,
-                    order=order,
-                    first_coordinate=surface_first,
-                    second_coordinate=surface_second,
-                    index=state_index,
-                    evaluation=True,
-                )
+            options = source if bit else destination
+            chosen = next(
+                (a, p0, p1, order)
+                for a in ("受ける", "写す", "移す")
+                if (a, p0) not in seen_ap
+                for p1 in options
+                if (p0, p1) not in seen_pairs
             )
-    return tuple(rows)
+            result.append(chosen)
+    return tuple(result)
 
 
-def extract_local_factor(
-    observation: ContinuousJapaneseObservation,
-    *,
-    entity_grounding: Sequence[tuple[str, int]],
+def heldout_observations() -> tuple[ContinuousJapaneseObservation, ...]:
+    result: list[ContinuousJapaneseObservation] = []
+    for index, spec in enumerate(heldout_specs()):
+        first, second = index % 4, (index + 2) % 4
+        for e0, e1 in ((first, second), (second, first)):
+            result.append(build(
+                spec, e0, e1, 20_000 + index, evaluation=True
+            ))
+    return tuple(result)
+
+
+def extract_factor(
+    row: ContinuousJapaneseObservation,
+    entity_lexicon: Sequence[tuple[str, int]],
     action_lexicon: Sequence[str],
-    require_transition: bool = True,
-) -> tuple[LocalGrammarFactor, tuple[int, int]]:
-    text = observation.text
-    entities = entity_spans(observation, entity_grounding)
+    *,
+    transition: bool = True,
+) -> tuple[Factor, tuple[int, int]]:
+    entities = entity_spans(row, entity_lexicon)
     if len(entities) != 2 or entities[0][2] == entities[1][2]:
-        raise ValueError("local grammar row requires two distinct entities")
+        raise ValueError("need two distinct entities")
+    entities = tuple(sorted(entities))
     blocked = tuple((start, end) for start, end, _, _ in entities)
-
     actions: list[tuple[int, int, str]] = []
     for action in action_lexicon:
-        spans = non_overlapping_occurrences(text, action, blocked)
+        spans = non_overlapping_occurrences(row.text, action, blocked)
         if len(spans) > 1:
-            raise ValueError("an action lexeme occurs more than once")
-        if len(spans) == 1:
+            raise ValueError("repeated action")
+        if spans:
             actions.append((*spans[0], action))
     if len(actions) != 1:
-        raise ValueError("local grammar row requires exactly one action")
-    action_start, action_end, action = actions[0]
-
-    surface_entities = tuple(sorted(entities))
-    semantic_spans = tuple(
-        sorted(
-            (
-                (
-                    surface_entities[0][0],
-                    surface_entities[0][1],
-                    "E0",
-                ),
-                (
-                    surface_entities[1][0],
-                    surface_entities[1][1],
-                    "E1",
-                ),
-                (action_start, action_end, "A"),
-            )
-        )
-    )
-    order = tuple(label for _, _, label in semantic_spans)
+        raise ValueError("need one action")
+    astart, aend, action = actions[0]
+    spans = tuple(sorted((
+        (entities[0][0], entities[0][1], "E0"),
+        (entities[1][0], entities[1][1], "E1"),
+        (astart, aend, "A"),
+    )))
+    order: Order = tuple(label for _, _, label in spans)  # type: ignore[assignment]
     markers: dict[str, str] = {}
-    for index, (_, end, label) in enumerate(semantic_spans):
-        next_start = (
-            semantic_spans[index + 1][0]
-            if index + 1 < len(semantic_spans)
-            else len(text)
-        )
-        gap = text[end:next_start]
-        if label in {"E0", "E1"}:
+    for index, (_, end, label) in enumerate(spans):
+        next_start = spans[index + 1][0] if index + 1 < len(spans) else len(row.text)
+        gap = row.text[end:next_start]
+        if label.startswith("E"):
             if not gap:
-                raise ValueError("each entity requires a nonempty local marker")
+                raise ValueError("empty case marker")
             markers[label] = gap
         elif gap:
-            raise ValueError("action-local gap is outside the declared grammar")
-
-    coordinates = (
-        surface_entities[0][3],
-        surface_entities[1][3],
-    )
-    if not require_transition:
-        return (
-            LocalGrammarFactor(
-                action,
-                markers["E0"],
-                markers["E1"],
-                order,
-                False,
-            ),
-            coordinates,
-        )
-
-    roles = infer_transition_roles(observation)
-    if roles.source == coordinates[0] and roles.destination == coordinates[1]:
-        effective_forward = True
-    elif roles.source == coordinates[1] and roles.destination == coordinates[0]:
-        effective_forward = False
+            raise ValueError("nonempty action gap")
+    coords = (entities[0][3], entities[1][3])
+    if not transition:
+        return Factor(action, markers["E0"], markers["E1"], order, False), coords
+    roles = infer_transition_roles(row)
+    if (roles.source, roles.destination) == coords:
+        forward = True
+    elif (roles.source, roles.destination) == (coords[1], coords[0]):
+        forward = False
     else:
-        raise ValueError("surface entities do not explain the transition")
-    return (
-        LocalGrammarFactor(
-            action,
-            markers["E0"],
-            markers["E1"],
-            order,
-            effective_forward,
-        ),
-        coordinates,
-    )
+        raise ValueError("transition not explained")
+    return Factor(action, markers["E0"], markers["E1"], order, forward), coords
 
 
-def fit_local_case_grammar_from_factors(
-    factors: Iterable[LocalGrammarFactor],
-) -> LocalGrammarFit:
+def fit_factors(factors: Iterable[Factor]) -> Fit:
     rows = tuple(factors)
-    if not rows:
-        raise NonIdentifiableLocalGrammarError("no local grammar factors supplied")
-
     grouped: dict[tuple[str, str], Counter[bool]] = defaultdict(Counter)
-    for factor in rows:
-        grouped[(factor.action, factor.first_particle)][
-            factor.effective_forward
-        ] += 1
-
+    for row in rows:
+        grouped[(row.action, row.first_particle)][row.forward] += 1
     labels: dict[tuple[str, str], bool] = {}
-    training_errors = 0
+    errors = 0
     for key, counts in grouped.items():
         if counts[True] == counts[False]:
-            raise NonIdentifiableLocalGrammarError(
-                f"local majority is tied for {key!r}"
-            )
+            raise NonIdentifiableLocalGrammarError("tied majority")
         labels[key] = counts[True] > counts[False]
-        training_errors += min(counts.values())
-
-    actions = tuple(sorted({action for action, _ in labels}))
-    particles = tuple(
-        sorted(
-            {
-                particle
-                for factor in rows
-                for particle in (
-                    factor.first_particle,
-                    factor.second_particle,
-                )
-            }
-        )
-    )
-    particle_ids = {particle: index for index, particle in enumerate(particles)}
+        errors += min(counts.values())
+    actions = tuple(sorted({a for a, _ in labels}))
+    particles = tuple(sorted({
+        particle for row in rows
+        for particle in (row.first_particle, row.second_particle)
+    }))
+    ids = {particle: index for index, particle in enumerate(particles)}
     edges = tuple(
-        LabeledSemanticEdge(
-            action,
-            particle_ids[particle],
-            label,
-        )
+        LabeledSemanticEdge(action, ids[particle], label)
         for (action, particle), label in sorted(labels.items())
     )
     try:
-        factorization = induce_linear_factorization(
-            edges,
-            verbs=actions,
-            template_positions=tuple(range(len(particles))),
+        xor = induce_linear_factorization(
+            edges, verbs=actions, template_positions=tuple(range(len(particles)))
         )
     except InconsistentSemanticsError as error:
-        raise NonIdentifiableLocalGrammarError(
-            "local action-particle graph has a contradictory cycle"
-        ) from error
-    if not factorization.identifiable:
-        raise NonIdentifiableLocalGrammarError(
-            "local action-particle graph is disconnected"
-        )
-
-    particle_bits = dict(factorization.template_bits)
-    for factor in rows:
-        first_id = particle_ids[factor.first_particle]
-        second_id = particle_ids[factor.second_particle]
-        if particle_bits[first_id] == particle_bits[second_id]:
-            raise NonIdentifiableLocalGrammarError(
-                "observed case markers do not encode opposite local roles"
-            )
-
-    return LocalGrammarFit(
-        tuple((particle, particle_ids[particle]) for particle in particles),
-        tuple(sorted({factor.order for factor in rows})),
-        factorization,
-        training_errors,
-        len(rows),
-        0,
+        raise NonIdentifiableLocalGrammarError("contradictory cycle") from error
+    if not xor.identifiable:
+        raise NonIdentifiableLocalGrammarError("disconnected graph")
+    bits = dict(xor.template_bits)
+    if any(
+        bits[ids[row.first_particle]] == bits[ids[row.second_particle]]
+        for row in rows
+    ):
+        raise NonIdentifiableLocalGrammarError("same-role case pair")
+    return Fit(
+        tuple((particle, ids[particle]) for particle in particles),
+        tuple(sorted({row.order for row in rows})),
+        xor, errors, len(rows), 0,
     )
 
 
-def fit_local_case_grammar(
-    observations: Iterable[ContinuousJapaneseObservation],
-    *,
-    entity_grounding: Sequence[tuple[str, int]],
-    action_lexicon: Sequence[str],
-) -> LocalGrammarFit:
-    factors: list[LocalGrammarFactor] = []
+def fit_rows(
+    rows: Iterable[ContinuousJapaneseObservation],
+    entities: Sequence[tuple[str, int]],
+    actions: Sequence[str],
+) -> Fit:
+    factors: list[Factor] = []
     skipped = 0
-    for observation in observations:
+    for row in rows:
         try:
-            factor, _ = extract_local_factor(
-                observation,
-                entity_grounding=entity_grounding,
-                action_lexicon=action_lexicon,
-            )
-            factors.append(factor)
+            factors.append(extract_factor(row, entities, actions)[0])
         except ValueError:
             skipped += 1
-    fitted = fit_local_case_grammar_from_factors(factors)
-    return LocalGrammarFit(
-        fitted.particle_index,
-        fitted.order_patterns,
-        fitted.factorization,
-        fitted.training_errors,
-        fitted.semantic_rows,
-        skipped,
+    fit = fit_factors(factors)
+    return Fit(
+        fit.particle_index, fit.orders, fit.xor, fit.errors, fit.rows, skipped
     )
+
+
+def fit_literal(
+    rows: Iterable[ContinuousJapaneseObservation],
+    entities: Sequence[tuple[str, int]],
+    actions: Sequence[str],
+) -> LiteralBaseline:
+    grouped: dict[tuple[str, str, str, Order], Counter[bool]] = defaultdict(Counter)
+    for row in rows:
+        factor, _ = extract_factor(row, entities, actions)
+        grouped[(
+            factor.action, factor.first_particle, factor.second_particle, factor.order
+        )][factor.forward] += 1
+    table = tuple(
+        (*key, counts[True] > counts[False])
+        for key, counts in sorted(grouped.items(), key=repr)
+        if counts[True] != counts[False]
+    )
+    return LiteralBaseline(tuple(entities), tuple(actions), table)
 
 
 def induce_local_case_grammar(
-    observations: Iterable[ContinuousJapaneseObservation],
-) -> tuple[
-    LocalCaseGrammarModel,
-    ContinuousJapaneseModel,
-    LocalGrammarFit,
-]:
-    rows = tuple(observations)
-    segmentation_model, _, _, _ = induce_continuous_japanese(rows)
-    fitted = fit_local_case_grammar(
-        rows,
-        entity_grounding=segmentation_model.entity_lexicon,
-        action_lexicon=segmentation_model.action_lexicon,
+    rows: Iterable[ContinuousJapaneseObservation],
+) -> tuple[LocalModel, LiteralBaseline, Fit]:
+    rows = tuple(rows)
+    entities, _ = induce_entity_grounding(rows)
+    semantic = complete_semantic_rows(rows, entities)
+    candidates = action_candidate_lexemes(semantic, entities)
+    covers = exact_cover_action_lexicons(semantic, entities, candidates)
+    valid: list[tuple[tuple[int, int], tuple[str, ...], Fit]] = []
+    for actions in covers:
+        try:
+            fit = fit_rows(semantic, entities, actions)
+        except NonIdentifiableLocalGrammarError:
+            continue
+        if fit.skipped:
+            continue
+        description = (
+            sum(map(len, actions))
+            + sum(len(p) for p, _ in fit.particle_index)
+            + len(fit.orders)
+            + len(fit.xor.verb_bits)
+            + len(fit.xor.template_bits)
+        )
+        valid.append(((fit.errors, description), tuple(actions), fit))
+    if not valid:
+        raise NonIdentifiableLocalGrammarError("no valid action segmentation")
+    best_score = min(score for score, _, _ in valid)
+    best = [row for row in valid if row[0] == best_score]
+    if len(best) != 1:
+        raise NonIdentifiableLocalGrammarError("ambiguous action segmentation")
+    _, actions, _ = best[0]
+    fit = fit_rows(rows, entities, actions)
+    fit = Fit(
+        fit.particle_index, fit.orders, fit.xor, fit.errors, fit.rows, fit.skipped,
+        len(candidates), len(covers), len(valid), len(best),
     )
+    model = LocalModel(
+        tuple(entities), actions, fit.particle_index, fit.orders, fit.xor
+    )
+    return model, fit_literal(semantic, entities, actions), fit
+
+
+def score(model: object, rows: Iterable[ContinuousJapaneseObservation]) -> tuple[float, float]:
+    rows = tuple(rows)
+    answers = [model.predict(row.sentence, row.before) for row in rows]
+    answered = sum(answer is not None for answer in answers)
+    correct = sum(answer == row.after for answer, row in zip(answers, rows))
     return (
-        LocalCaseGrammarModel(
-            segmentation_model.entity_lexicon,
-            segmentation_model.action_lexicon,
-            fitted.particle_index,
-            fitted.order_patterns,
-            fitted.factorization,
-            len(rows),
-        ),
-        segmentation_model,
-        fitted,
+        correct / len(rows) if rows else 0.0,
+        answered / len(rows) if rows else 0.0,
     )
 
 
 def evaluate_model(
-    model: LocalCaseGrammarModel,
-    observations: Iterable[ContinuousJapaneseObservation],
+    model: LocalModel,
+    rows: Iterable[ContinuousJapaneseObservation],
 ) -> tuple[float, float]:
-    rows = tuple(observations)
-    answered = 0
-    correct = 0
-    for observation in rows:
-        prediction = model.predict(observation.sentence, observation.before)
-        if prediction is None:
-            continue
-        answered += 1
-        correct += int(prediction == observation.after)
-    return (
-        correct / len(rows) if rows else 0.0,
-        answered / len(rows) if rows else 0.0,
-    )
+    return score(model, rows)
 
 
-def evaluate_template_model(
-    model: ContinuousJapaneseModel,
-    observations: Iterable[ContinuousJapaneseObservation],
-) -> tuple[float, float]:
-    rows = tuple(observations)
-    answered = 0
-    correct = 0
-    for observation in rows:
-        prediction = model.predict(observation.sentence, observation.before)
-        if prediction is None:
-            continue
-        answered += 1
-        correct += int(prediction == observation.after)
-    return (
-        correct / len(rows) if rows else 0.0,
-        answered / len(rows) if rows else 0.0,
-    )
+def heldout_unseen_local_compositions(
+) -> tuple[ContinuousJapaneseObservation, ...]:
+    return heldout_observations()
 
 
-def positionless_character_upper_bound(
-    observations: Iterable[ContinuousJapaneseObservation],
-) -> float:
-    rows = tuple(observations)
-    grouped: dict[
-        tuple[tuple[str, ...], AnonymousState],
-        Counter[AnonymousState],
-    ] = defaultdict(Counter)
-    for observation in rows:
-        grouped[
-            (tuple(sorted(observation.text)), observation.before)
-        ][observation.after] += 1
-    return (
-        sum(max(counts.values()) for counts in grouped.values()) / len(rows)
-        if rows
-        else 0.0
-    )
+def positionless_bound(rows: Iterable[ContinuousJapaneseObservation]) -> float:
+    groups: dict[tuple[tuple[str, ...], State], Counter[State]] = defaultdict(Counter)
+    rows = tuple(rows)
+    for row in rows:
+        groups[(tuple(sorted(row.text)), row.before)][row.after] += 1
+    return sum(max(counts.values()) for counts in groups.values()) / len(rows)
 
 
-def exact_sentence_memorizer_coverage(
-    training: Iterable[ContinuousJapaneseObservation],
-    evaluation: Iterable[ContinuousJapaneseObservation],
-) -> float:
-    known = {observation.text for observation in training}
-    rows = tuple(evaluation)
-    return (
-        sum(observation.text in known for observation in rows) / len(rows)
-        if rows
-        else 0.0
-    )
-
-
-def factor_memorizer_coverage(
-    training: Iterable[ContinuousJapaneseObservation],
-    evaluation: Iterable[ContinuousJapaneseObservation],
-    model: LocalCaseGrammarModel,
-    *,
+def memorizer_coverage(
+    train: Iterable[ContinuousJapaneseObservation],
+    test: Iterable[ContinuousJapaneseObservation],
+    model: LocalModel,
     fields: tuple[str, ...],
 ) -> float:
-    def factor_key(factor: LocalGrammarFactor) -> tuple[object, ...]:
-        values: dict[str, object] = {
+    def key(factor: Factor) -> tuple[object, ...]:
+        values = {
             "action": factor.action,
-            "first_particle": factor.first_particle,
-            "second_particle": factor.second_particle,
+            "p0": factor.first_particle,
+            "p1": factor.second_particle,
             "order": factor.order,
         }
         return tuple(values[field] for field in fields)
-
-    known: set[tuple[object, ...]] = set()
-    for observation in training:
-        try:
-            factor, _ = extract_local_factor(
-                observation,
-                entity_grounding=model.entity_lexicon,
-                action_lexicon=model.action_lexicon,
-            )
-        except ValueError:
-            continue
-        known.add(factor_key(factor))
-
-    rows = tuple(evaluation)
-    covered = 0
-    for observation in rows:
-        factor, _ = extract_local_factor(
-            observation,
-            entity_grounding=model.entity_lexicon,
-            action_lexicon=model.action_lexicon,
-        )
-        covered += int(factor_key(factor) in known)
-    return covered / len(rows) if rows else 0.0
+    known = {
+        key(extract_factor(row, model.entity_lexicon, model.action_lexicon)[0])
+        for row in train
+    }
+    test = tuple(test)
+    return sum(
+        key(extract_factor(row, model.entity_lexicon, model.action_lexicon)[0]) in known
+        for row in test
+    ) / len(test)
 
 
-def majority_recovery_union_bound(
-    *,
-    groups: int,
-    repetitions: int,
-    flip_probability: float,
-) -> float:
-    if groups < 1 or repetitions < 1:
-        raise ValueError("groups and repetitions must be positive")
-    if not 0.0 <= flip_probability < 0.5:
-        raise ValueError("flip probability must be in [0, 0.5)")
-    gap = 0.5 - flip_probability
-    return min(1.0, groups * exp(-2.0 * repetitions * gap * gap))
+def union_bound() -> float:
+    gap = 0.5 - FLIPS / REPETITIONS
+    return len(TRAINING_SPECS) * exp(-2 * REPETITIONS * gap * gap)
 
 
 def tied_majority_is_rejected() -> bool:
-    factors = (
-        LocalGrammarFactor("a0", "p0", "p1", ("E0", "E1", "A"), True),
-        LocalGrammarFactor("a0", "p0", "p1", ("E0", "E1", "A"), False),
+    rows = (
+        Factor("a", "p0", "p1", ORDERS[0], True),
+        Factor("a", "p0", "p1", ORDERS[0], False),
     )
     try:
-        fit_local_case_grammar_from_factors(factors)
+        fit_factors(rows)
     except NonIdentifiableLocalGrammarError:
         return True
     return False
 
 
 def disconnected_graph_is_rejected() -> bool:
-    factors = (
-        LocalGrammarFactor("a0", "p0", "p1", ("E0", "E1", "A"), True),
-        LocalGrammarFactor("a1", "p2", "p3", ("E0", "E1", "A"), False),
+    rows = (
+        Factor("a0", "p0", "p1", ORDERS[0], True),
+        Factor("a1", "p2", "p3", ORDERS[0], False),
     )
     try:
-        fit_local_case_grammar_from_factors(factors)
+        fit_factors(rows)
     except NonIdentifiableLocalGrammarError:
         return True
     return False
 
 
 def contradictory_cycle_is_rejected() -> bool:
-    factors = (
-        LocalGrammarFactor("a0", "p0", "p1", ("E0", "E1", "A"), True),
-        LocalGrammarFactor("a0", "p1", "p0", ("E0", "E1", "A"), False),
-        LocalGrammarFactor("a1", "p0", "p1", ("E0", "E1", "A"), True),
-        LocalGrammarFactor("a1", "p1", "p0", ("E0", "E1", "A"), True),
+    rows = (
+        Factor("a0", "p0", "p1", ORDERS[0], True),
+        Factor("a0", "p1", "p0", ORDERS[0], False),
+        Factor("a1", "p0", "p1", ORDERS[0], True),
+        Factor("a1", "p1", "p0", ORDERS[0], True),
     )
     try:
-        fit_local_case_grammar_from_factors(factors)
+        fit_factors(rows)
     except NonIdentifiableLocalGrammarError:
         return True
     return False
 
 
-def same_polarity_pair_abstains(model: LocalCaseGrammarModel) -> bool:
-    observation = build_observation(
-        action="渡す",
-        first_particle="が",
-        second_particle="から",
-        order=0,
-        first_coordinate=0,
-        second_coordinate=1,
-        index=80_000,
-    )
-    return model.predict(observation.sentence, observation.before) is None
+def same_polarity_pair_abstains(model: LocalModel) -> bool:
+    row = build(("渡す", "が", "から", 0), 0, 1, 80_000)
+    return model.predict(row.sentence, row.before) is None
 
 
-def unknown_particle_abstains(model: LocalCaseGrammarModel) -> bool:
-    before = (1, 2, 3, 4)
-    sentence = render_sentence(
-        "渡す",
-        "側",
-        "に",
-        0,
-        "アキ",
-        "ボブ",
-        index=90_000,
-        evaluation=True,
-    )
-    return model.predict(sentence, before) is None
+def unknown_particle_abstains(model: LocalModel) -> bool:
+    sentence = render("渡す", "側", "に", 0, "アキ", "ボブ", index=90_000)
+    return model.predict(sentence, (1, 2, 3, 4)) is None
 
 
-def literal_template_payload_bits(
-    templates: Iterable[tuple[str, str, str, OrderPattern]],
-) -> int:
-    unique = set(templates)
-    return len(
-        json.dumps(
-            sorted(
-                (
-                    action,
-                    first,
-                    second,
-                    list(order),
-                )
-                for action, first, second, order in unique
-            ),
-            ensure_ascii=False,
-            separators=(",", ":"),
-        ).encode("utf-8")
-    ) * 8
+def literal_bits(templates: Iterable[tuple[str, str, str, Order]]) -> int:
+    rows = sorted((a, p0, p1, list(order)) for a, p0, p1, order in set(templates))
+    return len(json.dumps(rows, ensure_ascii=False, separators=(",", ":")).encode()) * 8
 
 
 def run() -> dict[str, object]:
-    training = training_observations()
-    semantic_training = semantic_training_observations()
-    heldout = heldout_unseen_local_compositions()
-    model, template_model, fitted = induce_local_case_grammar(training)
-
-    accuracy, coverage = evaluate_model(model, heldout)
-    template_accuracy, template_coverage = evaluate_template_model(
-        template_model,
-        heldout,
+    train = training_observations()
+    semantic = semantic_training_observations()
+    test = heldout_observations()
+    model, literal, fit = induce_local_case_grammar(train)
+    accuracy, coverage = score(model, test)
+    literal_accuracy, literal_coverage = score(literal, test)
+    pmap = dict(model.particle_index)
+    bits = dict(model.xor.template_bits)
+    zeros = sum(not bit for bit in bits.values())
+    ones = sum(bits.values())
+    valid_pairs = 2 * zeros * ones
+    expressible = len(model.action_lexicon) * valid_pairs * len(model.orders)
+    observed_bits = literal_bits((
+        (a, p0, p1, ORDERS[order]) for a, p0, p1, order in TRAINING_SPECS
+    ))
+    exhaustive_bits = literal_bits((
+        (a, p0, p1, order)
+        for a in model.action_lexicon
+        for p0, i0 in model.particle_index
+        for p1, i1 in model.particle_index
+        if bits[i0] != bits[i1]
+        for order in model.orders
+    ))
+    full_cov = memorizer_coverage(
+        semantic, test, model, ("action", "p0", "p1", "order")
     )
-    flip_rate = FLIPS_PER_GROUP / REPETITIONS
-    recovery_bound = majority_recovery_union_bound(
-        groups=len(TRAINING_SPECS),
-        repetitions=REPETITIONS,
-        flip_probability=flip_rate,
-    )
-    full_template_coverage = factor_memorizer_coverage(
-        semantic_training,
-        heldout,
-        model,
-        fields=("action", "first_particle", "second_particle", "order"),
-    )
-    action_particle_coverage = factor_memorizer_coverage(
-        semantic_training,
-        heldout,
-        model,
-        fields=("action", "first_particle"),
-    )
-    particle_pair_coverage = factor_memorizer_coverage(
-        semantic_training,
-        heldout,
-        model,
-        fields=("first_particle", "second_particle"),
-    )
-    particle_order_coverage = factor_memorizer_coverage(
-        semantic_training,
-        heldout,
-        model,
-        fields=("first_particle", "order"),
-    )
-
-    particle_bits = dict(fitted.factorization.template_bits)
-    source_count = sum(not bit for bit in particle_bits.values())
-    destination_count = sum(bit for bit in particle_bits.values())
-    valid_directed_pairs = 2 * source_count * destination_count
-    expressible_templates = (
-        len(model.action_lexicon)
-        * valid_directed_pairs
-        * len(model.order_patterns)
-    )
-    observed_full_templates = len(TRAINING_SPECS)
-    observed_literal_bits = literal_template_payload_bits(
-        (
-            (
-                action,
-                first_particle,
-                second_particle,
-                ORDER_PATTERNS[order],
-            )
-            for action, first_particle, second_particle, order in TRAINING_SPECS
-        )
-    )
-    exhaustive_literal_bits = literal_template_payload_bits(
-        (
-            (action, first_particle, second_particle, order)
-            for action in model.action_lexicon
-            for first_particle, first_id in model.particle_index
-            for second_particle, second_id in model.particle_index
-            if particle_bits[first_id] != particle_bits[second_id]
-            for order in model.order_patterns
-        )
-    )
-
-    theorem_checks = {
-        "whitespace_free_segmentation_still_succeeds": (
-            tuple(sorted(model.entity_lexicon))
-            == tuple(sorted(template_model.entity_lexicon))
-            and tuple(sorted(model.action_lexicon))
-            == tuple(sorted(template_model.action_lexicon))
-        ),
-        "local_action_particle_graph_is_connected": (
-            fitted.factorization.identifiable
+    ap_cov = memorizer_coverage(semantic, test, model, ("action", "p0"))
+    pair_cov = memorizer_coverage(semantic, test, model, ("p0", "p1"))
+    po_cov = memorizer_coverage(semantic, test, model, ("p0", "order"))
+    checks = {
+        "continuous_entity_and_action_segmentation_is_unique": (
+            len(model.entity_lexicon) == 4
+            and len(model.action_lexicon) == 4
+            and fit.best_action_models == 1
         ),
         "all_six_case_markers_are_induced": len(model.particle_index) == 6,
-        "all_three_action_positions_are_induced": (
-            len(model.order_patterns) == 3
+        "all_three_action_positions_are_induced": len(model.orders) == 3,
+        "local_graph_is_connected": model.xor.identifiable,
+        "case_pairs_have_opposite_polarity": all(
+            bits[pmap[p0]] != bits[pmap[p1]]
+            for _, p0, p1, _ in TRAINING_SPECS
         ),
-        "opposite_case_polarities_are_required": all(
-            particle_bits[dict(model.particle_index)[first]]
-            != particle_bits[dict(model.particle_index)[second]]
-            for _, first, second, _ in TRAINING_SPECS
-        ),
-        "bounded_direction_noise_is_recovered": (
-            fitted.training_errors
-            == len(TRAINING_SPECS) * FLIPS_PER_GROUP
-        ),
-        "finite_sample_bound_is_below_one_percent": recovery_bound < 0.01,
-        "auxiliary_incomplete_rows_are_skipped": fitted.skipped_rows == 2,
+        "bounded_noise_is_recovered": fit.errors == len(TRAINING_SPECS) * FLIPS,
+        "finite_sample_bound_is_below_one_percent": union_bound() < 0.01,
+        "two_incomplete_rows_are_skipped": fit.skipped == 2,
         "tied_majority_is_rejected": tied_majority_is_rejected(),
         "disconnected_graph_is_rejected": disconnected_graph_is_rejected(),
         "contradictory_cycle_is_rejected": contradictory_cycle_is_rejected(),
-        "same_polarity_particle_pair_abstains": (
-            same_polarity_pair_abstains(model)
-        ),
+        "same_role_pair_abstains": same_polarity_pair_abstains(model),
         "unknown_particle_abstains": unknown_particle_abstains(model),
-        "heldout_local_compositions_are_perfect": (
-            accuracy == 1.0 and coverage == 1.0
+        "unseen_whole_forms_are_perfect": accuracy == coverage == 1.0,
+        "literal_frame_baseline_has_zero_coverage": literal_coverage == 0.0,
+        "full_tuple_memorizer_has_zero_coverage": full_cov == 0.0,
+        "action_particle_memorizer_has_zero_coverage": ap_cov == 0.0,
+        "particle_pair_memorizer_has_zero_coverage": pair_cov == 0.0,
+        "particle_order_memorizer_has_zero_coverage": po_cov == 0.0,
+        "positionless_character_bound_is_half": positionless_bound(test) == 0.5,
+        "atomic_grammar_expands_nine_to_216_forms": expressible == 216,
+        "atomic_payload_beats_exhaustive_enumeration": (
+            model.description_bits < exhaustive_bits
         ),
-        "literal_template_model_has_zero_coverage": template_coverage == 0.0,
-        "full_tuple_memorizer_has_zero_coverage": full_template_coverage == 0.0,
-        "action_particle_memorizer_has_zero_coverage": (
-            action_particle_coverage == 0.0
-        ),
-        "particle_pair_memorizer_has_zero_coverage": (
-            particle_pair_coverage == 0.0
-        ),
-        "particle_order_memorizer_has_zero_coverage": (
-            particle_order_coverage == 0.0
-        ),
-        "positionless_character_upper_bound_is_half": (
-            positionless_character_upper_bound(heldout) == 0.5
-        ),
-        "exact_sentence_memorizer_has_zero_coverage": (
-            exact_sentence_memorizer_coverage(training, heldout) == 0.0
-        ),
-        "local_grammar_expands_beyond_observed_templates": (
-            expressible_templates > observed_full_templates
-        ),
-        "local_grammar_payload_is_smaller_than_exhaustive_templates": (
-            model.description_bits < exhaustive_literal_bits
-        ),
-        "all_raw_sentences_are_continuous": all(
-            not any(character.isspace() for character in observation.sentence)
-            for observation in (*training, *heldout)
+        "sentences_have_no_whitespace": all(
+            not any(character.isspace() for character in row.sentence)
+            for row in (*train, *test)
         ),
     }
-
     return {
         "campaign": {
             "name": "phase18a3-local-case-grammar-c1",
-            "language": "controlled continuous Japanese character strings",
-            "full_case_frame_templates_stored_in_final_model": False,
-            "entity_and_action_segmentation_reused_from_phase18a2": True,
-            "anonymous_world_coordinates": True,
-            "bounded_direction_noise": True,
+            "literal_whole_frames_stored_in_final_model": False,
+            "action_segmentation_selected_by_local_grammar": True,
             "public_benchmark_examples_used": 0,
         },
         "grammar": {
             "actions": len(model.action_lexicon),
-            "case_markers": len(model.particle_index),
-            "order_patterns": len(model.order_patterns),
-            "observed_action_case_order_templates": observed_full_templates,
-            "valid_directed_case_pairs": valid_directed_pairs,
-            "expressible_atomic_cross_product_templates": expressible_templates,
-            "heldout_full_templates": len(heldout_specs()),
-            "learned_particle_bits": [
-                [particle, particle_bits[index]]
-                for particle, index in model.particle_index
+            "particles": len(model.particle_index),
+            "orders": len(model.orders),
+            "observed_whole_forms": len(TRAINING_SPECS),
+            "valid_directed_particle_pairs": valid_pairs,
+            "expressible_atomic_cross_product_forms": expressible,
+            "heldout_whole_forms": len(heldout_specs()),
+            "action_candidates": fit.action_candidates,
+            "action_exact_covers": fit.action_covers,
+            "valid_action_models": fit.valid_action_models,
+            "best_action_models": fit.best_action_models,
+            "particle_bits": [
+                [particle, bits[index]] for particle, index in model.particle_index
             ],
         },
         "evaluation": {
-            "training_observations": len(training),
-            "semantic_training_observations": len(semantic_training),
-            "skipped_incomplete_observations": fitted.skipped_rows,
-            "heldout_specifications": len(heldout_specs()),
-            "heldout_role_reversal_rows": len(heldout),
-            "heldout_accuracy": accuracy,
-            "heldout_coverage": coverage,
-            "phase18a2_literal_template_accuracy": template_accuracy,
-            "phase18a2_literal_template_coverage": template_coverage,
-            "full_tuple_memorizer_coverage": full_template_coverage,
-            "action_first_particle_memorizer_coverage": (
-                action_particle_coverage
-            ),
-            "particle_pair_memorizer_coverage": particle_pair_coverage,
-            "particle_order_memorizer_coverage": particle_order_coverage,
-            "positionless_character_upper_bound": (
-                positionless_character_upper_bound(heldout)
-            ),
-            "exact_sentence_memorizer_coverage": (
-                exact_sentence_memorizer_coverage(training, heldout)
-            ),
+            "training_rows": len(train),
+            "semantic_rows": len(semantic),
+            "skipped_rows": fit.skipped,
+            "heldout_specs": len(heldout_specs()),
+            "heldout_reversal_rows": len(test),
+            "accuracy": accuracy,
+            "coverage": coverage,
+            "literal_frame_accuracy": literal_accuracy,
+            "literal_frame_coverage": literal_coverage,
+            "full_tuple_memorizer_coverage": full_cov,
+            "action_particle_memorizer_coverage": ap_cov,
+            "particle_pair_memorizer_coverage": pair_cov,
+            "particle_order_memorizer_coverage": po_cov,
+            "positionless_character_upper_bound": positionless_bound(test),
         },
         "theory": {
-            "identifying_action_particle_edges": len(TRAINING_SPECS),
-            "repetitions_per_edge": REPETITIONS,
-            "adversarial_flips_per_edge": FLIPS_PER_GROUP,
-            "empirical_flip_rate": flip_rate,
-            "iid_hoeffding_union_bound": recovery_bound,
-            "identifiability_condition": (
-                "the action-to-first-case-marker XOR graph is connected and "
-                "cycle-consistent; every observed second marker has the opposite "
-                "latent case polarity; all accepted order atoms are learned "
-                "independently of action and case-pair identity"
+            "edges": len(TRAINING_SPECS),
+            "repetitions": REPETITIONS,
+            "flips_per_edge": FLIPS,
+            "flip_rate": FLIPS / REPETITIONS,
+            "iid_hoeffding_union_bound": union_bound(),
+            "condition": (
+                "connected cycle-consistent action/first-marker XOR graph, "
+                "opposite polarity for the second marker, and independently "
+                "learned action-position atoms"
             ),
         },
-        "resource_accounting": {
-            "serialized_local_grammar_model_bits": model.description_bits,
-            "literal_observed_template_payload_bits": observed_literal_bits,
-            "literal_exhaustive_template_payload_bits": exhaustive_literal_bits,
-            "phase18a3_module_source_bytes": Path(__file__).read_bytes().__len__(),
-            "python_runtime_and_standard_library_bytes_included": False,
+        "resources": {
+            "atomic_model_bits": model.description_bits,
+            "observed_literal_bits": observed_bits,
+            "exhaustive_literal_bits": exhaustive_bits,
+            "source_bytes": Path(__file__).read_bytes().__len__(),
+            "python_runtime_included": False,
         },
-        "learned_model": {
-            "entity_lexicon": [list(row) for row in model.entity_lexicon],
-            "action_lexicon": list(model.action_lexicon),
-            "particle_index": [list(row) for row in model.particle_index],
-            "order_patterns": [list(row) for row in model.order_patterns],
-            "factorization": model.factorization.render(),
-        },
-        "theorem_checks": theorem_checks,
-        "all_theorem_checks_pass": all(theorem_checks.values()),
+        "theorem_checks": checks,
+        "all_theorem_checks_pass": all(checks.values()),
         "claim_boundary": {
-            "literal_case_frame_storage_removed": all(
-                theorem_checks.values()
-            ),
-            "unseen_local_grammar_recombination_demonstrated": all(
-                theorem_checks.values()
-            ),
+            "literal_frame_storage_removed": all(checks.values()),
+            "unseen_local_recombination_demonstrated": all(checks.values()),
             "general_japanese_grammar_demonstrated": False,
-            "passive_causative_or_inflection_understanding_demonstrated": False,
-            "natural_language_understanding_demonstrated": False,
-            "japanese_high_school_intelligence_demonstrated": False,
-            "general_llm_parity_allowed": False,
+            "high_school_intelligence_demonstrated": False,
         },
         "limitations": [
-            "entity and action segmentation are inherited from Phase 18a-2 rather than jointly reoptimized with the local grammar",
-            "the declared grammar attaches one nonempty marker immediately after each entity",
-            "discourse material is restricted to prefixes outside the semantic core",
-            "only three action positions and one binary copy event are supported",
-            "case markers are monosemous and do not undergo phonological or orthographic variation",
-            "verb inflection, passive, causative, negation, synonymy, ellipsis, and discourse reference remain absent",
-            "world interventions remain noiseless apart from bounded direction-label flips",
-            "Python and its standard library remain excluded substrate",
+            "entity search is inherited from Phase 18a-2 and not globally co-optimized",
+            "one nonempty marker must immediately follow each entity",
+            "only prefix discourse, three action positions, and one copy event are supported",
+            "inflection, passive, causative, negation, synonymy, ellipsis, and discourse reference are absent",
+            "Python and its standard library are excluded substrate",
         ],
     }
 
@@ -1048,51 +691,33 @@ def render_markdown(payload: Mapping[str, object]) -> str:
     grammar = payload["grammar"]
     evaluation = payload["evaluation"]
     theory = payload["theory"]
-    resources = payload["resource_accounting"]
+    resources = payload["resources"]
     lines = [
-        "# Phase 18a-3 results: local Japanese case grammar",
-        "",
-        "Phase 18a-3 removes literal whole-frame storage from the final semantic",
-        "model. It learns action meaning, local case-marker polarity, and action",
-        "position atoms separately, then recombines them on unseen full forms.",
-        "",
-        "## Atomic grammar",
-        "",
-        f"- Actions / case markers / order atoms: **{grammar['actions']} / {grammar['case_markers']} / {grammar['order_patterns']}**",
-        f"- Observed full action-case-order templates: **{grammar['observed_action_case_order_templates']}**",
-        f"- Valid directed case pairs: **{grammar['valid_directed_case_pairs']}**",
-        f"- Expressible atomic cross-product templates: **{grammar['expressible_atomic_cross_product_templates']}**",
-        f"- Held-out whole templates: **{grammar['heldout_full_templates']}**",
-        "",
-        "## Held-out transfer",
-        "",
-        f"- Training / semantic / skipped rows: **{evaluation['training_observations']} / {evaluation['semantic_training_observations']} / {evaluation['skipped_incomplete_observations']}**",
-        f"- Held-out specifications / reversal rows: **{evaluation['heldout_specifications']} / {evaluation['heldout_role_reversal_rows']}**",
-        f"- Local grammar accuracy / coverage: **{100 * evaluation['heldout_accuracy']:.1f}% / {100 * evaluation['heldout_coverage']:.1f}%**",
-        f"- Phase 18a-2 literal-template coverage: **{100 * evaluation['phase18a2_literal_template_coverage']:.1f}%**",
-        f"- Action+first-case memorizer coverage: **{100 * evaluation['action_first_particle_memorizer_coverage']:.1f}%**",
-        f"- Case-pair memorizer coverage: **{100 * evaluation['particle_pair_memorizer_coverage']:.1f}%**",
-        f"- Case+order memorizer coverage: **{100 * evaluation['particle_order_memorizer_coverage']:.1f}%**",
-        f"- Positionless character upper bound: **{100 * evaluation['positionless_character_upper_bound']:.1f}%**",
-        "",
-        "## Noise and resource accounting",
-        "",
-        f"- Direction flip rate: **{100 * theory['empirical_flip_rate']:.1f}%**",
+        "# Phase 18a-3 results: local Japanese case grammar", "",
+        "The final model stores action bits, case-marker bits, and order atoms rather",
+        "than complete Japanese case-frame strings.", "",
+        "## Atomic grammar", "",
+        f"- Actions / particles / orders: **{grammar['actions']} / {grammar['particles']} / {grammar['orders']}**",
+        f"- Observed whole forms: **{grammar['observed_whole_forms']}**",
+        f"- Expressible atomic cross product: **{grammar['expressible_atomic_cross_product_forms']}**",
+        f"- Held-out whole forms: **{grammar['heldout_whole_forms']}**", "",
+        "## Held-out transfer", "",
+        f"- Training / semantic / skipped rows: **{evaluation['training_rows']} / {evaluation['semantic_rows']} / {evaluation['skipped_rows']}**",
+        f"- Held-out forms / reversal rows: **{evaluation['heldout_specs']} / {evaluation['heldout_reversal_rows']}**",
+        f"- Local grammar accuracy / coverage: **{100 * evaluation['accuracy']:.1f}% / {100 * evaluation['coverage']:.1f}%**",
+        f"- Literal whole-frame baseline coverage: **{100 * evaluation['literal_frame_coverage']:.1f}%**",
+        f"- Action+marker / marker-pair / marker+order memorizer coverage: **{100 * evaluation['action_particle_memorizer_coverage']:.1f}% / {100 * evaluation['particle_pair_memorizer_coverage']:.1f}% / {100 * evaluation['particle_order_memorizer_coverage']:.1f}%**",
+        f"- Positionless character upper bound: **{100 * evaluation['positionless_character_upper_bound']:.1f}%**", "",
+        "## Noise and resources", "",
+        f"- Direction flip rate: **{100 * theory['flip_rate']:.1f}%**",
         f"- IID Hoeffding union bound: **{100 * theory['iid_hoeffding_union_bound']:.3f}%**",
-        f"- Serialized local grammar: **{resources['serialized_local_grammar_model_bits']} bits**",
-        f"- Literal observed-template payload: **{resources['literal_observed_template_payload_bits']} bits**",
-        f"- Literal exhaustive supported-template payload: **{resources['literal_exhaustive_template_payload_bits']} bits**",
-        f"- Phase 18a-3 source: **{resources['phase18a3_module_source_bytes']} bytes**",
-        "- Python runtime and standard library: excluded and declared",
-        "",
-        "## Claim boundary",
-        "",
-        "This refutes literal whole-case-frame memorization for the declared",
-        "held-out cross product. It remains a small controlled grammar, not general",
-        "Japanese syntax, reading comprehension, or high-school intelligence.",
-        "",
-        "## Limitations",
-        "",
+        f"- Atomic model / observed literal / exhaustive literal: **{resources['atomic_model_bits']} / {resources['observed_literal_bits']} / {resources['exhaustive_literal_bits']} bits**",
+        f"- Source: **{resources['source_bytes']} bytes**",
+        "- Python runtime and standard library: excluded and declared", "",
+        "## Claim boundary", "",
+        "This rejects literal whole-frame memorization on the declared cross product.",
+        "It is still a controlled micro-grammar, not unrestricted Japanese or",
+        "Japanese high-school-level intelligence.", "", "## Limitations", "",
     ]
     lines.extend(f"- {item}" for item in payload["limitations"])
     return "\n".join(lines) + "\n"
@@ -1103,8 +728,7 @@ def main() -> None:
     output = Path("results")
     output.mkdir(parents=True, exist_ok=True)
     (output / "phase18a3.json").write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     markdown = render_markdown(payload)
     (output / "phase18a3.md").write_text(markdown, encoding="utf-8")
