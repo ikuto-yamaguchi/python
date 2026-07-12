@@ -1,0 +1,47 @@
+{
+  "suite": {
+    "name": "phase13a-frozen-public-multi-domain",
+    "manifest_sha256": "e54edfb0054f950f1752be7d9738249fbf75874738f69966051816a66614f8db",
+    "public": true,
+    "examples": 200,
+    "axes": 5,
+    "exact_new_calibration_prompt_overlap": 0,
+    "benchmark_examples_used_for_calibration": 0
+  },
+  "scope_correction": {
+    "independent_interactions": 5,
+    "precedence_candidates_evaluated": 6051,
+    "precedence": {"*": 2, "+": 1, "-": 1, "/": 1, "and": 2, "neg": 2, "not": 2, "or": 1},
+    "description_bits": 9192,
+    "description_bytes": 1149,
+    "domain_specific_handlers": 0,
+    "benchmark_specific_handlers_added": 0,
+    "benchmark_specific_grammar_rules_added": 0
+  },
+  "before": {
+    "score": {"examples": 200, "answered": 151, "correct": 137, "overall_accuracy": 0.685, "selective_accuracy": 0.9072847682119205, "coverage": 0.755}
+  },
+  "after": {
+    "score": {"examples": 200, "answered": 160, "correct": 160, "overall_accuracy": 0.8, "selective_accuracy": 1.0, "coverage": 0.8},
+    "axis_scores": {
+      "boolean_expressions": {"examples": 40, "answered": 40, "correct": 40, "accuracy": 1.0, "coverage": 1.0},
+      "direct_arithmetic": {"examples": 40, "answered": 40, "correct": 40, "accuracy": 1.0, "coverage": 1.0},
+      "multistep_arithmetic": {"examples": 40, "answered": 40, "correct": 40, "accuracy": 1.0, "coverage": 1.0},
+      "object_counting": {"examples": 40, "answered": 0, "correct": 0, "accuracy": 0.0, "coverage": 0.0},
+      "word_sorting": {"examples": 40, "answered": 40, "correct": 40, "accuracy": 1.0, "coverage": 1.0}
+    },
+    "resources": {"model_bytes": 2041, "peak_rss_bytes": 51212288, "wall_ns": 4447408523, "cpu_ns": 4751451000, "operations": 8630, "reads": 260, "writes": 160, "energy_joules": null},
+    "multistep_wrong": 0,
+    "multistep_abstained": 0
+  },
+  "delta": {"correct": 23, "accuracy_points": 11.5, "coverage_points": 4.5},
+  "gates": {
+    "fully_public_improvement_measured": true,
+    "benchmark_specialization_used": false,
+    "unary_scope_failure_resolved": true,
+    "public_multi_domain_quality_parity_allowed": false,
+    "public_multi_domain_runtime_pareto_allowed": false,
+    "general_llm_parity_allowed": false,
+    "stage_c_score_changed": false
+  }
+}
