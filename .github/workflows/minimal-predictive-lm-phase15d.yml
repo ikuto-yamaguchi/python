@@ -1,0 +1,55 @@
+name: minimal-predictive-lm-phase15d
+
+on:
+  pull_request:
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/generic_temporal_state.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/phase15d_*.py"
+      - "minimal-predictive-lm/tests/test_phase15d_*.py"
+      - "minimal-predictive-lm/pyproject.toml"
+      - ".github/workflows/minimal-predictive-lm-phase15d.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  phase15d:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: minimal-predictive-lm/pyproject.toml
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm
+      - name: Temporal state regression tests
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p minimal-predictive-lm/results
+          python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase15d_generic_temporal_state.py' -v 2>&1 | tee minimal-predictive-lm/results/phase15d-test.log
+      - name: Upload Phase 15d diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase15d-diagnostics
+          retention-days: 7
+          path: minimal-predictive-lm/results/phase15d-test.log
+      - name: Run temporal state public experiment
+        working-directory: minimal-predictive-lm
+        run: mpm-phase15d
+      - name: Upload Phase 15d result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase15d-results
+          retention-days: 7
+          if-no-files-found: ignore
+          path: |
+            minimal-predictive-lm/results/phase15d.json
+            minimal-predictive-lm/results/phase15d.md
