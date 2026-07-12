@@ -10,8 +10,10 @@ from .benchmark_harness import RunPolicy, answer_is_correct, run_command_adapter
 from .phase13a_experiment import build_phase13a_manifest
 from .phase13d_experiment import build_public_quantifier
 from .wordnet_ontology import (
+    OEWN_2025_SHA256,
     OEWN_2025_URL,
     OntologyBackedQuantifier,
+    OntologyDecision,
     WordNetNounOntology,
     download_pinned_wordnet,
 )
@@ -42,6 +44,21 @@ def _axis_scores(manifest, predictions: dict[str, str]) -> dict[str, dict[str, o
     return output
 
 
+def _decision_payload(
+    ontology: WordNetNounOntology,
+    decision: OntologyDecision,
+) -> dict[str, object]:
+    return {
+        "item": decision.item,
+        "concept": decision.concept,
+        "value": decision.value,
+        "reason": decision.reason,
+        "item_candidates": list(decision.item_candidates),
+        "concept_candidates": list(decision.concept_candidates),
+        "proof": [list(row) for row in ontology.proof_lemmas(decision)],
+    }
+
+
 def _cross_domain_queries(ontology: WordNetNounOntology) -> dict[str, object]:
     checks = (
         ("salmon", "animal", True),
@@ -58,12 +75,9 @@ def _cross_domain_queries(ontology: WordNetNounOntology) -> dict[str, object]:
         correct += int(decision.value is expected)
         rows.append(
             {
-                "item": item,
-                "concept": concept,
+                **_decision_payload(ontology, decision),
                 "expected": expected,
                 "observed": decision.value,
-                "reason": decision.reason,
-                "proof": [list(row) for row in ontology.proof_lemmas(decision)],
             }
         )
     return {
@@ -74,17 +88,22 @@ def _cross_domain_queries(ontology: WordNetNounOntology) -> dict[str, object]:
     }
 
 
-def _collect_public_proofs(manifest, ontology: WordNetNounOntology) -> dict[str, object]:
+def _collect_public_proofs(
+    manifest,
+    ontology: WordNetNounOntology,
+    predictions: dict[str, str],
+) -> dict[str, object]:
     grounded = OntologyBackedQuantifier(build_public_quantifier(), ontology)
     proof_examples: dict[str, object] = {}
     unresolved_items: set[str] = set()
+    wrong_examples: list[dict[str, object]] = []
     resolved_true = 0
     resolved_false = 0
     unknown = 0
     for example in manifest.examples:
         if example.axis != "object_counting":
             continue
-        grounded.answer(example.prompt)
+        local_answer = grounded.answer(example.prompt)
         parsed = grounded.base.parse(example.prompt)
         if parsed is None:
             continue
@@ -93,23 +112,40 @@ def _collect_public_proofs(manifest, ontology: WordNetNounOntology) -> dict[str,
                 resolved_true += 1
                 proof_examples.setdefault(
                     parsed.query_concept,
-                    {
-                        "item": decision.item,
-                        "concept": decision.concept,
-                        "proof": [list(row) for row in ontology.proof_lemmas(decision)],
-                    },
+                    _decision_payload(ontology, decision),
                 )
             elif decision.value is False:
                 resolved_false += 1
             else:
                 unknown += 1
                 unresolved_items.add(decision.item)
+        prediction = predictions.get(example.example_id, "")
+        if not answer_is_correct(example, prediction):
+            wrong_examples.append(
+                {
+                    "id": example.example_id,
+                    "prompt": example.prompt,
+                    "query_concept": parsed.query_concept,
+                    "target": example.target,
+                    "worker_prediction": prediction,
+                    "local_answer": local_answer,
+                    "items": [
+                        {
+                            "surface": item.surface,
+                            "quantity": item.quantity,
+                            "decision": _decision_payload(ontology, decision),
+                        }
+                        for item, decision in zip(parsed.items, grounded.last_decisions)
+                    ],
+                }
+            )
     return {
         "resolved_true": resolved_true,
         "resolved_false": resolved_false,
         "unknown": unknown,
         "unresolved_items": sorted(unresolved_items),
         "proof_examples": proof_examples,
+        "wrong_examples": wrong_examples,
     }
 
 
@@ -150,7 +186,7 @@ def run() -> dict[str, object]:
 
     ontology = WordNetNounOntology.from_zip_path(source_path)
     cross_domain = _cross_domain_queries(ontology)
-    public_proofs = _collect_public_proofs(manifest, ontology)
+    public_proofs = _collect_public_proofs(manifest, ontology, after_predictions)
     ontology_metrics = ontology.metrics()
     cache_bytes = (ontology_metrics.cache_bits + 7) // 8
 
@@ -169,6 +205,7 @@ def run() -> dict[str, object]:
             "license_id": "CC-BY-4.0",
             "release": "2025",
             "source_sha256": source_sha256,
+            "expected_source_sha256": OEWN_2025_SHA256,
             "source_bytes": source_bytes,
             "noun_synsets": ontology_metrics.synsets,
             "lemmas": ontology_metrics.lemmas,
@@ -204,7 +241,7 @@ def run() -> dict[str, object]:
         },
         "gates": {
             "general_external_ontology_used": True,
-            "source_checksum_observed": bool(source_sha256),
+            "source_checksum_pinned": source_sha256 == OEWN_2025_SHA256,
             "benchmark_specialization_used": False,
             "cross_domain_transfer_passed": cross_domain["accuracy"] == 1.0,
             "object_counting_fully_resolved": after_axes["object_counting"]["accuracy"] == 1.0,
@@ -216,7 +253,6 @@ def run() -> dict[str, object]:
         },
         "limitations": [
             "Open English WordNet is a large human-curated external knowledge resource rather than knowledge induced from the model's own experience",
-            "the archive checksum is observed in this first run and must be frozen in a follow-up commit",
             "word-sense disambiguation uses an any-sense hypernym rule and can over-classify genuinely ambiguous words",
             "compound and plural normalization is a bounded human-designed morphology layer",
             "the full external ontology cost is counted in model_bytes even though only a small proof cache is used",
@@ -230,6 +266,7 @@ def render_markdown(payload: dict[str, object]) -> str:
     ontology = payload["ontology"]
     before = payload["before"]
     after = payload["after"]
+    wrong_count = len(ontology["public_proofs"]["wrong_examples"])
     lines = [
         "# Phase 14a results: pinned general ontology with proof-cache compilation",
         "",
@@ -263,6 +300,7 @@ def render_markdown(payload: dict[str, object]) -> str:
             f"Overall: **{100 * before['score']['overall_accuracy']:.1f}% → {100 * after['score']['overall_accuracy']:.1f}%**",
             f"Coverage: **{100 * before['score']['coverage']:.1f}% → {100 * after['score']['coverage']:.1f}%**",
             f"Answered/correct: **{after['score']['answered']} / {after['score']['correct']}**",
+            f"Saved wrong-example diagnostics: **{wrong_count}**",
             "",
             "## Claim boundary",
             "",
