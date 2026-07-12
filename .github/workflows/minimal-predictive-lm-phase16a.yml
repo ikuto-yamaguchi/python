@@ -35,6 +35,9 @@ jobs:
       - name: Run frozen public Phase 16a experiment
         working-directory: minimal-predictive-lm
         run: mpm-phase16a
+      - name: Capture non-abstention diagnostics
+        working-directory: minimal-predictive-lm
+        run: python -m minimal_predictive_lm.phase16a_diagnostic
       - name: Upload Phase 16a diagnostics and results
         if: always()
         uses: actions/upload-artifact@v4
@@ -46,3 +49,4 @@ jobs:
             minimal-predictive-lm/results/phase16a-test.log
             minimal-predictive-lm/results/phase16a.json
             minimal-predictive-lm/results/phase16a.md
+            minimal-predictive-lm/results/phase16a_diagnostic.json
