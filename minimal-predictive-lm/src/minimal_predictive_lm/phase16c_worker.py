@@ -7,7 +7,7 @@ import sys
 
 from .aggregate_routing import phase12_prompt_eligibility, routing_guard_description_bits
 from .benchmark_harness import ABSTAIN_TOKEN
-from .generic_proposition_machine import GenericPropositionMachine
+from .corrected_proposition_machine import CorrectedPropositionMachine
 from .generic_state_machine import GenericStateMachine
 from .generic_temporal_state import GenericTemporalMachine
 from .mixed_task_learner import induce_mixed_task_model
@@ -34,7 +34,7 @@ def main() -> None:
     algebra = build_guarded_algebra_model()
     state_machine = GenericStateMachine()
     temporal_machine = GenericTemporalMachine()
-    proposition_machine = GenericPropositionMachine()
+    proposition_machine = CorrectedPropositionMachine()
     quantifier = build_public_quantifier()
     wordnet = WordNetNounOntology.from_zip_path(source_path)
     document_graph = build_phase14b_graph()
