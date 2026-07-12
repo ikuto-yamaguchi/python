@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from minimal_predictive_lm.phase18a3_local_case_grammar import (
+from minimal_predictive_lm.phase18a3_local_case_grammar_v2 import (
     TRAINING_SPECS,
     contradictory_cycle_is_rejected,
     disconnected_graph_is_rejected,
