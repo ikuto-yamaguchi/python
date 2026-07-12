@@ -84,7 +84,7 @@ class Phase16bGenericPropositionMachineTests(unittest.TestCase):
 
     def test_none_of_disjunction_has_negation_over_full_scope(self) -> None:
         prompt = (
-            '"First premise: Every person who is calm is focused. '
+            '"First premise: Everyone who is calm is focused. '
             "Second premise: Whoever is neither noisy nor hurried is calm. "
             "Therefore, whoever is none of this: noisy or hurried, is focused.\"\n"
             "Is the argument, given the explicitly stated premises, "
