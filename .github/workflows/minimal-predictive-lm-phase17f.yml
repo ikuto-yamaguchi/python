@@ -1,0 +1,50 @@
+name: minimal-predictive-lm-phase17f
+
+on:
+  pull_request:
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/phase17d_*.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/phase17e_*.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/phase17f_*.py"
+      - "minimal-predictive-lm/tests/test_phase17f_*.py"
+      - "minimal-predictive-lm/docs/phase17f_*.md"
+      - ".github/workflows/minimal-predictive-lm-phase17f.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  phase17f:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: minimal-predictive-lm/pyproject.toml
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm
+      - name: Linear semantic induction theorem tests
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p minimal-predictive-lm/results
+          python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase17f_linear_semantic_induction.py' -v 2>&1 | tee minimal-predictive-lm/results/phase17f-test.log
+      - name: Run linear semantic scaling experiment
+        working-directory: minimal-predictive-lm
+        run: python -m minimal_predictive_lm.phase17f_linear_semantic_induction
+      - name: Upload Phase 17f diagnostics and results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase17f-results
+          retention-days: 7
+          if-no-files-found: warn
+          path: |
+            minimal-predictive-lm/results/phase17f-test.log
+            minimal-predictive-lm/results/phase17f.json
+            minimal-predictive-lm/results/phase17f.md
