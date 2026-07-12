@@ -1,0 +1,79 @@
+{
+  "adaptation_protocol": {
+    "public_surface_formats_inspected": true,
+    "strict_zero_shot_claim": false,
+    "benchmark_examples_used_as_training_rows": 0,
+    "benchmark_targets_used_as_training_rows": 0,
+    "human_designed_surface_compilers": 4,
+    "benchmark_task_name_branches": 0,
+    "shared_runtime": true,
+    "date_capability_intentionally_not_added": true
+  },
+  "state_machine": {
+    "description_bits": 1784,
+    "description_bytes": 223,
+    "runtime_operations": ["push", "pop", "turn", "move_relative", "move_absolute", "swap", "less", "rank"],
+    "query_operations": ["close_stack", "at_origin", "map_option", "order_option"],
+    "compiler_count": 4,
+    "benchmark_task_name_branches": 0,
+    "cross_domain_heldout": {
+      "examples": 8,
+      "correct": 8,
+      "accuracy": 1.0
+    }
+  },
+  "suite": {
+    "name": "phase15a-frozen-unseen-public-capabilities",
+    "manifest_sha256": "571132e48105bc59221674d52fcafb40e131afd32ae5d830b4687a60651e8967",
+    "examples": 200,
+    "axes": 5
+  },
+  "before": {
+    "examples": 200,
+    "answered": 0,
+    "correct": 0,
+    "accuracy": 0.0,
+    "coverage": 0.0
+  },
+  "after": {
+    "examples": 200,
+    "answered": 160,
+    "correct": 160,
+    "accuracy": 0.8,
+    "coverage": 0.8,
+    "selective_accuracy": 1.0,
+    "axis_accuracy": {
+      "date_understanding": 0.0,
+      "logical_ordering": 1.0,
+      "spatial_navigation": 1.0,
+      "stack_completion": 1.0,
+      "state_permutation_tracking": 1.0
+    },
+    "resources": {
+      "model_bytes": 9620715,
+      "peak_rss_bytes": 127500288,
+      "wall_ns": 7057033083,
+      "cpu_ns": 7380548000,
+      "operations": 10469,
+      "reads": 1861,
+      "writes": 1449
+    }
+  },
+  "original_public_regression": {
+    "examples": 200,
+    "answered": 200,
+    "correct": 200,
+    "accuracy": 1.0
+  },
+  "gates": {
+    "cross_domain_shared_runtime_passed": true,
+    "four_state_axes_fully_resolved": true,
+    "date_axis_remains_abstention": true,
+    "all_answered_predictions_correct": true,
+    "original_public_200_of_200_retained": true,
+    "benchmark_task_name_specialization_used": false,
+    "benchmark_surface_adaptation_used": true,
+    "general_runtime_claim_allowed": false,
+    "general_llm_parity_allowed": false
+  }
+}
