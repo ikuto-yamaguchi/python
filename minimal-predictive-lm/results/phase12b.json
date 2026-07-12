@@ -1,0 +1,66 @@
+{
+  "suite": {
+    "name": "phase12a-mixed-micro-suite",
+    "manifest_sha256": "6e181a388cc177ebe7b7ab9327233dc70b12bd06f64b3b126bfebb943fba3fdd",
+    "examples": 70,
+    "axes": 7,
+    "public_examples": 40,
+    "public_axes": 1,
+    "fully_public": false,
+    "public_arithmetic_source_sha256": "6d12670a3d2e71dd5603810c8c940220c4898c467692200979515d4dcbc67d37"
+  },
+  "calibration": {
+    "examples": 40,
+    "prompt_output_examples_matched": true,
+    "mpm_structured_state_evidence": true,
+    "smollm2_structured_state_evidence": false
+  },
+  "mpm": {
+    "score": {"examples": 70, "answered": 70, "correct": 70, "overall_accuracy": 1.0, "selective_accuracy": 1.0, "coverage": 1.0},
+    "axis_scores": {
+      "composition": {"examples": 4, "correct": 4, "accuracy": 1.0},
+      "conditional_execution": {"examples": 6, "correct": 6, "accuracy": 1.0},
+      "event_extraction": {"examples": 4, "correct": 4, "accuracy": 1.0},
+      "mathematics_public": {"examples": 40, "correct": 40, "accuracy": 1.0},
+      "provenance": {"examples": 4, "correct": 4, "accuracy": 1.0},
+      "state_update": {"examples": 6, "correct": 6, "accuracy": 1.0},
+      "string_transformation": {"examples": 6, "correct": 6, "accuracy": 1.0}
+    },
+    "resources": {"model_bytes": 892, "peak_rss_bytes": 50737152, "wall_ns": 4328707269, "cpu_ns": 4636869999, "operations": 483, "reads": 143, "writes": 70, "energy_joules": null},
+    "metadata": {"rules": 11, "candidate_evaluations": 108238, "domain_specific_handlers": 0, "calibration_examples": 40}
+  },
+  "smollm2": {
+    "score": {"examples": 70, "answered": 70, "correct": 25, "overall_accuracy": 0.35714285714285715, "selective_accuracy": 0.35714285714285715, "coverage": 1.0},
+    "axis_scores": {
+      "composition": {"examples": 4, "correct": 1, "accuracy": 0.25},
+      "conditional_execution": {"examples": 6, "correct": 3, "accuracy": 0.5},
+      "event_extraction": {"examples": 4, "correct": 4, "accuracy": 1.0},
+      "mathematics_public": {"examples": 40, "correct": 13, "accuracy": 0.325},
+      "provenance": {"examples": 4, "correct": 4, "accuracy": 1.0},
+      "state_update": {"examples": 6, "correct": 0, "accuracy": 0.0},
+      "string_transformation": {"examples": 6, "correct": 0, "accuracy": 0.0}
+    },
+    "resources": {"model_bytes": 538060032, "peak_rss_bytes": 1856081920, "wall_ns": 174367687767, "cpu_ns": 567379052999, "operations": 0, "reads": 76862, "writes": 609, "energy_joules": null},
+    "metadata": {"model_id": "HuggingFaceTB/SmolLM2-135M-Instruct", "requested_revision": "12fd25f77366fa6b3b4b768ec3050bf629380bac", "resolved_revision": "12fd25f77366fa6b3b4b768ec3050bf629380bac", "max_new_tokens": 24, "batch_size": 8, "torch_version": "2.7.1+cpu", "same_prompt_output_calibration_examples": 40, "total_input_tokens": 76862, "total_output_tokens": 609, "state_transition_evidence_visible": false}
+  },
+  "exploratory_comparison": {
+    "overall_accuracy_delta_mpm_minus_smollm2": 0.6428571428571428,
+    "runtime_ratios": {"model_bytes_smollm2_over_mpm": 603206.3139013452, "peak_rss_smollm2_over_mpm": 36.582304028416885, "wall_time_smollm2_over_mpm": 40.28170003911623},
+    "fairness_violations": ["benchmark_not_public", "calibration_observability_mismatch_on_state_transition", "mixed_suite_not_fully_public"],
+    "exploratory_result_available": true,
+    "strict_parity_claim_allowed": false,
+    "runtime_pareto_claim_allowed": false,
+    "public_multi_domain_parity_allowed": false,
+    "general_llm_parity_allowed": false
+  },
+  "limitations": [
+    "six of seven axes are deterministic synthetic micro-tasks",
+    "MPM sees structured state-transition evidence for state calibration while SmolLM2 sees prompt-output demonstrations",
+    "SmolLM2 rereads all forty demonstrations for every query while MPM compiles them once",
+    "shared-prefix KV-cache reuse is not implemented for the SmolLM2 reference runner",
+    "model parameter bytes are measured after float32 loading",
+    "training, induction, and pretraining costs are not in one lifetime ledger",
+    "energy is not measured",
+    "the run cannot authorize public multi-domain or general LLM parity"
+  ]
+}
