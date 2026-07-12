@@ -14,8 +14,7 @@ def _normalize(value: str) -> str:
     text = unicodedata.normalize("NFKC", value).casefold()
     text = re.sub(r"[^a-z0-9 ]+", " ", text)
     words = [word for word in text.split() if word not in {"a", "an", "the"}]
-    normalized = [_singular(word) for word in words]
-    return "_".join(normalized)
+    return "_".join(_singular(word) for word in words)
 
 
 def _singular(word: str) -> str:
@@ -113,13 +112,23 @@ class ProvenanceConceptGraph:
             else:
                 self._negative.setdefault((edge.child, edge.parent), []).append(edge)
 
+    @property
+    def source_ids(self) -> tuple[str, ...]:
+        return tuple(sorted({edge.source_id for edge in self.edges}))
+
     def query(self, item: str, concept: str) -> GraphDecision:
         child = _normalize(item)
         parent = _normalize(concept)
         negative = tuple(self._negative.get((child, parent), ()))
         positive_path = self._positive_path(child, parent)
         if positive_path is not None and negative:
-            return GraphDecision(item, concept, None, positive_path + negative, "conflicting-evidence")
+            return GraphDecision(
+                item,
+                concept,
+                None,
+                positive_path + negative,
+                "conflicting-document-evidence",
+            )
         if positive_path is not None:
             return GraphDecision(item, concept, True, positive_path, "positive-provenance-path")
         if negative:
@@ -133,7 +142,7 @@ class ProvenanceConceptGraph:
         predecessor: dict[str, tuple[str, ConceptEdge] | None] = {child: None}
         while queue:
             node = queue.popleft()
-            for edge in self._positive.get(node, ()):  # child -> parent
+            for edge in self._positive.get(node, ()):
                 if edge.parent in predecessor:
                     continue
                 predecessor[edge.parent] = (node, edge)
@@ -157,6 +166,8 @@ class ProvenanceConceptGraph:
 
 
 class ProvenanceOverlayOntology:
+    """Conservative overlay for open-world WordNet plus explicit document evidence."""
+
     def __init__(
         self,
         base: WordNetNounOntology,
@@ -176,53 +187,90 @@ class ProvenanceOverlayOntology:
             self.cache_hits += 1
             return cached
 
-        graph_decision = self.graph.query(item, concept)
+        graph = self.graph.query(item, concept)
         wordnet = self.base.is_a(item, concept)
-        if graph_decision.value is not None:
-            decision = OverlayDecision(
-                item=item,
-                concept=concept,
-                value=graph_decision.value,
-                item_candidates=wordnet.item_candidates,
-                concept_candidates=wordnet.concept_candidates,
-                proof_offsets=wordnet.proof_offsets if wordnet.value is graph_decision.value else (),
-                reason=(
-                    graph_decision.reason
-                    if wordnet.value in {graph_decision.value, None}
-                    else "document-evidence-overrides-wordnet-open-world-absence"
-                ),
-                graph_proof=graph_decision.proof,
-                wordnet_decision=wordnet,
+
+        if graph.reason == "conflicting-document-evidence":
+            decision = self._decision(
+                item,
+                concept,
+                None,
+                wordnet,
+                graph,
+                "conflicting-document-evidence",
             )
-        elif graph_decision.reason == "conflicting-evidence":
-            decision = OverlayDecision(
-                item=item,
-                concept=concept,
-                value=None,
-                item_candidates=wordnet.item_candidates,
-                concept_candidates=wordnet.concept_candidates,
-                reason="conflicting-document-evidence",
-                graph_proof=graph_decision.proof,
-                wordnet_decision=wordnet,
+        elif graph.value is True:
+            decision = self._decision(
+                item,
+                concept,
+                True,
+                wordnet,
+                graph,
+                (
+                    "document-positive-and-wordnet-positive"
+                    if wordnet.value is True
+                    else "document-positive-fills-open-world-gap"
+                ),
+                keep_wordnet_proof=wordnet.value is True,
+            )
+        elif graph.value is False and wordnet.value is True:
+            decision = self._decision(
+                item,
+                concept,
+                None,
+                wordnet,
+                graph,
+                "explicit-document-negative-conflicts-with-wordnet-positive",
+                keep_wordnet_proof=True,
+            )
+        elif graph.value is False:
+            decision = self._decision(
+                item,
+                concept,
+                False,
+                wordnet,
+                graph,
+                "explicit-document-negative",
             )
         else:
-            decision = OverlayDecision(
-                item=item,
-                concept=concept,
-                value=wordnet.value,
-                item_candidates=wordnet.item_candidates,
-                concept_candidates=wordnet.concept_candidates,
-                proof_offsets=wordnet.proof_offsets,
-                reason=f"wordnet:{wordnet.reason}",
-                wordnet_decision=wordnet,
+            decision = self._decision(
+                item,
+                concept,
+                wordnet.value,
+                wordnet,
+                graph,
+                f"wordnet:{wordnet.reason}",
+                keep_wordnet_proof=True,
             )
+
         self._cache[key] = decision
         return decision
 
+    @staticmethod
+    def _decision(
+        item: str,
+        concept: str,
+        value: bool | None,
+        wordnet: OntologyDecision,
+        graph: GraphDecision,
+        reason: str,
+        *,
+        keep_wordnet_proof: bool = False,
+    ) -> OverlayDecision:
+        return OverlayDecision(
+            item=item,
+            concept=concept,
+            value=value,
+            item_candidates=wordnet.item_candidates,
+            concept_candidates=wordnet.concept_candidates,
+            proof_offsets=wordnet.proof_offsets if keep_wordnet_proof else (),
+            reason=reason,
+            graph_proof=graph.proof,
+            wordnet_decision=wordnet,
+        )
+
     def proof_lemmas(self, decision: OverlayDecision) -> tuple[tuple[str, ...], ...]:
-        if decision.proof_offsets:
-            return tuple(self.base.synsets[offset].lemmas for offset in decision.proof_offsets)
-        return ()
+        return tuple(self.base.synsets[offset].lemmas for offset in decision.proof_offsets)
 
     def cache_payload(self) -> object:
         return [
@@ -246,7 +294,7 @@ class ProvenanceOverlayOntology:
 
 _INCLUDE_RE = re.compile(r"^(.+?)\s+includes?\s+(.+)$", re.IGNORECASE)
 _POSITIVE_RE = re.compile(
-    r"^(?:every\s+)?(.+?)\s+(?:are|is\s+(?:a|an)|is\s+a\s+kind\s+of)\s+(.+)$",
+    r"^(?:every\s+)?(.+?)\s+(?:are|is\s+a\s+kind\s+of|is\s+(?:a|an))\s+(.+)$",
     re.IGNORECASE,
 )
 _NEGATIVE_RE = re.compile(
@@ -262,7 +310,9 @@ def _split_members(text: str) -> tuple[str, ...]:
 
 def extract_edges(document: DocumentObservation) -> tuple[ConceptEdge, ...]:
     edges: list[ConceptEdge] = []
-    sentences = [segment.strip() for segment in re.split(r"[.!?]+", document.text) if segment.strip()]
+    sentences = [
+        segment.strip() for segment in re.split(r"[.!?]+", document.text) if segment.strip()
+    ]
     for sentence in sentences:
         negative = _NEGATIVE_RE.match(sentence)
         if negative:
