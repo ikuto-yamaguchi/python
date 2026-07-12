@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 import json
 import re
-from typing import Iterable
 
 from .generic_state_machine import CompiledStateProgram, StateEvent, StatePrediction, StateQuery
 
@@ -24,6 +23,11 @@ _MONTHS.update(
 )
 _MONTHS.update({"sept": 9, "feburary": 2})
 _OPTION_RE = re.compile(r"^\(([A-F])\)\s*(\d{1,2}/\d{1,2}/\d{4})\s*$", re.MULTILINE)
+_NAMED_DATE_RE = re.compile(
+    r"\b([A-Za-z]+)\.?\s+(\d{1,2})(?:st|nd|rd|th)?(?:,)?\s+(\d{4})\b",
+    re.IGNORECASE,
+)
+_NUMERIC_DATE_RE = re.compile(r"(?<!\d)(\d{1,2})/(\d{1,2})/(\d{4})(?!\d)")
 
 
 def _bits(payload: object) -> int:
@@ -42,11 +46,7 @@ def _month_number(raw: str) -> int:
 
 
 def _parse_named_date(text: str) -> date | None:
-    match = re.search(
-        r"\b([A-Za-z]+)\.?\s+(\d{1,2})(?:st|nd|rd|th)?(?:,)?\s+(\d{4})\b",
-        text,
-        re.IGNORECASE,
-    )
+    match = _NAMED_DATE_RE.search(text)
     if not match:
         return None
     try:
@@ -56,7 +56,7 @@ def _parse_named_date(text: str) -> date | None:
 
 
 def _parse_numeric_date(text: str, *, day_first: bool = False) -> date | None:
-    match = re.search(r"(?<!\d)(\d{1,2})/(\d{1,2})/(\d{4})(?!\d)", text)
+    match = _NUMERIC_DATE_RE.search(text)
     if not match:
         return None
     first, second, year = map(int, match.groups())
@@ -72,7 +72,7 @@ def _parse_any_date(text: str, *, day_first: bool = False) -> date | None:
 
 
 def _shift_months(value: date, months: int) -> date:
-    index = value.year * 12 + (value.month - 1) + months
+    index = value.year * 12 + value.month - 1 + months
     year, zero_month = divmod(index, 12)
     month = zero_month + 1
     day = min(value.day, calendar.monthrange(year, month)[1])
@@ -86,8 +86,8 @@ def _shift_years(value: date, years: int) -> date:
 
 
 def _first_weekday(year: int, month: int, weekday: int) -> date:
-    candidate = date(year, month, 1)
-    return candidate + timedelta(days=(weekday - candidate.weekday()) % 7)
+    start = date(year, month, 1)
+    return start + timedelta(days=(weekday - start.weekday()) % 7)
 
 
 def _palindrome_day(year: int) -> date | None:
@@ -129,9 +129,8 @@ def _derive_today(context: str) -> tuple[date | None, str]:
     if match:
         return date(int(match.group(1)), 12, 24), "named-holiday"
 
-    if "people usually put the day before the month" in lowered:
-        value = _parse_numeric_date(context, day_first=True)
-        return value, "locale-date"
+    if "day before the month" in lowered:
+        return _parse_numeric_date(context, day_first=True), "locale-date"
 
     correctness = re.search(
         r"Jane thinks today is\s+([^,]+),\s+but John thinks today is\s+([^\.]+)\.\s+(Jane|John) is correct",
@@ -151,7 +150,11 @@ def _derive_today(context: str) -> tuple[date | None, str]:
         base = _parse_any_date(marriage.group(1))
         return (_shift_years(base, int(marriage.group(2))) if base else None), "anniversary"
 
-    golden = re.search(r"married on\s+(.+?)\.\s+Today is their golden wedding anniversary", context, re.IGNORECASE)
+    golden = re.search(
+        r"married on\s+(.+?)\.\s+Today is their golden wedding anniversary",
+        context,
+        re.IGNORECASE,
+    )
     if golden:
         base = _parse_any_date(golden.group(1))
         return (_shift_years(base, 50) if base else None), "golden-anniversary"
@@ -175,12 +178,20 @@ def _derive_today(context: str) -> tuple[date | None, str]:
         base = _parse_any_date(eggs.group(1))
         return (base + timedelta(days=int(eggs.group(2))) if base else None), "daily-consumption"
 
-    elapsed = re.search(r"on\s+(.+?)\.\s+(\d+) days have passed since then", context, re.IGNORECASE)
+    elapsed = re.search(
+        r"on\s+(.+?)\.\s+(\d+) days have passed since then",
+        context,
+        re.IGNORECASE,
+    )
     if elapsed:
         base = _parse_any_date(elapsed.group(1))
         return (base + timedelta(days=int(elapsed.group(2))) if base else None), "elapsed-days"
 
-    ten_years = re.search(r"(.+?) is like yesterday.*?actually ten years ago", context, re.IGNORECASE)
+    ten_years = re.search(
+        r"(.+?) is like yesterday.*?actually ten years ago",
+        context,
+        re.IGNORECASE,
+    )
     if ten_years:
         base = _parse_any_date(ten_years.group(1))
         return (_shift_years(base, 10) if base else None), "relative-years"
@@ -210,46 +221,55 @@ def _derive_today(context: str) -> tuple[date | None, str]:
     if last_year:
         return date(int(last_year.group(1)), 12, 31), "year-boundary"
 
-    ordinal_month = re.search(
-        r"second day of the third month of\s+(\d{4})",
-        lowered,
-    )
+    ordinal_month = re.search(r"second day of the third month of\s+(\d{4})", lowered)
     if ordinal_month:
         return date(int(ordinal_month.group(1)), 3, 2), "ordinal-date"
 
-    deadline = re.search(r"deadline is\s+(.+?),\s+which is\s+(\d+)\s+days? away from now", context, re.IGNORECASE)
+    deadline = re.search(
+        r"deadline is\s+(.+?),\s+which is\s+(\d+)\s+days? away from now",
+        context,
+        re.IGNORECASE,
+    )
     if deadline:
         due = _parse_any_date(deadline.group(1))
         return (due - timedelta(days=int(deadline.group(2))) if due else None), "future-offset-anchor"
 
-    tomorrow = re.search(r"tomorrow(?:\s*\([^)]*?([0-9]+/[0-9]+/[0-9]+)\)|,?\s+([A-Za-z]+\.?\s+\d{1,2}(?:st|nd|rd|th)?(?:,)?\s+\d{4})|\s+is\s+([0-9]+/[0-9]+/[0-9]+))", context, re.IGNORECASE)
-    if tomorrow:
-        raw = next(value for value in tomorrow.groups() if value)
-        anchor = _parse_any_date(raw)
-        return (anchor - timedelta(days=1) if anchor else None), "tomorrow-anchor"
+    tomorrow_match = re.search(r"\btomorrow\b([^.]*)", context, re.IGNORECASE)
+    if tomorrow_match:
+        anchor = _parse_any_date(tomorrow_match.group(0))
+        if anchor is not None:
+            return anchor - timedelta(days=1), "tomorrow-anchor"
 
-    yesterday = re.search(r"Yesterday(?: was|,)?\s+(.+?)(?:\.|,\s+Jane)", context, re.IGNORECASE)
-    if yesterday:
-        anchor = _parse_any_date(yesterday.group(1))
-        return (anchor + timedelta(days=1) if anchor else None), "yesterday-anchor"
+    yesterday_match = re.search(r"\bYesterday\b([^.]*)", context, re.IGNORECASE)
+    if yesterday_match:
+        anchor = _parse_any_date(yesterday_match.group(0))
+        if anchor is not None:
+            return anchor + timedelta(days=1), "yesterday-anchor"
 
-    current_time = re.search(r"current local time is.+?of\s+([0-9]+/[0-9]+/[0-9]+)", context, re.IGNORECASE)
+    current_time = re.search(
+        r"current local time is.+?of\s+([0-9]+/[0-9]+/[0-9]+)",
+        context,
+        re.IGNORECASE,
+    )
     if current_time:
         return _parse_any_date(current_time.group(1)), "clock-date"
 
-    direct_patterns = (
-        r"Today is\s+(.+?)(?:\.|,|$)",
-        r"Today,\s+(.+?),\s+is",
-        r"It is\s+(.+?)\s+today",
+    direct_named = re.search(
+        r"\bToday is\s+([A-Za-z]+\.?\s+\d{1,2}(?:st|nd|rd|th)?(?:,)?\s+\d{4})",
+        context,
+        re.IGNORECASE,
     )
-    for pattern in direct_patterns:
-        match = re.search(pattern, context, re.IGNORECASE)
-        if match:
-            value = _parse_any_date(match.group(1))
-            if value is not None:
-                return value, "direct-today"
+    if direct_named:
+        return _parse_named_date(direct_named.group(1)), "direct-today"
 
-    # A sub-two-day statement without a time-of-day does not uniquely identify a date.
+    direct_numeric = re.search(
+        r"(?:\bToday is|\bToday,|\bIt is)\s*(\d{1,2}/\d{1,2}/\d{4})(?:\s+today)?",
+        context,
+        re.IGNORECASE,
+    )
+    if direct_numeric:
+        return _parse_numeric_date(direct_numeric.group(1)), "direct-today"
+
     if re.search(r"coming in\s+\d+\s+hours", lowered):
         return None, "time-of-day-ambiguous"
 
@@ -267,8 +287,7 @@ class TemporalPrediction:
 
 class TemporalStateRuntime:
     def execute(self, program: CompiledStateProgram) -> StatePrediction:
-        initial = dict(program.initial_state)
-        current = date.fromisoformat(str(initial["today"]))
+        current = date.fromisoformat(str(dict(program.initial_state)["today"]))
         operations = reads = writes = 0
         for event in program.events:
             operations += 1
