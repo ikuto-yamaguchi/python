@@ -164,6 +164,7 @@ cd minimal-predictive-lm
 pip install -e .
 python -m unittest discover -s tests -v
 mpm-phase12a
+# optional torch/transformers dependencies are required for mpm-phase12b
 ```
 
 GitHub ActionsではPhase 1から最新の軽量Phaseまで全unit test・全再現実験を実行します。重いSmolLM2比較は手動またはmain上の比較コード変更時だけ走ります。
