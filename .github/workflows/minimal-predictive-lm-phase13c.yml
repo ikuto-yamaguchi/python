@@ -1,0 +1,42 @@
+name: minimal-predictive-lm-phase13c
+
+on:
+  pull_request:
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/generic_algebra.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/phase13c_*.py"
+      - "minimal-predictive-lm/tests/test_phase13c_*.py"
+      - "minimal-predictive-lm/pyproject.toml"
+      - ".github/workflows/minimal-predictive-lm-phase13c.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  phase13c:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: minimal-predictive-lm/pyproject.toml
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm
+      - name: Scope correction regression tests
+        run: python -m unittest discover -s minimal-predictive-lm/tests -p 'test_phase13c_unary_scope.py' -v
+      - name: Run public Phase 13c experiment
+        working-directory: minimal-predictive-lm
+        run: mpm-phase13c
+      - name: Upload Phase 13c result
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase13c-results
+          retention-days: 7
+          path: |
+            minimal-predictive-lm/results/phase13c.json
+            minimal-predictive-lm/results/phase13c.md
