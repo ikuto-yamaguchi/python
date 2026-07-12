@@ -1,0 +1,68 @@
+{
+  "suite": {
+    "name": "phase12a-mixed-micro-suite",
+    "manifest_sha256": "6e181a388cc177ebe7b7ab9327233dc70b12bd06f64b3b126bfebb943fba3fdd",
+    "examples": 70,
+    "axes": 7,
+    "public_examples": 40,
+    "public_axes": 1,
+    "fully_public": false,
+    "public_arithmetic_source_sha256": "6d12670a3d2e71dd5603810c8c940220c4898c467692200979515d4dcbc67d37",
+    "calibration_examples": 40,
+    "calibration_prompt_overlap": 0,
+    "public_calibration_prompt_overlap": 0
+  },
+  "model": {
+    "rules": 11,
+    "description_bits": 7136,
+    "description_bytes": 892,
+    "candidate_evaluations": 108238,
+    "domain_specific_handlers": 0,
+    "calibration_accuracy": 1.0
+  },
+  "score": {
+    "examples": 70,
+    "answered": 70,
+    "correct": 70,
+    "overall_accuracy": 1.0,
+    "selective_accuracy": 1.0,
+    "coverage": 1.0
+  },
+  "axis_scores": {
+    "composition": {"examples": 4, "correct": 4, "accuracy": 1.0},
+    "conditional_execution": {"examples": 6, "correct": 6, "accuracy": 1.0},
+    "event_extraction": {"examples": 4, "correct": 4, "accuracy": 1.0},
+    "mathematics_public": {"examples": 40, "correct": 40, "accuracy": 1.0},
+    "provenance": {"examples": 4, "correct": 4, "accuracy": 1.0},
+    "state_update": {"examples": 6, "correct": 6, "accuracy": 1.0},
+    "string_transformation": {"examples": 6, "correct": 6, "accuracy": 1.0}
+  },
+  "resources": {
+    "model_bytes": 892,
+    "peak_rss_bytes": 50397184,
+    "wall_ns": 5411587054,
+    "cpu_ns": 5719407000,
+    "operations": 483,
+    "reads": 143,
+    "writes": 70,
+    "energy_joules": null
+  },
+  "gates": {
+    "mixed_multi_axis_execution_success": true,
+    "same_learner_all_axes": true,
+    "narrow_public_comparison_already_available": true,
+    "mixed_suite_ready_for_exploratory_open_model_run": true,
+    "public_multi_domain_parity_allowed": false,
+    "general_llm_parity_allowed": false,
+    "stage_c_score_changed": false
+  },
+  "limitations": [
+    "only the arithmetic slice is a pinned public benchmark",
+    "the remaining axes are deterministic synthetic micro-tasks",
+    "generic extraction still relies on numbers and ASCII key=value structure",
+    "lexical routing is learned from a small calibration set rather than open language",
+    "the invented string primitive is limited to affine character transforms",
+    "natural-language generation, long-context understanding, and open-domain knowledge are not tested",
+    "a successful mixed micro-suite cannot establish general LLM parity"
+  ]
+}
