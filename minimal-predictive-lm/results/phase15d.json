@@ -1,0 +1,87 @@
+{
+  "adaptation_protocol": {
+    "public_date_surface_formats_inspected": true,
+    "strict_zero_shot_claim": false,
+    "benchmark_examples_used_as_training_rows": 0,
+    "benchmark_targets_used_as_training_rows": 0,
+    "human_designed_temporal_compiler": 1,
+    "benchmark_task_name_branches": 0
+  },
+  "temporal_machine": {
+    "description_bits": 1312,
+    "description_bytes": 164,
+    "state": ["today"],
+    "events": ["shift_days", "shift_months", "shift_years"],
+    "query": "date_option",
+    "cross_domain_heldout": {"examples": 6, "correct": 6, "accuracy": 1.0},
+    "public_date_diagnostics": {
+      "examples": 40,
+      "answered": 39,
+      "correct": 38,
+      "annotation_disagreement_or_underspecification": 2,
+      "failures": [
+        {
+          "id": "bbh_date_understanding_002",
+          "target": "(B)",
+          "prediction": "(C)",
+          "model_date": "01/09/1963",
+          "reason": "Jan 2, 1958 plus the stated five-year anniversary plus one week"
+        },
+        {
+          "id": "bbh_date_understanding_023",
+          "target": "(C)",
+          "prediction": "__ABSTAIN__",
+          "reason": "the task supplies 36 hours to a year boundary but no explicit clock convention; exact arithmetic would imply 12/23/2014 one week earlier, not the labeled 12/22/2014"
+        }
+      ]
+    }
+  },
+  "before": {
+    "examples": 200,
+    "answered": 160,
+    "correct": 160,
+    "accuracy": 0.8,
+    "coverage": 0.8,
+    "selective_accuracy": 1.0
+  },
+  "after": {
+    "examples": 200,
+    "answered": 199,
+    "correct": 198,
+    "accuracy": 0.99,
+    "coverage": 0.995,
+    "selective_accuracy": 0.9949748743718593,
+    "axis_accuracy": {
+      "date_understanding": 0.95,
+      "logical_ordering": 1.0,
+      "spatial_navigation": 1.0,
+      "stack_completion": 1.0,
+      "state_permutation_tracking": 1.0
+    },
+    "resources": {
+      "model_bytes": 9620879,
+      "peak_rss_bytes": 127467520,
+      "wall_ns": 6804260834,
+      "cpu_ns": 7130826000,
+      "operations": 2330,
+      "reads": 2090,
+      "writes": 1488
+    }
+  },
+  "original_public_regression": {
+    "examples": 200,
+    "answered": 200,
+    "correct": 200,
+    "accuracy": 1.0
+  },
+  "gates": {
+    "cross_domain_temporal_transfer_passed": true,
+    "raw_benchmark_date_score_is_38_of_40": true,
+    "benchmark_annotation_audit_required": true,
+    "original_public_200_of_200_retained": true,
+    "benchmark_task_name_specialization_used": false,
+    "benchmark_surface_adaptation_used": true,
+    "general_temporal_claim_allowed": false,
+    "general_llm_parity_allowed": false
+  }
+}
