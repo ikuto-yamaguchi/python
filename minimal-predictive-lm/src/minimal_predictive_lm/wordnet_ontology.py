@@ -16,9 +16,7 @@ from .generic_quantifier import GenericQuantifierProgram, IdentifiabilityInterva
 
 
 OEWN_2025_URL = "https://en-word.net/static/english-wordnet-2025.zip"
-# Filled after the first dedicated CI download. Keeping this optional allows the
-# source checksum to be observed before it is frozen in a follow-up commit.
-OEWN_2025_SHA256: str | None = None
+OEWN_2025_SHA256 = "38b16326159f51853626b7d24a44c453fa88ab33f06fce5ec8fc5996d1c2be93"
 
 
 def _normalize_text(value: str) -> str:
