@@ -6,14 +6,100 @@ import os
 from pathlib import Path
 import sys
 
-from .benchmark_harness import RunPolicy, run_command_adapter, score_report
-from .generic_proposition_machine import GenericPropositionMachine
+from .benchmark_harness import BenchmarkExample, RunPolicy, answer_is_correct, run_command_adapter, score_report
+from .corrected_proposition_machine import CorrectedPropositionMachine
 from .phase13a_experiment import build_phase13a_manifest
 from .phase15a_experiment import axis_scores
 from .phase15a_public_benchmarks import load_phase15a_public_transfer_suite
 from .phase16a_experiment import failure_examples
 from .phase16a_public_benchmarks import load_phase16a_public_transfer_suite
 from .wordnet_ontology import download_pinned_wordnet
+
+
+def independent_proposition_examples() -> tuple[BenchmarkExample, ...]:
+    return (
+        BenchmarkExample(
+            "claim_testimony_chain",
+            "testimony",
+            (
+                "Question: Mira is reliable. Sol reports Mira is reliable. "
+                "Taro reports Sol is unreliable. Does Taro tell the truth?"
+            ),
+            "No",
+        ),
+        BenchmarkExample(
+            "claim_sensor_chain",
+            "sensor_audit",
+            (
+                "Question: SensorA is accurate. SensorB claims SensorA is inaccurate. "
+                "SensorC reports SensorB is correct. Does SensorC tell the truth?"
+            ),
+            "No",
+        ),
+        BenchmarkExample(
+            "claim_review_chain",
+            "code_review",
+            (
+                "Question: PatchA is valid. ReviewerB says PatchA is invalid. "
+                "ReviewerC claims ReviewerB is wrong. Does ReviewerC tell the truth?"
+            ),
+            "Yes",
+        ),
+        BenchmarkExample(
+            "formal_valid_contraposition",
+            "controlled_formal_logic",
+            (
+                '"First premise: Every quiet traveler is an awake person. '
+                "Second premise: No awake person is an indoor person. "
+                "Therefore, no quiet traveler is an indoor person.\"\n"
+                "Is the argument, given the explicitly stated premises, deductively valid or invalid?\n"
+                "Options:\n- valid \n- invalid"
+            ),
+            "valid",
+        ),
+        BenchmarkExample(
+            "formal_invalid_converse",
+            "controlled_formal_logic",
+            (
+                '"First premise: Every quiet traveler is an awake person. '
+                "Therefore, every awake person is a quiet traveler.\"\n"
+                "Is the argument, given the explicitly stated premises, deductively valid or invalid?\n"
+                "Options:\n- valid \n- invalid"
+            ),
+            "invalid",
+        ),
+    )
+
+
+def independent_proposition_score(machine: CorrectedPropositionMachine) -> dict[str, object]:
+    predictions: dict[str, str] = {}
+    correct = 0
+    family_counts: dict[str, int] = {}
+    for row in independent_proposition_examples():
+        prediction = machine.predict(row.prompt)
+        text = prediction.output or "__ABSTAIN__"
+        predictions[row.example_id] = text
+        if prediction.family is not None:
+            family_counts[prediction.family] = family_counts.get(prediction.family, 0) + 1
+        correct += int(answer_is_correct(row, text))
+
+    contradiction = machine.predict(
+        "Question: BaseA is reliable. JudgeB says BaseA is reliable. "
+        "JudgeB says BaseA is unreliable. Does JudgeB tell the truth?"
+    )
+    unanchored = machine.predict(
+        "Question: AnchorA is reliable. NodeB says NodeC is reliable. "
+        "NodeC says NodeB is reliable. Does NodeB tell the truth?"
+    )
+    return {
+        "examples": len(independent_proposition_examples()),
+        "correct": correct,
+        "accuracy": correct / len(independent_proposition_examples()),
+        "predictions": predictions,
+        "family_counts": family_counts,
+        "contradiction_abstained": contradiction.output is None,
+        "unanchored_cycle_abstained": unanchored.output is None,
+    }
 
 
 def run() -> dict[str, object]:
@@ -74,22 +160,25 @@ def run() -> dict[str, object]:
     after_predictions = {row.example_id: row.text for row in after.predictions}
     before_axes = axis_scores(third, before_predictions)
     after_axes = axis_scores(third, after_predictions)
-    runtime = GenericPropositionMachine()
+    runtime = CorrectedPropositionMachine()
+    independent = independent_proposition_score(runtime)
 
     return {
         "runtime": {
-            "name": "shared-parity-and-monadic-proposition-machine",
+            "name": "induced-signed-claim-and-monadic-proposition-machine",
             "description_bits": runtime.description_bits,
             "description_bytes": (runtime.description_bits + 7) // 8,
             "human_designed_surface_compilers": runtime.human_designed_surface_compilers,
             "benchmark_task_name_branches": runtime.benchmark_task_name_branches,
+            "truth_phrase_groundings": len(runtime.claim_machine.truth_phrases),
+            "attribution_phrase_groundings": len(runtime.claim_machine.attribution_phrases),
             "shared_mechanisms": [
-                "signed parity constraint propagation",
+                "signed fixed-point claim propagation",
                 "Boolean expression algebra",
                 "finite-model entailment for equality-free monadic logic",
-                "contradiction-aware abstention",
+                "contradiction and unanchored-cycle abstention",
             ],
-            "independent_unit_tests": 6,
+            "independent_cross_domain": independent,
         },
         "adaptation_protocol": {
             "public_benchmark_format_inspected": True,
@@ -100,6 +189,7 @@ def run() -> dict[str, object]:
             "task_name_dispatch_branches": 0,
             "strict_zero_shot_claim_allowed": False,
             "classification": "benchmark-informed post-hoc capability adaptation",
+            "claim_domains": ["testimony", "sensor_audit", "code_review"],
         },
         "suite": {
             "name": third.name,
@@ -140,25 +230,31 @@ def run() -> dict[str, object]:
                 - (before_score.answered - before_score.correct)
             ),
             "coverage_points": 100 * (after_score.coverage - before_score.coverage),
-            "accuracy_points": 100
-            * (after_score.overall_accuracy - before_score.overall_accuracy),
+            "accuracy_points": 100 * (
+                after_score.overall_accuracy - before_score.overall_accuracy
+            ),
             "model_bytes": after.resources.model_bytes - before.resources.model_bytes,
         },
         "gates": {
-            "independent_runtime_tests_declared": True,
+            "cross_domain_proposition_transfer_passed": independent["accuracy"] == 1.0,
+            "contradiction_forces_abstention": independent["contradiction_abstained"],
+            "unanchored_cycle_forces_abstention": independent["unanchored_cycle_abstained"],
             "task_name_specialization_absent": runtime.benchmark_task_name_branches == 0,
             "original_public_200_of_200_retained": original_score.correct == 200,
             "second_public_raw_198_of_200_retained": second_score.correct == 198,
             "belief_propagation_opened": after_axes["belief_propagation"]["correct"] > 0,
             "formal_validity_opened": after_axes["formal_validity"]["correct"] > 0,
+            "all_answered_predictions_correct": after_score.answered == after_score.correct,
             "third_slice_full_parity_allowed": after_score.correct == len(third.examples),
             "strict_zero_shot_claim_allowed": False,
             "general_llm_parity_allowed": False,
         },
         "limitations": [
+            "truth and attribution phrase meanings use independent supervised grounding observations",
             "the two surface compilers were designed after inspecting public task formats",
             "finite-model search is bounded to at most fourteen predicate atoms per parsed argument",
             "the formal-language compiler covers a controlled fragment and abstains outside it",
+            "signed claims are unary reliability reports rather than arbitrary propositions",
             "reference resolution, adjective ordering, and causal judgement are not targeted",
             "the third slice is only a five-task public benchmark sample",
             "free-form dialogue, real-repository coding, long context, multimodal perception, and autonomous parser induction remain untested",
@@ -172,19 +268,23 @@ def render_markdown(payload: dict[str, object]) -> str:
     after = payload["after"]
     regressions = payload["regressions"]
     delta = payload["delta"]
+    independent = runtime["independent_cross_domain"]
     lines = [
         "# Phase 16c results: shared proposition runtime",
         "",
-        "A signed parity graph and a finite-model monadic proposition engine are",
-        "shared across quoted truth propagation and controlled formal validity.",
-        "The public formats were inspected, so this is post-hoc adaptation rather than",
-        "strict zero-shot transfer.",
+        "An induced signed-claim graph and a finite-model monadic proposition engine",
+        "are shared across testimony, sensor audit, code review, quoted truth propagation,",
+        "and controlled formal validity. Public formats were inspected, so this is post-hoc",
+        "adaptation rather than strict zero-shot transfer.",
         "",
         "## Runtime",
         "",
         f"- payload: **{runtime['description_bytes']} bytes**",
         f"- human-designed surface compilers: **{runtime['human_designed_surface_compilers']}**",
         f"- benchmark task-name branches: **{runtime['benchmark_task_name_branches']}**",
+        f"- truth / attribution phrase groundings: **{runtime['truth_phrase_groundings']} / {runtime['attribution_phrase_groundings']}**",
+        f"- independent cross-domain: **{independent['correct']}/{independent['examples']}**",
+        f"- contradiction / unanchored cycle abstention: **{independent['contradiction_abstained']} / {independent['unanchored_cycle_abstained']}**",
         "",
         "## Third public slice",
         "",
@@ -209,8 +309,8 @@ def render_markdown(payload: dict[str, object]) -> str:
             "## Claim boundary",
             "",
             "This phase may support only the measured proposition capabilities. It does",
-            "not establish strict zero-shot transfer, complete third-slice parity, or",
-            "general-LLM parity.",
+            "not establish strict zero-shot transfer, complete third-slice parity, arbitrary",
+            "proposition understanding, or general-LLM parity.",
             "",
             "## Limitations",
             "",
