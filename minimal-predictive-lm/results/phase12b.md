@@ -5,6 +5,9 @@ demonstrations are used for MPM and SmolLM2-135M-Instruct. The result is
 exploratory because the suite is not fully public and state calibration
 observability is not structurally identical.
 
+- benchmark manifest SHA-256: **6e181a388cc177ebe7b7ab9327233dc70b12bd06f64b3b126bfebb943fba3fdd**
+- public BIG-bench arithmetic source SHA-256: **6d12670a3d2e71dd5603810c8c940220c4898c467692200979515d4dcbc67d37**
+
 ## Overall
 
 | system | accuracy | coverage | model bytes | peak RSS | wall time |
