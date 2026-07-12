@@ -10,10 +10,16 @@ on:
       - "minimal-predictive-lm/src/minimal_predictive_lm/public_benchmarks.py"
       - "minimal-predictive-lm/src/minimal_predictive_lm/phase10h_worker.py"
       - "minimal-predictive-lm/src/minimal_predictive_lm/phase10i_*.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/phase12*.py"
+      - ".github/workflows/minimal-predictive-lm-open-model.yml"
+  pull_request:
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/phase12*.py"
+      - "minimal-predictive-lm/pyproject.toml"
       - ".github/workflows/minimal-predictive-lm-open-model.yml"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -25,10 +31,9 @@ jobs:
       TOKENIZERS_PARALLELISM: "false"
       MPM_OPEN_MODEL_ID: "HuggingFaceTB/SmolLM2-135M-Instruct"
       MPM_OPEN_MODEL_REVISION: "12fd25f77366fa6b3b4b768ec3050bf629380bac"
-      MPM_MAX_NEW_TOKENS: "16"
-      MPM_OPEN_MODEL_BATCH: "16"
+      MPM_MAX_NEW_TOKENS: "24"
+      MPM_OPEN_MODEL_BATCH: "8"
       MPM_TORCH_THREADS: "4"
-      MPM_SMOLLM_FEWSHOT: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -47,14 +52,14 @@ jobs:
         run: |
           python -m pip install "torch==2.7.1" --index-url https://download.pytorch.org/whl/cpu
           python -m pip install "transformers==4.53.2" "safetensors==0.5.3"
-      - name: Run matched BIG-bench arithmetic comparison
+      - name: Run exploratory mixed-suite comparison
         working-directory: minimal-predictive-lm
-        run: mpm-phase10i
-      - name: Upload matched comparison
+        run: mpm-phase12b
+      - name: Upload exploratory mixed comparison
         uses: actions/upload-artifact@v4
         with:
-          name: phase10i-smollm2-comparison
+          name: phase12b-smollm2-mixed-comparison
           retention-days: 7
           path: |
-            minimal-predictive-lm/results/phase10i.json
-            minimal-predictive-lm/results/phase10i.md
+            minimal-predictive-lm/results/phase12b.json
+            minimal-predictive-lm/results/phase12b.md
