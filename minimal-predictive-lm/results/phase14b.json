@@ -1,0 +1,90 @@
+{
+  "suite": {
+    "name": "phase13a-frozen-public-multi-domain",
+    "manifest_sha256": "e54edfb0054f950f1752be7d9738249fbf75874738f69966051816a66614f8db",
+    "examples": 200,
+    "axes": 5,
+    "benchmark_examples_used_for_training": 0,
+    "benchmark_targets_used_for_training": 0
+  },
+  "adaptation_protocol": {
+    "evidence_selected_after_failure_analysis": true,
+    "strict_zero_shot_claim": false,
+    "failed_surface_identified_before_evidence_selection": "garlic",
+    "public_item_surface_overlap": ["garlic", "onion"],
+    "benchmark_specific_handlers_added": 0,
+    "benchmark_specific_solver_added": false,
+    "benchmark_specific_item_dictionary_added": false,
+    "evidence_source": "https://arxiv.org/abs/2409.11187"
+  },
+  "knowledge": {
+    "wordnet_sha256": "38b16326159f51853626b7d24a44c453fa88ab33f06fce5ec8fc5996d1c2be93",
+    "wordnet_source_bytes": 9616299,
+    "document_sources": 4,
+    "document_edges": 9,
+    "document_graph_bits": 15128,
+    "document_graph_bytes": 1891,
+    "overlay_cache_bits": 117304,
+    "overlay_cache_bytes": 14663,
+    "compiled_graph_plus_cache_bytes": 16554,
+    "compiled_to_wordnet_ratio": 0.0017214522967723862,
+    "wordnet_queries": 59,
+    "wordnet_cache_hits": 1,
+    "wordnet_synset_reads": 982,
+    "wordnet_edge_reads": 984,
+    "overlay_queries": 176,
+    "overlay_cache_hits": 118,
+    "cross_domain_checks": {"correct": 6, "examples": 6, "accuracy": 1.0},
+    "conflict_demo": {
+      "value": null,
+      "reason": "conflicting-document-evidence",
+      "document_proof_count": 2,
+      "abstains": true
+    },
+    "public_document_evidence_uses": 8,
+    "unresolved_public_rows": 0
+  },
+  "before": {
+    "examples": 200,
+    "answered": 200,
+    "correct": 196,
+    "accuracy": 0.98,
+    "coverage": 1.0,
+    "selective_accuracy": 0.98
+  },
+  "after": {
+    "examples": 200,
+    "answered": 200,
+    "correct": 200,
+    "accuracy": 1.0,
+    "coverage": 1.0,
+    "selective_accuracy": 1.0,
+    "axis_accuracy": {
+      "boolean_expressions": 1.0,
+      "direct_arithmetic": 1.0,
+      "multistep_arithmetic": 1.0,
+      "object_counting": 1.0,
+      "word_sorting": 1.0
+    },
+    "resources": {
+      "model_bytes": 9642678,
+      "peak_rss_bytes": 127045632,
+      "wall_ns": 7466436308,
+      "cpu_ns": 7793891000,
+      "operations": 13938,
+      "reads": 1417,
+      "writes": 200
+    }
+  },
+  "gates": {
+    "source_checksum_pinned": true,
+    "shared_document_graph_cross_domain_transfer": true,
+    "contradiction_causes_abstention": true,
+    "object_counting_fully_resolved": true,
+    "all_public_predictions_correct": true,
+    "benchmark_specialization_used": false,
+    "strict_zero_shot_claim_allowed": false,
+    "public_multi_domain_quality_parity_allowed": false,
+    "general_llm_parity_allowed": false
+  }
+}
