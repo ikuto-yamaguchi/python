@@ -6,6 +6,7 @@ on:
       - "minimal-predictive-lm/src/minimal_predictive_lm/generic_proposition_machine.py"
       - "minimal-predictive-lm/src/minimal_predictive_lm/corrected_proposition_machine.py"
       - "minimal-predictive-lm/src/minimal_predictive_lm/signed_claim_graph.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/queue_signed_claim_runtime.py"
       - "minimal-predictive-lm/src/minimal_predictive_lm/phase16c_*.py"
       - "minimal-predictive-lm/tests/test_phase16b_generic_proposition_machine.py"
       - ".github/workflows/minimal-predictive-lm-phase16c.yml"
