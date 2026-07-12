@@ -109,6 +109,7 @@ jobs:
           mpm-phase12a
           mpm-phase13a
           mpm-phase13b
+          python -m minimal_predictive_lm.phase13b_diagnostic
       - name: Upload Phase 9, Stage C, Phase 11, Phase 12, and Phase 13 results
         uses: actions/upload-artifact@v4
         with:
@@ -153,3 +154,4 @@ jobs:
             minimal-predictive-lm/results/phase13a.md
             minimal-predictive-lm/results/phase13b.json
             minimal-predictive-lm/results/phase13b.md
+            minimal-predictive-lm/results/phase13b_diagnostic.json
