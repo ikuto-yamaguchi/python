@@ -87,11 +87,7 @@ class RawSchemaModel:
 
     @property
     def bits(self) -> int:
-        payload = {
-            "cue_roles": self.cue_roles,
-            "count_program": self.count_program,
-            "value_program": self.value_program,
-        }
+        payload = {"cue_roles": self.cue_roles, "count_program": self.count_program, "value_program": self.value_program}
         return len(json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()) * 8
 
     def compile_parsed(self, parsed: ParsedProblem) -> ConstraintGraph:
@@ -102,7 +98,6 @@ class RawSchemaModel:
             if role is None:
                 raise NonIdentifiableConstraintError("unknown relation span")
             buckets[role].append(fact)
-
         if len(buckets["COUNT"]) != 1 or len(buckets["VALUE"]) != 1:
             raise NonIdentifiableConstraintError("count and value facts must be unique")
 
@@ -121,7 +116,6 @@ class RawSchemaModel:
         value_fact = buckets["VALUE"][0]
         if len(count_fact.entities) == 1 or len(value_fact.entities) == 1:
             raise NonIdentifiableConstraintError("global facts cannot mention exactly one target entity")
-
         x, y = parsed.entities
         rate_x = rate_by_entity[x]
         rate_y = rate_by_entity[y]
@@ -141,7 +135,6 @@ class RawSchemaModel:
             "Y_MINUS_X": {x: -rate_x.value, y: rate_y.value},
             "CROSS_SUM": {x: rate_y.value, y: rate_x.value},
         }[self.value_program]
-
         return ConstraintGraph.build(
             parsed.entities,
             (
@@ -184,8 +177,7 @@ def _relation_span(sentence: str, entities: tuple[str, str]) -> str:
     normalized = sentence
     for entity in sorted(entities, key=len, reverse=True):
         normalized = normalized.replace(entity, "<E>")
-    normalized = NUMBER_UNIT_RE.sub("<N><U>", normalized)
-    return normalized
+    return NUMBER_UNIT_RE.sub("<N><U>", normalized)
 
 
 def parse(text: str) -> ParsedProblem:
@@ -271,7 +263,7 @@ def heldout() -> tuple[Demonstration, ...]:
         (("短時間", "長時間"), (8, 5), (15, 40), "回", "分", 0, (2, 0), 1, 2, (2, 1, 0, 3)),
     )
     rows: list[Demonstration] = []
-    for index, specification in enumerate(specifications):
+    for specification in specifications:
         rows.append(render(*specification, distractors=("この説明には不要な背景文も含まれる",)))
         entities, counts, rates, count_unit, value_unit, count_index, rate_indexes, value_index, question_index, order = specification
         rows.append(
@@ -286,7 +278,7 @@ def heldout() -> tuple[Demonstration, ...]:
                 (value_index + 1) % len(VALUE_TEMPLATES),
                 (question_index + 1) % len(QUESTION_TEMPLATES),
                 tuple(reversed(order)),
-                distractors=(f"昨日の記録{index + 1}も確認した",),
+                distractors=("昨日の記録も確認した",),
             )
         )
     return tuple(rows)
@@ -416,8 +408,7 @@ def schema_intervention_changes_prediction(model: RawSchemaModel) -> bool:
     roles = dict(model.cue_roles)
     count_cue = next(fact.cue for fact in parsed.facts if roles[fact.cue] == "COUNT")
     altered = RawSchemaModel(tuple((cue, "VALUE" if cue == count_cue else role) for cue, role in model.cue_roles), model.count_program, model.value_program)
-    changed = altered.answer_parsed(parsed)
-    return original is not None and changed is None
+    return original is not None and altered.answer_parsed(parsed) is None
 
 
 def tampered_solution_is_rejected(model: RawSchemaModel) -> bool:
