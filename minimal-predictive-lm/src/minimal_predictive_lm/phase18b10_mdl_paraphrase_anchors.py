@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from fractions import Fraction
+from functools import lru_cache
 import json
 from pathlib import Path
 import re
@@ -76,11 +77,7 @@ class AnchorModel:
 
     @property
     def bits(self) -> int:
-        payload = {
-            "anchors": self.anchors,
-            "count_program": self.count_program,
-            "value_program": self.value_program,
-        }
+        payload = {"anchors": self.anchors, "count_program": self.count_program, "value_program": self.value_program}
         return len(json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()) * 8
 
     def role_for(self, fact: Fact) -> str | None:
@@ -101,22 +98,16 @@ class AnchorModel:
             if role is None:
                 raise NonIdentifiableConstraintError("zero, conflicting, or structurally invalid anchor evidence")
             cue_roles.append((fact.cue, role))
-        exact = RawSchemaModel(tuple(cue_roles), self.count_program, self.value_program)
-        return exact.compile_parsed(parsed)
+        return RawSchemaModel(tuple(cue_roles), self.count_program, self.value_program).compile_parsed(parsed)
 
     def answer_parsed(self, parsed: ParsedProblem) -> Solution | None:
-        try:
-            exact = RawSchemaModel(
-                tuple((fact.cue, self.role_for(fact) or "UNKNOWN") for fact in parsed.facts),
-                self.count_program,
-                self.value_program,
-            )
-            if any(role == "UNKNOWN" for _, role in exact.cue_roles):
+        cue_roles = []
+        for fact in parsed.facts:
+            role = self.role_for(fact)
+            if role is None:
                 return None
-            answer = exact.answer_parsed(parsed)
-        except (ValueError, NonIdentifiableConstraintError):
-            return None
-        return answer
+            cue_roles.append((fact.cue, role))
+        return RawSchemaModel(tuple(cue_roles), self.count_program, self.value_program).answer_parsed(parsed)
 
     def answer(self, text: str) -> Solution | None:
         try:
@@ -158,7 +149,7 @@ def calibration() -> tuple[Demonstration, ...]:
         ("白箱", "黒箱", (4, 11), (20, 60), "個", "g"),
         ("小型車", "大型車", (12, 3), (4, 8), "台", "本"),
         ("赤札", "青札", (8, 5), (90, 140), "枚", "円"),
-        ("短問", "長問", (14, 6), (3, 7), "問", "点"),
+        ("短答", "長答", (14, 6), (3, 7), "回", "点"),
         ("軽袋", "重袋", (7, 4), (50, 180), "個", "g"),
         ("午前枠", "午後枠", (9, 7), (400, 900), "人", "円"),
         ("正答", "誤答", (15, 5), (4, -1), "回", "点"),
@@ -187,7 +178,12 @@ def calibration() -> tuple[Demonstration, ...]:
     return tuple(rows)
 
 
-def _expected_answer(parsed: ParsedProblem, row: Demonstration) -> tuple[Q, Q]:
+@lru_cache(maxsize=1)
+def _base_exact() -> tuple[RawSchemaModel, dict[str, int]]:
+    return induce_exact_schema()
+
+
+def _expected_answer(row: Demonstration) -> tuple[Q, Q]:
     return tuple(Q(value) for value in row.answer)
 
 
@@ -209,7 +205,7 @@ def induce_extension_roles(base: RawSchemaModel) -> tuple[tuple[tuple[str, str],
             if answer is None:
                 continue
             values = dict(answer.values)
-            if (values[parsed.entities[0]], values[parsed.entities[1]]) == _expected_answer(parsed, row):
+            if (values[parsed.entities[0]], values[parsed.entities[1]]) == _expected_answer(row):
                 surviving.append(role)
         if len(surviving) != 1:
             raise NonIdentifiableAnchorError(f"span={cue} surviving={surviving}")
@@ -247,9 +243,9 @@ def _longest_common_substrings(left: str, right: str) -> tuple[str, ...]:
 def _anchor_candidates(cue_roles: Sequence[tuple[str, str]]) -> tuple[tuple[str, str, frozenset[int]], ...]:
     chunks = tuple(_content_chunks(cue) for cue, _ in cue_roles)
     raw: list[tuple[str, str, frozenset[int]]] = []
-    for left_index, (left_cue, left_role) in enumerate(cue_roles):
+    for left_index, (_, left_role) in enumerate(cue_roles):
         for right_index in range(left_index + 1, len(cue_roles)):
-            right_cue, right_role = cue_roles[right_index]
+            _, right_role = cue_roles[right_index]
             if left_role != right_role:
                 continue
             for left_chunk in chunks[left_index]:
@@ -259,10 +255,7 @@ def _anchor_candidates(cue_roles: Sequence[tuple[str, str]]) -> tuple[tuple[str,
                             continue
                         if not (re.search(r"[一-龥]", anchor) or anchor == "ごと"):
                             continue
-                        coverage = frozenset(
-                            index for index, (cue, role) in enumerate(cue_roles)
-                            if role == left_role and anchor in cue
-                        )
+                        coverage = frozenset(index for index, (cue, role) in enumerate(cue_roles) if role == left_role and anchor in cue)
                         if len(coverage) < 2:
                             continue
                         if any(anchor in cue for cue, role in cue_roles if role != left_role):
@@ -280,7 +273,7 @@ def _anchor_candidates(cue_roles: Sequence[tuple[str, str]]) -> tuple[tuple[str,
 def induce_anchors(cue_roles: Sequence[tuple[str, str]]) -> tuple[tuple[tuple[str, str], ...], dict[str, int]]:
     candidates = _anchor_candidates(cue_roles)
     target_mask = (1 << len(cue_roles)) - 1
-    valid: list[tuple[tuple[int, int, tuple[tuple[str, str], ...]], tuple[tuple[str, str], ...]]] = []
+    valid: list[tuple[tuple[int, int], tuple[tuple[str, str], ...]]] = []
     for subset in range(1 << len(candidates)):
         coverage_mask = 0
         chosen: list[tuple[str, str]] = []
@@ -293,12 +286,11 @@ def induce_anchors(cue_roles: Sequence[tuple[str, str]]) -> tuple[tuple[tuple[st
             for cue_index in coverage:
                 coverage_mask |= 1 << cue_index
         if coverage_mask == target_mask:
-            chosen_tuple = tuple(sorted(chosen))
-            valid.append(((byte_cost, len(chosen_tuple), chosen_tuple), chosen_tuple))
+            valid.append(((byte_cost, len(chosen)), tuple(sorted(chosen))))
     if not valid:
         raise NonIdentifiableAnchorError("no anchor cover")
-    best_score = min(score[:2] for score, _ in valid)
-    best = {chosen for score, chosen in valid if score[:2] == best_score}
+    best_score = min(score for score, _ in valid)
+    best = {chosen for score, chosen in valid if score == best_score}
     if len(best) != 1:
         raise NonIdentifiableAnchorError(f"minimum covers={len(best)}")
     selected = next(iter(best))
@@ -311,14 +303,13 @@ def induce_anchors(cue_roles: Sequence[tuple[str, str]]) -> tuple[tuple[tuple[st
     }
 
 
+@lru_cache(maxsize=1)
 def induce() -> tuple[AnchorModel, dict[str, int], tuple[tuple[str, str], ...]]:
-    base, base_fit = induce_exact_schema()
+    base, base_fit = _base_exact()
     extensions, extension_fit = induce_extension_roles(base)
     cue_roles = base.cue_roles + extensions
     anchors, anchor_fit = induce_anchors(cue_roles)
-    model = AnchorModel(anchors, base.count_program, base.value_program)
-    fit = {**base_fit, **extension_fit, **anchor_fit}
-    return model, fit, cue_roles
+    return AnchorModel(anchors, base.count_program, base.value_program), {**base_fit, **extension_fit, **anchor_fit}, cue_roles
 
 
 def heldout() -> tuple[Demonstration, ...]:
@@ -326,7 +317,7 @@ def heldout() -> tuple[Demonstration, ...]:
         (("普通券", "優待券"), (8, 6), (800, 300), "枚", "円"),
         (("白鳥", "亀"), (10, 5), (2, 4), "匹", "本"),
         (("軽箱", "重箱"), (7, 9), (40, 90), "個", "g"),
-        (("短答", "長答"), (12, 4), (3, 8), "問", "点"),
+        (("短答", "長答"), (12, 4), (3, 8), "回", "点"),
         (("午前車", "午後車"), (9, 3), (4, 6), "台", "本"),
         (("小皿", "大皿"), (11, 5), (100, 260), "枚", "円"),
     )
@@ -372,7 +363,7 @@ def evaluate(model: AnchorModel) -> tuple[float, float, float]:
 
 
 def exact_span_baseline_coverage() -> float:
-    base, _ = induce_exact_schema()
+    base, _ = _base_exact()
     return sum(base.answer(row.text) is not None for row in heldout()) / len(heldout())
 
 
@@ -380,12 +371,9 @@ def conflict_unknown_and_arity_controls(model: AnchorModel) -> dict[str, bool]:
     row = heldout()[0]
     parsed = parse(row.text)
     count_fact = next(fact for fact in parsed.facts if len(fact.entities) == 2)
-    conflict_surface = count_fact.surface.replace("全部", "全部の合計値")
-    conflict = row.text.replace(count_fact.surface, conflict_surface)
-    unknown_surface = count_fact.surface.replace("全部", "二種類をまとめた結果")
-    unknown = row.text.replace(count_fact.surface, unknown_surface)
-    arity_surface = re.sub(r"を全部まとめると", "の単価情報では", count_fact.surface)
-    arity = row.text.replace(count_fact.surface, arity_surface)
+    conflict = row.text.replace(count_fact.surface, count_fact.surface.replace("全部", "全部の合計値"))
+    unknown = row.text.replace(count_fact.surface, count_fact.surface.replace("全部", "二種類をまとめた結果"))
+    arity = row.text.replace(count_fact.surface, re.sub(r"を全部まとめると", "の単価情報では", count_fact.surface))
     return {
         "conflicting_anchors": model.answer(conflict) is None,
         "no_known_anchor": model.answer(unknown) is None,
@@ -397,8 +385,8 @@ def unseen_synonym_without_anchor_abstains(model: AnchorModel) -> bool:
     row = heldout()[0]
     parsed = parse(row.text)
     count_fact = next(fact for fact in parsed.facts if len(fact.entities) == 2)
-    synonym_surface = count_fact.surface.replace("全部", "総計対象を")
-    return model.answer(row.text.replace(count_fact.surface, synonym_surface)) is None
+    synonym = row.text.replace(count_fact.surface, count_fact.surface.replace("全部", "総計対象を"))
+    return model.answer(synonym) is None
 
 
 def anchor_ablation_reduces_coverage(model: AnchorModel) -> bool:
@@ -443,7 +431,7 @@ def run() -> dict[str, object]:
     }
     return {
         "campaign": {
-            "name": "phase18b10-mdl-paraphrase-anchors-c1",
+            "name": "phase18b10-mdl-paraphrase-anchors-c2",
             "generalization_type": "unseen full-span recombination around learned character anchors",
             "fully_unseen_synonyms": False,
             "fixed_morpheme_splitter": True,
