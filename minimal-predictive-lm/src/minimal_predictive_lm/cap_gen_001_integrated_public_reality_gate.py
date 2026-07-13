@@ -11,11 +11,12 @@ from .benchmark_harness import (
     ABSTAIN_TOKEN,
     BenchmarkExample,
     BenchmarkManifest,
+    PredictionRecord,
     RunPolicy,
+    ScoreSummary,
     answer_is_correct,
     build_manifest,
     run_command_adapter,
-    score_report,
 )
 from .phase13a_experiment import build_phase13a_manifest
 from .phase15a_experiment import axis_scores
@@ -29,6 +30,7 @@ CAPABILITY_ID = "CAP-GEN-001"
 EXAMPLES_PER_AXIS = 40
 PUBLIC_AXIS_TARGET = 0.70
 PUBLIC_AGGREGATE_TARGET = 0.80
+HIDDEN_AXIS = "__hidden__"
 
 
 def _prefixed_examples(
@@ -71,6 +73,52 @@ def build_integrated_manifest(
         license_id="mixed:Apache-2.0+MIT",
         public=True,
         examples=examples,
+    )
+
+
+def axis_blind_manifest(scoring_manifest: BenchmarkManifest) -> BenchmarkManifest:
+    """Create the target-identical model view with every task/axis name hidden."""
+
+    return build_manifest(
+        name=scoring_manifest.name + "-axis-blind-model-view",
+        split=scoring_manifest.split,
+        source=scoring_manifest.source,
+        license_id=scoring_manifest.license_id,
+        public=scoring_manifest.public,
+        examples=(
+            BenchmarkExample(
+                row.example_id,
+                HIDDEN_AXIS,
+                row.prompt,
+                row.target,
+                row.answer_type,
+            )
+            for row in scoring_manifest.examples
+        ),
+    )
+
+
+def score_axis_blind_predictions(
+    scoring_manifest: BenchmarkManifest,
+    predictions: Sequence[PredictionRecord],
+) -> ScoreSummary:
+    mapping = {row.example_id: row.text for row in predictions}
+    answered = 0
+    correct = 0
+    for example in scoring_manifest.examples:
+        prediction = mapping.get(example.example_id, "").strip()
+        if not prediction or prediction == ABSTAIN_TOKEN:
+            continue
+        answered += 1
+        correct += int(answer_is_correct(example, prediction))
+    total = len(scoring_manifest.examples)
+    return ScoreSummary(
+        total,
+        answered,
+        correct,
+        correct / total,
+        correct / answered if answered else 0.0,
+        answered / total,
     )
 
 
@@ -138,7 +186,8 @@ def run_gate() -> dict[str, object]:
     )
     os.environ["MPM_WORDNET_ZIP"] = str(source_path.resolve())
 
-    manifest = build_integrated_manifest()
+    scoring_manifest = build_integrated_manifest()
+    model_manifest = axis_blind_manifest(scoring_manifest)
     fingerprint_before = frozen_phase15d_fingerprint()
     policy = RunPolicy(
         max_output_chars=256,
@@ -151,25 +200,34 @@ def run_gate() -> dict[str, object]:
         seed=0,
     )
     report = run_command_adapter(
-        manifest,
+        model_manifest,
         policy,
         model_id="mpm-single-frozen-worker-integrated-public-reality-baseline",
         command=(sys.executable, "-m", "minimal_predictive_lm.phase15d_worker"),
         timeout_seconds=900.0,
     )
     fingerprint_after = frozen_phase15d_fingerprint()
-    score = score_report(manifest, report)
+    score = score_axis_blind_predictions(scoring_manifest, report.predictions)
     predictions = {row.example_id: row.text for row in report.predictions}
-    axes = axis_scores(manifest, predictions)
+    axes = axis_scores(scoring_manifest, predictions)
     readiness = readiness_decision(axes, score.overall_accuracy)
 
     checks = {
-        "manifest_is_public": manifest.public,
+        "manifest_is_public": scoring_manifest.public,
         "exactly_fifteen_axes": len(axes) == 15,
-        "exactly_600_examples": len(manifest.examples) == 600,
+        "exactly_600_examples": len(scoring_manifest.examples) == 600,
         "one_frozen_fingerprint": fingerprint_before == fingerprint_after,
         "one_worker_for_every_axis": True,
-        "no_axis_name_routing_added_by_gate": True,
+        "axis_names_hidden_from_worker": all(
+            row.axis == HIDDEN_AXIS for row in model_manifest.examples
+        ),
+        "model_and_scoring_prompts_identical": all(
+            model.prompt == scoring.prompt
+            and model.example_id == scoring.example_id
+            for model, scoring in zip(
+                model_manifest.examples, scoring_manifest.examples
+            )
+        ),
         "pinned_wordnet_verified": source_sha256 == OEWN_2025_SHA256,
         "reality_gate_reports_failure_without_promoting_claim": (
             not readiness["japanese_high_school_claim_allowed"]
@@ -183,11 +241,13 @@ def run_gate() -> dict[str, object]:
             "fifteen previously public reasoning axes before any further micro-gate"
         ),
         "suite": {
-            "name": manifest.name,
-            "manifest_sha256": manifest.sha256,
-            "examples": len(manifest.examples),
+            "name": scoring_manifest.name,
+            "scoring_manifest_sha256": scoring_manifest.sha256,
+            "axis_blind_model_manifest_sha256": model_manifest.sha256,
+            "examples": len(scoring_manifest.examples),
             "axes": len(axes),
             "examples_per_axis": EXAMPLES_PER_AXIS,
+            "axis_visible_to_model": False,
         },
         "frozen_model": {
             "worker": "minimal_predictive_lm.phase15d_worker",
@@ -199,7 +259,7 @@ def run_gate() -> dict[str, object]:
         "score": asdict(score),
         "axis_scores": axes,
         "readiness": readiness,
-        "failure_examples": _failure_examples(manifest, predictions),
+        "failure_examples": _failure_examples(scoring_manifest, predictions),
         "resources": asdict(report.resources),
         "checks": checks,
         "gate_valid": all(checks.values()),
@@ -223,6 +283,7 @@ def render_markdown(result: Mapping[str, object]) -> str:
         f"Current capability passed: **{result['capability_passed']}**",
         "",
         f"- Examples / axes: **{result['suite']['examples']} / {result['suite']['axes']}**",
+        f"- Axis visible to model: **{result['suite']['axis_visible_to_model']}**",
         f"- Overall accuracy: **{100 * score['overall_accuracy']:.1f}%**",
         f"- Coverage: **{100 * score['coverage']:.1f}%**",
         f"- Minimum axis accuracy: **{100 * readiness['observed_axis_floor']:.1f}%**",
