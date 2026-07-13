@@ -3,13 +3,18 @@ name: minimal-predictive-lm-phase18b6
 on:
   pull_request:
     paths:
-      - "minimal-predictive-lm/**"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/phase18b6_*.py"
+      - "minimal-predictive-lm/tests/test_phase18b6_*.py"
+      - "minimal-predictive-lm/docs/phase18b6_*.md"
       - ".github/workflows/minimal-predictive-lm-phase18b6.yml"
   push:
     branches: [main]
     paths:
-      - "minimal-predictive-lm/**"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/phase18b6_*.py"
+      - "minimal-predictive-lm/tests/test_phase18b6_*.py"
+      - "minimal-predictive-lm/docs/phase18b6_*.md"
       - ".github/workflows/minimal-predictive-lm-phase18b6.yml"
+  workflow_dispatch:
 
 concurrency:
   group: phase18b6-${{ github.ref }}
