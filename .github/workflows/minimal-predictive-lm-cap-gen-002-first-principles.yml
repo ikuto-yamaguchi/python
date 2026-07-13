@@ -1,0 +1,37 @@
+name: minimal-predictive-lm-cap-gen-002-first-principles
+
+on:
+  pull_request:
+    branches:
+      - research/minimal-compute-lm
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/cap_gen_002_predictive_state_lower_bound.py"
+      - "minimal-predictive-lm/tests/test_cap_gen_002_predictive_state_lower_bound.py"
+      - "minimal-predictive-lm/docs/cap_gen_002_first_principles_intelligence_program.md"
+      - ".github/workflows/minimal-predictive-lm-cap-gen-002-first-principles.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  first-principles:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: minimal-predictive-lm/pyproject.toml
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Predictive-state lower-bound tests
+        run: python -m pytest -q minimal-predictive-lm/tests/test_cap_gen_002_predictive_state_lower_bound.py
+      - name: Enforce first-principles boundaries
+        run: |
+          grep -q "today's dense accelerator workload is not a known lower bound" minimal-predictive-lm/docs/cap_gen_002_first_principles_intelligence_program.md
+          grep -q "No axis-specific" minimal-predictive-lm/docs/cap_gen_002_first_principles_intelligence_program.md
+          grep -q "At least three materially different" minimal-predictive-lm/docs/cap_gen_002_first_principles_intelligence_program.md
