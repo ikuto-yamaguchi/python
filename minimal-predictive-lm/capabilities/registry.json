@@ -67,8 +67,25 @@
         "training_operations": 30544,
         "average_inference_operations": 523.03125
       },
-      "next_dependency": "CAP-SEM-004 sparse noisy definition and usage induction",
       "boundary": "complete controlled behavioral contrast set; not natural-language definition understanding"
+    },
+    {
+      "id": "CAP-SEM-004",
+      "name": "sparse noisy definition and ordinary-usage induction",
+      "status": "passed_limited",
+      "implementation": "src/minimal_predictive_lm/cap_sem_004_sparse_noisy_induction.py",
+      "evidence": "docs/cap_sem_004_sparse_noisy_induction.md",
+      "workflow": ".github/workflows/minimal-predictive-lm-cap-sem-004.yml",
+      "successful_ci_run": 29263275335,
+      "resource_result": {
+        "evidence_documents": 104,
+        "intentionally_corrupted_documents": 16,
+        "learned_payload_bytes": 253,
+        "training_operations": 34304,
+        "average_inference_operations": 523.03125
+      },
+      "next_dependency": "CAP-SEM-005 ontology expansion from data",
+      "boundary": "controlled synthetic definitions and usages; every term still maps into one of four existing latent relation codes"
     }
   ]
 }
