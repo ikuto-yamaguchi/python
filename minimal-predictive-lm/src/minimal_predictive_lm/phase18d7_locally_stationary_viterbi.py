@@ -282,12 +282,23 @@ def infer_locally_stationary_path(
     )
 
 
-def _expand_blocks(blocks: Sequence[Mapping[str, Any]]) -> tuple[str, ...]:
-    return tuple(
+def _expand_blocks(
+    blocks: Sequence[Mapping[str, Any]],
+    *,
+    target_length: int | None = None,
+) -> tuple[str, ...]:
+    labels = tuple(
         str(block["label"])
         for block in blocks
         for _ in range(int(block["length"]))
     )
+    if target_length is None:
+        return labels
+    if not labels or len(labels) > target_length:
+        raise ValueError("audit block metadata exceeds decoded record count")
+    # A trailing boundary-calibration record may extend the final stationary
+    # block without changing the learner input or supplying a task boundary.
+    return labels + (labels[-1],) * (target_length - len(labels))
 
 
 def audit_path(result: ViterbiResult, labels: Sequence[str]) -> tuple[int, int]:
@@ -439,7 +450,10 @@ def run() -> dict[str, Any]:
     )
     states, expressions_evaluated = enumerate_program_states(initial_records)
     initial = infer_locally_stationary_path(initial_records, states)
-    initial_labels = _expand_blocks(payload["audit_blocks"])
+    initial_labels = _expand_blocks(
+        payload["audit_blocks"],
+        target_length=len(initial_records),
+    )
     initial_audit_correct, initial_audit_total = audit_path(
         initial, initial_labels
     )
@@ -452,7 +466,8 @@ def run() -> dict[str, Any]:
     final_records = initial_records + post_records
     final = infer_locally_stationary_path(final_records, states)
     final_labels = initial_labels + _expand_blocks(
-        payload["post_freeze_audit_blocks"]
+        payload["post_freeze_audit_blocks"],
+        target_length=len(post_records),
     )
     final_audit_correct, final_audit_total = audit_path(final, final_labels)
     all_episodes = tuple(payload["episodes"]) + tuple(
@@ -500,9 +515,18 @@ def run() -> dict[str, Any]:
         for block in tuple(payload["audit_blocks"])
         + tuple(payload["post_freeze_audit_blocks"])
     }
+    declared_initial_records = sum(
+        int(block["length"]) for block in payload["audit_blocks"]
+    )
+    trailing_boundary_calibration_records = (
+        len(initial_records) - declared_initial_records
+    )
 
     checks = {
         "candidate_state_count": len(states) == 130,
+        "single_trailing_boundary_calibration_record": (
+            trailing_boundary_calibration_records == 1
+        ),
         "initial_path_audit": initial_audit_correct == initial_audit_total,
         "final_path_audit": final_audit_correct == final_audit_total,
         "initial_used_programs": len(initial.used_states()) == 7,
@@ -545,6 +569,9 @@ def run() -> dict[str, Any]:
             "candidate_states": len(states),
             "expressions_evaluated_once": expressions_evaluated,
             "initial_records": len(initial_records),
+            "trailing_boundary_calibration_records": (
+                trailing_boundary_calibration_records
+            ),
             "initial_used_programs": len(initial.used_states()),
             "initial_switches": initial.switches,
             "final_records": len(final_records),
