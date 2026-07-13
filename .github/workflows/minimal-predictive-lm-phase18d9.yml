@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'minimal-predictive-lm/src/minimal_predictive_lm/phase18d9_online_library_growth.py'
+      - 'minimal-predictive-lm/src/minimal_predictive_lm/phase18d9_online_library_audit.py'
       - 'minimal-predictive-lm/tests/test_phase18d9_online_library_growth.py'
       - 'minimal-predictive-lm/docs/phase18d9_online_library_growth.md'
       - '.github/workflows/minimal-predictive-lm-phase18d9.yml'
@@ -32,7 +33,7 @@ jobs:
         working-directory: minimal-predictive-lm
         run: |
           set -o pipefail
-          python -m minimal_predictive_lm.phase18d9_online_library_growth 2>&1 | tee results/phase18d9-run.log
+          python -m minimal_predictive_lm.phase18d9_online_library_audit 2>&1 | tee results/phase18d9-run.log
       - name: Upload Phase 18d-9 diagnostics and results
         if: always()
         uses: actions/upload-artifact@v4
