@@ -30,7 +30,8 @@ from .cap_sem_002_raw_japanese_bridge import (
 
 CAPABILITY_ID = "CAP-SEM-003"
 
-# Hidden only in the data generator. The learner never reads this table.
+# This table belongs only to the data generator. Learner functions are audited
+# not to reference it.
 NOVEL_ALIAS_GROUPS = (
     ("ゼルク", "ノアル"),
     ("ミヴァ", "トレン"),
@@ -66,10 +67,8 @@ class LexicalEvaluation:
 
 
 def _fingerprint(payload: Mapping[str, object]) -> str:
-    serialized = json.dumps(
-        payload, ensure_ascii=False, sort_keys=True
-    ).encode("utf-8")
-    return hashlib.sha256(serialized).hexdigest()
+    raw = json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8")
+    return hashlib.sha256(raw).hexdigest()
 
 
 def _render(template: str, left: str, right: str, marker: str) -> str:
@@ -77,17 +76,17 @@ def _render(template: str, left: str, right: str, marker: str) -> str:
 
 
 def _compile_open_marker_skeleton(skeleton: str):
-    pieces = re.split(r"(<E0>|<E1>|<M>)", skeleton)
+    parts = re.split(r"(<E0>|<E1>|<M>)", skeleton)
     output: list[str] = []
-    for piece in pieces:
-        if piece == "<E0>":
+    for part in parts:
+        if part == "<E0>":
             output.append("(?P<e0>.+?)")
-        elif piece == "<E1>":
+        elif part == "<E1>":
             output.append("(?P<e1>.+?)")
-        elif piece == "<M>":
+        elif part == "<M>":
             output.append("(?P<marker>.+?)")
         else:
-            output.append(re.escape(piece))
+            output.append(re.escape(part))
     return re.compile("^" + "".join(output) + "$")
 
 
@@ -96,7 +95,7 @@ def _parse_open_marker_clause(
     skeletons: Sequence[str],
     orientations: Mapping[str, int],
 ) -> tuple[str, str, str]:
-    matches = []
+    matches: list[tuple[str, str, str]] = []
     for skeleton in skeletons:
         match = _compile_open_marker_skeleton(skeleton).fullmatch(clause)
         if match is None or match.group("e0") == match.group("e1"):
@@ -105,17 +104,14 @@ def _parse_open_marker_clause(
         if orientations[skeleton] == 1:
             pair = pair[::-1]
         marker = match.group("marker")
-        if not marker:
-            continue
-        matches.append((pair[0], marker, pair[1]))
+        if marker:
+            matches.append((pair[0], marker, pair[1]))
     if len(matches) != 1:
         raise ValueError("open-vocabulary clause has zero or multiple parses")
     return matches[0]
 
 
-def parse_open_vocabulary(
-    bridge: SurfaceBridge, example: RawExample
-) -> Record:
+def parse_open_vocabulary(bridge: SurfaceBridge, example: RawExample) -> Record:
     if not example.text.endswith(bridge.query_terminator):
         raise ValueError("unknown query terminator")
     body = example.text[: -len(bridge.query_terminator)]
@@ -131,9 +127,7 @@ def parse_open_vocabulary(
         for clause in clauses[:-1]
     )
     query = _parse_open_marker_clause(
-        clauses[-1],
-        bridge.query_skeletons,
-        bridge.query_orientations,
+        clauses[-1], bridge.query_skeletons, bridge.query_orientations
     )
     return Record(facts, query, example.answer)
 
@@ -157,41 +151,32 @@ def build_lexical_training_records(
             for known_query in known_queries:
                 query_code = base.marker_codes[known_query]
                 for reverse in (False, True):
-                    left = f"語{index:04x}甲"
-                    right = f"語{index:04x}乙"
+                    left, right = f"語{index:04x}甲", f"語{index:04x}乙"
                     statement = _render(
-                        STATEMENT_TEMPLATES[index % len(STATEMENT_TEMPLATES)],
-                        left,
-                        right,
-                        alias,
+                        STATEMENT_TEMPLATES[index % 3], left, right, alias
                     )
                     query_left, query_right = (
                         (right, left) if reverse else (left, right)
                     )
                     query = _render(
-                        QUERY_TEMPLATES[
-                            (index // len(STATEMENT_TEMPLATES))
-                            % len(QUERY_TEMPLATES)
-                        ],
+                        QUERY_TEMPLATES[(index // 3) % 3],
                         query_left,
                         query_right,
                         known_query,
                     )
-                    effective_code = hidden_code ^ int(reverse)
                     rows.append(
                         RawExample(
                             statement + "。" + query + "？",
-                            effective_code == query_code,
+                            (hidden_code ^ int(reverse)) == query_code,
                         )
                     )
                     index += 1
             for known_statement in known_statements:
                 statement_code = base.marker_codes[known_statement]
                 for reverse in (False, True):
-                    left = f"語{index:04x}甲"
-                    right = f"語{index:04x}乙"
+                    left, right = f"語{index:04x}甲", f"語{index:04x}乙"
                     statement = _render(
-                        STATEMENT_TEMPLATES[index % len(STATEMENT_TEMPLATES)],
+                        STATEMENT_TEMPLATES[index % 3],
                         left,
                         right,
                         known_statement,
@@ -200,19 +185,15 @@ def build_lexical_training_records(
                         (right, left) if reverse else (left, right)
                     )
                     query = _render(
-                        QUERY_TEMPLATES[
-                            (index // len(STATEMENT_TEMPLATES))
-                            % len(QUERY_TEMPLATES)
-                        ],
+                        QUERY_TEMPLATES[(index // 3) % 3],
                         query_left,
                         query_right,
                         alias,
                     )
-                    effective_statement = statement_code ^ int(reverse)
                     rows.append(
                         RawExample(
                             statement + "。" + query + "？",
-                            effective_statement == hidden_code,
+                            (statement_code ^ int(reverse)) == hidden_code,
                         )
                     )
                     index += 1
@@ -251,11 +232,7 @@ def learn_lexical_extension(
         for candidate_code in range(4):
             candidates_evaluated += 1
             candidate_model = LearnedMeaning(
-                {
-                    **base_model.marker_codes,
-                    **learned,
-                    marker: candidate_code,
-                },
+                {**base_model.marker_codes, **learned, marker: candidate_code},
                 base_model.inverse_codes,
                 base_model.training_operations,
             )
@@ -265,9 +242,7 @@ def learn_lexical_extension(
                 markers = tuple(fact[1] for fact in row.facts) + (
                     row.query[1],
                 )
-                if any(
-                    value not in candidate_model.marker_codes for value in markers
-                ):
+                if any(value not in candidate_model.marker_codes for value in markers):
                     continue
                 prediction, used = predict(candidate_model, row)
                 operations += used
@@ -301,7 +276,7 @@ def build_novel_alias_heldout(
     base = learn_meaning(build_training_records())
     output: list[RawExample] = []
     for record_index, structured in enumerate(build_heldout_records()):
-        facts = []
+        facts: list[str] = []
         for edge_index, (left, known_marker, right) in enumerate(
             structured.facts
         ):
@@ -313,8 +288,7 @@ def build_novel_alias_heldout(
             facts.append(
                 _render(
                     STATEMENT_TEMPLATES[
-                        (record_index + edge_index + template_variant)
-                        % len(STATEMENT_TEMPLATES)
+                        (record_index + edge_index + template_variant) % 3
                     ],
                     left,
                     right,
@@ -329,15 +303,14 @@ def build_novel_alias_heldout(
             (record_index + template_variant) % len(aliases[query_code])
         ]
         query = _render(
-            QUERY_TEMPLATES[
-                (2 * record_index + template_variant)
-                % len(QUERY_TEMPLATES)
-            ],
+            QUERY_TEMPLATES[(2 * record_index + template_variant) % 3],
             query_left,
             query_right,
             query_alias,
         )
-        output.append(RawExample("。".join(facts) + "。" + query + "？", structured.answer))
+        output.append(
+            RawExample("。".join(facts) + "。" + query + "？", structured.answer)
+        )
     return tuple(output)
 
 
@@ -366,12 +339,12 @@ def exact_text_memorizer_accuracy(
 ) -> float:
     table = {row.text: row.answer for row in train}
     majority = Counter(row.answer for row in train).most_common(1)[0][0]
-    correct = sum(table.get(row.text, majority) == row.answer for row in heldout)
-    return correct / len(heldout)
+    return sum(table.get(row.text, majority) == row.answer for row in heldout) / len(
+        heldout
+    )
 
 
 def build_ambiguous_calibration() -> tuple[RawExample, ...]:
-    """Codes 1 and 3 are both consistent when only codes 0 and 2 are probed."""
     base = learn_meaning(build_training_records())
     alias = "曖昧語"
     rows: list[RawExample] = []
@@ -380,12 +353,7 @@ def build_ambiguous_calibration() -> tuple[RawExample, ...]:
         left, right = f"曖{index}甲", f"曖{index}乙"
         statement = _render(STATEMENT_TEMPLATES[index], left, right, alias)
         query = _render(QUERY_TEMPLATES[index], left, right, known_query)
-        rows.append(
-            RawExample(
-                statement + "。" + query + "？",
-                False,
-            )
-        )
+        rows.append(RawExample(statement + "。" + query + "？", False))
         assert base.marker_codes[known_query] in (0, 2)
     return tuple(rows)
 
@@ -410,6 +378,13 @@ def learner_references_hidden_alias_groups() -> bool:
     )
 
 
+def _present_alias(text: str, marker_codes: Mapping[str, int]) -> str:
+    present = tuple(marker for marker in marker_codes if marker in text)
+    if not present:
+        raise ValueError("control record contains no grounded alias")
+    return present[0]
+
+
 def run_gate() -> dict[str, object]:
     base_model = learn_meaning(build_training_records())
     base_fingerprint = _fingerprint(base_model.payload())
@@ -420,9 +395,7 @@ def run_gate() -> dict[str, object]:
     extension = learn_lexical_extension(lexical_training, bridge, base_model)
     extended_model = extend_semantic_model(base_model, extension)
     heldout = build_novel_alias_heldout(aliases)
-    evaluation = evaluate_novel_aliases(
-        heldout, bridge, extended_model
-    )
+    evaluation = evaluate_novel_aliases(heldout, bridge, extended_model)
     variant = evaluate_novel_aliases(
         build_novel_alias_heldout(aliases, template_variant=1),
         bridge,
@@ -442,27 +415,26 @@ def run_gate() -> dict[str, object]:
         renamed_model,
     )
 
-    ambiguous_rejected = False
     try:
-        learn_lexical_extension(
-            build_ambiguous_calibration(), bridge, base_model
-        )
+        learn_lexical_extension(build_ambiguous_calibration(), bridge, base_model)
+        ambiguous_rejected = False
     except ValueError:
         ambiguous_rejected = True
 
-    contradictory_rejected = False
     contradictory = lexical_training[:1] + (
         RawExample(lexical_training[0].text, not lexical_training[0].answer),
     )
     try:
         learn_lexical_extension(contradictory, bridge, base_model)
+        contradictory_rejected = False
     except ValueError:
         contradictory_rejected = True
 
-    unknown = build_novel_alias_heldout(aliases)[:1]
-    unknown_text = unknown[0].text.replace(aliases[0][0], "未登録関係")
+    control_row = heldout[0]
+    alias_in_control = _present_alias(control_row.text, extension.marker_codes)
+    unknown_text = control_row.text.replace(alias_in_control, "未登録関係")
     unknown_evaluation = evaluate_novel_aliases(
-        (RawExample(unknown_text, unknown[0].answer),),
+        (RawExample(unknown_text, control_row.answer),),
         bridge,
         extended_model,
     )
@@ -545,10 +517,7 @@ def render_markdown(result: Mapping[str, object]) -> str:
         f"- Held-out accuracy: **{result['heldout_accuracy']:.3f}**",
         f"- Held-out coverage: **{result['heldout_coverage']:.3f}**",
         f"- Renamed-alias accuracy: **{result['renamed_alias_accuracy']:.3f}**",
-        (
-            "- Exact raw-text memorizer: "
-            f"**{result['exact_text_memorizer_accuracy']:.3f}**"
-        ),
+        f"- Exact raw-text memorizer: **{result['exact_text_memorizer_accuracy']:.3f}**",
         f"- Learned extension payload: **{result['extension_payload_bytes']} bytes**",
         "",
         "## Checks",
