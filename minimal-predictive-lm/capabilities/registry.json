@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "management_mode": "capability-unit",
+  "resource_accounting": {
+    "model_size": "executable_total_description_bits",
+    "training_compute": "separate_operation_count",
+    "inference_compute": "separate_operation_count"
+  },
+  "rules": [
+    "Historical phase names remain only as evidence identifiers.",
+    "New work must have a stable capability ID, falsifiable gate, hard resource budget, baselines, metamorphic tests, and explicit claim boundary.",
+    "Task-specific score gains do not count unless the same learned mechanism transfers across held-out entities, compositions, or domains."
+  ],
+  "capabilities": [
+    {
+      "id": "CAP-GL-001",
+      "name": "mixed-domain self-supervised statistical learning",
+      "status": "passed_limited",
+      "evidence": "docs/phase19a_general_learning_reality_gate.md",
+      "boundary": "repository compression scaling only"
+    },
+    {
+      "id": "CAP-XFER-001",
+      "name": "leave-one-domain-out statistical transfer",
+      "status": "partial",
+      "evidence": "docs/phase19b_domain_holdout_transfer_gate.md",
+      "boundary": "positive for code and prose; negative for structured data"
+    },
+    {
+      "id": "CAP-MEM-001",
+      "name": "causal long-prefix memory",
+      "status": "passed_limited",
+      "evidence": "docs/phase19c_causal_long_memory_gate.md",
+      "boundary": "online compression memory, not semantics"
+    },
+    {
+      "id": "CAP-SEM-001",
+      "name": "weakly supervised relational meaning invariance",
+      "status": "implemented_pending_ci",
+      "evidence": "docs/cap_sem_001_relational_meaning.md",
+      "workflow": ".github/workflows/minimal-predictive-lm-cap-sem-001.yml",
+      "next_dependency": "CAP-SEM-002 raw Japanese clause and argument grounding",
+      "boundary": "tokenized controlled clauses; not unrestricted Japanese understanding"
+    }
+  ]
+}
