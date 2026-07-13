@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from fractions import Fraction
 from math import ceil, log2, prod
 from typing import Iterable, Sequence
 
@@ -45,6 +46,68 @@ class MacroReplacement:
             - self.macro_operations_per_use
             - self.lookup_operations_per_use
         )
+
+
+@dataclass(frozen=True)
+class AffineMap:
+    """Exact one-dimensional affine map used for identifiability counterexamples."""
+
+    scale: Fraction
+    shift: Fraction
+
+    @classmethod
+    def build(cls, scale: int | Fraction, shift: int | Fraction) -> "AffineMap":
+        return cls(Fraction(scale), Fraction(shift))
+
+    def apply(self, value: int | Fraction) -> Fraction:
+        return self.scale * Fraction(value) + self.shift
+
+    def compose(self, inner: "AffineMap") -> "AffineMap":
+        """Return self(inner(x))."""
+        return AffineMap(
+            self.scale * inner.scale,
+            self.scale * inner.shift + self.shift,
+        )
+
+    def inverse(self) -> "AffineMap":
+        if self.scale == 0:
+            raise ValueError("non-invertible affine map")
+        return AffineMap(1 / self.scale, -self.shift / self.scale)
+
+    def conjugate_by(self, coordinate_change: "AffineMap") -> "AffineMap":
+        """Return h o self o h^-1 for h=coordinate_change."""
+        return coordinate_change.compose(self).compose(coordinate_change.inverse())
+
+
+def observed_affine_trajectory(
+    initial_state: int | Fraction,
+    word: Sequence[int],
+    generators: Sequence[AffineMap],
+    decoder: AffineMap,
+) -> tuple[Fraction, ...]:
+    state = Fraction(initial_state)
+    observations = [decoder.apply(state)]
+    for symbol in word:
+        if symbol < 0 or symbol >= len(generators):
+            raise ValueError("generator symbol outside library")
+        state = generators[symbol].apply(state)
+        observations.append(decoder.apply(state))
+    return tuple(observations)
+
+
+def conjugate_latent_system(
+    initial_state: int | Fraction,
+    generators: Sequence[AffineMap],
+    decoder: AffineMap,
+    coordinate_change: AffineMap,
+) -> tuple[Fraction, tuple[AffineMap, ...], AffineMap]:
+    """Equivalent latent system under an arbitrary invertible coordinate change."""
+    transformed_initial = coordinate_change.apply(initial_state)
+    transformed_generators = tuple(
+        generator.conjugate_by(coordinate_change) for generator in generators
+    )
+    transformed_decoder = decoder.compose(coordinate_change.inverse())
+    return transformed_initial, transformed_generators, transformed_decoder
 
 
 def flat_boolean_factor_entries(variable_count: int) -> int:
