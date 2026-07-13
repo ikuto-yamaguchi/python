@@ -23,11 +23,13 @@ Further semantic micro-gates are frozen. The critical path is now:
 5. aggregate score and minimum-domain score reported together;
 6. architecture changes accepted only when several domains improve without material regression.
 
+A new experiment is admitted to the critical path only when it declares in advance which integrated public or prospectively frozen scores it should improve. Synthetic-only success without an immediate external transfer test remains component research, not main progress.
+
 ## Executable milestones
 
 ### CAP-GEN-001 — integrated public reality baseline
 
-Run one frozen worker and fingerprint on all 600 examples from the three prior public slices: 15 axes, 40 examples per axis.
+Run one frozen worker and fingerprint on all 600 examples from the three prior public slices: 15 axes, 40 examples per axis. Task and axis names are hidden from the worker and retained only by the scorer.
 
 This gate establishes the actual baseline. It does not require a high score to be protocol-valid.
 
@@ -103,6 +105,8 @@ The defensible forecast is conditional:
 - Under the previous CAP-SEM-only trajectory: no credible route; practical forecast is never.
 - Under the new integrated trajectory: HSS candidacy begins only after CAP-GEN-002 and CAP-GEN-003 pass. It is not one or two micro-capabilities away.
 - Strong-LLM parity is strictly later and may require an architecture qualitatively different from the current symbolic system.
+
+Calendar planning is replaced by evidence checkpoints. A date estimate becomes defensible only after at least two consecutive major architecture iterations improve both aggregate accuracy and the minimum-axis floor on the frozen integrated gate. Before that evidence exists, any month or year would be invented.
 
 ## Mandatory stop and pivot rules
 
