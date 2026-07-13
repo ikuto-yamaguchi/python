@@ -1,0 +1,52 @@
+name: minimal-predictive-lm-phase18d7
+on:
+  pull_request:
+    paths:
+      - 'minimal-predictive-lm/data/phase18d7_locally_stationary_byte_stream.json'
+      - 'minimal-predictive-lm/src/minimal_predictive_lm/phase18d7_locally_stationary_viterbi.py'
+      - 'minimal-predictive-lm/tests/test_phase18d7_locally_stationary_viterbi.py'
+      - 'minimal-predictive-lm/docs/phase18d7_locally_stationary_viterbi.md'
+      - '.github/workflows/minimal-predictive-lm-phase18d7.yml'
+concurrency:
+  group: phase18d7-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  phase18d7:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Locally stationary Viterbi theorem tests
+        id: theorem_tests
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          python -m pytest -vv minimal-predictive-lm/tests/test_phase18d7_locally_stationary_viterbi.py 2>&1 | tee phase18d7-test.log
+      - name: Run Phase 18d-7 experiment
+        id: experiment
+        continue-on-error: true
+        working-directory: minimal-predictive-lm
+        run: |
+          set -o pipefail
+          python -m minimal_predictive_lm.phase18d7_locally_stationary_viterbi 2>&1 | tee phase18d7-experiment.log
+      - name: Upload Phase 18d-7 diagnostics and results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase18d7-results
+          path: |
+            phase18d7-test.log
+            minimal-predictive-lm/phase18d7-experiment.log
+            minimal-predictive-lm/results/phase18d7.json
+            minimal-predictive-lm/results/phase18d7.md
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Enforce Phase 18d-7 success
+        if: always()
+        run: |
+          test "${{ steps.theorem_tests.outcome }}" = "success"
+          test "${{ steps.experiment.outcome }}" = "success"
