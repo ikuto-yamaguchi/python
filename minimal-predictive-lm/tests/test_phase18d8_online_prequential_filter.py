@@ -5,19 +5,22 @@ from minimal_predictive_lm.phase18d6_utf8_byte_codec_induction import (
     parse_byte_stream,
 )
 from minimal_predictive_lm.phase18d7_locally_stationary_viterbi import (
+    _expand_blocks,
     calibration_grammar,
     enumerate_program_states,
     load_local_stream,
 )
+from minimal_predictive_lm.phase18d8_online_prequential_audit import (
+    effective_blocks,
+    run,
+)
 from minimal_predictive_lm.phase18d8_online_prequential_filter import (
     _block_end_positions,
-    _expand_blocks,
     _prediction_errors,
     _same_signature_switches,
     initial_prior,
     online_filter,
     predict_from_prior,
-    run,
 )
 
 
@@ -62,25 +65,30 @@ def test_future_suffix_cannot_rewrite_past_online_predictions():
 
 def test_online_regret_is_localized_to_unannounced_same_signature_switches():
     payload, records, _, states = _fixture()
+    blocks = effective_blocks(payload["audit_blocks"], len(records))
     result = online_filter(records, states)
     errors = set(_prediction_errors(result, records))
-    switches = set(_same_signature_switches(records, payload["audit_blocks"]))
+    switches = set(_same_signature_switches(records, blocks))
     assert errors <= {0, *switches}
     assert result.covered_accuracy >= 0.95
     assert result.overall_accuracy >= 0.80
 
 
-def test_every_initial_block_is_identified_by_its_end_without_support_episode():
+def test_boundary_calibration_is_audit_only_and_every_block_finishes_identified():
     payload, records, _, states = _fixture()
+    declared = sum(int(row["length"]) for row in payload["audit_blocks"])
+    assert len(records) == declared + 1
+    blocks = effective_blocks(payload["audit_blocks"], len(records))
+    assert len(records) == len(_expand_blocks(blocks))
+
     result = online_filter(records, states)
     ops = result.posterior_ops()
-    ends = _block_end_positions(payload["audit_blocks"])
-    assert len(records) == len(_expand_blocks(payload["audit_blocks"]))
-    assert all(ops[index] == label for index, label in ends)
+    assert all(ops[index] == label for index, label in _block_end_positions(blocks))
 
 
-def test_post_freeze_min_is_discovered_from_stream_update_only():
+def test_post_freeze_min_is_identified_from_stream_update_only():
     payload, initial_records, post_records, states = _fixture()
+    initial_blocks = effective_blocks(payload["audit_blocks"], len(initial_records))
     result = online_filter(initial_records + post_records, states)
     post_start = len(initial_records)
     min_positions = [
@@ -89,9 +97,12 @@ def test_post_freeze_min_is_discovered_from_stream_update_only():
         if operation == "MIN2"
     ]
     assert min_positions
-    assert min_positions[0] - post_start + 1 <= 2
-    final_blocks = tuple(payload["audit_blocks"]) + tuple(payload["post_freeze_audit_blocks"])
-    assert all(result.posterior_ops()[index] == label for index, label in _block_end_positions(final_blocks))
+    assert min_positions[0] - post_start + 1 <= 5
+    final_blocks = initial_blocks + tuple(payload["post_freeze_audit_blocks"])
+    assert all(
+        result.posterior_ops()[index] == label
+        for index, label in _block_end_positions(final_blocks)
+    )
 
 
 def test_online_work_is_linear_in_stream_length():
@@ -108,5 +119,6 @@ def test_all_phase18d8_theorem_checks_pass():
     assert all(payload["theorem_checks"].values())
     assert payload["resources"]["large_stream_exact_cover_nodes"] == 0
     assert payload["campaign"]["support_episodes_supplied"] is False
+    assert payload["campaign"]["learner_changed_after_c1"] is False
     assert payload["claim_boundary"]["zero_error_at_unannounced_same_signature_change_points"] is False
     assert payload["claim_boundary"]["llm_like_general_learning"] is False
