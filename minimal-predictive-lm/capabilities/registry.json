@@ -9,7 +9,8 @@
   "rules": [
     "Historical phase names remain only as evidence identifiers.",
     "New work must have a stable capability ID, falsifiable gate, hard resource budget, baselines, metamorphic tests, and explicit claim boundary.",
-    "Task-specific score gains do not count unless the same learned mechanism transfers across held-out entities, compositions, or domains."
+    "Task-specific score gains do not count unless the same learned mechanism transfers across held-out entities, compositions, or domains.",
+    "A downstream capability must preserve every dependency declared frozen; relearning a dependency disqualifies promotion even when task accuracy is perfect."
   ],
   "capabilities": [
     {
@@ -36,11 +37,21 @@
     {
       "id": "CAP-SEM-001",
       "name": "weakly supervised relational meaning invariance",
-      "status": "implemented_pending_ci",
+      "status": "passed_limited",
       "evidence": "docs/cap_sem_001_relational_meaning.md",
       "workflow": ".github/workflows/minimal-predictive-lm-cap-sem-001.yml",
-      "next_dependency": "CAP-SEM-002 raw Japanese clause and argument grounding",
       "boundary": "tokenized controlled clauses; not unrestricted Japanese understanding"
+    },
+    {
+      "id": "CAP-SEM-002",
+      "name": "raw controlled-Japanese clause and argument grounding",
+      "status": "implemented_pending_ci",
+      "canonical_implementation": "src/minimal_predictive_lm/cap_sem_002_raw_japanese_bridge.py",
+      "experimental_ablation": "src/minimal_predictive_lm/cap_sem_002_raw_japanese_grounding.py",
+      "selection_evidence": "docs/cap_sem_002_selection.md",
+      "workflow": ".github/workflows/minimal-predictive-lm-cap-sem-002.yml",
+      "next_dependency": "CAP-SEM-003 open relation-expression grounding",
+      "boundary": "finite controlled Japanese grammar; inherited closed relation vocabulary"
     }
   ]
 }
