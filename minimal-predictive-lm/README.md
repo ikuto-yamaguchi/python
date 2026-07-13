@@ -153,18 +153,48 @@ prediction / task loss
 
 結果・設計: [`12a`](results/phase12a.md) / [`12b`](results/phase12b.md) / [`12a theory`](docs/phase12a_mixed_multi_axis_learner.md) / [`12b theory`](docs/phase12b_exploratory_mixed_open_model_comparison.md)
 
-## 次の段階
+## Public reality evidence
 
-次はsynthetic軸を増やさず、公開raw benchmarkへ移ります。boolean expression、multi-step arithmetic、object counting、sequence/string reasoningなどを、修正前の固定モデルへ入力して失敗境界を測ります。その後、個別solverではなく共通表現・program libraryの拡張だけで改善できるかを検証します。
+公開raw benchmarkへ移った後の凍結結果は、controlled gateより大幅に弱いものでした。
 
-## 再現
+- Phase 13a: 40/200。直接算術以外の4軸は0%。
+- Phase 15a: 新規5軸で0/200。
+- Phase 16a: さらに新規5軸で0/200。
+
+この結果を無視してcontrolled relation gateを増やしても、高校生級への見通しにはなりません。CAP-SEM-001〜005はcomponent evidenceとして保存しますが、critical pathから凍結します。
+
+## Current critical path: CAP-GEN
+
+[`intelligence roadmap`](docs/intelligence_roadmap_and_stop_rules.md) に従い、現在の最優先は `CAP-GEN-001` です。
+
+- 過去3回の公開sliceを統合した15軸600問
+- 単一worker・単一fingerprint
+- model入力からtask/axis名を隠す
+- aggregate scoreと最低axis scoreを同時評価
+- micro-gateではなく、複数の無関係axisが同時に改善した場合だけ進展と認定
+
+3回の大規模architecture iterationで統合accuracyが合計15ポイント以上改善しなければ、現core architectureを放棄します。2回の大規模iteration後も0%のaxisが残る場合、local solver追加ではなくshared representationまたはlearning objectiveを変更します。
+
+## 到達条件
+
+「日本の賢い高校生」は曖昧な呼称ではなく、[`high-school target`](docs/phase18_japanese_high_school_intelligence_target.md) の凍結gateで判定します。
+
+- aggregate 80%以上
+- 全domain 70%以上
+- 新規未見問題75%以上
+- 記述式70%以上
+- 誤答訂正80%以上
+- 日本語、数学、英語、理科、地歴公民、情報、長文統合、実repository作業を含む
+
+現状から1〜2個の能力追加で到達する段階ではありません。CAP-GEN-002とCAP-GEN-003を先に通し、その後に初めて高校生級候補となります。
+
+## Reproduction
 
 ```bash
 cd minimal-predictive-lm
 pip install -e .
 python -m unittest discover -s tests -v
-mpm-phase12a
-# optional torch/transformers dependencies are required for mpm-phase12b
+python -m minimal_predictive_lm.cap_gen_001_integrated_public_reality_gate
 ```
 
-GitHub ActionsではPhase 1から最新の軽量Phaseまで全unit test・全再現実験を実行します。重いSmolLM2比較は手動またはmain上の比較コード変更時だけ走ります。
+GitHub ActionsではPhase 1から最新の軽量Phaseまで全unit test・全再現実験を実行します。重い比較は専用workflowへ分離します。
