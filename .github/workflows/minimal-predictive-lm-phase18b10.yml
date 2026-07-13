@@ -1,0 +1,36 @@
+name: minimal-predictive-lm-phase18b10
+on:
+  pull_request:
+    paths:
+      - 'minimal-predictive-lm/src/minimal_predictive_lm/phase18b7_shared_linear_constraint_graph.py'
+      - 'minimal-predictive-lm/src/minimal_predictive_lm/phase18b9_raw_japanese_span_schema.py'
+      - 'minimal-predictive-lm/src/minimal_predictive_lm/phase18b10_mdl_paraphrase_anchors.py'
+      - 'minimal-predictive-lm/tests/test_phase18b10_mdl_paraphrase_anchors.py'
+      - 'minimal-predictive-lm/docs/phase18b10_mdl_paraphrase_anchors.md'
+      - '.github/workflows/minimal-predictive-lm-phase18b10.yml'
+concurrency:
+  group: phase18b10-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  phase18b10:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: MDL paraphrase-anchor theorem tests
+        run: python -m pytest -q minimal-predictive-lm/tests/test_phase18b10_mdl_paraphrase_anchors.py
+      - name: Run Phase 18b-10 experiment
+        working-directory: minimal-predictive-lm
+        run: python -m minimal_predictive_lm.phase18b10_mdl_paraphrase_anchors
+      - name: Upload Phase 18b-10 diagnostics and results
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase18b10-results
+          path: |
+            minimal-predictive-lm/results/phase18b10.json
+            minimal-predictive-lm/results/phase18b10.md
+          retention-days: 7
