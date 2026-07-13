@@ -1,12 +1,16 @@
 from minimal_predictive_lm.benchmark_harness import (
     BenchmarkExample,
+    PredictionRecord,
     build_manifest,
 )
 from minimal_predictive_lm.cap_gen_001_integrated_public_reality_gate import (
+    HIDDEN_AXIS,
     PUBLIC_AGGREGATE_TARGET,
     PUBLIC_AXIS_TARGET,
     _prefixed_examples,
+    axis_blind_manifest,
     readiness_decision,
+    score_axis_blind_predictions,
 )
 
 
@@ -23,19 +27,52 @@ def _axes(*accuracies: float):
     }
 
 
-def test_prefixing_prevents_cross_slice_id_collisions():
-    source = build_manifest(
+def _source_manifest():
+    return build_manifest(
         name="source",
         split="test",
         source="local",
         license_id="test",
         public=True,
-        examples=(BenchmarkExample("same", "axis", "q", "a"),),
+        examples=(
+            BenchmarkExample("same", "secret_axis", "q", "a"),
+            BenchmarkExample("other", "another_axis", "q2", "b"),
+        ),
     )
+
+
+def test_prefixing_prevents_cross_slice_id_collisions():
+    source = _source_manifest()
     first = _prefixed_examples(source, "first")
     second = _prefixed_examples(source, "second")
     assert first[0].example_id != second[0].example_id
     assert first[0].prompt == second[0].prompt == "q"
+
+
+def test_axis_blind_model_view_preserves_prompts_ids_and_targets():
+    source = _source_manifest()
+    hidden = axis_blind_manifest(source)
+    assert {row.axis for row in hidden.examples} == {HIDDEN_AXIS}
+    for original, model_view in zip(source.examples, hidden.examples):
+        assert model_view.example_id == original.example_id
+        assert model_view.prompt == original.prompt
+        assert model_view.target == original.target
+        assert model_view.answer_type == original.answer_type
+
+
+def test_axis_blind_predictions_are_scored_against_secret_axes():
+    source = _source_manifest()
+    score = score_axis_blind_predictions(
+        source,
+        (
+            PredictionRecord("same", "a"),
+            PredictionRecord("other", "wrong"),
+        ),
+    )
+    assert score.examples == 2
+    assert score.answered == 2
+    assert score.correct == 1
+    assert score.overall_accuracy == 0.5
 
 
 def test_reality_gate_requires_aggregate_and_every_axis_floor():
