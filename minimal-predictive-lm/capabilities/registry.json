@@ -1,6 +1,7 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "management_mode": "capability-unit",
+  "critical_path": "cross-domain integrated general learning",
   "resource_accounting": {
     "model_size": "executable_total_description_bits",
     "training_compute": "separate_operation_count",
@@ -10,7 +11,10 @@
     "Historical phase names remain only as evidence identifiers.",
     "New work must have a stable capability ID, falsifiable gate, hard resource budget, baselines, metamorphic tests, and explicit claim boundary.",
     "Task-specific score gains do not count unless the same learned mechanism transfers across held-out entities, compositions, or domains.",
-    "A downstream capability must preserve every dependency declared frozen; relearning a dependency disqualifies promotion even when task accuracy is perfect."
+    "A downstream capability must preserve every dependency declared frozen; relearning a dependency disqualifies promotion even when task accuracy is perfect.",
+    "CAP-SEM micro-gates are frozen from the critical path until one frozen checkpoint improves multiple unrelated public axes.",
+    "Three major architecture iterations with less than fifteen aggregate percentage points of CAP-GEN-001 improvement require abandonment of the current core architecture.",
+    "Any axis that remains at zero after two major iterations requires a shared-representation or learning-objective change rather than another local solver."
   ],
   "capabilities": [
     {
@@ -102,8 +106,27 @@
         "training_operations": 24612,
         "average_inference_operations": 140.171875
       },
-      "next_dependency": "CAP-SEM-006 algebra selection and runtime expansion",
+      "critical_path_status": "frozen_component_evidence",
       "boundary": "new ontology pair uses the same directed transitive graph algebra; not arbitrary concept formation"
+    },
+    {
+      "id": "CAP-GEN-001",
+      "name": "single-checkpoint integrated public reality baseline",
+      "status": "implemented_pending_ci",
+      "implementation": "src/minimal_predictive_lm/cap_gen_001_integrated_public_reality_gate.py",
+      "evidence": "docs/intelligence_roadmap_and_stop_rules.md",
+      "workflow": ".github/workflows/minimal-predictive-lm-cap-gen-001.yml",
+      "suite": {
+        "public_axes": 15,
+        "examples": 600,
+        "same_worker": true,
+        "same_fingerprint": true
+      },
+      "promotion_gate": {
+        "aggregate_accuracy": 0.8,
+        "minimum_axis_accuracy": 0.7
+      },
+      "boundary": "public reasoning proxy only; insufficient for Japanese high-school intelligence or strong-LLM parity"
     }
   ]
 }
