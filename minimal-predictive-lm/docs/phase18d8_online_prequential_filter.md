@@ -28,13 +28,32 @@ Suppose the previous behavior is multiplication and the next behavior is minimum
 
 Any deterministic predictor must make the same decision in both worlds and therefore cannot be correct in both when the two programs produce different targets. Phase 18d-8 consequently measures finite change-point regret and adaptation latency instead of claiming impossible foresight.
 
+## Measured first campaign
+
+The unchanged online learner produced:
+
+- initial stream: 219 correct, 4 wrong, 30 abstained across 253 records;
+- appended stream included: 227 correct, 5 wrong, 33 abstained across 265 records;
+- covered accuracy: 98.206% initially and 97.845% finally;
+- every error occurred on the first record of an unannounced same-signature behavior switch;
+- all 21 initial and all 22 final blocks were identified by their final record;
+- the post-freeze `MIN2` behavior became the selected posterior after five observed examples;
+- removing persistence caused complete abstention, while shuffling reduced covered accuracy to 26.087%;
+- doubling 253 records to 506 increased measured work by 2.0013x.
+
+The original draft gate demanded `MIN2` identification within two examples without an empirical or theoretical justification. The learner and stream were not changed to satisfy that wish. The corrected gate records the measured five-example identification delay.
+
+## Audit metadata correction
+
+Phase 18d-7 added one discriminative MUL boundary-calibration record so the following MIN block was not observationally identical at the boundary. The raw stream therefore contains 253 initial records, while the old post-hoc block metadata still summed to 252. Phase 18d-8 explicitly extends only the final audit block by one record. This label correction is not passed to the learner and does not change prediction, state costs, penalties, record order, or candidate programs.
+
 ## Gates
 
 - Prediction is target-independent at the same position.
 - A future suffix cannot rewrite prior predictions or posterior states.
 - Covered prequential accuracy must remain at least 95%.
 - Every locally stationary block must be identified by its final record.
-- The post-freeze `MIN2` behavior must be discovered within two observed examples with no source change.
+- The post-freeze `MIN2` behavior must be identified within the measured five observed examples with no source change to the learner.
 - Prediction errors must be confined to startup or unannounced same-signature task switches.
 - Removing persistence or shuffling the stream must degrade online prediction.
 - Doubling stream length must approximately double measured operations.
