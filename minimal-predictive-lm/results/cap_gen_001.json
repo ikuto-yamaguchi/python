@@ -1,0 +1,79 @@
+{
+  "capability_id": "CAP-GEN-001",
+  "purpose": "freeze one current worker and measure the same checkpoint on all fifteen previously public reasoning axes before any further micro-gate",
+  "suite": {
+    "name": "cap-gen-001-integrated-public-reality-gate",
+    "scoring_manifest_sha256": "5c3e5cd7092a2da4a06a4e03174bef340ded6bbce2d5a525ea6ebd30636f96c1",
+    "axis_blind_model_manifest_sha256": "a2a14827498dc9409860c760f860f33cf381a13a05ef442782a3bb865b125ea3",
+    "examples": 600,
+    "axes": 15,
+    "examples_per_axis": 40,
+    "axis_visible_to_model": false
+  },
+  "frozen_model": {
+    "worker": "minimal_predictive_lm.phase15d_worker",
+    "fingerprint_before": "a2b80caa8b72990cb69162f8769e34034bd2c6cb76904ba6636464f5313bf089",
+    "fingerprint_after": "a2b80caa8b72990cb69162f8769e34034bd2c6cb76904ba6636464f5313bf089",
+    "unchanged": true,
+    "benchmark_specific_changes_for_this_gate": 0
+  },
+  "score": {
+    "examples": 600,
+    "answered": 400,
+    "correct": 398,
+    "overall_accuracy": 0.6633333333333333,
+    "selective_accuracy": 0.995,
+    "coverage": 0.6666666666666666
+  },
+  "axis_scores": {
+    "adjective_order": {"examples": 40, "answered": 0, "correct": 0, "wrong": 0, "abstained": 40, "accuracy": 0.0, "coverage": 0.0, "selective_accuracy": 0.0},
+    "belief_propagation": {"examples": 40, "answered": 0, "correct": 0, "wrong": 0, "abstained": 40, "accuracy": 0.0, "coverage": 0.0, "selective_accuracy": 0.0},
+    "boolean_expressions": {"examples": 40, "answered": 40, "correct": 40, "wrong": 0, "abstained": 0, "accuracy": 1.0, "coverage": 1.0, "selective_accuracy": 1.0},
+    "causal_judgement": {"examples": 40, "answered": 0, "correct": 0, "wrong": 0, "abstained": 40, "accuracy": 0.0, "coverage": 0.0, "selective_accuracy": 0.0},
+    "date_understanding": {"examples": 40, "answered": 39, "correct": 38, "wrong": 1, "abstained": 1, "accuracy": 0.95, "coverage": 0.975, "selective_accuracy": 0.9743589743589743},
+    "direct_arithmetic": {"examples": 40, "answered": 40, "correct": 40, "wrong": 0, "abstained": 0, "accuracy": 1.0, "coverage": 1.0, "selective_accuracy": 1.0},
+    "formal_validity": {"examples": 40, "answered": 1, "correct": 0, "wrong": 1, "abstained": 39, "accuracy": 0.0, "coverage": 0.025, "selective_accuracy": 0.0},
+    "logical_ordering": {"examples": 40, "answered": 40, "correct": 40, "wrong": 0, "abstained": 0, "accuracy": 1.0, "coverage": 1.0, "selective_accuracy": 1.0},
+    "multistep_arithmetic": {"examples": 40, "answered": 40, "correct": 40, "wrong": 0, "abstained": 0, "accuracy": 1.0, "coverage": 1.0, "selective_accuracy": 1.0},
+    "object_counting": {"examples": 40, "answered": 40, "correct": 40, "wrong": 0, "abstained": 0, "accuracy": 1.0, "coverage": 1.0, "selective_accuracy": 1.0},
+    "reference_resolution": {"examples": 40, "answered": 0, "correct": 0, "wrong": 0, "abstained": 40, "accuracy": 0.0, "coverage": 0.0, "selective_accuracy": 0.0},
+    "spatial_navigation": {"examples": 40, "answered": 40, "correct": 40, "wrong": 0, "abstained": 0, "accuracy": 1.0, "coverage": 1.0, "selective_accuracy": 1.0},
+    "stack_completion": {"examples": 40, "answered": 40, "correct": 40, "wrong": 0, "abstained": 0, "accuracy": 1.0, "coverage": 1.0, "selective_accuracy": 1.0},
+    "state_permutation_tracking": {"examples": 40, "answered": 40, "correct": 40, "wrong": 0, "abstained": 0, "accuracy": 1.0, "coverage": 1.0, "selective_accuracy": 1.0},
+    "word_sorting": {"examples": 40, "answered": 40, "correct": 40, "wrong": 0, "abstained": 0, "accuracy": 1.0, "coverage": 1.0, "selective_accuracy": 1.0}
+  },
+  "readiness": {
+    "aggregate_target": 0.8,
+    "axis_floor_target": 0.7,
+    "observed_axis_floor": 0.0,
+    "weak_axes": ["adjective_order", "belief_propagation", "causal_judgement", "formal_validity", "reference_resolution"],
+    "public_reasoning_proxy_passed": false,
+    "japanese_high_school_claim_allowed": false,
+    "general_llm_parity_allowed": false,
+    "architecture_pivot_required": true
+  },
+  "resources": {
+    "model_bytes": 9643094,
+    "peak_rss_bytes": 127602688,
+    "wall_ns": 7653197640,
+    "cpu_ns": 7999709999,
+    "operations": 107949,
+    "reads": 3747,
+    "writes": 1689,
+    "energy_joules": null
+  },
+  "checks": {
+    "manifest_is_public": true,
+    "exactly_fifteen_axes": true,
+    "exactly_600_examples": true,
+    "one_frozen_fingerprint": true,
+    "one_worker_for_every_axis": true,
+    "axis_names_hidden_from_worker": true,
+    "model_and_scoring_prompts_identical": true,
+    "pinned_wordnet_verified": true,
+    "reality_gate_reports_failure_without_promoting_claim": true
+  },
+  "gate_valid": true,
+  "capability_passed": false,
+  "claim_boundary": "This fifteen-axis public reasoning proxy is necessary but not sufficient for Japanese high-school intelligence. Japanese, mathematics curriculum, science, humanities, writing, repository coding, long context, and interactive learning remain separate required gates."
+}
