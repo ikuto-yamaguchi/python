@@ -1,0 +1,66 @@
+name: minimal-predictive-lm-phase18d13
+
+on:
+  pull_request:
+    paths:
+      - "minimal-predictive-lm/data/phase18d13_raw_utf8_stream.json"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/phase18d10_primitive_core.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/phase18d12_multi_primitive_core.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/phase18d13_raw_utf8_grammar.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/phase18d13_raw_utf8_core.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/phase18d13_raw_utf8_multi_primitive.py"
+      - "minimal-predictive-lm/tests/test_phase18d13_raw_utf8_multi_primitive.py"
+      - "minimal-predictive-lm/docs/phase18d13_raw_utf8_multi_primitive.md"
+      - ".github/workflows/minimal-predictive-lm-phase18d13.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  phase18d13:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: minimal-predictive-lm/pyproject.toml
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Raw UTF-8 invention theorem tests
+        id: tests
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p minimal-predictive-lm/results
+          python -m pytest -q minimal-predictive-lm/tests/test_phase18d13_raw_utf8_multi_primitive.py 2>&1 | tee minimal-predictive-lm/results/phase18d13-test.log
+      - name: Run Phase 18d-13 experiment
+        id: experiment
+        continue-on-error: true
+        working-directory: minimal-predictive-lm
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m minimal_predictive_lm.phase18d13_raw_utf8_multi_primitive 2>&1 | tee results/phase18d13-run.log
+      - name: Upload Phase 18d-13 diagnostics and results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase18d13-results
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            minimal-predictive-lm/results/phase18d13.json
+            minimal-predictive-lm/results/phase18d13.md
+            minimal-predictive-lm/results/phase18d13-test.log
+            minimal-predictive-lm/results/phase18d13-run.log
+      - name: Enforce Phase 18d-13 success
+        if: always()
+        run: |
+          test "${{ steps.tests.outcome }}" = "success"
+          test "${{ steps.experiment.outcome }}" = "success"
