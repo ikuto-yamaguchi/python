@@ -1,3 +1,4 @@
+# Isolated audit rerun; runtime and gate are unchanged.
 name: minimal-predictive-lm-phase19b
 
 on:
