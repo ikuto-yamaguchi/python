@@ -45,11 +45,12 @@
     {
       "id": "CAP-SEM-002",
       "name": "raw controlled-Japanese clause and argument grounding",
-      "status": "implemented_pending_ci",
+      "status": "passed_limited",
       "canonical_implementation": "src/minimal_predictive_lm/cap_sem_002_raw_japanese_bridge.py",
       "experimental_ablation": "src/minimal_predictive_lm/cap_sem_002_raw_japanese_grounding.py",
       "selection_evidence": "docs/cap_sem_002_selection.md",
       "workflow": ".github/workflows/minimal-predictive-lm-cap-sem-002.yml",
+      "successful_ci_run": 29261896307,
       "next_dependency": "CAP-SEM-003 open relation-expression grounding",
       "boundary": "finite controlled Japanese grammar; inherited closed relation vocabulary"
     }
