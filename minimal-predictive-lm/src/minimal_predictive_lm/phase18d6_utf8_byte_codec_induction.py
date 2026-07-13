@@ -99,8 +99,11 @@ def _decode_utf8(atom: bytes) -> str:
         text = atom.decode("utf-8")
     except UnicodeDecodeError as exc:
         raise ByteGrammarError("atom is not valid UTF-8") from exc
-    if not text or any(not character.isprintable() for character in text):
-        raise ByteGrammarError("atom is not printable UTF-8")
+    if not text or any(
+        not character.isprintable() and unicodedata.category(character) != "Co"
+        for character in text
+    ):
+        raise ByteGrammarError("atom is not printable UTF-8 or a private-use glyph")
     return text
 
 
