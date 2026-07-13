@@ -1,0 +1,40 @@
+name: minimal-predictive-lm-phase18d2
+
+on:
+  pull_request:
+    paths:
+      - 'minimal-predictive-lm/data/phase18d2_library_tasks.json'
+      - 'minimal-predictive-lm/src/minimal_predictive_lm/phase18d1_dataset_to_program_meta_learner.py'
+      - 'minimal-predictive-lm/src/minimal_predictive_lm/phase18d2_data_driven_library_growth.py'
+      - 'minimal-predictive-lm/tests/test_phase18d2_data_driven_library_growth.py'
+      - 'minimal-predictive-lm/docs/phase18d2_data_driven_library_growth.md'
+      - '.github/workflows/minimal-predictive-lm-phase18d2.yml'
+
+concurrency:
+  group: phase18d2-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  phase18d2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Data-driven library theorem tests
+        run: python -m pytest -q minimal-predictive-lm/tests/test_phase18d2_data_driven_library_growth.py
+      - name: Run Phase 18d-2 experiment
+        working-directory: minimal-predictive-lm
+        run: python -m minimal_predictive_lm.phase18d2_data_driven_library_growth
+      - name: Upload Phase 18d-2 diagnostics and results
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase18d2-results
+          path: |
+            minimal-predictive-lm/results/phase18d2.json
+            minimal-predictive-lm/results/phase18d2.md
+          retention-days: 7
