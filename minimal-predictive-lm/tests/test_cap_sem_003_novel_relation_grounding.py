@@ -79,7 +79,9 @@ def test_unregistered_marker_does_not_silently_map():
     base, bridge, _, aliases, extension = _models()
     model = extend_semantic_model(base, extension)
     row = build_novel_alias_heldout(aliases)[0]
-    known_alias = next(iter(extension.marker_codes))
+    known_alias = next(
+        marker for marker in extension.marker_codes if marker in row.text
+    )
     unknown = RawExample(
         row.text.replace(known_alias, "未登録関係"), row.answer
     )
