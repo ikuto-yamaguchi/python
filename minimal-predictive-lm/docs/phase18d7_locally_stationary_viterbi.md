@@ -8,7 +8,7 @@ Phase 18d-7 replaces exact cover at the large stage with a dynamic program. It a
 
 ## Input and state library
 
-A small Phase 18d-6 calibration stream still identifies the UTF-8 delimiter roles and private-use numeric codebook. The large experiment then receives 252 byte records arranged as 21 locally stationary blocks. Task IDs, task count, and block boundaries are not supplied to the learner.
+A small Phase 18d-6 calibration stream still identifies the UTF-8 delimiter roles and private-use numeric codebook. The large experiment receives 253 byte records arranged as 21 locally stationary blocks: 252 regular records plus one trailing boundary-calibration record that disambiguates the final multiplication block from the subsequently appended minimum block. Task IDs, task count, and block boundaries are not supplied to the learner; the extra record is used only in held-out audit metadata.
 
 The frozen DSL is enumerated once through cost three and deduplicated by behavior on a finite probe set. This yields 130 candidate states across numeric and string signatures.
 
@@ -26,6 +26,7 @@ An exact prediction has zero emission cost, a wrong prediction has a fixed penal
 - Randomly shuffling the stream destroys local stationarity and also degrades recovery.
 - Doubling the record stream must approximately double measured Viterbi operations.
 - Empty input, ambiguous context, and a behavior outside the used library must abstain.
+- A behaviorally ambiguous boundary record is not counted as identifiable; the audit includes one explicit boundary-calibration record where multiplication and minimum differ.
 
 These controls show that local persistence is an actual source of identification, not decorative regularization.
 
