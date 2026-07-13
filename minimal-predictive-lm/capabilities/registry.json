@@ -84,8 +84,26 @@
         "training_operations": 34304,
         "average_inference_operations": 523.03125
       },
-      "next_dependency": "CAP-SEM-005 ontology expansion from data",
       "boundary": "controlled synthetic definitions and usages; every term still maps into one of four existing latent relation codes"
+    },
+    {
+      "id": "CAP-SEM-005",
+      "name": "data-driven ontology expansion with a new inverse relation pair",
+      "status": "passed_limited",
+      "implementation": "src/minimal_predictive_lm/cap_sem_005_ontology_expansion.py",
+      "evidence": "docs/cap_sem_005_ontology_expansion.md",
+      "workflow": ".github/workflows/minimal-predictive-lm-cap-sem-005.yml",
+      "successful_ci_run": 29264016356,
+      "resource_result": {
+        "calibration_documents": 96,
+        "new_relation_pairs": 1,
+        "new_marker_mappings": 8,
+        "learned_payload_bytes": 103,
+        "training_operations": 24612,
+        "average_inference_operations": 140.171875
+      },
+      "next_dependency": "CAP-SEM-006 algebra selection and runtime expansion",
+      "boundary": "new ontology pair uses the same directed transitive graph algebra; not arbitrary concept formation"
     }
   ]
 }
