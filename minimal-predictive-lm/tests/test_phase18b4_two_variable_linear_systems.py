@@ -1,4 +1,4 @@
-from phase18b4_two_variable_linear_systems import (
+from minimal_predictive_lm.phase18b4_two_variable_linear_systems import (
     ambiguous_calibration_is_rejected,
     evaluate,
     heldout,
