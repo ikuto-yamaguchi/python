@@ -1,0 +1,59 @@
+name: minimal-predictive-lm-cap-gen-001
+
+on:
+  pull_request:
+    paths:
+      - 'minimal-predictive-lm/src/minimal_predictive_lm/cap_gen_001_integrated_public_reality_gate.py'
+      - 'minimal-predictive-lm/tests/test_cap_gen_001_integrated_public_reality_gate.py'
+      - 'minimal-predictive-lm/docs/intelligence_roadmap_and_stop_rules.md'
+      - 'minimal-predictive-lm/capabilities/registry.json'
+      - '.github/workflows/minimal-predictive-lm-cap-gen-001.yml'
+      - 'minimal-predictive-lm/src/minimal_predictive_lm/phase13a_experiment.py'
+      - 'minimal-predictive-lm/src/minimal_predictive_lm/phase15a_public_benchmarks.py'
+      - 'minimal-predictive-lm/src/minimal_predictive_lm/phase16a_public_benchmarks.py'
+      - 'minimal-predictive-lm/src/minimal_predictive_lm/phase15d_worker.py'
+
+concurrency:
+  group: cap-gen-001-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cap-gen-001:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: CAP-GEN-001 contract tests
+        id: tests
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          python -m pytest -q minimal-predictive-lm/tests/test_cap_gen_001_integrated_public_reality_gate.py 2>&1 | tee cap-gen-001-pytest.log
+      - name: Run integrated public reality gate
+        id: experiment
+        continue-on-error: true
+        working-directory: minimal-predictive-lm
+        run: |
+          set -o pipefail
+          python -m minimal_predictive_lm.cap_gen_001_integrated_public_reality_gate 2>&1 | tee ../cap-gen-001-experiment.log
+      - name: Upload reality diagnostics and results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cap-gen-001-results
+          path: |
+            minimal-predictive-lm/results/cap_gen_001.json
+            minimal-predictive-lm/results/cap_gen_001.md
+            cap-gen-001-pytest.log
+            cap-gen-001-experiment.log
+          retention-days: 14
+      - name: Enforce protocol validity
+        if: always()
+        run: |
+          test "${{ steps.tests.outcome }}" = "success"
+          test "${{ steps.experiment.outcome }}" = "success"
