@@ -1,0 +1,37 @@
+name: minimal-predictive-lm-phase18d3
+on:
+  pull_request:
+    paths:
+      - 'minimal-predictive-lm/data/phase18d3_unlabeled_stream.json'
+      - 'minimal-predictive-lm/src/minimal_predictive_lm/phase18d1_dataset_to_program_meta_learner.py'
+      - 'minimal-predictive-lm/src/minimal_predictive_lm/phase18d3_latent_task_partition.py'
+      - 'minimal-predictive-lm/tests/test_phase18d3_latent_task_partition.py'
+      - 'minimal-predictive-lm/docs/phase18d3_latent_task_partition.md'
+      - '.github/workflows/minimal-predictive-lm-phase18d3.yml'
+concurrency:
+  group: phase18d3-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  phase18d3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Latent partition theorem tests
+        run: python -m pytest -q minimal-predictive-lm/tests/test_phase18d3_latent_task_partition.py
+      - name: Run Phase 18d-3 experiment
+        working-directory: minimal-predictive-lm
+        run: python -m minimal_predictive_lm.phase18d3_latent_task_partition
+      - name: Upload Phase 18d-3 diagnostics and results
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase18d3-results
+          path: |
+            minimal-predictive-lm/results/phase18d3.json
+            minimal-predictive-lm/results/phase18d3.md
+          retention-days: 7
