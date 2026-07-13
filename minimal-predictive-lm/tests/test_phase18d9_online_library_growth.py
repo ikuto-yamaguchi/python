@@ -14,10 +14,10 @@ from minimal_predictive_lm.phase18d8_online_prequential_filter import (
     _block_end_positions,
     _same_signature_switches,
 )
+from minimal_predictive_lm.phase18d9_online_library_audit import run
 from minimal_predictive_lm.phase18d9_online_library_growth import (
     _growth_prediction_errors,
     grow_program_library,
-    run,
 )
 
 
@@ -60,7 +60,7 @@ def test_every_block_finishes_with_the_acquired_program_active():
 
 
 def test_post_freeze_stream_adds_min_without_source_change():
-    payload, records, post_records, states = _fixture()
+    _, records, post_records, states = _fixture()
     initial = grow_program_library(records, states)
     final = grow_program_library(records + post_records, states)
     assert set(final.acquired_ops()) - set(initial.acquired_ops()) == {"MIN2"}
