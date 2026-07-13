@@ -37,6 +37,13 @@ def _fixture():
     return payload, grammar, initial_records, post_records, states, evaluated
 
 
+def _initial_labels(payload, records):
+    return _expand_blocks(
+        payload["audit_blocks"],
+        target_length=len(records),
+    )
+
+
 def test_generic_candidate_state_library_has_expected_behavior_classes():
     _, _, _, _, states, evaluated = _fixture()
     assert len(states) == 130
@@ -46,14 +53,15 @@ def test_generic_candidate_state_library_has_expected_behavior_classes():
 def test_viterbi_recovers_every_locally_stationary_record():
     payload, _, records, _, states, _ = _fixture()
     result = infer_locally_stationary_path(records, states)
-    labels = _expand_blocks(payload["audit_blocks"])
-    assert audit_path(result, labels) == (252, 252)
+    labels = _initial_labels(payload, records)
+    assert audit_path(result, labels) == (len(records), len(records))
+    assert len(records) == 253
     assert len(result.used_states()) == 7
 
 
 def test_local_persistence_is_causal_not_decorative():
     payload, _, records, _, states, _ = _fixture()
-    labels = _expand_blocks(payload["audit_blocks"])
+    labels = _initial_labels(payload, records)
     no_prior = infer_locally_stationary_path(records, states, switch_penalty=0)
     no_prior_correct, total = audit_path(no_prior, labels)
     assert no_prior_correct < total
