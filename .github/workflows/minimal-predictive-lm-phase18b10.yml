@@ -22,15 +22,29 @@ jobs:
       - name: Install
         run: python -m pip install -e minimal-predictive-lm pytest
       - name: MDL paraphrase-anchor theorem tests
-        run: python -m pytest -q minimal-predictive-lm/tests/test_phase18b10_mdl_paraphrase_anchors.py
+        id: theorem
+        continue-on-error: true
+        run: |
+          mkdir -p minimal-predictive-lm/results
+          python -m pytest -vv -x minimal-predictive-lm/tests/test_phase18b10_mdl_paraphrase_anchors.py > minimal-predictive-lm/results/phase18b10-pytest.log 2>&1
       - name: Run Phase 18b-10 experiment
+        id: experiment
+        if: always()
+        continue-on-error: true
         working-directory: minimal-predictive-lm
-        run: python -m minimal_predictive_lm.phase18b10_mdl_paraphrase_anchors
+        run: python -m minimal_predictive_lm.phase18b10_mdl_paraphrase_anchors > results/phase18b10-experiment.log 2>&1
       - name: Upload Phase 18b-10 diagnostics and results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: phase18b10-results
           path: |
             minimal-predictive-lm/results/phase18b10.json
             minimal-predictive-lm/results/phase18b10.md
+            minimal-predictive-lm/results/phase18b10-pytest.log
+            minimal-predictive-lm/results/phase18b10-experiment.log
+          if-no-files-found: warn
           retention-days: 7
+      - name: Enforce Phase 18b-10 gates
+        if: steps.theorem.outcome == 'failure' || steps.experiment.outcome == 'failure'
+        run: exit 1
