@@ -1,0 +1,54 @@
+name: minimal-predictive-lm-phase18d11
+on:
+  pull_request:
+    paths:
+      - 'minimal-predictive-lm/data/phase18d11_ungrouped_stream.json'
+      - 'minimal-predictive-lm/src/minimal_predictive_lm/phase18d10_primitive_core.py'
+      - 'minimal-predictive-lm/src/minimal_predictive_lm/phase18d11_ungrouped_online_residual.py'
+      - 'minimal-predictive-lm/tests/test_phase18d11_ungrouped_online_residual.py'
+      - 'minimal-predictive-lm/docs/phase18d11_ungrouped_online_residual.md'
+      - '.github/workflows/minimal-predictive-lm-phase18d11.yml'
+concurrency:
+  group: phase18d11-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  phase18d11:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Ungrouped residual theorem tests
+        id: tests
+        continue-on-error: true
+        run: |
+          mkdir -p minimal-predictive-lm/results
+          set -o pipefail
+          python -m pytest -q minimal-predictive-lm/tests/test_phase18d11_ungrouped_online_residual.py 2>&1 | tee minimal-predictive-lm/results/phase18d11-test.log
+      - name: Run Phase 18d-11 experiment
+        id: experiment
+        continue-on-error: true
+        working-directory: minimal-predictive-lm
+        run: |
+          set -o pipefail
+          python -m minimal_predictive_lm.phase18d11_ungrouped_online_residual 2>&1 | tee results/phase18d11-run.log
+      - name: Upload Phase 18d-11 diagnostics and results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase18d11-results
+          path: |
+            minimal-predictive-lm/results/phase18d11.json
+            minimal-predictive-lm/results/phase18d11.md
+            minimal-predictive-lm/results/phase18d11-test.log
+            minimal-predictive-lm/results/phase18d11-run.log
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Enforce Phase 18d-11 success
+        if: always()
+        run: |
+          test '${{ steps.tests.outcome }}' = 'success'
+          test '${{ steps.experiment.outcome }}' = 'success'
