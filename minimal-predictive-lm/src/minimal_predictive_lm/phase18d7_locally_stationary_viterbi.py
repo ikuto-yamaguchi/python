@@ -515,9 +515,12 @@ def run() -> dict[str, Any]:
         "switch_prior_is_causal": no_prior_correct < no_prior_total,
         "local_stationarity_is_causal": shuffled_correct < shuffled_total,
         "linear_operation_scaling": 1.95 <= operation_ratio <= 2.05,
-        "large_stream_exact_cover_absent": (
-            "_exact_disjoint_cover" not in source
-            and "discover_partition" not in source
+        "large_stream_exact_cover_absent": all(
+            name not in source
+            for name in (
+                "_exact_" + "disjoint_cover",
+                "discover_" + "partition",
+            )
         ),
         "audit_names_absent_from_source": all(
             name not in source for name in audit_names
