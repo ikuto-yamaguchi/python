@@ -79,6 +79,8 @@ intelligence.
 - Exact-match memorization, retrieval-only, bag-of-words, finite-state, and compact
   neural baselines are reported.
 - Hidden test authors do not inspect model failures before freezing the final set.
+- Task and subject names are hidden from the model where they are not intrinsically
+  part of the question.
 
 ## Required evaluation layers
 
@@ -127,34 +129,51 @@ persistent learned bits
 External tools and indexes are not free. Tool-free and tool-assisted systems are
 separate tracks.
 
+## Critical-path entry conditions
+
+The former Phase 18a–18d component sequence is retained as evidence, but it is no
+longer sufficient evidence of movement toward this target. Before an HSS campaign
+may begin, the project must pass:
+
+1. `CAP-GEN-001`: one frozen axis-blind worker measured on the integrated 15-axis
+   public reality suite;
+2. `CAP-GEN-002`: at least 50% aggregate, at least 20% on every public axis, and
+   transfer to prospectively frozen axes without task-specific handlers;
+3. `CAP-GEN-003`: at least 60% aggregate and 40% per domain on one checkpoint jointly
+   covering natural Japanese, mathematics, science, code, and newly taught rules.
+
+These are entry conditions, not substitutes for the full HSS gate.
+
 ## Development sequence
 
-### Phase 18a: Japanese grounded language
+### CAP-GEN-001: integrated reality baseline
 
-Move from controlled symbol sequences to Japanese paraphrases with particles,
-ellipsis, optional modifiers, and noisy observations. Preserve identifiable negative
-controls.
+Freeze the current complete worker and expose the actual cross-domain score. Do not
+improve individual axes before the baseline is recorded.
 
-### Phase 18b: mathematical language and proof
+### CAP-GEN-002: shared representation and learning objective
 
-Ground quantities, variables, relations, diagrams, and proof obligations. Evaluate
-unseen theorem combinations rather than answer-template recognition.
+Train one shared latent sequence/event model and generic execution library. Reject
+linear growth in task handlers, parsers, and routing descriptions.
 
-### Phase 18c: science and causal experimentation
+### CAP-GEN-003: natural curriculum integration
 
-Learn reusable physical and chemical relations from text, tables, graphs, and
-interventions. Require unit and counterfactual consistency.
+Jointly train and test Japanese reading, mathematical language, science experiments,
+code, and unfamiliar taught rules in one model state.
 
-### Phase 18d: knowledge and source reasoning
+### HSS-001: integrated frozen examination
 
-Acquire historical, geographic, civic, and biological knowledge with provenance,
-contradiction handling, temporal validity, and retrieval cost included.
+Run the full multi-domain suite only after the general-learning entry conditions are
+met. Reserve a final unseen examination and shifted practical task set for forecast
+validation.
 
-### Phase 18e: integrated frozen examination
+## Forecast rule
 
-Run the full multi-domain suite only after the individual mechanisms and baselines
-are frozen. Reserve a final unseen examination and a shifted practical task set for
-forecast validation.
+A calendar estimate is forbidden until two consecutive major architecture iterations
+raise both CAP-GEN aggregate accuracy and the minimum-axis floor. Prior to that,
+calendar claims are speculation. Three major iterations with less than fifteen total
+aggregate percentage points of improvement force abandonment of the current core
+architecture.
 
 ## Claim boundary
 
