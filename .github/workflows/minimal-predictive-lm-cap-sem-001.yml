@@ -1,0 +1,56 @@
+name: minimal-predictive-lm-cap-sem-001
+
+on:
+  pull_request:
+    paths:
+      - 'minimal-predictive-lm/capabilities/registry.json'
+      - 'minimal-predictive-lm/docs/capability_management.md'
+      - 'minimal-predictive-lm/docs/cap_sem_001_relational_meaning.md'
+      - 'minimal-predictive-lm/src/minimal_predictive_lm/cap_sem_001_relational_meaning.py'
+      - 'minimal-predictive-lm/tests/test_cap_sem_001_relational_meaning.py'
+      - '.github/workflows/minimal-predictive-lm-cap-sem-001.yml'
+
+concurrency:
+  group: cap-sem-001-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cap-sem-001:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Capability theorem tests
+        id: tests
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          python -m pytest -q minimal-predictive-lm/tests/test_cap_sem_001_relational_meaning.py 2>&1 | tee cap-sem-001-pytest.log
+      - name: Run CAP-SEM-001 gate
+        id: experiment
+        continue-on-error: true
+        working-directory: minimal-predictive-lm
+        run: |
+          set -o pipefail
+          python -m minimal_predictive_lm.cap_sem_001_relational_meaning 2>&1 | tee ../cap-sem-001-experiment.log
+      - name: Upload capability diagnostics and results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cap-sem-001-results
+          path: |
+            minimal-predictive-lm/results/cap_sem_001.json
+            minimal-predictive-lm/results/cap_sem_001.md
+            cap-sem-001-pytest.log
+            cap-sem-001-experiment.log
+          retention-days: 7
+      - name: Enforce CAP-SEM-001 gate
+        if: always()
+        run: |
+          test "${{ steps.tests.outcome }}" = "success"
+          test "${{ steps.experiment.outcome }}" = "success"
