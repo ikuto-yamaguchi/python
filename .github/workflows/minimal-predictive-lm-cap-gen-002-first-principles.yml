@@ -32,6 +32,17 @@ jobs:
         run: python -m pytest -q minimal-predictive-lm/tests/test_cap_gen_002_predictive_state_lower_bound.py
       - name: Enforce first-principles boundaries
         run: |
-          grep -q "today's dense accelerator workload is not a known lower bound" minimal-predictive-lm/docs/cap_gen_002_first_principles_intelligence_program.md
-          grep -q "No axis-specific" minimal-predictive-lm/docs/cap_gen_002_first_principles_intelligence_program.md
-          grep -q "At least three materially different" minimal-predictive-lm/docs/cap_gen_002_first_principles_intelligence_program.md
+          python - <<'PY'
+          from pathlib import Path
+
+          text = Path(
+              "minimal-predictive-lm/docs/cap_gen_002_first_principles_intelligence_program.md"
+          ).read_text(encoding="utf-8")
+          required = (
+              "today's dense accelerator workload is not a known lower bound",
+              "No axis-specific",
+              "At least three materially different",
+          )
+          missing = [phrase for phrase in required if phrase not in text]
+          assert not missing, f"missing boundary statements: {missing}"
+          PY
