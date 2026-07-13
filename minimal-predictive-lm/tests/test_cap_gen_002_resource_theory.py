@@ -1,12 +1,16 @@
+from fractions import Fraction
 from itertools import product
 
 from minimal_predictive_lm.cap_gen_002_resource_theory import (
+    AffineMap,
     MacroReplacement,
     ResourcePoint,
     affine_word_value,
+    conjugate_latent_system,
     downstream_error_bound,
     fixed_length_program_count,
     flat_boolean_factor_entries,
+    observed_affine_trajectory,
     program_code_bits,
     resource_frontier_dominates,
     resource_objective_delta,
@@ -28,6 +32,60 @@ def test_fixed_length_generator_words_are_distinguishable_on_affine_probe():
     assert len(words) == fixed_length_program_count(generator_count, depth)
     assert len(values) == len(words)
     assert program_code_bits(generator_count, depth) == 12
+
+
+def test_latent_generators_are_not_identifiable_under_coordinate_conjugacy():
+    initial = Fraction(1, 3)
+    generators = (
+        AffineMap.build(2, 1),
+        AffineMap.build(-1, 3),
+    )
+    decoder = AffineMap.build(5, -2)
+    coordinate_change = AffineMap.build(3, 7)
+    word = (0, 1, 0, 0, 1, 1)
+
+    transformed_initial, transformed_generators, transformed_decoder = (
+        conjugate_latent_system(
+            initial,
+            generators,
+            decoder,
+            coordinate_change,
+        )
+    )
+    original_observations = observed_affine_trajectory(
+        initial,
+        word,
+        generators,
+        decoder,
+    )
+    transformed_observations = observed_affine_trajectory(
+        transformed_initial,
+        word,
+        transformed_generators,
+        transformed_decoder,
+    )
+
+    assert transformed_generators != generators
+    assert transformed_decoder != decoder
+    assert transformed_initial != initial
+    assert transformed_observations == original_observations
+
+
+def test_macro_boundaries_are_not_identifiable_from_aggregate_map_alone():
+    outer = AffineMap.build(2, 1)
+    inner = AffineMap.build(3, -2)
+    hidden_change = AffineMap.build(5, 4)
+
+    original = outer.compose(inner)
+    alternative_outer = outer.compose(hidden_change.inverse())
+    alternative_inner = hidden_change.compose(inner)
+    alternative = alternative_outer.compose(alternative_inner)
+
+    assert alternative_outer != outer
+    assert alternative_inner != inner
+    assert alternative == original
+    for probe in (Fraction(-2), Fraction(0), Fraction(7, 3)):
+        assert alternative.apply(probe) == original.apply(probe)
 
 
 def test_lipschitz_suffix_bound_matches_explicit_linear_error():
