@@ -1,0 +1,42 @@
+name: minimal-predictive-lm-cap-gen-002-theory
+
+on:
+  pull_request:
+    branches:
+      - research/minimal-compute-lm
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/cap_gen_002_resource_theory.py"
+      - "minimal-predictive-lm/tests/test_cap_gen_002_resource_theory.py"
+      - "minimal-predictive-lm/docs/cap_gen_002_novelty_and_expressivity_gate.md"
+      - "minimal-predictive-lm/docs/cap_gen_002_prior_art_matrix.md"
+      - "minimal-predictive-lm/docs/cap_gen_002_identifiability_boundary.md"
+      - ".github/workflows/minimal-predictive-lm-cap-gen-002-theory.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cap-gen-002-theory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: minimal-predictive-lm/pyproject.toml
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Run resource-normalized expressivity tests
+        run: |
+          python -m pytest -q minimal-predictive-lm/tests/test_cap_gen_002_resource_theory.py
+      - name: Enforce novelty and identifiability boundaries
+        run: |
+          grep -q "rejected as a core research contribution" minimal-predictive-lm/docs/cap_gen_002_novelty_and_expressivity_gate.md
+          grep -q "A universal-approximation statement alone is insufficient" minimal-predictive-lm/docs/cap_gen_002_novelty_and_expressivity_gate.md
+          grep -q "must not add separate" minimal-predictive-lm/docs/cap_gen_002_novelty_and_expressivity_gate.md
+          grep -q "novelty_hypothesis_unverified" minimal-predictive-lm/docs/cap_gen_002_prior_art_matrix.md
+          grep -q "latent coordinates and generator parameters are not identifiable" minimal-predictive-lm/docs/cap_gen_002_identifiability_boundary.md

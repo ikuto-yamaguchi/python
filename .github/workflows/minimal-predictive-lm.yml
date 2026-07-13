@@ -7,13 +7,10 @@ on:
     paths:
       - "minimal-predictive-lm/**"
       - ".github/workflows/minimal-predictive-lm.yml"
-  pull_request:
-    paths:
-      - "minimal-predictive-lm/**"
-      - ".github/workflows/minimal-predictive-lm.yml"
+  workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -98,60 +95,3 @@ jobs:
           mpm-phase10c
           mpm-phase10d
           mpm-phase10e
-          mpm-phase10f
-          mpm-phase10g
-          mpm-phase10h
-          mpm-phase11a
-          mpm-phase11b
-          mpm-phase11c
-          mpm-phase11d
-          mpm-phase11e
-          mpm-phase12a
-          mpm-phase13a
-          mpm-phase13b
-          python -m minimal_predictive_lm.phase13b_diagnostic
-      - name: Upload Phase 9, Stage C, Phase 11, Phase 12, and Phase 13 results
-        uses: actions/upload-artifact@v4
-        with:
-          name: phase9-stage-c-results
-          retention-days: 7
-          path: |
-            minimal-predictive-lm/results/phase9a.json
-            minimal-predictive-lm/results/phase9a.md
-            minimal-predictive-lm/results/phase9b.json
-            minimal-predictive-lm/results/phase9b.md
-            minimal-predictive-lm/results/phase9c.json
-            minimal-predictive-lm/results/phase9c.md
-            minimal-predictive-lm/results/phase10a.json
-            minimal-predictive-lm/results/phase10a.md
-            minimal-predictive-lm/results/phase10b.json
-            minimal-predictive-lm/results/phase10b.md
-            minimal-predictive-lm/results/phase10c.json
-            minimal-predictive-lm/results/phase10c.md
-            minimal-predictive-lm/results/phase10d.json
-            minimal-predictive-lm/results/phase10d.md
-            minimal-predictive-lm/results/phase10e.json
-            minimal-predictive-lm/results/phase10e.md
-            minimal-predictive-lm/results/phase10f.json
-            minimal-predictive-lm/results/phase10f.md
-            minimal-predictive-lm/results/phase10g.json
-            minimal-predictive-lm/results/phase10g.md
-            minimal-predictive-lm/results/phase10h.json
-            minimal-predictive-lm/results/phase10h.md
-            minimal-predictive-lm/results/phase11a.json
-            minimal-predictive-lm/results/phase11a.md
-            minimal-predictive-lm/results/phase11b.json
-            minimal-predictive-lm/results/phase11b.md
-            minimal-predictive-lm/results/phase11c.json
-            minimal-predictive-lm/results/phase11c.md
-            minimal-predictive-lm/results/phase11d.json
-            minimal-predictive-lm/results/phase11d.md
-            minimal-predictive-lm/results/phase11e.json
-            minimal-predictive-lm/results/phase11e.md
-            minimal-predictive-lm/results/phase12a.json
-            minimal-predictive-lm/results/phase12a.md
-            minimal-predictive-lm/results/phase13a.json
-            minimal-predictive-lm/results/phase13a.md
-            minimal-predictive-lm/results/phase13b.json
-            minimal-predictive-lm/results/phase13b.md
-            minimal-predictive-lm/results/phase13b_diagnostic.json
