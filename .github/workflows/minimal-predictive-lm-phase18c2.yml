@@ -1,0 +1,35 @@
+name: minimal-predictive-lm-phase18c2
+on:
+  pull_request:
+    paths:
+      - 'minimal-predictive-lm/src/minimal_predictive_lm/phase18c1_multiplicative_relation_core.py'
+      - 'minimal-predictive-lm/src/minimal_predictive_lm/phase18c2_raw_japanese_multiplicative_bridge.py'
+      - 'minimal-predictive-lm/tests/test_phase18c2_raw_japanese_multiplicative_bridge.py'
+      - 'minimal-predictive-lm/docs/phase18c2_raw_japanese_multiplicative_bridge.md'
+      - '.github/workflows/minimal-predictive-lm-phase18c2.yml'
+concurrency:
+  group: phase18c2-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  phase18c2:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Japanese multiplicative bridge theorem tests
+        run: python -m pytest -q minimal-predictive-lm/tests/test_phase18c2_raw_japanese_multiplicative_bridge.py
+      - name: Run Phase 18c-2 experiment
+        working-directory: minimal-predictive-lm
+        run: python -m minimal_predictive_lm.phase18c2_raw_japanese_multiplicative_bridge
+      - name: Upload Phase 18c-2 diagnostics and results
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase18c2-results
+          path: |
+            minimal-predictive-lm/results/phase18c2.json
+            minimal-predictive-lm/results/phase18c2.md
+          retention-days: 7
