@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "stream": [
+    {"inputs":{"u":-2,"v":4},"output":-6,"gold":"N-SUB"},
+    {"inputs":{"u":-4,"v":3},"output":-12,"gold":"N-MUL"},
+    {"inputs":{"u":4,"v":-1},"output":5,"gold":"N-SUB"},
+    {"inputs":{"u":"aBcD"},"output":"ABCD","gold":"S-UPPER"},
+    {"inputs":{"u":"Cab"},"output":"baC","gold":"S-REVERSE_STRING"},
+    {"inputs":{"u":"Cab"},"output":"CAB","gold":"S-UPPER"},
+    {"inputs":{"u":"PyThon"},"output":"python","gold":"S-LOWER"},
+    {"inputs":{"u":2,"v":-2},"output":2,"gold":"N-MAX2"},
+    {"inputs":{"u":"xYz"},"output":"xyz","gold":"S-LOWER"},
+    {"inputs":{"u":"qWe"},"output":"QWE","gold":"S-UPPER"},
+    {"inputs":{"u":4,"v":-3},"output":-12,"gold":"N-MUL"},
+    {"inputs":{"u":-4,"v":5},"output":-20,"gold":"N-MUL"},
+    {"inputs":{"u":4,"v":2},"output":8,"gold":"N-MUL"},
+    {"inputs":{"u":"Hello"},"output":"hello","gold":"S-LOWER"},
+    {"inputs":{"u":-3,"v":-1},"output":-2,"gold":"N-SUB"},
+    {"inputs":{"u":-1,"v":-3},"output":-1,"gold":"N-MAX2"},
+    {"inputs":{"u":"aBcD"},"output":"DcBa","gold":"S-REVERSE_STRING"},
+    {"inputs":{"u":5,"v":-2},"output":7,"gold":"N-SUB"},
+    {"inputs":{"u":"Ab"},"output":"ab","gold":"S-LOWER"},
+    {"inputs":{"u":-4,"v":5},"output":1,"gold":"N-ADD"},
+    {"inputs":{"u":"Zebra"},"output":"arbeZ","gold":"S-REVERSE_STRING"},
+    {"inputs":{"u":5,"v":3},"output":15,"gold":"N-MUL"},
+    {"inputs":{"u":-4,"v":5},"output":5,"gold":"N-MAX2"},
+    {"inputs":{"u":5,"v":-2},"output":3,"gold":"N-ADD"},
+    {"inputs":{"u":"Ab"},"output":"bA","gold":"S-REVERSE_STRING"},
+    {"inputs":{"u":"Test"},"output":"test","gold":"S-LOWER"},
+    {"inputs":{"u":"MiXeD"},"output":"MIXED","gold":"S-UPPER"},
+    {"inputs":{"u":-2,"v":-1},"output":-3,"gold":"N-ADD"},
+    {"inputs":{"u":"xYz"},"output":"XYZ","gold":"S-UPPER"},
+    {"inputs":{"u":2,"v":5},"output":7,"gold":"N-ADD"},
+    {"inputs":{"u":"Test"},"output":"tseT","gold":"S-REVERSE_STRING"},
+    {"inputs":{"u":-1,"v":-4},"output":-1,"gold":"N-MAX2"},
+    {"inputs":{"u":3,"v":-4},"output":3,"gold":"N-MAX2"},
+    {"inputs":{"u":3,"v":2},"output":5,"gold":"N-ADD"},
+    {"inputs":{"u":3,"v":-1},"output":4,"gold":"N-SUB"}
+  ],
+  "post_freeze_stream": [
+    {"inputs":{"u":4,"v":-1},"output":-1,"gold":"N-MIN2"},
+    {"inputs":{"u":-5,"v":-1},"output":-5,"gold":"N-MIN2"},
+    {"inputs":{"u":3,"v":2},"output":2,"gold":"N-MIN2"},
+    {"inputs":{"u":-2,"v":2},"output":-2,"gold":"N-MIN2"},
+    {"inputs":{"u":6,"v":-3},"output":-3,"gold":"N-MIN2"}
+  ],
+  "episodes": [
+    {"gold":"N-ADD","support":[{"inputs":{"u":2,"v":3},"output":5}],"queries":[{"inputs":{"u":7,"v":-2},"output":5},{"inputs":{"u":-3,"v":6},"output":3}]},
+    {"gold":"N-SUB","support":[{"inputs":{"u":5,"v":2},"output":3}],"queries":[{"inputs":{"u":9,"v":4},"output":5},{"inputs":{"u":-2,"v":7},"output":-9}]},
+    {"gold":"N-MUL","support":[{"inputs":{"u":3,"v":4},"output":12}],"queries":[{"inputs":{"u":-3,"v":5},"output":-15},{"inputs":{"u":6,"v":2},"output":12}]},
+    {"gold":"N-MAX2","support":[{"inputs":{"u":-2,"v":5},"output":5}],"queries":[{"inputs":{"u":7,"v":3},"output":7},{"inputs":{"u":-8,"v":-1},"output":-1}]},
+    {"gold":"S-UPPER","support":[{"inputs":{"u":"Ab"},"output":"AB"}],"queries":[{"inputs":{"u":"mIx"},"output":"MIX"},{"inputs":{"u":"hello"},"output":"HELLO"}]},
+    {"gold":"S-LOWER","support":[{"inputs":{"u":"Ab"},"output":"ab"}],"queries":[{"inputs":{"u":"MiX"},"output":"mix"},{"inputs":{"u":"WORLD"},"output":"world"}]},
+    {"gold":"S-REVERSE_STRING","support":[{"inputs":{"u":"Ab"},"output":"bA"}],"queries":[{"inputs":{"u":"abc"},"output":"cba"},{"inputs":{"u":"Zx9"},"output":"9xZ"}]}
+  ],
+  "post_freeze_episodes": [
+    {"gold":"N-MIN2","support":[{"inputs":{"u":-2,"v":5},"output":-2}],"queries":[{"inputs":{"u":7,"v":3},"output":3},{"inputs":{"u":-8,"v":-1},"output":-8}]}
+  ]
+}
