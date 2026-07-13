@@ -322,7 +322,8 @@ def heldout() -> tuple[Demonstration, ...]:
         (("小皿", "大皿"), (11, 5), (100, 260), "枚", "円"),
     )
     rows: list[Demonstration] = []
-    for index, (x, y, counts, rates, count_unit, value_unit) in enumerate(specifications):
+    for index, (entities, counts, rates, count_unit, value_unit) in enumerate(specifications):
+        x, y = entities
         count_index = index % 3
         rate_left = (index + 1) % 3
         rate_right = (index + 2) % 3
@@ -431,7 +432,7 @@ def run() -> dict[str, object]:
     }
     return {
         "campaign": {
-            "name": "phase18b10-mdl-paraphrase-anchors-c2",
+            "name": "phase18b10-mdl-paraphrase-anchors-c3",
             "generalization_type": "unseen full-span recombination around learned character anchors",
             "fully_unseen_synonyms": False,
             "fixed_morpheme_splitter": True,
