@@ -1,0 +1,55 @@
+name: minimal-predictive-lm-phase19b
+
+on:
+  pull_request:
+    paths:
+      - 'minimal-predictive-lm/src/minimal_predictive_lm/phase19a_general_learning_reality_gate.py'
+      - 'minimal-predictive-lm/src/minimal_predictive_lm/phase19b_cross_file_span_gate.py'
+      - 'minimal-predictive-lm/tests/test_phase19b_cross_file_span_gate.py'
+      - 'minimal-predictive-lm/docs/phase19b_cross_file_span_gate.md'
+      - '.github/workflows/minimal-predictive-lm-phase19b.yml'
+
+concurrency:
+  group: phase19b-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  phase19b:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Cross-file span theorem tests
+        id: tests
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          python -m pytest -q minimal-predictive-lm/tests/test_phase19b_cross_file_span_gate.py 2>&1 | tee phase19b-pytest.log
+      - name: Run Phase 19b reality gate
+        id: experiment
+        continue-on-error: true
+        working-directory: minimal-predictive-lm
+        run: |
+          set -o pipefail
+          python -m minimal_predictive_lm.phase19b_cross_file_span_gate 2>&1 | tee ../phase19b-experiment.log
+      - name: Upload Phase 19b diagnostics and results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase19b-results
+          path: |
+            minimal-predictive-lm/results/phase19b.json
+            minimal-predictive-lm/results/phase19b.md
+            phase19b-pytest.log
+            phase19b-experiment.log
+          retention-days: 7
+      - name: Enforce Phase 19b gate
+        if: always()
+        run: |
+          test "${{ steps.tests.outcome }}" = "success"
+          test "${{ steps.experiment.outcome }}" = "success"
