@@ -1,0 +1,59 @@
+name: minimal-predictive-lm-cap-sem-003
+
+on:
+  pull_request:
+    paths:
+      - 'minimal-predictive-lm/src/minimal_predictive_lm/cap_sem_001_relational_meaning.py'
+      - 'minimal-predictive-lm/src/minimal_predictive_lm/cap_sem_002_raw_japanese_bridge.py'
+      - 'minimal-predictive-lm/src/minimal_predictive_lm/cap_sem_003_open_relation_grounding.py'
+      - 'minimal-predictive-lm/tests/test_cap_sem_003_open_relation_grounding.py'
+      - 'minimal-predictive-lm/docs/cap_sem_003_open_relation_grounding.md'
+      - '.github/workflows/minimal-predictive-lm-cap-sem-003.yml'
+
+concurrency:
+  group: cap-sem-003-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cap-sem-003:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: CAP-SEM-003 theorem tests
+        id: tests
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          python -m pytest -q \
+            minimal-predictive-lm/tests/test_cap_sem_003_open_relation_grounding.py \
+            2>&1 | tee cap-sem-003-pytest.log
+      - name: Run CAP-SEM-003 gate
+        id: experiment
+        continue-on-error: true
+        working-directory: minimal-predictive-lm
+        run: |
+          set -o pipefail
+          python -m minimal_predictive_lm.cap_sem_003_open_relation_grounding \
+            2>&1 | tee ../cap-sem-003-experiment.log
+      - name: Upload capability diagnostics and results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cap-sem-003-results
+          path: |
+            minimal-predictive-lm/results/cap_sem_003.json
+            minimal-predictive-lm/results/cap_sem_003.md
+            cap-sem-003-pytest.log
+            cap-sem-003-experiment.log
+          retention-days: 7
+      - name: Enforce CAP-SEM-003 gate
+        if: always()
+        run: |
+          test "${{ steps.tests.outcome }}" = "success"
+          test "${{ steps.experiment.outcome }}" = "success"
