@@ -1,5 +1,6 @@
 name: minimal-predictive-lm-phase18d14
 
+# Isolated verification marker; no runtime behavior change.
 on:
   pull_request:
     paths:
