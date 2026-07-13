@@ -51,8 +51,24 @@
       "selection_evidence": "docs/cap_sem_002_selection.md",
       "workflow": ".github/workflows/minimal-predictive-lm-cap-sem-002.yml",
       "successful_ci_run": 29261896307,
-      "next_dependency": "CAP-SEM-003 open relation-expression grounding",
       "boundary": "finite controlled Japanese grammar; inherited closed relation vocabulary"
+    },
+    {
+      "id": "CAP-SEM-003",
+      "name": "opaque relation-expression grounding into frozen semantics",
+      "status": "passed_limited",
+      "implementation": "src/minimal_predictive_lm/cap_sem_003_open_relation_grounding.py",
+      "evidence": "docs/cap_sem_003_open_relation_grounding.md",
+      "workflow": ".github/workflows/minimal-predictive-lm-cap-sem-003.yml",
+      "successful_ci_run": 29262318165,
+      "resource_result": {
+        "learned_payload_bytes": 150,
+        "executable_total_description_bits": 40968,
+        "training_operations": 30544,
+        "average_inference_operations": 523.03125
+      },
+      "next_dependency": "CAP-SEM-004 sparse noisy definition and usage induction",
+      "boundary": "complete controlled behavioral contrast set; not natural-language definition understanding"
     }
   ]
 }
