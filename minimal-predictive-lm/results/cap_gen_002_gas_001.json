@@ -1,0 +1,36 @@
+{
+  "capability_id": "CAP-GEN-002-GAS-001",
+  "ci_run": 29299673065,
+  "artifact_id": 8298076353,
+  "fully_symmetric_four": {
+    "group_size": 24,
+    "minimum_direct_anchors": 3
+  },
+  "cycle_eight": {
+    "group_size": 16,
+    "minimum_direct_anchors": 2,
+    "binary_information_lower_bound": 4,
+    "one_anchor_remaining_alignments": 2,
+    "two_anchor_remaining_alignments": 1
+  },
+  "representation_tradeoff": {
+    "transition_only": {
+      "executable_bits": 8,
+      "symmetry_tax_bits": 14,
+      "grounded_total_bits": 22
+    },
+    "observable_auxiliary": {
+      "executable_bits": 20,
+      "symmetry_tax_bits": 0,
+      "grounded_total_bits": 20
+    },
+    "expensive_grounding_choice": "observable-auxiliary-cycle",
+    "cheap_grounding_choice": "transition-only-cycle-cheap-grounding",
+    "pareto_frontier": [
+      "observable-auxiliary-cycle",
+      "transition-only-cycle"
+    ]
+  },
+  "passed": true,
+  "claim_boundary": "Permutation-group bases, automorphism ambiguity, information lower bounds, and active identification are prior art. The unverified novelty candidate is joint raw acquisition of parser, action quotient, auxiliary invariants, and a resource-minimal symmetry-breaking interaction policy."
+}
