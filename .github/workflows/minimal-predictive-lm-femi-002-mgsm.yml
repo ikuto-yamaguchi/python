@@ -47,11 +47,14 @@ jobs:
             public_data/mgsm/exemplars.py \
             --adaptation-train 200 \
             | tee results/femi_002_mgsm.json
-      - name: Upload result before gating
+      - name: Upload result and public inputs before gating
         uses: actions/upload-artifact@v4
         with:
           name: femi-002-mgsm-results
-          path: minimal-predictive-lm/results/femi_002_mgsm.json
+          path: |
+            minimal-predictive-lm/results/femi_002_mgsm.json
+            minimal-predictive-lm/public_data/mgsm/mgsm_ja.tsv
+            minimal-predictive-lm/public_data/mgsm/exemplars.py
           retention-days: 14
       - name: Enforce public-data claim boundary
         working-directory: minimal-predictive-lm
