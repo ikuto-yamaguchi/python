@@ -1,0 +1,65 @@
+name: minimal-predictive-lm-meci-001
+
+on:
+  pull_request:
+    branches:
+      - research/minimal-compute-lm
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/meci_*.py"
+      - "minimal-predictive-lm/tests/test_meci_*.py"
+      - "minimal-predictive-lm/docs/meci_001_*.md"
+      - ".github/workflows/minimal-predictive-lm-meci-001.yml"
+  workflow_dispatch:
+
+jobs:
+  meci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: minimal-predictive-lm/pyproject.toml
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Core and chat tests
+        run: python -m pytest -q minimal-predictive-lm/tests/test_meci_core.py minimal-predictive-lm/tests/test_meci_chat.py
+      - name: Run MECI experiment
+        working-directory: minimal-predictive-lm
+        run: |
+          mkdir -p results
+          python -m minimal_predictive_lm.meci_experiment | tee results/meci_001.json
+      - name: Enforce theory and claim boundaries
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path("results/meci_001.json").read_text())
+          assert result["passed"] is True
+          assert result["neural_network_used"] is False
+          assert result["gradient_training_used"] is False
+          assert result["dense_parameter_matrix_used"] is False
+          assert result["theory"]["memory_bound_attained"] is True
+          assert result["theory"]["transition_within_one_decision"] is True
+          assert result["byte_language_model"]["sample_reply_exact"] is True
+          assert result["byte_language_model"]["predictive_states_after_quotient"] <= result["byte_language_model"]["contexts_before_quotient"]
+          assert "not globally optimal" in result["claim_boundary"]
+          assert "not an LLM-level model" in result["claim_boundary"]
+
+          theory = Path("docs/meci_001_theory.md").read_text()
+          limits = Path("docs/meci_001_limits.md").read_text()
+          assert "ceil(log2 N_B) bits" in theory
+          assert "Program discovery remains the central unsolved problem" in theory
+          assert "public text corpus" in limits
+          assert "If prior work already contains" in limits
+          PY
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: meci-001-results
+          path: minimal-predictive-lm/results/meci_001.json
+          retention-days: 14

@@ -61,6 +61,8 @@ mpm-phase16d = "minimal_predictive_lm.phase16d_experiment:main"
 mpm-phase16e = "minimal_predictive_lm.phase16e_experiment:main"
 mpm-phase16f = "minimal_predictive_lm.phase16f_experiment:main"
 mpm-phase16g = "minimal_predictive_lm.phase16g_experiment:main"
+meci-chat = "minimal_predictive_lm.meci_cli:main"
+meci-exp = "minimal_predictive_lm.meci_experiment:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
