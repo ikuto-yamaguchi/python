@@ -1,0 +1,49 @@
+{
+  "capability_id": "CAP-GEN-002-RII-002",
+  "ci_run": 29295368401,
+  "artifact_id": 8296512880,
+  "head_sha": "381d4b4ce26b4d45e7f1325a810ab513e7123171",
+  "training": {
+    "raw_bytes": 3229,
+    "event_boundaries_visible_to_learner": false,
+    "aligned_examples_visible_to_learner": false,
+    "task_ids_visible_to_learner": false
+  },
+  "program_search": {
+    "instruction_set": ["INC", "DEC", "NOT", "EMIT"],
+    "program_library_candidates": 682,
+    "program_candidates_executed": 86660
+  },
+  "boundary_recovery": {
+    "expected_boundaries": 192,
+    "found_boundaries": 192,
+    "correct_boundaries": 192,
+    "precision": 1.0,
+    "recall": 1.0
+  },
+  "model": {
+    "surface_links": 6,
+    "shared_programs": 3,
+    "programs": [
+      {"reverse": false, "body": ["EMIT", "EMIT"]},
+      {"reverse": true, "body": ["EMIT"]},
+      {"reverse": false, "body": ["INC", "INC", "INC", "EMIT"]}
+    ],
+    "learned_payload_bits": 435
+  },
+  "frozen_evaluation": {
+    "target_spans": 48,
+    "coverage": 1.0,
+    "exact_accuracy": 1.0,
+    "inference_operations": 822
+  },
+  "rii_001_affine_baseline": {
+    "surface_links": 4,
+    "missed_length_changing_surface_links": 2
+  },
+  "independent_target_control": {
+    "accepted_links": 0
+  },
+  "passed": true,
+  "claim_boundary": "Synthetic repeated-context loop-normal-form byte-VM evidence only; not a universal operator language, natural concept learning, public-axis improvement, or human-level intelligence."
+}
