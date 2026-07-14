@@ -1,0 +1,76 @@
+name: minimal-predictive-lm-cap-gen-003-mso-001
+
+on:
+  pull_request:
+    branches:
+      - research/minimal-compute-lm
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/cap_gen_003_mixed_stream_operational_reuse.py"
+      - "minimal-predictive-lm/tests/test_cap_gen_003_mixed_stream_operational_reuse.py"
+      - "minimal-predictive-lm/docs/cap_gen_003_mixed_stream_operational_reuse.md"
+      - ".github/workflows/minimal-predictive-lm-cap-gen-003-mso-001.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mixed-stream-operational-reuse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: minimal-predictive-lm/pyproject.toml
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Theory proposition tests
+        run: python -m pytest -q minimal-predictive-lm/tests/test_cap_gen_003_mixed_stream_operational_reuse.py
+      - name: Run frozen MSO gate
+        working-directory: minimal-predictive-lm
+        run: |
+          mkdir -p results
+          python -m minimal_predictive_lm.cap_gen_003_mixed_stream_operational_reuse \
+            | tee results/cap_gen_003_mso_001.json
+      - name: Enforce purpose and claim boundaries
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path("results/cap_gen_003_mso_001.json").read_text())
+          assert result["passed"] is True
+          assert result["stream"]["domain_label_tokens_used"] == 0
+          assert result["stream"]["training_episode_count"] == 2
+          assert result["positive_transfer"]["exact_accuracy"] == 1.0
+          assert result["positive_transfer"]["predictions"] == 9
+          assert result["positive_transfer"]["grounded_interactions"] == 1
+          assert result["positive_transfer"]["zero_anchor_status"] == "abstain"
+          assert result["positive_transfer"]["zero_anchor_candidates"] == 2
+          assert result["positive_transfer"]["unsupported_status"] == "unsupported"
+          assert result["segmentation_absorption"]["core_only_reduction"] == 13.0
+          assert result["segmentation_absorption"]["fully_charged_reduction"] < 1.0
+          assert result["causal_boundary_control"]["certified"] is False
+          assert result["causal_boundary_control"]["future_successors_used"] == 1
+          assert result["no_reset_control"]["status"] == "contradiction"
+          assert result["resources"]["control_entry_reduction"] == 4.2
+          assert result["resources"]["heldout_interaction_savings"] == 8
+          assert "prior art" in result["claim_boundary"]
+          assert "not raw natural-language learning" in result["claim_boundary"]
+
+          theory = Path("docs/cap_gen_003_mixed_stream_operational_reuse.md").read_text()
+          assert "Segmentation absorption theorem" in theory
+          assert "Another typed cycle stream by itself is not research progress" in theory
+          assert "public or natural interaction trace" in theory
+          PY
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: cap-gen-003-mso-001-results
+          path: minimal-predictive-lm/results/cap_gen_003_mso_001.json
+          retention-days: 14
