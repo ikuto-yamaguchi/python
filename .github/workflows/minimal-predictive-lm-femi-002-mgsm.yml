@@ -1,0 +1,7 @@
+name: minimal-predictive-lm-femi-002-mgsm
+on: [workflow_dispatch]
+jobs:
+  femi-mgsm:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo FEMI-MGSM
