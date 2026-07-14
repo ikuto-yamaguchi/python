@@ -1,0 +1,63 @@
+name: minimal-predictive-lm-cap-gen-004-pola-001
+
+on:
+  pull_request:
+    branches:
+      - research/minimal-compute-lm
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/cap_gen_004_prospective_library.py"
+      - "minimal-predictive-lm/tests/test_cap_gen_004_prospective_library.py"
+      - "minimal-predictive-lm/docs/cap_gen_004_prospective_library.md"
+      - ".github/workflows/minimal-predictive-lm-cap-gen-004-pola-001.yml"
+  workflow_dispatch:
+
+jobs:
+  prospective-library:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: minimal-predictive-lm/pyproject.toml
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Algorithm tests
+        run: python -m pytest -q minimal-predictive-lm/tests/test_cap_gen_004_prospective_library.py
+      - name: Run frozen POLA experiment
+        working-directory: minimal-predictive-lm
+        run: |
+          mkdir -p results
+          python -m minimal_predictive_lm.cap_gen_004_prospective_library \
+            | tee results/cap_gen_004_pola_001.json
+      - name: Enforce purpose and novelty boundaries
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path("results/cap_gen_004_pola_001.json").read_text())
+          assert result["passed"] is True
+          assert result["costs"]["prospective"] < result["costs"]["retrospective"]
+          assert result["costs"]["prospective_vs_retrospective_reduction"] > 0.18
+          assert result["prospective"]["probation_events"] == 2
+          assert result["prospective"]["confirmed_events"] == 2
+          assert result["controls"]["isolated_prospective_admissions"] == 0
+          assert result["controls"]["duration_shift_regret"] <= 16
+          assert result["curriculum"]["family_labels_visible_to_learner"] == 0
+          assert "Novelty is not established" in result["claim_boundary"]
+
+          theory = Path("docs/cap_gen_004_prospective_library.md").read_text()
+          assert "first new algorithmic hypothesis" in theory
+          assert "public program or reasoning corpus" in theory
+          assert "rejected rather than patched indefinitely" in theory
+          PY
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: cap-gen-004-pola-001-results
+          path: minimal-predictive-lm/results/cap_gen_004_pola_001.json
+          retention-days: 14
