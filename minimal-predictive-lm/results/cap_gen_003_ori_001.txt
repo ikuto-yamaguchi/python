@@ -1,0 +1,4 @@
+ci_run=29343245816
+artifact_id=8314940859
+validated_head=a92ce74fd7de889816207eb18842c91a818eff85
+passed=true
