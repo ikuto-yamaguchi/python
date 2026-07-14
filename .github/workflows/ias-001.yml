@@ -1,0 +1,71 @@
+name: minimal-predictive-lm-cap-gen-002-ias-001
+
+on:
+  pull_request:
+    branches:
+      - research/minimal-compute-lm
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/cap_gen_002_invariant_auxiliary_symmetry.py"
+      - "minimal-predictive-lm/tests/test_cap_gen_002_invariant_auxiliary_symmetry.py"
+      - "minimal-predictive-lm/docs/ias_001.md"
+      - ".github/workflows/ias-001.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  invariant-auxiliary-symmetry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: minimal-predictive-lm/pyproject.toml
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Theory proposition tests
+        run: python -m pytest -q minimal-predictive-lm/tests/test_cap_gen_002_invariant_auxiliary_symmetry.py
+      - name: Run finite IAS gate
+        working-directory: minimal-predictive-lm
+        run: |
+          mkdir -p results
+          python -m minimal_predictive_lm.cap_gen_002_invariant_auxiliary_symmetry \
+            | tee results/cap_gen_002_ias_001.json
+      - name: Enforce theory and novelty boundaries
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path("results/cap_gen_002_ias_001.json").read_text())
+          assert result["passed"] is True
+          assert result["base_symmetry"]["group_size"] == 16
+          assert result["stable_bundle"]["training_information_bits"] < 1.1
+          assert result["stable_bundle"]["residual_group_size"] == 1
+          assert result["stable_bundle"]["grounded_total_bits"] == 8
+          assert result["spurious_unique_tag"]["training_information_bits"] == 3.0
+          assert result["spurious_unique_tag"]["naive_environmentwise_residual_size"] == 1
+          assert result["spurious_unique_tag"]["certified_residual_group_size"] == 16
+          assert result["spurious_unique_tag"]["grounded_total_bits"] == 17
+          assert result["single_environment_counterexample"]["future_predictions_differ"] is True
+          assert result["prospective_shift_counterexample"]["prospective_environment_exposes_shift"] is True
+          assert "prior art" in result["claim_boundary"]
+          assert "does not prove universal future invariance" in result["claim_boundary"]
+
+          theory = Path("docs/ias_001.md").read_text()
+          assert "information is not grounding" in theory
+          assert "finite observed invariance is not universal invariance" in theory
+          assert "A further synthetic example" in theory
+          PY
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: cap-gen-002-ias-001-results
+          path: minimal-predictive-lm/results/cap_gen_002_ias_001.json
+          retention-days: 14
