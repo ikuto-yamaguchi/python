@@ -1,1 +1,21 @@
-{}
+{
+  "capability_id": "CAP-GEN-003-COT-001",
+  "validation_mode": "independent local execution",
+  "training_state_counts": [5, 7],
+  "heldout_state_count": 9,
+  "zero_anchor_candidates": 2,
+  "zero_anchor_status": "abstain",
+  "grounded_interactions": 1,
+  "one_anchor_candidates": 1,
+  "transferred_predictions": 9,
+  "transferred_exact_accuracy": 1.0,
+  "surface_baseline_accuracy": 0.0,
+  "separate_table_accuracy": 0.1111111111111111,
+  "path_topology_status": "unsupported",
+  "separate_control_entries": 21,
+  "shared_control_entries": 4,
+  "control_entry_reduction": 5.25,
+  "heldout_interaction_savings": 8,
+  "passed": true,
+  "claim_boundary": "finite bridge gate; not raw language, public benchmark, or human intelligence evidence"
+}
