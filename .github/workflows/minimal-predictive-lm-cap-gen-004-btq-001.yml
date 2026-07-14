@@ -1,0 +1,68 @@
+name: minimal-predictive-lm-cap-gen-004-btq-001
+
+on:
+  pull_request:
+    branches:
+      - research/minimal-compute-lm
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/cap_gen_004_btq_*.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/cap_gen_004_behavioral_trace_quotient.py"
+      - "minimal-predictive-lm/tests/test_cap_gen_004_btq_*.py"
+      - "minimal-predictive-lm/docs/cap_gen_004_behavioral_trace_quotient.md"
+      - ".github/workflows/minimal-predictive-lm-cap-gen-004-btq-001.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  behavioral-trace-quotient:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: minimal-predictive-lm/pyproject.toml
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Proposition and transfer tests
+        run: python -m pytest -q minimal-predictive-lm/tests/test_cap_gen_004_btq_*.py
+      - name: Run frozen BTQ gate
+        working-directory: minimal-predictive-lm
+        run: |
+          mkdir -p results
+          python -m minimal_predictive_lm.cap_gen_004_behavioral_trace_quotient \
+            | tee results/cap_gen_004_btq_001.json
+      - name: Enforce capability and claim boundaries
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path("results/cap_gen_004_btq_001.json").read_text())
+          assert result["passed"] is True
+          assert result["training"]["syntax_bigram_overlap"] == 0
+          assert result["learned_library"]["template_count"] == 3
+          assert result["heldout_grid"]["task_count"] == 6
+          assert result["heldout_grid"]["cold_candidate_count"] == 70
+          assert result["heldout_grid"]["guided_candidate_count"] == 22
+          assert result["heldout_grid"]["all_guided_exact"] is True
+          assert result["heldout_grid"]["same_solutions_as_cold"] is True
+          assert result["resources"]["cold_target_candidate_executions"] == 1260
+          assert result["resources"]["incremental_guided_total"] == 536
+          assert result["resources"]["full_curriculum_total"] == 923
+          assert result["resources"]["full_curriculum_surplus_vs_cold_target"] == 337
+          assert "unverified novelty candidate" in result["claim_boundary"]
+          assert "not raw-stream learning" in result["claim_boundary"]
+          PY
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: cap-gen-004-btq-001-results
+          path: minimal-predictive-lm/results/cap_gen_004_btq_001.json
+          retention-days: 14
