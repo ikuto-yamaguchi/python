@@ -54,7 +54,8 @@ jobs:
           assert result["rii_002_exact_anchor_baseline"]["surface_links"] == 0
           assert result["independent_target_control"]["context_roles"] == 0
           assert result["model"]["learned_payload_bits"] < result["model"]["exact_cross_product_template_bits"]
-          assert "already observed individual context variants" in result["claim_boundary"]
+          assert "all individual context variants are seen during training" in result["claim_boundary"]
+          assert "not unseen-vocabulary grounding" in result["claim_boundary"]
 
           boundary = Path("docs/cap_gen_002_factorized_context_induction.md").read_text()
           assert "Theta(k^2)" in boundary
