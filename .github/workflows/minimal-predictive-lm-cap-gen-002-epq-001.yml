@@ -1,0 +1,70 @@
+name: minimal-predictive-lm-cap-gen-002-epq-001
+
+on:
+  pull_request:
+    branches:
+      - research/minimal-compute-lm
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/cap_gen_002_executable_predictive_quotient.py"
+      - "minimal-predictive-lm/tests/test_cap_gen_002_executable_predictive_quotient.py"
+      - "minimal-predictive-lm/docs/cap_gen_002_executable_predictive_quotient.md"
+      - ".github/workflows/minimal-predictive-lm-cap-gen-002-epq-001.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  executable-predictive-quotient:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: minimal-predictive-lm/pyproject.toml
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Theory proposition tests
+        run: python -m pytest -q minimal-predictive-lm/tests/test_cap_gen_002_executable_predictive_quotient.py
+      - name: Run frozen finite theory gate
+        working-directory: minimal-predictive-lm
+        run: |
+          mkdir -p results
+          python -m minimal_predictive_lm.cap_gen_002_executable_predictive_quotient \
+            | tee results/cap_gen_002_epq_001.json
+      - name: Enforce theorem and claim boundaries
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path("results/cap_gen_002_epq_001.json").read_text())
+          assert result["passed"] is True
+          assert result["quotient"]["state_count"] == 4
+          assert result["probe_selection"]["exact"] == ["high-bit", "low-bit"]
+          assert result["probe_selection"]["exact_cost"] == 2
+          assert result["probe_selection"]["greedy_cost"] == 2
+          assert result["canonical_tie"]["abstained"] is True
+          assert result["canonical_strict"]["selected"] == "short-recompute"
+          assert result["unseen_surface_counterexample"]["training_views_equal"] is True
+          assert result["unseen_surface_counterexample"]["unseen_views_differ"] is True
+          assert "known-style constructions" in result["claim_boundary"]
+          assert "unverified novelty candidate" in result["claim_boundary"]
+
+          theory = Path("docs/cap_gen_002_executable_predictive_quotient.md").read_text()
+          assert "unseen-surface no-free-lunch" in theory
+          assert "Minimum state count" in theory
+          assert "The exact novelty" in theory
+          assert "must not train on causal judgement" in theory
+          PY
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: cap-gen-002-epq-001-results
+          path: minimal-predictive-lm/results/cap_gen_002_epq_001.json
+          retention-days: 14
