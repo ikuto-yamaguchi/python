@@ -1,0 +1,32 @@
+{
+  "capability_id": "CAP-GEN-002-SPG-001",
+  "ci_run": 29297733290,
+  "artifact_id": 8297376960,
+  "head_sha": "da44f303300fd42743406b653de77dcbdb8c52be",
+  "two_distinction_fixture": {
+    "shared_optimum": ["shared-probe-a", "shared-probe-b"],
+    "shared_optimum_bits": 12,
+    "isolated_optimum": ["direct-probe-a", "direct-probe-b"],
+    "isolated_optimum_bits": 14
+  },
+  "greedy_counterexample": {
+    "n": 6,
+    "setup_bits": 36,
+    "exact_probes": ["shared-0", "shared-1", "shared-2", "shared-3", "shared-4", "shared-5"],
+    "exact_bits": 42,
+    "greedy_probes": ["direct-0", "direct-1", "direct-2", "direct-3", "direct-4", "direct-5"],
+    "greedy_bits": 210,
+    "ratio": 5.0
+  },
+  "submodularity": {
+    "shared_code": true,
+    "separation_coverage": true
+  },
+  "prospective_pruning_counterexample": {
+    "current_groups": [["probe-left", "probe-right"]],
+    "current_signatures_equal": true,
+    "unseen_signatures_differ": true
+  },
+  "passed": true,
+  "claim_boundary": "Submodular-cost cover, active distinguishing tests, and observational quotienting are prior art; joint raw acquisition of the shared probe grammar remains an unverified novelty candidate."
+}
