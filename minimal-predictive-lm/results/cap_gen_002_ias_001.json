@@ -1,0 +1,47 @@
+{
+  "capability_id": "CAP-GEN-002-IAS-001",
+  "ci_run": 29302427579,
+  "artifact_id": 8298987281,
+  "head_sha": "39540c34516191f4342adf07a1b9f58d284442fe",
+  "base_symmetry": {
+    "group_size": 16,
+    "minimum_direct_anchors": 2
+  },
+  "stable_bundle": {
+    "channels": ["stable-marker-a", "stable-marker-b"],
+    "training_information_bits": 1.061278124459133,
+    "residual_group_size": 1,
+    "direct_anchor_count": 0,
+    "executable_bits": 8,
+    "symmetry_tax_bits": 0,
+    "grounded_total_bits": 8
+  },
+  "policy_specific_unique_tag": {
+    "training_information_bits": 3.0,
+    "naive_environmentwise_residual_size": 1,
+    "certified_residual_group_size": 16,
+    "rejected": true,
+    "executable_bits": 3,
+    "symmetry_tax_bits": 14,
+    "grounded_total_bits": 17
+  },
+  "no_auxiliary": {
+    "residual_group_size": 16,
+    "symmetry_tax_bits": 14,
+    "grounded_total_bits": 14
+  },
+  "single_environment_counterexample": {
+    "observed_training_signatures_equal": true,
+    "future_predictions_differ": true
+  },
+  "prospective_shift_counterexample": {
+    "stable_on_observed_environments": true,
+    "prospective_environment_exposes_shift": true
+  },
+  "pareto_frontier": [
+    [],
+    ["stable-marker-a", "stable-marker-b"]
+  ],
+  "passed": true,
+  "claim_boundary": "Invariant prediction, auxiliary-variable identifiability, automorphism stabilizers, and multi-environment causal representation learning are prior art. IAS-001 is a finite project-specific counterexample and resource objective, not a universal future-invariance theorem."
+}
