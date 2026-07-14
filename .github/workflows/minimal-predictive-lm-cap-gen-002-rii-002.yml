@@ -53,8 +53,12 @@ jobs:
           assert result["rii_001_affine_baseline"]["surface_links"] == 4
           assert result["independent_target_control"]["accepted_links"] == 0
           assert "not a universal" in result["claim_boundary"]
+
+          boundary = Path("docs/cap_gen_002_loop_microprogram_induction.md").read_text()
+          assert "transformation-specific opcodes" in boundary
+          assert "is prohibited" in boundary
+          assert "does not establish natural-language understanding" in boundary
           PY
-          grep -q "Adding.*transformation-specific opcodes.*prohibited" docs/cap_gen_002_loop_microprogram_induction.md
       - name: Upload result
         uses: actions/upload-artifact@v4
         with:
