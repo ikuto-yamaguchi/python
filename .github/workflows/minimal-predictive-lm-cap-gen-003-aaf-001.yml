@@ -1,0 +1,70 @@
+name: minimal-predictive-lm-cap-gen-003-aaf-001
+
+on:
+  pull_request:
+    branches:
+      - research/minimal-compute-lm
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/cap_gen_003_adapter_absorption.py"
+      - "minimal-predictive-lm/tests/test_cap_gen_003_adapter_absorption.py"
+      - "minimal-predictive-lm/docs/cap_gen_003_adapter_absorption.md"
+      - ".github/workflows/minimal-predictive-lm-cap-gen-003-aaf-001.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  adapter-absorption:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: minimal-predictive-lm/pyproject.toml
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Theory proposition tests
+        run: python -m pytest -q minimal-predictive-lm/tests/test_cap_gen_003_adapter_absorption.py
+      - name: Run frozen AAF gate
+        working-directory: minimal-predictive-lm
+        run: |
+          mkdir -p results
+          python -m minimal_predictive_lm.cap_gen_003_adapter_absorption \
+            | tee results/cap_gen_003_aaf_001.json
+      - name: Enforce purpose and claim boundaries
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path("results/cap_gen_003_aaf_001.json").read_text())
+          assert result["passed"] is True
+          assert result["adapter_absorption"]["core_only_reduction"] == 18.0
+          assert result["adapter_absorption"]["fully_charged_reduction"] < 1.0
+          assert result["heldout_lookup_controls"]["lawful_partial"]["accuracy"] == 0.125
+          assert result["heldout_lookup_controls"]["future_leaking"]["future_active_successors_used"] == 7
+          assert result["heldout_lookup_controls"]["future_leaking"]["certified"] is False
+          assert result["heldout_lookup_controls"]["fully_grounded"]["certified"] is False
+          assert result["indistinguishable_worlds"]["common_transition_count"] == 1
+          assert result["positive_control"]["certified"] is True
+          assert result["positive_control"]["storage_savings"] == 8
+          assert result["positive_control"]["interaction_savings"] == 8
+          assert "prior art" in result["claim_boundary"]
+          assert "not raw-stream learning" in result["claim_boundary"]
+
+          theory = Path("docs/cap_gen_003_adapter_absorption.md").read_text()
+          assert "The next step must not add more arbitrary transition tables or cycle sizes" in theory
+          assert "public or natural interaction trace" in theory
+          PY
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: cap-gen-003-aaf-001-results
+          path: minimal-predictive-lm/results/cap_gen_003_aaf_001.json
+          retention-days: 14
