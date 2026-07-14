@@ -47,6 +47,12 @@ jobs:
             public_data/mgsm/exemplars.py \
             --adaptation-train 200 \
             | tee results/femi_002_mgsm.json
+      - name: Upload result before gating
+        uses: actions/upload-artifact@v4
+        with:
+          name: femi-002-mgsm-results
+          path: minimal-predictive-lm/results/femi_002_mgsm.json
+          retention-days: 14
       - name: Enforce public-data claim boundary
         working-directory: minimal-predictive-lm
         run: |
@@ -69,9 +75,3 @@ jobs:
           protocol = Path("docs/femi_002_mgsm.md").read_text()
           assert "Failure rejects the current learner" in protocol
           PY
-      - name: Upload result
-        uses: actions/upload-artifact@v4
-        with:
-          name: femi-002-mgsm-results
-          path: minimal-predictive-lm/results/femi_002_mgsm.json
-          retention-days: 14
