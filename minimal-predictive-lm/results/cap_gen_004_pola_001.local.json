@@ -1,0 +1,41 @@
+{
+  "capability_id": "CAP-GEN-004-POLA-001",
+  "claim_boundary": "The 2026 prospective-compression work establishes the normative principle and human evidence; POLA-001 is a candidate online algorithm that estimates reuse duration causally and uses a one-task real option. Novelty is not established until broader prior-art review and public heterogeneous benchmarks.",
+  "controls": {
+    "duration_shift_probation_tokens": 8,
+    "duration_shift_regret": 10,
+    "isolated_prospective_admissions": 0
+  },
+  "costs": {
+    "none": 4076863808,
+    "prospective": 2927677672,
+    "prospective_vs_none_reduction": 0.2818799425541173,
+    "prospective_vs_retrospective_reduction": 0.1833374841539708,
+    "retrospective": 3584929656
+  },
+  "curriculum": {
+    "family_labels_visible_to_learner": 0,
+    "primitive_vocabulary": 48,
+    "semantic_families_for_evaluation_only": [
+      "list",
+      "string",
+      "grid"
+    ],
+    "task_count": 20
+  },
+  "hypothesis": "a causal forecast of abstraction reuse duration can admit a probationary helper before retrospective compression justifies permanent admission",
+  "passed": true,
+  "prospective": {
+    "confirmed_events": 2,
+    "grid_probation_task": 16,
+    "permanent_helpers": 4,
+    "probation_events": 2,
+    "probation_storage_tokens": 8,
+    "string_probation_task": 11
+  },
+  "retrospective": {
+    "grid_admission_task": 17,
+    "string_admission_task": 12
+  },
+  "validation_mode": "independent local execution; GitHub Actions pending"
+}
