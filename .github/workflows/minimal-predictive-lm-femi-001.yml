@@ -1,0 +1,7 @@
+name: minimal-predictive-lm-femi-001
+on: [workflow_dispatch]
+jobs:
+  femi:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo FEMI
