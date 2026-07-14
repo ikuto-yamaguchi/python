@@ -1,0 +1,75 @@
+name: minimal-predictive-lm-cap-gen-002-asvs-001
+
+on:
+  pull_request:
+    branches:
+      - research/minimal-compute-lm
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/cap_gen_002_anytime_symmetry_version_space.py"
+      - "minimal-predictive-lm/tests/test_cap_gen_002_anytime_symmetry_version_space.py"
+      - "minimal-predictive-lm/docs/asvs_001.md"
+      - ".github/workflows/asvs-001.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  anytime-symmetry-version-space:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: minimal-predictive-lm/pyproject.toml
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Theory proposition tests
+        run: python -m pytest -q minimal-predictive-lm/tests/test_cap_gen_002_anytime_symmetry_version_space.py
+      - name: Run frozen ASVS gate
+        working-directory: minimal-predictive-lm
+        run: |
+          mkdir -p results
+          python -m minimal_predictive_lm.cap_gen_002_anytime_symmetry_version_space \
+            | tee results/cap_gen_002_asvs_001.json
+      - name: Enforce theory and novelty boundaries
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path("results/cap_gen_002_asvs_001.json").read_text())
+          assert result["passed"] is True
+          assert result["time_uniform_certificate"]["allocated_budget_through_100000"] < 0.05
+          assert result["finite_sample_progression"]["trials_16"]["retained_elements"] == 16
+          assert result["finite_sample_progression"]["trials_16"]["robust_base_size"] == 2
+          assert result["finite_sample_progression"]["trials_32"]["retained_elements"] == 1
+          assert result["finite_sample_progression"]["trials_32"]["robust_base_size"] == 0
+          assert result["logical_pruning"]["raw_retained_elements"] == 2
+          assert result["logical_pruning"]["logically_supported_elements"] == 1
+          assert result["version_space_vs_envelope"]["robust_base_size"] == 1
+          assert result["version_space_vs_envelope"]["generated_envelope_base_size"] == 2
+          assert result["active_choice_counterexample"]["element_count_choice"]["rejected_elements"] == 6
+          assert result["active_choice_counterexample"]["version_space_choice"]["rejected_elements"] == 5
+          assert result["active_choice_counterexample"]["element_count_choice"]["robust_base_size"] == 1
+          assert result["active_choice_counterexample"]["version_space_choice"]["robust_base_size"] == 0
+          assert "prior art" in result["claim_boundary"]
+          assert "unverified novelty candidate" in result["claim_boundary"]
+
+          theory = Path("docs/asvs_001.md").read_text()
+          assert "Subgroup version space" in theory
+          assert "Logical pruning" in theory
+          assert "Robust grounding base" in theory
+          assert "Merely replacing Hoeffding" in theory
+          PY
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: cap-gen-002-asvs-001-results
+          path: minimal-predictive-lm/results/cap_gen_002_asvs_001.json
+          retention-days: 14
