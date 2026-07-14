@@ -1,0 +1,66 @@
+name: minimal-predictive-lm-cap-gen-002-gas-001
+
+on:
+  pull_request:
+    branches:
+      - research/minimal-compute-lm
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/cap_gen_002_grounded_actuation_symmetry.py"
+      - "minimal-predictive-lm/tests/test_cap_gen_002_grounded_actuation_symmetry.py"
+      - ".github/workflows/minimal-predictive-lm-cap-gen-002-gas-001.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  grounded-actuation-symmetry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: minimal-predictive-lm/pyproject.toml
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Theory proposition tests
+        run: python -m pytest -q minimal-predictive-lm/tests/test_cap_gen_002_grounded_actuation_symmetry.py
+      - name: Run frozen symmetry gate
+        working-directory: minimal-predictive-lm
+        run: |
+          mkdir -p results
+          python -m minimal_predictive_lm.cap_gen_002_grounded_actuation_symmetry \
+            | tee results/cap_gen_002_gas_001.json
+      - name: Enforce theory and novelty boundaries
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path("results/cap_gen_002_gas_001.json").read_text())
+          assert result["passed"] is True
+          assert result["fully_symmetric_four"]["group_size"] == 24
+          assert result["fully_symmetric_four"]["minimum_direct_anchors"] == 3
+          assert result["cycle_eight"]["group_size"] == 16
+          assert result["cycle_eight"]["minimum_direct_anchors"] == 2
+          assert result["cycle_eight"]["one_anchor_remaining_alignments"] == 2
+          assert result["cycle_eight"]["two_anchor_remaining_alignments"] == 1
+          assert result["representation_tradeoff"]["transition_only"]["executable_bits"] == 8
+          assert result["representation_tradeoff"]["transition_only"]["grounded_total_bits"] == 22
+          assert result["representation_tradeoff"]["observable_auxiliary"]["grounded_total_bits"] == 20
+          assert result["representation_tradeoff"]["expensive_grounding_choice"] == "observable-auxiliary-cycle"
+          assert result["representation_tradeoff"]["cheap_grounding_choice"] == "transition-only-cycle-cheap-grounding"
+          assert "prior art" in result["claim_boundary"]
+          assert "unverified novelty candidate" in result["claim_boundary"]
+          PY
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: cap-gen-002-gas-001-results
+          path: minimal-predictive-lm/results/cap_gen_002_gas_001.json
+          retention-days: 14
