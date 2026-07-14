@@ -1,0 +1,47 @@
+{
+  "capability_id": "CAP-GEN-002-EPQ-001",
+  "ci_run": 29297485028,
+  "artifact_id": 8297291519,
+  "head_sha": "94bae67765a8ede3f668ff7c2d978cec30b38d64",
+  "quotient": {
+    "classes": [
+      ["a0", "a1"],
+      ["b"],
+      ["sink0"],
+      ["sink1"]
+    ],
+    "state_count": 4,
+    "minimum_fixed_state_bits": 2
+  },
+  "probe_selection": {
+    "class_pairs": 6,
+    "exact": ["high-bit", "low-bit"],
+    "exact_cost": 2,
+    "greedy": ["high-bit", "low-bit"],
+    "greedy_cost": 2
+  },
+  "resource_frontier": [
+    {
+      "identifier": "large-lookup",
+      "resources": [100, 120, 1, 80, 8]
+    },
+    {
+      "identifier": "short-recompute",
+      "resources": [10, 80, 100, 4, 8]
+    }
+  ],
+  "canonical_tie": {
+    "abstained": true,
+    "reason": "resource gap is insufficient; internal representative is not stable"
+  },
+  "canonical_strict": {
+    "selected": "short-recompute",
+    "gap": 917
+  },
+  "unseen_surface_counterexample": {
+    "training_views_equal": true,
+    "unseen_views_differ": true
+  },
+  "passed": true,
+  "claim_boundary": "The quotient, bisimulation refinement, minimum-test formulation, and observational program quotient are known-style constructions; only the joint lifetime-resource acquisition hypothesis remains an unverified novelty candidate."
+}
