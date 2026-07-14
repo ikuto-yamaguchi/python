@@ -1,3 +1,5 @@
+from random import Random
+
 from minimal_predictive_lm.cap_gen_002_raw_interchange_induction import (
     ByteAffineProgram,
     DiscoveryConfig,
@@ -51,6 +53,55 @@ def test_frozen_model_generalizes_to_new_values_without_retraining():
     assert result.byte_accuracy == 1.0
     assert literal.exact_accuracy == 0.0
     assert result.inference_operations < result.target_bytes * 2
+
+
+def _same_alphabet_noise_stream(seed: int = 41, instances: int = 16) -> bytes:
+    """Anchors, values, and noise all use the same alphabet.
+
+    This prevents success from depending on a punctuation-only delimiter channel.
+    Hidden episode boundaries are never returned to the learner.
+    """
+
+    rng = Random(seed)
+    alphabet = b"abcdefghjkmnpqrstuvwxyz23456789"
+    relations = (
+        ((b"mira", b"nora"), (b"peta", b"qeta")),
+        ((b"raku", b"saku"), (b"taku", b"vaku")),
+    )
+    chunks: list[bytes] = []
+    for _ in range(instances):
+        order = list(range(len(relations)))
+        rng.shuffle(order)
+        for index in order:
+            source, target = relations[index]
+            value = bytes(rng.choice(alphabet) for _ in range(rng.randint(4, 7)))
+            transformed = value[::-1]
+
+            def noise(minimum: int, maximum: int) -> bytes:
+                return bytes(
+                    rng.choice(alphabet)
+                    for _ in range(rng.randint(minimum, maximum))
+                )
+
+            chunks.append(
+                noise(1, 5)
+                + source[0]
+                + value
+                + source[1]
+                + noise(1, 7)
+                + target[0]
+                + transformed
+                + target[1]
+                + noise(1, 5)
+            )
+    return b"".join(chunks)
+
+
+def test_boundary_discovery_does_not_require_a_disjoint_delimiter_alphabet():
+    model = discover_interchange_model(_same_alphabet_noise_stream())
+    assert len(model.links) == 2
+    assert len(model.programs) == 1
+    assert model.programs[0].signature == (True, 1, 0)
 
 
 def test_independent_targets_do_not_create_spurious_operator_links():
