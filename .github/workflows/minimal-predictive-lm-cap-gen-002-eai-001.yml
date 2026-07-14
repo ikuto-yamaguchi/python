@@ -1,0 +1,73 @@
+name: minimal-predictive-lm-cap-gen-002-eai-001
+
+on:
+  pull_request:
+    branches:
+      - research/minimal-compute-lm
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/cap_gen_002_endogenous_actuation_identifiability.py"
+      - "minimal-predictive-lm/tests/test_cap_gen_002_endogenous_actuation_identifiability.py"
+      - "minimal-predictive-lm/docs/cap_gen_002_endogenous_actuation_identifiability.md"
+      - ".github/workflows/minimal-predictive-lm-cap-gen-002-eai-001.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  endogenous-actuation-identifiability:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: minimal-predictive-lm/pyproject.toml
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Theory proposition tests
+        run: python -m pytest -q minimal-predictive-lm/tests/test_cap_gen_002_endogenous_actuation_identifiability.py
+      - name: Run finite endogenous-actuation gate
+        working-directory: minimal-predictive-lm
+        run: |
+          mkdir -p results
+          python -m minimal_predictive_lm.cap_gen_002_endogenous_actuation_identifiability \
+            | tee results/cap_gen_002_eai_001.json
+      - name: Enforce theorem and steering boundaries
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path("results/cap_gen_002_eai_001.json").read_text())
+          assert result["passed"] is True
+          assert result["passive_non_identifiability"]["observational_views_equal"] is True
+          assert result["passive_non_identifiability"]["controlled_actuation_positions"] != result["passive_non_identifiability"]["autonomous_actuation_positions"]
+          assert result["identifiable_regime_fixture"]["behavioral_action_classes"] == [
+              ["flip-a", "flip-b"],
+              ["push-a", "push-b"],
+          ]
+          assert all(
+              result["no_policy_shift_fixture"]["roles"][surface] == "abstain"
+              for surface in ("push-a", "push-b", "flip-a", "flip-b")
+          )
+          assert result["resource_comparison"]["compression_ratio"] > 5.0
+          assert "known-style constructions" in result["claim_boundary"]
+          assert "unverified novelty candidate" in result["claim_boundary"]
+
+          theory = Path("docs/cap_gen_002_endogenous_actuation_identifiability.md").read_text()
+          assert "passive actuation decomposition is non-identifiable" in theory
+          assert "Stagnation audit" in theory
+          assert "Do not" not in theory or "prohibited" in theory
+          assert "No public-axis solver" in theory
+          PY
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: cap-gen-002-eai-001-results
+          path: minimal-predictive-lm/results/cap_gen_002_eai_001.json
+          retention-days: 14
