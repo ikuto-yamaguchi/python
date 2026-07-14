@@ -1,0 +1,61 @@
+{
+  "capability_id": "CAP-GEN-002-RII-003",
+  "ci_run": 29296155793,
+  "artifact_id": 8296802891,
+  "head_sha": "74f54cbdbf1b1b5a48fe91d50b5fae556f9fdca4",
+  "training": {
+    "raw_bytes": 1213,
+    "hidden_boundaries_visible_to_learner": false,
+    "task_ids_visible_to_learner": false,
+    "aligned_examples_visible_to_learner": false,
+    "exact_source_context_pairs": 36,
+    "exact_target_context_pairs": 36
+  },
+  "model": {
+    "context_roles": 3,
+    "shared_programs": 3,
+    "learned_payload_bits": 1251,
+    "exact_cross_product_template_bits": 4608,
+    "compression_ratio_vs_cross_product": 3.683453237410072
+  },
+  "training_boundary_recovery": {
+    "expected_boundaries": 72,
+    "predicted_boundaries": 72,
+    "correct_boundaries": 72,
+    "precision": 1.0,
+    "recall": 1.0
+  },
+  "frozen_unseen_combination_evaluation": {
+    "expected_pairs": 24,
+    "predicted_pairs": 24,
+    "correct_pairs": 24,
+    "precision": 1.0,
+    "recall": 1.0,
+    "exact_accuracy": 1.0,
+    "source_candidates": 25,
+    "target_candidates": 24,
+    "context_scan_operations": 4872,
+    "program_operations": 404
+  },
+  "exact_pair_baseline": {
+    "paired_predictions": 0,
+    "exact_accuracy": 0.0
+  },
+  "rii_002_exact_anchor_baseline": {
+    "surface_links": 0
+  },
+  "independent_target_control": {
+    "context_roles": 0
+  },
+  "discovery_stats": {
+    "split_position": 808,
+    "target_span_index_entries": 10719,
+    "source_spans_examined": 3615,
+    "program_candidates_executed": 2461338,
+    "exact_program_matches": 116,
+    "program_groups_examined": 4,
+    "peak_context_class_entries": 16
+  },
+  "passed": true,
+  "claim_boundary": "All individual context variants were seen during training; only complete left/right combinations were unseen. This is not unseen-vocabulary grounding, natural-language concept learning, public-axis improvement, or human-level intelligence."
+}
