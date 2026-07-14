@@ -12,7 +12,7 @@ from .cap_gen_002_loop_microprogram_induction import (
     LoopProgram,
     discover_loop_interchange_model,
 )
-from .cap_gen_002_raw_interchange_induction import DiscoveryConfig, HiddenEpisode
+from .cap_gen_002_raw_interchange_induction import DiscoveryConfig
 
 
 TemplatePair = tuple[bytes, bytes]
@@ -46,7 +46,7 @@ class ContextDiscoveryConfig:
         if self.maximum_relation_delay < self.minimum_relation_delay:
             raise ValueError("invalid relation delay interval")
         if not 0.5 < self.fit_fraction < 0.9:
-            raise ValueError("fit fraction must leave chronological calibration data")
+            raise ValueError("fit fraction must leave calibration data")
         if min(
             self.minimum_anchor_support,
             self.minimum_fit_support,
@@ -69,11 +69,11 @@ class SpanProgramMatch:
 
     @property
     def source_context_pair(self) -> TemplatePair:
-        return (self.source_left, self.source_right)
+        return self.source_left, self.source_right
 
     @property
     def target_context_pair(self) -> TemplatePair:
-        return (self.target_left, self.target_right)
+        return self.target_left, self.target_right
 
 
 @dataclass(frozen=True)
@@ -125,23 +125,19 @@ class FactorizedContextModel:
                 role.target_right_class,
             )
         )
-        # Direction-independent role framing, one program reference, and four set tags.
-        role_metadata_bits = 20 * len(self.roles)
-        return program_bits + anchor_bits + role_metadata_bits
+        return program_bits + anchor_bits + 20 * len(self.roles)
 
     @property
     def exact_cross_product_template_bits(self) -> int:
-        """Bits for explicitly storing every left/right combination covered by classes."""
-
         total = 0
         for role in self.roles:
             total += sum(
-                (len(left) + len(right)) * 8
+                8 * (len(left) + len(right))
                 for left in role.source_left_class
                 for right in role.source_right_class
             )
             total += sum(
-                (len(left) + len(right)) * 8
+                8 * (len(left) + len(right))
                 for left in role.target_left_class
                 for right in role.target_right_class
             )
@@ -200,56 +196,39 @@ class HiddenContextEpisode:
     target_context_pair: TemplatePair
 
 
-def _positive_limit_bits(limit: int) -> int:
-    return max(1, ceil(log2(limit + 1)))
-
-
 def _enumerate_program_matches(
     stream: bytes,
     config: ContextDiscoveryConfig,
     program_library: Sequence[LoopProgram],
-) -> tuple[tuple[SpanProgramMatch, ...], Mapping[str, int]]:
-    """Search every raw source span and retain minimum-code exact program matches."""
-
+) -> tuple[tuple[SpanProgramMatch, ...], dict[str, int]]:
     context = config.context_length
     target_index: dict[tuple[int, bytes], list[int]] = defaultdict(list)
     target_entries = 0
-    for target_length in range(
-        config.minimum_source_length,
-        config.maximum_target_length + 1,
-    ):
-        final_start = len(stream) - target_length - context
-        for start in range(context, final_start + 1):
-            target_index[(target_length, stream[start : start + target_length])].append(start)
+    for length in range(config.minimum_source_length, config.maximum_target_length + 1):
+        for start in range(context, len(stream) - length - context + 1):
+            target_index[(length, stream[start : start + length])].append(start)
             target_entries += 1
 
     best: dict[tuple[Boundary, Boundary], SpanProgramMatch] = {}
-    source_spans = program_executions = 0
-    for source_length in range(
-        config.minimum_source_length,
-        config.maximum_source_length + 1,
-    ):
-        final_start = len(stream) - source_length - context
-        for source_start in range(context, final_start + 1):
+    source_spans = executions = 0
+    for length in range(config.minimum_source_length, config.maximum_source_length + 1):
+        for source_start in range(context, len(stream) - length - context + 1):
             source_spans += 1
-            source_end = source_start + source_length
+            source_end = source_start + length
             source = stream[source_start:source_end]
-            minimum_target_start = source_end + config.minimum_relation_delay
-            maximum_target_start = source_end + config.maximum_relation_delay
+            low = source_end + config.minimum_relation_delay
+            high = source_end + config.maximum_relation_delay
             for program_index, program in enumerate(program_library):
-                program_executions += 1
+                executions += 1
                 target = program.apply(source)
                 positions = target_index.get((len(target), target))
                 if not positions:
                     continue
-                left = bisect_left(positions, minimum_target_start)
-                right = bisect_right(positions, maximum_target_start)
+                left = bisect_left(positions, low)
+                right = bisect_right(positions, high)
                 for target_start in positions[left:right]:
                     target_end = target_start + len(target)
-                    key = (
-                        (source_start, source_end),
-                        (target_start, target_end),
-                    )
+                    key = ((source_start, source_end), (target_start, target_end))
                     candidate = SpanProgramMatch(
                         program_index,
                         key[0],
@@ -286,23 +265,21 @@ def _enumerate_program_matches(
     return matches, {
         "target_span_index_entries": target_entries,
         "source_spans_examined": source_spans,
-        "program_candidates_executed": program_executions,
+        "program_candidates_executed": executions,
         "exact_program_matches": len(matches),
     }
 
 
 def _anchor_classes(
-    rows: Sequence[SpanProgramMatch],
-    minimum_support: int,
+    rows: Sequence[SpanProgramMatch], minimum_support: int
 ) -> dict[str, frozenset[bytes]]:
-    attributes = (
+    output: dict[str, frozenset[bytes]] = {}
+    for attribute in (
         "source_left",
         "source_right",
         "target_left",
         "target_right",
-    )
-    output: dict[str, frozenset[bytes]] = {}
-    for attribute in attributes:
+    ):
         counts = Counter(getattr(row, attribute) for row in rows)
         output[attribute] = frozenset(
             anchor for anchor, support in counts.items() if support >= minimum_support
@@ -311,27 +288,30 @@ def _anchor_classes(
 
 
 def _inside_classes(
-    row: SpanProgramMatch,
-    classes: Mapping[str, frozenset[bytes]],
+    row: SpanProgramMatch, classes: Mapping[str, frozenset[bytes]]
 ) -> bool:
-    return all(getattr(row, attribute) in anchors for attribute, anchors in classes.items())
+    return all(getattr(row, name) in anchors for name, anchors in classes.items())
 
 
 def _role_gain_bits(
     program: LoopProgram,
     classes: Mapping[str, frozenset[bytes]],
     confirmed: Sequence[SpanProgramMatch],
-    stream_length: int,
 ) -> int:
+    """Target literal code minus executable role code.
+
+    Occurrence positions are not stored in the learned artifact: the deterministic
+    context scanner recovers them from the raw stream.  Its cost is therefore charged to
+    training/inference operations.  Charging per-occurrence pointers here as well would
+    count the same location mechanism twice.
+    """
+
     literal_bits = 8 * sum(len(row.target_value) for row in confirmed)
     anchor_bits = 8 * sum(
-        len(anchor)
-        for anchor_class in classes.values()
-        for anchor in anchor_class
+        len(anchor) for anchors in classes.values() for anchor in anchors
     )
-    pointer_bits = 2 * _positive_limit_bits(stream_length) * len(confirmed)
-    encoded_bits = program.description_bits + anchor_bits + pointer_bits + 20
-    return literal_bits - encoded_bits
+    executable_bits = program.description_bits + anchor_bits + 20
+    return literal_bits - executable_bits
 
 
 def discover_factorized_context_model(
@@ -339,13 +319,7 @@ def discover_factorized_context_model(
     config: ContextDiscoveryConfig = ContextDiscoveryConfig(),
     program_library: Sequence[LoopProgram] = DEFAULT_PROGRAM_LIBRARY,
 ) -> FactorizedContextModel:
-    """Learn left/right context classes and transformations from one raw byte stream.
-
-    Full context pairs need not repeat.  Individual left and right contexts are retained
-    when repeated high-confidence transformation matches support them.  A later raw
-    suffix calibrates the cross-product classes.  No token, record, event, role, task,
-    domain, aligned example, or hidden boundary is passed to this function.
-    """
+    """Jointly induce raw span roles, factorized contexts, and loop programs."""
 
     config.validate()
     if not program_library:
@@ -353,10 +327,17 @@ def discover_factorized_context_model(
     matches, counters = _enumerate_program_matches(stream, config, program_library)
     split = int(len(stream) * config.fit_fraction)
 
-    raw_roles: list[tuple[LoopProgram, dict[str, frozenset[bytes]], tuple[SpanProgramMatch, ...], int, int, int]] = []
-    calibration_bytes = 0
-    peak_class_entries = 0
-    program_groups = 0
+    raw_roles: list[
+        tuple[
+            LoopProgram,
+            dict[str, frozenset[bytes]],
+            tuple[SpanProgramMatch, ...],
+            int,
+            int,
+            int,
+        ]
+    ] = []
+    calibration_bytes = peak_entries = program_groups = 0
     for library_index in sorted({row.program_library_index for row in matches}):
         program_groups += 1
         program = program_library[library_index]
@@ -372,27 +353,22 @@ def discover_factorized_context_model(
             if row.program_library_index == library_index
             and row.source_boundary[0] >= split
         )
-        candidate_classes = _anchor_classes(fit_rows, config.minimum_anchor_support)
-        if any(not anchors for anchors in candidate_classes.values()):
+        candidates = _anchor_classes(fit_rows, config.minimum_anchor_support)
+        if any(not anchors for anchors in candidates.values()):
             continue
-
-        calibration_confirmed = tuple(
-            row for row in calibration_rows if _inside_classes(row, candidate_classes)
+        calibrated = tuple(
+            row for row in calibration_rows if _inside_classes(row, candidates)
         )
-        calibration_bytes += sum(len(row.target_value) for row in calibration_confirmed)
-        if len(calibration_confirmed) < config.minimum_calibration_support:
+        calibration_bytes += sum(len(row.target_value) for row in calibrated)
+        if len(calibrated) < config.minimum_calibration_support:
             continue
 
-        # Calibration retains only context variants that independently recur in the
-        # held-out chronological suffix.  Exact left/right pair combinations are not
-        # required to have appeared in the fit prefix.
         final_classes = {
-            attribute: frozenset(getattr(row, attribute) for row in calibration_confirmed)
-            for attribute in candidate_classes
+            name: frozenset(getattr(row, name) for row in calibrated)
+            for name in candidates
         }
-        peak_class_entries = max(
-            peak_class_entries,
-            sum(len(anchors) for anchors in final_classes.values()),
+        peak_entries = max(
+            peak_entries, sum(len(anchors) for anchors in final_classes.values())
         )
         fit_confirmed = tuple(
             row for row in fit_rows if _inside_classes(row, final_classes)
@@ -405,7 +381,7 @@ def discover_factorized_context_model(
             if row.program_library_index == library_index
             and _inside_classes(row, final_classes)
         )
-        gain = _role_gain_bits(program, final_classes, confirmed, len(stream))
+        gain = _role_gain_bits(program, final_classes, confirmed)
         if gain <= 0:
             continue
         raw_roles.append(
@@ -414,7 +390,7 @@ def discover_factorized_context_model(
                 final_classes,
                 confirmed,
                 len(fit_confirmed),
-                len(calibration_confirmed),
+                len(calibrated),
                 gain,
             )
         )
@@ -423,15 +399,15 @@ def discover_factorized_context_model(
     program_indices: dict[tuple[bool, tuple[str, ...]], int] = {}
     roles: list[ContextRole] = []
     for program, classes, confirmed, fit_support, calibration_support, gain in raw_roles:
-        signature = (program.reverse, program.body)
-        program_index = program_indices.get(signature)
-        if program_index is None:
-            program_index = len(programs)
-            program_indices[signature] = program_index
+        signature = program.reverse, program.body
+        index = program_indices.get(signature)
+        if index is None:
+            index = len(programs)
+            program_indices[signature] = index
             programs.append(program)
         roles.append(
             ContextRole(
-                program_index,
+                index,
                 classes["source_left"],
                 classes["source_right"],
                 classes["target_left"],
@@ -453,13 +429,13 @@ def discover_factorized_context_model(
         ContextDiscoveryStats(
             len(stream),
             split,
-            int(counters["target_span_index_entries"]),
-            int(counters["source_spans_examined"]),
-            int(counters["program_candidates_executed"]),
-            int(counters["exact_program_matches"]),
+            counters["target_span_index_entries"],
+            counters["source_spans_examined"],
+            counters["program_candidates_executed"],
+            counters["exact_program_matches"],
             program_groups,
             calibration_bytes,
-            peak_class_entries,
+            peak_entries,
         ),
     )
 
@@ -474,8 +450,10 @@ def _find_factorized_spans(
     maximum_length: int,
 ) -> tuple[tuple[Boundary, bytes], ...]:
     output: list[tuple[Boundary, bytes]] = []
-    final_start = len(stream) - context_length - minimum_length
-    for start in range(context_length, final_start + 1):
+    for start in range(
+        context_length,
+        len(stream) - context_length - minimum_length + 1,
+    ):
         if stream[start - context_length : start] not in left_class:
             continue
         for length in range(minimum_length, maximum_length + 1):
@@ -488,12 +466,10 @@ def _find_factorized_spans(
 
 
 def evaluate_factorized_context_model(
-    model: FactorizedContextModel,
-    stream: bytes,
+    model: FactorizedContextModel, stream: bytes
 ) -> FactorizedEvaluation:
     predictions: list[PredictedSpanPair] = []
-    source_candidate_total = target_candidate_total = 0
-    scan_operations = program_operations = 0
+    source_total = target_total = scan_operations = program_operations = 0
     context = model.config.context_length
 
     for role_index, role in enumerate(model.roles):
@@ -513,8 +489,8 @@ def evaluate_factorized_context_model(
             minimum_length=model.config.minimum_source_length,
             maximum_length=model.config.maximum_target_length,
         )
-        source_candidate_total += len(sources)
-        target_candidate_total += len(targets)
+        source_total += len(sources)
+        target_total += len(targets)
         scan_operations += 2 * max(0, len(stream) - 2 * context)
         scan_operations += len(sources) * (
             model.config.maximum_source_length - model.config.minimum_source_length + 1
@@ -524,33 +500,34 @@ def evaluate_factorized_context_model(
         )
 
         targets_by_start: dict[int, list[tuple[Boundary, bytes]]] = defaultdict(list)
-        for row in targets:
-            targets_by_start[row[0][0]].append(row)
-        starts = sorted(targets_by_start)
-        used_targets: set[Boundary] = set()
+        for target in targets:
+            targets_by_start[target[0][0]].append(target)
+        target_starts = sorted(targets_by_start)
+        used: set[Boundary] = set()
         program = model.programs[role.program_index]
-
         for source_boundary, source_value in sources:
             prediction = program.apply(source_value)
             program_operations += len(source_value) * program.operations_per_input_byte
-            minimum_start = source_boundary[1] + model.config.minimum_relation_delay
-            maximum_start = source_boundary[1] + model.config.maximum_relation_delay
-            index = bisect_left(starts, minimum_start)
+            low = source_boundary[1] + model.config.minimum_relation_delay
+            high = source_boundary[1] + model.config.maximum_relation_delay
+            position = bisect_left(target_starts, low)
             selected: tuple[Boundary, bytes] | None = None
-            while index < len(starts) and starts[index] <= maximum_start:
-                for candidate in targets_by_start[starts[index]]:
-                    if candidate[0] in used_targets:
-                        continue
-                    if len(candidate[1]) != len(prediction):
-                        continue
-                    selected = candidate
-                    break
+            while position < len(target_starts) and target_starts[position] <= high:
+                selected = next(
+                    (
+                        target
+                        for target in targets_by_start[target_starts[position]]
+                        if target[0] not in used
+                        and len(target[1]) == len(prediction)
+                    ),
+                    None,
+                )
                 if selected is not None:
                     break
-                index += 1
+                position += 1
             if selected is None:
                 continue
-            used_targets.add(selected[0])
+            used.add(selected[0])
             predictions.append(
                 PredictedSpanPair(
                     role_index,
@@ -562,8 +539,8 @@ def evaluate_factorized_context_model(
             )
 
     return FactorizedEvaluation(
-        source_candidate_total,
-        target_candidate_total,
+        source_total,
+        target_total,
         tuple(predictions),
         scan_operations,
         program_operations,
@@ -571,21 +548,20 @@ def evaluate_factorized_context_model(
 
 
 def evaluate_exact_pair_baseline(
-    model: FactorizedContextModel,
-    stream: bytes,
+    model: FactorizedContextModel, stream: bytes
 ) -> FactorizedEvaluation:
-    """Ablation: store seen full left/right pairs instead of factorized classes."""
-
     context = model.config.context_length
     predictions: list[PredictedSpanPair] = []
-    source_total = target_total = scan_operations = program_operations = 0
+    source_total = target_total = scans = operations = 0
     for role_index, role in enumerate(model.roles):
-        source_rows: list[tuple[Boundary, bytes]] = []
-        target_rows: list[tuple[Boundary, bytes]] = []
-        final_start = len(stream) - context - model.config.minimum_source_length
-        for start in range(context, final_start + 1):
+        sources: list[tuple[Boundary, bytes]] = []
+        targets: list[tuple[Boundary, bytes]] = []
+        for start in range(
+            context,
+            len(stream) - context - model.config.minimum_source_length + 1,
+        ):
             left = stream[start - context : start]
-            scan_operations += 1
+            scans += 1
             for length in range(
                 model.config.minimum_source_length,
                 model.config.maximum_target_length + 1,
@@ -593,33 +569,36 @@ def evaluate_exact_pair_baseline(
                 end = start + length
                 if end + context > len(stream):
                     break
-                pair = (left, stream[end : end + context])
-                if length <= model.config.maximum_source_length and pair in role.seen_source_pairs:
-                    source_rows.append(((start, end), stream[start:end]))
+                pair = left, stream[end : end + context]
+                if (
+                    length <= model.config.maximum_source_length
+                    and pair in role.seen_source_pairs
+                ):
+                    sources.append(((start, end), stream[start:end]))
                 if pair in role.seen_target_pairs:
-                    target_rows.append(((start, end), stream[start:end]))
-        source_total += len(source_rows)
-        target_total += len(target_rows)
+                    targets.append(((start, end), stream[start:end]))
+        source_total += len(sources)
+        target_total += len(targets)
         targets_by_start: dict[int, list[tuple[Boundary, bytes]]] = defaultdict(list)
-        for row in target_rows:
-            targets_by_start[row[0][0]].append(row)
-        starts = sorted(targets_by_start)
+        for target in targets:
+            targets_by_start[target[0][0]].append(target)
+        target_starts = sorted(targets_by_start)
         program = model.programs[role.program_index]
-        for source_boundary, source_value in source_rows:
+        for source_boundary, source_value in sources:
             prediction = program.apply(source_value)
-            program_operations += len(source_value) * program.operations_per_input_byte
-            index = bisect_left(
-                starts,
+            operations += len(source_value) * program.operations_per_input_byte
+            position = bisect_left(
+                target_starts,
                 source_boundary[1] + model.config.minimum_relation_delay,
             )
-            while index < len(starts) and starts[index] <= (
+            while position < len(target_starts) and target_starts[position] <= (
                 source_boundary[1] + model.config.maximum_relation_delay
             ):
                 selected = next(
                     (
-                        row
-                        for row in targets_by_start[starts[index]]
-                        if len(row[1]) == len(prediction)
+                        target
+                        for target in targets_by_start[target_starts[position]]
+                        if len(target[1]) == len(prediction)
                     ),
                     None,
                 )
@@ -634,14 +613,9 @@ def evaluate_exact_pair_baseline(
                         )
                     )
                     break
-                index += 1
-
+                position += 1
     return FactorizedEvaluation(
-        source_total,
-        target_total,
-        tuple(predictions),
-        scan_operations,
-        program_operations,
+        source_total, target_total, tuple(predictions), scans, operations
     )
 
 
@@ -649,19 +623,20 @@ def predicted_boundary_scores(
     evaluation: FactorizedEvaluation,
     episodes: Sequence[HiddenContextEpisode],
 ) -> dict[str, float | int]:
-    expected_pairs = {
+    expected = {
         (episode.source_boundary, episode.target_boundary) for episode in episodes
     }
-    predicted_pairs = {
-        (row.source_boundary, row.target_boundary) for row in evaluation.paired_predictions
+    predicted = {
+        (row.source_boundary, row.target_boundary)
+        for row in evaluation.paired_predictions
     }
-    overlap = len(expected_pairs & predicted_pairs)
+    correct = len(expected & predicted)
     return {
-        "expected_pairs": len(expected_pairs),
-        "predicted_pairs": len(predicted_pairs),
-        "correct_pairs": overlap,
-        "precision": overlap / len(predicted_pairs) if predicted_pairs else 0.0,
-        "recall": overlap / len(expected_pairs) if expected_pairs else 0.0,
+        "expected_pairs": len(expected),
+        "predicted_pairs": len(predicted),
+        "correct_pairs": correct,
+        "precision": correct / len(predicted) if predicted else 0.0,
+        "recall": correct / len(expected) if expected else 0.0,
     }
 
 
@@ -689,18 +664,18 @@ def training_boundary_scores(
     }
 
 
-def _anchor_sets() -> tuple[tuple[tuple[bytes, ...], ...], ...]:
+def _build_anchor_sets() -> tuple[tuple[tuple[bytes, ...], ...], ...]:
     alphabet = b"abcdefghjkmnpqrstuvwxyz23456789"
     base = len(alphabet)
-    index = 0
-    output: list[tuple[tuple[bytes, ...], ...]] = []
-    for _role in range(3):
+    counter = 0
+    roles: list[tuple[tuple[bytes, ...], ...]] = []
+    for _ in range(3):
         positions: list[tuple[bytes, ...]] = []
-        for _position in range(4):
+        for _ in range(4):
             variants: list[bytes] = []
-            for _variant in range(4):
-                value = index
-                index += 1
+            for _ in range(4):
+                value = counter
+                counter += 1
                 variants.append(
                     bytes(
                         (
@@ -711,11 +686,11 @@ def _anchor_sets() -> tuple[tuple[tuple[bytes, ...], ...], ...]:
                     )
                 )
             positions.append(tuple(variants))
-        output.append(tuple(positions))
-    return tuple(output)
+        roles.append(tuple(positions))
+    return tuple(roles)
 
 
-ANCHOR_SETS = _anchor_sets()
+ANCHOR_SETS = _build_anchor_sets()
 HIDDEN_PROGRAMS = (
     LoopProgram(True, ("EMIT",)),
     LoopProgram(False, ("EMIT", "EMIT")),
@@ -735,13 +710,6 @@ def make_combinatorial_context_stream(
     evaluation_repeats: int = 2,
     independent_targets: bool = False,
 ) -> tuple[bytes, tuple[HiddenContextRole, ...], tuple[HiddenContextEpisode, ...]]:
-    """Build one delimiter-free stream whose full context pairs do not repeat.
-
-    Training uses the off-diagonal combinations of four left and four right variants.
-    Evaluation uses only diagonal combinations, which were never observed as full pairs.
-    Every individual anchor variant is nevertheless identified in training/calibration.
-    """
-
     if split not in {"train", "evaluation"}:
         raise ValueError("split must be train or evaluation")
     rng = Random(seed)
@@ -755,21 +723,22 @@ def make_combinatorial_context_stream(
         )
         for index in range(3)
     )
-    if split == "train":
-        combination_blocks = tuple(
+    blocks = (
+        tuple(
             tuple((index, (index + shift) % 4) for index in range(4))
             for shift in (1, 2, 3)
         )
-    else:
-        combination_blocks = tuple(
+        if split == "train"
+        else tuple(
             tuple((index, index) for index in range(4))
             for _ in range(evaluation_repeats)
         )
+    )
 
     pieces: list[bytes] = []
     episodes: list[HiddenContextEpisode] = []
     position = 0
-    for block_index, combinations in enumerate(combination_blocks):
+    for block_index, combinations in enumerate(blocks):
         for left_index, right_index in combinations:
             for role_index, role in enumerate(roles):
                 target_left_index = (left_index + 1) % 4
@@ -800,12 +769,7 @@ def make_combinatorial_context_stream(
                 )
                 source_start = position + len(prefix) + len(source_left)
                 source_end = source_start + len(source_value)
-                target_start = (
-                    source_end
-                    + len(source_right)
-                    + len(middle)
-                    + len(target_left)
-                )
+                target_start = source_end + len(source_right) + len(middle) + len(target_left)
                 target_end = target_start + len(target_value)
                 episodes.append(
                     HiddenContextEpisode(
@@ -818,41 +782,31 @@ def make_combinatorial_context_stream(
                 )
                 pieces.append(piece)
                 position += len(piece)
-
-        # A raw same-alphabet bridge makes the chronological 2/3 split land between
-        # fit and calibration blocks without exposing an event delimiter to the learner.
         if split == "train" and block_index == 1:
             bridge = _random_bytes(rng, 48, 48)
             pieces.append(bridge)
             position += len(bridge)
-
     return b"".join(pieces), roles, tuple(episodes)
 
 
 def run_experiment() -> dict[str, object]:
     config = ContextDiscoveryConfig()
     training_stream, hidden_roles, training_episodes = make_combinatorial_context_stream(
-        seed=7,
-        split="train",
+        seed=7, split="train"
     )
-    evaluation_stream, _hidden_roles2, evaluation_episodes = make_combinatorial_context_stream(
-        seed=97,
-        split="evaluation",
-        evaluation_repeats=2,
+    evaluation_stream, _roles2, evaluation_episodes = make_combinatorial_context_stream(
+        seed=97, split="evaluation", evaluation_repeats=2
     )
-    control_stream, _hidden_roles3, _control_episodes = make_combinatorial_context_stream(
-        seed=1701,
-        split="train",
-        independent_targets=True,
+    control_stream, _roles3, _episodes3 = make_combinatorial_context_stream(
+        seed=1701, split="train", independent_targets=True
     )
 
     model = discover_factorized_context_model(training_stream, config)
     evaluation = evaluate_factorized_context_model(model, evaluation_stream)
-    exact_pair_baseline = evaluate_exact_pair_baseline(model, evaluation_stream)
+    exact_pair = evaluate_exact_pair_baseline(model, evaluation_stream)
     control_model = discover_factorized_context_model(control_stream, config)
-    old_exact_anchor_model = discover_loop_interchange_model(
-        training_stream,
-        DiscoveryConfig(maximum_gap=12),
+    old_exact_anchor = discover_loop_interchange_model(
+        training_stream, DiscoveryConfig(maximum_gap=12)
     )
 
     training_boundaries = training_boundary_scores(model, training_episodes)
@@ -863,27 +817,15 @@ def run_experiment() -> dict[str, object]:
     discovered_programs = {
         (program.reverse, program.body) for program in model.programs
     }
-    training_source_pairs = {
-        episode.source_context_pair for episode in training_episodes
-    }
-    evaluation_source_pairs = {
-        episode.source_context_pair for episode in evaluation_episodes
-    }
-    training_target_pairs = {
-        episode.target_context_pair for episode in training_episodes
-    }
-    evaluation_target_pairs = {
-        episode.target_context_pair for episode in evaluation_episodes
-    }
+    training_source_pairs = {row.source_context_pair for row in training_episodes}
+    evaluation_source_pairs = {row.source_context_pair for row in evaluation_episodes}
+    training_target_pairs = {row.target_context_pair for row in training_episodes}
+    evaluation_target_pairs = {row.target_context_pair for row in evaluation_episodes}
 
     checks = {
         "one_raw_training_stream": isinstance(training_stream, bytes),
-        "no_exact_source_pair_overlap": not (
-            training_source_pairs & evaluation_source_pairs
-        ),
-        "no_exact_target_pair_overlap": not (
-            training_target_pairs & evaluation_target_pairs
-        ),
+        "no_exact_source_pair_overlap": not training_source_pairs & evaluation_source_pairs,
+        "no_exact_target_pair_overlap": not training_target_pairs & evaluation_target_pairs,
         "three_context_roles_discovered": len(model.roles) == 3,
         "three_programs_recovered": discovered_programs == expected_programs,
         "training_boundary_precision": training_boundaries["precision"] == 1.0,
@@ -891,8 +833,8 @@ def run_experiment() -> dict[str, object]:
         "unseen_combination_pair_precision": evaluation_pairs["precision"] == 1.0,
         "unseen_combination_pair_recall": evaluation_pairs["recall"] == 1.0,
         "frozen_exact_predictions": evaluation.exact_accuracy == 1.0,
-        "exact_pair_baseline_has_zero_pairs": exact_pair_baseline.paired == 0,
-        "rii_002_exact_anchor_model_has_zero_links": len(old_exact_anchor_model.links) == 0,
+        "exact_pair_baseline_has_zero_pairs": exact_pair.paired == 0,
+        "rii_002_exact_anchor_model_has_zero_links": len(old_exact_anchor.links) == 0,
         "independent_target_control_rejected": len(control_model.roles) == 0,
         "factorized_context_code_smaller_than_cross_product": (
             model.learned_payload_bits < model.exact_cross_product_template_bits
@@ -938,15 +880,13 @@ def run_experiment() -> dict[str, object]:
             "program_operations": evaluation.program_operations,
         },
         "exact_pair_baseline": {
-            "paired_predictions": exact_pair_baseline.paired,
-            "exact_accuracy": exact_pair_baseline.exact_accuracy,
+            "paired_predictions": exact_pair.paired,
+            "exact_accuracy": exact_pair.exact_accuracy,
         },
         "rii_002_exact_anchor_baseline": {
-            "surface_links": len(old_exact_anchor_model.links),
+            "surface_links": len(old_exact_anchor.links)
         },
-        "independent_target_control": {
-            "context_roles": len(control_model.roles),
-        },
+        "independent_target_control": {"context_roles": len(control_model.roles)},
         "discovery_stats": {
             "split_position": model.stats.split_position,
             "target_span_index_entries": model.stats.target_span_index_entries,
