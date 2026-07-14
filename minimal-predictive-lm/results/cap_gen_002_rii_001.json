@@ -1,0 +1,60 @@
+{
+  "capability_id": "CAP-GEN-002-RII-001",
+  "ci_run": 29294995373,
+  "artifact_id": 8296393579,
+  "head_sha": "e93b792a4243c4a58d4de01ded6d3e87736f9f1e",
+  "training": {
+    "raw_bytes": 2111,
+    "hidden_metadata_visible_to_learner": false,
+    "task_ids_visible_to_learner": false,
+    "event_boundaries_visible_to_learner": false,
+    "aligned_examples_visible_to_learner": false
+  },
+  "boundary_recovery": {
+    "expected_boundaries": 128,
+    "found_boundaries": 128,
+    "correct_boundaries": 128,
+    "precision": 1.0,
+    "recall": 1.0
+  },
+  "model": {
+    "surface_links": 4,
+    "shared_programs": 2,
+    "programs": [
+      [false, 1, 3],
+      [true, 1, 0]
+    ],
+    "learned_payload_bits": 342,
+    "minimum_link_gain_bits": 495
+  },
+  "frozen_evaluation": {
+    "target_spans": 32,
+    "coverage": 1.0,
+    "exact_accuracy": 1.0,
+    "byte_accuracy": 1.0,
+    "inference_operations": 211
+  },
+  "literal_template_baseline": {
+    "exact_accuracy": 0.0,
+    "byte_accuracy": 0.05027932960893855
+  },
+  "independent_target_control": {
+    "accepted_links": 0
+  },
+  "discovery_stats": {
+    "slot_windows_examined": 25206,
+    "slot_templates_retained": 53,
+    "relation_links_examined": 2756,
+    "paired_examples_examined": 5612,
+    "program_candidates_examined": 17340,
+    "validation_bytes_checked": 376,
+    "peak_occurrence_entries": 16
+  },
+  "same_alphabet_noise_control": {
+    "passed": true,
+    "surface_links": 2,
+    "shared_programs": 1
+  },
+  "passed": true,
+  "claim_boundary": "Controlled synthetic exact byte-transform evidence only; no natural-language understanding, unrestricted operator invention, public-axis improvement, or human-level intelligence claim."
+}
