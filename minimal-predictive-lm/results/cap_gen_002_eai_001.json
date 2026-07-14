@@ -1,0 +1,39 @@
+{
+  "capability_id": "CAP-GEN-002-EAI-001",
+  "ci_run": 29298396539,
+  "artifact_id": 8297610719,
+  "head_sha": "7852de553869b147c85c489f9342611b2bac474a",
+  "passive_non_identifiability": {
+    "raw_trace": ["s0", "u", "s1", "v", "s0", "u", "s1"],
+    "controlled_actuation_positions": [1, 3, 5],
+    "autonomous_actuation_positions": [],
+    "observational_views_equal": true
+  },
+  "identifiable_regime_fixture": {
+    "roles": {
+      "push-a": "action",
+      "push-b": "action",
+      "flip-a": "action",
+      "flip-b": "action",
+      "red": "observation",
+      "round": "observation"
+    },
+    "behavioral_action_classes": [
+      ["flip-a", "flip-b"],
+      ["push-a", "push-b"]
+    ]
+  },
+  "no_policy_shift_fixture": {
+    "effectful_surface_role": "abstain"
+  },
+  "resource_comparison": {
+    "flat_transition_bits": 1536,
+    "quotient_transition_bits": 96,
+    "surface_to_class_bits": 128,
+    "parser_bits": 64,
+    "quotient_total_bits": 288,
+    "compression_ratio": 5.333333333333333
+  },
+  "passed": true,
+  "claim_boundary": "Known-style passive impossibility and invariance constructions only. The unverified novelty candidate is joint raw-span segmentation, policy-regime discovery, predictive quotient acquisition, and shared executable action grammar under complete lifetime resource accounting."
+}
