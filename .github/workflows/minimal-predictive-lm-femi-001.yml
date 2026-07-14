@@ -1,7 +1,60 @@
 name: minimal-predictive-lm-femi-001
-on: [workflow_dispatch]
+
+on:
+  pull_request:
+    branches:
+      - research/minimal-compute-lm
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/femi.py"
+      - "minimal-predictive-lm/tests/test_femi_core.py"
+      - "minimal-predictive-lm/docs/femi_001_theory.md"
+      - ".github/workflows/minimal-predictive-lm-femi-001.yml"
+  workflow_dispatch:
+
 jobs:
   femi:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - run: echo FEMI
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: minimal-predictive-lm/pyproject.toml
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Core and program-induction tests
+        run: python -m pytest -q minimal-predictive-lm/tests/test_femi_core.py
+      - name: Run FEMI experiment
+        working-directory: minimal-predictive-lm
+        run: |
+          mkdir -p results
+          python -m minimal_predictive_lm.femi | tee results/femi_001.json
+      - name: Enforce scaling and claim boundaries
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path("results/femi_001.json").read_text())
+          assert result["passed"] is True
+          assert result["neural_network_used"] is False
+          assert result["task_labels_visible_to_learner"] == 0
+          assert result["evaluation"]["accuracy"] == 1.0
+          assert result["evaluation"]["mean_activated_factors"] < result["learned_rule_count"]
+          scale = result["scaling_theory_control"]
+          assert scale["factorized_state_bits"] == scale["information_lower_bound_bits"]
+          assert scale["transition_entry_reduction"] > 1_000_000
+          assert "not Japanese-high-school-level intelligence" in result["claim_boundary"]
+          theory = Path("docs/femi_001_theory.md").read_text()
+          assert "llm-jp-eval" in theory
+          assert "the proposed efficiency advantage disappears" in theory
+          PY
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: femi-001-results
+          path: minimal-predictive-lm/results/femi_001.json
+          retention-days: 14
