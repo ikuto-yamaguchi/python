@@ -1,0 +1,71 @@
+name: minimal-predictive-lm-cap-gen-002-spg-001
+
+on:
+  pull_request:
+    branches:
+      - research/minimal-compute-lm
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/cap_gen_002_shared_probe_grammar.py"
+      - "minimal-predictive-lm/tests/test_cap_gen_002_shared_probe_grammar.py"
+      - "minimal-predictive-lm/docs/cap_gen_002_shared_probe_grammar_theory.md"
+      - ".github/workflows/minimal-predictive-lm-cap-gen-002-spg-001.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  shared-probe-grammar-theory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: minimal-predictive-lm/pyproject.toml
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Theory proposition tests
+        run: python -m pytest -q minimal-predictive-lm/tests/test_cap_gen_002_shared_probe_grammar.py
+      - name: Run frozen shared-probe theory gate
+        working-directory: minimal-predictive-lm
+        run: |
+          mkdir -p results
+          python -m minimal_predictive_lm.cap_gen_002_shared_probe_grammar \
+            | tee results/cap_gen_002_spg_001.json
+      - name: Enforce theorem and novelty boundaries
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path("results/cap_gen_002_spg_001.json").read_text())
+          assert result["passed"] is True
+          assert result["submodularity"]["shared_code"] is True
+          assert result["submodularity"]["separation_coverage"] is True
+          assert result["two_distinction_fixture"]["shared_optimum"] == ["shared-probe-a", "shared-probe-b"]
+          assert result["two_distinction_fixture"]["shared_optimum_bits"] == 12
+          assert result["two_distinction_fixture"]["isolated_optimum"] == ["direct-probe-a", "direct-probe-b"]
+          assert result["greedy_counterexample"]["exact_bits"] == 42
+          assert result["greedy_counterexample"]["greedy_bits"] == 210
+          assert result["greedy_counterexample"]["ratio"] == 5.0
+          assert result["prospective_pruning_counterexample"]["current_signatures_equal"] is True
+          assert result["prospective_pruning_counterexample"]["unseen_signatures_differ"] is True
+          assert "prior art" in result["claim_boundary"]
+          assert "unverified novelty candidate" in result["claim_boundary"]
+
+          theory = Path("docs/cap_gen_002_shared_probe_grammar_theory.md").read_text()
+          assert "one-step marginal greedy can be arbitrarily bad" in theory
+          assert "Submodular Cost Submodular Cover" in theory or "submodular-cost submodular cover" in theory
+          assert "Do not respond to this result by adding a new semantic probe" in theory
+          PY
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: cap-gen-002-spg-001-results
+          path: minimal-predictive-lm/results/cap_gen_002_spg_001.json
+          retention-days: 14
