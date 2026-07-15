@@ -18,3 +18,20 @@ jobs:
         run: python -m pip install -e minimal-predictive-lm pytest
       - name: Unit tests
         run: python -m pytest -q minimal-predictive-lm/tests/test_cic_mixed.py
+      - name: Acquire public datasets
+        run: |
+          git clone --depth 1 https://github.com/nlp-waseda/chain-of-thought-ja-dataset.git /tmp/cot-ja
+          mkdir -p minimal-predictive-lm/public_data/cic_mixed
+          cp /tmp/cot-ja/dataset/mawps/test.json minimal-predictive-lm/public_data/cic_mixed/mawps.json
+          cp /tmp/cot-ja/dataset/jcommonsenseqa/test.json minimal-predictive-lm/public_data/cic_mixed/jcommonsenseqa.json
+      - name: Run mixed experiment
+        working-directory: minimal-predictive-lm
+        run: |
+          mkdir -p results
+          python -m minimal_predictive_lm.cic_mixed_experiment public_data/cic_mixed/mawps.json public_data/cic_mixed/jcommonsenseqa.json --output results/cic_003_mixed.json
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: cic-003-mixed-results
+          path: minimal-predictive-lm/results
+          retention-days: 14
