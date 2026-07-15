@@ -1,7 +1,44 @@
 name: cic
-on: [workflow_dispatch]
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/cic_*.py"
+      - "minimal-predictive-lm/tests/test_cic_*.py"
+      - "minimal-predictive-lm/docs/cic_*.md"
+      - ".github/workflows/cic.yml"
+  workflow_dispatch:
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - run: echo ok
+      - uses: actions/checkout@v4
+      - name: Acquire aligned public traces
+        run: |
+          mkdir -p minimal-predictive-lm/public_data/cic
+          python - <<'PY'
+          from pathlib import Path
+          from urllib.request import urlopen
+          root = Path('minimal-predictive-lm/public_data/cic')
+          urls = {
+              'mgsm_ja.tsv': 'https://raw.githubusercontent.com/google-research/url-nlp/452a21ad3dae5668c06ceeac21ff073e1e40f9be/mgsm/mgsm_ja.tsv',
+              'gsm8k.jsonl': 'https://raw.githubusercontent.com/WannaLearning/grade-school-math/master/grade_school_math/data/test.jsonl',
+          }
+          for name, url in urls.items():
+              data = urlopen(url).read()
+              if name == 'gsm8k.jsonl':
+                  data = b'\n'.join(data.splitlines()[:250]) + b'\n'
+              (root / name).write_bytes(data)
+          PY
+      - name: Verify public inputs
+        run: |
+          test "$(wc -l < minimal-predictive-lm/public_data/cic/mgsm_ja.tsv)" -eq 250
+          test "$(wc -l < minimal-predictive-lm/public_data/cic/gsm8k.jsonl)" -eq 250
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cic-001-public-inputs
+          path: minimal-predictive-lm/public_data/cic
+          retention-days: 14
