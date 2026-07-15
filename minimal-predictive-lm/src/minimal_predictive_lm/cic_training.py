@@ -33,10 +33,14 @@ def load_mawps(path: str | Path) -> list[MathExample]:
     result: list[MathExample] = []
     for row in rows:
         try:
-            answer = int(Fraction(str(row["answer"])))
+            exact_answer = Fraction(str(row["answer"]))
         except (KeyError, ValueError, ZeroDivisionError):
             continue
-        result.append(MathExample(str(row["question"]), answer))
+        # CIC-001 currently emits integer answers only. Fractional labels must not
+        # be silently truncated because that corrupts both training and evaluation.
+        if exact_answer.denominator != 1:
+            continue
+        result.append(MathExample(str(row["question"]), exact_answer.numerator))
     return result
 
 
@@ -52,14 +56,15 @@ def compile_candidates(examples: Iterable[MathExample]) -> tuple[list[CandidateE
 
 
 def stable_outer_split(
-    rows: Sequence[CandidateExample],
+    rows: Sequence[MathExample],
     *,
     test_threshold: int = 2000,
-) -> tuple[list[CandidateExample], list[CandidateExample]]:
-    train: list[CandidateExample] = []
-    test: list[CandidateExample] = []
+) -> tuple[list[MathExample], list[MathExample]]:
+    """Split raw labelled rows before any answer-driven program synthesis."""
+    train: list[MathExample] = []
+    test: list[MathExample] = []
     for row in rows:
-        code = int(hashlib.sha256(row.example.question.encode()).hexdigest(), 16) % 10000
+        code = int(hashlib.sha256(row.question.encode()).hexdigest(), 16) % 10000
         (test if code < test_threshold else train).append(row)
     return train, test
 
