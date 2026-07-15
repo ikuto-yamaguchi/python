@@ -19,8 +19,8 @@ from .cic_training import (
 def run_experiment(dataset: str | Path, output: str | Path | None = None) -> dict[str, object]:
     start = time.perf_counter()
     examples = load_mawps(dataset)
-    candidates, expansions = compile_candidates(examples)
-    train_rows, test_rows = stable_outer_split(candidates)
+    raw_train, raw_test = stable_outer_split(examples)
+    train_rows, expansions = compile_candidates(raw_train)
     selected_epochs, validation_scores = choose_epochs(train_rows)
     model = train_raw_model(train_rows, epochs=selected_epochs)
     full = CICArtifact.from_raw(
@@ -34,18 +34,20 @@ def run_experiment(dataset: str | Path, output: str | Path | None = None) -> dic
         quantization_limit=7,
         metadata={"variant": "compact", "selected_epochs": selected_epochs},
     )
-    full_correct, total, full_work = artifact_accuracy(full, test_rows)
-    compact_correct, _total, compact_work = artifact_accuracy(compact, test_rows)
+    full_correct, total, full_work = artifact_accuracy(full, raw_test)
+    compact_correct, _total, compact_work = artifact_accuracy(compact, raw_test)
     elapsed = time.perf_counter() - start
     result: dict[str, object] = {
-        "capability_id": "CIC-001-MAWPS",
+        "capability_id": "CIC-002-MAWPS-CORRECTED",
         "neural_network_used": False,
         "gradient_training_used": False,
         "dataset": {
-            "public_rows": len(examples),
-            "solvable_rows": len(candidates),
-            "train_rows": len(train_rows),
-            "untouched_test_rows": len(test_rows),
+            "integer_label_rows": len(examples),
+            "raw_train_rows": len(raw_train),
+            "synthesizable_train_rows": len(train_rows),
+            "untouched_raw_test_rows": len(raw_test),
+            "fractional_rows_skipped_without_truncation": True,
+            "split_before_answer_driven_synthesis": True,
             "split": "sha256(question) mod 10000 < 2000",
         },
         "selection": {
@@ -72,14 +74,15 @@ def run_experiment(dataset: str | Path, output: str | Path | None = None) -> dic
             "mean_checked_mechanisms": compact_work,
         },
         "resources": {
-            "synthesis_expansions": expansions,
+            "training_synthesis_expansions": expansions,
             "elapsed_seconds": elapsed,
             "peak_process_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
         },
         "claim_boundary": (
-            "CIC-001 is a non-neural executable arithmetic mechanism compiler. "
-            "It is not general dialogue, not Japanese high-school-level intelligence, "
-            "and not evidence of globally minimal compute or memory."
+            "This corrected result evaluates every raw holdout row after splitting before "
+            "answer-driven synthesis. CIC remains arithmetic-only, not general dialogue, "
+            "not Japanese high-school-level intelligence, and not evidence of globally "
+            "minimal compute or memory."
         ),
     }
     result["passed"] = bool(
@@ -100,9 +103,9 @@ def run_experiment(dataset: str | Path, output: str | Path | None = None) -> dic
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run the CIC-001 public MAWPS experiment")
+    parser = argparse.ArgumentParser(description="Run the corrected CIC public MAWPS experiment")
     parser.add_argument("dataset")
-    parser.add_argument("--output", default="results/cic_001_mawps.json")
+    parser.add_argument("--output", default="results/cic_002_mawps.json")
     args = parser.parse_args()
     print(json.dumps(run_experiment(args.dataset, args.output), ensure_ascii=False, indent=2))
 
