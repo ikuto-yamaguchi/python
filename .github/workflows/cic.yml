@@ -34,11 +34,14 @@ jobs:
                   data = b'\n'.join(data.splitlines()[:250]) + b'\n'
               (root / name).write_bytes(data)
           PY
+          git clone --depth 1 https://github.com/nlp-waseda/chain-of-thought-ja-dataset.git /tmp/cot-ja
+          cp -R /tmp/cot-ja/dataset/mawps minimal-predictive-lm/public_data/cic/mawps_ja
       - name: Verify public inputs
         run: |
           test "$(wc -l < minimal-predictive-lm/public_data/cic/mgsm_ja.tsv)" -eq 250
           test "$(wc -l < minimal-predictive-lm/public_data/cic/gsm8k_test.jsonl)" -eq 250
           test "$(wc -l < minimal-predictive-lm/public_data/cic/gsm8k_train.jsonl)" -gt 7000
+          test -d minimal-predictive-lm/public_data/cic/mawps_ja
       - uses: actions/upload-artifact@v4
         with:
           name: cic-001-public-inputs
