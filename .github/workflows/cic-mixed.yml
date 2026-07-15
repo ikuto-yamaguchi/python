@@ -1,0 +1,7 @@
+name: cic-mixed
+on: [workflow_dispatch]
+jobs:
+  mixed:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo cic-mixed
