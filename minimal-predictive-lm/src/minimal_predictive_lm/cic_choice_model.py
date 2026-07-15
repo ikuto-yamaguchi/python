@@ -9,12 +9,82 @@ import numpy as np
 from .cic_choice_data import (
     ChoiceExample,
     choice_features,
+    legacy_choice_features,
     stable_choice_split,
 )
 
 
-def _dot(weights: Mapping[int, int | float], features: Mapping[int, int]) -> float:
-    return float(sum(weights.get(index, 0) * value for index, value in features.items()))
+def _dot(
+    weights: Mapping[int, int | float] | np.ndarray,
+    features: Mapping[int, int | float],
+) -> float:
+    if isinstance(weights, np.ndarray):
+        return float(
+            sum(float(weights[index]) * float(value) for index, value in features.items())
+        )
+    return float(
+        sum(float(weights.get(index, 0)) * float(value) for index, value in features.items())
+    )
+
+
+@dataclass
+class LegacyChoiceMechanism:
+    weights: dict[int, float]
+    dimensions: int
+    epochs: int
+
+    def predict(self, stem: str, options: Sequence[str]) -> tuple[int, int]:
+        scores = [
+            _dot(
+                self.weights,
+                legacy_choice_features(
+                    stem, option, index, dimensions=self.dimensions
+                ),
+            )
+            for index, option in enumerate(options)
+        ]
+        return int(np.argmax(np.asarray(scores))), len(options)
+
+
+def train_legacy_choice_mechanism(
+    rows: Sequence[ChoiceExample],
+    *,
+    epochs: int,
+    dimensions: int = 16384,
+    seed: int = 0,
+) -> LegacyChoiceMechanism:
+    weights = np.zeros(dimensions, dtype=np.float32)
+    cached = [
+        [
+            legacy_choice_features(
+                row.stem, option, index, dimensions=dimensions
+            )
+            for index, option in enumerate(row.options)
+        ]
+        for row in rows
+    ]
+    generator = random.Random(seed)
+    for epoch in range(epochs):
+        order = list(range(len(rows)))
+        generator.shuffle(order)
+        rate = 0.35 / (1.0 + 0.15 * epoch)
+        for row_index in order:
+            features_by_option = cached[row_index]
+            scores = [_dot(weights, features) for features in features_by_option]
+            predicted = int(np.argmax(np.asarray(scores)))
+            gold = rows[row_index].answer_index
+            if predicted == gold:
+                continue
+            for index, value in features_by_option[gold].items():
+                weights[index] += rate * value
+            for index, value in features_by_option[predicted].items():
+                weights[index] -= rate * value
+    nonzero = np.flatnonzero(weights)
+    return LegacyChoiceMechanism(
+        {int(index): float(weights[index]) for index in nonzero},
+        dimensions,
+        epochs,
+    )
 
 
 @dataclass
@@ -22,6 +92,8 @@ class RawChoiceMechanism:
     weights: dict[int, float]
     dimensions: int
     epochs: int
+    aggressiveness: float = 0.25
+    averaged: bool = True
 
     def predict(self, stem: str, options: Sequence[str]) -> tuple[int, int]:
         scores = [
@@ -34,14 +106,36 @@ class RawChoiceMechanism:
         return int(np.argmax(np.asarray(scores))), len(options)
 
 
+def _difference(
+    positive: Mapping[int, float], negative: Mapping[int, float]
+) -> dict[int, float]:
+    result = dict(positive)
+    for index, value in negative.items():
+        result[index] = result.get(index, 0.0) - value
+        if abs(result[index]) < 1e-12:
+            result.pop(index)
+    return result
+
+
 def train_choice_mechanism(
     rows: Sequence[ChoiceExample],
     *,
     epochs: int,
-    dimensions: int = 16384,
+    dimensions: int = 32768,
     seed: int = 0,
+    aggressiveness: float = 0.25,
 ) -> RawChoiceMechanism:
+    """Train an averaged passive-aggressive option ranker.
+
+    Every row enforces a unit margin between the gold option and the strongest
+    distractor. Correct but fragile decisions therefore continue to improve,
+    unlike the CIC-003 mistake-only perceptron. Lazy averaging does not enlarge
+    the serialized artifact.
+    """
+
     weights = np.zeros(dimensions, dtype=np.float32)
+    totals = np.zeros(dimensions, dtype=np.float64)
+    timestamps = np.zeros(dimensions, dtype=np.int64)
     cached = [
         [
             choice_features(row.stem, option, index, dimensions=dimensions)
@@ -50,34 +144,52 @@ def train_choice_mechanism(
         for row in rows
     ]
     generator = random.Random(seed)
-    for epoch in range(epochs):
+    step = 0
+    for _epoch in range(epochs):
         order = list(range(len(rows)))
         generator.shuffle(order)
-        rate = 0.35 / (1.0 + 0.15 * epoch)
         for row_index in order:
+            step += 1
             features_by_option = cached[row_index]
-            scores = [
-                sum(weights[index] * value for index, value in features.items())
-                for features in features_by_option
-            ]
-            predicted = int(np.argmax(np.asarray(scores)))
+            scores = [_dot(weights, features) for features in features_by_option]
             gold = rows[row_index].answer_index
-            if predicted == gold:
+            strongest_wrong = max(
+                (index for index in range(len(scores)) if index != gold),
+                key=lambda index: scores[index],
+            )
+            margin = scores[gold] - scores[strongest_wrong]
+            if margin >= 1.0:
                 continue
-            for index, value in features_by_option[gold].items():
-                weights[index] += rate * value
-            for index, value in features_by_option[predicted].items():
-                weights[index] -= rate * value
-    nonzero = np.flatnonzero(weights)
+            delta = _difference(
+                features_by_option[gold], features_by_option[strongest_wrong]
+            )
+            squared_norm = sum(value * value for value in delta.values())
+            tau = min(
+                aggressiveness,
+                (1.0 - margin) / (squared_norm + 1e-12),
+            )
+            for index, value in delta.items():
+                totals[index] += (step - timestamps[index]) * float(weights[index])
+                timestamps[index] = step
+                weights[index] += tau * value
+
+    if step:
+        totals += (step + 1 - timestamps) * weights
+        averaged = totals / (step + 1)
+    else:
+        averaged = weights.astype(np.float64)
+    nonzero = np.flatnonzero(np.abs(averaged) > 1e-9)
     return RawChoiceMechanism(
-        {int(index): float(weights[index]) for index in nonzero},
+        {int(index): float(averaged[index]) for index in nonzero},
         dimensions,
         epochs,
+        aggressiveness,
+        True,
     )
 
 
 def choice_accuracy(
-    model: RawChoiceMechanism | "QuantizedChoiceMechanism",
+    model: LegacyChoiceMechanism | RawChoiceMechanism | "QuantizedChoiceMechanism",
     rows: Sequence[ChoiceExample],
 ) -> tuple[int, int, float]:
     correct = 0
@@ -89,7 +201,7 @@ def choice_accuracy(
     return correct, len(rows), work / len(rows) if rows else 0.0
 
 
-def choose_choice_epochs(
+def choose_legacy_choice_epochs(
     rows: Sequence[ChoiceExample],
     *,
     candidates: Sequence[int] = (1, 2, 3, 4, 6, 8),
@@ -100,8 +212,32 @@ def choose_choice_epochs(
     )
     scores: dict[int, float] = {}
     for epochs in candidates:
-        model = train_choice_mechanism(
+        model = train_legacy_choice_mechanism(
             inner_train, epochs=epochs, dimensions=dimensions
+        )
+        correct, total, _work = choice_accuracy(model, validation)
+        scores[epochs] = correct / total if total else 0.0
+    selected = max(candidates, key=lambda value: (scores[value], -value))
+    return selected, scores
+
+
+def choose_choice_epochs(
+    rows: Sequence[ChoiceExample],
+    *,
+    candidates: Sequence[int] = (1, 2, 3, 4, 6),
+    dimensions: int = 32768,
+    aggressiveness: float = 0.25,
+) -> tuple[int, dict[int, float]]:
+    inner_train, validation = stable_choice_split(
+        rows, test_threshold=1500, namespace="inner:"
+    )
+    scores: dict[int, float] = {}
+    for epochs in candidates:
+        model = train_choice_mechanism(
+            inner_train,
+            epochs=epochs,
+            dimensions=dimensions,
+            aggressiveness=aggressiveness,
         )
         correct, total, _work = choice_accuracy(model, validation)
         scores[epochs] = correct / total if total else 0.0
@@ -120,8 +256,8 @@ class QuantizedChoiceMechanism:
         cls,
         model: RawChoiceMechanism,
         *,
-        quantization_limit: int = 31,
-        top_weights: int = 4096,
+        quantization_limit: int = 63,
+        top_weights: int = 8192,
     ) -> "QuantizedChoiceMechanism":
         items = sorted(
             model.weights.items(), key=lambda item: abs(item[1]), reverse=True
