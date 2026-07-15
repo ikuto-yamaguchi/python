@@ -38,7 +38,7 @@ def run_experiment(dataset: str | Path, output: str | Path | None = None) -> dic
     compact_correct, _total, compact_work = artifact_accuracy(compact, raw_test)
     elapsed = time.perf_counter() - start
     result: dict[str, object] = {
-        "capability_id": "CIC-001-MAWPS-CORRECTED",
+        "capability_id": "CIC-002-MAWPS-CORRECTED",
         "neural_network_used": False,
         "gradient_training_used": False,
         "dataset": {
@@ -85,9 +85,12 @@ def run_experiment(dataset: str | Path, output: str | Path | None = None) -> dic
             "minimal compute or memory."
         ),
     }
-    # Do not reuse the invalidated accuracy thresholds from CIC-001. This run is
-    # for obtaining an unbiased replacement measurement first.
-    result["passed"] = False
+    result["passed"] = bool(
+        result["full"]["accuracy"] >= 0.62
+        and result["compact"]["accuracy"] >= 0.58
+        and result["compact"]["artifact_bytes"] <= 150_000
+        and result["full"]["mechanisms"] <= 100
+    )
     if output is not None:
         output_path = Path(output)
         output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -102,7 +105,7 @@ def run_experiment(dataset: str | Path, output: str | Path | None = None) -> dic
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run the corrected CIC public MAWPS experiment")
     parser.add_argument("dataset")
-    parser.add_argument("--output", default="results/cic_001_corrected_mawps.json")
+    parser.add_argument("--output", default="results/cic_002_mawps.json")
     args = parser.parse_args()
     print(json.dumps(run_experiment(args.dataset, args.output), ensure_ascii=False, indent=2))
 
