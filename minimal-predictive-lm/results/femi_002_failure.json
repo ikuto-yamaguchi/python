@@ -1,0 +1,27 @@
+{
+  "capability_id": "FEMI-002-MGSM",
+  "status": "rejected",
+  "ci_run": 29377090448,
+  "artifact_id": 8328326451,
+  "official_eight_shot": {
+    "correct": 8,
+    "total": 250,
+    "accuracy": 0.032,
+    "program_count": 6,
+    "model_bytes": 28679,
+    "peak_python_bytes": 386208,
+    "training_synthesis_expansions": 528
+  },
+  "public_adaptation_holdout": {
+    "training_rows": 200,
+    "holdout_rows": 50,
+    "correct": 0,
+    "accuracy": 0.0,
+    "solved_training_rows": 152,
+    "program_count": 130,
+    "model_bytes": 1199939,
+    "peak_python_bytes": 19560420,
+    "training_synthesis_expansions": 4546191
+  },
+  "conclusion": "The expression search can fit many labelled examples, but the language-to-program selector does not generalize. FEMI is rejected as a scaling route to high-school intelligence in its current form."
+}
