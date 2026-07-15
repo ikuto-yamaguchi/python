@@ -38,15 +38,24 @@ jobs:
           mkdir -p results
           python -m minimal_predictive_lm.cic_experiment \
             public_data/cic/mawps_ja/test.json \
-            --output results/cic_001_mawps.json \
-            | tee results/cic_001_stdout.json
+            --output results/cic_002_mawps.json \
+            | tee results/cic_002_stdout.json
+      - name: Upload results before gating
+        uses: actions/upload-artifact@v4
+        with:
+          name: cic-002-results
+          path: |
+            minimal-predictive-lm/results/cic_002_mawps.json
+            minimal-predictive-lm/results/cic_002_mawps.full.cic
+            minimal-predictive-lm/results/cic_002_mawps.compact.cic
+          retention-days: 14
       - name: Enforce capability and resource gates
         working-directory: minimal-predictive-lm
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-          result = json.loads(Path('results/cic_001_mawps.json').read_text())
+          result = json.loads(Path('results/cic_002_mawps.json').read_text())
           assert result['passed'] is True
           assert result['neural_network_used'] is False
           assert result['gradient_training_used'] is False
@@ -57,11 +66,3 @@ jobs:
           assert result['full']['mechanisms'] <= 100
           assert 'not Japanese high-school-level intelligence' in result['claim_boundary']
           PY
-      - uses: actions/upload-artifact@v4
-        with:
-          name: cic-001-results
-          path: |
-            minimal-predictive-lm/results/cic_001_mawps.json
-            minimal-predictive-lm/results/cic_001_mawps.full.cic
-            minimal-predictive-lm/results/cic_001_mawps.compact.cic
-          retention-days: 14
