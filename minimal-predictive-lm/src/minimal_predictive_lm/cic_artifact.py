@@ -9,7 +9,7 @@ from typing import Sequence
 
 from .cic_expr import Expression, extract_numbers, parse_expression
 from .cic_features import hashed_features, sparse_dot
-from .cic_training import CandidateExample, RawMechanismModel
+from .cic_training import MathExample, RawMechanismModel
 
 
 @dataclass(frozen=True)
@@ -122,12 +122,13 @@ class CICArtifact:
 
 def artifact_accuracy(
     artifact: CICArtifact,
-    rows: Sequence[CandidateExample],
+    rows: Sequence[MathExample],
 ) -> tuple[int, int, float]:
+    """Evaluate every raw holdout row; unsynthesizable rows stay in the denominator."""
     correct = 0
     work = 0
     for row in rows:
-        prediction, _mechanism, checked = artifact.predict(row.example.question)
+        prediction, _mechanism, checked = artifact.predict(row.question)
         work += checked
-        correct += int(prediction == row.example.answer)
+        correct += int(prediction == row.answer)
     return correct, len(rows), work / len(rows) if rows else 0.0
