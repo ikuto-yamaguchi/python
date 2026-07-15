@@ -10,7 +10,9 @@ from .cic_choice_model import (
     QuantizedChoiceMechanism,
     choice_accuracy,
     choose_choice_epochs,
+    choose_legacy_choice_epochs,
     train_choice_mechanism,
+    train_legacy_choice_mechanism,
 )
 from .cic_mixed_artifact import MixedCICArtifact
 from .cic_training import (
@@ -41,6 +43,9 @@ class MixedTrainingResult:
     choice_validation: dict[int, float]
     majority_correct: int
     choice_nonzero_weights: int
+    legacy_correct: int
+    legacy_epochs: int
+    legacy_validation: dict[int, float]
 
 
 def train_mixed(
@@ -62,6 +67,13 @@ def train_mixed(
 
     choice_rows = load_choice_dataset(commonsense_path)
     choice_train, choice_test = stable_choice_split(choice_rows)
+
+    legacy_epochs, legacy_validation = choose_legacy_choice_epochs(choice_train)
+    legacy_raw = train_legacy_choice_mechanism(choice_train, epochs=legacy_epochs)
+    legacy_correct, _legacy_total, _legacy_work = choice_accuracy(
+        legacy_raw, choice_test
+    )
+
     choice_epochs, choice_validation = choose_choice_epochs(choice_train)
     choice_raw = train_choice_mechanism(choice_train, epochs=choice_epochs)
     choice = QuantizedChoiceMechanism.from_raw(choice_raw)
@@ -72,7 +84,7 @@ def train_mixed(
     artifact = MixedCICArtifact(
         arithmetic,
         choice,
-        {"capability_id": "CIC-003-MIXED"},
+        {"capability_id": "CIC-004-MARGIN"},
     )
     return MixedTrainingResult(
         artifact,
@@ -92,4 +104,7 @@ def train_mixed(
         choice_validation,
         majority_correct,
         len(choice.weights),
+        legacy_correct,
+        legacy_epochs,
+        legacy_validation,
     )
