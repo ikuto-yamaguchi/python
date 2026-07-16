@@ -6,7 +6,9 @@ from minimal_predictive_lm.cic_choice_data import (
 )
 from minimal_predictive_lm.cic_choice_model import (
     QuantizedChoiceMechanism,
+    choice_accuracy,
     train_choice_mechanism,
+    train_legacy_choice_mechanism,
 )
 from minimal_predictive_lm.cic_mixed_artifact import MixedCICArtifact
 
@@ -28,6 +30,33 @@ def test_choice_split_is_deterministic() -> None:
     second = stable_choice_split(rows)
     assert first == second
     assert len(first[0]) + len(first[1]) == len(rows)
+
+
+def test_margin_choice_model_survives_quantization() -> None:
+    rows = []
+    for index in range(12):
+        rows.append(
+            ChoiceExample(
+                f"果物{index}",
+                "食べられる果物は？",
+                ("りんご", "自動車"),
+                0,
+            )
+        )
+        rows.append(
+            ChoiceExample(
+                f"乗り物{index}",
+                "道路を走る乗り物は？",
+                ("桃", "自動車"),
+                1,
+            )
+        )
+    legacy = train_legacy_choice_mechanism(rows, epochs=4, dimensions=4096)
+    raw = train_choice_mechanism(rows, epochs=4, dimensions=4096)
+    quantized = QuantizedChoiceMechanism.from_raw(raw, top_weights=1024)
+    assert choice_accuracy(legacy, rows)[0] == len(rows)
+    assert choice_accuracy(raw, rows)[0] == len(rows)
+    assert choice_accuracy(quantized, rows)[0] == len(rows)
 
 
 def test_mixed_artifact_roundtrip() -> None:

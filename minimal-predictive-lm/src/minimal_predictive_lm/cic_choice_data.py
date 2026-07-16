@@ -40,10 +40,30 @@ def parse_choice_question(text: str) -> tuple[str, tuple[str, ...]] | None:
     return " ".join(stem_lines).strip(), ordered
 
 
+def _read_rows(path: str | Path) -> list[dict[str, object]]:
+    text = Path(path).read_text(encoding="utf-8")
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError:
+        return [json.loads(line) for line in text.splitlines() if line.strip()]
+    if isinstance(payload, list):
+        return [dict(row) for row in payload]
+    raise ValueError(f"unsupported choice dataset format: {path}")
+
+
 def load_choice_dataset(path: str | Path) -> list[ChoiceExample]:
-    rows = json.loads(Path(path).read_text(encoding="utf-8"))
     result: list[ChoiceExample] = []
-    for row in rows:
+    for row in _read_rows(path):
+        if "choice0" in row:
+            stem = str(row.get("question", "")).strip()
+            options = tuple(str(row[f"choice{index}"]) for index in range(5))
+            answer_index = int(row["label"])
+            raw_question = stem + "\n" + "\n".join(
+                f"({index}){option}" for index, option in enumerate(options)
+            )
+            result.append(ChoiceExample(raw_question, stem, options, answer_index))
+            continue
+
         raw_question = str(row.get("question", ""))
         parsed = parse_choice_question(raw_question)
         match = ANSWER_RE.match(str(row.get("answer", "")))
@@ -88,7 +108,7 @@ def _ngrams(text: str, widths: Sequence[int]) -> list[str]:
     return result
 
 
-def choice_features(
+def legacy_choice_features(
     stem: str,
     option: str,
     position: int,
@@ -116,3 +136,19 @@ def choice_features(
         index, sign = _index("M:", token, dimensions)
         values[index] += 2 * sign
     return {index: max(-6, min(6, value)) for index, value in values.items()}
+
+
+def choice_features(
+    stem: str,
+    option: str,
+    position: int,
+    *,
+    dimensions: int = 32768,
+) -> dict[int, int]:
+    """CIC-004 uses the proven compact map and changes the learning rule only.
+
+    Keeping inference features aligned with CIC-003 isolates whether margin
+    enforcement and weight averaging add value, and scales to the full official
+    JGLUE training split without the sparse-feature explosion seen in run 1.
+    """
+    return legacy_choice_features(stem, option, position, dimensions=dimensions)
