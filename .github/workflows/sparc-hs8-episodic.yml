@@ -1,0 +1,54 @@
+name: sparc-hs8-episodic
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+  workflow_dispatch:
+
+jobs:
+  hs8-episodic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Unit tests
+        run: python -m pytest -q minimal-predictive-lm/tests/test_sparc_episodic.py
+      - name: Train and evaluate SPARC-HS8
+        working-directory: minimal-predictive-lm
+        run: python -m minimal_predictive_lm.sparc_hs8_experiment
+      - name: Upload model and report
+        uses: actions/upload-artifact@v4
+        with:
+          name: sparc-hs8-episodic-results
+          path: minimal-predictive-lm/results
+          retention-days: 14
+      - name: Enforce capability and resource gates
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path('results/sparc_hs8_episodic.json').read_text())
+          scale = result['large_episodic_memory']
+          assert result['passed'] is True
+          assert result['passed_checks'] == result['total_checks'] == 12
+          assert result['transformer_used'] is False
+          assert result['softmax_attention_used'] is False
+          assert result['growing_kv_cache_used'] is False
+          assert result['full_history_scan_used'] is False
+          assert scale['episodes'] == 100000
+          assert scale['correct_queries'] == scale['sample_queries'] == 512
+          assert scale['max_candidates_observed'] <= 32
+          assert scale['max_anchor_reads_observed'] <= 192
+          assert scale['max_estimated_operations'] <= 512
+          assert scale['full_history_scan_used'] is False
+          assert scale['serialized_bytes'] <= 5000000
+          assert result['peak_process_kib'] <= 1000000
+          assert result['elapsed_seconds'] <= 120
+          PY
