@@ -26,52 +26,63 @@ from .cic_training import (
 class ChoiceConfig:
     name: str
     dimensions: int
+    hash_replicas: int
     epochs: int
     aggressiveness: float
     top_weights: int
     quantization_limit: int = 63
 
     @property
-    def training_key(self) -> tuple[int, int, float]:
-        return self.dimensions, self.epochs, self.aggressiveness
+    def training_key(self) -> tuple[int, int, int, float]:
+        return (
+            self.dimensions,
+            self.hash_replicas,
+            self.epochs,
+            self.aggressiveness,
+        )
 
 
 BASELINE_CONFIG = ChoiceConfig(
-    "cic_004_32k_8k",
-    dimensions=32768,
+    "cic_005_single_64k_8k",
+    dimensions=65536,
+    hash_replicas=1,
     epochs=3,
     aggressiveness=0.25,
     top_weights=8192,
 )
 
-CAPACITY_CONFIGS = (
+DUAL_HASH_CONFIGS = (
     BASELINE_CONFIG,
     ChoiceConfig(
-        "cic_005_64k_8k",
-        dimensions=65536,
+        "cic_006_dual_128k_8k",
+        dimensions=131072,
+        hash_replicas=2,
         epochs=3,
         aggressiveness=0.25,
         top_weights=8192,
     ),
     ChoiceConfig(
-        "cic_005_64k_12k",
-        dimensions=65536,
+        "cic_006_dual_128k_12k",
+        dimensions=131072,
+        hash_replicas=2,
         epochs=3,
         aggressiveness=0.25,
         top_weights=12288,
     ),
     ChoiceConfig(
-        "cic_005_64k_soft_12k",
-        dimensions=65536,
+        "cic_006_dual_128k_16k",
+        dimensions=131072,
+        hash_replicas=2,
+        epochs=3,
+        aggressiveness=0.25,
+        top_weights=16384,
+    ),
+    ChoiceConfig(
+        "cic_006_dual_soft_128k_16k",
+        dimensions=131072,
+        hash_replicas=2,
         epochs=4,
         aggressiveness=0.10,
-        top_weights=12288,
-    ),
-    ChoiceConfig(
-        "cic_005_128k_16k",
-        dimensions=131072,
-        epochs=3,
-        aggressiveness=0.25,
         top_weights=16384,
     ),
 )
@@ -93,22 +104,20 @@ class MixedTrainingResult:
     choice_work: float
     majority_correct: int
     choice_nonzero_weights: int
-    cic_004_correct: int
+    cic_005_correct: int
     selected_config_name: str
     selected_config: dict[str, object]
     candidate_configs: dict[str, dict[str, object]]
-    inner_capacity_validation: dict[str, float]
+    inner_dual_hash_validation: dict[str, float]
 
 
-def _fit_quantized(
-    rows,
-    config: ChoiceConfig,
-) -> QuantizedChoiceMechanism:
+def _fit_quantized(rows, config: ChoiceConfig) -> QuantizedChoiceMechanism:
     raw = train_choice_mechanism(
         rows,
         epochs=config.epochs,
         dimensions=config.dimensions,
         aggressiveness=config.aggressiveness,
+        hash_replicas=config.hash_replicas,
     )
     return QuantizedChoiceMechanism.from_raw(
         raw,
@@ -117,25 +126,29 @@ def _fit_quantized(
     )
 
 
-def _select_capacity(
-    choice_train,
-) -> tuple[ChoiceConfig, dict[str, float]]:
+def _select_dual_hash(choice_train) -> tuple[ChoiceConfig, dict[str, float]]:
     inner_train, inner_validation = stable_choice_split(
         choice_train,
         test_threshold=1500,
-        namespace="capacity-selection:",
+        namespace="dual-hash-selection:",
     )
-    grouped: dict[tuple[int, int, float], list[ChoiceConfig]] = defaultdict(list)
-    for config in CAPACITY_CONFIGS:
+    grouped: dict[tuple[int, int, int, float], list[ChoiceConfig]] = defaultdict(list)
+    for config in DUAL_HASH_CONFIGS:
         grouped[config.training_key].append(config)
 
     scores: dict[str, float] = {}
-    for (dimensions, epochs, aggressiveness), configs in grouped.items():
+    for (
+        dimensions,
+        hash_replicas,
+        epochs,
+        aggressiveness,
+    ), configs in grouped.items():
         raw = train_choice_mechanism(
             inner_train,
             epochs=epochs,
             dimensions=dimensions,
             aggressiveness=aggressiveness,
+            hash_replicas=hash_replicas,
         )
         for config in configs:
             quantized = QuantizedChoiceMechanism.from_raw(
@@ -149,10 +162,11 @@ def _select_capacity(
         gc.collect()
 
     selected = max(
-        CAPACITY_CONFIGS,
+        DUAL_HASH_CONFIGS,
         key=lambda config: (
             scores[config.name],
             -config.top_weights,
+            -config.hash_replicas,
             -config.dimensions,
             -config.epochs,
         ),
@@ -184,16 +198,16 @@ def train_mixed(
     else:
         choice_test = load_choice_dataset(commonsense_test_path)
 
-    selected_config, validation_scores = _select_capacity(choice_train)
+    selected_config, validation_scores = _select_dual_hash(choice_train)
 
-    cic_004 = _fit_quantized(choice_train, BASELINE_CONFIG)
-    cic_004_correct, _baseline_total, _baseline_work = choice_accuracy(
-        cic_004,
+    cic_005 = _fit_quantized(choice_train, BASELINE_CONFIG)
+    cic_005_correct, _baseline_total, _baseline_work = choice_accuracy(
+        cic_005,
         choice_test,
     )
 
     if selected_config == BASELINE_CONFIG:
-        choice = cic_004
+        choice = cic_005
     else:
         choice = _fit_quantized(choice_train, selected_config)
     choice_correct, _choice_total, choice_work = choice_accuracy(choice, choice_test)
@@ -205,7 +219,7 @@ def train_mixed(
         arithmetic,
         choice,
         {
-            "capability_id": "CIC-005-CAPACITY",
+            "capability_id": "CIC-006-DUALHASH",
             "selected_config": asdict(selected_config),
             "selection_scope": "official_train_inner_split_only",
         },
@@ -225,9 +239,9 @@ def train_mixed(
         choice_work=choice_work,
         majority_correct=majority_correct,
         choice_nonzero_weights=len(choice.weights),
-        cic_004_correct=cic_004_correct,
+        cic_005_correct=cic_005_correct,
         selected_config_name=selected_config.name,
         selected_config=asdict(selected_config),
-        candidate_configs={config.name: asdict(config) for config in CAPACITY_CONFIGS},
-        inner_capacity_validation=validation_scores,
+        candidate_configs={config.name: asdict(config) for config in DUAL_HASH_CONFIGS},
+        inner_dual_hash_validation=validation_scores,
     )

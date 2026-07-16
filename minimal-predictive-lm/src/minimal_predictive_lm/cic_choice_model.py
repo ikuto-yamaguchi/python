@@ -94,12 +94,19 @@ class RawChoiceMechanism:
     epochs: int
     aggressiveness: float = 0.25
     averaged: bool = True
+    hash_replicas: int = 1
 
     def predict(self, stem: str, options: Sequence[str]) -> tuple[int, int]:
         scores = [
             _dot(
                 self.weights,
-                choice_features(stem, option, index, dimensions=self.dimensions),
+                choice_features(
+                    stem,
+                    option,
+                    index,
+                    dimensions=self.dimensions,
+                    hash_replicas=self.hash_replicas,
+                ),
             )
             for index, option in enumerate(options)
         ]
@@ -124,13 +131,13 @@ def train_choice_mechanism(
     dimensions: int = 32768,
     seed: int = 0,
     aggressiveness: float = 0.25,
+    hash_replicas: int = 1,
 ) -> RawChoiceMechanism:
     """Train an averaged passive-aggressive option ranker.
 
     Every row enforces a unit margin between the gold option and the strongest
-    distractor. Correct but fragile decisions therefore continue to improve,
-    unlike the CIC-003 mistake-only perceptron. Lazy averaging does not enlarge
-    the serialized artifact.
+    distractor. Multiple independent hashes, when requested, occupy disjoint
+    vector blocks and are optimized jointly by the same sparse margin update.
     """
 
     weights = np.zeros(dimensions, dtype=np.float32)
@@ -138,7 +145,13 @@ def train_choice_mechanism(
     timestamps = np.zeros(dimensions, dtype=np.int64)
     cached = [
         [
-            choice_features(row.stem, option, index, dimensions=dimensions)
+            choice_features(
+                row.stem,
+                option,
+                index,
+                dimensions=dimensions,
+                hash_replicas=hash_replicas,
+            )
             for index, option in enumerate(row.options)
         ]
         for row in rows
@@ -180,11 +193,12 @@ def train_choice_mechanism(
         averaged = weights.astype(np.float64)
     nonzero = np.flatnonzero(np.abs(averaged) > 1e-9)
     return RawChoiceMechanism(
-        {int(index): float(averaged[index]) for index in nonzero},
-        dimensions,
-        epochs,
-        aggressiveness,
-        True,
+        weights={int(index): float(averaged[index]) for index in nonzero},
+        dimensions=dimensions,
+        epochs=epochs,
+        aggressiveness=aggressiveness,
+        averaged=True,
+        hash_replicas=hash_replicas,
     )
 
 
@@ -227,6 +241,7 @@ def choose_choice_epochs(
     candidates: Sequence[int] = (1, 2, 3, 4, 6),
     dimensions: int = 32768,
     aggressiveness: float = 0.25,
+    hash_replicas: int = 1,
 ) -> tuple[int, dict[int, float]]:
     inner_train, validation = stable_choice_split(
         rows, test_threshold=1500, namespace="inner:"
@@ -238,6 +253,7 @@ def choose_choice_epochs(
             epochs=epochs,
             dimensions=dimensions,
             aggressiveness=aggressiveness,
+            hash_replicas=hash_replicas,
         )
         correct, total, _work = choice_accuracy(model, validation)
         scores[epochs] = correct / total if total else 0.0
@@ -250,6 +266,7 @@ class QuantizedChoiceMechanism:
     dimensions: int
     scale: float
     weights: dict[int, int]
+    hash_replicas: int = 1
 
     @classmethod
     def from_raw(
@@ -269,14 +286,25 @@ class QuantizedChoiceMechanism:
             for index, value in items
             if int(round(value / scale)) != 0
         }
-        return cls(model.dimensions, scale, quantized)
+        return cls(
+            dimensions=model.dimensions,
+            scale=scale,
+            weights=quantized,
+            hash_replicas=model.hash_replicas,
+        )
 
     def predict(self, stem: str, options: Sequence[str]) -> tuple[int, int]:
         scores = [
             self.scale
             * _dot(
                 self.weights,
-                choice_features(stem, option, index, dimensions=self.dimensions),
+                choice_features(
+                    stem,
+                    option,
+                    index,
+                    dimensions=self.dimensions,
+                    hash_replicas=self.hash_replicas,
+                ),
             )
             for index, option in enumerate(options)
         ]
