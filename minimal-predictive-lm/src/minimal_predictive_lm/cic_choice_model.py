@@ -13,6 +13,8 @@ from .cic_choice_data import (
     stable_choice_split,
 )
 
+CompactVector = tuple[np.ndarray, np.ndarray]
+
 
 def _dot(
     weights: Mapping[int, int | float] | np.ndarray,
@@ -25,6 +27,30 @@ def _dot(
     return float(
         sum(float(weights.get(index, 0)) * float(value) for index, value in features.items())
     )
+
+
+def _compact(features: Mapping[int, int | float]) -> CompactVector:
+    return (
+        np.fromiter(features.keys(), dtype=np.int32, count=len(features)),
+        np.fromiter(features.values(), dtype=np.float32, count=len(features)),
+    )
+
+
+def _compact_dot(weights: np.ndarray, features: CompactVector) -> float:
+    indices, values = features
+    return float(weights[indices] @ values) if len(indices) else 0.0
+
+
+def _compact_difference(positive: CompactVector, negative: CompactVector) -> CompactVector:
+    positive_indices, positive_values = positive
+    negative_indices, negative_values = negative
+    indices = np.concatenate((positive_indices, negative_indices))
+    values = np.concatenate((positive_values, -negative_values))
+    unique, inverse = np.unique(indices, return_inverse=True)
+    reduced = np.zeros(len(unique), dtype=np.float32)
+    np.add.at(reduced, inverse, values)
+    keep = np.abs(reduced) > 1e-12
+    return unique[keep].astype(np.int32, copy=False), reduced[keep]
 
 
 @dataclass
@@ -115,17 +141,6 @@ class RawChoiceMechanism:
         return int(np.argmax(np.asarray(scores))), len(options)
 
 
-def _difference(
-    positive: Mapping[int, float], negative: Mapping[int, float]
-) -> dict[int, float]:
-    result = dict(positive)
-    for index, value in negative.items():
-        result[index] = result.get(index, 0.0) - value
-        if abs(result[index]) < 1e-12:
-            result.pop(index)
-    return result
-
-
 def train_choice_mechanism(
     rows: Sequence[ChoiceExample],
     *,
@@ -138,23 +153,25 @@ def train_choice_mechanism(
 ) -> RawChoiceMechanism:
     """Train an averaged passive-aggressive option ranker.
 
-    Multiple independent hashes occupy disjoint vector blocks. relation_scope
-    controls whether fixed-cost question/option relations are drawn from the
-    input tail or spread across the complete input.
+    Feature dictionaries are immediately packed into int32/float32 arrays.
+    This keeps the exact sparse update semantics while avoiding the multi-GB
+    Python-dict cache that dominated CIC-007's first multidomain run.
     """
 
     weights = np.zeros(dimensions, dtype=np.float32)
     totals = np.zeros(dimensions, dtype=np.float64)
     timestamps = np.zeros(dimensions, dtype=np.int64)
-    cached = [
+    cached: list[list[CompactVector]] = [
         [
-            choice_features(
-                row.stem,
-                option,
-                index,
-                dimensions=dimensions,
-                hash_replicas=hash_replicas,
-                relation_scope=relation_scope,
+            _compact(
+                choice_features(
+                    row.stem,
+                    option,
+                    index,
+                    dimensions=dimensions,
+                    hash_replicas=hash_replicas,
+                    relation_scope=relation_scope,
+                )
             )
             for index, option in enumerate(row.options)
         ]
@@ -168,7 +185,7 @@ def train_choice_mechanism(
         for row_index in order:
             step += 1
             features_by_option = cached[row_index]
-            scores = [_dot(weights, features) for features in features_by_option]
+            scores = [_compact_dot(weights, features) for features in features_by_option]
             gold = rows[row_index].answer_index
             strongest_wrong = max(
                 (index for index in range(len(scores)) if index != gold),
@@ -177,18 +194,19 @@ def train_choice_mechanism(
             margin = scores[gold] - scores[strongest_wrong]
             if margin >= 1.0:
                 continue
-            delta = _difference(
+            delta_indices, delta_values = _compact_difference(
                 features_by_option[gold], features_by_option[strongest_wrong]
             )
-            squared_norm = sum(value * value for value in delta.values())
+            squared_norm = float(delta_values @ delta_values)
             tau = min(
                 aggressiveness,
                 (1.0 - margin) / (squared_norm + 1e-12),
             )
-            for index, value in delta.items():
-                totals[index] += (step - timestamps[index]) * float(weights[index])
-                timestamps[index] = step
-                weights[index] += tau * value
+            totals[delta_indices] += (
+                step - timestamps[delta_indices]
+            ) * weights[delta_indices]
+            timestamps[delta_indices] = step
+            weights[delta_indices] += tau * delta_values
 
     if step:
         totals += (step + 1 - timestamps) * weights
