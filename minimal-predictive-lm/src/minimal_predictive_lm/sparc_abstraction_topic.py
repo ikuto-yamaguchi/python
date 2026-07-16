@@ -64,6 +64,18 @@ class SparseAbstractionMemory(_BaseAbstractionMemory):
             if len(statements) >= 3:
                 break
 
+        # Reuse the evidence that produced the abstraction as the next-turn focus.
+        # Only a few local episodes enter the fixed workspace; no paragraph history
+        # or generated summary text is appended as an ever-growing context.
+        focused_ids = local_ids[: min(3, len(local_ids))]
+        base.episodic.workspace.extend(focused_ids)
+        for episode_id in focused_ids:
+            episode = base.episodic.episodes[episode_id]
+            if episode.claim_subject:
+                base.episodic.focus_terms.append(episode.claim_subject)
+            if episode.claim_value:
+                base.episodic.focus_terms.append(episode.claim_value)
+
         self.last_candidates = 1
         self.last_anchor_reads = 0
         self.last_estimated_operations = len(local_ids[:8]) + inspected + len(statements)
