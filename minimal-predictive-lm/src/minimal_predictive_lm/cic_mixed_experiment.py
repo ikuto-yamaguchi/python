@@ -11,11 +11,16 @@ from .cic_mixed_train import train_mixed
 
 def run_mixed_experiment(
     mawps_path: str | Path,
-    commonsense_path: str | Path,
+    commonsense_train_path: str | Path,
+    commonsense_test_path: str | Path | None = None,
     output: str | Path | None = None,
 ) -> dict[str, object]:
     start = time.perf_counter()
-    row = train_mixed(mawps_path, commonsense_path)
+    row = train_mixed(
+        mawps_path,
+        commonsense_train_path,
+        commonsense_test_path,
+    )
     artifact_bytes = len(row.artifact.to_bytes())
     math_accuracy = row.math_correct / row.math_total if row.math_total else 0.0
     choice_accuracy = (
@@ -24,15 +29,19 @@ def run_mixed_experiment(
     legacy_accuracy = (
         row.legacy_correct / row.choice_test_rows if row.choice_test_rows else 0.0
     )
+    margin_accuracy = (
+        row.margin_correct / row.choice_test_rows if row.choice_test_rows else 0.0
+    )
     majority_accuracy = (
         row.majority_correct / row.choice_test_rows if row.choice_test_rows else 0.0
     )
     result: dict[str, object] = {
-        "capability_id": "CIC-004-MARGIN",
+        "capability_id": "CIC-004-JGLUE",
         "neural_network_used": False,
         "gradient_training_used": False,
         "task_id_input_used": False,
         "same_artifact_for_both_capabilities": True,
+        "official_train_to_validation_transfer": commonsense_test_path is not None,
         "arithmetic": {
             "correct": row.math_correct,
             "total": row.math_total,
@@ -43,22 +52,21 @@ def run_mixed_experiment(
             "inner_validation_accuracy_by_epoch": row.math_validation,
         },
         "commonsense_choice": {
-            "public_rows": row.choice_rows,
-            "train_rows": row.choice_train_rows,
-            "untouched_test_rows": row.choice_test_rows,
-            "correct": row.choice_correct,
-            "accuracy": choice_accuracy,
-            "cic_003_baseline_correct": row.legacy_correct,
-            "cic_003_baseline_accuracy": legacy_accuracy,
-            "absolute_gain_over_cic_003": choice_accuracy - legacy_accuracy,
+            "official_train_rows": row.choice_train_rows,
+            "untouched_validation_rows": row.choice_test_rows,
+            "selected_learner": row.selected_learner,
+            "selected_correct": row.choice_correct,
+            "selected_accuracy": choice_accuracy,
+            "cic_003_correct": row.legacy_correct,
+            "cic_003_accuracy": legacy_accuracy,
+            "cic_004_margin_correct": row.margin_correct,
+            "cic_004_margin_accuracy": margin_accuracy,
+            "absolute_margin_gain": margin_accuracy - legacy_accuracy,
             "majority_baseline_accuracy": majority_accuracy,
             "mean_checked_options": row.choice_work,
             "selected_epochs": row.choice_epochs,
-            "inner_validation_accuracy_by_epoch": row.choice_validation,
-            "baseline_selected_epochs": row.legacy_epochs,
-            "baseline_inner_validation_accuracy_by_epoch": row.legacy_validation,
+            "inner_learner_validation": row.choice_validation,
             "test_used_for_selection": False,
-            "learner": "averaged_passive_aggressive_relational_ranker",
         },
         "artifact": {
             "bytes": artifact_bytes,
@@ -71,16 +79,17 @@ def run_mixed_experiment(
             "peak_process_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
         },
         "claim_boundary": (
-            "This tests whether a margin-trained task-ID-free relational memory "
-            "improves the same untouched Japanese commonsense holdout while "
-            "retaining arithmetic. It is not free-form general dialogue and not "
-            "Japanese high-school-level intelligence."
+            "This is supervised transfer from the official public JGLUE "
+            "JCommonsenseQA training split to its untouched validation split. "
+            "It tests compact non-neural knowledge acquisition, not free-form "
+            "dialogue or Japanese high-school-level intelligence."
         ),
     }
     result["passed"] = bool(
         math_accuracy >= 0.58
-        and choice_accuracy >= legacy_accuracy
-        and choice_accuracy >= majority_accuracy + 0.03
+        and row.selected_learner == "cic_004_averaged_margin"
+        and margin_accuracy >= legacy_accuracy
+        and margin_accuracy >= majority_accuracy + 0.03
         and artifact_bytes <= 250_000
         and row.math_mechanisms <= 100
     )
@@ -97,12 +106,18 @@ def run_mixed_experiment(
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run CIC mixed-capability experiment")
     parser.add_argument("mawps")
-    parser.add_argument("commonsense")
-    parser.add_argument("--output", default="results/cic_004_margin.json")
+    parser.add_argument("commonsense_train")
+    parser.add_argument("commonsense_test", nargs="?", default=None)
+    parser.add_argument("--output", default="results/cic_004_jglue.json")
     args = parser.parse_args()
     print(
         json.dumps(
-            run_mixed_experiment(args.mawps, args.commonsense, args.output),
+            run_mixed_experiment(
+                args.mawps,
+                args.commonsense_train,
+                args.commonsense_test,
+                args.output,
+            ),
             ensure_ascii=False,
             indent=2,
         )
