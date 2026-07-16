@@ -10,6 +10,7 @@ from typing import Sequence
 
 OPTION_RE = re.compile(r"^\((\d+)\)(.*)$")
 ANSWER_RE = re.compile(r"^\((\d+)\)")
+JNLI_OPTIONS = ("entailment", "contradiction", "neutral")
 
 
 @dataclass(frozen=True)
@@ -54,6 +55,26 @@ def _read_rows(path: str | Path) -> list[dict[str, object]]:
 def load_choice_dataset(path: str | Path) -> list[ChoiceExample]:
     result: list[ChoiceExample] = []
     for row in _read_rows(path):
+        if "sentence1" in row and "sentence2" in row:
+            premise = str(row["sentence1"]).strip()
+            hypothesis = str(row["sentence2"]).strip()
+            label = str(row["label"]).strip()
+            if label not in JNLI_OPTIONS:
+                continue
+            stem = f"前提：{premise}\n仮説：{hypothesis}"
+            raw_question = stem + "\n" + "\n".join(
+                f"({index}){option}" for index, option in enumerate(JNLI_OPTIONS)
+            )
+            result.append(
+                ChoiceExample(
+                    raw_question,
+                    stem,
+                    JNLI_OPTIONS,
+                    JNLI_OPTIONS.index(label),
+                )
+            )
+            continue
+
         if "choice0" in row:
             stem = str(row.get("question", "")).strip()
             options = tuple(str(row[f"choice{index}"]) for index in range(5))
@@ -108,6 +129,14 @@ def _ngrams(text: str, widths: Sequence[int]) -> list[str]:
     return result
 
 
+def _spread_sample(tokens: Sequence[str], limit: int) -> list[str]:
+    if len(tokens) <= limit:
+        return list(tokens)
+    if limit <= 1:
+        return [tokens[-1]]
+    return [tokens[(index * (len(tokens) - 1)) // (limit - 1)] for index in range(limit)]
+
+
 def legacy_choice_features(
     stem: str,
     option: str,
@@ -115,6 +144,7 @@ def legacy_choice_features(
     *,
     dimensions: int = 16384,
     hash_salt: str = "",
+    relation_scope: str = "tail",
 ) -> dict[int, int]:
     values: Counter[int] = Counter({0: 1})
     stem_tokens = _ngrams(stem, (2, 3, 4))
@@ -123,7 +153,14 @@ def legacy_choice_features(
         for token in tokens:
             index, sign = _index(hash_salt + namespace, token, dimensions)
             values[index] += sign
-    for question_token in _ngrams(stem[-20:], (2, 3))[-40:]:
+
+    if relation_scope == "tail":
+        relation_tokens = _ngrams(stem[-20:], (2, 3))[-40:]
+    elif relation_scope == "full":
+        relation_tokens = _spread_sample(_ngrams(stem, (2, 3)), 40)
+    else:
+        raise ValueError(f"unsupported relation_scope: {relation_scope}")
+    for question_token in relation_tokens:
         for option_token in option_tokens[:32]:
             index, sign = _index(
                 hash_salt + "R:", question_token + "=>" + option_token, dimensions
@@ -148,20 +185,27 @@ def choice_features(
     *,
     dimensions: int = 32768,
     hash_replicas: int = 1,
+    relation_scope: str = "tail",
 ) -> dict[int, int]:
     """Return one or more disjoint signed feature hashes.
 
-    A replica receives the same symbolic relation stream but an independent
-    BLAKE2 namespace and a disjoint block of the weight vector. CIC-006 can
-    therefore average collision noise inside one executable sparse mechanism
-    without adding a task router or a neural layer.
+    The default tail relation exactly preserves CIC-006. The generic full
+    relation samples the whole input at fixed cost so premise/hypothesis and
+    long questions can influence candidate ranking without increasing feature
+    count per example.
     """
     if hash_replicas < 1:
         raise ValueError("hash_replicas must be positive")
     if dimensions % hash_replicas:
         raise ValueError("dimensions must be divisible by hash_replicas")
     if hash_replicas == 1:
-        return legacy_choice_features(stem, option, position, dimensions=dimensions)
+        return legacy_choice_features(
+            stem,
+            option,
+            position,
+            dimensions=dimensions,
+            relation_scope=relation_scope,
+        )
 
     block = dimensions // hash_replicas
     if block < 2:
@@ -174,6 +218,7 @@ def choice_features(
             position,
             dimensions=block,
             hash_salt=f"H{replica}:",
+            relation_scope=relation_scope,
         )
         offset = replica * block
         for index, value in local.items():
