@@ -24,8 +24,24 @@ jobs:
           minimal-predictive-lm/tests/test_sparc_cross_domain_plans.py
       - name: Train and evaluate SPARC-HS11
         working-directory: minimal-predictive-lm
-        run: python -m minimal_predictive_lm.sparc_hs11_experiment
-      - name: Upload model and report
+        run: |
+          mkdir -p results
+          python - <<'PY'
+          import traceback
+          from pathlib import Path
+          from minimal_predictive_lm.sparc_hs11_experiment import run_experiment
+
+          try:
+              result = run_experiment()
+              print(result)
+          except BaseException:
+              Path('results/hs11_error.txt').write_text(
+                  traceback.format_exc(), encoding='utf-8'
+              )
+              raise
+          PY
+      - name: Upload model, report, or diagnostics
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: sparc-hs11-cross-domain-results
