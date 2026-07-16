@@ -17,7 +17,10 @@ jobs:
       - name: Install
         run: python -m pip install -e minimal-predictive-lm pytest
       - name: Unit tests
-        run: python -m pytest -q minimal-predictive-lm/tests/test_cic_mixed.py
+        run: |
+          python -m pytest -q \
+            minimal-predictive-lm/tests/test_cic_mixed.py \
+            minimal-predictive-lm/tests/test_cic_tridomain.py
       - name: Acquire public datasets
         run: |
           git clone --depth 1 https://github.com/nlp-waseda/chain-of-thought-ja-dataset.git /tmp/cot-ja
@@ -35,21 +38,29 @@ jobs:
           curl -L --fail --retry 3 \
             https://raw.githubusercontent.com/yahoojapan/JGLUE/v1.1.0/datasets/jnli-v1.1/valid-v1.1.json \
             -o minimal-predictive-lm/public_data/cic_mixed/jnli-valid.jsonl
-      - name: Run multidomain experiment
+          curl -L --fail --retry 3 \
+            https://raw.githubusercontent.com/yahoojapan/JGLUE/v1.1.0/datasets/jsts-v1.1/train-v1.1.json \
+            -o minimal-predictive-lm/public_data/cic_mixed/jsts-train.jsonl
+          curl -L --fail --retry 3 \
+            https://raw.githubusercontent.com/yahoojapan/JGLUE/v1.1.0/datasets/jsts-v1.1/valid-v1.1.json \
+            -o minimal-predictive-lm/public_data/cic_mixed/jsts-valid.jsonl
+      - name: Run tri-domain experiment
         working-directory: minimal-predictive-lm
         run: |
           mkdir -p results
-          python -m minimal_predictive_lm.cic_multidomain_experiment \
+          python -m minimal_predictive_lm.cic_tridomain_experiment \
             public_data/cic_mixed/mawps.json \
             public_data/cic_mixed/jcommonsenseqa-train.jsonl \
             public_data/cic_mixed/jcommonsenseqa-valid.jsonl \
             public_data/cic_mixed/jnli-train.jsonl \
             public_data/cic_mixed/jnli-valid.jsonl \
-            --output results/cic_007_multidomain.json
+            public_data/cic_mixed/jsts-train.jsonl \
+            public_data/cic_mixed/jsts-valid.jsonl \
+            --output results/cic_008_tridomain.json
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
-          name: cic-007-multidomain-results
+          name: cic-008-tridomain-results
           path: minimal-predictive-lm/results
           retention-days: 14
       - name: Enforce gates
@@ -58,14 +69,17 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          row = json.loads(Path('results/cic_007_multidomain.json').read_text())
+          row = json.loads(Path('results/cic_008_tridomain.json').read_text())
           assert row['passed'] is True
           assert row['task_id_input_used'] is False
-          assert row['same_choice_mechanism_for_both_domains'] is True
+          assert row['same_choice_mechanism_for_all_three_domains'] is True
           assert row['same_artifact_for_all_capabilities'] is True
           assert row['arithmetic']['accuracy'] >= 0.58
-          assert row['jnli']['gain_over_majority'] >= 0.05
-          assert row['jcommonsenseqa']['joint_accuracy'] >= row['jcommonsenseqa']['cic_006_single_domain_accuracy'] - 0.02
+          assert row['jcommonsenseqa']['change_from_cic_007'] >= -0.02
+          assert row['jnli']['change_from_cic_007'] >= -0.02
+          assert row['jsts']['pearson'] >= 0.45
+          assert row['jsts']['mae_improvement_over_mean'] >= 0.15
           assert row['artifact']['bytes'] <= 250000
           assert row['resources']['peak_process_kib'] <= 2500000
+          assert row['resources']['elapsed_seconds'] <= 1200
           PY
