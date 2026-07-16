@@ -22,6 +22,7 @@ jobs:
           minimal-predictive-lm/tests/test_sparc_role_induction.py
           minimal-predictive-lm/tests/test_sparc_role_competition.py
           minimal-predictive-lm/tests/test_sparc_cross_domain_plans.py
+          minimal-predictive-lm/tests/test_sparc_cross_domain_subject_routing.py
       - name: Train and evaluate SPARC-HS11
         working-directory: minimal-predictive-lm
         run: |
@@ -29,7 +30,7 @@ jobs:
           python - <<'PY'
           import traceback
           from pathlib import Path
-          from minimal_predictive_lm.sparc_hs11_experiment import run_experiment
+          from minimal_predictive_lm.sparc_hs11_experiment_v2 import run_experiment
 
           try:
               result = run_experiment()
