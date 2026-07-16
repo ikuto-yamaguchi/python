@@ -18,7 +18,7 @@ mpm-phase5a = "minimal_predictive_lm.phase5_experiment:main"
 mpm-phase6a = "minimal_predictive_lm.phase6_experiment:main"
 mpm-phase6c = "minimal_predictive_lm.phase6c_experiment:main"
 mpm-phase7a = "minimal_predictive_lm.phase7_experiment:main"
-mpm-phase8a = "minimal_predictive_lm.phase8_experiment:main"
+mpm-phase8a = "minimal_predictive_lm.phase8a_experiment:main"
 mpm-phase8b = "minimal_predictive_lm.phase8b_experiment:main"
 mpm-phase8c = "minimal_predictive_lm.phase8c_experiment:main"
 mpm-phase8d = "minimal_predictive_lm.phase8d_experiment:main"
@@ -91,6 +91,8 @@ sparc-hs12-chat = "minimal_predictive_lm.sparc_hs12_cli:main"
 sparc-hs12-exp = "minimal_predictive_lm.sparc_hs12_experiment_v2:main"
 sparc-hs13-chat = "minimal_predictive_lm.sparc_hs13_cli:main"
 sparc-hs13-exp = "minimal_predictive_lm.sparc_hs13_experiment:main"
+sparc-hs15-chat = "minimal_predictive_lm.sparc_hs15_cli:main"
+sparc-hs15-exp = "minimal_predictive_lm.sparc_hs15_experiment:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
