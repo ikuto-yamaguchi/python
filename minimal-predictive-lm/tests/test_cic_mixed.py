@@ -70,24 +70,36 @@ def test_dual_hash_uses_disjoint_blocks() -> None:
     assert any(1024 < index < 2048 for index in features)
 
 
-def test_full_relation_scope_changes_long_input_features() -> None:
-    stem = "前提：" + "赤い車が道路を走る。" * 8 + "\n仮説：乗り物が動く。"
+def test_adaptive_relation_adds_two_span_edit_features() -> None:
+    stem = "前提：犬が道路を走っている。\n仮説：動物が動いている。"
     tail = choice_features(
         stem,
         "entailment",
         0,
-        dimensions=4096,
+        dimensions=8192,
         relation_scope="tail",
     )
-    full = choice_features(
+    adaptive = choice_features(
         stem,
         "entailment",
         0,
-        dimensions=4096,
-        relation_scope="full",
+        dimensions=8192,
+        relation_scope="adaptive",
     )
-    assert tail != full
-    assert len(full) > 0
+    assert adaptive != tail
+    assert len(adaptive) > len(tail)
+
+
+def test_adaptive_relation_remains_compact_for_single_span() -> None:
+    stem = "水を出すときに捻るものは？"
+    adaptive = choice_features(
+        stem,
+        "蛇口",
+        0,
+        dimensions=4096,
+        relation_scope="adaptive",
+    )
+    assert adaptive
 
 
 def test_margin_choice_model_survives_quantization() -> None:
@@ -115,7 +127,7 @@ def test_margin_choice_model_survives_quantization() -> None:
         epochs=4,
         dimensions=8192,
         hash_replicas=2,
-        relation_scope="full",
+        relation_scope="adaptive",
     )
     quantized = QuantizedChoiceMechanism.from_raw(raw, top_weights=2048)
     assert choice_accuracy(legacy, rows)[0] == len(rows)
@@ -133,7 +145,7 @@ def test_mixed_artifact_roundtrip() -> None:
         epochs=4,
         dimensions=2048,
         hash_replicas=2,
-        relation_scope="full",
+        relation_scope="adaptive",
     )
     choice = QuantizedChoiceMechanism.from_raw(raw, top_weights=1024)
     arithmetic = CICArtifact(4096, {}, {"variant": "empty-test"})
@@ -142,5 +154,5 @@ def test_mixed_artifact_roundtrip() -> None:
     question = "問題：果物は？\n(0)りんご\n(1)車\n解答："
     assert restored.predict(question).answer == artifact.predict(question).answer
     assert restored.choice.hash_replicas == 2
-    assert restored.choice.relation_scope == "full"
+    assert restored.choice.relation_scope == "adaptive"
     assert restored.metadata == {"test": True}
