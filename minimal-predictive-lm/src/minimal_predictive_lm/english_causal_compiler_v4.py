@@ -6,15 +6,13 @@ from .english_causal_compiler import CausalAnswer, _norm
 from .english_causal_compiler_v2 import _last_question_v2
 from .english_causal_compiler_v3_runtime import EnglishCausalResolverV3Runtime
 from .sparse_causal_curriculum import build_sparse_causal_curriculum
-from .sparse_causal_induction import (
-    SparseCausalPrototypeModel,
-    train_sparse_causal_prototypes,
-)
+from .sparse_causal_induction import SparseCausalPrototypeModel
+from .sparse_causal_routing import train_routed_sparse_causal_prototypes
 
 
 @lru_cache(maxsize=1)
 def build_sparse_causal_model() -> SparseCausalPrototypeModel:
-    return train_sparse_causal_prototypes(build_sparse_causal_curriculum())
+    return train_routed_sparse_causal_prototypes(build_sparse_causal_curriculum())
 
 
 class EnglishCausalResolverV4:
@@ -28,7 +26,6 @@ class EnglishCausalResolverV4:
         self.domain_specific_handlers = 0
 
     def answer(self, prompt: str) -> CausalAnswer:
-        low = _norm(prompt)
         query = _normalised_question(prompt)
         if not query or (
             "cause" not in query
@@ -63,8 +60,6 @@ class EnglishCausalResolverV4:
                 max(4, symbolic.confidence),
             )
 
-        # A learned prototype may override a brittle surface decision only with a
-        # strong local match and a clear opposite-answer margin.
         if learned.score >= 0.20 and learned.margin >= 0.035:
             return CausalAnswer(
                 learned.answer,
