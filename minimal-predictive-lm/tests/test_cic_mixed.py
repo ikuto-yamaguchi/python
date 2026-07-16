@@ -1,7 +1,10 @@
+import json
+
 from minimal_predictive_lm.cic_artifact import CICArtifact
 from minimal_predictive_lm.cic_choice_data import (
     ChoiceExample,
     choice_features,
+    load_choice_dataset,
     parse_choice_question,
     stable_choice_split,
 )
@@ -20,6 +23,27 @@ def test_parse_choice_question() -> None:
         "水を出すときに捻るものは？",
         ("蛇口", "ハンドル", "流し"),
     )
+
+
+def test_load_jnli_as_generic_choice(tmp_path) -> None:
+    path = tmp_path / "jnli.jsonl"
+    path.write_text(
+        json.dumps(
+            {
+                "sentence1": "犬が走っている。",
+                "sentence2": "動物が動いている。",
+                "label": "entailment",
+            },
+            ensure_ascii=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    rows = load_choice_dataset(path)
+    assert len(rows) == 1
+    assert rows[0].stem == "前提：犬が走っている。\n仮説：動物が動いている。"
+    assert rows[0].options == ("entailment", "contradiction", "neutral")
+    assert rows[0].answer_index == 0
 
 
 def test_choice_split_is_deterministic() -> None:
@@ -44,6 +68,26 @@ def test_dual_hash_uses_disjoint_blocks() -> None:
     assert 0 in features
     assert any(0 < index < 1024 for index in features)
     assert any(1024 < index < 2048 for index in features)
+
+
+def test_full_relation_scope_changes_long_input_features() -> None:
+    stem = "前提：" + "赤い車が道路を走る。" * 8 + "\n仮説：乗り物が動く。"
+    tail = choice_features(
+        stem,
+        "entailment",
+        0,
+        dimensions=4096,
+        relation_scope="tail",
+    )
+    full = choice_features(
+        stem,
+        "entailment",
+        0,
+        dimensions=4096,
+        relation_scope="full",
+    )
+    assert tail != full
+    assert len(full) > 0
 
 
 def test_margin_choice_model_survives_quantization() -> None:
@@ -71,6 +115,7 @@ def test_margin_choice_model_survives_quantization() -> None:
         epochs=4,
         dimensions=8192,
         hash_replicas=2,
+        relation_scope="full",
     )
     quantized = QuantizedChoiceMechanism.from_raw(raw, top_weights=2048)
     assert choice_accuracy(legacy, rows)[0] == len(rows)
@@ -88,6 +133,7 @@ def test_mixed_artifact_roundtrip() -> None:
         epochs=4,
         dimensions=2048,
         hash_replicas=2,
+        relation_scope="full",
     )
     choice = QuantizedChoiceMechanism.from_raw(raw, top_weights=1024)
     arithmetic = CICArtifact(4096, {}, {"variant": "empty-test"})
@@ -96,4 +142,5 @@ def test_mixed_artifact_roundtrip() -> None:
     question = "問題：果物は？\n(0)りんご\n(1)車\n解答："
     assert restored.predict(question).answer == artifact.predict(question).answer
     assert restored.choice.hash_replicas == 2
+    assert restored.choice.relation_scope == "full"
     assert restored.metadata == {"test": True}
