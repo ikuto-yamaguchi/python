@@ -1,0 +1,72 @@
+name: meci-conversation
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+  workflow_dispatch:
+
+jobs:
+  cognitive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Unit tests
+        run: |
+          python -m pytest -q \
+            minimal-predictive-lm/tests/test_meci_agent.py \
+            minimal-predictive-lm/tests/test_sacs_core.py \
+            minimal-predictive-lm/tests/test_sparc_core.py
+      - name: Run free-form conversation scaffold
+        working-directory: minimal-predictive-lm
+        run: python -m minimal_predictive_lm.meci_agent_experiment
+      - name: Run fixed-memory SACS ablation
+        working-directory: minimal-predictive-lm
+        run: python -m minimal_predictive_lm.sacs_experiment
+      - name: Run event-driven SPARC ablation
+        working-directory: minimal-predictive-lm
+        run: python -m minimal_predictive_lm.sparc_experiment
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: meci-conversation-sacs-sparc-results
+          path: minimal-predictive-lm/results
+          retention-days: 14
+      - name: Enforce research gates
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          conversation = json.loads(Path('results/meci_002_conversation.json').read_text())
+          sacs = json.loads(Path('results/sacs_001_fixed_memory.json').read_text())
+          sparc = json.loads(Path('results/sparc_001_event_graph.json').read_text())
+
+          assert conversation['passed'] is True
+          assert conversation['free_form_text_input'] is True
+          assert conversation['multi_turn_state'] is True
+          assert conversation['artifact_bytes'] <= 100000
+          assert conversation['passed_checks'] == conversation['total_checks']
+
+          assert sacs['passed'] is True
+          assert sacs['fixed_state_independent_of_history'] is True
+          assert sacs['kv_cache_used'] is False
+          assert sacs['softmax_attention_used'] is False
+          assert sacs['sacs']['nearest_value_accuracy'] >= 0.70
+          assert sacs['sacs']['report']['total_bytes'] < sacs['full_history_attention']['scaling']['8192']['cache_bytes']
+
+          assert sparc['passed'] is True
+          assert sparc['event_driven'] is True
+          assert sparc['history_scan_used'] is False
+          assert sparc['softmax_attention_used'] is False
+          assert sparc['post_warmup']['write_fraction'] <= 0.01
+          assert sparc['associative_recall']['accuracy'] == 1.0
+          assert sparc['comparisons']['candidate_reduction_vs_full_scan'] >= 8.0
+          assert sparc['comparisons']['routine_op_reduction_vs_sacs'] >= 8.0
+          PY
