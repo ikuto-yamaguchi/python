@@ -28,7 +28,7 @@ jobs:
         working-directory: minimal-predictive-lm
         run: |
           set -o pipefail
-          python -m minimal_predictive_lm.sparc_hs17_reference_gate 2>&1 | tee ../sparc-hs17-reference-gate.log
+          python -m minimal_predictive_lm.sparc_hs17_reference_gate_v2 2>&1 | tee ../sparc-hs17-reference-gate.log
       - name: Upload results or diagnostics
         if: always()
         uses: actions/upload-artifact@v4
