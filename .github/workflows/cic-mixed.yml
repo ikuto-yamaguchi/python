@@ -37,11 +37,11 @@ jobs:
             public_data/cic_mixed/mawps.json \
             public_data/cic_mixed/jcommonsenseqa-train.jsonl \
             public_data/cic_mixed/jcommonsenseqa-valid.jsonl \
-            --output results/cic_005_capacity.json
+            --output results/cic_006_dualhash.json
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
-          name: cic-005-capacity-results
+          name: cic-006-dualhash-results
           path: minimal-predictive-lm/results
           retention-days: 14
       - name: Enforce gates
@@ -50,14 +50,14 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          row = json.loads(Path('results/cic_005_capacity.json').read_text())
+          row = json.loads(Path('results/cic_006_dualhash.json').read_text())
           assert row['passed'] is True
           assert row['task_id_input_used'] is False
           assert row['same_artifact_for_both_capabilities'] is True
           assert row['official_train_to_validation_transfer'] is True
           assert row['arithmetic']['accuracy'] >= 0.58
           choice = row['commonsense_choice']
-          assert choice['selected_config_name'] != 'cic_004_32k_8k'
-          assert choice['selected_accuracy'] > choice['cic_004_baseline_accuracy']
+          assert choice['selected_config']['hash_replicas'] == 2
+          assert choice['selected_accuracy'] > choice['cic_005_baseline_accuracy']
           assert row['artifact']['bytes'] <= 250000
           PY
