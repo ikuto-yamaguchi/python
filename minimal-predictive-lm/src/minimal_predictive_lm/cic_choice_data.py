@@ -49,6 +49,8 @@ def _read_rows(path: str | Path) -> list[dict[str, object]]:
         return [json.loads(line) for line in text.splitlines() if line.strip()]
     if isinstance(payload, list):
         return [dict(row) for row in payload]
+    if isinstance(payload, dict):
+        return [dict(payload)]
     raise ValueError(f"unsupported choice dataset format: {path}")
 
 
