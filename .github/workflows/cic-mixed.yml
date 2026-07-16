@@ -23,16 +23,25 @@ jobs:
           git clone --depth 1 https://github.com/nlp-waseda/chain-of-thought-ja-dataset.git /tmp/cot-ja
           mkdir -p minimal-predictive-lm/public_data/cic_mixed
           cp /tmp/cot-ja/dataset/mawps/test.json minimal-predictive-lm/public_data/cic_mixed/mawps.json
-          cp /tmp/cot-ja/dataset/jcommonsenseqa/test.json minimal-predictive-lm/public_data/cic_mixed/jcommonsenseqa.json
+          curl -L --fail --retry 3 \
+            https://raw.githubusercontent.com/yahoojapan/JGLUE/v1.1.0/datasets/jcommonsenseqa-v1.1/train-v1.1.json \
+            -o minimal-predictive-lm/public_data/cic_mixed/jcommonsenseqa-train.jsonl
+          curl -L --fail --retry 3 \
+            https://raw.githubusercontent.com/yahoojapan/JGLUE/v1.1.0/datasets/jcommonsenseqa-v1.1/valid-v1.1.json \
+            -o minimal-predictive-lm/public_data/cic_mixed/jcommonsenseqa-valid.jsonl
       - name: Run mixed experiment
         working-directory: minimal-predictive-lm
         run: |
           mkdir -p results
-          python -m minimal_predictive_lm.cic_mixed_experiment public_data/cic_mixed/mawps.json public_data/cic_mixed/jcommonsenseqa.json --output results/cic_003_mixed.json
+          python -m minimal_predictive_lm.cic_mixed_experiment \
+            public_data/cic_mixed/mawps.json \
+            public_data/cic_mixed/jcommonsenseqa-train.jsonl \
+            public_data/cic_mixed/jcommonsenseqa-valid.jsonl \
+            --output results/cic_004_jglue.json
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
-          name: cic-003-mixed-results
+          name: cic-004-jglue-results
           path: minimal-predictive-lm/results
           retention-days: 14
       - name: Enforce gates
@@ -41,11 +50,13 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          row = json.loads(Path('results/cic_003_mixed.json').read_text())
+          row = json.loads(Path('results/cic_004_jglue.json').read_text())
           assert row['passed'] is True
           assert row['task_id_input_used'] is False
           assert row['same_artifact_for_both_capabilities'] is True
+          assert row['official_train_to_validation_transfer'] is True
           assert row['arithmetic']['accuracy'] >= 0.58
-          assert row['commonsense_choice']['accuracy'] >= 0.25
+          assert row['commonsense_choice']['selected_learner'] == 'cic_004_averaged_margin'
+          assert row['commonsense_choice']['cic_004_margin_accuracy'] >= row['commonsense_choice']['cic_003_accuracy']
           assert row['artifact']['bytes'] <= 250000
           PY
