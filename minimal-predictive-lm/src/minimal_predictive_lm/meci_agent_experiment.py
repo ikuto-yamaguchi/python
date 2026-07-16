@@ -34,23 +34,24 @@ def run_experiment(output: str | Path | None = None) -> dict[str, object]:
         return reply.text
 
     learned_name = turn("私の名前は郁斗です。")
-    distractor = turn("こんにちは")
+    turn("こんにちは")
     recalled_name = turn("私の名前は何？")
 
-    learned_1 = turn("アキラは高校生です。")
-    learned_2 = turn("高校生は学生です。")
-    learned_3 = turn("学生は人です。")
-    transitive = turn("アキラは人ですか？")
+    turn("アキラは高校生です。")
+    turn("高校生は学生です。")
+    turn("学生は人です。")
+    turn("人は生物です。")
+    transitive = turn("アキラは生物？")
 
-    learned_property = turn("富士山の高さは3776メートルです。")
-    property_recall = turn("富士山の高さは何ですか？")
+    turn("富士山の高さは3776メートルです。")
+    property_recall = turn("富士山の高さは何？")
     follow_up = turn("それは何？")
 
-    learned_cause = turn("道路が濡れているのは雨が降ったからです。")
+    turn("道路が濡れているのは雨が降ったからです。")
     cause = turn("道路が濡れているのはなぜ？")
 
     arithmetic = turn("18*7-9は？")
-    paraphrase = turn("具合はどう？")
+    paraphrase = turn("調子どう？")
     unknown = turn("量子重力の完全な理論を説明して")
 
     artifact = agent.to_bytes()
@@ -60,9 +61,13 @@ def run_experiment(output: str | Path | None = None) -> dict[str, object]:
     checks = {
         "online_name_learning": learned_name == "分かりました。覚えておきます。",
         "working_memory_survives_distractor": recalled_name == "ユーザーの名前は郁斗です。",
-        "three_hop_transitive_reasoning": transitive.startswith("はい。") and "アキラは高校生" in transitive and "学生は人" in transitive,
+        "four_hop_transitive_reasoning": (
+            transitive.startswith("はい。")
+            and "アキラは高校生" in transitive
+            and "人は生物" in transitive
+        ),
         "novel_property_recall": property_recall == "富士山の高さは3776メートルです。",
-        "follow_up_subject_resolution": follow_up.startswith("富士山は") or "富士山" in follow_up,
+        "follow_up_subject_resolution": "富士山" in follow_up,
         "causal_recall": cause == "雨が降ったからです。",
         "symbolic_arithmetic": arithmetic == "117です。",
         "paraphrase_episode_retrieval": paraphrase == "順調です。今日は何を一緒に考えますか？",
@@ -73,7 +78,7 @@ def run_experiment(output: str | Path | None = None) -> dict[str, object]:
     report = agent.report()
     result: dict[str, object] = {
         "capability_id": "MECI-002-CONVERSATION",
-        "target": "minimal-resource Japanese conversational intelligence",
+        "target": "minimum-resource Japanese conversational intelligence",
         "neural_network_used": False,
         "transformer_used": False,
         "gradient_training_used": False,
@@ -89,10 +94,10 @@ def run_experiment(output: str | Path | None = None) -> dict[str, object]:
         "elapsed_seconds": time.perf_counter() - start,
         "peak_process_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
         "claim_boundary": (
-            "MECI-002 is the first free-form, stateful non-neural conversation kernel in this research line. "
-            "It demonstrates online fact learning, bounded working memory, sparse episode retrieval, symbolic arithmetic "
-            "and explicit multi-hop reasoning. It is not yet Japanese high-school-level general intelligence; future "
-            "milestones must expand language understanding, world knowledge, planning, explanation and generative expression."
+            "MECI-002 is a stateful non-neural conversation scaffold. It demonstrates online fact learning, bounded "
+            "working memory, sparse episode retrieval, symbolic arithmetic and explicit multi-hop reasoning. It is not "
+            "a learned Japanese language intelligence and not yet high-school-level general intelligence. The learned "
+            "SACS recurrent core must replace hand-written semantic parsing before this line can satisfy the target."
         ),
     }
     result["passed"] = bool(
