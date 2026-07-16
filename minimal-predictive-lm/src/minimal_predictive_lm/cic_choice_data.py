@@ -114,17 +114,20 @@ def legacy_choice_features(
     position: int,
     *,
     dimensions: int = 16384,
+    hash_salt: str = "",
 ) -> dict[int, int]:
     values: Counter[int] = Counter({0: 1})
     stem_tokens = _ngrams(stem, (2, 3, 4))
     option_tokens = _ngrams(option, (1, 2, 3))
     for namespace, tokens in (("Q:", stem_tokens), ("O:", option_tokens)):
         for token in tokens:
-            index, sign = _index(namespace, token, dimensions)
+            index, sign = _index(hash_salt + namespace, token, dimensions)
             values[index] += sign
     for question_token in _ngrams(stem[-20:], (2, 3))[-40:]:
         for option_token in option_tokens[:32]:
-            index, sign = _index("R:", question_token + "=>" + option_token, dimensions)
+            index, sign = _index(
+                hash_salt + "R:", question_token + "=>" + option_token, dimensions
+            )
             values[index] += sign
     overlap = min(4, len(set(_ngrams(stem, (2,))) & set(_ngrams(option, (2,)))))
     for token in (
@@ -133,7 +136,7 @@ def legacy_choice_features(
         f"POSITION={position}",
         "ENDING=" + stem[-8:],
     ):
-        index, sign = _index("M:", token, dimensions)
+        index, sign = _index(hash_salt + "M:", token, dimensions)
         values[index] += 2 * sign
     return {index: max(-6, min(6, value)) for index, value in values.items()}
 
@@ -144,11 +147,36 @@ def choice_features(
     position: int,
     *,
     dimensions: int = 32768,
+    hash_replicas: int = 1,
 ) -> dict[int, int]:
-    """CIC-004 uses the proven compact map and changes the learning rule only.
+    """Return one or more disjoint signed feature hashes.
 
-    Keeping inference features aligned with CIC-003 isolates whether margin
-    enforcement and weight averaging add value, and scales to the full official
-    JGLUE training split without the sparse-feature explosion seen in run 1.
+    A replica receives the same symbolic relation stream but an independent
+    BLAKE2 namespace and a disjoint block of the weight vector. CIC-006 can
+    therefore average collision noise inside one executable sparse mechanism
+    without adding a task router or a neural layer.
     """
-    return legacy_choice_features(stem, option, position, dimensions=dimensions)
+    if hash_replicas < 1:
+        raise ValueError("hash_replicas must be positive")
+    if dimensions % hash_replicas:
+        raise ValueError("dimensions must be divisible by hash_replicas")
+    if hash_replicas == 1:
+        return legacy_choice_features(stem, option, position, dimensions=dimensions)
+
+    block = dimensions // hash_replicas
+    if block < 2:
+        raise ValueError("each hash replica needs at least two dimensions")
+    values: Counter[int] = Counter({0: 1})
+    for replica in range(hash_replicas):
+        local = legacy_choice_features(
+            stem,
+            option,
+            position,
+            dimensions=block,
+            hash_salt=f"H{replica}:",
+        )
+        offset = replica * block
+        for index, value in local.items():
+            if index:
+                values[offset + index] += value
+    return {index: max(-6, min(6, value)) for index, value in values.items()}
