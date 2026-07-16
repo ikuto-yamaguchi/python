@@ -71,6 +71,8 @@ sparc-hs2-chat = "minimal_predictive_lm.sparc_hs2_cli:main"
 sparc-hs2-exp = "minimal_predictive_lm.sparc_hs2_experiment:main"
 sparc-hs3-chat = "minimal_predictive_lm.sparc_hs3_cli:main"
 sparc-hs3-exp = "minimal_predictive_lm.sparc_hs3_experiment:main"
+sparc-hs4-chat = "minimal_predictive_lm.sparc_hs4_cli:main"
+sparc-hs4-exp = "minimal_predictive_lm.sparc_hs4_experiment:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
