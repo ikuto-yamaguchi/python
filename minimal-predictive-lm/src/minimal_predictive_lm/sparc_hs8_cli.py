@@ -4,8 +4,8 @@ import argparse
 import json
 from pathlib import Path
 
-from .sparc_episodic import SPARCHS8Model
-from .sparc_hs8_experiment import configured_model
+from .sparc_episodic_focus import SPARCHS8Model
+from .sparc_hs8_focus_experiment import configured_model
 
 
 def main() -> None:
