@@ -21,9 +21,10 @@ jobs:
           python -m pytest -q
           minimal-predictive-lm/tests/test_sparc_discourse.py
           minimal-predictive-lm/tests/test_sparc_role_induction.py
+          minimal-predictive-lm/tests/test_sparc_role_competition.py
       - name: Train and evaluate SPARC-HS10
         working-directory: minimal-predictive-lm
-        run: python -m minimal_predictive_lm.sparc_hs10_experiment
+        run: python -m minimal_predictive_lm.sparc_hs10_experiment_v2
       - name: Upload model and report
         uses: actions/upload-artifact@v4
         with:
