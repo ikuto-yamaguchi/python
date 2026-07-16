@@ -1,0 +1,17 @@
+{
+  "capability_id": "SPARC-HS3-SCHEMA-COMPOSITION",
+  "locally_validated": true,
+  "passed_checks": 8,
+  "total_checks": 8,
+  "large_schema_bank": {
+    "schemas": 10000,
+    "sample_queries": 512,
+    "correct_queries": 512,
+    "max_candidates_observed": 32,
+    "max_anchor_reads_observed": 150,
+    "serialized_bytes": 59182
+  },
+  "elapsed_seconds": 2.3081724779999604,
+  "peak_process_kib": 355728,
+  "claim_boundary": "Structured demonstrations are still required; raw-text semantic role discovery remains future work."
+}
