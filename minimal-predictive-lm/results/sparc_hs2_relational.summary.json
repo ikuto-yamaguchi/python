@@ -1,0 +1,18 @@
+{
+  "capability_id": "SPARC-HS2-RELATIONAL",
+  "locally_validated": true,
+  "passed_checks": 8,
+  "total_checks": 8,
+  "large_relational_cortex": {
+    "entities": 100000,
+    "relation_edges": 80000,
+    "sample_queries": 512,
+    "correct_queries": 512,
+    "max_nodes_activated_observed": 5,
+    "max_edges_inspected_observed": 4,
+    "serialized_bytes": 629353
+  },
+  "elapsed_seconds": 3.447016442000006,
+  "peak_process_kib": 375972,
+  "claim_boundary": "Local pre-CI measurement only. The Japanese relation parser still uses bootstrap templates and this is not high-school-level general intelligence."
+}
