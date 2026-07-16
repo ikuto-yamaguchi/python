@@ -1,0 +1,58 @@
+name: sparc-hs16-public-gate
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+  workflow_dispatch:
+
+concurrency:
+  group: sparc-hs16-public-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  hs16-public-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Contract tests
+        run: python -m pytest -q minimal-predictive-lm/tests/test_sparc_hs16_public_gate.py
+      - name: Run identical 600-question public gate
+        working-directory: minimal-predictive-lm
+        run: |
+          set -o pipefail
+          python -m minimal_predictive_lm.sparc_hs16_public_gate 2>&1 | tee ../sparc-hs16-public-gate.log
+      - name: Upload public-gate report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sparc-hs16-public-gate-results
+          path: |
+            minimal-predictive-lm/results/sparc_hs16_public_gate.json
+            minimal-predictive-lm/results/sparc_hs16_public_gate.md
+            sparc-hs16-public-gate.log
+          retention-days: 14
+      - name: Enforce integration gain
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path('results/sparc_hs16_public_gate.json').read_text())
+          assert result['passed'] is True
+          assert result['baseline']['score']['correct'] == 398
+          assert result['score']['correct'] >= 478
+          assert result['axis_scores']['belief_propagation']['correct'] == 40
+          assert result['axis_scores']['formal_validity']['correct'] == 40
+          assert result['gain']['correct'] >= 80
+          assert len(result['gain']['nonregressing_other_axes']) == 13
+          assert result['protocol']['axis_visible_to_worker'] is False
+          assert result['protocol']['public_targets_used_for_training'] == 0
+          assert result['readiness']['japanese_high_school_claim_allowed'] is False
+          PY
