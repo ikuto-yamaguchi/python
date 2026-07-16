@@ -41,6 +41,39 @@ def test_learned_committee_handles_paraphrased_unseen_scenarios():
     assert resolver.answer(redundant).output == "No"
 
 
+def test_deliberate_maintenance_is_not_collapsed_into_passive_nonaction():
+    resolver = EnglishCausalResolverV4()
+    passive = (
+        "A service sends a reward when a client is subscribed. The client was already "
+        "subscribed and did not change the status. The reward arrived. Did the reward "
+        "arrive because the client did not change the subscription status?"
+    )
+    deliberate = (
+        "A service sends a reward when a client is subscribed. The client checked the "
+        "account, saw that it was subscribed, and deliberately left the status unchanged. "
+        "The account remained subscribed and the reward arrived. Did the reward arrive "
+        "because the client did not change the subscription status?"
+    )
+    assert resolver.answer(passive).output == "No"
+    assert resolver.answer(deliberate).output == "Yes"
+
+
+def test_learned_override_cannot_erase_high_confidence_control_evidence():
+    resolver = EnglishCausalResolverV4()
+    controlled = (
+        "An engineer knew that activating the device would also destroy the sample. "
+        "The engineer did not care and deliberately activated it. The sample was "
+        "destroyed. Did the engineer intentionally destroy the sample?"
+    )
+    accidental = (
+        "An engineer wanted to test a device, but lost balance and the control slipped "
+        "from her hand. The device activated and destroyed the sample unexpectedly. "
+        "Did the engineer intentionally destroy the sample?"
+    )
+    assert resolver.answer(controlled).output == "Yes"
+    assert resolver.answer(accidental).output == "No"
+
+
 def test_model_is_local_sparse_and_has_no_benchmark_task_router():
     resolver = EnglishCausalResolverV4()
     prediction = resolver.model.predict(
