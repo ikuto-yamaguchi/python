@@ -226,8 +226,13 @@ class SparseEpisodicRevisionMemory:
 
     def _expanded_query(self, query: str) -> str:
         if re.search(r"(?:それ|そのこと|このこと|先ほどの内容)", query):
+            if self.workspace:
+                recent = self.episodes[self.workspace[-1]]
+                focus = recent.claim_subject or ""
+                value = recent.claim_value or recent.sentence
+                return query + focus + value
             if self.focus_terms:
-                return query + "".join(self.focus_terms)
+                return query + self.focus_terms[-1]
         return query
 
     def _candidate_ids(self, query: str) -> list[int]:
