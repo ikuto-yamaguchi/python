@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import math
 import re
 from collections import Counter
 from dataclasses import dataclass
@@ -41,10 +40,30 @@ def parse_choice_question(text: str) -> tuple[str, tuple[str, ...]] | None:
     return " ".join(stem_lines).strip(), ordered
 
 
+def _read_rows(path: str | Path) -> list[dict[str, object]]:
+    text = Path(path).read_text(encoding="utf-8")
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError:
+        return [json.loads(line) for line in text.splitlines() if line.strip()]
+    if isinstance(payload, list):
+        return [dict(row) for row in payload]
+    raise ValueError(f"unsupported choice dataset format: {path}")
+
+
 def load_choice_dataset(path: str | Path) -> list[ChoiceExample]:
-    rows = json.loads(Path(path).read_text(encoding="utf-8"))
     result: list[ChoiceExample] = []
-    for row in rows:
+    for row in _read_rows(path):
+        if "choice0" in row:
+            stem = str(row.get("question", "")).strip()
+            options = tuple(str(row[f"choice{index}"]) for index in range(5))
+            answer_index = int(row["label"])
+            raw_question = stem + "\n" + "\n".join(
+                f"({index}){option}" for index, option in enumerate(options)
+            )
+            result.append(ChoiceExample(raw_question, stem, options, answer_index))
+            continue
+
         raw_question = str(row.get("question", ""))
         parsed = parse_choice_question(raw_question)
         match = ANSWER_RE.match(str(row.get("answer", "")))
@@ -89,10 +108,6 @@ def _ngrams(text: str, widths: Sequence[int]) -> list[str]:
     return result
 
 
-def _unique_limited(tokens: Sequence[str], limit: int) -> list[str]:
-    return list(dict.fromkeys(tokens))[:limit]
-
-
 def legacy_choice_features(
     stem: str,
     option: str,
@@ -100,7 +115,6 @@ def legacy_choice_features(
     *,
     dimensions: int = 16384,
 ) -> dict[int, int]:
-    """Exact CIC-003 feature map retained as an internal comparison baseline."""
     values: Counter[int] = Counter({0: 1})
     stem_tokens = _ngrams(stem, (2, 3, 4))
     option_tokens = _ngrams(option, (1, 2, 3))
@@ -130,46 +144,11 @@ def choice_features(
     position: int,
     *,
     dimensions: int = 32768,
-) -> dict[int, float]:
-    """Build a compact task-free relation vector for one question/option pair.
+) -> dict[int, int]:
+    """CIC-004 uses the proven compact map and changes the learning rule only.
 
-    Question-only features are intentionally omitted because they are identical
-    for every option and cannot affect ranking. Capacity is spent on option
-    priors, question/option relations, suffix cues and structural metadata.
+    Keeping inference features aligned with CIC-003 isolates whether margin
+    enforcement and weight averaging add value, and scales to the full official
+    JGLUE training split without the sparse-feature explosion seen in run 1.
     """
-
-    values: Counter[int] = Counter({0: 1.0})
-    question_tokens = _unique_limited(
-        _ngrams(stem, (2, 3, 4))[-96:] + _ngrams(stem, (1,))[-32:], 128
-    )
-    option_tokens = _unique_limited(_ngrams(option, (1, 2, 3, 4)), 48)
-
-    for token in option_tokens:
-        index, sign = _index("O:", token, dimensions)
-        values[index] += 0.65 * sign
-
-    for question_token in question_tokens:
-        for option_token in option_tokens[:28]:
-            index, sign = _index("R:", question_token + "=>" + option_token, dimensions)
-            values[index] += sign
-
-    compact_stem = re.sub(r"\s+", "", stem)
-    for width in (6, 10, 16, 24):
-        suffix = compact_stem[-width:]
-        for option_token in option_tokens[:24]:
-            index, sign = _index(f"S{width}:", suffix + "=>" + option_token, dimensions)
-            values[index] += 1.5 * sign
-
-    overlap = min(6, len(set(_ngrams(stem, (2,))) & set(_ngrams(option, (2,)))))
-    for token, magnitude in (
-        (f"OVERLAP={overlap}", 1.0),
-        (f"OLEN={min(12, len(option) // 2)}", 1.0),
-        (f"POSITION={position}", 0.75),
-        ("ENDING=" + compact_stem[-12:], 1.25),
-        ("QMARK=" + str(compact_stem.endswith(("?", "？"))), 0.5),
-    ):
-        index, sign = _index("M:", token, dimensions)
-        values[index] += magnitude * sign
-
-    norm = math.sqrt(sum(value * value for value in values.values())) or 1.0
-    return {index: value / norm for index, value in values.items()}
+    return legacy_choice_features(stem, option, position, dimensions=dimensions)
