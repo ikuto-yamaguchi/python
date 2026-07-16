@@ -28,15 +28,24 @@ jobs:
           set -o pipefail
           python -m pytest -vv \
             minimal-predictive-lm/tests/test_sparc_dialogue_composer.py \
+            minimal-predictive-lm/tests/test_sparc_dialogue_transducer.py \
             2>&1 | tee minimal-predictive-lm/results/hs19_unit.log
       - name: Run compositional dialogue gate
-        id: experiment
+        id: composition
         continue-on-error: true
         working-directory: minimal-predictive-lm
         run: |
           set -o pipefail
           python -m minimal_predictive_lm.sparc_hs19_dialogue_gate \
             2>&1 | tee ../sparc-hs19-dialogue.log
+      - name: Run raw-pair transduction gate
+        id: transduction
+        continue-on-error: true
+        working-directory: minimal-predictive-lm
+        run: |
+          set -o pipefail
+          python -m minimal_predictive_lm.sparc_hs19_transduction_gate \
+            2>&1 | tee ../sparc-hs19-transduction.log
       - name: Upload results or diagnostics
         if: always()
         uses: actions/upload-artifact@v4
@@ -47,10 +56,15 @@ jobs:
             minimal-predictive-lm/results/sparc_hs19_dialogue.json
             minimal-predictive-lm/results/sparc_hs19_dialogue.md
             minimal-predictive-lm/results/SPARC-HS19-dialogue.model.zlib
+            minimal-predictive-lm/results/sparc_hs19_transduction.json
+            minimal-predictive-lm/results/sparc_hs19_transduction.md
+            minimal-predictive-lm/results/SPARC-HS19-transducer.model.zlib
             sparc-hs19-dialogue.log
+            sparc-hs19-transduction.log
           retention-days: 14
       - name: Enforce gate
         if: always()
         run: |
           test "${{ steps.unit.outcome }}" = "success"
-          test "${{ steps.experiment.outcome }}" = "success"
+          test "${{ steps.composition.outcome }}" = "success"
+          test "${{ steps.transduction.outcome }}" = "success"
