@@ -23,6 +23,9 @@ from .cic_training import (
     train_raw_model,
 )
 
+CIC006_VALIDATION_ROWS = 1119
+CIC006_VALIDATION_CORRECT = 313
+
 
 @dataclass(frozen=True)
 class MultiDomainConfig:
@@ -46,18 +49,27 @@ class MultiDomainConfig:
         )
 
 
-CIC006_BASELINE = MultiDomainConfig(
-    "cic_006_single_domain_tail_8k",
-    relation_scope="tail",
-    top_weights=8192,
-)
-
 MULTIDOMAIN_CONFIGS = (
-    MultiDomainConfig("cic_007_joint_tail_8k", "tail", 8192),
     MultiDomainConfig("cic_007_joint_tail_12k", "tail", 12288),
-    MultiDomainConfig("cic_007_joint_full_8k", "full", 8192),
-    MultiDomainConfig("cic_007_joint_full_12k", "full", 12288),
-    MultiDomainConfig("cic_007_joint_full_16k", "full", 16384),
+    MultiDomainConfig(
+        "cic_007_joint_adaptive_12k",
+        "adaptive",
+        12288,
+        aggressiveness=0.20,
+    ),
+    MultiDomainConfig(
+        "cic_007_joint_adaptive_16k",
+        "adaptive",
+        16384,
+        aggressiveness=0.20,
+    ),
+    MultiDomainConfig(
+        "cic_007_joint_adaptive_256k_16k",
+        "adaptive",
+        16384,
+        dimensions=262144,
+        aggressiveness=0.20,
+    ),
 )
 
 
@@ -221,6 +233,7 @@ def _select_multidomain_config(
             metrics[config.name]["macro_gain_over_majority"],
             metrics[config.name]["minimum_gain_over_majority"],
             -config.top_weights,
+            -config.dimensions,
         ),
     )
     return selected, metrics
@@ -250,6 +263,8 @@ def train_multidomain(
     commonsense_test = load_choice_dataset(commonsense_test_path)
     jnli_train = load_choice_dataset(jnli_train_path)
     jnli_test = load_choice_dataset(jnli_test_path)
+    if len(commonsense_test) != CIC006_VALIDATION_ROWS:
+        raise ValueError("JCommonsenseQA validation no longer matches frozen CIC-006 result")
 
     selected_config, inner_validation = _select_multidomain_config(
         commonsense_train,
@@ -267,12 +282,6 @@ def train_multidomain(
     )
     jnli_correct, _nli_total, jnli_work = choice_accuracy(joint_model, jnli_test)
 
-    cic_006 = _fit_quantized(commonsense_train, CIC006_BASELINE)
-    cic_006_correct, _baseline_total, _baseline_work = choice_accuracy(
-        cic_006,
-        commonsense_test,
-    )
-
     artifact = MixedCICArtifact(
         arithmetic,
         joint_model,
@@ -281,6 +290,10 @@ def train_multidomain(
             "selected_config": asdict(selected_config),
             "domains": ["jcommonsenseqa", "jnli"],
             "selection_scope": "per-domain official-train inner splits only",
+            "frozen_cic_006_reference": {
+                "correct": CIC006_VALIDATION_CORRECT,
+                "total": CIC006_VALIDATION_ROWS,
+            },
         },
     )
     return MultiDomainTrainingResult(
@@ -303,7 +316,7 @@ def train_multidomain(
         jnli_work=jnli_work,
         commonsense_majority_correct=_majority_correct(commonsense_test),
         jnli_majority_correct=_majority_correct(jnli_test),
-        cic_006_commonsense_correct=cic_006_correct,
+        cic_006_commonsense_correct=CIC006_VALIDATION_CORRECT,
         choice_nonzero_weights=len(joint_model.weights),
         selected_config_name=selected_config.name,
         selected_config=asdict(selected_config),
