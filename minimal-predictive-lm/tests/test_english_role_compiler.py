@@ -1,4 +1,4 @@
-from minimal_predictive_lm.english_role_compiler_v4 import EnglishRoleReferenceResolverV4
+from minimal_predictive_lm.english_role_compiler_v5 import EnglishRoleReferenceResolverV5
 
 
 def _prompt(sentence: str, a: str, b: str, ambiguous: str = "(C) Ambiguous") -> str:
@@ -10,7 +10,7 @@ def _prompt(sentence: str, a: str, b: str, ambiguous: str = "(C) Ambiguous") -> 
 
 
 def test_core_role_evidence_and_ambiguity():
-    resolver = EnglishRoleReferenceResolverV4()
+    resolver = EnglishRoleReferenceResolverV5()
     assert resolver.answer(
         _prompt(
             "The guard called the cleaner and asked them to open the door.",
@@ -42,7 +42,7 @@ def test_core_role_evidence_and_ambiguity():
 
 
 def test_recipient_possessor_and_causal_roles():
-    resolver = EnglishRoleReferenceResolverV4()
+    resolver = EnglishRoleReferenceResolverV5()
     assert resolver.answer(
         _prompt(
             "The customer asked the salesperson if they could send the prices.",
@@ -88,7 +88,7 @@ def test_recipient_possessor_and_causal_roles():
 
 
 def test_complement_roles_and_possessive_subjects():
-    resolver = EnglishRoleReferenceResolverV4()
+    resolver = EnglishRoleReferenceResolverV5()
     assert resolver.answer(
         _prompt(
             "The patient disclosed to the counselor that they had a history of substance abuse.",
@@ -134,7 +134,7 @@ def test_complement_roles_and_possessive_subjects():
 
 
 def test_non_reference_prompt_abstains():
-    resolver = EnglishRoleReferenceResolverV4()
+    resolver = EnglishRoleReferenceResolverV5()
     assert resolver.answer("What is 17 plus 4?").output is None
     assert resolver.benchmark_task_name_branches == 0
     assert resolver.domain_specific_handlers == 0
