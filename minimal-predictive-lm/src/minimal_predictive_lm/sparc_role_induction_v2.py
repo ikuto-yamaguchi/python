@@ -6,7 +6,15 @@ import math
 import zlib
 from pathlib import Path
 
-from .sparc_discourse import SPARCHS9Model, SparseDiscourseGraph, _sentences
+from .sparc_discourse import (
+    DiscourseDocument,
+    DiscourseNode,
+    SPARCHS9Model,
+    SparseDiscourseGraph,
+    _anchors,
+    _normalise,
+    _sentences,
+)
 from .sparc_role_induction import (
     ROLES,
     InducedDiscourseGraph,
@@ -17,7 +25,7 @@ from .sparc_role_induction import (
 
 
 class SparseRoleInducerV2(SparseRoleInducer):
-    """Correct score-directed Viterbi decoding for the HS10 sparse prototypes."""
+    """Correct score-directed Viterbi decoding for sparse role prototypes."""
 
     def predict(self, text: str) -> tuple[str, ...]:
         sentences = _sentences(text)
@@ -101,6 +109,79 @@ class InducedDiscourseGraphV2(InducedDiscourseGraph):
             read_budget=read_budget,
             workspace_documents=workspace_documents,
         )
+        self.exact_titles: dict[str, int] = {}
+
+    @staticmethod
+    def _selected_anchors(title: str, source_id: str, text: str) -> set[str]:
+        essential = _anchors(title + source_id)
+        content = sorted(_anchors(text), key=lambda value: (-len(value), value))[:96]
+        return essential | set(content)
+
+    def ingest_induced(self, text: str, *, source_id: str, title: str = "") -> int:
+        if len(self.documents) >= self.max_documents:
+            raise MemoryError("discourse document capacity reached")
+        sentences = _sentences(text)
+        roles = self.inducer.predict(text)
+        if len(sentences) != len(roles):
+            raise ValueError("role induction length mismatch")
+        document_id = len(self.documents)
+        title = title or source_id
+        node_ids: list[int] = []
+        last_claim: int | None = None
+        recent_support: list[int] = []
+        for position, (sentence, role) in enumerate(zip(sentences, roles)):
+            node_id = len(self.nodes)
+            self.nodes.append(
+                DiscourseNode(document_id, str(source_id), position, sentence, role)
+            )
+            node_ids.append(node_id)
+            self.role_nodes[document_id][role].append(node_id)
+            if role == "claim":
+                last_claim = node_id
+                recent_support.clear()
+            elif role in {"evidence", "example"} and last_claim is not None:
+                self._add_edge(
+                    node_id,
+                    last_claim,
+                    "supports" if role == "evidence" else "exemplifies",
+                )
+                recent_support.append(node_id)
+            elif role == "counter" and last_claim is not None:
+                self._add_edge(node_id, last_claim, "opposes")
+            elif role == "concession" and last_claim is not None:
+                self._add_edge(node_id, last_claim, "qualifies")
+            elif role == "detail" and last_claim is not None:
+                self._add_edge(node_id, last_claim, "elaborates")
+            elif role == "conclusion":
+                if last_claim is not None:
+                    self._add_edge(last_claim, node_id, "develops")
+                for support in recent_support[-4:]:
+                    self._add_edge(support, node_id, "supports")
+                last_claim = node_id
+                recent_support.clear()
+        self.documents.append(
+            DiscourseDocument(str(source_id), title, tuple(node_ids))
+        )
+        self.exact_titles[_normalise(title)] = document_id
+        for anchor in self._selected_anchors(title, str(source_id), text):
+            self.postings[anchor].add(document_id)
+        self.workspace.append(document_id)
+        return document_id
+
+    def _candidate_documents(self, query: str) -> list[int]:
+        compact = _normalise(query)
+        exact = [
+            (len(title), document_id)
+            for title, document_id in self.exact_titles.items()
+            if title and title in compact
+        ]
+        if exact:
+            length, document_id = max(exact)
+            self.last_scores = {document_id: float(length)}
+            self.last_candidates = 1
+            self.last_anchor_reads = 0
+            return [document_id]
+        return super()._candidate_documents(query)
 
     @classmethod
     def from_bytes(cls, data: bytes) -> "InducedDiscourseGraphV2":
@@ -119,11 +200,17 @@ class InducedDiscourseGraphV2(InducedDiscourseGraph):
         graph.documents = base.documents
         graph.nodes = base.nodes
         graph.edges = base.edges
-        graph.postings = base.postings
         graph.incoming_edges = base.incoming_edges
         graph.outgoing_edges = base.outgoing_edges
         graph.role_nodes = base.role_nodes
         graph.workspace = base.workspace
+        for document_id, document in enumerate(graph.documents):
+            graph.exact_titles[_normalise(document.title)] = document_id
+            text = "".join(graph.nodes[node_id].text for node_id in document.node_ids)
+            for anchor in graph._selected_anchors(
+                document.title, document.source_id, text
+            ):
+                graph.postings[anchor].add(document_id)
         return graph
 
 
