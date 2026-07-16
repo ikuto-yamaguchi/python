@@ -53,13 +53,14 @@ class MixedCICArtifact:
 
     def to_bytes(self) -> bytes:
         payload = {
-            "format": "cic-mixed-002",
+            "format": "cic-mixed-003",
             "metadata": self.metadata,
             "arithmetic": base64.b64encode(self.arithmetic.to_bytes()).decode("ascii"),
             "choice": {
                 "dimensions": self.choice.dimensions,
                 "scale": self.choice.scale,
                 "hash_replicas": self.choice.hash_replicas,
+                "relation_scope": self.choice.relation_scope,
                 "weights": {
                     str(index): value for index, value in self.choice.weights.items()
                 },
@@ -86,6 +87,7 @@ class MixedCICArtifact:
                     int(index): int(value) for index, value in choice["weights"].items()
                 },
                 hash_replicas=int(choice.get("hash_replicas", 1)),
+                relation_scope=str(choice.get("relation_scope", "tail")),
             ),
             dict(payload.get("metadata", {})),
         )
