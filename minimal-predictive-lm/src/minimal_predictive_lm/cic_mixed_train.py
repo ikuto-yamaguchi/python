@@ -9,8 +9,6 @@ from .cic_choice_data import load_choice_dataset, stable_choice_split
 from .cic_choice_model import (
     QuantizedChoiceMechanism,
     choice_accuracy,
-    choose_choice_epochs,
-    choose_legacy_choice_epochs,
     train_choice_mechanism,
     train_legacy_choice_mechanism,
 )
@@ -40,17 +38,19 @@ class MixedTrainingResult:
     choice_correct: int
     choice_work: float
     choice_epochs: int
-    choice_validation: dict[int, float]
+    choice_validation: dict[str, float]
     majority_correct: int
     choice_nonzero_weights: int
     legacy_correct: int
+    margin_correct: int
     legacy_epochs: int
-    legacy_validation: dict[int, float]
+    selected_learner: str
 
 
 def train_mixed(
     mawps_path: str | Path,
-    commonsense_path: str | Path,
+    commonsense_train_path: str | Path,
+    commonsense_test_path: str | Path | None = None,
 ) -> MixedTrainingResult:
     math_rows = load_mawps(mawps_path)
     math_train_raw, math_test_raw = stable_outer_split(math_rows)
@@ -65,18 +65,64 @@ def train_mixed(
     )
     math_correct, math_total, math_work = artifact_accuracy(arithmetic, math_test_raw)
 
-    choice_rows = load_choice_dataset(commonsense_path)
-    choice_train, choice_test = stable_choice_split(choice_rows)
+    choice_rows = load_choice_dataset(commonsense_train_path)
+    if commonsense_test_path is None:
+        choice_train, choice_test = stable_choice_split(choice_rows)
+    else:
+        choice_train = choice_rows
+        choice_test = load_choice_dataset(commonsense_test_path)
 
-    legacy_epochs, legacy_validation = choose_legacy_choice_epochs(choice_train)
-    legacy_raw = train_legacy_choice_mechanism(choice_train, epochs=legacy_epochs)
+    # The two learners use the same compact executable feature map. Only the
+    # update rule differs. Learner selection happens on an inner split of the
+    # official training data; the official validation set remains untouched.
+    inner_train, inner_validation = stable_choice_split(
+        choice_train, test_threshold=1500, namespace="learner-selection:"
+    )
+    legacy_epochs = 4
+    margin_epochs = 3
+    legacy_probe = train_legacy_choice_mechanism(
+        inner_train, epochs=legacy_epochs
+    )
+    margin_probe = train_choice_mechanism(
+        inner_train, epochs=margin_epochs
+    )
+    legacy_inner_correct, inner_total, _ = choice_accuracy(
+        legacy_probe, inner_validation
+    )
+    margin_inner_correct, _inner_total, _ = choice_accuracy(
+        margin_probe, inner_validation
+    )
+    validation_scores = {
+        "cic_003_mistake_perceptron": (
+            legacy_inner_correct / inner_total if inner_total else 0.0
+        ),
+        "cic_004_averaged_margin": (
+            margin_inner_correct / inner_total if inner_total else 0.0
+        ),
+    }
+    selected_learner = max(validation_scores, key=validation_scores.get)
+
+    legacy_raw = train_legacy_choice_mechanism(
+        choice_train, epochs=legacy_epochs
+    )
+    legacy = QuantizedChoiceMechanism.from_raw(
+        legacy_raw, quantization_limit=31, top_weights=4096
+    )
     legacy_correct, _legacy_total, _legacy_work = choice_accuracy(
-        legacy_raw, choice_test
+        legacy, choice_test
     )
 
-    choice_epochs, choice_validation = choose_choice_epochs(choice_train)
-    choice_raw = train_choice_mechanism(choice_train, epochs=choice_epochs)
-    choice = QuantizedChoiceMechanism.from_raw(choice_raw)
+    margin_raw = train_choice_mechanism(
+        choice_train, epochs=margin_epochs
+    )
+    margin = QuantizedChoiceMechanism.from_raw(
+        margin_raw, quantization_limit=63, top_weights=8192
+    )
+    margin_correct, _margin_total, _margin_work = choice_accuracy(
+        margin, choice_test
+    )
+
+    choice = margin if selected_learner == "cic_004_averaged_margin" else legacy
     choice_correct, _choice_total, choice_work = choice_accuracy(choice, choice_test)
     majority_index = Counter(row.answer_index for row in choice_train).most_common(1)[0][0]
     majority_correct = sum(row.answer_index == majority_index for row in choice_test)
@@ -84,7 +130,10 @@ def train_mixed(
     artifact = MixedCICArtifact(
         arithmetic,
         choice,
-        {"capability_id": "CIC-004-MARGIN"},
+        {
+            "capability_id": "CIC-004-JGLUE",
+            "selected_learner": selected_learner,
+        },
     )
     return MixedTrainingResult(
         artifact,
@@ -100,11 +149,12 @@ def train_mixed(
         len(choice_test),
         choice_correct,
         choice_work,
-        choice_epochs,
-        choice_validation,
+        margin_epochs if selected_learner == "cic_004_averaged_margin" else legacy_epochs,
+        validation_scores,
         majority_correct,
         len(choice.weights),
         legacy_correct,
+        margin_correct,
         legacy_epochs,
-        legacy_validation,
+        selected_learner,
     )
