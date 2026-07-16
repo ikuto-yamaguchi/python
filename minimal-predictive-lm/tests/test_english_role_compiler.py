@@ -1,4 +1,4 @@
-from minimal_predictive_lm.english_role_compiler import EnglishRoleReferenceResolver
+from minimal_predictive_lm.english_role_compiler_v2 import EnglishRoleReferenceResolverV2
 
 
 def _prompt(sentence: str, a: str, b: str, ambiguous: str = "(C) Ambiguous") -> str:
@@ -10,7 +10,7 @@ def _prompt(sentence: str, a: str, b: str, ambiguous: str = "(C) Ambiguous") -> 
 
 
 def test_object_control_subject_continuity_semantics_and_ambiguity():
-    resolver = EnglishRoleReferenceResolver()
+    resolver = EnglishRoleReferenceResolverV2()
     assert resolver.answer(
         _prompt(
             "The guard called the cleaner and asked them to open the door.",
@@ -42,7 +42,7 @@ def test_object_control_subject_continuity_semantics_and_ambiguity():
 
 
 def test_non_reference_prompt_abstains():
-    resolver = EnglishRoleReferenceResolver()
+    resolver = EnglishRoleReferenceResolverV2()
     assert resolver.answer("What is 17 plus 4?").output is None
     assert resolver.benchmark_task_name_branches == 0
     assert resolver.domain_specific_handlers == 0
