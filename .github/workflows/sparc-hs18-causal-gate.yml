@@ -28,7 +28,6 @@ jobs:
           set -o pipefail
           python -m pytest -vv minimal-predictive-lm/tests/test_english_causal_compiler.py 2>&1 | tee minimal-predictive-lm/results/hs18_unit.log
       - name: Run integrated, development, and frozen V2 causal gates
-        if: ${{ steps.unit.outcome == 'success' }}
         id: experiment
         continue-on-error: true
         working-directory: minimal-predictive-lm
