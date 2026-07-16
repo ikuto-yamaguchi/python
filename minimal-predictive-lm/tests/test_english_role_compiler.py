@@ -1,4 +1,4 @@
-from minimal_predictive_lm.english_role_compiler_v2 import EnglishRoleReferenceResolverV2
+from minimal_predictive_lm.english_role_compiler_v3 import EnglishRoleReferenceResolverV3
 
 
 def _prompt(sentence: str, a: str, b: str, ambiguous: str = "(C) Ambiguous") -> str:
@@ -9,8 +9,8 @@ def _prompt(sentence: str, a: str, b: str, ambiguous: str = "(C) Ambiguous") -> 
     )
 
 
-def test_object_control_subject_continuity_semantics_and_ambiguity():
-    resolver = EnglishRoleReferenceResolverV2()
+def test_core_role_evidence_and_ambiguity():
+    resolver = EnglishRoleReferenceResolverV3()
     assert resolver.answer(
         _prompt(
             "The guard called the cleaner and asked them to open the door.",
@@ -41,8 +41,47 @@ def test_object_control_subject_continuity_semantics_and_ambiguity():
     ).output == "(C)"
 
 
+def test_generalized_recipient_possessor_and_causal_roles():
+    resolver = EnglishRoleReferenceResolverV3()
+    assert resolver.answer(
+        _prompt(
+            "The customer asked the salesperson if they could send the prices.",
+            "The customer would send the prices",
+            "The salesperson would send the prices",
+        )
+    ).output == "(B)"
+    assert resolver.answer(
+        _prompt(
+            "The worker told the pedestrian that they should avoid the closed street.",
+            "The worker should avoid it",
+            "The pedestrian should avoid it",
+        )
+    ).output == "(B)"
+    assert resolver.answer(
+        _prompt(
+            "After meeting with the producers, Sam went to her office.",
+            "It was the producers' office",
+            "It was Sam's office",
+        )
+    ).output == "(B)"
+    assert resolver.answer(
+        _prompt(
+            "The practitioner made a house call for the patient because he felt gravely ill.",
+            "The practitioner felt ill",
+            "The patient felt ill",
+        )
+    ).output == "(B)"
+    assert resolver.answer(
+        _prompt(
+            "The sheriff protected the writer because he upholds the peace.",
+            "The sheriff upholds the peace",
+            "The writer upholds the peace",
+        )
+    ).output == "(A)"
+
+
 def test_non_reference_prompt_abstains():
-    resolver = EnglishRoleReferenceResolverV2()
+    resolver = EnglishRoleReferenceResolverV3()
     assert resolver.answer("What is 17 plus 4?").output is None
     assert resolver.benchmark_task_name_branches == 0
     assert resolver.domain_specific_handlers == 0
