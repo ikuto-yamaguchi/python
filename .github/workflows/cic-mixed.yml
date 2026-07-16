@@ -29,19 +29,27 @@ jobs:
           curl -L --fail --retry 3 \
             https://raw.githubusercontent.com/yahoojapan/JGLUE/v1.1.0/datasets/jcommonsenseqa-v1.1/valid-v1.1.json \
             -o minimal-predictive-lm/public_data/cic_mixed/jcommonsenseqa-valid.jsonl
-      - name: Run mixed experiment
+          curl -L --fail --retry 3 \
+            https://raw.githubusercontent.com/yahoojapan/JGLUE/v1.1.0/datasets/jnli-v1.1/train-v1.1.json \
+            -o minimal-predictive-lm/public_data/cic_mixed/jnli-train.jsonl
+          curl -L --fail --retry 3 \
+            https://raw.githubusercontent.com/yahoojapan/JGLUE/v1.1.0/datasets/jnli-v1.1/valid-v1.1.json \
+            -o minimal-predictive-lm/public_data/cic_mixed/jnli-valid.jsonl
+      - name: Run multidomain experiment
         working-directory: minimal-predictive-lm
         run: |
           mkdir -p results
-          python -m minimal_predictive_lm.cic_mixed_experiment \
+          python -m minimal_predictive_lm.cic_multidomain_experiment \
             public_data/cic_mixed/mawps.json \
             public_data/cic_mixed/jcommonsenseqa-train.jsonl \
             public_data/cic_mixed/jcommonsenseqa-valid.jsonl \
-            --output results/cic_006_dualhash.json
+            public_data/cic_mixed/jnli-train.jsonl \
+            public_data/cic_mixed/jnli-valid.jsonl \
+            --output results/cic_007_multidomain.json
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
-          name: cic-006-dualhash-results
+          name: cic-007-multidomain-results
           path: minimal-predictive-lm/results
           retention-days: 14
       - name: Enforce gates
@@ -50,14 +58,13 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          row = json.loads(Path('results/cic_006_dualhash.json').read_text())
+          row = json.loads(Path('results/cic_007_multidomain.json').read_text())
           assert row['passed'] is True
           assert row['task_id_input_used'] is False
-          assert row['same_artifact_for_both_capabilities'] is True
-          assert row['official_train_to_validation_transfer'] is True
+          assert row['same_choice_mechanism_for_both_domains'] is True
+          assert row['same_artifact_for_all_capabilities'] is True
           assert row['arithmetic']['accuracy'] >= 0.58
-          choice = row['commonsense_choice']
-          assert choice['selected_config']['hash_replicas'] == 2
-          assert choice['selected_accuracy'] > choice['cic_005_baseline_accuracy']
+          assert row['jnli']['gain_over_majority'] >= 0.05
+          assert row['jcommonsenseqa']['joint_accuracy'] >= row['jcommonsenseqa']['cic_006_single_domain_accuracy'] - 0.02
           assert row['artifact']['bytes'] <= 250000
           PY
