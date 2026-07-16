@@ -4,8 +4,8 @@ import argparse
 import json
 from pathlib import Path
 
-from .sparc_cross_domain_plans import SPARCHS11Model
-from .sparc_hs11_experiment import configured_model
+from .sparc_cross_domain_plans_v2 import SPARCHS11ModelV2
+from .sparc_hs11_experiment_v2 import configured_model
 
 
 def main() -> None:
@@ -17,7 +17,7 @@ def main() -> None:
     parser.add_argument("--prompt", help="run one prompt and exit")
     args = parser.parse_args()
 
-    model = SPARCHS11Model.load(args.model) if args.model else configured_model()
+    model = SPARCHS11ModelV2.load(args.model) if args.model else configured_model()
     if args.prompt is not None:
         print(model.reply(args.prompt).text)
         return
