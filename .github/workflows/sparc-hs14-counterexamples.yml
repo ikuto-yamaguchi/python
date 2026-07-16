@@ -1,0 +1,82 @@
+name: sparc-hs14-counterexamples
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+  workflow_dispatch:
+
+jobs:
+  hs14-counterexamples:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Unit tests
+        run: >-
+          python -m pytest -q
+          minimal-predictive-lm/tests/test_sparc_goal_rules.py
+          minimal-predictive-lm/tests/test_sparc_counterexamples.py
+      - name: Train and evaluate SPARC-HS14
+        working-directory: minimal-predictive-lm
+        run: |
+          mkdir -p results
+          python - <<'PY'
+          import traceback
+          from pathlib import Path
+          from minimal_predictive_lm.sparc_hs14_experiment_v2 import run_experiment
+
+          try:
+              result = run_experiment()
+              print(result)
+          except BaseException:
+              Path('results/hs14_error.txt').write_text(
+                  traceback.format_exc(), encoding='utf-8'
+              )
+              raise
+          PY
+      - name: Upload model, report, or diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sparc-hs14-counterexample-results
+          path: minimal-predictive-lm/results
+          retention-days: 14
+      - name: Enforce capability and resource gates
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path('results/sparc_hs14_counterexamples.json').read_text())
+          scale = result['large_counterexample_memory']
+          assert result['passed'] is True
+          assert result['passed_checks'] == result['total_checks'] == 12
+          assert result['transformer_used'] is False
+          assert result['softmax_attention_used'] is False
+          assert result['growing_kv_cache_used'] is False
+          assert scale['subjects'] == 50000
+          assert scale['episodes'] == 100025
+          assert scale['indexed_relation_slots'] == 100025
+          assert scale['validated_rules'] == 1
+          assert scale['exclusion_guards'] == 1
+          assert scale['correct_normal_queries'] == scale['expected_normal_queries'] == 256
+          assert scale['correct_blocked_queries'] == scale['expected_blocked_queries'] == 256
+          assert scale['max_rule_candidates'] <= 1
+          assert scale['max_guard_reads'] <= 1
+          assert scale['max_rule_reads'] <= 1
+          assert scale['max_edge_reads'] <= 2
+          assert scale['max_nodes_activated'] <= 4
+          assert scale['max_estimated_operations'] <= 24
+          assert scale['forward_materialisation_used'] is False
+          assert scale['validation_scan_used_at_inference'] is False
+          assert scale['global_exception_scan_used'] is False
+          assert scale['serialized_bytes'] <= 10000000
+          assert result['peak_process_kib'] <= 1200000
+          assert result['elapsed_seconds'] <= 120
+          PY
