@@ -4,25 +4,29 @@ import argparse
 import json
 from pathlib import Path
 
-from .sparc_discourse import SPARCHS9Model
-from .sparc_hs9_experiment import configured_model
+from .sparc_discourse_compact import SPARCHS9CompactModel
+from .sparc_hs9_compact_experiment import configured_model
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="SPARC-HS9 sparse discourse conversation shell"
+        description="SPARC-HS9 compact sparse discourse conversation shell"
     )
     parser.add_argument("--model", type=Path, help="load an existing HS9 model")
     parser.add_argument("--save", type=Path, help="save when the shell exits")
     parser.add_argument("--prompt", help="run one prompt and exit")
     args = parser.parse_args()
 
-    model = SPARCHS9Model.load(args.model) if args.model else configured_model()
+    model = (
+        SPARCHS9CompactModel.load(args.model)
+        if args.model
+        else configured_model()
+    )
     if args.prompt is not None:
         print(model.reply(args.prompt).text)
         return
 
-    print("SPARC-HS9 discourse conversation shell")
+    print("SPARC-HS9 compact discourse conversation shell")
     print(
         "commands: /article SOURCE TITLE PATH, /article-text SOURCE TITLE TEXT, "
         "/stats, /save PATH, /quit"
