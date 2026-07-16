@@ -53,12 +53,13 @@ class MixedCICArtifact:
 
     def to_bytes(self) -> bytes:
         payload = {
-            "format": "cic-mixed-001",
+            "format": "cic-mixed-002",
             "metadata": self.metadata,
             "arithmetic": base64.b64encode(self.arithmetic.to_bytes()).decode("ascii"),
             "choice": {
                 "dimensions": self.choice.dimensions,
                 "scale": self.choice.scale,
+                "hash_replicas": self.choice.hash_replicas,
                 "weights": {
                     str(index): value for index, value in self.choice.weights.items()
                 },
@@ -79,9 +80,12 @@ class MixedCICArtifact:
         return cls(
             CICArtifact.from_bytes(base64.b64decode(payload["arithmetic"])),
             QuantizedChoiceMechanism(
-                int(choice["dimensions"]),
-                float(choice["scale"]),
-                {int(index): int(value) for index, value in choice["weights"].items()},
+                dimensions=int(choice["dimensions"]),
+                scale=float(choice["scale"]),
+                weights={
+                    int(index): int(value) for index, value in choice["weights"].items()
+                },
+                hash_replicas=int(choice.get("hash_replicas", 1)),
             ),
             dict(payload.get("metadata", {})),
         )
