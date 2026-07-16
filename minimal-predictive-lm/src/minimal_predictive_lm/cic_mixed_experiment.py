@@ -23,20 +23,17 @@ def run_mixed_experiment(
     )
     artifact_bytes = len(row.artifact.to_bytes())
     math_accuracy = row.math_correct / row.math_total if row.math_total else 0.0
-    choice_accuracy = (
+    selected_accuracy = (
         row.choice_correct / row.choice_test_rows if row.choice_test_rows else 0.0
     )
-    legacy_accuracy = (
-        row.legacy_correct / row.choice_test_rows if row.choice_test_rows else 0.0
-    )
-    margin_accuracy = (
-        row.margin_correct / row.choice_test_rows if row.choice_test_rows else 0.0
+    baseline_accuracy = (
+        row.cic_004_correct / row.choice_test_rows if row.choice_test_rows else 0.0
     )
     majority_accuracy = (
         row.majority_correct / row.choice_test_rows if row.choice_test_rows else 0.0
     )
     result: dict[str, object] = {
-        "capability_id": "CIC-004-JGLUE",
+        "capability_id": "CIC-005-CAPACITY",
         "neural_network_used": False,
         "gradient_training_used": False,
         "task_id_input_used": False,
@@ -54,18 +51,17 @@ def run_mixed_experiment(
         "commonsense_choice": {
             "official_train_rows": row.choice_train_rows,
             "untouched_validation_rows": row.choice_test_rows,
-            "selected_learner": row.selected_learner,
+            "selected_config_name": row.selected_config_name,
+            "selected_config": row.selected_config,
+            "candidate_configs": row.candidate_configs,
+            "inner_capacity_validation": row.inner_capacity_validation,
             "selected_correct": row.choice_correct,
-            "selected_accuracy": choice_accuracy,
-            "cic_003_correct": row.legacy_correct,
-            "cic_003_accuracy": legacy_accuracy,
-            "cic_004_margin_correct": row.margin_correct,
-            "cic_004_margin_accuracy": margin_accuracy,
-            "absolute_margin_gain": margin_accuracy - legacy_accuracy,
+            "selected_accuracy": selected_accuracy,
+            "cic_004_baseline_correct": row.cic_004_correct,
+            "cic_004_baseline_accuracy": baseline_accuracy,
+            "absolute_gain_over_cic_004": selected_accuracy - baseline_accuracy,
             "majority_baseline_accuracy": majority_accuracy,
             "mean_checked_options": row.choice_work,
-            "selected_epochs": row.choice_epochs,
-            "inner_learner_validation": row.choice_validation,
             "test_used_for_selection": False,
         },
         "artifact": {
@@ -79,17 +75,18 @@ def run_mixed_experiment(
             "peak_process_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
         },
         "claim_boundary": (
-            "This is supervised transfer from the official public JGLUE "
-            "JCommonsenseQA training split to its untouched validation split. "
-            "It tests compact non-neural knowledge acquisition, not free-form "
-            "dialogue or Japanese high-school-level intelligence."
+            "CIC-005 selects hash dimensions, retained weights and margin "
+            "strength using only an inner split of the official JGLUE training "
+            "data, then compares once against the frozen CIC-004 configuration "
+            "on the untouched validation set. This is not free-form dialogue or "
+            "Japanese high-school-level intelligence."
         ),
     }
     result["passed"] = bool(
         math_accuracy >= 0.58
-        and row.selected_learner == "cic_004_averaged_margin"
-        and margin_accuracy >= legacy_accuracy
-        and margin_accuracy >= majority_accuracy + 0.03
+        and row.selected_config_name != "cic_004_32k_8k"
+        and selected_accuracy > baseline_accuracy
+        and selected_accuracy >= majority_accuracy + 0.03
         and artifact_bytes <= 250_000
         and row.math_mechanisms <= 100
     )
@@ -108,7 +105,7 @@ def main() -> None:
     parser.add_argument("mawps")
     parser.add_argument("commonsense_train")
     parser.add_argument("commonsense_test", nargs="?", default=None)
-    parser.add_argument("--output", default="results/cic_004_jglue.json")
+    parser.add_argument("--output", default="results/cic_005_capacity.json")
     args = parser.parse_args()
     print(
         json.dumps(
