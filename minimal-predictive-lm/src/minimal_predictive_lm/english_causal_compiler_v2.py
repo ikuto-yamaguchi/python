@@ -196,16 +196,22 @@ class EnglishCausalResolverV2(EnglishCausalResolver):
 
     @staticmethod
     def _omission_actor(q: str) -> str:
-        because = re.search(r"because\s+([a-z][a-z'-]*)\s+(?:did not|didn't|not)", q)
+        because = re.search(
+            r"because\s+(?:the\s+)?([a-z][a-z'-]*)\s+(?:did not|didn't|not)", q
+        )
         if because:
             return because.group(1)
-        direct = re.search(r"did\s+([a-z][a-z'-]*)\s+(?:not putting|not put|did not put)", q)
+        direct = re.search(
+            r"did\s+(?:the\s+)?([a-z][a-z'-]*)\s+(?:not putting|not put|did not put)", q
+        )
         if direct:
             return direct.group(1)
-        generic = re.search(r"\b([a-z][a-z'-]*)\s+not putting oil", q)
+        generic = re.search(
+            r"\b(?:the\s+)?([a-z][a-z'-]*)\s+not putting oil", q
+        )
         return generic.group(1) if generic else ""
 
     @staticmethod
     def _actor_after_did(q: str) -> str:
-        match = re.match(r"did\s+([a-z][a-z'-]*)", q)
+        match = re.match(r"did\s+(?:the\s+)?([a-z][a-z'-]*)", q)
         return match.group(1) if match else ""
