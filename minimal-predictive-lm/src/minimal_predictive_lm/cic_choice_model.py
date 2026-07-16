@@ -95,6 +95,7 @@ class RawChoiceMechanism:
     aggressiveness: float = 0.25
     averaged: bool = True
     hash_replicas: int = 1
+    relation_scope: str = "tail"
 
     def predict(self, stem: str, options: Sequence[str]) -> tuple[int, int]:
         scores = [
@@ -106,6 +107,7 @@ class RawChoiceMechanism:
                     index,
                     dimensions=self.dimensions,
                     hash_replicas=self.hash_replicas,
+                    relation_scope=self.relation_scope,
                 ),
             )
             for index, option in enumerate(options)
@@ -132,12 +134,13 @@ def train_choice_mechanism(
     seed: int = 0,
     aggressiveness: float = 0.25,
     hash_replicas: int = 1,
+    relation_scope: str = "tail",
 ) -> RawChoiceMechanism:
     """Train an averaged passive-aggressive option ranker.
 
-    Every row enforces a unit margin between the gold option and the strongest
-    distractor. Multiple independent hashes, when requested, occupy disjoint
-    vector blocks and are optimized jointly by the same sparse margin update.
+    Multiple independent hashes occupy disjoint vector blocks. relation_scope
+    controls whether fixed-cost question/option relations are drawn from the
+    input tail or spread across the complete input.
     """
 
     weights = np.zeros(dimensions, dtype=np.float32)
@@ -151,6 +154,7 @@ def train_choice_mechanism(
                 index,
                 dimensions=dimensions,
                 hash_replicas=hash_replicas,
+                relation_scope=relation_scope,
             )
             for index, option in enumerate(row.options)
         ]
@@ -199,6 +203,7 @@ def train_choice_mechanism(
         aggressiveness=aggressiveness,
         averaged=True,
         hash_replicas=hash_replicas,
+        relation_scope=relation_scope,
     )
 
 
@@ -242,6 +247,7 @@ def choose_choice_epochs(
     dimensions: int = 32768,
     aggressiveness: float = 0.25,
     hash_replicas: int = 1,
+    relation_scope: str = "tail",
 ) -> tuple[int, dict[int, float]]:
     inner_train, validation = stable_choice_split(
         rows, test_threshold=1500, namespace="inner:"
@@ -254,6 +260,7 @@ def choose_choice_epochs(
             dimensions=dimensions,
             aggressiveness=aggressiveness,
             hash_replicas=hash_replicas,
+            relation_scope=relation_scope,
         )
         correct, total, _work = choice_accuracy(model, validation)
         scores[epochs] = correct / total if total else 0.0
@@ -267,6 +274,7 @@ class QuantizedChoiceMechanism:
     scale: float
     weights: dict[int, int]
     hash_replicas: int = 1
+    relation_scope: str = "tail"
 
     @classmethod
     def from_raw(
@@ -291,6 +299,7 @@ class QuantizedChoiceMechanism:
             scale=scale,
             weights=quantized,
             hash_replicas=model.hash_replicas,
+            relation_scope=model.relation_scope,
         )
 
     def predict(self, stem: str, options: Sequence[str]) -> tuple[int, int]:
@@ -304,6 +313,7 @@ class QuantizedChoiceMechanism:
                     index,
                     dimensions=self.dimensions,
                     hash_replicas=self.hash_replicas,
+                    relation_scope=self.relation_scope,
                 ),
             )
             for index, option in enumerate(options)
