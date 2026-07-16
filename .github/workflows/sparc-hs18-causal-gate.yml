@@ -29,14 +29,15 @@ jobs:
           python -m pytest -vv \
             minimal-predictive-lm/tests/test_english_causal_compiler.py \
             minimal-predictive-lm/tests/test_english_causal_compiler_v3.py \
+            minimal-predictive-lm/tests/test_sparse_causal_induction.py \
             2>&1 | tee minimal-predictive-lm/results/hs18_unit.log
-      - name: Run integrated, development, and frozen V3 causal gates
+      - name: Run learned sparse causal final-tail gate
         id: experiment
         continue-on-error: true
         working-directory: minimal-predictive-lm
         run: |
           set -o pipefail
-          python -m minimal_predictive_lm.sparc_hs18_causal_gate_v3_runtime 2>&1 | tee ../sparc-hs18-causal-gate.log
+          python -m minimal_predictive_lm.sparc_hs18_causal_gate_v4 2>&1 | tee ../sparc-hs18-causal-gate.log
       - name: Upload results or diagnostics
         if: always()
         uses: actions/upload-artifact@v4
@@ -44,8 +45,8 @@ jobs:
           name: sparc-hs18-causal-gate-results
           path: |
             minimal-predictive-lm/results/hs18_unit.log
-            minimal-predictive-lm/results/sparc_hs18_causal_gate_v3.json
-            minimal-predictive-lm/results/sparc_hs18_causal_gate_v3.md
+            minimal-predictive-lm/results/sparc_hs18_causal_gate_v4.json
+            minimal-predictive-lm/results/sparc_hs18_causal_gate_v4.md
             sparc-hs18-causal-gate.log
           retention-days: 14
       - name: Enforce gate
