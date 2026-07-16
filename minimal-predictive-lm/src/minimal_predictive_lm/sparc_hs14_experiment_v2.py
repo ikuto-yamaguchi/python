@@ -4,9 +4,11 @@ import json
 
 from . import sparc_hs14_experiment as _experiment
 
+_ORIGINAL_CONFIGURED_MODEL = _experiment.configured_model
+
 
 def configured_model():
-    model = _experiment.configured_model()
+    model = _ORIGINAL_CONFIGURED_MODEL()
     model.ingest_fact(
         "ハヤブサの分類は鳥類である。", source_id="HS14保持確認分類資料"
     )
