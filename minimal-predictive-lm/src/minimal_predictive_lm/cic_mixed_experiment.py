@@ -27,13 +27,13 @@ def run_mixed_experiment(
         row.choice_correct / row.choice_test_rows if row.choice_test_rows else 0.0
     )
     baseline_accuracy = (
-        row.cic_004_correct / row.choice_test_rows if row.choice_test_rows else 0.0
+        row.cic_005_correct / row.choice_test_rows if row.choice_test_rows else 0.0
     )
     majority_accuracy = (
         row.majority_correct / row.choice_test_rows if row.choice_test_rows else 0.0
     )
     result: dict[str, object] = {
-        "capability_id": "CIC-005-CAPACITY",
+        "capability_id": "CIC-006-DUALHASH",
         "neural_network_used": False,
         "gradient_training_used": False,
         "task_id_input_used": False,
@@ -54,12 +54,12 @@ def run_mixed_experiment(
             "selected_config_name": row.selected_config_name,
             "selected_config": row.selected_config,
             "candidate_configs": row.candidate_configs,
-            "inner_capacity_validation": row.inner_capacity_validation,
+            "inner_dual_hash_validation": row.inner_dual_hash_validation,
             "selected_correct": row.choice_correct,
             "selected_accuracy": selected_accuracy,
-            "cic_004_baseline_correct": row.cic_004_correct,
-            "cic_004_baseline_accuracy": baseline_accuracy,
-            "absolute_gain_over_cic_004": selected_accuracy - baseline_accuracy,
+            "cic_005_baseline_correct": row.cic_005_correct,
+            "cic_005_baseline_accuracy": baseline_accuracy,
+            "absolute_gain_over_cic_005": selected_accuracy - baseline_accuracy,
             "majority_baseline_accuracy": majority_accuracy,
             "mean_checked_options": row.choice_work,
             "test_used_for_selection": False,
@@ -67,6 +67,7 @@ def run_mixed_experiment(
         "artifact": {
             "bytes": artifact_bytes,
             "choice_nonzero_weights": row.choice_nonzero_weights,
+            "hash_replicas": int(row.selected_config["hash_replicas"]),
             "format": "cic-mixed-002",
         },
         "resources": {
@@ -75,16 +76,15 @@ def run_mixed_experiment(
             "peak_process_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
         },
         "claim_boundary": (
-            "CIC-005 selects hash dimensions, retained weights and margin "
-            "strength using only an inner split of the official JGLUE training "
-            "data, then compares once against the frozen CIC-004 configuration "
-            "on the untouched validation set. This is not free-form dialogue or "
-            "Japanese high-school-level intelligence."
+            "CIC-006 selects single- versus dual-hash sparse mechanisms using "
+            "only an inner split of the official JGLUE training data, then "
+            "compares once against frozen CIC-005 on untouched validation. It "
+            "is not free-form dialogue or Japanese high-school-level intelligence."
         ),
     }
     result["passed"] = bool(
         math_accuracy >= 0.58
-        and row.selected_config_name != "cic_004_32k_8k"
+        and int(row.selected_config["hash_replicas"]) == 2
         and selected_accuracy > baseline_accuracy
         and selected_accuracy >= majority_accuracy + 0.03
         and artifact_bytes <= 250_000
@@ -105,7 +105,7 @@ def main() -> None:
     parser.add_argument("mawps")
     parser.add_argument("commonsense_train")
     parser.add_argument("commonsense_test", nargs="?", default=None)
-    parser.add_argument("--output", default="results/cic_005_capacity.json")
+    parser.add_argument("--output", default="results/cic_006_dualhash.json")
     args = parser.parse_args()
     print(
         json.dumps(
