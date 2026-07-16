@@ -1,0 +1,46 @@
+name: sparc-hs1-language
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+  workflow_dispatch:
+
+jobs:
+  hs1-language:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Unit tests
+        run: python -m pytest -q minimal-predictive-lm/tests/test_sparc_language.py
+      - name: Train and evaluate SPARC-HS1
+        working-directory: minimal-predictive-lm
+        run: python -m minimal_predictive_lm.sparc_language_experiment
+      - name: Upload model and report
+        uses: actions/upload-artifact@v4
+        with:
+          name: sparc-hs1-language-results
+          path: minimal-predictive-lm/results/sparc_hs1_language*
+          retention-days: 14
+      - name: Enforce capability and resource gates
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path('results/sparc_hs1_language.json').read_text())
+          assert report['passed'] is True
+          assert report['conversation']['heldout_accuracy'] >= 0.90
+          assert report['desktop_large']['stress_items'] >= 8000
+          assert report['desktop_large']['accuracy'] == 1.0
+          assert report['desktop_large']['max_candidates'] <= 4
+          assert report['desktop_large']['max_posting_reads'] <= 64
+          assert report['architecture']['transformer_used'] is False
+          assert report['architecture']['growing_kv_cache_used'] is False
+          PY

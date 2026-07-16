@@ -65,6 +65,8 @@ meci-chat = "minimal_predictive_lm.meci_cli:main"
 meci-exp = "minimal_predictive_lm.meci_experiment:main"
 meci-cognitive-chat = "minimal_predictive_lm.meci_agent_cli:main"
 meci-cognitive-exp = "minimal_predictive_lm.meci_agent_experiment:main"
+sparc-hs-chat = "minimal_predictive_lm.sparc_language_cli:main"
+sparc-hs1-exp = "minimal_predictive_lm.sparc_language_experiment:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
