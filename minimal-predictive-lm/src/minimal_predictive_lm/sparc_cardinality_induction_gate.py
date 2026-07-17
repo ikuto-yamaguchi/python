@@ -18,11 +18,9 @@ def train(cls):
     cardinality_records = []
     for index in range(8):
         suffix = jpnum(1100 + index)
-        # A previously unseen anonymous surface family is consistently single-valued.
         cardinality_records.append(
             (paragraph("produce", "生産工程" + suffix, "生成物" + suffix), f"単値根拠-{index}")
         )
-        # An already induced anonymous relation is observed with two objects per subject.
         part = "共通部品" + suffix
         for side in ("左装置", "右装置"):
             cardinality_records.append(
@@ -42,7 +40,7 @@ def run_gate(output_dir: Path) -> dict[str, object]:
     adaptive_initial_bytes = len(model.to_bytes())
 
     functional_probe = model._match_sentence(
-        RELATIONS["produce"][3].format(a="判定工程", b="判定生成物")
+        RELATIONS["produce"][0].format(a="判定工程", b="判定生成物")
     )[0][1]
     part_probe = model._match_sentence(
         RELATIONS["part"][3].format(a="判定部品", b="判定全体")
@@ -60,8 +58,8 @@ def run_gate(output_dir: Path) -> dict[str, object]:
         subject = "評価工程" + suffix
         first = "正生成物" + suffix
         second = "誤生成物" + suffix
-        sentence1 = RELATIONS["produce"][3].format(a=subject, b=first)
-        sentence2 = RELATIONS["produce"][3].format(a=subject, b=second)
+        sentence1 = RELATIONS["produce"][0].format(a=subject, b=first)
+        sentence2 = RELATIONS["produce"][0].format(a=subject, b=second)
         model.read_discourse_sentence(sentence1, f"生成正-{index}")
         accepted, reason = model.read_discourse_sentence(sentence2, f"生成誤-{index}")
         relation = model._match_sentence(sentence1)[0][1]
