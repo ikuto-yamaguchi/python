@@ -5,7 +5,15 @@ from itertools import combinations
 import re
 from typing import Iterable
 
-from .sparc_highschool_general import Edit, Program, SparseGeneralLearner, World, _clean
+from .sparc_highschool_general import (
+    Edit,
+    Program,
+    SparseGeneralLearner,
+    World,
+    _clean,
+    _cosine,
+    _ngrams,
+)
 
 
 _NUMBER = re.compile(r"-?\d+")
@@ -39,6 +47,7 @@ class TextObservationLearner(SparseGeneralLearner):
         self.text_observation_abstentions = 0
         self.entity_pair_hypotheses = 0
         self.typed_numeric_overrides = 0
+        self.fact_relation_merges = 0
 
     @staticmethod
     def _substrings(text: str, lo: int = 1, hi: int = 24) -> set[str]:
@@ -154,18 +163,42 @@ class TextObservationLearner(SparseGeneralLearner):
         output.append(text[cursor:])
         return "".join(output)
 
+    @staticmethod
+    def _relation_similarity(left_patterns: set[str], right_patterns: set[str]) -> float:
+        return max(
+            (_cosine(_ngrams(left), _ngrams(right)) for left in left_patterns for right in right_patterns),
+            default=0.0,
+        )
+
     def learn_fact_observation_group(self, sentences: Iterable[str]) -> str:
         rows = tuple(sentences)
         subject, obj = self._discover_pair(rows)
-        relation = f"TR{self.next_text_relation}"
-        self.next_text_relation += 1
-        edit = Edit("add_fact", relation, 0, 1)
-        signature = self._signature((edit,))
-        program_id = f"P{self.next_program}"
-        self.next_program += 1
         patterns = {self._abstract_pair(row, subject, obj) for row in rows}
-        self.programs[program_id] = Program(program_id, signature, (edit,), patterns)
-        self.fact_program_ids.add(program_id)
+        ranked = sorted(
+            (
+                self._relation_similarity(patterns, self.programs[program_id].patterns),
+                program_id,
+            )
+            for program_id in self.fact_program_ids
+        )
+        ranked.reverse()
+        reusable = None
+        if ranked and ranked[0][0] >= 0.45:
+            if len(ranked) == 1 or ranked[0][0] - ranked[1][0] >= 0.08:
+                reusable = self.programs[ranked[0][1]]
+        if reusable is not None:
+            reusable.patterns.update(patterns)
+            relation = reusable.edits[0].relation
+            self.fact_relation_merges += 1
+        else:
+            relation = f"TR{self.next_text_relation}"
+            self.next_text_relation += 1
+            edit = Edit("add_fact", relation, 0, 1)
+            signature = self._signature((edit,))
+            program_id = f"P{self.next_program}"
+            self.next_program += 1
+            self.programs[program_id] = Program(program_id, signature, (edit,), patterns)
+            self.fact_program_ids.add(program_id)
         self.training_episodes += 1
         self.text_observation_groups += 1
         return relation
@@ -309,6 +342,7 @@ class TextObservationLearner(SparseGeneralLearner):
             "text_observation_abstentions": self.text_observation_abstentions,
             "entity_pair_hypotheses": self.entity_pair_hypotheses,
             "fact_observation_programs": len(self.fact_program_ids),
+            "fact_relation_merges": self.fact_relation_merges,
             "numeric_observation_relations": len(self.numeric_observation_patterns),
             "typed_numeric_overrides": self.typed_numeric_overrides,
             "relation_ids_supplied_by_caller": False,
