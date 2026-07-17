@@ -1,0 +1,311 @@
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+import random
+import resource
+import time
+
+from .sparc_highschool_document_stream import IndependentDocumentLearner
+from .sparc_highschool_general import World
+
+
+def _corpus():
+    texts = [
+        "水は物質である", "酸素は気体である", "鉄は金属である", "正方形は図形である",
+        "江戸幕府は政権である", "鎌倉幕府は政権である",
+        "ルネサンスは文化運動である", "産業革命は社会変化である",
+        "水というものは物質に分類される", "酸素というものは気体に分類される",
+        "鉄というものは金属に分類される", "正方形というものは図形に分類される",
+        "歴史上の江戸幕府は一つの政権だった", "歴史上の鎌倉幕府は一つの政権だった",
+        "歴史上の室町幕府は一つの政権だった", "歴史上のルネサンスは一つの文化運動だった",
+        "歴史上の産業革命は一つの社会変化だった",
+        "物質の仲間に数えられるものが水だ", "気体の仲間に数えられるものが酸素だ",
+        "金属の仲間に数えられるものが鉄だ", "図形の仲間に数えられるものが正方形だ",
+        "水を分類すると物質に入る", "酸素を分類すると気体に入る",
+        "鉄を分類すると金属に入る", "正方形を分類すると図形に入る",
+        "東京は日本に位置する", "パリはフランスに位置する", "ローマはイタリアに位置する", "ベルリンはドイツに位置する",
+        "日本に位置する都市が東京だ", "フランスに位置する都市がパリだ", "イタリアに位置する都市がローマだ", "ドイツに位置する都市がベルリンだ",
+        "東京の所在国は日本である", "パリの所在国はフランスである", "ローマの所在国はイタリアである", "ベルリンの所在国はドイツである",
+        "今日は静かな雨が降る", "春には花が咲く",
+    ]
+    rows = [(text, f"D{index:03d}") for index, text in enumerate(texts)]
+    random.Random(17).shuffle(rows)
+    return rows
+
+
+def _oriented_fact(world: World, left: str, right: str):
+    rows = [
+        fact for fact in world.facts
+        if (fact[0] == left and fact[2] == right) or (fact[0] == right and fact[2] == left)
+    ]
+    return rows[0] if len(rows) == 1 else None
+
+
+def _orient(reference, left: str, right: str):
+    if reference is None:
+        return None
+    return (left, reference[1], right) if reference[0] in {"水", "東京"} else (right, reference[1], left)
+
+
+def run_gate(output_dir: str | Path) -> dict[str, object]:
+    output = Path(output_dir)
+    output.mkdir(parents=True, exist_ok=True)
+    started = time.perf_counter()
+    learner = IndependentDocumentLearner()
+
+    training_started = time.perf_counter()
+    stream = learner.learn_independent_documents(_corpus(), min_support=4)
+    count_relation = learner.learn_numeric_observation_group([
+        "箱Aには2個ある", "2個入っている箱は箱Aだ", "箱Aの個数は2である",
+    ])
+    temperature_relation = learner.learn_numeric_observation_group([
+        "試料Aの温度は10度である", "10度を示すのは試料Aだ", "試料Aは温度10度の状態にある",
+    ])
+    for text, before, after in [
+        ("箱Aに3個加える", "箱Aには2個ある", "箱Aには5個ある"),
+        ("箱Bに3個加える", "箱Bには4個ある", "箱Bには7個ある"),
+        ("箱Aを2倍にする", "箱Aには3個ある", "箱Aには6個ある"),
+        ("箱Bを2倍にする", "箱Bには5個ある", "箱Bには10個ある"),
+        ("試料Aの温度を5度上げる", "試料Aの温度は10度である", "試料Aの温度は15度である"),
+        ("試料Bの温度を5度上げる", "試料Bの温度は20度である", "試料Bの温度は25度である"),
+    ]:
+        learner.teach_event_from_text(text, [before], [after])
+    training_seconds = time.perf_counter() - training_started
+
+    axes: dict[str, dict[str, int]] = {}
+    inference_seconds = 0.0
+    total_queries = 0
+    max_candidates = 0
+    max_feature_reads = 0
+
+    def apply(text: str, world: World):
+        nonlocal inference_seconds, total_queries, max_candidates, max_feature_reads
+        stamp = time.perf_counter()
+        result = learner.apply(text, world)
+        inference_seconds += time.perf_counter() - stamp
+        total_queries += 1
+        max_candidates = max(max_candidates, learner.last_candidates)
+        max_feature_reads = max(max_feature_reads, learner.last_feature_reads)
+        return result
+
+    document_world = learner.learned_document_world()
+    kind_reference = _oriented_fact(document_world, "水", "物質")
+    location_reference = _oriented_fact(document_world, "東京", "日本")
+    relation_ok = (
+        stream.relation_clusters == 2
+        and kind_reference is not None
+        and location_reference is not None
+        and kind_reference[1] != location_reference[1]
+    )
+    axes["ungrouped_relation_discovery"] = {"correct": 2 if relation_ok else 0, "total": 2}
+
+    kind_pairs = {
+        ("水", "物質"), ("酸素", "気体"), ("鉄", "金属"), ("正方形", "図形"),
+        ("江戸幕府", "政権"), ("鎌倉幕府", "政権"), ("室町幕府", "政権"),
+        ("ルネサンス", "文化運動"), ("産業革命", "社会変化"),
+    }
+    location_pairs = {
+        ("東京", "日本"), ("パリ", "フランス"), ("ローマ", "イタリア"), ("ベルリン", "ドイツ"),
+    }
+    expected_facts = {
+        _orient(kind_reference, left, right) for left, right in kind_pairs
+    } | {
+        _orient(location_reference, left, right) for left, right in location_pairs
+    }
+    expected_facts.discard(None)
+    correct_graph = len(document_world.facts & expected_facts) + int(document_world.facts == expected_facts)
+    axes["independent_document_graph"] = {"correct": correct_graph, "total": len(expected_facts) + 1}
+
+    source_correct = 0
+    for left, right in [("水", "物質"), ("酸素", "気体"), ("鉄", "金属"), ("正方形", "図形")]:
+        fact = _orient(kind_reference, left, right)
+        source_correct += int(fact in learner.document_sources and len(learner.document_sources[fact]) >= 4)
+    axes["source_grounding"] = {"correct": source_correct, "total": 4}
+
+    kind_relation = kind_reference[1] if kind_reference else ""
+    location_relation = location_reference[1] if location_reference else ""
+    direct_cases = []
+    for index in range(20):
+        direct_cases.extend([
+            (f"銅{index}は金属である", _orient(kind_reference, f"銅{index}", "金属")),
+            (f"大阪{index}は日本に位置する", _orient(location_reference, f"大阪{index}", "日本")),
+        ])
+    correct = 0
+    for text, expected in direct_cases:
+        result = apply(text, World())
+        correct += int(result.accepted and expected in result.world.facts)
+    axes["independent_surface_transfer"] = {"correct": correct, "total": len(direct_cases)}
+
+    paraphrases = [
+        ("酸素は気体に分類される", _orient(kind_reference, "酸素", "気体")),
+        ("歴史上の鎌倉幕府は政権の仲間に数えられる", _orient(kind_reference, "鎌倉幕府", "政権")),
+        ("正方形というものは図形である", _orient(kind_reference, "正方形", "図形")),
+        ("銅を分類すると金属だった", _orient(kind_reference, "銅", "金属")),
+    ] * 5
+    correct = 0
+    for text, expected in paraphrases:
+        result = apply(text, World())
+        correct += int(result.accepted and expected in result.world.facts)
+    axes["untouched_compositional_paraphrase"] = {"correct": correct, "total": len(paraphrases)}
+
+    explanation_correct = 0
+    explanation_samples = []
+    for left, right in [("酸素", "気体"), ("鎌倉幕府", "政権"), ("正方形", "図形"), ("銅", "金属")] * 5:
+        fact = _orient(kind_reference, left, right)
+        stamp = time.perf_counter()
+        text = learner.explain(World.from_parts([fact] if fact else []))
+        inference_seconds += time.perf_counter() - stamp
+        explanation_samples.append(text)
+        explanation_correct += int(left in text and right in text and text.endswith("。"))
+    axes["free_form_explanation"] = {"correct": explanation_correct, "total": 20}
+
+    numeric_correct = 0
+    for index in range(10, 30):
+        subject = f"箱{index}"
+        before = learner.observe_world([f"{subject}には{index}個ある"]).world
+        added = apply(f"{subject}に3個加える", before)
+        doubled = apply(f"{subject}を2倍にする", before)
+        numeric_correct += int(added.accepted and added.world.number_map().get((subject, count_relation)) == index + 3)
+        numeric_correct += int(doubled.accepted and doubled.world.number_map().get((subject, count_relation)) == index * 2)
+    axes["text_only_numeric_transfer"] = {"correct": numeric_correct, "total": 40}
+
+    causal_correct = 0
+    for index in range(20):
+        subject = f"試料{index + 30}"
+        state = learner.observe_world([f"{subject}の温度は{10 + index}度である"]).world
+        state = apply(f"{subject}の温度を5度上げる", state).world
+        result = apply(f"{subject}の温度を5度上げる", state)
+        causal_correct += int(result.accepted and result.world.number_map().get((subject, temperature_relation)) == 20 + index)
+    axes["causal_state_simulation"] = {"correct": causal_correct, "total": 20}
+
+    planning_correct = 0
+    planning_expanded = 0
+    for index in range(20):
+        subject = f"計画箱{index}"
+        start = learner.observe_world([f"{subject}には1個ある"]).world
+        goal = learner.observe_world([f"{subject}には8個ある"]).world
+        stamp = time.perf_counter()
+        plan = learner.plan(start, goal, [f"{subject}に3個加える", f"{subject}を2倍にする"], max_depth=3)
+        inference_seconds += time.perf_counter() - stamp
+        planning_correct += int(plan.found and plan.actions == (f"{subject}に3個加える", f"{subject}を2倍にする"))
+        planning_expanded += plan.expanded
+    axes["goal_directed_planning"] = {"correct": planning_correct, "total": 20}
+
+    learner.teach_event_from_text("箱Aから3個取り除く", ["箱Aには5個ある"], ["箱Aには2個ある"])
+    continual_correct = 0
+    for index in range(20):
+        subject = f"継続箱{index}"
+        before = learner.observe_world([f"{subject}には{index + 5}個ある"]).world
+        removed = apply(f"{subject}から3個取り除く", before)
+        retained = apply(f"{subject}に3個加える", before)
+        continual_correct += int(
+            removed.accepted and removed.world.number_map().get((subject, count_relation)) == index + 2
+            and retained.accepted and retained.world.number_map().get((subject, count_relation)) == index + 8
+        )
+    axes["continual_program_growth"] = {"correct": continual_correct, "total": 20}
+
+    unknown_correct = 0
+    for text in ["今日はとても静かだ", "この主張を詳しく論証せよ", "未知の規則で変換する"] * 10:
+        before = learner.observe_world(["箱Aには2個ある"]).world
+        result = apply(text, before)
+        unknown_correct += int(not result.accepted and result.world == before)
+    axes["unknown_abstention"] = {"correct": unknown_correct, "total": 30}
+
+    dialogue_correct = 0
+    for index in range(20):
+        subject = f"対話箱{index}"
+        state = learner.observe_world([f"{subject}には1個ある"]).world
+        for _ in range(4):
+            state = apply(f"{subject}に3個加える", state).world
+            state = apply(f"{subject}を2倍にする", state).world
+        dialogue_correct += int(state.number_map().get((subject, count_relation)) == 106)
+    axes["bounded_long_dialogue_state"] = {"correct": dialogue_correct, "total": 20}
+
+    model = learner.report()
+    scaffolds = sum(int(not model[key]) for key in [
+        "paraphrase_group_labels_supplied", "entity_spans_supplied", "document_relation_labels_supplied",
+        "relation_ids_supplied_by_caller", "grounded_worlds_supplied_by_caller",
+    ])
+    axes["caller_scaffolds_removed"] = {"correct": scaffolds, "total": 5}
+
+    total_correct = sum(row["correct"] for row in axes.values())
+    total = sum(row["total"] for row in axes.values())
+    percentages = {name: row["correct"] / row["total"] for name, row in axes.items()}
+    minimum_axis = min(percentages, key=percentages.get)
+    wall = time.perf_counter() - started
+    peak_rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024
+    estimated_ops = max_feature_reads * max(1, total_queries) + planning_expanded * max(1, len(learner.programs))
+    structural = (
+        all(value >= 0.95 for name, value in percentages.items() if name != "untouched_compositional_paraphrase")
+        and percentages["untouched_compositional_paraphrase"] >= 0.50
+        and model["serialized_bytes"] <= 131072
+        and peak_rss <= 536870912
+        and wall <= 8.0
+    )
+    report = {
+        "stage": "SPARC-highschool-general-001-r4-independent-documents",
+        "axes": axes,
+        "total_correct": total_correct,
+        "total": total,
+        "overall_accuracy": total_correct / total,
+        "minimum_axis": minimum_axis,
+        "minimum_axis_accuracy": percentages[minimum_axis],
+        "stream": stream.__dict__,
+        "model": model,
+        "kind_relation": kind_relation,
+        "location_relation": location_relation,
+        "kind_orientation": "forward" if kind_reference and kind_reference[0] == "水" else "reverse",
+        "location_orientation": "forward" if location_reference and location_reference[0] == "東京" else "reverse",
+        "graph_extras": sorted(document_world.facts - expected_facts),
+        "planning_expanded": planning_expanded,
+        "peak_rss_bytes": peak_rss,
+        "wall_seconds": wall,
+        "training_seconds": training_seconds,
+        "inference_seconds_total": inference_seconds,
+        "mean_inference_seconds": inference_seconds / max(1, total_queries + 40),
+        "max_candidates": max_candidates,
+        "max_feature_reads": max_feature_reads,
+        "estimated_sparse_operations": estimated_ops,
+        "free_dialogue_samples": explanation_samples[:4],
+        "structural_integration_passed": structural,
+        "highschool_level_passed": False,
+        "passed": structural,
+        "claim_boundary": (
+            "Fact schemas and relation clusters are induced from a shuffled independent document stream without paraphrase-group labels. "
+            "The stream requires at least four distinct value pairs per frame; numeric observation bootstrapping remains grouped, and unrestricted textbooks and open dialogue remain outside this gate."
+        ),
+    }
+    (output / "SPARC-highschool-general-independent-documents.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    (output / "SPARC-highschool-general-independent-documents.model.zlib").write_bytes(learner.to_bytes())
+    lines = [
+        "# SPARC independent-document integrated gate", "",
+        f"- structural integration: {structural}",
+        f"- overall: {total_correct}/{total} ({report['overall_accuracy']:.2%})",
+        f"- minimum axis: {minimum_axis} ({report['minimum_axis_accuracy']:.2%})",
+        f"- model bytes: {model['serialized_bytes']}",
+        f"- peak RSS: {peak_rss}",
+        f"- training seconds: {training_seconds:.6f}",
+        f"- mean inference seconds: {report['mean_inference_seconds']:.9f}",
+        f"- max candidates / feature reads: {max_candidates} / {max_feature_reads}",
+        "", "## Axes",
+    ]
+    for name, row in axes.items():
+        lines.append(f"- {name}: {row['correct']}/{row['total']}")
+    lines += ["", "## Claim boundary", report["claim_boundary"]]
+    (output / "SPARC-highschool-general-independent-documents.md").write_text("\n".join(lines), encoding="utf-8")
+    if not structural:
+        raise SystemExit("independent-document integration gate failed")
+    return report
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output-dir", required=True)
+    args = parser.parse_args()
+    print(json.dumps(run_gate(args.output_dir), ensure_ascii=False, indent=2))
+
+
+if __name__ == "__main__":
+    main()

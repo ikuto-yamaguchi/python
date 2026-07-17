@@ -1,0 +1,54 @@
+name: sparc-highschool-independent-documents-001
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/sparc_highschool_general.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/sparc_highschool_text_observation.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/sparc_highschool_document_stream.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/sparc_highschool_document_stream_gate.py"
+      - "minimal-predictive-lm/tests/test_sparc_highschool_document_stream.py"
+      - ".github/workflows/sparc-highschool-independent-documents-001.yml"
+  workflow_dispatch:
+
+jobs:
+  independent-documents:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm
+      - name: Unit tests
+        run: |
+          mkdir -p artifacts/sparc-highschool-independent-documents-001
+          set +e
+          python -m unittest discover -s minimal-predictive-lm/tests -p 'test_sparc_highschool_document_stream.py' -v 2>&1 | tee artifacts/sparc-highschool-independent-documents-001/tests.log
+          echo ${PIPESTATUS[0]} > artifacts/sparc-highschool-independent-documents-001/tests.exit
+          exit 0
+      - name: Run independent-document integrated gate
+        continue-on-error: true
+        run: python -m minimal_predictive_lm.sparc_highschool_document_stream_gate --output-dir artifacts/sparc-highschool-independent-documents-001 2>&1 | tee artifacts/sparc-highschool-independent-documents-001/gate.log
+      - name: Upload results or diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sparc-highschool-independent-documents-001-results
+          path: artifacts/sparc-highschool-independent-documents-001
+          retention-days: 90
+      - name: Enforce gate
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path("artifacts/sparc-highschool-independent-documents-001")
+          if root.joinpath("tests.exit").read_text().strip() != "0":
+              raise SystemExit("independent-document unit tests failed")
+          report = json.loads(root.joinpath("SPARC-highschool-general-independent-documents.json").read_text())
+          if not report["passed"]:
+              raise SystemExit("independent-document integration gate failed")
+          PY
