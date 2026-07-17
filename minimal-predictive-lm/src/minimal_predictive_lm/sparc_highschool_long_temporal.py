@@ -79,13 +79,10 @@ class LongTemporalNarrativeLearner(TemporalNarrativeLearner):
             for match in re.finditer(re.escape(fragment), text):
                 matches.append((match.start(), match.end(), weight, fragment))
 
-        # Weighted interval selection favors long complete evidence and prevents the
-        # old global replacement bug where overlapping literals destroyed slots.
         matches.sort(key=lambda row: (row[1], row[0], -row[2], -len(row[3])))
         ends = [row[1] for row in matches]
         best: list[tuple[int, tuple[int, ...]]] = [(0, ())]
         for i, (start, _end, weight, _fragment) in enumerate(matches):
-            previous = -1
             lo, hi = 0, i
             while lo < hi:
                 mid = (lo + hi) // 2
@@ -94,15 +91,12 @@ class LongTemporalNarrativeLearner(TemporalNarrativeLearner):
                 else:
                     hi = mid
             previous = lo - 1
-            take_score = weight + (best[previous][0] if previous >= 0 else 0)
-            take_path = (best[previous][1] if previous >= 0 else ()) + (i,)
-            skip_score, skip_path = best[i - 1] if i else (0, ())
-            if take_score > skip_score:
-                best.append((take_score, take_path))
-            else:
-                best.append((skip_score, skip_path))
+            take_score = weight + best[previous + 1][0]
+            take_path = best[previous + 1][1] + (i,)
+            skip_score, skip_path = best[i]
+            best.append((take_score, take_path) if take_score > skip_score else (skip_score, skip_path))
 
-        selected = [matches[index] for index in (best[-1][1] if best else ())]
+        selected = [matches[index] for index in best[-1][1]]
         selected.sort(key=lambda row: row[0])
         bindings: list[str] = []
         cursor = 0
