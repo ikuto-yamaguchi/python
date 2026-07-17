@@ -38,6 +38,7 @@ class TextObservationLearner(SparseGeneralLearner):
         self.text_worlds_built = 0
         self.text_observation_abstentions = 0
         self.entity_pair_hypotheses = 0
+        self.typed_numeric_overrides = 0
 
     @staticmethod
     def _substrings(text: str, lo: int = 1, hi: int = 24) -> set[str]:
@@ -268,15 +269,19 @@ class TextObservationLearner(SparseGeneralLearner):
         for sentence in sentences:
             fact = self._observe_fact(sentence)
             number = self._observe_number(sentence)
-            if fact is not None and number is None:
-                facts.add(fact)
-                accepted += 1
-                mechanisms.append("induced-fact-observation")
-            elif number is not None and fact is None:
+            if number is not None:
                 subject, relation, value = number
                 numbers[(subject, relation)] = value
                 accepted += 1
-                mechanisms.append("induced-numeric-observation")
+                if fact is not None:
+                    self.typed_numeric_overrides += 1
+                    mechanisms.append("typed-numeric-observation")
+                else:
+                    mechanisms.append("induced-numeric-observation")
+            elif fact is not None:
+                facts.add(fact)
+                accepted += 1
+                mechanisms.append("induced-fact-observation")
             else:
                 abstained += 1
                 mechanisms.append("abstain-observation")
@@ -305,6 +310,7 @@ class TextObservationLearner(SparseGeneralLearner):
             "entity_pair_hypotheses": self.entity_pair_hypotheses,
             "fact_observation_programs": len(self.fact_program_ids),
             "numeric_observation_relations": len(self.numeric_observation_patterns),
+            "typed_numeric_overrides": self.typed_numeric_overrides,
             "relation_ids_supplied_by_caller": False,
             "grounded_worlds_supplied_by_caller": False,
             "text_only_transition_teaching": True,
