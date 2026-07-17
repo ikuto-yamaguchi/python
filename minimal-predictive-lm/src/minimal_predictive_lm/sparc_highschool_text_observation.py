@@ -48,6 +48,16 @@ class TextObservationLearner(SparseGeneralLearner):
             for index in range(max(0, len(text) - width + 1))
         }
 
+    @staticmethod
+    def _position_score(candidate: str, rows: tuple[str, ...]) -> float:
+        positions = [
+            row.find(candidate) / max(1, len(row) - len(candidate))
+            for row in rows
+        ]
+        mean = sum(positions) / len(positions)
+        variance = sum((position - mean) ** 2 for position in positions) / len(positions)
+        return len(candidate) ** 2 + 3.0 * variance + 0.2 * len(set(candidate))
+
     def _discover_pair(self, sentences: Iterable[str]) -> tuple[str, str]:
         rows = tuple(_clean(sentence) for sentence in sentences)
         if len(rows) < 3 or any(not row for row in rows):
@@ -55,17 +65,9 @@ class TextObservationLearner(SparseGeneralLearner):
         common = set.intersection(*(self._substrings(row) for row in rows))
         scored: list[tuple[float, str]] = []
         for candidate in common:
-            counts = [row.count(candidate) for row in rows]
-            if any(count != 1 for count in counts):
+            if any(row.count(candidate) != 1 for row in rows):
                 continue
-            positions = [
-                row.find(candidate) / max(1, len(row) - len(candidate))
-                for row in rows
-            ]
-            mean = sum(positions) / len(positions)
-            variance = sum((position - mean) ** 2 for position in positions) / len(positions)
-            score = len(candidate) ** 2 + 3.0 * variance + 0.2 * len(set(candidate))
-            scored.append((score, candidate))
+            scored.append((self._position_score(candidate, rows), candidate))
         scored.sort(key=lambda item: (-item[0], -len(item[1]), item[1]))
         self.entity_pair_hypotheses += len(scored[:80])
         best: tuple[float, str, str] | None = None
@@ -95,6 +97,43 @@ class TextObservationLearner(SparseGeneralLearner):
         _, left, right = best
         first = rows[0]
         return (left, right) if first.find(left) <= first.find(right) else (right, left)
+
+    def _discover_numeric_pair(self, sentences: Iterable[str]) -> tuple[str, str]:
+        rows = tuple(_clean(sentence) for sentence in sentences)
+        if len(rows) < 3 or any(not row for row in rows):
+            raise ValueError("at least three non-empty paraphrases are required")
+        shared_numbers = set.intersection(*(set(_NUMBER.findall(row)) for row in rows))
+        shared_numbers = {
+            value for value in shared_numbers
+            if all(row.count(value) == 1 for row in rows)
+        }
+        if len(shared_numbers) != 1:
+            raise ValueError("numeric paraphrases must share exactly one integer value")
+        number = next(iter(shared_numbers))
+        common = set.intersection(*(self._substrings(row) for row in rows))
+        candidates: list[tuple[float, str]] = []
+        for candidate in common:
+            if _NUMBER.fullmatch(candidate) or candidate in number or number in candidate:
+                continue
+            if any(row.count(candidate) != 1 for row in rows):
+                continue
+            valid = True
+            for row in rows:
+                entity_index = row.find(candidate)
+                number_index = row.find(number)
+                if not (
+                    entity_index + len(candidate) <= number_index
+                    or number_index + len(number) <= entity_index
+                ):
+                    valid = False
+                    break
+            if valid:
+                candidates.append((self._position_score(candidate, rows), candidate))
+        candidates.sort(key=lambda item: (-item[0], -len(item[1]), item[1]))
+        self.entity_pair_hypotheses += len(candidates[:80])
+        if not candidates:
+            raise ValueError("could not induce the numeric observation entity")
+        return candidates[0][1], number
 
     @staticmethod
     def _abstract_pair(text: str, first: str, second: str, markers=("<V0>", "<V1>")) -> str:
@@ -153,12 +192,7 @@ class TextObservationLearner(SparseGeneralLearner):
 
     def learn_numeric_observation_group(self, sentences: Iterable[str]) -> str:
         rows = tuple(sentences)
-        first, second = self._discover_pair(rows)
-        first_is_number = bool(_NUMBER.fullmatch(first))
-        second_is_number = bool(_NUMBER.fullmatch(second))
-        if first_is_number == second_is_number:
-            raise ValueError("numeric observations require one entity and one integer")
-        subject, number = (second, first) if first_is_number else (first, second)
+        subject, number = self._discover_numeric_pair(rows)
         relation = f"NR{self.next_numeric_relation}"
         self.next_numeric_relation += 1
         patterns = {
@@ -183,7 +217,13 @@ class TextObservationLearner(SparseGeneralLearner):
                     continue
                 subject = match.groupdict().get("V0", "")
                 obj = match.groupdict().get("V1", "")
-                if subject and obj and subject != obj:
+                if (
+                    subject
+                    and obj
+                    and subject != obj
+                    and not _NUMBER.fullmatch(subject)
+                    and not _NUMBER.fullmatch(obj)
+                ):
                     specificity = len(pattern.replace("<V0>", "").replace("<V1>", ""))
                     candidates.append((specificity, edit.relation, subject, obj))
         candidates.sort(key=lambda item: (-item[0], item[1], item[2], item[3]))
