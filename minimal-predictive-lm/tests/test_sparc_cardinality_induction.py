@@ -28,8 +28,8 @@ def trained():
 class CardinalityInductionTest(unittest.TestCase):
     def test_functional_relation_rejects_conflict(self):
         model = trained()
-        first = RELATIONS["produce"][3].format(a="光合成工程", b="酸素")
-        second = RELATIONS["produce"][3].format(a="光合成工程", b="窒素")
+        first = RELATIONS["produce"][0].format(a="光合成工程", b="酸素")
+        second = RELATIONS["produce"][0].format(a="光合成工程", b="窒素")
         relation = model._match_sentence(first)[0][1]
         self.assertIn(relation, model.functional_relations)
         self.assertTrue(model.read_discourse_sentence(first, "正")[0])
