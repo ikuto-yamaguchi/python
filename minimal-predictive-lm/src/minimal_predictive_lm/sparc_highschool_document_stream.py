@@ -43,6 +43,7 @@ class IndependentDocumentLearner(TextObservationLearner):
         self.document_retained_templates = 0
         self.document_relation_clusters = 0
         self.document_rejected_isolated_templates = 0
+        self.document_ambiguous_observations = 0
 
     @staticmethod
     def _derive_template(left: str, right: str) -> str | None:
@@ -94,6 +95,10 @@ class IndependentDocumentLearner(TextObservationLearner):
         return pattern.replace("<X0>", "<TMP>").replace("<X1>", "<X0>").replace("<TMP>", "<X1>")
 
     @staticmethod
+    def _program_pattern(pattern: str) -> str:
+        return pattern.replace("<X0>", "<V0>").replace("<X1>", "<V1>")
+
+    @staticmethod
     def _specificity(pattern: str) -> int:
         return len(_DOC_SLOT.sub("", pattern))
 
@@ -136,7 +141,7 @@ class IndependentDocumentLearner(TextObservationLearner):
             if left_root != right_root:
                 parent[right_root] = left_root
 
-        return parent, find, union
+        return find, union
 
     def learn_independent_documents(
         self,
@@ -162,8 +167,8 @@ class IndependentDocumentLearner(TextObservationLearner):
             if len(set(rows.values())) >= min_support:
                 extracted[pattern] = rows
 
-        # Pairwise alignment can produce several equivalent frames. Keep the most
-        # specific frame for an identical document->binding mapping.
+        # Pairwise alignment can produce equivalent frames. Keep the most specific
+        # frame for an identical document->binding mapping.
         deduplicated: dict[frozenset[tuple[int, tuple[str, str]]], str] = {}
         for pattern, rows in extracted.items():
             key = frozenset(rows.items())
@@ -174,7 +179,7 @@ class IndependentDocumentLearner(TextObservationLearner):
         patterns = sorted(extracted)
         self.document_retained_templates += len(patterns)
 
-        parent, find, union = self._union_find(patterns)
+        find, union = self._union_find(patterns)
         edges: dict[str, list[tuple[str, int]]] = {pattern: [] for pattern in patterns}
         for index, left in enumerate(patterns):
             left_pairs = set(extracted[left].values())
@@ -192,11 +197,14 @@ class IndependentDocumentLearner(TextObservationLearner):
         components: dict[str, list[str]] = {}
         for pattern in patterns:
             components.setdefault(find(pattern), []).append(pattern)
-
         accepted_components = [sorted(component) for component in components.values() if len(component) >= 2]
-        self.document_rejected_isolated_templates += sum(len(component) for component in components.values() if len(component) < 2)
+        rejected = sum(len(component) for component in components.values() if len(component) < 2)
+        self.document_rejected_isolated_templates += rejected
 
-        all_new_facts: set[tuple[str, str, str]] = set()
+        # First create relation programs and remember each frame's canonical role
+        # orientation. Facts are resolved afterwards across all relations so a more
+        # specific frame wins over a generic frame on the same document.
+        metadata: dict[str, tuple[str, int]] = {}
         for component in accepted_components:
             orientation: dict[str, int] = {component[0]: 1}
             queue = [component[0]]
@@ -214,24 +222,38 @@ class IndependentDocumentLearner(TextObservationLearner):
 
             relation = f"DR{self.next_document_relation}"
             self.next_document_relation += 1
-            canonical_patterns: set[str] = set()
-            facts: set[tuple[str, str, str]] = set()
-            for pattern in component:
-                sign = orientation.get(pattern, 1)
-                canonical_patterns.add(pattern if sign == 1 else self._swap_slots(pattern))
-                for document_index, pair in extracted[pattern].items():
-                    subject, obj = pair if sign == 1 else (pair[1], pair[0])
-                    fact = (subject, relation, obj)
-                    facts.add(fact)
-                    self.document_sources.setdefault(fact, set()).add(documents[document_index][1])
-
+            canonical_patterns = {
+                self._program_pattern(pattern if orientation.get(pattern, 1) == 1 else self._swap_slots(pattern))
+                for pattern in component
+            }
             edit = Edit("add_fact", relation, 0, 1)
             program_id = f"P{self.next_program}"
             self.next_program += 1
             self.programs[program_id] = Program(program_id, self._signature((edit,)), (edit,), canonical_patterns)
             self.fact_program_ids.add(program_id)
             self.document_patterns[relation] = canonical_patterns
-            all_new_facts.update(facts)
+            for pattern in component:
+                metadata[pattern] = (relation, orientation.get(pattern, 1))
+
+        all_new_facts: set[tuple[str, str, str]] = set()
+        for document_index, (_text, source) in enumerate(documents):
+            candidates: list[tuple[int, str, str, str, str]] = []
+            for pattern, (relation, sign) in metadata.items():
+                pair = extracted[pattern].get(document_index)
+                if pair is None:
+                    continue
+                subject, obj = pair if sign == 1 else (pair[1], pair[0])
+                candidates.append((self._specificity(pattern), relation, subject, obj, pattern))
+            candidates.sort(key=lambda row: (-row[0], row[1], row[2], row[3], row[4]))
+            if not candidates:
+                continue
+            top = candidates[0]
+            if len(candidates) > 1 and candidates[1][0] == top[0] and candidates[1][1:4] != top[1:4]:
+                self.document_ambiguous_observations += 1
+                continue
+            fact = (top[2], top[1], top[3])
+            all_new_facts.add(fact)
+            self.document_sources.setdefault(fact, set()).add(source)
 
         self.document_facts.update(all_new_facts)
         self.independent_documents += len(documents)
@@ -243,7 +265,7 @@ class IndependentDocumentLearner(TextObservationLearner):
             retained_templates=len(patterns),
             relation_clusters=len(accepted_components),
             facts=len(all_new_facts),
-            rejected_isolated_templates=sum(len(component) for component in components.values() if len(component) < 2),
+            rejected_isolated_templates=rejected,
         )
 
     def learned_document_world(self) -> World:
@@ -257,6 +279,7 @@ class IndependentDocumentLearner(TextObservationLearner):
             "document_retained_templates": self.document_retained_templates,
             "document_relation_clusters": self.document_relation_clusters,
             "document_rejected_isolated_templates": self.document_rejected_isolated_templates,
+            "document_ambiguous_observations": self.document_ambiguous_observations,
             "document_facts": len(self.document_facts),
             "document_sources": sum(len(sources) for sources in self.document_sources.values()),
             "paraphrase_group_labels_supplied": False,
