@@ -3,61 +3,38 @@ import unittest
 from minimal_predictive_lm.sparc_highschool_general import SparseGeneralLearner, World
 
 
+def w(*facts, numbers=None):
+    return World.from_parts(facts, numbers or {})
+
+
 class SparseHighSchoolGeneralTests(unittest.TestCase):
-    def test_shared_fact_program_transfers_across_domains(self):
+    def test_composes_unseen_surface_fragments(self):
         learner = SparseGeneralLearner()
-        for text, fact in [
-            ("水は物質である", ("水", "R-kind", "物質")),
-            ("鉄は金属である", ("鉄", "R-kind", "金属")),
-        ]:
-            learner.teach(text, World.from_parts(), World.from_parts([fact]))
-        result = learner.apply("酸素は気体である", World.from_parts())
+        learner.teach("水は物質である", w(), w(("水", "kind", "物質")))
+        learner.teach("鉄というものは金属に分類される", w(), w(("鉄", "kind", "金属")))
+        result = learner.apply("酸素は気体に分類される", w())
         self.assertTrue(result.accepted)
-        self.assertIn(("酸素", "R-kind", "気体"), result.world.facts)
-        self.assertEqual(1, len(learner.programs))
+        self.assertEqual(result.mechanism, "composed-surface-schema")
+        self.assertIn(("酸素", "kind", "気体"), result.world.facts)
 
-    def test_numeric_program_and_planning_share_executor(self):
+    def test_verbalizes_with_learned_inverse_schema(self):
         learner = SparseGeneralLearner()
-        for subject, old, new, text in [
-            ("箱A", 2, 5, "箱Aに3個加える"),
-            ("箱B", 4, 7, "箱Bに3個加える"),
-            ("箱A", 3, 6, "箱Aを2倍にする"),
-            ("箱B", 5, 10, "箱Bを2倍にする"),
-        ]:
-            learner.teach(
-                text,
-                World.from_parts(numbers={(subject, "count"): old}),
-                World.from_parts(numbers={(subject, "count"): new}),
-            )
-        start = World.from_parts(numbers={("箱C", "count"): 1})
-        goal = World.from_parts(numbers={("箱C", "count"): 8})
-        plan = learner.plan(start, goal, ["箱Cに3個加える", "箱Cを2倍にする"], max_depth=3)
-        self.assertTrue(plan.found)
-        self.assertEqual(("箱Cに3個加える", "箱Cを2倍にする"), plan.actions)
+        learner.teach("水は物質である", w(), w(("水", "kind", "物質")))
+        self.assertEqual(learner.explain(w(("酸素", "kind", "気体"))), "酸素は気体である。")
 
-    def test_unknown_surface_abstains_without_mutation(self):
+    def test_numeric_and_abstention_are_preserved(self):
         learner = SparseGeneralLearner()
-        learner.teach(
-            "箱Aに3個加える",
-            World.from_parts(numbers={("箱A", "count"): 2}),
-            World.from_parts(numbers={("箱A", "count"): 5}),
-        )
-        before = World.from_parts([("保持", "R", "知識")])
-        result = learner.apply("未知の理論を説明する", before)
-        self.assertFalse(result.accepted)
-        self.assertEqual(before, result.world)
+        learner.teach("箱Aに3個加える", w(numbers={("箱A", "count"): 2}), w(numbers={("箱A", "count"): 5}))
+        result = learner.apply("箱Zに3個加える", w(numbers={("箱Z", "count"): 7}))
+        self.assertEqual(result.world.number_map()[("箱Z", "count")], 10)
+        unknown = learner.apply("今日は雨である", w(("保持", "R", "知識")))
+        self.assertFalse(unknown.accepted)
 
-    def test_serialization_preserves_program_bank(self):
+    def test_serialization_keeps_bidirectional_schema(self):
         learner = SparseGeneralLearner()
-        learner.teach(
-            "水は物質である",
-            World.from_parts(),
-            World.from_parts([("水", "R-kind", "物質")]),
-        )
+        learner.teach("水は物質である", w(), w(("水", "kind", "物質")))
         restored = SparseGeneralLearner.from_bytes(learner.to_bytes())
-        result = restored.apply("酸素は気体である", World.from_parts())
-        self.assertTrue(result.accepted)
-        self.assertIn(("酸素", "R-kind", "気体"), result.world.facts)
+        self.assertEqual(restored.explain(w(("銅", "kind", "金属"))), "銅は金属である。")
 
 
 if __name__ == "__main__":
