@@ -30,7 +30,6 @@ class TextObservationLearnerTests(unittest.TestCase):
 
     def test_clusters_separate_raw_groups_into_one_relation(self):
         learner = self.make_learner()
-        first = next(iter(learner.programs[pid].edits)).relation if False else None
         relation = learner.learn_fact_observation_group([
             "鉄というものは金属に分類される",
             "金属の一つとして鉄が知られる",
