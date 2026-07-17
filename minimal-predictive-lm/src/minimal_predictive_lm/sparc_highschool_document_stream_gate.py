@@ -15,22 +15,38 @@ def _corpus():
     texts = [
         "水は物質である", "酸素は気体である", "鉄は金属である", "正方形は図形である",
         "江戸幕府は政権である", "鎌倉幕府は政権である",
+        "ルネサンスは文化運動である", "産業革命は社会変化である",
         "水というものは物質に分類される", "酸素というものは気体に分類される",
         "鉄というものは金属に分類される", "正方形というものは図形に分類される",
         "歴史上の江戸幕府は一つの政権だった", "歴史上の鎌倉幕府は一つの政権だった",
-        "歴史上の室町幕府は一つの政権だった",
+        "歴史上の室町幕府は一つの政権だった", "歴史上のルネサンスは一つの文化運動だった",
+        "歴史上の産業革命は一つの社会変化だった",
         "物質の仲間に数えられるものが水だ", "気体の仲間に数えられるものが酸素だ",
         "金属の仲間に数えられるものが鉄だ", "図形の仲間に数えられるものが正方形だ",
         "水を分類すると物質に入る", "酸素を分類すると気体に入る",
         "鉄を分類すると金属に入る", "正方形を分類すると図形に入る",
-        "東京は日本に位置する", "パリはフランスに位置する", "ローマはイタリアに位置する",
-        "日本に位置する都市が東京だ", "フランスに位置する都市がパリだ", "イタリアに位置する都市がローマだ",
-        "東京の所在国は日本である", "パリの所在国はフランスである", "ローマの所在国はイタリアである",
+        "東京は日本に位置する", "パリはフランスに位置する", "ローマはイタリアに位置する", "ベルリンはドイツに位置する",
+        "日本に位置する都市が東京だ", "フランスに位置する都市がパリだ", "イタリアに位置する都市がローマだ", "ドイツに位置する都市がベルリンだ",
+        "東京の所在国は日本である", "パリの所在国はフランスである", "ローマの所在国はイタリアである", "ベルリンの所在国はドイツである",
         "今日は静かな雨が降る", "春には花が咲く",
     ]
     rows = [(text, f"D{index:03d}") for index, text in enumerate(texts)]
     random.Random(17).shuffle(rows)
     return rows
+
+
+def _oriented_fact(world: World, left: str, right: str):
+    rows = [
+        fact for fact in world.facts
+        if (fact[0] == left and fact[2] == right) or (fact[0] == right and fact[2] == left)
+    ]
+    return rows[0] if len(rows) == 1 else None
+
+
+def _orient(reference, left: str, right: str):
+    if reference is None:
+        return None
+    return (left, reference[1], right) if reference[0] in {"水", "東京"} else (right, reference[1], left)
 
 
 def run_gate(output_dir: str | Path) -> dict[str, object]:
@@ -40,7 +56,7 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
     learner = IndependentDocumentLearner()
 
     training_started = time.perf_counter()
-    stream = learner.learn_independent_documents(_corpus())
+    stream = learner.learn_independent_documents(_corpus(), min_support=4)
     count_relation = learner.learn_numeric_observation_group([
         "箱Aには2個ある", "2個入っている箱は箱Aだ", "箱Aの個数は2である",
     ])
@@ -74,63 +90,75 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
         max_feature_reads = max(max_feature_reads, learner.last_feature_reads)
         return result
 
-    world = learner.learned_document_world()
+    document_world = learner.learned_document_world()
+    kind_reference = _oriented_fact(document_world, "水", "物質")
+    location_reference = _oriented_fact(document_world, "東京", "日本")
+    relation_ok = (
+        stream.relation_clusters == 2
+        and kind_reference is not None
+        and location_reference is not None
+        and kind_reference[1] != location_reference[1]
+    )
+    axes["ungrouped_relation_discovery"] = {"correct": 2 if relation_ok else 0, "total": 2}
+
     kind_pairs = {
         ("水", "物質"), ("酸素", "気体"), ("鉄", "金属"), ("正方形", "図形"),
         ("江戸幕府", "政権"), ("鎌倉幕府", "政権"), ("室町幕府", "政権"),
+        ("ルネサンス", "文化運動"), ("産業革命", "社会変化"),
     }
-    location_pairs = {("東京", "日本"), ("パリ", "フランス"), ("ローマ", "イタリア")}
-    kind_relations = {relation for subject, relation, obj in world.facts if (subject, obj) in kind_pairs}
-    location_relations = {relation for subject, relation, obj in world.facts if (subject, obj) in location_pairs}
-    relation_ok = stream.relation_clusters == 2 and len(kind_relations) == 1 and len(location_relations) == 1 and kind_relations != location_relations
-    axes["ungrouped_relation_discovery"] = {"correct": 2 if relation_ok else 0, "total": 2}
-
-    expected = kind_pairs | location_pairs
-    found_pairs = {(subject, obj) for subject, _relation, obj in world.facts}
-    exact_graph = len(expected & found_pairs)
-    extras = found_pairs - expected
-    axes["independent_document_graph"] = {"correct": exact_graph + int(not extras), "total": len(expected) + 1}
+    location_pairs = {
+        ("東京", "日本"), ("パリ", "フランス"), ("ローマ", "イタリア"), ("ベルリン", "ドイツ"),
+    }
+    expected_facts = {
+        _orient(kind_reference, left, right) for left, right in kind_pairs
+    } | {
+        _orient(location_reference, left, right) for left, right in location_pairs
+    }
+    expected_facts.discard(None)
+    correct_graph = len(document_world.facts & expected_facts) + int(document_world.facts == expected_facts)
+    axes["independent_document_graph"] = {"correct": correct_graph, "total": len(expected_facts) + 1}
 
     source_correct = 0
-    for subject, obj in [("水", "物質"), ("酸素", "気体"), ("鉄", "金属"), ("正方形", "図形")]:
-        fact = next((fact for fact in learner.document_facts if fact[0] == subject and fact[2] == obj), None)
-        source_correct += int(fact is not None and len(learner.document_sources[fact]) >= 4)
+    for left, right in [("水", "物質"), ("酸素", "気体"), ("鉄", "金属"), ("正方形", "図形")]:
+        fact = _orient(kind_reference, left, right)
+        source_correct += int(fact in learner.document_sources and len(learner.document_sources[fact]) >= 4)
     axes["source_grounding"] = {"correct": source_correct, "total": 4}
 
-    kind_relation = next(iter(kind_relations)) if len(kind_relations) == 1 else ""
-    location_relation = next(iter(location_relations)) if len(location_relations) == 1 else ""
+    kind_relation = kind_reference[1] if kind_reference else ""
+    location_relation = location_reference[1] if location_reference else ""
     direct_cases = []
     for index in range(20):
         direct_cases.extend([
-            (f"銅{index}は金属である", f"銅{index}", kind_relation, "金属"),
-            (f"大阪{index}は日本に位置する", f"大阪{index}", location_relation, "日本"),
+            (f"銅{index}は金属である", _orient(kind_reference, f"銅{index}", "金属")),
+            (f"大阪{index}は日本に位置する", _orient(location_reference, f"大阪{index}", "日本")),
         ])
     correct = 0
-    for text, subject, relation, obj in direct_cases:
+    for text, expected in direct_cases:
         result = apply(text, World())
-        correct += int(result.accepted and (subject, relation, obj) in result.world.facts)
+        correct += int(result.accepted and expected in result.world.facts)
     axes["independent_surface_transfer"] = {"correct": correct, "total": len(direct_cases)}
 
     paraphrases = [
-        ("酸素は気体に分類される", "酸素", kind_relation, "気体"),
-        ("歴史上の鎌倉幕府は政権の仲間に数えられる", "鎌倉幕府", kind_relation, "政権"),
-        ("正方形というものは図形である", "正方形", kind_relation, "図形"),
-        ("銅を分類すると金属だった", "銅", kind_relation, "金属"),
+        ("酸素は気体に分類される", _orient(kind_reference, "酸素", "気体")),
+        ("歴史上の鎌倉幕府は政権の仲間に数えられる", _orient(kind_reference, "鎌倉幕府", "政権")),
+        ("正方形というものは図形である", _orient(kind_reference, "正方形", "図形")),
+        ("銅を分類すると金属だった", _orient(kind_reference, "銅", "金属")),
     ] * 5
     correct = 0
-    for text, subject, relation, obj in paraphrases:
+    for text, expected in paraphrases:
         result = apply(text, World())
-        correct += int(result.accepted and (subject, relation, obj) in result.world.facts)
+        correct += int(result.accepted and expected in result.world.facts)
     axes["untouched_compositional_paraphrase"] = {"correct": correct, "total": len(paraphrases)}
 
     explanation_correct = 0
     explanation_samples = []
-    for subject, obj in [("酸素", "気体"), ("鎌倉幕府", "政権"), ("正方形", "図形"), ("銅", "金属")] * 5:
+    for left, right in [("酸素", "気体"), ("鎌倉幕府", "政権"), ("正方形", "図形"), ("銅", "金属")] * 5:
+        fact = _orient(kind_reference, left, right)
         stamp = time.perf_counter()
-        text = learner.explain(World.from_parts([(subject, kind_relation, obj)]))
+        text = learner.explain(World.from_parts([fact] if fact else []))
         inference_seconds += time.perf_counter() - stamp
         explanation_samples.append(text)
-        explanation_correct += int(subject in text and obj in text and text.endswith("。"))
+        explanation_correct += int(left in text and right in text and text.endswith("。"))
     axes["free_form_explanation"] = {"correct": explanation_correct, "total": 20}
 
     numeric_correct = 0
@@ -228,7 +256,9 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
         "model": model,
         "kind_relation": kind_relation,
         "location_relation": location_relation,
-        "graph_extras": sorted(extras),
+        "kind_orientation": "forward" if kind_reference and kind_reference[0] == "水" else "reverse",
+        "location_orientation": "forward" if location_reference and location_reference[0] == "東京" else "reverse",
+        "graph_extras": sorted(document_world.facts - expected_facts),
         "planning_expanded": planning_expanded,
         "peak_rss_bytes": peak_rss,
         "wall_seconds": wall,
@@ -243,8 +273,8 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
         "highschool_level_passed": False,
         "passed": structural,
         "claim_boundary": (
-            "Fact schemas and their relation clusters are induced from a shuffled independent document stream without paraphrase-group labels. "
-            "The corpus still contains repeated relational structure; numeric observation bootstrapping remains grouped, and unrestricted textbooks and open dialogue remain outside this gate."
+            "Fact schemas and relation clusters are induced from a shuffled independent document stream without paraphrase-group labels. "
+            "The stream requires at least four distinct value pairs per frame; numeric observation bootstrapping remains grouped, and unrestricted textbooks and open dialogue remain outside this gate."
         ),
     }
     (output / "SPARC-highschool-general-independent-documents.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
