@@ -34,7 +34,8 @@ jobs:
           path: artifacts/sparc-relational-world-001
           retention-days: 90
       - name: Enforce gate
-        run: python - <<'PY'
+        run: |
+          python - <<'PY'
           import json
           from pathlib import Path
           report = json.loads(Path('artifacts/sparc-relational-world-001/SPARC-relational-world-001.json').read_text())
