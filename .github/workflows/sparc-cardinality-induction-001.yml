@@ -22,9 +22,15 @@ jobs:
       - name: Install
         run: python -m pip install -e minimal-predictive-lm
       - name: Unit tests
-        run: python -m unittest discover -s minimal-predictive-lm/tests -p 'test_sparc_cardinality_induction.py' -v
+        run: |
+          mkdir -p artifacts/sparc-cardinality-induction-001
+          set +e
+          python -m unittest discover -s minimal-predictive-lm/tests -p 'test_sparc_cardinality_induction.py' -v 2>&1 | tee artifacts/sparc-cardinality-induction-001/tests.log
+          echo ${PIPESTATUS[0]} > artifacts/sparc-cardinality-induction-001/tests.exit
+          exit 0
       - name: Run frozen cardinality gate
-        run: python -m minimal_predictive_lm.sparc_cardinality_induction_gate --output-dir artifacts/sparc-cardinality-induction-001
+        continue-on-error: true
+        run: python -m minimal_predictive_lm.sparc_cardinality_induction_gate --output-dir artifacts/sparc-cardinality-induction-001 2>&1 | tee artifacts/sparc-cardinality-induction-001/gate.log
       - name: Upload results or diagnostics
         if: always()
         uses: actions/upload-artifact@v4
@@ -37,7 +43,10 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          report = json.loads(Path("artifacts/sparc-cardinality-induction-001/SPARC-cardinality-induction-001.json").read_text())
+          root = Path("artifacts/sparc-cardinality-induction-001")
+          if root.joinpath("tests.exit").read_text().strip() != "0":
+              raise SystemExit("cardinality unit tests failed")
+          report = json.loads(root.joinpath("SPARC-cardinality-induction-001.json").read_text())
           if not report["passed"]:
               raise SystemExit("cardinality induction gate failed")
           PY
