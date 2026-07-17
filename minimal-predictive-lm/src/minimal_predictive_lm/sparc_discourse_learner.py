@@ -24,12 +24,13 @@ class DiscourseTextbookLearner(OpenTextbookLearner):
     def read_document(self,text,source_id):
         focus=None; accepted=abstained=resolved=0; mechanisms=[]; before=set(self.facts)
         for index,sentence in enumerate(_split_sentences(text)):
-            sid=f"{source_id}#s{index+1}"; ok,new_focus,mechanism=self._match_and_read(sentence,sid)
-            if not ok and focus:
-                replaced,n=self.ANAPHOR_RE.subn(focus+"は",sentence,count=1)
-                if n:
-                    self.discourse_retries+=1; ok,new_focus,mechanism=self._match_and_read(replaced,sid)
-                    if ok:resolved+=1; self.resolved_anaphors+=1; mechanism="resolved-anaphor:"+str(mechanism)
+            sid=f"{source_id}#s{index+1}"; prepared=sentence; was_resolved=False
+            if focus:
+                prepared,n=self.ANAPHOR_RE.subn(focus+"は",sentence,count=1)
+                if n:self.discourse_retries+=1; was_resolved=True
+            ok,new_focus,mechanism=self._match_and_read(prepared,sid)
+            if ok and was_resolved:
+                resolved+=1; self.resolved_anaphors+=1; mechanism="resolved-anaphor:"+str(mechanism)
             if ok:accepted+=1; focus=new_focus
             else:abstained+=1
             mechanisms.append(str(mechanism))
