@@ -1,0 +1,44 @@
+name: sparc-open-textbook-001
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/sparc_open_textbook_learner.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/sparc_open_textbook_gate.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/sparc_open_textbook_cli.py"
+      - "minimal-predictive-lm/tests/test_sparc_open_textbook_learner.py"
+      - ".github/workflows/sparc-open-textbook-001.yml"
+  workflow_dispatch:
+
+jobs:
+  open-textbook:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm
+      - name: Unit tests
+        run: python -m unittest discover -s minimal-predictive-lm/tests -p 'test_sparc_open_textbook_learner.py' -v
+      - name: Run open textbook gate
+        run: python -m minimal_predictive_lm.sparc_open_textbook_gate --output-dir artifacts/sparc-open-textbook-001
+      - name: Upload results or diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sparc-open-textbook-001-results
+          path: artifacts/sparc-open-textbook-001
+          retention-days: 90
+      - name: Enforce gate
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("artifacts/sparc-open-textbook-001/SPARC-open-textbook-001.json").read_text())
+          if not report["passed"]:
+              raise SystemExit("open textbook gate failed")
+          PY
