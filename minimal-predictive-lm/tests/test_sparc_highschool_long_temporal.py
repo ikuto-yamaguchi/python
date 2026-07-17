@@ -55,7 +55,7 @@ class LongTemporalNarrativeLearnerTests(unittest.TestCase):
         self.assertEqual(result.transitions_found, 2)
         self.assertEqual(len(learner.programs), 2)
 
-    def test_rejects_ambiguous_two-event_explanation(self):
+    def test_rejects_ambiguous_two_event_explanation(self):
         learner = self.make_learner()
         text = "箱Aには2個ある。箱Aに3個加える。箱Aを3増やす。箱Aには5個ある。"
         result = learner.learn_long_chronological_document(text, "A")
