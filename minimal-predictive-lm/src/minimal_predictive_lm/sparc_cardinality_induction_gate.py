@@ -15,15 +15,15 @@ def train(cls):
     model = cls()
     records, _, chains = base_training()
     model.learn_paragraphs(records)
-    # Ordinary prose demonstrates that the latent part relation is legitimately
-    # one-to-many: each whole has two components.  No relation label is passed to
-    # the learner; the shared surfaces connect these facts to the existing relation.
+    # Ordinary prose demonstrates that one anonymous relation legitimately allows
+    # one subject to have several objects.  Relation names/cardinalities are not
+    # supplied to the learner; shared induced surfaces identify the relation.
     multi_records = []
     for index in range(8):
         suffix = jpnum(1100 + index)
-        whole = "複合装置" + suffix
-        for side in ("左部品", "右部品"):
-            part = side + suffix
+        part = "共通部品" + suffix
+        for side in ("左装置", "右装置"):
+            whole = side + suffix
             multi_records.append((paragraph("part", part, whole), f"多値根拠-{index}-{side}"))
     model.learn_paragraphs(multi_records)
     model.induce_rules(min_support=6)
@@ -65,31 +65,25 @@ def run_gate(output_dir: Path) -> dict[str, object]:
 
     for index in range(40):
         suffix = jpnum(1300 + index)
-        whole = "評価全体" + suffix
-        left = "評価左部品" + suffix
-        right = "評価右部品" + suffix
-        first = RELATIONS["part"][3].format(a=left, b=whole)
-        second = RELATIONS["part"][3].format(a=right, b=whole)
-        # Reverse orientation gives one whole several parts in the graph only when
-        # the learned relation surfaces preserve their observed roles.
+        part = "評価共通部品" + suffix
+        whole_left = "評価全体甲" + suffix
+        whole_right = "評価全体乙" + suffix
+        first = RELATIONS["part"][3].format(a=part, b=whole_left)
+        second = RELATIONS["part"][3].format(a=part, b=whole_right)
+
         ok1, _ = model.read_discourse_sentence(first, f"多値左-{index}")
         ok2, _ = model.read_discourse_sentence(second, f"多値右-{index}")
         relation = model._match_sentence(first)[0][1]
-        values = {
-            obj for (subject, rel, obj) in model.facts
-            if rel == relation and subject in {left, right} and obj == whole
-        }
-        legitimate_multi_accepted += int(ok1 and ok2 and len(values) == 1)
+        values = model.out_index.get(part, {}).get(relation, set())
+        legitimate_multi_accepted += int(ok1 and ok2 and values == {whole_left, whole_right})
 
-        baseline.read_discourse_sentence(first, f"基準左-{index}")
-        # The previous guard is tested on a genuinely one-to-many subject using
-        # direct graph insertion from prose-derived relation identity.
-        existing = baseline.out_index.get(left, {}).get(relation, set())
-        if existing:
-            accepted, _ = baseline.read_discourse_sentence(
-                RELATIONS["part"][3].format(a=left, b="別全体" + suffix), f"基準多値-{index}"
-            )
-            old_guard_false_rejections += int(not accepted)
+        baseline_relation = baseline._match_sentence(first)[0][1]
+        base_first, _ = baseline.read_discourse_sentence(first, f"基準左-{index}")
+        base_second, _ = baseline.read_discourse_sentence(second, f"基準右-{index}")
+        baseline_values = baseline.out_index.get(part, {}).get(baseline_relation, set())
+        old_guard_false_rejections += int(
+            base_first and not base_second and baseline_values == {whole_left}
+        )
 
     blob = model.to_bytes()
     restored = CardinalityInductionLearner.from_bytes(blob)
@@ -104,7 +98,7 @@ def run_gate(output_dir: Path) -> dict[str, object]:
         "functional_conflicts_40_of_40_rejected": functional_conflicts_rejected == 40,
         "functional_prior_40_of_40_preserved": functional_prior_preserved == 40,
         "legitimate_multivalue_40_of_40_accepted": legitimate_multi_accepted == 40,
-        "previous_guard_exhibits_false_rejection": old_guard_false_rejections > 0,
+        "previous_guard_false_rejections_40_of_40": old_guard_false_rejections == 40,
         "save_restore_preserves_cardinality": (
             tax_probe in restored.functional_relations and part_probe in restored.nonfunctional_relations
         ),
