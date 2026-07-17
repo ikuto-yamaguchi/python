@@ -1,0 +1,55 @@
+name: sparc-latent-program-002
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+  workflow_dispatch:
+
+concurrency:
+  group: sparc-latent-program-002-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  latent-program-v2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Unit tests
+        id: unit
+        continue-on-error: true
+        run: |
+          mkdir -p minimal-predictive-lm/results
+          set -o pipefail
+          python -m pytest -vv minimal-predictive-lm/tests/test_sparc_latent_program_v2.py \
+            2>&1 | tee minimal-predictive-lm/results/latent_program_002_unit.log
+      - name: Run gate
+        id: experiment
+        continue-on-error: true
+        working-directory: minimal-predictive-lm
+        run: |
+          set -o pipefail
+          python -m minimal_predictive_lm.sparc_latent_program_v2 \
+            2>&1 | tee ../sparc-latent-program-002.log
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sparc-latent-program-002-results
+          path: |
+            minimal-predictive-lm/results/latent_program_002_unit.log
+            minimal-predictive-lm/results/sparc_latent_program_002.json
+            minimal-predictive-lm/results/sparc_latent_program_002.md
+            minimal-predictive-lm/results/SPARC-latent-program-002.model.zlib
+            sparc-latent-program-002.log
+          retention-days: 14
+      - name: Enforce gate
+        if: always()
+        run: |
+          test "${{ steps.unit.outcome }}" = "success"
+          test "${{ steps.experiment.outcome }}" = "success"
