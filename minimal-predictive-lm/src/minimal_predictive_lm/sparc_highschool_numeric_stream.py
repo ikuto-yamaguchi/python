@@ -31,6 +31,7 @@ class IndependentNumericDocumentLearner(IndependentDocumentLearner):
         self.numeric_document_values: dict[tuple[str, str], int] = {}
         self.numeric_document_sources: dict[tuple[str, str, int], set[str]] = {}
         self.numeric_document_patterns: dict[str, set[str]] = {}
+        self.numeric_relation_affixes: dict[str, tuple[str, str]] = {}
         self.next_numeric_document_relation = 0
         self.independent_numeric_documents = 0
         self.numeric_candidate_templates = 0
@@ -83,6 +84,50 @@ class IndependentNumericDocumentLearner(IndependentDocumentLearner):
     def _specificity(pattern: str) -> int:
         return len(pattern.replace("<S>", "").replace("<N>", ""))
 
+    @staticmethod
+    def _common_prefix(values: list[str]) -> str:
+        if not values:
+            return ""
+        prefix = values[0]
+        for value in values[1:]:
+            while prefix and not value.startswith(prefix):
+                prefix = prefix[:-1]
+        return prefix
+
+    @classmethod
+    def _common_suffix(cls, values: list[str]) -> str:
+        return cls._common_prefix([value[::-1] for value in values])[::-1]
+
+    @staticmethod
+    def _slot_neighbors(pattern: str) -> tuple[str, str]:
+        before, after = pattern.split("<S>", 1)
+        before = before.rsplit("<N>", 1)[-1]
+        after = after.split("<N>", 1)[0]
+        return before, after
+
+    @classmethod
+    def _component_affix(cls, patterns: list[str]) -> tuple[str, str]:
+        neighbors = [cls._slot_neighbors(pattern) for pattern in patterns]
+        prefix = cls._common_suffix([before for before, _after in neighbors])
+        suffix = cls._common_prefix([after for _before, after in neighbors])
+        # Do not absorb long relation phrases. Affixes are only compact recurring
+        # pieces immediately touching the variable entity slot.
+        if len(prefix) > 8:
+            prefix = ""
+        if len(suffix) > 8:
+            suffix = ""
+        return prefix, suffix
+
+    @staticmethod
+    def _canonical_subject(raw: str, affix: tuple[str, str]) -> str:
+        prefix, suffix = affix
+        subject = raw
+        if prefix and not subject.startswith(prefix):
+            subject = prefix + subject
+        if suffix and not subject.endswith(suffix):
+            subject = subject + suffix
+        return subject
+
     @classmethod
     def _extract_numeric(cls, pattern: str, documents: tuple[tuple[str, str], ...]):
         matcher = cls._compile_numeric_observation(pattern)
@@ -97,6 +142,30 @@ class IndependentNumericDocumentLearner(IndependentDocumentLearner):
                 continue
             extracted[index] = (subject, value)
         return extracted
+
+    def _observe_number(self, sentence: str):
+        normalized = _clean(sentence)
+        candidates = []
+        reads = 0
+        for relation, patterns in self.numeric_observation_patterns.items():
+            for pattern in patterns:
+                reads += len(pattern)
+                match = self._compile_numeric_observation(pattern).fullmatch(normalized)
+                if not match:
+                    continue
+                raw_subject = match.group("S")
+                subject = self._canonical_subject(raw_subject, self.numeric_relation_affixes.get(relation, ("", "")))
+                value = int(match.group("N"))
+                specificity = len(pattern.replace("<S>", "").replace("<N>", ""))
+                candidates.append((specificity, relation, subject, value))
+        candidates.sort(key=lambda item: (-item[0], item[1], item[2], item[3]))
+        self.last_feature_reads += reads
+        if not candidates:
+            return None
+        if len(candidates) > 1 and candidates[0][0] == candidates[1][0] and candidates[0][1:] != candidates[1][1:]:
+            return None
+        _specificity, relation, subject, value = candidates[0]
+        return subject, relation, value
 
     def learn_independent_numeric_documents(
         self,
@@ -130,16 +199,12 @@ class IndependentNumericDocumentLearner(IndependentDocumentLearner):
         self.numeric_retained_templates += len(patterns)
 
         find, union = self._union_find(patterns)
-        edges: dict[str, list[str]] = {pattern: [] for pattern in patterns}
         for index, left in enumerate(patterns):
             left_pairs = set(extracted[left].values())
             for right in patterns[index + 1:]:
                 overlap = len(left_pairs & set(extracted[right].values()))
-                if overlap < min_overlap:
-                    continue
-                edges[left].append(right)
-                edges[right].append(left)
-                union(left, right)
+                if overlap >= min_overlap:
+                    union(left, right)
 
         components: dict[str, list[str]] = {}
         for pattern in patterns:
@@ -155,6 +220,7 @@ class IndependentNumericDocumentLearner(IndependentDocumentLearner):
             component_patterns = set(component)
             self.numeric_observation_patterns[relation] = component_patterns
             self.numeric_document_patterns[relation] = component_patterns
+            self.numeric_relation_affixes[relation] = self._component_affix(component)
             for pattern in component:
                 metadata[pattern] = relation
 
@@ -165,7 +231,8 @@ class IndependentNumericDocumentLearner(IndependentDocumentLearner):
                 row = extracted[pattern].get(document_index)
                 if row is None:
                     continue
-                subject, value = row
+                raw_subject, value = row
+                subject = self._canonical_subject(raw_subject, self.numeric_relation_affixes[relation])
                 candidates.append((self._specificity(pattern), relation, subject, value, pattern))
             candidates.sort(key=lambda row: (-row[0], row[1], row[2], row[3], row[4]))
             if not candidates:
@@ -209,6 +276,7 @@ class IndependentNumericDocumentLearner(IndependentDocumentLearner):
             "numeric_ambiguous_observations": self.numeric_ambiguous_observations,
             "numeric_document_values": len(self.numeric_document_values),
             "numeric_document_sources": sum(len(sources) for sources in self.numeric_document_sources.values()),
+            "numeric_relation_affixes": dict(self.numeric_relation_affixes),
             "numeric_paraphrase_group_labels_supplied": False,
             "numeric_relation_labels_supplied": False,
             "numeric_entity_spans_supplied": False,
