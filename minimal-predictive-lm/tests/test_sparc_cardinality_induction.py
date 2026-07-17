@@ -3,18 +3,23 @@ from __future__ import annotations
 import unittest
 
 from minimal_predictive_lm.sparc_cardinality_induction import CardinalityInductionLearner
-from minimal_predictive_lm.sparc_open_textbook_gate import QUERIES, RELATIONS, base_training, paragraph, train_queries
+from minimal_predictive_lm.sparc_open_textbook_gate import RELATIONS, base_training, paragraph, train_queries
 
 
 def trained():
     model = CardinalityInductionLearner()
     records, _, chains = base_training()
     model.learn_paragraphs(records)
-    multi = []
+    cardinality = []
     for index in range(8):
+        cardinality.append(
+            (paragraph("produce", f"工程{index}", f"生成物{index}"), f"単値-{index}")
+        )
         for whole in (f"装置甲{index}", f"装置乙{index}"):
-            multi.append((paragraph("part", f"共通部品{index}", whole), f"多値-{index}-{whole}"))
-    model.learn_paragraphs(multi)
+            cardinality.append(
+                (paragraph("part", f"共通部品{index}", whole), f"多値-{index}-{whole}")
+            )
+    model.learn_paragraphs(cardinality)
     model.induce_rules(min_support=6)
     train_queries(model, chains)
     return model
@@ -23,13 +28,15 @@ def trained():
 class CardinalityInductionTest(unittest.TestCase):
     def test_functional_relation_rejects_conflict(self):
         model = trained()
-        tax = model._match_sentence("光合成の分類先は生物活動である。")[0][1]
-        self.assertIn(tax, model.functional_relations)
-        self.assertTrue(model.read_discourse_sentence("光合成の分類先は生物活動である。", "正")[0])
-        accepted, reason = model.read_discourse_sentence("光合成の分類先は化学反応である。", "誤")
+        first = RELATIONS["produce"][3].format(a="光合成工程", b="酸素")
+        second = RELATIONS["produce"][3].format(a="光合成工程", b="窒素")
+        relation = model._match_sentence(first)[0][1]
+        self.assertIn(relation, model.functional_relations)
+        self.assertTrue(model.read_discourse_sentence(first, "正")[0])
+        accepted, reason = model.read_discourse_sentence(second, "誤")
         self.assertFalse(accepted)
         self.assertEqual(reason, "abstain-functional-conflict")
-        self.assertEqual(model.ask(QUERIES["tax"]["direct"][0].format(a="光合成")).value, "生物活動")
+        self.assertEqual(model.out_index["光合成工程"][relation], {"酸素"})
 
     def test_induced_multivalued_relation_accepts_two_objects(self):
         model = trained()
