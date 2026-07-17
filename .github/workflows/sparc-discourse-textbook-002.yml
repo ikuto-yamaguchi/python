@@ -20,9 +20,16 @@ jobs:
       - name: Install
         run: python -m pip install -e minimal-predictive-lm
       - name: Unit tests
-        run: python -m unittest discover -s minimal-predictive-lm/tests -p 'test_sparc_discourse_learner.py' -v
+        run: |
+          mkdir -p artifacts/sparc-discourse-textbook-002
+          set +e
+          python -m unittest discover -s minimal-predictive-lm/tests -p 'test_sparc_discourse_learner.py' -v 2>&1 | tee artifacts/sparc-discourse-textbook-002/tests.log
+          code=${PIPESTATUS[0]}
+          echo $code > artifacts/sparc-discourse-textbook-002/tests.exit
+          exit 0
       - name: Run frozen gate
-        run: python -m minimal_predictive_lm.sparc_discourse_gate --output-dir artifacts/sparc-discourse-textbook-002
+        continue-on-error: true
+        run: python -m minimal_predictive_lm.sparc_discourse_gate --output-dir artifacts/sparc-discourse-textbook-002 > artifacts/sparc-discourse-textbook-002/gate.log 2>&1
       - name: Upload results
         if: always()
         uses: actions/upload-artifact@v4
@@ -35,7 +42,10 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          report=json.loads(Path('artifacts/sparc-discourse-textbook-002/SPARC-discourse-textbook-002.json').read_text())
+          root=Path('artifacts/sparc-discourse-textbook-002')
+          if root.joinpath('tests.exit').read_text().strip()!='0':
+              raise SystemExit('unit tests failed')
+          report=json.loads(root.joinpath('SPARC-discourse-textbook-002.json').read_text())
           if not report['passed']:
               raise SystemExit('discourse textbook gate failed')
           PY
