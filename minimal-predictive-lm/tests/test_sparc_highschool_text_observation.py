@@ -28,6 +28,21 @@ class TextObservationLearnerTests(unittest.TestCase):
         self.assertEqual((subject, obj), ("酸素", "気体"))
         self.assertTrue(relation.startswith("TR"))
 
+    def test_clusters_separate_raw_groups_into_one_relation(self):
+        learner = self.make_learner()
+        first = next(iter(learner.programs[pid].edits)).relation if False else None
+        relation = learner.learn_fact_observation_group([
+            "鉄というものは金属に分類される",
+            "金属の一つとして鉄が知られる",
+            "鉄を分類すると金属に入る",
+        ])
+        base_relation = learner.programs[next(iter(learner.fact_program_ids))].edits[0].relation
+        self.assertEqual(relation, base_relation)
+        self.assertEqual(learner.fact_relation_merges, 1)
+        result = learner.apply("酸素は気体に分類される", World())
+        self.assertTrue(result.accepted)
+        self.assertIn(("酸素", base_relation, "気体"), result.world.facts)
+
     def test_builds_numeric_world_without_relation_id(self):
         learner = self.make_learner()
         observed = learner.observe_world(["箱Zには9個ある"])
