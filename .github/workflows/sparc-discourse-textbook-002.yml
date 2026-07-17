@@ -1,0 +1,41 @@
+name: sparc-discourse-textbook-002
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/sparc_discourse_learner.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/sparc_discourse_gate.py"
+      - "minimal-predictive-lm/tests/test_sparc_discourse_learner.py"
+      - ".github/workflows/sparc-discourse-textbook-002.yml"
+  workflow_dispatch:
+jobs:
+  discourse-textbook:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm
+      - name: Unit tests
+        run: python -m unittest discover -s minimal-predictive-lm/tests -p 'test_sparc_discourse_learner.py' -v
+      - name: Run frozen gate
+        run: python -m minimal_predictive_lm.sparc_discourse_gate --output-dir artifacts/sparc-discourse-textbook-002
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sparc-discourse-textbook-002-results
+          path: artifacts/sparc-discourse-textbook-002
+          retention-days: 90
+      - name: Enforce gate
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report=json.loads(Path('artifacts/sparc-discourse-textbook-002/SPARC-discourse-textbook-002.json').read_text())
+          if not report['passed']:
+              raise SystemExit('discourse textbook gate failed')
+          PY
