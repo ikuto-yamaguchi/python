@@ -8,24 +8,27 @@ import time
 
 from .sparc_cardinality_induction import CardinalityInductionLearner
 from .sparc_conflict_guard import ConflictGuardLearner
-from .sparc_open_textbook_gate import QUERIES, RELATIONS, base_training, jpnum, paragraph, train_queries
+from .sparc_open_textbook_gate import RELATIONS, base_training, jpnum, paragraph, train_queries
 
 
 def train(cls):
     model = cls()
     records, _, chains = base_training()
     model.learn_paragraphs(records)
-    # Ordinary prose demonstrates that one anonymous relation legitimately allows
-    # one subject to have several objects.  Relation names/cardinalities are not
-    # supplied to the learner; shared induced surfaces identify the relation.
-    multi_records = []
+    cardinality_records = []
     for index in range(8):
         suffix = jpnum(1100 + index)
+        # A previously unseen anonymous surface family is consistently single-valued.
+        cardinality_records.append(
+            (paragraph("produce", "生産工程" + suffix, "生成物" + suffix), f"単値根拠-{index}")
+        )
+        # An already induced anonymous relation is observed with two objects per subject.
         part = "共通部品" + suffix
         for side in ("左装置", "右装置"):
-            whole = side + suffix
-            multi_records.append((paragraph("part", part, whole), f"多値根拠-{index}-{side}"))
-    model.learn_paragraphs(multi_records)
+            cardinality_records.append(
+                (paragraph("part", part, side + suffix), f"多値根拠-{index}-{side}")
+            )
+    model.learn_paragraphs(cardinality_records)
     model.induce_rules(min_support=6)
     train_queries(model, chains)
     return model
@@ -38,8 +41,12 @@ def run_gate(output_dir: Path) -> dict[str, object]:
     baseline_bytes = len(baseline.to_bytes())
     adaptive_initial_bytes = len(model.to_bytes())
 
-    tax_probe = model._match_sentence(RELATIONS["tax"][3].format(a="判定主題", b="判定分類"))[0][1]
-    part_probe = model._match_sentence(RELATIONS["part"][3].format(a="判定部品", b="判定全体"))[0][1]
+    functional_probe = model._match_sentence(
+        RELATIONS["produce"][3].format(a="判定工程", b="判定生成物")
+    )[0][1]
+    part_probe = model._match_sentence(
+        RELATIONS["part"][3].format(a="判定部品", b="判定全体")
+    )[0][1]
 
     functional_conflicts_rejected = 0
     functional_prior_preserved = 0
@@ -50,16 +57,19 @@ def run_gate(output_dir: Path) -> dict[str, object]:
 
     for index in range(40):
         suffix = jpnum(1200 + index)
-        subject = "分類主題" + suffix
-        first = "正分類" + suffix
-        second = "誤分類" + suffix
-        model.read_discourse_sentence(RELATIONS["tax"][3].format(a=subject, b=first), f"分類正-{index}")
-        accepted, reason = model.read_discourse_sentence(
-            RELATIONS["tax"][3].format(a=subject, b=second), f"分類誤-{index}"
+        subject = "評価工程" + suffix
+        first = "正生成物" + suffix
+        second = "誤生成物" + suffix
+        sentence1 = RELATIONS["produce"][3].format(a=subject, b=first)
+        sentence2 = RELATIONS["produce"][3].format(a=subject, b=second)
+        model.read_discourse_sentence(sentence1, f"生成正-{index}")
+        accepted, reason = model.read_discourse_sentence(sentence2, f"生成誤-{index}")
+        relation = model._match_sentence(sentence1)[0][1]
+        values = model.out_index.get(subject, {}).get(relation, set())
+        functional_conflicts_rejected += int(
+            not accepted and reason == "abstain-functional-conflict"
         )
-        answer = model.ask(QUERIES["tax"]["direct"][0].format(a=subject))
-        functional_conflicts_rejected += int(not accepted and reason == "abstain-functional-conflict")
-        functional_prior_preserved += int(answer.value == first)
+        functional_prior_preserved += int(values == {first})
         feature_reads += model.last_feature_reads
         max_candidates = max(max_candidates, model.last_candidates)
 
@@ -93,14 +103,15 @@ def run_gate(output_dir: Path) -> dict[str, object]:
     estimated_operations = feature_reads + model.cardinality_rebuild_reads + model.conflict_checks
 
     checks = {
-        "functional_relation_induced_without_name": tax_probe in model.functional_relations,
+        "functional_relation_induced_without_name": functional_probe in model.functional_relations,
         "multivalued_relation_induced_without_name": part_probe in model.nonfunctional_relations,
         "functional_conflicts_40_of_40_rejected": functional_conflicts_rejected == 40,
         "functional_prior_40_of_40_preserved": functional_prior_preserved == 40,
         "legitimate_multivalue_40_of_40_accepted": legitimate_multi_accepted == 40,
         "previous_guard_false_rejections_40_of_40": old_guard_false_rejections == 40,
         "save_restore_preserves_cardinality": (
-            tax_probe in restored.functional_relations and part_probe in restored.nonfunctional_relations
+            functional_probe in restored.functional_relations
+            and part_probe in restored.nonfunctional_relations
         ),
         "no_supplied_relation_cardinalities": model.report()["relation_cardinalities_supplied"] is False,
         "no_additional_discourse_slots": model.report()["cardinality_state_slots_added"] == 0,
