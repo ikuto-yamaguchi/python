@@ -1,7 +1,7 @@
 import random
 import unittest
 
-from minimal_predictive_lm.sparc_highschool_general import World
+from minimal_predictive_lm.sparc_highschool_general import Edit, Program, World
 from minimal_predictive_lm.sparc_highschool_long_temporal import LongTemporalNarrativeLearner
 
 
@@ -43,6 +43,24 @@ class LongTemporalNarrativeLearnerTests(unittest.TestCase):
         report = learner.report()
         self.assertFalse(report["fixed_three_sentence_layout_supplied"])
         self.assertFalse(report["event_boundaries_supplied"])
+
+    def test_aligns_partial_literal_boundaries_without_global_replacement(self):
+        program = Program(
+            "P",
+            (),
+            (Edit("add_fact", "R", 0, 1),),
+            {
+                "歴史上の<V0>は一つの<V1>だった",
+                "<V1>の仲間に数えられるものが<V0>だ",
+                "<V0>は<V1>である",
+            },
+        )
+        bindings, score, reads = LongTemporalNarrativeLearner._schema_bind(
+            program, "歴史上の鎌倉幕府は政権の仲間に数えられる"
+        )
+        self.assertEqual(bindings, ("鎌倉幕府", "政権"))
+        self.assertGreaterEqual(score, 0.76)
+        self.assertGreater(reads, 0)
 
     def test_handles_interleaved_observations_by_latent_state_key(self):
         learner = self.make_learner()

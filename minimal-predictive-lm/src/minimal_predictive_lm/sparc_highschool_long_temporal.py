@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import dataclass
+import re
 from typing import Iterable
 
-from .sparc_highschool_general import World
+from .sparc_highschool_general import Program, World
 from .sparc_highschool_temporal_stream import TemporalNarrativeLearner
 
 
@@ -26,6 +27,13 @@ class LongTemporalNarrativeLearner(TemporalNarrativeLearner):
     of the same key define a candidate interval even when unrelated observations or
     prose occur between them. Only an intervening sentence whose grounded slots can
     exactly compile the observed edit is accepted as the event.
+
+    Surface binding is shared across factual reading and event execution. Instead of
+    deleting only whole memorized literals, it aligns reusable literal boundaries:
+    full fragments are preferred, while sufficiently long prefix/suffix boundaries
+    may be reused when ordinary Japanese inserts or removes a clause at that edge.
+    This preserves sparse exact evidence but permits unseen combinations of learned
+    modifiers and predicates without task-specific phrases or domain routing.
     """
 
     def __init__(self, **kwargs):
@@ -37,6 +45,78 @@ class LongTemporalNarrativeLearner(TemporalNarrativeLearner):
         self.long_temporal_ambiguous_transitions = 0
         self.long_temporal_maximum_delay = 0
         self.long_temporal_sources: dict[str, set[str]] = {}
+        self.boundary_compositions = 0
+
+    @classmethod
+    def _schema_bind(cls, program: Program, text: str) -> tuple[tuple[str, ...], float, int]:
+        slot_count = 1 + max(
+            index
+            for edit in program.edits
+            for index in (edit.subject_slot, edit.object_slot)
+            if index is not None
+        )
+        literals = {
+            fragment
+            for pattern in program.patterns
+            for fragment in cls._literal_fragments(pattern)
+            if fragment
+        }
+        candidates: dict[str, int] = {}
+        reads = 0
+        for literal in literals:
+            reads += 1
+            candidates[literal] = max(candidates.get(literal, 0), len(literal) * 4)
+            if len(literal) >= 8:
+                for width in range(4, len(literal)):
+                    prefix = literal[:width]
+                    suffix = literal[-width:]
+                    candidates[prefix] = max(candidates.get(prefix, 0), width * 2)
+                    candidates[suffix] = max(candidates.get(suffix, 0), width * 2)
+
+        matches: list[tuple[int, int, int, str]] = []
+        for fragment, weight in candidates.items():
+            reads += 1
+            for match in re.finditer(re.escape(fragment), text):
+                matches.append((match.start(), match.end(), weight, fragment))
+
+        matches.sort(key=lambda row: (row[1], row[0], -row[2], -len(row[3])))
+        ends = [row[1] for row in matches]
+        best: list[tuple[int, tuple[int, ...]]] = [(0, ())]
+        for i, (start, _end, weight, _fragment) in enumerate(matches):
+            lo, hi = 0, i
+            while lo < hi:
+                mid = (lo + hi) // 2
+                if ends[mid] <= start:
+                    lo = mid + 1
+                else:
+                    hi = mid
+            previous = lo - 1
+            take_score = weight + best[previous + 1][0]
+            take_path = best[previous + 1][1] + (i,)
+            skip_score, skip_path = best[i]
+            best.append((take_score, take_path) if take_score > skip_score else (skip_score, skip_path))
+
+        selected = [matches[index] for index in best[-1][1]]
+        selected.sort(key=lambda row: row[0])
+        bindings: list[str] = []
+        cursor = 0
+        covered = 0
+        for start, end, _weight, _fragment in selected:
+            if start > cursor:
+                bindings.append(text[cursor:start])
+            covered += end - start
+            cursor = max(cursor, end)
+        if cursor < len(text):
+            bindings.append(text[cursor:])
+        bindings = [value for value in bindings if value]
+        cue_ratio = covered / max(1, len(text))
+        if len(bindings) != slot_count or cue_ratio < 0.35:
+            return (), cue_ratio, reads
+        if any(len(value) > 24 for value in bindings):
+            return (), cue_ratio, reads
+        partial_used = any(fragment not in literals for *_rest, fragment in selected)
+        score = min(0.985, 0.72 + 0.27 * cue_ratio - (0.015 if partial_used else 0.0))
+        return tuple(bindings), score, reads
 
     @staticmethod
     def _single_numeric_observation(world: World):
@@ -131,6 +211,7 @@ class LongTemporalNarrativeLearner(TemporalNarrativeLearner):
             "long_temporal_ambiguous_transitions": self.long_temporal_ambiguous_transitions,
             "long_temporal_maximum_delay": self.long_temporal_maximum_delay,
             "long_temporal_source_links": sum(len(sources) for sources in self.long_temporal_sources.values()),
+            "boundary_compositional_alignment": True,
             "fixed_three_sentence_layout_supplied": False,
             "event_boundaries_supplied": False,
             "delay_length_supplied": False,
