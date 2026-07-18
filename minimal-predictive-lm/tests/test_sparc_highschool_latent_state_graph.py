@@ -16,6 +16,11 @@ class LatentStateGraphLearnerTest(unittest.TestCase):
         learner.learn_long_chronological_documents(_long_corpus())
         return learner
 
+    @staticmethod
+    def subject_value(world, subject: str) -> int | None:
+        rows = [value for (row_subject, _relation), value in world.number_map().items() if row_subject == subject]
+        return rows[0] if len(rows) == 1 else None
+
     def test_recovers_omitted_initial_and_intermediate_states(self):
         learner = self.learner()
         text = (
@@ -43,7 +48,7 @@ class LatentStateGraphLearnerTest(unittest.TestCase):
         self.assertTrue(result.accepted)
         recovered = {(subject, node, value) for subject, _relation, node, value in result.recovered_states}
         self.assertIn(("系列", 0, 10), recovered)
-        self.assertNotIn(("無関係", "count"), result.initial_world.number_map())
+        self.assertIsNone(self.subject_value(result.initial_world, "無関係"))
         self.assertGreaterEqual(learner.latent_unanchored_components_skipped, 1)
 
     def test_observation_only_component_is_preserved_as_fixed_context(self):
@@ -53,8 +58,8 @@ class LatentStateGraphLearnerTest(unittest.TestCase):
             "系列を2倍にする。系列には26個ある。"
         )
         self.assertTrue(result.accepted)
-        self.assertEqual(99, result.initial_world.number_map()[("資料C", "count")])
-        self.assertEqual(99, result.final_world.number_map()[("資料C", "count")])
+        self.assertEqual(99, self.subject_value(result.initial_world, "資料C"))
+        self.assertEqual(99, self.subject_value(result.final_world, "資料C"))
         self.assertGreaterEqual(learner.latent_fixed_observation_components, 1)
 
     def test_abstains_on_inconsistent_middle_observation(self):
