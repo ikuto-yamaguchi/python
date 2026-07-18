@@ -7,7 +7,7 @@ from html.parser import HTMLParser
 import json
 from pathlib import Path
 import time
-from urllib.parse import urljoin, urlparse
+from urllib.parse import parse_qs, urljoin, urlparse
 from urllib.request import Request, urlopen
 
 
@@ -70,9 +70,22 @@ def _download(url: str) -> tuple[bytes, str]:
     return data, media_type
 
 
+def _asset_extension(url: str) -> str | None:
+    parsed = urlparse(url)
+    candidates = [parsed.path]
+    for values in parse_qs(parsed.query).values():
+        candidates.extend(values)
+    for candidate in candidates:
+        lowered = candidate.lower()
+        if lowered.endswith(".pdf"):
+            return ".pdf"
+        if lowered.endswith(".mp3"):
+            return ".mp3"
+    return None
+
+
 def _asset_link(url: str) -> bool:
-    path = urlparse(url).path.lower()
-    return path.endswith(".pdf") or path.endswith(".mp3")
+    return _asset_extension(url) in {".pdf", ".mp3"}
 
 
 def freeze_sources(
@@ -130,7 +143,10 @@ def freeze_sources(
         "main_answer_assets_at_least_20": counts.get("common_test_2026_main_answers", 0) >= 20,
         "makeup_question_assets_at_least_35": counts.get("common_test_2026_makeup_questions", 0) >= 35,
         "makeup_answer_assets_at_least_20": counts.get("common_test_2026_makeup_answers", 0) >= 20,
-        "audio_assets_present": sum(asset.media_type.startswith("audio/") or asset.url.lower().endswith(".mp3") for asset in assets) >= 4,
+        "audio_assets_present": sum(
+            asset.media_type.startswith("audio/") or _asset_extension(asset.url) == ".mp3"
+            for asset in assets
+        ) >= 4,
         "all_assets_official": all(urlparse(asset.url).hostname == OFFICIAL_HOST for asset in assets),
         "all_assets_nonempty": all(asset.size_bytes > 0 for asset in assets),
         "all_assets_hashed": all(len(asset.sha256) == 64 for asset in assets),
