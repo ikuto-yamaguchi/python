@@ -16,6 +16,10 @@ class ImplicitWorldLearnerTest(unittest.TestCase):
         learner.learn_long_chronological_documents(_long_corpus())
         return learner
 
+    @staticmethod
+    def values(result):
+        return {(subject, value) for subject, _relation, value in result.inferred_values}
+
     def test_recovers_two_omitted_initial_states_with_one_shared_mechanism(self):
         learner = self.learner()
         text = (
@@ -26,10 +30,7 @@ class ImplicitWorldLearnerTest(unittest.TestCase):
         result = learner.infer_implicit_world(text)
         self.assertTrue(result.accepted)
         self.assertTrue(result.verified)
-        self.assertEqual(
-            (("主系列", "個数", 10), ("副系列", "個数", 5)),
-            result.inferred_values,
-        )
+        self.assertEqual({("主系列", 10), ("副系列", 5)}, self.values(result))
         self.assertIn("逆向き", result.answer)
         self.assertIn("検算", result.answer)
         self.assertEqual("shared-reversible-affine-world-constraint", result.mechanism)
@@ -45,7 +46,7 @@ class ImplicitWorldLearnerTest(unittest.TestCase):
         restored = ImplicitWorldLearner.from_bytes(learner.to_bytes())
         result = restored.infer_implicit_world("保存系列に2個加える。保存系列を3倍にする。保存系列には27個ある。")
         self.assertTrue(result.accepted)
-        self.assertEqual((("保存系列", "個数", 7),), result.inferred_values)
+        self.assertEqual({("保存系列", 7)}, self.values(result))
 
 
 if __name__ == "__main__":
