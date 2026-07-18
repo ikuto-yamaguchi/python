@@ -22,10 +22,9 @@ def _weak(target: str, initial: int, add: int, note: str) -> str:
 
 
 def _strong(target: str, initial: int, add: int, note: str) -> str:
-    middle = initial + add
-    final = middle * 2
+    final = (initial + add) * 2
     return (
-        f"{target}には{initial}個ある。{target}に{add}個加える。{target}には{middle}個ある。"
+        f"{target}には{initial}個ある。{target}に{add}個加える。"
         f"{target}を2倍にする。{target}には{final}個ある。{note}。"
         f"{target}について不足する状態を根拠付きで説明してください。"
     )
@@ -88,12 +87,12 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
         stable_states = {(row[2], row[3]) for row in stable_result.selected_states}
         passed = (
             resolved.accepted
-            and resolved.support == 6
+            and resolved.support == 4
             and resolved.competing_hypotheses == 2
             and (0, strong_initial) in selected
             and (0, weak_initial) not in selected
             and stable_result.accepted
-            and stable_result.support == 3
+            and stable_result.support == 2
             and (0, stable_initial) in stable_states
             and resolved.mechanism == "shared-bounded-verified-evidence-quality-consensus-graph"
             and max_graph_bytes <= 32768
@@ -105,7 +104,8 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
             "target": target,
             "weak_independent_lineages": 3,
             "strong_independent_lineages": 2,
-            "selected_weight": resolved.support,
+            "weak_total_weight": 3,
+            "strong_total_weight": resolved.support,
             "selected_states": resolved.selected_states,
             "stable_target_preserved": stable_result.accepted,
             "hypothesis_reads": hypothesis_reads,
@@ -133,6 +133,7 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
         "lineages": len(learner._lineages),
         "quality_observation_reads": learner.quality_observation_reads,
         "quality_transition_reads": learner.quality_transition_reads,
+        "quality_canonical_replays": learner.quality_canonical_replays,
         "quality_writes": learner.quality_writes,
         "quality_reads": learner.quality_reads,
         "quality_graph_bytes": len(learner.quality_graph_bytes()),
@@ -152,6 +153,7 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
         + learner.lineage_comparisons
         + learner.quality_observation_reads
         + learner.quality_transition_reads
+        + learner.quality_canonical_replays
         + learner.quality_reads
         + learner.latent_constraint_reads
         + learner.latent_forward_checks
@@ -208,7 +210,7 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
         "structural_integration_passed": improved and efficient,
         "highschool_level_passed": False,
         "passed": improved and efficient,
-        "claim_boundary": "The same verified latent-world learner now ranks independent lineages by bounded directly replayable observation coverage rather than raw source count. Evaluation remains controlled synthetic Japanese; broad textbooks, qualitative evidence quality, source expertise, real measurement uncertainty, and natural free dialogue remain unproven.",
+        "claim_boundary": "The same verified latent-world learner now canonicalizes worlds across observation layouts and ranks independent lineages by bounded directly replayable observation coverage rather than raw source count. Evaluation remains controlled synthetic Japanese; broad textbooks, qualitative evidence quality, source expertise, real measurement uncertainty, and natural free dialogue remain unproven.",
     }
     (output / "SPARC-highschool-general-evidence-quality.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     (output / "SPARC-highschool-general-evidence-quality.model.zlib").write_bytes(learner.to_bytes())
