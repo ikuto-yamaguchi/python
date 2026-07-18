@@ -12,7 +12,7 @@ concurrency:
 jobs:
   curriculum-memory-development:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -35,52 +35,85 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           repository: ikuto-yamaguchi/python
           run-id: 29634782012
-      - name: Acquire Japanese curriculum corpus without exam targets
+      - name: Acquire subject-balanced introductory curriculum without exam targets
         working-directory: minimal-predictive-lm
         run: |
           set -o pipefail
           python -m minimal_predictive_lm.japanese_curriculum_corpus \
-            --output results/japanese_curriculum.jsonl \
+            --output results/japanese_curriculum_intro.jsonl \
             --results-per-query 30 \
             2>&1 | tee ../curriculum-corpus.log
-      - name: Acquire frozen JMMLU development diagnostic
+      - name: Expand every curriculum article beyond its introduction
+        working-directory: minimal-predictive-lm
+        run: |
+          set -o pipefail
+          python -m minimal_predictive_lm.enrich_japanese_curriculum \
+            results/japanese_curriculum_intro.jsonl \
+            results/japanese_curriculum_full.jsonl \
+            --max-chars 12000 \
+            2>&1 | tee ../curriculum-enrichment.log
+      - name: Acquire disclosed JMMLU development diagnostic
         run: |
           curl -L --fail --retry 3 \
             https://huggingface.co/datasets/nlp-waseda/JMMLU/resolve/main/JMMLU.zip \
             -o /tmp/JMMLU.zip
           mkdir -p /tmp/jmmlu
           unzip -q /tmp/JMMLU.zip -d /tmp/jmmlu
-      - name: Build compact curriculum memory and evaluate
+      - name: Build expanded curriculum memory and evaluate all 7536 items
         working-directory: minimal-predictive-lm
         run: |
-          python -m minimal_predictive_lm.curriculum_memory_jmmlu_experiment \
+          set -o pipefail
+          python -m minimal_predictive_lm.expanded_curriculum_memory_jmmlu_experiment \
             /tmp/mobile-public/mobile_public_transfer.mpmobile \
-            results/japanese_curriculum.jsonl \
+            results/japanese_curriculum_full.jsonl \
             /tmp/jmmlu \
-            --output-dir results
-      - name: Package the selected policy into one executable artifact
+            --output-dir results \
+            2>&1 | tee ../expanded-curriculum-experiment.log
+      - name: Package the development-selected full-text policy
         working-directory: minimal-predictive-lm
         run: |
           python -m minimal_predictive_lm.package_mobile_exam_artifact \
             /tmp/mobile-public/mobile_public_transfer.mpmobile \
             results/curriculum_memory.zlib \
             results/curriculum_memory_jmmlu.json \
-            results/mobile_university_exam.mpexam
-      - name: Enforce resource and contamination boundaries
+            results/mobile_university_exam_fulltext.mpexam
+      - name: Prevent the known truncated-knowledge photosynthesis error
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          from minimal_predictive_lm.mobile_exam_artifact import MobileExamArtifact
+          artifact = MobileExamArtifact.load('results/mobile_university_exam_fulltext.mpexam')
+          prompt = '問題：植物が光合成で放出する気体は何か。\n(0)窒素\n(1)酸素\n(2)二酸化炭素\n(3)水素'
+          prediction = artifact.predict(prompt)
+          print({'answer': prediction.answer, 'mode': prediction.mode, 'evidence': prediction.evidence_titles})
+          assert prediction.answer == '酸素'
+          PY
+      - name: Enforce resource, corpus, and contamination boundaries
         working-directory: minimal-predictive-lm
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
           row = json.loads(Path('results/curriculum_memory_jmmlu.json').read_text())
-          package = json.loads(Path('results/mobile_university_exam.mpexam.json').read_text())
+          intro = json.loads(Path('results/japanese_curriculum_intro.jsonl.report.json').read_text())
+          full = json.loads(Path('results/japanese_curriculum_full.jsonl.report.json').read_text())
+          package = json.loads(Path('results/mobile_university_exam_fulltext.mpexam.json').read_text())
           protocol = row['protocol']
           assert row['experiment_protocol_passed'] is True
+          assert intro['documents'] >= 250
+          assert full['enrichment_passed'] is True
+          assert full['documents'] == intro['documents']
+          assert full['expanded_documents'] >= int(0.75 * full['documents'])
+          assert full['characters'] >= 1_500_000
+          assert full['target_exam_questions_used'] == 0
+          assert full['target_exam_answers_used'] == 0
           assert protocol['jmmlu_is_development_benchmark'] is True
           assert protocol['strict_unseen_jmmlu_claim_allowed'] is False
           assert protocol['individual_jmmlu_targets_inspected_by_builder'] == 0
           assert protocol['official_common_test_targets_used'] == 0
           assert protocol['subject_name_visible_to_model'] is False
+          assert row['memory_build']['full_text_curriculum'] is True
+          assert row['memory_build']['max_snippet_chars'] == 3000
           assert row['memory']['serialized_bytes'] <= 80_000_000
           assert row['memory']['estimated_active_bytes'] <= 128 * 1024
           assert row['resources']['planned_complete_package_bytes'] <= 1_000_000_000
@@ -93,7 +126,7 @@ jobs:
           assert package['university_exam_mastery_passed'] is False
           assert package['highschool_level_passed'] is False
           PY
-      - name: Upload curriculum-memory evidence and executable artifact
+      - name: Upload expanded curriculum evidence and executable artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -102,9 +135,12 @@ jobs:
             minimal-predictive-lm/results/curriculum_memory_junit.xml
             minimal-predictive-lm/results/curriculum_memory_unit.log
             curriculum-corpus.log
-            minimal-predictive-lm/results/japanese_curriculum.jsonl.report.json
+            curriculum-enrichment.log
+            expanded-curriculum-experiment.log
+            minimal-predictive-lm/results/japanese_curriculum_intro.jsonl.report.json
+            minimal-predictive-lm/results/japanese_curriculum_full.jsonl.report.json
             minimal-predictive-lm/results/curriculum_memory.zlib
             minimal-predictive-lm/results/curriculum_memory_jmmlu.json
-            minimal-predictive-lm/results/mobile_university_exam.mpexam
-            minimal-predictive-lm/results/mobile_university_exam.mpexam.json
+            minimal-predictive-lm/results/mobile_university_exam_fulltext.mpexam
+            minimal-predictive-lm/results/mobile_university_exam_fulltext.mpexam.json
           retention-days: 30
