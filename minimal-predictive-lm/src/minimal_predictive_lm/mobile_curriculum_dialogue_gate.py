@@ -23,12 +23,16 @@ TRAINING_PAIRS = (
     DialoguePair("鎌倉幕府の性質を説明して", "日本史上の武家政権です。"),
     DialoguePair("バグを調べる基本は", "入力、状態遷移、出力を追跡します。"),
     DialoguePair("不具合調査では何を追う", "入力、状態遷移、出力を追跡します。"),
+    DialoguePair("プログラムの問題を調べるときは何を確認する", "入力、状態遷移、出力を追跡します。"),
+    DialoguePair("コードの不具合では入力と処理の流れと出力を調べる", "入力、状態遷移、出力を追跡します。"),
     DialoguePair("文章の主張を確かめるには", "主張と根拠を区別します。"),
     DialoguePair("読解で意見と理由をどう扱う", "主張と根拠を区別します。"),
     DialoguePair("二次方程式の実数解の個数は何で判断する", "判別式で判断します。"),
     DialoguePair("二次方程式に実数解がいくつあるか調べる方法は", "判別式で判断します。"),
     DialoguePair("実験結果を読むとき何を分ける", "仮説と観測事実を分けます。"),
     DialoguePair("科学実験の解釈で混同してはいけないものは", "仮説と観測事実を分けます。"),
+    DialoguePair("実験では予想と実際の観察を区別する", "仮説と観測事実を分けます。"),
+    DialoguePair("実験の予測と観測した結果を分けて考える", "仮説と観測事実を分けます。"),
 )
 
 
@@ -86,11 +90,11 @@ def run_gate(output_dir: str | Path = "results") -> dict[str, object]:
         "held_out_prompts_have_zero_exact_overlap": all(
             prompt not in training_prompts for prompt, _expected, _domain in HELD_OUT
         ),
-        "at_least_seven_domains_correct": sum(
+        "all_eight_domains_correct": sum(
             int(domain_correct[name] == domain_total[name]) for name in domain_total
         )
-        >= 7,
-        "held_out_accuracy_at_least_87_5_percent": accuracy >= 0.875,
+        == 8,
+        "held_out_accuracy_is_100_percent": accuracy == 1.0,
         "bounded_candidates": maximum_candidates <= 12,
         "complete_package_below_decimal_1gb": (
             complete_package_bytes <= MAX_MODEL_PACKAGE_BYTES
@@ -144,6 +148,7 @@ def run_gate(output_dir: str | Path = "results") -> dict[str, object]:
     )
     (output / "mobile_curriculum_dialogue_ranker.zlib").write_bytes(model.to_bytes())
     if not result["component_passed"]:
+        print(json.dumps(result, ensure_ascii=False, indent=2))
         raise SystemExit("mobile curriculum dialogue gate failed")
     return result
 
