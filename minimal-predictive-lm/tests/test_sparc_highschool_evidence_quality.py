@@ -31,7 +31,7 @@ class EvidenceQualityConsensusTest(unittest.TestCase):
 
     def test_fewer_well_anchored_lineages_beat_many_weak_reconstructions(self):
         learner = self.learner()
-        target = "品質論点A"
+        target = "品質論点0A"
         for note in ("北側の伝聞記録", "西側の間接記録", "旧帳簿の再構成"):
             learner.ingest_quality_verified_hypothesis(weak(target, 7, 3, note))
         for note in ("山岳観測所の光学計器による原簿", "沿岸研究船の重量センサー再測定"):
@@ -44,7 +44,7 @@ class EvidenceQualityConsensusTest(unittest.TestCase):
 
     def test_equal_verified_coverage_abstains(self):
         learner = self.learner()
-        target = "品質論点B"
+        target = "品質論点1B"
         learner.ingest_quality_verified_hypothesis(strong(target, 5, 2, "森林試験区の自動計数器で観測"))
         learner.ingest_quality_verified_hypothesis(strong(target, 9, 2, "地下実験室の圧力装置で再測定"))
         result = learner.answer_from_quality_graph(f"{target}の結論を説明してください。")
@@ -53,7 +53,7 @@ class EvidenceQualityConsensusTest(unittest.TestCase):
 
     def test_duplicate_lineage_does_not_add_quality(self):
         learner = self.learner()
-        target = "品質論点C"
+        target = "品質論点2C"
         text = strong(target, 8, 4, "共同測定の記録をそのまま転記した")
         learner.ingest_quality_verified_hypothesis(text)
         learner.ingest_quality_verified_hypothesis(text)
@@ -73,7 +73,7 @@ class EvidenceQualityConsensusTest(unittest.TestCase):
         )
         for index, note in enumerate(notes):
             learner.ingest_quality_verified_hypothesis(
-                strong(f"品質保存{index}", index + 3, 2, note)
+                strong(f"品質保存{index}A", index + 3, 2, note)
             )
         payload = learner.quality_graph_bytes()
         self.assertLessEqual(len(payload), 32768)
