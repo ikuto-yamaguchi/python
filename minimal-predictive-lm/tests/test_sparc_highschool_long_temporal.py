@@ -1,8 +1,10 @@
 import random
 import unittest
 
+from minimal_predictive_lm.sparc_highschool_document_stream_gate import _corpus, _orient, _oriented_fact
 from minimal_predictive_lm.sparc_highschool_general import Edit, Program, World
 from minimal_predictive_lm.sparc_highschool_long_temporal import LongTemporalNarrativeLearner
+from minimal_predictive_lm.sparc_highschool_numeric_stream_gate import _numeric_corpus
 
 
 def numeric_corpus():
@@ -33,63 +35,60 @@ class LongTemporalNarrativeLearnerTests(unittest.TestCase):
         learner.learn_independent_numeric_documents(numeric_corpus())
         return learner
 
+    @staticmethod
+    def fact_program():
+        return Program("P", (), (Edit("add_fact", "R", 0, 1),), {
+            "<V0>は<V1>である", "<V0>というものは<V1>に分類される",
+            "歴史上の<V0>は一つの<V1>だった", "<V1>の仲間に数えられるものが<V0>だ",
+            "<V0>を分類すると<V1>に入る",
+        })
+
     def test_discovers_delayed_events_with_distractors(self):
-        learner = self.make_learner()
-        result = learner.learn_long_chronological_documents(long_corpus())
-        self.assertEqual(result.transitions_found, 6)
-        self.assertEqual(len(learner.programs), 3)
-        self.assertGreaterEqual(result.distractor_sentences_ignored, 8)
-        self.assertGreaterEqual(result.maximum_delay, 3)
-        report = learner.report()
-        self.assertFalse(report["fixed_three_sentence_layout_supplied"])
-        self.assertFalse(report["event_boundaries_supplied"])
+        learner = self.make_learner(); result = learner.learn_long_chronological_documents(long_corpus())
+        self.assertEqual(result.transitions_found, 6); self.assertEqual(len(learner.programs), 3)
+        self.assertGreaterEqual(result.distractor_sentences_ignored, 8); self.assertGreaterEqual(result.maximum_delay, 3)
+        report = learner.report(); self.assertFalse(report["fixed_three_sentence_layout_supplied"]); self.assertFalse(report["event_boundaries_supplied"])
 
     def test_aligns_partial_literal_boundaries_without_global_replacement(self):
-        program = Program(
-            "P",
-            (),
-            (Edit("add_fact", "R", 0, 1),),
-            {
-                "歴史上の<V0>は一つの<V1>だった",
-                "<V1>の仲間に数えられるものが<V0>だ",
-                "<V0>は<V1>である",
-            },
-        )
-        bindings, score, reads = LongTemporalNarrativeLearner._schema_bind(
-            program, "歴史上の鎌倉幕府は政権の仲間に数えられる"
-        )
-        self.assertEqual(bindings, ("鎌倉幕府", "政権"))
-        self.assertGreaterEqual(score, 0.76)
-        self.assertGreater(reads, 0)
+        bindings, score, reads = LongTemporalNarrativeLearner._schema_bind(self.fact_program(), "歴史上の鎌倉幕府は政権の仲間に数えられる")
+        self.assertEqual(bindings, ("鎌倉幕府", "政権")); self.assertGreaterEqual(score, 0.76); self.assertGreater(reads, 0)
+
+    def test_slot_order_anchor_lattice_composes_all_unseen_boundaries(self):
+        cases = {"酸素は気体に分類される": ("酸素", "気体"), "歴史上の鎌倉幕府は政権の仲間に数えられる": ("鎌倉幕府", "政権"), "正方形というものは図形である": ("正方形", "図形"), "銅を分類すると金属だった": ("銅", "金属")}
+        for text, expected in cases.items():
+            with self.subTest(text=text):
+                bindings, score, reads = LongTemporalNarrativeLearner._schema_bind(self.fact_program(), text)
+                self.assertEqual(bindings, expected); self.assertGreaterEqual(score, 0.80); self.assertGreater(reads, 0)
+
+    def test_actual_induced_program_transfers_every_untouched_paraphrase(self):
+        learner = LongTemporalNarrativeLearner()
+        learner.learn_independent_documents(_corpus(), min_support=4)
+        learner.learn_independent_numeric_documents(_numeric_corpus())
+        learner.learn_long_chronological_documents(long_corpus())
+        reference = _oriented_fact(learner.learned_document_world(), "水", "物質")
+        cases = [("酸素は気体に分類される", "酸素", "気体"), ("歴史上の鎌倉幕府は政権の仲間に数えられる", "鎌倉幕府", "政権"), ("正方形というものは図形である", "正方形", "図形"), ("銅を分類すると金属だった", "銅", "金属")]
+        for text, left, right in cases:
+            with self.subTest(text=text):
+                result = learner.apply(text, World())
+                self.assertTrue(result.accepted, (result.mechanism, result.confidence, learner._rank(text)))
+                self.assertIn(_orient(reference, left, right), result.world.facts, (result, learner._rank(text)))
+
+    def test_reversed_surface_order_keeps_semantic_roles(self):
+        bindings, score, _ = LongTemporalNarrativeLearner._schema_bind(self.fact_program(), "金属の仲間に数えられるものが銅だ")
+        self.assertEqual(bindings, ("銅", "金属")); self.assertGreaterEqual(score, 0.80)
 
     def test_handles_interleaved_observations_by_latent_state_key(self):
-        learner = self.make_learner()
-        text = (
-            "箱Aには2個ある。試料Aの温度は10度である。"
-            "箱Aに3個加える。誰かが窓を開けた。箱Aには5個ある。"
-            "試料Aの温度を5度上げる。外では雨が降った。試料Aの温度は15度である。"
-        )
-        result = learner.learn_long_chronological_document(text, "I")
-        self.assertEqual(result.transitions_found, 2)
-        self.assertEqual(len(learner.programs), 2)
+        learner = self.make_learner(); text = "箱Aには2個ある。試料Aの温度は10度である。箱Aに3個加える。誰かが窓を開けた。箱Aには5個ある。試料Aの温度を5度上げる。外では雨が降った。試料Aの温度は15度である。"
+        result = learner.learn_long_chronological_document(text, "I"); self.assertEqual(result.transitions_found, 2); self.assertEqual(len(learner.programs), 2)
 
     def test_rejects_ambiguous_two_event_explanation(self):
-        learner = self.make_learner()
-        text = "箱Aには2個ある。箱Aに3個加える。箱Aを3増やす。箱Aには5個ある。"
-        result = learner.learn_long_chronological_document(text, "A")
-        self.assertEqual(result.transitions_found, 0)
-        self.assertEqual(result.ambiguous_transitions, 1)
-        self.assertEqual(len(learner.programs), 0)
+        learner = self.make_learner(); result = learner.learn_long_chronological_document("箱Aには2個ある。箱Aに3個加える。箱Aを3増やす。箱Aには5個ある。", "A")
+        self.assertEqual(result.transitions_found, 0); self.assertEqual(result.ambiguous_transitions, 1); self.assertEqual(len(learner.programs), 0)
 
     def test_transfers_delayed_program_after_serialization(self):
-        learner = self.make_learner()
-        learner.learn_long_chronological_documents(long_corpus())
-        restored = LongTemporalNarrativeLearner.from_bytes(learner.to_bytes())
-        before = restored.observe_world(["箱Zには9個ある"]).world
-        result = restored.apply("箱Zに3個加える", before)
-        self.assertTrue(result.accepted)
-        self.assertIn(12, result.world.number_map().values())
+        learner = self.make_learner(); learner.learn_long_chronological_documents(long_corpus()); restored = LongTemporalNarrativeLearner.from_bytes(learner.to_bytes())
+        before = restored.observe_world(["箱Zには9個ある"]).world; result = restored.apply("箱Zに3個加える", before)
+        self.assertTrue(result.accepted); self.assertIn(12, result.world.number_map().values())
 
 
-if __name__ == "__main__":
-    unittest.main()
+if __name__ == "__main__": unittest.main()
