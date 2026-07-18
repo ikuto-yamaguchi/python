@@ -24,7 +24,9 @@ jobs:
         run: |
           mkdir -p minimal-predictive-lm/results
           set -o pipefail
-          python -m pytest -vv minimal-predictive-lm/tests/test_sparc_hs18_semantics.py \
+          python -m pytest -vv \
+            minimal-predictive-lm/tests/test_sparc_hs18_semantics.py \
+            minimal-predictive-lm/tests/test_sparc_hs18_semantics_v2.py \
             --junitxml=minimal-predictive-lm/results/hs18_semantic_junit.xml \
             2>&1 | tee minimal-predictive-lm/results/hs18_semantic_unit.log
       - name: Run axis-blind development and frozen causal gates
@@ -59,7 +61,7 @@ jobs:
           assert row['final_uninspected_causal']['score']['correct'] >= 28
           assert row['resources']['planned_complete_mobile_package_bytes'] <= 1_000_000_000
           assert row['protocol']['axis_visible_to_worker'] is False
-          assert row['protocol']['development_public_causal_targets_inspected'] == 40
+          assert row['protocol']['development_public_causal_targets_inspected'] == 80
           assert row['protocol']['final_targets_inspected_before_freeze'] == 0
           assert row['protocol']['final_targets_used_for_training'] == 0
           assert row['mobile_device_gate_passed'] is False
