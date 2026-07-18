@@ -51,6 +51,14 @@ jobs:
             results/japanese_curriculum.jsonl \
             /tmp/jmmlu \
             --output-dir results
+      - name: Package the selected policy into one executable artifact
+        working-directory: minimal-predictive-lm
+        run: |
+          python -m minimal_predictive_lm.package_mobile_exam_artifact \
+            /tmp/mobile-public/mobile_public_transfer.mpmobile \
+            results/curriculum_memory.zlib \
+            results/curriculum_memory_jmmlu.json \
+            results/mobile_university_exam.mpexam
       - name: Enforce resource and contamination boundaries
         working-directory: minimal-predictive-lm
         run: |
@@ -58,6 +66,7 @@ jobs:
           import json
           from pathlib import Path
           row = json.loads(Path('results/curriculum_memory_jmmlu.json').read_text())
+          package = json.loads(Path('results/mobile_university_exam.mpexam.json').read_text())
           protocol = row['protocol']
           assert row['experiment_protocol_passed'] is True
           assert protocol['jmmlu_is_development_benchmark'] is True
@@ -68,11 +77,16 @@ jobs:
           assert row['memory']['serialized_bytes'] <= 80_000_000
           assert row['memory']['estimated_active_bytes'] <= 128 * 1024
           assert row['resources']['planned_complete_package_bytes'] <= 1_000_000_000
+          assert package['package_passed'] is True
+          assert package['resources']['planned_complete_package_bytes'] <= 1_000_000_000
+          assert package['resources']['estimated_combined_active_bytes'] <= 5_000_000
           assert row['university_exam_mastery_passed'] is False
           assert row['highschool_level_passed'] is False
           assert row['mobile_device_gate_passed'] is False
+          assert package['university_exam_mastery_passed'] is False
+          assert package['highschool_level_passed'] is False
           PY
-      - name: Upload curriculum-memory evidence
+      - name: Upload curriculum-memory evidence and executable artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -81,4 +95,6 @@ jobs:
             minimal-predictive-lm/results/japanese_curriculum.jsonl.report.json
             minimal-predictive-lm/results/curriculum_memory.zlib
             minimal-predictive-lm/results/curriculum_memory_jmmlu.json
+            minimal-predictive-lm/results/mobile_university_exam.mpexam
+            minimal-predictive-lm/results/mobile_university_exam.mpexam.json
           retention-days: 30
