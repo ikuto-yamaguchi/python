@@ -16,8 +16,6 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
     output = Path(output_dir)
     output.mkdir(parents=True, exist_ok=True)
 
-    # The previous frozen 216-point gate is rerun unchanged.  Its model is the
-    # baseline on the expanded denominator and has no branch-comparison method.
     previous = run_previous_gate(output / "previous-gate")
     started = time.perf_counter()
     learner = CounterfactualNarrativeLearner()
@@ -65,7 +63,7 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
             result.accepted
             and factual == 2 * (index + 3)
             and alternative == 4 * index
-            and result.changed_numbers
+            and bool(result.changed_numbers)
         )
 
     for index in range(10):
@@ -89,14 +87,11 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
             result.accepted
             and factual == initial + 10
             and alternative == initial + 5
-            and result.changed_numbers
+            and bool(result.changed_numbers)
         )
 
     axes = dict(previous["axes"])
-    axes["shared_counterfactual_branching"] = {
-        "correct": counterfactual_correct,
-        "total": 20,
-    }
+    axes["shared_counterfactual_branching"] = {"correct": counterfactual_correct, "total": 20}
     total_correct = sum(row["correct"] for row in axes.values())
     total = sum(row["total"] for row in axes.values())
     percentages = {name: row["correct"] / row["total"] for name, row in axes.items()}
