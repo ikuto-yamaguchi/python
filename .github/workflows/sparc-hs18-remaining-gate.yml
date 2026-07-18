@@ -1,0 +1,57 @@
+name: sparc-hs18-remaining-gate
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+  workflow_dispatch:
+
+concurrency:
+  group: sparc-hs18-remaining-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  hs18-remaining-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Semantic unit tests
+        run: python -m pytest -q minimal-predictive-lm/tests/test_sparc_hs18_semantics.py
+      - name: Run identical axis-blind 600-question gate
+        working-directory: minimal-predictive-lm
+        run: |
+          set -o pipefail
+          python -m minimal_predictive_lm.sparc_hs18_remaining_gate 2>&1 | tee ../sparc-hs18-remaining-gate.log
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sparc-hs18-remaining-gate-results
+          path: |
+            minimal-predictive-lm/results/sparc_hs18_remaining_gate.json
+            minimal-predictive-lm/results/sparc_hs18_remaining_gate.md
+            sparc-hs18-remaining-gate.log
+          retention-days: 14
+      - name: Enforce capability, mobile, and claim boundaries
+        if: always()
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          row = json.loads(Path('results/sparc_hs18_remaining_gate.json').read_text())
+          assert row['passed'] is True
+          assert row['score']['correct'] >= 581
+          assert row['axis_scores']['adjective_order']['correct'] >= 36
+          assert row['axis_scores']['causal_judgement']['correct'] >= 30
+          assert row['resources']['planned_complete_mobile_package_bytes'] <= 1_000_000_000
+          assert row['protocol']['axis_visible_to_worker'] is False
+          assert row['protocol']['public_targets_used_for_training'] == 0
+          assert row['mobile_device_gate_passed'] is False
+          assert row['highschool_level_passed'] is False
+          PY
