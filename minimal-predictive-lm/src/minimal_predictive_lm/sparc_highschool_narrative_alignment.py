@@ -53,10 +53,11 @@ class NarrativeAlignedLearner(CounterfactualNarrativeLearner):
         return rows[0][1].program_id
 
     def _executable_clause(self, sentence: str, world: World | None = None) -> tuple[str, str] | None:
-        """Recover the longest executable suffix using the same program bank.
+        """Recover the longest state-consistent executable suffix.
 
-        This handles discourse framing around an event without storing cue words or
-        benchmark phrases. Ambiguous suffixes are rejected rather than repaired.
+        Every candidate is scored by the same program bank and, when a world is
+        available, must execute against that world. This removes discourse framing
+        structurally without storing cue words or benchmark phrases.
         """
         candidates: list[tuple[int, str, str]] = []
         for start in range(len(sentence)):
@@ -120,7 +121,7 @@ class NarrativeAlignedLearner(CounterfactualNarrativeLearner):
                     continue
 
                 for sentence in sentences[end_i + 1 :]:
-                    executable = self._executable_clause(sentence)
+                    executable = self._executable_clause(sentence, start_world)
                     if executable is None:
                         ignored += 1
                         continue
