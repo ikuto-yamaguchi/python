@@ -3,6 +3,7 @@ from .conversation import ConsistentConversationEngine, ConversationReply, Conve
 from .gate import GateCase, GateReport, UniversityExamGate
 from .model import SolveResult, SparseMemory, SparcHS16
 from .reading import JapaneseReadingReasoner, ReadingAnswer
+from .router import RouteExample, SparseMechanismRouter, build_bootstrap_router
 from .runtime import AdaptiveSparcRuntime
 
 __all__ = [
@@ -16,6 +17,9 @@ __all__ = [
     "JapaneseOrderingSolver",
     "JapaneseReadingReasoner",
     "ReadingAnswer",
+    "RouteExample",
+    "SparseMechanismRouter",
+    "build_bootstrap_router",
     "UniversityExamGate",
     "SolveResult",
     "SparseMemory",
