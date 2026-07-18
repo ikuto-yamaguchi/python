@@ -71,10 +71,12 @@ jobs:
       - name: Exercise exam and ordinary conversation routes
         working-directory: minimal-predictive-lm
         run: |
-          mpm-university-exam-chat results/mobile_university_exam_gated.mpexam \
+          python -m minimal_predictive_lm.mobile_gated_exam_chat_cli \
+            results/mobile_university_exam_gated.mpexam \
             --once $'問題：植物が光合成で放出する気体は何か。\n(0)窒素\n(1)酸素\n(2)二酸化炭素\n(3)水素' \
             --debug | tee ../gated-exam-smoke.log
-          mpm-university-exam-chat results/mobile_university_exam_gated.mpexam \
+          python -m minimal_predictive_lm.mobile_gated_exam_chat_cli \
+            results/mobile_university_exam_gated.mpexam \
             --once 'DNAの中には何が記録されているの' \
             --debug | tee ../gated-dialogue-smoke.log
       - name: Enforce out-of-fold improvement and resource boundaries
