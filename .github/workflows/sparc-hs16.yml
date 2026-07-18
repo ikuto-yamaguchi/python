@@ -26,9 +26,9 @@ jobs:
           python-version: "3.12"
       - name: Unit tests
         run: python -m unittest discover -s tests -v
-      - name: Run 404-case pilot
+      - name: Run 404-case integrated pilot
         run: python run_pilot.py | tee pilot_report.json
-      - name: Verify truthful gate state
+      - name: Verify truthful integrated gate state
         run: |
           python - <<'PY'
           import json
@@ -41,7 +41,26 @@ jobs:
           assert report["university_exam_mastery_passed"] is False
           assert report["highschool_level_passed"] is False
           PY
+      - name: Run autonomous program-induction pilot
+        run: python run_induction_pilot.py | tee induction_report.json
+      - name: Verify induced transfer and truthful claim boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("induction_report.json").read_text())
+          assert report["correct"] == 200
+          assert report["unseen_cases"] == 200
+          assert report["accuracy"] == 1.0
+          assert report["serialized_program_bank_bytes"] < 10_000
+          assert report["transformer_used"] is False
+          assert report["gradient_training_used"] is False
+          assert report["task_specific_formulas_supplied"] is False
+          assert report["university_exam_mastery_passed"] is False
+          PY
       - uses: actions/upload-artifact@v4
         with:
-          name: sparc-hs16-pilot-report
-          path: sparc_hs16/pilot_report.json
+          name: sparc-hs16-reports
+          path: |
+            sparc_hs16/pilot_report.json
+            sparc_hs16/induction_report.json
