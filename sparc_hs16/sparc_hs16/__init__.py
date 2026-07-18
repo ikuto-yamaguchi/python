@@ -1,9 +1,14 @@
 from .gate import GateCase, GateReport, UniversityExamGate
 from .model import SolveResult, SparseMemory, SparcHS16
+from .reading import JapaneseReadingReasoner, ReadingAnswer
+from .runtime import AdaptiveSparcRuntime
 
 __all__ = [
+    "AdaptiveSparcRuntime",
     "GateCase",
     "GateReport",
+    "JapaneseReadingReasoner",
+    "ReadingAnswer",
     "UniversityExamGate",
     "SolveResult",
     "SparseMemory",
