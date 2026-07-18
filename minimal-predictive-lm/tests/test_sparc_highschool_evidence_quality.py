@@ -1,6 +1,9 @@
 import unittest
 
+from minimal_predictive_lm.sparc_highschool_document_stream_gate import _corpus
 from minimal_predictive_lm.sparc_highschool_evidence_quality import EvidenceQualityConsensusLearner
+from minimal_predictive_lm.sparc_highschool_long_temporal_gate import _long_corpus
+from minimal_predictive_lm.sparc_highschool_numeric_stream_gate import _numeric_corpus
 
 
 def weak(target: str, initial: int, add: int, note: str) -> str:
@@ -21,13 +24,17 @@ def strong(target: str, initial: int, add: int, note: str) -> str:
 
 class EvidenceQualityConsensusTest(unittest.TestCase):
     def learner(self):
-        return EvidenceQualityConsensusLearner(
+        learner = EvidenceQualityConsensusLearner(
             max_evidence_components=4,
             max_hypotheses_per_target=3,
             max_lineages=10,
             lineage_similarity_threshold=0.50,
             max_quality_weight=3,
         )
+        learner.learn_independent_documents(_corpus(), min_support=4)
+        learner.learn_independent_numeric_documents(_numeric_corpus())
+        learner.learn_long_chronological_documents(_long_corpus())
+        return learner
 
     def test_fewer_well_anchored_lineages_beat_many_weak_reconstructions(self):
         learner = self.learner()
