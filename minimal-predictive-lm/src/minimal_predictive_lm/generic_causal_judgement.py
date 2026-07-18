@@ -19,9 +19,11 @@ class GenericCausalJudgement:
     omissions, redundancy, preemption, causal proximity, and intentional side effects.
     """
 
+    # Capitalization is intentional: lower-case "is" and "was" inside narrative
+    # sentences are not question starts. Quoted questions remain candidates, and the
+    # final one before Options is selected by _split.
     _FINAL_QUESTION = re.compile(
-        r"\b(?P<question>(?:Did|Does|Is|Was|Were|Would|Could)\s+[^?]+\?)",
-        re.IGNORECASE,
+        r"\b(?P<question>(?:Did|Does|Is|Was|Were|Would|Could)\s+[^?\n]+\?)"
     )
     _ABNORMAL = (
         "not supposed", "do not come", "don't log on", "do not log on",
@@ -76,8 +78,6 @@ class GenericCausalJudgement:
         matches = list(self._FINAL_QUESTION.finditer(body))
         if not matches:
             return None
-        # Narratives can contain quoted questions.  The scored query is the last one
-        # immediately before the answer options.
         match = matches[-1]
         return self._normalize(body[: match.start("question")]), self._normalize(
             match.group("question")
@@ -140,11 +140,7 @@ class GenericCausalJudgement:
             if self._contains_any(clause, self._NORMAL):
                 normal_score += 1
             if "only one permitted" in clause:
-                # The actor is abnormal only when the clause says another person is the
-                # sole permitted actor; direct permission is normal.
                 normal_score += int(actor in clause.split("only one permitted", 1)[0])
-        # Quoted directives sometimes place the name just before the quote.  Inspect a
-        # short actor-centred window without applying unrelated norms elsewhere.
         for match in re.finditer(re.escape(actor_tokens[0]), story):
             window = story[max(0, match.start() - 50) : match.end() + 150]
             if self._contains_any(window, self._ABNORMAL):
@@ -177,8 +173,6 @@ class GenericCausalJudgement:
             for word in ("harm", "shoot", "injure", "kill", "damage", "hurt")
         )
         if self._contains_any(local, self._FOREKNOWLEDGE):
-            # Ordinary judgements treat foreseen harmful side effects as intentional,
-            # but not merely foreseen beneficial or rule-fulfilling side effects.
             if harmful:
                 return True
             if beneficial:
@@ -247,8 +241,6 @@ class GenericCausalJudgement:
                 return True
             if norm > 0 and self._other_abnormal_actor(story, question):
                 return False
-            # With symmetric ordinary contributors, people generally decline to single
-            # out one contributor.  A separately abnormal contributor is selected.
             return False
         if has_or_rule:
             if norm < 0 or self._omission(question):
@@ -283,24 +275,17 @@ class GenericCausalJudgement:
         intentional = self._intentional(story, question)
         if intentional is not None:
             return CausalPrediction("Yes" if intentional else "No", len(prompt), 2)
-
         if self._remote_preempted(story, question):
             return CausalPrediction("No", len(prompt), 2)
-
         maintenance = self._maintenance_omission(story, question)
         if maintenance is not None:
             return CausalPrediction("Yes" if maintenance else "No", len(prompt), 3)
-
         structured = self._boolean_structure(story, question)
         if structured is not None:
             return CausalPrediction("Yes" if structured else "No", len(prompt), 3)
-
         direct = self._direct_physical(story, question)
         if direct is not None:
             return CausalPrediction("Yes" if direct else "No", len(prompt), 2)
-
-        # Intervening independent agents and later accidents preempt remote enabling
-        # conditions in ordinary causal attribution.
         if any(word in story for word in ("on the way", "drunk driver", "later")):
             return CausalPrediction("No", len(prompt), 1)
         return CausalPrediction(None, len(prompt), 0)
