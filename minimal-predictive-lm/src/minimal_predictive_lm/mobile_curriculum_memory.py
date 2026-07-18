@@ -67,10 +67,11 @@ class QuantizedCurriculumMemory:
 
     The full memory is an inverted index. A query touches only postings for its
     hashed lexical/subword features; no dense scan over the package is needed.
-    Weights and document norms are quantized for compact serialization.
+    Retrieved documents also carry a compact sorted feature set, so an option is
+    rewarded only when the retrieved evidence actually contains its features.
     """
 
-    FORMAT = "quantized-curriculum-memory-001"
+    FORMAT = "quantized-curriculum-memory-002"
 
     def __init__(
         self,
@@ -78,14 +79,19 @@ class QuantizedCurriculumMemory:
         buckets: int,
         titles: tuple[str, ...],
         snippets: tuple[str, ...],
+        doc_features: tuple[tuple[int, ...], ...],
         postings: dict[int, tuple[tuple[int, int], ...]],
         doc_norms: tuple[float, ...],
         idf: dict[int, int],
         max_active_postings: int = 8192,
     ) -> None:
+        if not (len(titles) == len(snippets) == len(doc_features) == len(doc_norms)):
+            raise ValueError("curriculum-memory document arrays disagree")
         self.buckets = buckets
         self.titles = titles
         self.snippets = snippets
+        self.doc_features = doc_features
+        self._doc_feature_sets = tuple(frozenset(row) for row in doc_features)
         self.postings = postings
         self.doc_norms = doc_norms
         self.idf = idf
@@ -148,6 +154,7 @@ class QuantizedCurriculumMemory:
             buckets=buckets,
             titles=tuple(row.title for row in rows),
             snippets=tuple(_normalize(row.text)[:max_snippet_chars] for row in rows),
+            doc_features=tuple(tuple(sorted(features)) for features in encoded),
             postings=postings,
             doc_norms=tuple(norms),
             idf=idf,
@@ -180,18 +187,24 @@ class QuantizedCurriculumMemory:
             active += used
             option_features = _features(option, buckets=self.buckets)
             score = 0.0
+            normalized_option = _normalize(option)
             for rank, (doc_id, retrieval_score) in enumerate(combined):
                 rank_weight = 1.0 / (1.0 + rank)
-                support = 0.0
-                snippet = self.snippets[doc_id]
-                for feature, frequency in option_features.items():
-                    if feature in self.postings:
-                        # The posting lookup is the compact proxy for lexical support;
-                        # exact document membership adds a stronger local signal.
-                        support += self.idf.get(feature, 1) * min(3, frequency)
+                document_features = self._doc_feature_sets[doc_id]
+                support = sum(
+                    self.idf.get(feature, 1) * min(3, frequency)
+                    for feature, frequency in option_features.items()
+                    if feature in document_features
+                )
+                coverage = (
+                    sum(1 for feature in option_features if feature in document_features)
+                    / max(1, len(option_features))
+                )
                 novelty = 1.15 if doc_id not in base_ids else 1.0
-                score += novelty * rank_weight * (retrieval_score + 0.02 * support)
-                if snippet and option and _normalize(option) in snippet:
+                score += novelty * rank_weight * (
+                    retrieval_score + 0.08 * support + 20.0 * coverage
+                )
+                if normalized_option and normalized_option in self.snippets[doc_id]:
                     score += 80.0 * rank_weight
             raw_scores.append(score)
         normalized = _unit(raw_scores)
@@ -209,14 +222,17 @@ class QuantizedCurriculumMemory:
     def resource_report(self) -> dict[str, object]:
         serialized = len(self.to_bytes())
         posting_count = sum(len(rows) for rows in self.postings.values())
+        document_feature_count = sum(len(row) for row in self.doc_features)
         return {
             "documents": len(self.titles),
             "features": len(self.postings),
             "postings": posting_count,
+            "document_features": document_feature_count,
             "serialized_bytes": serialized,
             "max_active_postings": self.max_active_postings,
             "estimated_active_bytes": self.max_active_postings * 8,
             "paged_sparse": True,
+            "document_local_support": True,
         }
 
     def to_bytes(self) -> bytes:
@@ -225,6 +241,7 @@ class QuantizedCurriculumMemory:
             "buckets": self.buckets,
             "titles": self.titles,
             "snippets": self.snippets,
+            "doc_features": self.doc_features,
             "postings": {
                 str(feature): rows for feature, rows in self.postings.items()
             },
@@ -244,6 +261,10 @@ class QuantizedCurriculumMemory:
             buckets=int(payload["buckets"]),
             titles=tuple(payload["titles"]),
             snippets=tuple(payload["snippets"]),
+            doc_features=tuple(
+                tuple(int(feature) for feature in row)
+                for row in payload["doc_features"]
+            ),
             postings={
                 int(feature): tuple((int(doc_id), int(weight)) for doc_id, weight in rows)
                 for feature, rows in payload["postings"].items()
