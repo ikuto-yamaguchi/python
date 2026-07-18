@@ -21,13 +21,13 @@ class InterventionLatticeResult:
 
 
 class InterventionLatticeLearner(CausalProvenanceLearner):
-    """Decompose an outcome through one shared intervention lattice.
+    """Decompose outcomes with one task-blind sparse intervention lattice.
 
-    The same task-blind narrative alignment, latent program bank, immutable World,
-    binder and executor are reused.  Every factual operation is omitted alone and
-    in pairs from the same initial world.  Marginal contributions and non-additive
-    interactions therefore come from executable world differences rather than a
-    causal vocabulary, domain selector, or problem-specific rule.
+    Instead of replaying every omission set from the initial world, the learner
+    expands one shared prefix graph. States with the same processed prefix and
+    omitted-index set are computed once and reused by every downstream single or
+    pair intervention. The mechanism is shared by calculation, causal comparison,
+    planning and explanation; no task/domain label or causal vocabulary is used.
     """
 
     def __init__(self, **kwargs):
@@ -35,6 +35,8 @@ class InterventionLatticeLearner(CausalProvenanceLearner):
         self.intervention_lattices = 0
         self.intervention_lattice_abstentions = 0
         self.intervention_rollouts = 0
+        self.intervention_transition_expansions = 0
+        self.intervention_prefix_reuses = 0
         self.single_contributions_measured = 0
         self.pairwise_interactions_measured = 0
         self.intervention_verification_failures = 0
@@ -49,70 +51,67 @@ class InterventionLatticeLearner(CausalProvenanceLearner):
             return None
         return value, rollout.world
 
+    def _shared_omission_lattice(self, initial, actions: tuple[str, ...]):
+        """Return terminal worlds for every omission set of size at most two.
+
+        The graph key is only (processed position, omitted indices). A transition
+        that keeps the next action executes exactly one learned event from the
+        cached prefix world; an omission transition reuses that world directly.
+        """
+        frontier: dict[frozenset[int], object] = {frozenset(): initial}
+        for index, action in enumerate(actions):
+            next_frontier: dict[frozenset[int], object] = {}
+            for omitted, world in frontier.items():
+                kept = self.rollout(world, (action,))
+                self.intervention_transition_expansions += 1
+                if not kept.accepted:
+                    return None
+                if omitted in next_frontier:
+                    self.intervention_prefix_reuses += 1
+                next_frontier[omitted] = kept.world
+                if len(omitted) < 2:
+                    omitted_next = frozenset((*omitted, index))
+                    if omitted_next in next_frontier:
+                        self.intervention_prefix_reuses += 1
+                    next_frontier[omitted_next] = world
+            frontier = next_frontier
+        return frontier
+
+    def _abstain(self, provenance, mechanism: str):
+        self.intervention_lattice_abstentions += 1
+        return InterventionLatticeResult(False, provenance, (), (), "", False, mechanism)
+
     def explain_interaction_narrative(self, text: str) -> InterventionLatticeResult:
         provenance = self.explain_causal_narrative(text)
         if not provenance.accepted or not provenance.verified:
-            self.intervention_lattice_abstentions += 1
-            return InterventionLatticeResult(
-                False,
-                provenance,
-                (),
-                (),
-                "",
-                False,
-                "abstain-unverified-causal-provenance",
-            )
+            return self._abstain(provenance, "abstain-unverified-causal-provenance")
 
         narrative = provenance.grounded.narrative
         actions = tuple(narrative.factual_actions)
         if len(actions) < 2 or narrative.comparison is None:
-            self.intervention_lattice_abstentions += 1
-            return InterventionLatticeResult(
-                False,
-                provenance,
-                (),
-                (),
-                "",
-                False,
-                "abstain-insufficient-shared-actions",
-            )
+            return self._abstain(provenance, "abstain-insufficient-shared-actions")
 
-        factual = self._numeric_rollout(narrative.initial_world, actions)
-        if factual is None:
-            self.intervention_lattice_abstentions += 1
-            return InterventionLatticeResult(
-                False, provenance, (), (), "", False, "abstain-factual-replay-failed"
-            )
-        factual_value, factual_world = factual
-        if factual_world != narrative.comparison.factual.world:
+        worlds = self._shared_omission_lattice(narrative.initial_world, actions)
+        if worlds is None:
+            return self._abstain(provenance, "abstain-shared-lattice-expansion-failed")
+
+        factual_world = worlds.get(frozenset())
+        if factual_world is None or factual_world != narrative.comparison.factual.world:
             self.intervention_verification_failures += 1
-            self.intervention_lattice_abstentions += 1
-            return InterventionLatticeResult(
-                False,
-                provenance,
-                (),
-                (),
-                "",
-                False,
-                "abstain-factual-world-mismatch",
-            )
+            return self._abstain(provenance, "abstain-factual-world-mismatch")
+        factual_value = self._only_value(factual_world)
+        if factual_value is None:
+            return self._abstain(provenance, "abstain-nonnumeric-factual-world")
 
         omitted_values: dict[frozenset[int], int] = {}
-        for index in range(len(actions)):
-            remaining = actions[:index] + actions[index + 1 :]
-            replay = self._numeric_rollout(narrative.initial_world, remaining)
-            if replay is None:
-                self.intervention_lattice_abstentions += 1
-                return InterventionLatticeResult(
-                    False,
-                    provenance,
-                    (),
-                    (),
-                    "",
-                    False,
-                    "abstain-single-intervention-failed",
-                )
-            omitted_values[frozenset((index,))] = replay[0]
+        required = [frozenset((i,)) for i in range(len(actions))]
+        required += [frozenset((i, j)) for i, j in combinations(range(len(actions)), 2)]
+        for omitted in required:
+            world = worlds.get(omitted)
+            value = None if world is None else self._only_value(world)
+            if value is None:
+                return self._abstain(provenance, "abstain-incomplete-shared-lattice")
+            omitted_values[omitted] = value
 
         contributions = tuple(
             factual_value - omitted_values[frozenset((index,))]
@@ -120,34 +119,17 @@ class InterventionLatticeLearner(CausalProvenanceLearner):
         )
         self.single_contributions_measured += len(contributions)
 
-        interactions: list[tuple[int, int, int]] = []
-        for left, right in combinations(range(len(actions)), 2):
-            remaining = tuple(
-                action
-                for index, action in enumerate(actions)
-                if index not in {left, right}
-            )
-            replay = self._numeric_rollout(narrative.initial_world, remaining)
-            if replay is None:
-                self.intervention_lattice_abstentions += 1
-                return InterventionLatticeResult(
-                    False,
-                    provenance,
-                    (),
-                    (),
-                    "",
-                    False,
-                    "abstain-pair-intervention-failed",
-                )
-            pair_value = replay[0]
-            interaction = (
+        pairwise = tuple(
+            (
+                left,
+                right,
                 factual_value
                 - omitted_values[frozenset((left,))]
                 - omitted_values[frozenset((right,))]
-                + pair_value
+                + omitted_values[frozenset((left, right))],
             )
-            interactions.append((left, right, interaction))
-        pairwise = tuple(interactions)
+            for left, right in combinations(range(len(actions)), 2)
+        )
         self.pairwise_interactions_measured += len(pairwise)
 
         strongest_index = max(
@@ -155,8 +137,9 @@ class InterventionLatticeLearner(CausalProvenanceLearner):
         )
         nonzero = [row for row in pairwise if row[2] != 0]
         if nonzero:
-            strongest_pair = max(nonzero, key=lambda row: (abs(row[2]), -row[0], -row[1]))
-            left, right, interaction = strongest_pair
+            left, right, interaction = max(
+                nonzero, key=lambda row: (abs(row[2]), -row[0], -row[1])
+            )
             relation = "増幅" if interaction > 0 else "抑制"
             interaction_text = (
                 f"操作{left + 1}と操作{right + 1}には{abs(interaction)}の{relation}相互作用があります。"
@@ -165,10 +148,10 @@ class InterventionLatticeLearner(CausalProvenanceLearner):
             interaction_text = "操作間の非加算的な相互作用は確認されませんでした。"
 
         answer = (
-            f"同じ初期状態から各操作を一つずつ外して再計算すると、単独寄与は{contributions}です。"
+            f"同じ初期状態から共有介入格子で計算すると、単独寄与は{contributions}です。"
             f"最大の単独寄与は操作{strongest_index + 1}の{abs(contributions[strongest_index])}です。"
             f"{interaction_text}"
-            f"全組合せを同じ世界遷移で再実行し、事実世界の結果{factual_value}と一致することを検算しました。"
+            f"共通接頭状態を再利用し、事実世界の結果{factual_value}と一致することを検算しました。"
         )
         self.intervention_lattices += 1
         return InterventionLatticeResult(
@@ -178,7 +161,7 @@ class InterventionLatticeLearner(CausalProvenanceLearner):
             pairwise,
             answer,
             True,
-            "shared-world-intervention-lattice",
+            "shared-sparse-prefix-intervention-lattice",
         )
 
     def report(self):
@@ -186,10 +169,13 @@ class InterventionLatticeLearner(CausalProvenanceLearner):
         result.update(
             {
                 "shared_intervention_lattice": True,
+                "shared_sparse_prefix_lattice": True,
                 "causal_vocabulary_supplied": False,
                 "intervention_lattices": self.intervention_lattices,
                 "intervention_lattice_abstentions": self.intervention_lattice_abstentions,
                 "intervention_rollouts": self.intervention_rollouts,
+                "intervention_transition_expansions": self.intervention_transition_expansions,
+                "intervention_prefix_reuses": self.intervention_prefix_reuses,
                 "single_contributions_measured": self.single_contributions_measured,
                 "pairwise_interactions_measured": self.pairwise_interactions_measured,
                 "intervention_verification_failures": self.intervention_verification_failures,
