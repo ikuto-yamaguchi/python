@@ -96,6 +96,7 @@ sparc-hs15-exp = "minimal_predictive_lm.sparc_hs15_experiment:main"
 mpm-mobile-chat = "minimal_predictive_lm.mobile_chat_cli:main"
 mpm-mobile-gate = "minimal_predictive_lm.mobile_hard_gate:main"
 mpm-mobile-unified-chat = "minimal_predictive_lm.mobile_unified_chat_cli:main"
+mpm-university-exam-chat = "minimal_predictive_lm.mobile_gated_exam_chat_cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
