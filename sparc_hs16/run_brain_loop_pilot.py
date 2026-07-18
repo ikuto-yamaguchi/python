@@ -41,7 +41,7 @@ def main() -> None:
     actions, train, hidden = build_cases()
     loop = CorticoHippocampalLoop(
         actions,
-        buckets=65536,
+        buckets=262144,
         episode_capacity=20000,
         alpha=0.08,
         gamma=0.9,
@@ -90,6 +90,7 @@ def main() -> None:
         "worlds_learned_sequentially": 20,
         "training_states": len(train),
         "unique_hidden_combinations": len(hidden),
+        "sparse_code_buckets": loop.encoder.buckets,
         "correct": correct,
         "accuracy": correct / len(hidden),
         "exact_table_unseen_baseline_accuracy": exact_table_default_correct / len(hidden),
