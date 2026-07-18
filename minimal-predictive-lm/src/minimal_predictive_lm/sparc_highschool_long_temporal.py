@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import dataclass
+from itertools import product
 import re
 from typing import Iterable
 
@@ -20,20 +21,20 @@ class LongTemporalResult:
 
 
 class LongTemporalNarrativeLearner(TemporalNarrativeLearner):
-    """Find delayed state transitions in long passages with interleaved distractors.
+    """Find delayed state transitions and reuse one role-aware surface binder.
 
-    Observation sentences are grounded by the existing independently learned world
-    schemas. Observations are indexed by latent state key. Consecutive observations
-    of the same key define a candidate interval even when unrelated observations or
-    prose occur between them. Only an intervening sentence whose grounded slots can
-    exactly compile the observed edit is accepted as the event.
+    Observation sentences are grounded by independently learned world schemas.
+    Consecutive observations of the same latent state key define candidate intervals,
+    and only a unique intervening sentence that compiles the observed edit is learned.
 
-    Surface binding is shared across factual reading and event execution. Instead of
-    deleting only whole memorized literals, it aligns reusable literal boundaries:
-    full fragments are preferred, while sufficiently long prefix/suffix boundaries
-    may be reused when ordinary Japanese inserts or removes a clause at that edge.
-    This preserves sparse exact evidence but permits unseen combinations of learned
-    modifiers and predicates without task-specific phrases or domain routing.
+    Surface binding is shared by factual reading, event execution, causal simulation,
+    planning, explanation, and dialogue. The primary binder constructs an ordered
+    anchor lattice from all learned schemas of a program. Anchors keep their position
+    relative to semantic slots, so fragments from different schemas may compose
+    without confusing a prefix, inter-slot predicate, or suffix. The older weighted
+    non-overlap alignment remains a conservative fallback for clause insertion and
+    omission. No task name, domain route, phrase exception, or relation dictionary is
+    supplied.
     """
 
     def __init__(self, **kwargs):
@@ -46,6 +47,120 @@ class LongTemporalNarrativeLearner(TemporalNarrativeLearner):
         self.long_temporal_maximum_delay = 0
         self.long_temporal_sources: dict[str, set[str]] = {}
         self.boundary_compositions = 0
+        self.slot_anchor_compositions = 0
+
+    @staticmethod
+    def _pattern_layout(pattern: str) -> tuple[tuple[int, ...], tuple[str, ...]]:
+        parts = re.split(r"(<V\d+>)", pattern)
+        slots: list[int] = []
+        literals: list[str] = [""]
+        for part in parts:
+            match = re.fullmatch(r"<V(\d+)>", part)
+            if match:
+                slots.append(int(match.group(1)))
+                literals.append("")
+            else:
+                literals[-1] += part
+        return tuple(slots), tuple(literals)
+
+    @classmethod
+    def _ordered_anchor_bind(
+        cls, program: Program, text: str, slot_count: int
+    ) -> tuple[tuple[str, ...], float, int]:
+        """Bind slots using anchors whose semantic boundary roles are preserved.
+
+        Learned patterns that expose the same textual slot order contribute anchors
+        to the same boundary pools. We enumerate sparse boundary choices, preserve
+        their order in the input, and score complete slot assignments by coverage,
+        number of independently supported boundaries, and compactness. This is a
+        shared schema operation rather than a Japanese phrase list.
+        """
+
+        layouts: dict[tuple[int, ...], list[tuple[str, ...]]] = defaultdict(list)
+        reads = 0
+        for pattern in program.patterns:
+            order, literals = cls._pattern_layout(pattern)
+            reads += len(pattern)
+            if len(order) == slot_count and set(order) == set(range(slot_count)):
+                layouts[order].append(literals)
+
+        ranked: list[tuple[float, tuple[str, ...], int]] = []
+        for order, rows in layouts.items():
+            pools: list[tuple[str, ...]] = []
+            for boundary in range(slot_count + 1):
+                values = sorted(
+                    {row[boundary] for row in rows if row[boundary]},
+                    key=lambda value: (-len(value), value),
+                )
+                # Prefix and suffix may be absent in an unseen composition. An
+                # inter-slot boundary is required because it separates two values.
+                if boundary in (0, slot_count):
+                    values.append("")
+                if not values:
+                    pools = []
+                    break
+                pools.append(tuple(values))
+            if not pools:
+                continue
+
+            for anchors in product(*pools):
+                reads += 1
+                if not anchors[0] and not anchors[-1] and slot_count == 1:
+                    continue
+                positions: list[tuple[int, int]] = []
+                cursor = 0
+                valid = True
+                for anchor in anchors:
+                    if not anchor:
+                        positions.append((cursor, cursor))
+                        continue
+                    start = text.find(anchor, cursor)
+                    if start < 0:
+                        valid = False
+                        break
+                    positions.append((start, start + len(anchor)))
+                    cursor = start + len(anchor)
+                if not valid:
+                    continue
+
+                textual_values: list[str] = []
+                for index in range(slot_count):
+                    left = positions[index][1]
+                    right = positions[index + 1][0]
+                    value = text[left:right]
+                    if not value or len(value) > 24:
+                        valid = False
+                        break
+                    textual_values.append(value)
+                if not valid:
+                    continue
+                if anchors[0] and positions[0][0] != 0:
+                    continue
+                if anchors[-1] and positions[-1][1] != len(text):
+                    continue
+
+                bindings = [""] * slot_count
+                for textual_index, slot_index in enumerate(order):
+                    bindings[slot_index] = textual_values[textual_index]
+                if any(not value for value in bindings):
+                    continue
+
+                covered = sum(len(anchor) for anchor in anchors)
+                cue_ratio = covered / max(1, len(text))
+                supported = sum(bool(anchor) for anchor in anchors)
+                if cue_ratio < 0.30 or supported < 1:
+                    continue
+                # Exact role-compatible anchors deserve a stronger score than
+                # character similarity, reducing false ambiguity between programs.
+                score = min(0.997, 0.79 + 0.18 * cue_ratio + 0.012 * supported)
+                ranked.append((score, tuple(bindings), reads))
+
+        ranked.sort(key=lambda row: (-row[0], sum(map(len, row[1])), row[1]))
+        if not ranked:
+            return (), 0.0, reads
+        if len(ranked) > 1 and ranked[0][0] == ranked[1][0] and ranked[0][1] != ranked[1][1]:
+            return (), ranked[0][0], reads
+        return ranked[0][1], ranked[0][0], reads
 
     @classmethod
     def _schema_bind(cls, program: Program, text: str) -> tuple[tuple[str, ...], float, int]:
@@ -55,6 +170,10 @@ class LongTemporalNarrativeLearner(TemporalNarrativeLearner):
             for index in (edit.subject_slot, edit.object_slot)
             if index is not None
         )
+        ordered, ordered_score, reads = cls._ordered_anchor_bind(program, text, slot_count)
+        if ordered:
+            return ordered, ordered_score, reads
+
         literals = {
             fragment
             for pattern in program.patterns
@@ -62,7 +181,6 @@ class LongTemporalNarrativeLearner(TemporalNarrativeLearner):
             if fragment
         }
         candidates: dict[str, int] = {}
-        reads = 0
         for literal in literals:
             reads += 1
             candidates[literal] = max(candidates.get(literal, 0), len(literal) * 4)
@@ -111,9 +229,9 @@ class LongTemporalNarrativeLearner(TemporalNarrativeLearner):
         bindings = [value for value in bindings if value]
         cue_ratio = covered / max(1, len(text))
         if len(bindings) != slot_count or cue_ratio < 0.35:
-            return (), cue_ratio, reads
+            return (), max(cue_ratio, ordered_score), reads
         if any(len(value) > 24 for value in bindings):
-            return (), cue_ratio, reads
+            return (), max(cue_ratio, ordered_score), reads
         partial_used = any(fragment not in literals for *_rest, fragment in selected)
         score = min(0.985, 0.72 + 0.27 * cue_ratio - (0.015 if partial_used else 0.0))
         return tuple(bindings), score, reads
@@ -145,11 +263,7 @@ class LongTemporalNarrativeLearner(TemporalNarrativeLearner):
             observations[index] = (key, value)
             occurrences[key].append((index, value))
 
-        transitions = 0
-        learned = 0
-        ignored = 0
-        ambiguous = 0
-        maximum_delay = 0
+        transitions = learned = ignored = ambiguous = maximum_delay = 0
         for key, rows in occurrences.items():
             for (before_index, before_value), (after_index, after_value) in zip(rows, rows[1:]):
                 if before_value == after_value or after_index <= before_index + 1:
@@ -212,6 +326,7 @@ class LongTemporalNarrativeLearner(TemporalNarrativeLearner):
             "long_temporal_maximum_delay": self.long_temporal_maximum_delay,
             "long_temporal_source_links": sum(len(sources) for sources in self.long_temporal_sources.values()),
             "boundary_compositional_alignment": True,
+            "slot_order_anchor_lattice": True,
             "fixed_three_sentence_layout_supplied": False,
             "event_boundaries_supplied": False,
             "delay_length_supplied": False,
