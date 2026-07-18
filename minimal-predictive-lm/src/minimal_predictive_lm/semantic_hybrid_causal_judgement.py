@@ -30,11 +30,30 @@ class SemanticHybridCausalJudgement:
     @property
     def description_bits(self) -> int:
         learned = self.ranker.description_bits if self.ranker else 0
-        return self.symbolic.description_bits + learned + 8 * 256
+        return self.symbolic.description_bits + learned + 8 * 384
+
+    def _eligible(self, prompt: str) -> bool:
+        split = self.symbolic._split(prompt)
+        if split is None:
+            return False
+        _story, question = split
+        return any(
+            marker in question
+            for marker in (
+                " cause ",
+                " caused ",
+                " because ",
+                " intentionally ",
+                " intend ",
+                " intended ",
+            )
+        ) or question.startswith(("did ", "was ")) and any(
+            marker in question for marker in ("cause", "intentional", "because")
+        )
 
     def answer(self, prompt: str) -> SemanticHybridPrediction:
         symbolic = self.symbolic.answer(prompt)
-        if self.ranker is None or "\nOptions:" not in prompt:
+        if self.ranker is None or not self._eligible(prompt):
             return SemanticHybridPrediction(symbolic.output, symbolic.operations, symbolic.evidence)
         output = combine_semantic_prediction(self.ranker, prompt, symbolic.output)
         return SemanticHybridPrediction(
