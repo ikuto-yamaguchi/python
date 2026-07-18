@@ -8,6 +8,7 @@ import time
 
 from .sparc_highschool_document_stream_gate import _corpus
 from .sparc_highschool_evidence_lineage import EvidenceLineageConsensusLearner
+from .sparc_highschool_evidence_revision import EvidenceRevisionWorkspaceLearner
 from .sparc_highschool_hypothesis_consensus_gate import run_gate as run_previous_gate
 from .sparc_highschool_long_temporal_gate import _long_corpus
 from .sparc_highschool_numeric_stream_gate import _numeric_corpus
@@ -30,6 +31,7 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
         max_evidence_components=4,
         max_hypotheses_per_target=3,
         max_lineages=10,
+        lineage_similarity_threshold=0.50,
     )
     training_started = time.perf_counter()
     learner.learn_independent_documents(_corpus(), min_support=4)
@@ -130,7 +132,26 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
     baseline_total = previous["total"] + 20
     percentages = {name: row["correct"] / row["total"] for name, row in axes.items()}
     minimum_axis = min(percentages, key=percentages.get)
-    model = learner.report()
+    model = EvidenceRevisionWorkspaceLearner.report(learner)
+    model.update({
+        "shared_bounded_verified_evidence_lineage_consensus_graph": True,
+        "hypothesis_targets": len(learner._hypotheses),
+        "hypothesis_count": sum(len(rows) for rows in learner._hypotheses.values()),
+        "hypothesis_reads": learner.hypothesis_reads,
+        "hypothesis_writes": learner.hypothesis_writes,
+        "hypothesis_support_updates": learner.hypothesis_support_updates,
+        "lineages": len(learner._lineages),
+        "lineage_feature_reads": learner.lineage_feature_reads,
+        "lineage_comparisons": learner.lineage_comparisons,
+        "lineage_reuses": learner.lineage_reuses,
+        "lineage_creations": learner.lineage_creations,
+        "lineage_dependent_duplicates": learner.lineage_dependent_duplicates,
+        "lineage_conflicts": learner.lineage_conflicts,
+        "lineage_evictions": learner.lineage_evictions,
+        "lineage_graph_bytes": len(learner.lineage_graph_bytes()),
+        "task_name_supplied": False,
+        "domain_name_supplied": False,
+    })
     peak_rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024
     wall_seconds = time.perf_counter() - started
     combined_model_bytes = int(model["serialized_bytes"]) + max_graph_bytes
@@ -150,11 +171,7 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
         axes[name]["correct"] >= row["correct"] and axes[name]["total"] == row["total"]
         for name, row in previous["axes"].items()
     )
-    improved = (
-        total_correct / total > baseline_correct / baseline_total
-        and percentages[axis_name] > 0.0
-        and no_regression
-    )
+    improved = total_correct / total > baseline_correct / baseline_total and percentages[axis_name] > 0.0 and no_regression
     efficient = (
         combined_model_bytes <= 131072
         and peak_rss <= 536870912
@@ -201,13 +218,9 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
         "structural_integration_passed": improved and efficient,
         "highschool_level_passed": False,
         "passed": improved and efficient,
-        "claim_boundary": (
-            "The same verified world learner now clusters sparse non-world document context into bounded evidence lineages, prevents near-copy reposts from manufacturing independent support, invalidates internally conflicting lineages, and answers only from a unique majority of independent verified lineages. Evaluation remains controlled synthetic Japanese; real provenance, broad textbooks, qualitative claims, source trust, and natural free dialogue remain unproven."
-        ),
+        "claim_boundary": "The same verified world learner now clusters sparse non-world document context into bounded evidence lineages, prevents near-copy reposts from manufacturing independent support, invalidates internally conflicting lineages, and answers only from a unique majority of independent verified lineages. Evaluation remains controlled synthetic Japanese; real provenance, broad textbooks, qualitative claims, source trust, and natural free dialogue remain unproven.",
     }
-    (output / "SPARC-highschool-general-evidence-lineage.json").write_text(
-        json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    (output / "SPARC-highschool-general-evidence-lineage.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     (output / "SPARC-highschool-general-evidence-lineage.model.zlib").write_bytes(learner.to_bytes())
     (output / "SPARC-highschool-general-evidence-lineage.graph.json").write_bytes(learner.lineage_graph_bytes())
     if not report["passed"]:
