@@ -60,6 +60,23 @@ jobs:
             /tmp/jmmlu \
             --output-dir results \
             2>&1 | tee ../curriculum-gate-experiment.log
+      - name: Package the gated conversation and exam artifact
+        working-directory: minimal-predictive-lm
+        run: |
+          python -m minimal_predictive_lm.package_mobile_gated_exam_artifact \
+            /tmp/mobile-public/mobile_public_transfer.mpmobile \
+            /tmp/curriculum-memory/minimal-predictive-lm/results/curriculum_memory.zlib \
+            results/curriculum_memory_gate.zlib \
+            results/mobile_university_exam_gated.mpexam
+      - name: Exercise exam and ordinary conversation routes
+        working-directory: minimal-predictive-lm
+        run: |
+          mpm-university-exam-chat results/mobile_university_exam_gated.mpexam \
+            --once $'問題：植物が光合成で放出する気体は何か。\n(0)窒素\n(1)酸素\n(2)二酸化炭素\n(3)水素' \
+            --debug | tee ../gated-exam-smoke.log
+          mpm-university-exam-chat results/mobile_university_exam_gated.mpexam \
+            --once 'DNAの中には何が記録されているの' \
+            --debug | tee ../gated-dialogue-smoke.log
       - name: Enforce out-of-fold improvement and resource boundaries
         working-directory: minimal-predictive-lm
         run: |
@@ -67,6 +84,7 @@ jobs:
           import json
           from pathlib import Path
           row = json.loads(Path('results/curriculum_gate_jmmlu.json').read_text())
+          package = json.loads(Path('results/mobile_university_exam_gated.mpexam.json').read_text())
           cv = row['cross_validation']
           protocol = row['protocol']
           assert row['gate_experiment_passed'] is True
@@ -80,11 +98,18 @@ jobs:
           assert protocol['official_common_test_remains_prospective'] is True
           assert row['final_gate']['serialized_bytes'] <= 16 * 1024
           assert row['resources']['planned_complete_package_bytes'] <= 1_000_000_000
+          assert package['package_passed'] is True
+          assert package['resources']['planned_complete_package_bytes'] <= 1_000_000_000
+          assert package['resources']['estimated_combined_active_bytes'] <= 5_000_000
+          assert package['resources']['official_common_test_targets_used'] == 0
           assert row['university_exam_mastery_passed'] is False
           assert row['highschool_level_passed'] is False
           assert row['mobile_device_gate_passed'] is False
+          assert package['university_exam_mastery_passed'] is False
+          assert package['highschool_level_passed'] is False
+          assert package['mobile_device_gate_passed'] is False
           PY
-      - name: Upload gate model and evidence
+      - name: Upload executable gated model and evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -93,6 +118,10 @@ jobs:
             minimal-predictive-lm/results/curriculum_gate_junit.xml
             minimal-predictive-lm/results/curriculum_gate_unit.log
             curriculum-gate-experiment.log
+            gated-exam-smoke.log
+            gated-dialogue-smoke.log
             minimal-predictive-lm/results/curriculum_memory_gate.zlib
             minimal-predictive-lm/results/curriculum_gate_jmmlu.json
+            minimal-predictive-lm/results/mobile_university_exam_gated.mpexam
+            minimal-predictive-lm/results/mobile_university_exam_gated.mpexam.json
           retention-days: 30
