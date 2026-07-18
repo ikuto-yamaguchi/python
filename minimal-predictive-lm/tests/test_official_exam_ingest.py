@@ -10,10 +10,17 @@ def test_freeze_requires_official_hashed_assets(monkeypatch, tmp_path) -> None:
         url: (
             "<html><body>"
             + "".join(
-                f'<a href="/asset/{source_id}/{index}.pdf">PDF {index}</a>'
+                (
+                    '<a href="/albums/abm.php?d=2144'
+                    f'&f=asset_{source_id}_{index}.pdf'
+                    f'&n=exam_{index}.pdf">PDF {index}</a>'
+                )
                 for index in range(40)
             )
-            + '<a href="/asset/audio.mp3">audio</a>'
+            + (
+                '<a href="/albums/abm.php?d=2144'
+                f'&f=audio_{source_id}.mp3&n=listening.mp3">audio</a>'
+            )
             + "</body></html>"
         ).encode()
         for source_id, url in ingest.DEFAULT_SOURCES.items()
@@ -22,8 +29,8 @@ def test_freeze_requires_official_hashed_assets(monkeypatch, tmp_path) -> None:
     def fake_download(url: str) -> tuple[bytes, str]:
         if url in pages:
             return pages[url], "text/html"
-        if url.endswith(".mp3"):
-            return b"audio-bytes", "audio/mpeg"
+        if ingest._asset_extension(url) == ".mp3":
+            return b"audio-bytes", "application/octet-stream"
         return ("pdf:" + url).encode(), "application/pdf"
 
     monkeypatch.setattr(ingest, "_download", fake_download)
@@ -35,6 +42,16 @@ def test_freeze_requires_official_hashed_assets(monkeypatch, tmp_path) -> None:
     saved = json.loads(output.read_text(encoding="utf-8"))
     assert saved["asset_total"] >= 160
     assert all(len(row["sha256"]) == 64 for row in saved["assets"])
+    assert sum(ingest._asset_extension(row["url"]) == ".mp3" for row in saved["assets"]) == 4
+
+
+def test_abm_query_filename_is_recognized() -> None:
+    pdf = "https://www.dnc.ac.jp/albums/abm.php?d=2144&f=x.pdf&n=exam.pdf"
+    audio = "https://www.dnc.ac.jp/albums/abm.php?d=2144&f=x.mp3&n=audio.mp3"
+    assert ingest._asset_extension(pdf) == ".pdf"
+    assert ingest._asset_extension(audio) == ".mp3"
+    assert ingest._asset_link(pdf) is True
+    assert ingest._asset_link(audio) is True
 
 
 def test_non_official_seed_is_rejected(tmp_path) -> None:
