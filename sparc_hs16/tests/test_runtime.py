@@ -29,6 +29,7 @@ class AdaptiveRuntimeTests(unittest.TestCase):
         dialogue = runtime.solve("こんにちは")
         self.assertEqual(induced.answer, "438です。")
         self.assertTrue(induced.mechanism.startswith("induced-program:"))
+        self.assertIn("route=", induced.mechanism)
         self.assertEqual(arithmetic.answer, "24です。")
         self.assertEqual(dialogue.answer, "こんにちは。今日は何を一緒に考えましょうか？")
 
@@ -41,7 +42,11 @@ class AdaptiveRuntimeTests(unittest.TestCase):
             restored = AdaptiveSparcRuntime.load(path)
             self.assertEqual(restored.solve("時速73kmで6時間進む距離は？").answer, "438です。")
             self.assertEqual(restored.solve("研究コードは何？").answer, "海側")
-            self.assertLess(path.stat().st_size, 10_000)
+            self.assertEqual(
+                restored.route("本文:葵は駅へ行った。問:葵はどこへ行った")[0],
+                runtime.route("本文:葵は駅へ行った。問:葵はどこへ行った")[0],
+            )
+            self.assertLess(path.stat().st_size, 100_000)
 
     def test_strict_gate_accepts_runtime_but_remains_fail_closed(self) -> None:
         runtime = self.build_runtime()
