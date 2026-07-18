@@ -1,0 +1,95 @@
+name: curriculum-memory-gate-jmmlu
+
+on:
+  pull_request:
+    branches: [research/university-exam-staging]
+  workflow_dispatch:
+
+concurrency:
+  group: curriculum-memory-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cross-validated-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Gate unit tests
+        run: |
+          mkdir -p minimal-predictive-lm/results
+          set -o pipefail
+          python -m pytest -vv minimal-predictive-lm/tests/test_curriculum_memory_gate.py \
+            --junitxml=minimal-predictive-lm/results/curriculum_gate_junit.xml \
+            2>&1 | tee minimal-predictive-lm/results/curriculum_gate_unit.log
+      - name: Reuse frozen base dialogue/reasoning artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: mobile-public-dialogue-results
+          path: /tmp/mobile-public
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ikuto-yamaguchi/python
+          run-id: 29634782012
+      - name: Reuse successful curriculum memory
+        uses: actions/download-artifact@v4
+        with:
+          name: curriculum-memory-jmmlu-results
+          path: /tmp/curriculum-memory
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ikuto-yamaguchi/python
+          run-id: 29641084625
+      - name: Acquire disclosed JMMLU development diagnostic
+        run: |
+          curl -L --fail --retry 3 \
+            https://huggingface.co/datasets/nlp-waseda/JMMLU/resolve/main/JMMLU.zip \
+            -o /tmp/JMMLU.zip
+          mkdir -p /tmp/jmmlu
+          unzip -q /tmp/JMMLU.zip -d /tmp/jmmlu
+      - name: Train and cross-validate the subject-blind gate
+        working-directory: minimal-predictive-lm
+        run: |
+          python -m minimal_predictive_lm.curriculum_gate_jmmlu_experiment \
+            /tmp/mobile-public/mobile_public_transfer.mpmobile \
+            /tmp/curriculum-memory/curriculum_memory.zlib \
+            /tmp/jmmlu \
+            --output-dir results
+      - name: Enforce out-of-fold improvement and resource boundaries
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          row = json.loads(Path('results/curriculum_gate_jmmlu.json').read_text())
+          cv = row['cross_validation']
+          protocol = row['protocol']
+          assert row['gate_experiment_passed'] is True
+          assert cv['rows'] == 7536
+          assert cv['folds'] == 5
+          assert cv['gated_gain_over_base'] > 0
+          assert sum(fold['gated_gain_over_base'] >= 0 for fold in cv['fold_reports']) >= 3
+          assert protocol['subject_name_visible_to_gate'] is False
+          assert protocol['prompt_text_visible_to_gate'] is False
+          assert protocol['official_common_test_targets_used'] == 0
+          assert protocol['official_common_test_remains_prospective'] is True
+          assert row['final_gate']['serialized_bytes'] <= 16 * 1024
+          assert row['resources']['planned_complete_package_bytes'] <= 1_000_000_000
+          assert row['university_exam_mastery_passed'] is False
+          assert row['highschool_level_passed'] is False
+          assert row['mobile_device_gate_passed'] is False
+          PY
+      - name: Upload gate model and evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: curriculum-memory-gate-jmmlu-results
+          path: |
+            minimal-predictive-lm/results/curriculum_gate_junit.xml
+            minimal-predictive-lm/results/curriculum_gate_unit.log
+            minimal-predictive-lm/results/curriculum_memory_gate.zlib
+            minimal-predictive-lm/results/curriculum_gate_jmmlu.json
+          retention-days: 30
