@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import hashlib
 import json
 import math
-from typing import Iterable, Sequence
+from typing import Sequence
 import zlib
 
 
@@ -91,7 +91,7 @@ class QuantizedCurriculumGate:
     def choose_index(self, row: GateObservation) -> int:
         if row.base_index == row.memory_index:
             return row.base_index
-        return self.memory_index if self.probability(row) >= self.threshold else row.base_index
+        return row.memory_index if self.probability(row) >= self.threshold else row.base_index
 
     def to_bytes(self) -> bytes:
         payload = {
