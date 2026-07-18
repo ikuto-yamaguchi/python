@@ -1,0 +1,87 @@
+name: cap-gen-002-mobile-public-dialogue
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+  workflow_dispatch:
+
+jobs:
+  mobile-public-dialogue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Dialogue and mobile unit tests
+        run: >-
+          python -m pytest -q
+          minimal-predictive-lm/tests/test_mobile_dialogue_ranker.py
+          minimal-predictive-lm/tests/test_mobile_sparse_core.py
+      - name: Run unseen-paraphrase curriculum gate
+        working-directory: minimal-predictive-lm
+        run: python -m minimal_predictive_lm.mobile_curriculum_dialogue_gate
+      - name: Acquire frozen public datasets
+        run: |
+          git clone --depth 1 https://github.com/nlp-waseda/chain-of-thought-ja-dataset.git /tmp/cot-ja
+          mkdir -p minimal-predictive-lm/public_data/mobile_public
+          cp /tmp/cot-ja/dataset/mawps/test.json minimal-predictive-lm/public_data/mobile_public/mawps.json
+          curl -L --fail --retry 3 \
+            https://raw.githubusercontent.com/yahoojapan/JGLUE/v1.1.0/datasets/jcommonsenseqa-v1.1/train-v1.1.json \
+            -o minimal-predictive-lm/public_data/mobile_public/jcommonsenseqa-train.jsonl
+          curl -L --fail --retry 3 \
+            https://raw.githubusercontent.com/yahoojapan/JGLUE/v1.1.0/datasets/jcommonsenseqa-v1.1/valid-v1.1.json \
+            -o minimal-predictive-lm/public_data/mobile_public/jcommonsenseqa-valid.jsonl
+          curl -L --fail --retry 3 \
+            https://raw.githubusercontent.com/yahoojapan/JGLUE/v1.1.0/datasets/jnli-v1.1/train-v1.1.json \
+            -o minimal-predictive-lm/public_data/mobile_public/jnli-train.jsonl
+          curl -L --fail --retry 3 \
+            https://raw.githubusercontent.com/yahoojapan/JGLUE/v1.1.0/datasets/jnli-v1.1/valid-v1.1.json \
+            -o minimal-predictive-lm/public_data/mobile_public/jnli-valid.jsonl
+      - name: Train and package public mobile artifact
+        working-directory: minimal-predictive-lm
+        run: |
+          python -m minimal_predictive_lm.mobile_public_transfer_experiment \
+            public_data/mobile_public/mawps.json \
+            public_data/mobile_public/jcommonsenseqa-train.jsonl \
+            public_data/mobile_public/jcommonsenseqa-valid.jsonl \
+            public_data/mobile_public/jnli-train.jsonl \
+            public_data/mobile_public/jnli-valid.jsonl \
+            --output-dir results
+      - name: Enforce public transfer and absolute package constraints
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          dialogue = json.loads(Path('results/mobile_curriculum_dialogue_gate.json').read_text())
+          public = json.loads(Path('results/mobile_public_transfer.json').read_text())
+          assert dialogue['component_passed'] is True
+          assert dialogue['held_out']['exact_prompt_overlap'] == 0
+          assert dialogue['held_out']['accuracy'] >= 0.875
+          assert public['public_transfer_passed'] is True
+          assert public['artifact']['planned_complete_package_bytes'] <= 1_000_000_000
+          assert public['resources']['recurrent_active_weight_bytes_per_step'] <= 4_000_000
+          assert public['resources']['recurrent_macs_per_byte_step'] <= 2_000_000
+          assert public['mobile_device_gate_passed'] is False
+          assert public['highschool_level_passed'] is False
+          PY
+      - name: Exercise unified conversation artifact
+        working-directory: minimal-predictive-lm
+        run: |
+          mpm-mobile-unified-chat results/mobile_public_transfer.mpmobile \
+            --once 'DNAの中には何が記録されているの'
+      - name: Upload research artifact and reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-public-dialogue-results
+          path: |
+            minimal-predictive-lm/results/mobile_curriculum_dialogue_gate.json
+            minimal-predictive-lm/results/mobile_curriculum_dialogue_ranker.zlib
+            minimal-predictive-lm/results/mobile_public_transfer.json
+            minimal-predictive-lm/results/mobile_public_transfer.mpmobile
+          retention-days: 14
