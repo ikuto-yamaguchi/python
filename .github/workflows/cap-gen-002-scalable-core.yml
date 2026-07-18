@@ -20,6 +20,7 @@ jobs:
         run: >-
           python -m pytest -q
           minimal-predictive-lm/tests/test_scalable_recurrent_core.py
+          minimal-predictive-lm/tests/test_adaptive_recurrent_core.py
       - name: Run shared latent smoke gate
         working-directory: minimal-predictive-lm
         run: python -m minimal_predictive_lm.cap_gen_002_shared_latent_smoke
