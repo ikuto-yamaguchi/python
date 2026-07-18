@@ -1,0 +1,50 @@
+name: official-university-exam-source-freeze
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+  workflow_dispatch:
+
+concurrency:
+  group: official-exam-freeze-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  freeze-common-test-2026:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Unit tests
+        run: python -m pytest -q minimal-predictive-lm/tests/test_official_exam_ingest.py
+      - name: Freeze official problem, answer, and audio assets
+        working-directory: minimal-predictive-lm
+        run: python -m minimal_predictive_lm.official_exam_ingest --output results/official_exam_source_manifest.json
+      - name: Enforce clean prospective holdout
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          row = json.loads(Path('results/official_exam_source_manifest.json').read_text())
+          assert row['source_freeze_passed'] is True
+          assert row['protocol']['targets_used_for_training'] == 0
+          assert row['protocol']['targets_inspected_by_model_builder'] == 0
+          assert row['protocol']['frozen_before_curriculum_training'] is True
+          assert row['checks']['all_assets_official'] is True
+          assert row['checks']['audio_assets_present'] is True
+          assert row['university_exam_mastery_passed'] is False
+          assert row['highschool_level_passed'] is False
+          PY
+      - name: Upload immutable source manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: official-university-exam-source-manifest
+          path: minimal-predictive-lm/results/official_exam_source_manifest.json
+          retention-days: 90
