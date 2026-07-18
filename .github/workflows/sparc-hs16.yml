@@ -75,6 +75,23 @@ jobs:
           assert report["university_exam_mastery_passed"] is False
           assert report["highschool_level_passed"] is False
           PY
+      - name: Run 500-case proof Japanese reading pilot
+        run: python run_reading_pilot.py | tee reading_report.json
+      - name: Verify unseen Japanese relations, causes and abstention
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("reading_report.json").read_text())
+          assert report["correct"] == 500
+          assert report["unseen_cases"] == 500
+          assert report["accuracy"] == 1.0
+          assert report["adaptive_runtime_bytes"] < 10_000
+          assert report["unsupported_question_abstained"] is True
+          assert report["proof_attached"] is True
+          assert report["transformer_used"] is False
+          assert report["university_exam_mastery_passed"] is False
+          PY
       - uses: actions/upload-artifact@v4
         with:
           name: sparc-hs16-reports
@@ -82,3 +99,4 @@ jobs:
             sparc_hs16/pilot_report.json
             sparc_hs16/induction_report.json
             sparc_hs16/adaptive_report.json
+            sparc_hs16/reading_report.json
