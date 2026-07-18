@@ -2,7 +2,7 @@ name: curriculum-memory-jmmlu
 
 on:
   pull_request:
-    branches: [research/minimal-compute-lm]
+    branches: [research/minimal-compute-lm, research/university-exam-staging]
   workflow_dispatch:
 
 concurrency:
