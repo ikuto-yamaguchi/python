@@ -34,6 +34,9 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
     for index in range(20):
         left = f"潜在時系列A{index}"
         right = f"潜在時系列B{index}"
+        unrelated = f"未観測系列{index}"
+        fixed = f"固定資料{index}"
+        fixed_value = 99 + index
         left_initial = 7 + index
         left_add = 2 + index % 3
         left_middle = left_initial + left_add
@@ -43,16 +46,21 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
         right_middle = right_initial * 3
         right_final = right_middle + 2
         document = (
+            f"{unrelated}に5個加える。{fixed}には{fixed_value}個ある。"
             f"{left}に{left_add}個加える。{left}には{left_middle}個ある。"
             f"別資料を確認した。{left}を2倍にする。{left}に4個加える。{left}には{left_final}個ある。"
             f"{right}を3倍にする。{right}には{right_middle}個ある。{right}に2個加える。"
             "観測されていない各時点の状態を、同じ出来事の流れから説明せよ。"
         )
         before_reads = learner.latent_constraint_reads
+        before_skipped = learner.latent_unanchored_components_skipped
+        before_fixed = learner.latent_fixed_observation_components
         stamp = time.perf_counter()
         result = learner.infer_latent_state_graph(document)
         inference_seconds += time.perf_counter() - stamp
         reads = learner.latent_constraint_reads - before_reads
+        skipped = learner.latent_unanchored_components_skipped - before_skipped
+        fixed_components = learner.latent_fixed_observation_components - before_fixed
         max_constraint_reads = max(max_constraint_reads, reads)
         max_candidates = max(max_candidates, learner.last_candidates)
         max_feature_reads = max(max_feature_reads, learner.last_feature_reads)
@@ -69,7 +77,12 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
             and expected.issubset(recovered)
             and result.mechanism == "shared-bidirectional-latent-state-graph"
             and "検算" in result.answer
-            and reads <= 36
+            and result.initial_world.number_map().get((fixed, "count")) == fixed_value
+            and result.final_world.number_map().get((fixed, "count")) == fixed_value
+            and (unrelated, "count") not in result.initial_world.number_map()
+            and skipped == 1
+            and fixed_components == 1
+            and reads <= 42
         )
         correct += int(passed)
         examples.append({
@@ -78,6 +91,8 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
             "verified": result.verified,
             "recovered_states": result.recovered_states,
             "constraint_reads": reads,
+            "unanchored_components_skipped": skipped,
+            "fixed_observation_components": fixed_components,
             "passed": passed,
         })
 
@@ -95,18 +110,27 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
     model = learner.report()
     peak_rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024
     wall_seconds = time.perf_counter() - started
-    estimated_ops = previous["estimated_sparse_operations"] + max_feature_reads * 20 + learner.latent_constraint_reads + learner.latent_forward_checks
+    estimated_ops = (
+        previous["estimated_sparse_operations"]
+        + max_feature_reads * 20
+        + learner.latent_constraint_reads
+        + learner.latent_forward_checks
+    )
     no_regression = all(
         axes[name]["correct"] >= row["correct"] and axes[name]["total"] == row["total"]
         for name, row in previous["axes"].items()
     )
-    improved = total_correct / total > baseline_correct / baseline_total and percentages[axis_name] > 0 and no_regression
+    improved = (
+        total_correct / total > baseline_correct / baseline_total
+        and percentages[axis_name] > 0
+        and no_regression
+    )
     efficient = (
         model["serialized_bytes"] <= 131072
         and peak_rss <= 536870912
         and wall_seconds <= 20.0
         and max_candidates <= 16
-        and max_constraint_reads <= 36
+        and max_constraint_reads <= 42
     )
     report = {
         "stage": "SPARC-highschool-general-001-r16-shared-bidirectional-latent-state-graph",
@@ -142,10 +166,23 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
         "structural_integration_passed": improved and efficient,
         "highschool_level_passed": False,
         "passed": improved and efficient,
-        "claim_boundary": "The same learner now solves omitted initial, intermediate, and terminal numeric states by propagating learned sparse affine transitions in both directions and verifying every observation. Evaluation remains controlled synthetic Japanese; real textbooks, broad qualitative relations, and natural open-ended dialogue are unproven.",
+        "claim_boundary": (
+            "The same learner now solves omitted initial, intermediate, and terminal "
+            "numeric states by propagating learned sparse affine transitions in both "
+            "directions, selecting only observation-anchored transition components, "
+            "preserving observation-only fixed context, and verifying every relevant "
+            "observation. Evaluation remains controlled synthetic Japanese; real "
+            "textbooks, broad qualitative relations, and natural open-ended dialogue "
+            "are unproven."
+        ),
     }
-    (output / "SPARC-highschool-general-latent-state-graph.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
-    (output / "SPARC-highschool-general-latent-state-graph.model.zlib").write_bytes(learner.to_bytes())
+    (output / "SPARC-highschool-general-latent-state-graph.json").write_text(
+        json.dumps(report, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    (output / "SPARC-highschool-general-latent-state-graph.model.zlib").write_bytes(
+        learner.to_bytes()
+    )
     if not report["passed"]:
         raise SystemExit("shared bidirectional latent-state integrated gate failed")
     return report
