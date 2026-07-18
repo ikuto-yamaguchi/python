@@ -34,7 +34,7 @@ class EvidenceQualityConsensusTest(unittest.TestCase):
         target = "品質論点A"
         for note in ("北側の伝聞記録", "西側の間接記録", "旧帳簿の再構成"):
             learner.ingest_quality_verified_hypothesis(weak(target, 7, 3, note))
-        for note in ("独立測定系列一", "独立測定系列二"):
+        for note in ("山岳観測所の光学計器による原簿", "沿岸研究船の重量センサー再測定"):
             learner.ingest_quality_verified_hypothesis(strong(target, 12, 3, note))
         result = learner.answer_from_quality_graph(f"{target}の現在の結論を説明してください。")
         self.assertTrue(result.accepted)
@@ -45,8 +45,8 @@ class EvidenceQualityConsensusTest(unittest.TestCase):
     def test_equal_verified_coverage_abstains(self):
         learner = self.learner()
         target = "品質論点B"
-        learner.ingest_quality_verified_hypothesis(strong(target, 5, 2, "独立測定甲"))
-        learner.ingest_quality_verified_hypothesis(strong(target, 9, 2, "独立測定乙"))
+        learner.ingest_quality_verified_hypothesis(strong(target, 5, 2, "森林試験区の自動計数器で観測"))
+        learner.ingest_quality_verified_hypothesis(strong(target, 9, 2, "地下実験室の圧力装置で再測定"))
         result = learner.answer_from_quality_graph(f"{target}の結論を説明してください。")
         self.assertFalse(result.accepted)
         self.assertEqual("abstain-unresolved-verified-quality-conflict", result.mechanism)
@@ -63,9 +63,17 @@ class EvidenceQualityConsensusTest(unittest.TestCase):
 
     def test_graph_is_bounded_and_serializable(self):
         learner = self.learner()
-        for index in range(6):
+        notes = (
+            "高原局の赤外線記録",
+            "港湾船の荷重観測",
+            "地下室の圧力測定",
+            "森林区の画像計数",
+            "河川塔の流量原簿",
+            "砂漠基地の磁気記録",
+        )
+        for index, note in enumerate(notes):
             learner.ingest_quality_verified_hypothesis(
-                strong(f"品質保存{index}", index + 3, 2, f"独立測定{index}")
+                strong(f"品質保存{index}", index + 3, 2, note)
             )
         payload = learner.quality_graph_bytes()
         self.assertLessEqual(len(payload), 32768)
