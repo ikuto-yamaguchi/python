@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import json
 
 from .sparc_highschool_evidence_lineage import EvidenceLineageConsensusLearner
+from .sparc_highschool_evidence_revision import StateRow
 from .sparc_highschool_hypothesis_consensus import HypothesisConsensusResult
 
 
@@ -35,6 +36,7 @@ class EvidenceQualityConsensusLearner(EvidenceLineageConsensusLearner):
         self.quality_transition_reads = 0
         self.quality_writes = 0
         self.quality_reads = 0
+        self.quality_canonical_replays = 0
         self.last_quality = EvidenceQualityStats("", 0, 0, 0)
 
     def reset_quality_graph(self) -> None:
@@ -53,10 +55,37 @@ class EvidenceQualityConsensusLearner(EvidenceLineageConsensusLearner):
                 transitions += 1
         self.quality_observation_reads += observations
         self.quality_transition_reads += transitions
-        # Multiple independently checked state anchors reduce reconstruction freedom.
-        # Transitions must exist, but do not manufacture weight without observations.
         weight = min(self.max_quality_weight, max(1, observations)) if transitions else 0
         return observations, transitions, weight
+
+    def _canonical_states(self, grounded, target: str) -> tuple[StateRow, ...]:
+        """Replay the verified world into one observation-layout-invariant trajectory."""
+        keys = sorted(key for key in grounded.initial_world.number_map() if key[0] == target)
+        if len(keys) != 1:
+            return ()
+        key = keys[0]
+        relation = key[1]
+        world = grounded.initial_world
+        current = world.number_map().get(key)
+        if current is None:
+            return ()
+        states: list[StateRow] = [(target, relation, 0, current)]
+        node = 0
+        for action in grounded.actions:
+            applied = self.apply(action, world)
+            self.quality_canonical_replays += 1
+            if not applied.accepted:
+                return ()
+            world = applied.world
+            value = world.number_map().get(key)
+            if value is not None and value != current:
+                node += 1
+                current = value
+                states.append((target, relation, node, value))
+        expected = grounded.final_world.number_map().get(key)
+        if current != expected:
+            return ()
+        return tuple(states)
 
     def ingest_quality_verified_hypothesis(self, text: str) -> HypothesisConsensusResult:
         sentences = tuple(self._sentences(text))
@@ -67,12 +96,14 @@ class EvidenceQualityConsensusLearner(EvidenceLineageConsensusLearner):
         grounded = self.infer_latent_state_graph(body)
         if not grounded.accepted or not grounded.verified:
             return self._h_abstain("abstain-unverified-quality-evidence")
-        entities = tuple(sorted({row[0] for row in grounded.recovered_states}))
+        entities = tuple(sorted({key[0] for key in grounded.initial_world.number_map()}))
         targets = self._question_targets(question, entities)
         if len(targets) != 1:
             return self._h_abstain("abstain-ambiguous-quality-evidence")
         target = targets[0]
-        states = tuple(row for row in grounded.recovered_states if row[0] == target)
+        states = self._canonical_states(grounded, target)
+        if not states:
+            return self._h_abstain("abstain-noncanonical-quality-evidence")
         _support, alternatives, stored = self._store_lineage_hypothesis(target, states, text)
         lineage_id = self.last_lineage.lineage_id
         observations, transitions, weight = self._verified_coverage(body)
