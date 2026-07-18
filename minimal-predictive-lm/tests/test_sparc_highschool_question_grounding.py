@@ -29,6 +29,19 @@ class QuestionGroundedWorldLearnerTest(unittest.TestCase):
         self.assertTrue(all(row[0] == "甲系列" for row in result.selected_states))
         self.assertIn("検算", result.answer)
 
+    def test_uses_maximal_entity_span_for_overlapping_names(self):
+        learner = self.learner()
+        result = learner.answer_question_grounded_world(
+            "系列1に3個加える。系列1には13個ある。系列1を2倍にする。"
+            "系列10を3倍にする。系列10には21個ある。系列10に2個加える。"
+            "系列10について不足する状態を説明してください。"
+        )
+        self.assertTrue(result.accepted)
+        self.assertEqual(("系列10",), result.targets)
+        self.assertTrue(result.selected_states)
+        self.assertTrue(all(row[0] == "系列10" for row in result.selected_states))
+        self.assertNotIn("系列1について", result.answer)
+
     def test_abstains_when_question_mentions_two_supported_targets(self):
         learner = self.learner()
         result = learner.answer_question_grounded_world(
