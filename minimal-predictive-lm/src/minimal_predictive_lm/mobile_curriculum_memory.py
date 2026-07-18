@@ -73,13 +73,7 @@ def _occurrences(text: str, needle: str) -> tuple[int, ...]:
 
 
 def _relation_proximity(stem: str, option: str, document: str) -> float:
-    """Measure whether an option occurs near the relation expressed by a question.
-
-    This is learned-task agnostic: relation cues are the longest character spans
-    shared by the question and the retrieved document, not a hand-written list of
-    benchmark verbs. It distinguishes, for example, an input material from a
-    nearby emitted product when both names occur in the same science paragraph.
-    """
+    """Score option proximity to longest relation spans shared by question and evidence."""
 
     normalized_stem = _normalize(stem)
     normalized_option = _normalize(option)
@@ -121,13 +115,7 @@ def _relation_proximity(stem: str, option: str, document: str) -> float:
 
 
 class QuantizedCurriculumMemory:
-    """Sparse offline knowledge memory for weak-phone retrieval.
-
-    The full memory is an inverted index. A query touches only postings for its
-    hashed lexical/subword features; no dense scan over the package is needed.
-    Retrieved documents also carry a compact sorted feature set, so an option is
-    rewarded only when the retrieved evidence actually contains its features.
-    """
+    """Paged, quantized, task-name-free curriculum retrieval for weak phones."""
 
     FORMAT = "quantized-curriculum-memory-002"
 
@@ -189,7 +177,7 @@ class QuantizedCurriculumMemory:
         temporary: dict[int, list[tuple[int, float]]] = defaultdict(list)
         norms: list[float] = []
         for doc_id, features in enumerate(encoded):
-            weighted: dict[int, float] = {
+            weighted = {
                 feature: (1.0 + math.log(value)) * idf_float[feature]
                 for feature, value in features.items()
             }
@@ -239,11 +227,12 @@ class QuantizedCurriculumMemory:
         base_ids = {doc_id for doc_id, _score in base_docs}
         raw_scores: list[float] = []
         active = base_active
-        evidence_titles: list[str] = [self.titles[doc_id] for doc_id, _ in base_docs[:4]]
+        evidence_titles = [self.titles[doc_id] for doc_id, _ in base_docs[:4]]
         for option in options:
             combined, used = self._retrieve(stem + "\n" + option, top_k=8)
             active += used
             option_features = _features(option, buckets=self.buckets)
+            option_feature_count = max(1, len(option_features))
             score = 0.0
             normalized_option = _normalize(option)
             for rank, (doc_id, retrieval_score) in enumerate(combined):
@@ -256,15 +245,17 @@ class QuantizedCurriculumMemory:
                 )
                 coverage = (
                     sum(1 for feature in option_features if feature in document_features)
-                    / max(1, len(option_features))
+                    / option_feature_count
                 )
                 novelty = 1.15 if doc_id not in base_ids else 1.0
                 score += novelty * rank_weight * (
-                    retrieval_score + 0.08 * support + 20.0 * coverage
+                    math.log1p(retrieval_score)
+                    + 0.05 * support / option_feature_count
+                    + 5.0 * coverage
                 )
                 if normalized_option and normalized_option in self.snippets[doc_id]:
-                    score += 60.0 * rank_weight
-                score += 120.0 * rank_weight * _relation_proximity(
+                    score += 10.0 * rank_weight
+                score += 30.0 * rank_weight * _relation_proximity(
                     stem, option, self.snippets[doc_id]
                 )
             raw_scores.append(score)
@@ -295,6 +286,7 @@ class QuantizedCurriculumMemory:
             "paged_sparse": True,
             "document_local_support": True,
             "local_relation_scoring": True,
+            "retrieval_magnitude_normalized": True,
         }
 
     def to_bytes(self) -> bytes:
@@ -304,9 +296,7 @@ class QuantizedCurriculumMemory:
             "titles": self.titles,
             "snippets": self.snippets,
             "doc_features": self.doc_features,
-            "postings": {
-                str(feature): rows for feature, rows in self.postings.items()
-            },
+            "postings": {str(feature): rows for feature, rows in self.postings.items()},
             "doc_norms": self.doc_norms,
             "idf": {str(feature): value for feature, value in self.idf.items()},
             "max_active_postings": self.max_active_postings,
