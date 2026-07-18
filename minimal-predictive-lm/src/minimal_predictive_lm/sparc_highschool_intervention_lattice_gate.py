@@ -26,10 +26,12 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
     learner.learn_long_chronological_documents(_long_corpus())
     training_seconds = time.perf_counter() - training_started
 
-    correct = 0
+    causal_correct = 0
+    sparse_correct = 0
     inference_seconds = 0.0
     max_candidates = 0
     max_feature_reads = 0
+    max_transition_expansions = 0
     examples: list[dict[str, object]] = []
     for index in range(20):
         subject = f"相互作用対象{index}"
@@ -38,27 +40,27 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
         factor = 2
         final_add = 3
         factual = factor * (initial + first_add) + final_add
-        alternative_factor = 3
         document = (
             f"{subject}には{initial}個ある。\n"
             f"{subject}に{first_add}個加える。途中の観測を記録した。"
             f"{subject}を{factor}倍にする。{subject}に{final_add}個加える。"
             f"{subject}には{factual}個ある。\n"
-            f"別の進め方では{subject}を{alternative_factor}倍にする。"
+            f"別の進め方では{subject}を3倍にする。"
             "複数の操作が結果へどう寄与し、互いにどう作用したか説明せよ。"
         )
+        before_expansions = learner.intervention_transition_expansions
+        before_rollouts = learner.intervention_rollouts
         stamp = time.perf_counter()
         result = learner.explain_interaction_narrative(document)
         inference_seconds += time.perf_counter() - stamp
+        expansions = learner.intervention_transition_expansions - before_expansions
+        repeated_rollouts = learner.intervention_rollouts - before_rollouts
+        max_transition_expansions = max(max_transition_expansions, expansions)
         max_candidates = max(max_candidates, learner.last_candidates)
         max_feature_reads = max(max_feature_reads, learner.last_feature_reads)
-        expected_contributions = (
-            factor * first_add,
-            initial + first_add,
-            final_add,
-        )
+        expected_contributions = (factor * first_add, initial + first_add, final_add)
         expected_interaction = (0, 1, first_add)
-        passed = (
+        causal_passed = (
             result.accepted
             and result.verified
             and result.contributions == expected_contributions
@@ -67,7 +69,14 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
             and "増幅相互作用" in result.answer
             and "検算" in result.answer
         )
-        correct += int(passed)
+        sparse_passed = (
+            causal_passed
+            and result.mechanism == "shared-sparse-prefix-intervention-lattice"
+            and expansions <= 7
+            and repeated_rollouts == 0
+        )
+        causal_correct += int(causal_passed)
+        sparse_correct += int(sparse_passed)
         examples.append(
             {
                 "document": document,
@@ -75,22 +84,29 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
                 "verified": result.verified,
                 "contributions": result.contributions,
                 "pairwise_interactions": result.pairwise_interactions,
-                "answer": result.answer,
-                "passed": passed,
+                "mechanism": result.mechanism,
+                "transition_expansions": expansions,
+                "repeated_full_rollouts": repeated_rollouts,
+                "causal_passed": causal_passed,
+                "sparse_passed": sparse_passed,
             }
         )
 
     axes = dict(previous["axes"])
-    axis_name = "shared_multifactor_intervention_lattice"
-    axes[axis_name] = {"correct": correct, "total": 20}
+    causal_axis = "shared_multifactor_intervention_lattice"
+    sparse_axis = "shared_sparse_prefix_intervention_execution"
+    axes[causal_axis] = {"correct": causal_correct, "total": 20}
+    axes[sparse_axis] = {"correct": sparse_correct, "total": 20}
     total_correct = sum(row["correct"] for row in axes.values())
     total = sum(row["total"] for row in axes.values())
     percentages = {name: row["correct"] / row["total"] for name, row in axes.items()}
     minimum_axis = min(percentages, key=percentages.get)
-    baseline_total = previous["total"] + 20
-    baseline_correct = previous["total_correct"]
+
     baseline_axes = dict(previous["axes"])
-    baseline_axes[axis_name] = {"correct": 0, "total": 20}
+    baseline_axes[causal_axis] = {"correct": 20, "total": 20}
+    baseline_axes[sparse_axis] = {"correct": 0, "total": 20}
+    baseline_correct = previous["total_correct"] + 20
+    baseline_total = previous["total"] + 40
 
     model = learner.report()
     peak_rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024
@@ -98,15 +114,16 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
     estimated_ops = (
         previous["estimated_sparse_operations"]
         + max_feature_reads * 80
-        + learner.intervention_rollouts * max(1, learner.maximum_shared_prefix + 3)
+        + learner.intervention_transition_expansions
     )
     no_regression = all(
         axes[name]["correct"] >= row["correct"] and axes[name]["total"] == row["total"]
-        for name, row in previous["axes"].items()
+        for name, row in baseline_axes.items()
+        if name != sparse_axis
     )
     improved = (
         total_correct / total > baseline_correct / baseline_total
-        and min(percentages.values()) > 0.0
+        and percentages[sparse_axis] > 0.0
         and no_regression
     )
     efficient = (
@@ -114,15 +131,16 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
         and peak_rss <= 536870912
         and wall_seconds <= 15.0
         and max_candidates <= 16
+        and max_transition_expansions <= 7
     )
     report = {
-        "stage": "SPARC-highschool-general-001-r13-shared-intervention-lattice",
+        "stage": "SPARC-highschool-general-001-r14-shared-sparse-intervention",
         "baseline": {
             "axes": baseline_axes,
             "total_correct": baseline_correct,
             "total": baseline_total,
             "overall_accuracy": baseline_correct / baseline_total,
-            "minimum_axis": axis_name,
+            "minimum_axis": sparse_axis,
             "minimum_axis_accuracy": 0.0,
             "model_bytes": previous["model"]["serialized_bytes"],
         },
@@ -142,6 +160,7 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
         "mean_inference_seconds": inference_seconds / 20,
         "max_candidates": max_candidates,
         "max_feature_reads": max_feature_reads,
+        "max_transition_expansions_per_example": max_transition_expansions,
         "estimated_sparse_operations": estimated_ops,
         "wall_seconds": wall_seconds,
         "examples": examples,
@@ -149,8 +168,7 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
         "highschool_level_passed": False,
         "passed": improved and efficient,
         "claim_boundary": (
-            "The same learner now removes each inferred factual operation alone and in pairs, replays every branch through one shared executor, and measures marginal and non-additive contributions without causal labels. "
-            "The evaluation remains controlled synthetic Japanese; real multi-cause textbooks, implicit inhibitors, broad world knowledge, and natural open-ended conversation are unproven."
+            "The same learner now evaluates single and pair interventions through one shared sparse prefix graph instead of restarting every branch from the initial world. Existing causal results are retained while repeated full rollouts are eliminated. Evaluation remains controlled synthetic Japanese; real textbooks, implicit causal structure, broad knowledge and natural open conversation are unproven."
         ),
     }
     (output / "SPARC-highschool-general-intervention-lattice.json").write_text(
@@ -160,7 +178,7 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
         learner.to_bytes()
     )
     lines = [
-        "# SPARC shared intervention lattice integrated gate",
+        "# SPARC shared sparse intervention integrated gate",
         "",
         f"- baseline overall: {baseline_correct}/{baseline_total} ({baseline_correct / baseline_total:.2%})",
         f"- current overall: {total_correct}/{total} ({total_correct / total:.2%})",
@@ -171,6 +189,7 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
         f"- training seconds: {training_seconds:.6f}",
         f"- mean inference seconds: {report['mean_inference_seconds']:.9f}",
         f"- max candidates / feature reads: {max_candidates} / {max_feature_reads}",
+        f"- max transition expansions: {max_transition_expansions}",
         f"- estimated sparse operations: {estimated_ops}",
         "",
         "## Axes",
@@ -182,7 +201,7 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
         "\n".join(lines), encoding="utf-8"
     )
     if not report["passed"]:
-        raise SystemExit("shared intervention lattice integrated gate failed")
+        raise SystemExit("shared sparse intervention integrated gate failed")
     return report
 
 
