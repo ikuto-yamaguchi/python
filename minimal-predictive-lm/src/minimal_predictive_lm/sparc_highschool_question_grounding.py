@@ -18,9 +18,9 @@ class QuestionGroundedResult:
 class QuestionGroundedWorldLearner(LatentStateGraphLearner):
     """Ground an open Japanese question to evidence in the shared world graph.
 
-    Candidate entities come only from learned transitions and observations.  The
+    Candidate entities come only from learned transitions and observations. The
     final utterance is matched against those entities without task/domain labels;
-    exactly one referenced connected component must be supported.  The underlying
+    exactly one referenced connected component must be supported. The underlying
     bidirectional solver and verifier remain unchanged.
     """
 
@@ -30,6 +30,38 @@ class QuestionGroundedWorldLearner(LatentStateGraphLearner):
         self.question_grounding_abstentions = 0
         self.question_entity_reads = 0
         self.question_selected_states = 0
+
+    @staticmethod
+    def _question_targets(question: str, entities: tuple[str, ...]) -> tuple[str, ...]:
+        """Return entities with a maximal explicit span in the question.
+
+        Entity names are induced strings, so a raw substring check confuses names
+        such as ``系列1`` and ``系列10``. We instead enumerate spans for every
+        evidence-supported entity and suppress a span only when a longer candidate
+        covers the same text. This is shared boundary resolution over the current
+        world graph rather than an entity- or phrase-specific exception table.
+        """
+        spans: list[tuple[int, int, str]] = []
+        for entity in entities:
+            if not entity:
+                continue
+            start = question.find(entity)
+            while start >= 0:
+                spans.append((start, start + len(entity), entity))
+                start = question.find(entity, start + 1)
+
+        maximal: set[str] = set()
+        for start, end, entity in spans:
+            embedded = any(
+                other_entity != entity
+                and other_start <= start
+                and end <= other_end
+                and (other_end - other_start) > (end - start)
+                for other_start, other_end, other_entity in spans
+            )
+            if not embedded:
+                maximal.add(entity)
+        return tuple(entity for entity in entities if entity in maximal)
 
     def answer_question_grounded_world(self, text: str) -> QuestionGroundedResult:
         sentences = tuple(self._sentences(text))
@@ -43,7 +75,7 @@ class QuestionGroundedWorldLearner(LatentStateGraphLearner):
 
         entities = tuple(sorted({subject for subject, _relation, _node, _value in grounded.recovered_states}))
         self.question_entity_reads += len(entities)
-        targets = tuple(entity for entity in entities if entity and entity in question)
+        targets = self._question_targets(question, entities)
         if len(targets) != 1:
             return self._q_abstain("abstain-ambiguous-question-target", grounded, targets)
 
