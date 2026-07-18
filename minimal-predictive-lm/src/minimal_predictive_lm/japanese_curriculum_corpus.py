@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+from http.client import HTTPResponse
 import json
 from pathlib import Path
 import time
+from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
@@ -12,6 +14,10 @@ from .mobile_curriculum_memory import KnowledgeDocument
 
 
 WIKIPEDIA_API = "https://ja.wikipedia.org/w/api.php"
+USER_AGENT = (
+    "minimal-predictive-lm-research/1.0 "
+    "(https://github.com/ikuto-yamaguchi/python; curriculum-memory research)"
+)
 CURRICULUM_QUERIES = (
     "高校 数学 代数 幾何 確率 統計",
     "高校 物理 力学 電磁気 波動 熱力学",
@@ -31,27 +37,71 @@ CURRICULUM_QUERIES = (
 )
 
 
-def _get_json(parameters: dict[str, str | int]) -> dict[str, object]:
-    url = WIKIPEDIA_API + "?" + urlencode(parameters)
-    request = Request(
-        url,
-        headers={"User-Agent": "minimal-predictive-lm-research/1.0 (+curriculum-memory)"},
-    )
-    with urlopen(request, timeout=90) as response:
-        data = response.read()
-    return json.loads(data)
+def _retry_delay(error: HTTPError | URLError, attempt: int) -> float:
+    if isinstance(error, HTTPError):
+        raw = error.headers.get("Retry-After") if error.headers else None
+        if raw:
+            try:
+                return min(90.0, max(1.0, float(raw)))
+            except ValueError:
+                pass
+    return min(90.0, 2.0 ** attempt)
+
+
+def _get_json(
+    parameters: dict[str, str | int],
+    *,
+    retries: int = 8,
+) -> tuple[dict[str, object], int]:
+    enriched = dict(parameters)
+    enriched.setdefault("maxlag", 5)
+    url = WIKIPEDIA_API + "?" + urlencode(enriched)
+    last_error: Exception | None = None
+    for attempt in range(retries + 1):
+        request = Request(
+            url,
+            headers={
+                "User-Agent": USER_AGENT,
+                "Api-User-Agent": USER_AGENT,
+                "Accept": "application/json",
+            },
+        )
+        try:
+            with urlopen(request, timeout=90) as response:
+                data = response.read()
+            payload = json.loads(data)
+            if isinstance(payload, dict) and "error" in payload:
+                error = payload["error"]
+                code = str(error.get("code", "")) if isinstance(error, dict) else ""
+                if code == "maxlag" and attempt < retries:
+                    time.sleep(min(90.0, 2.0 ** attempt))
+                    continue
+                raise RuntimeError(f"Wikimedia API error: {error}")
+            return payload, attempt
+        except HTTPError as error:
+            last_error = error
+            if error.code not in {429, 500, 502, 503, 504} or attempt >= retries:
+                raise
+            time.sleep(_retry_delay(error, attempt))
+        except URLError as error:
+            last_error = error
+            if attempt >= retries:
+                raise
+            time.sleep(_retry_delay(error, attempt))
+    raise RuntimeError(f"Wikimedia API retries exhausted: {last_error}")
 
 
 def acquire_curriculum(
     output_path: str | Path,
     *,
     results_per_query: int = 30,
-    delay_seconds: float = 0.1,
+    delay_seconds: float = 1.0,
 ) -> dict[str, object]:
     documents: dict[int, KnowledgeDocument] = {}
     query_records: list[dict[str, object]] = []
+    total_retries = 0
     for query in CURRICULUM_QUERIES:
-        payload = _get_json(
+        payload, retries_used = _get_json(
             {
                 "action": "query",
                 "format": "json",
@@ -67,7 +117,9 @@ def acquire_curriculum(
                 "redirects": 1,
             }
         )
-        pages = payload.get("query", {}).get("pages", []) if isinstance(payload.get("query"), dict) else []
+        total_retries += retries_used
+        query_payload = payload.get("query")
+        pages = query_payload.get("pages", []) if isinstance(query_payload, dict) else []
         accepted = 0
         page_ids: list[int] = []
         if isinstance(pages, list):
@@ -88,6 +140,7 @@ def acquire_curriculum(
                 "query": query,
                 "accepted": accepted,
                 "page_ids": sorted(page_ids),
+                "retries_used": retries_used,
             }
         )
         if delay_seconds:
@@ -113,6 +166,8 @@ def acquire_curriculum(
         "bytes": output.stat().st_size,
         "sha256": digest,
         "source": WIKIPEDIA_API,
+        "rate_limit_retries": total_retries,
+        "request_delay_seconds": delay_seconds,
         "target_exam_questions_used": 0,
         "target_exam_answers_used": 0,
         "development_corpus_passed": len(ordered) >= 250,
