@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import re
 
 from .sparc_highschool_latent_state_graph import LatentStateGraphResult
-from .sparc_highschool_question_grounding import QuestionGroundedResult, QuestionGroundedWorldLearner
+from .sparc_highschool_question_grounding import QuestionGroundedWorldLearner
 
 
 @dataclass(frozen=True)
@@ -40,9 +41,31 @@ class DiscourseEvidenceWorkspaceLearner(QuestionGroundedWorldLearner):
     def reset_discourse(self) -> None:
         self._discourse_focus = ()
 
+    @staticmethod
+    def _unsupported_entity_mentions(question: str, entities: tuple[str, ...]) -> tuple[str, ...]:
+        """Detect explicit entity-family mentions unsupported by the verified graph.
+
+        Entity identifiers are induced strings. Their trailing compact identifier is
+        separated from the shared lexical stem, then the question is scanned for
+        other members of that same family. This rejects an explicit unseen target
+        without a hand-written entity list or question-template routing.
+        """
+        unsupported: set[str] = set()
+        for entity in entities:
+            stem = re.sub(r"[0-9A-Za-z０-９Ａ-Ｚａ-ｚ]+$", "", entity)
+            if not stem or stem == entity:
+                continue
+            pattern = re.compile(re.escape(stem) + r"[0-9A-Za-z０-９Ａ-Ｚａ-ｚ]+")
+            for match in pattern.finditer(question):
+                candidate = match.group(0)
+                if candidate not in entities:
+                    unsupported.add(candidate)
+        return tuple(sorted(unsupported))
+
     def answer_discourse_grounded_world(self, text: str) -> DiscourseWorkspaceResult:
         sentences = tuple(self._sentences(text))
         if len(sentences) < 2:
+            self.reset_discourse()
             return self._d_abstain("abstain-missing-discourse-question")
         question = sentences[-1]
         body = "。".join(sentences[:-1]) + "。"
@@ -54,7 +77,11 @@ class DiscourseEvidenceWorkspaceLearner(QuestionGroundedWorldLearner):
         entities = tuple(sorted({subject for subject, _relation, _node, _value in grounded.recovered_states}))
         self.discourse_evidence_reads += len(entities)
         explicit = self._question_targets(question, entities)
+        unsupported = self._unsupported_entity_mentions(question, entities)
         reused = False
+        if unsupported:
+            self.reset_discourse()
+            return self._d_abstain("abstain-unsupported-explicit-discourse-target", grounded, unsupported)
         if len(explicit) == 1:
             targets = explicit
             if self._discourse_focus and self._discourse_focus != targets:
