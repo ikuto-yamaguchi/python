@@ -34,6 +34,29 @@ class LatentStateGraphLearnerTest(unittest.TestCase):
         self.assertEqual("shared-bidirectional-latent-state-graph", result.mechanism)
         self.assertIn("検算", result.answer)
 
+    def test_unanchored_transition_component_does_not_poison_solved_chain(self):
+        learner = self.learner()
+        result = learner.infer_latent_state_graph(
+            "無関係に5個加える。系列に3個加える。系列には13個ある。"
+            "系列を2倍にする。系列には26個ある。"
+        )
+        self.assertTrue(result.accepted)
+        recovered = {(subject, node, value) for subject, _relation, node, value in result.recovered_states}
+        self.assertIn(("系列", 0, 10), recovered)
+        self.assertNotIn(("無関係", "count"), result.initial_world.number_map())
+        self.assertGreaterEqual(learner.latent_unanchored_components_skipped, 1)
+
+    def test_observation_only_component_is_preserved_as_fixed_context(self):
+        learner = self.learner()
+        result = learner.infer_latent_state_graph(
+            "資料Cには99個ある。系列に3個加える。系列には13個ある。"
+            "系列を2倍にする。系列には26個ある。"
+        )
+        self.assertTrue(result.accepted)
+        self.assertEqual(99, result.initial_world.number_map()[("資料C", "count")])
+        self.assertEqual(99, result.final_world.number_map()[("資料C", "count")])
+        self.assertGreaterEqual(learner.latent_fixed_observation_components, 1)
+
     def test_abstains_on_inconsistent_middle_observation(self):
         learner = self.learner()
         result = learner.infer_latent_state_graph(
