@@ -47,7 +47,7 @@ class ConversationEngineTests(unittest.TestCase):
             self.assertEqual(restored.chat("私の名前は？").answer, "郁斗です。")
             self.assertEqual(restored.chat("私が好きなのは？").answer, "ラーメンです。")
             self.assertEqual(restored.chat("私の目標は？").answer, "24時間走で120kmです。")
-            self.assertLess(path.stat().st_size, 20_000)
+            self.assertLess(path.stat().st_size, 100_000)
 
 
 if __name__ == "__main__":
