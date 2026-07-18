@@ -1,0 +1,96 @@
+name: university-exam-mastery-baseline
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm, research/university-exam-staging]
+  workflow_dispatch:
+
+concurrency:
+  group: university-exam-mastery-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  jmmlu-zero-shot-baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Contract and loader tests
+        run: python -m pytest -q minimal-predictive-lm/tests/test_university_exam_mastery.py
+      - name: Reuse frozen mobile public-transfer artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: mobile-public-dialogue-results
+          path: /tmp/mobile-public
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ikuto-yamaguchi/python
+          run-id: 29634782012
+      - name: Acquire frozen public training references
+        run: |
+          git clone --depth 1 https://github.com/nlp-waseda/chain-of-thought-ja-dataset.git /tmp/cot-ja
+          mkdir -p minimal-predictive-lm/public_data/university_exam
+          cp /tmp/cot-ja/dataset/mawps/test.json minimal-predictive-lm/public_data/university_exam/mawps.json
+          curl -L --fail --retry 3 \
+            https://raw.githubusercontent.com/yahoojapan/JGLUE/v1.1.0/datasets/jcommonsenseqa-v1.1/train-v1.1.json \
+            -o minimal-predictive-lm/public_data/university_exam/jcommonsenseqa-train.jsonl
+          curl -L --fail --retry 3 \
+            https://raw.githubusercontent.com/yahoojapan/JGLUE/v1.1.0/datasets/jcommonsenseqa-v1.1/valid-v1.1.json \
+            -o minimal-predictive-lm/public_data/university_exam/jcommonsenseqa-valid.jsonl
+          curl -L --fail --retry 3 \
+            https://raw.githubusercontent.com/yahoojapan/JGLUE/v1.1.0/datasets/jnli-v1.1/train-v1.1.json \
+            -o minimal-predictive-lm/public_data/university_exam/jnli-train.jsonl
+          curl -L --fail --retry 3 \
+            https://raw.githubusercontent.com/yahoojapan/JGLUE/v1.1.0/datasets/jnli-v1.1/valid-v1.1.json \
+            -o minimal-predictive-lm/public_data/university_exam/jnli-valid.jsonl
+      - name: Acquire frozen JMMLU evaluation set
+        run: |
+          curl -L --fail --retry 3 \
+            https://huggingface.co/datasets/nlp-waseda/JMMLU/resolve/main/JMMLU.zip \
+            -o /tmp/JMMLU.zip
+          mkdir -p /tmp/jmmlu
+          unzip -q /tmp/JMMLU.zip -d /tmp/jmmlu
+      - name: Run all-subject zero-shot baseline
+        working-directory: minimal-predictive-lm
+        run: |
+          python -m minimal_predictive_lm.jmmlu_exam_baseline \
+            public_data/university_exam/mawps.json \
+            public_data/university_exam/jcommonsenseqa-train.jsonl \
+            public_data/university_exam/jcommonsenseqa-valid.jsonl \
+            public_data/university_exam/jnli-train.jsonl \
+            public_data/university_exam/jnli-valid.jsonl \
+            /tmp/jmmlu \
+            --reference-artifact /tmp/mobile-public/mobile_public_transfer.mpmobile \
+            --reference-report /tmp/mobile-public/mobile_public_transfer.json \
+            --output-dir results
+      - name: Enforce honest target and resource boundaries
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          row = json.loads(Path('results/jmmlu_exam_baseline.json').read_text())
+          assert row['baseline_experiment_passed'] is True
+          assert row['protocol']['subjects'] == 56
+          assert row['protocol']['items'] == 7536
+          assert row['protocol']['jmmlu_test_targets_used_for_training'] == 0
+          assert row['protocol']['jmmlu_examples_used_for_configuration_selection'] == 0
+          assert row['protocol']['subject_name_visible_to_model'] is False
+          assert row['protocol']['exact_training_prompt_overlap'] == 0
+          assert row['protocol']['frozen_reference_artifact_used'] is True
+          assert row['resources']['planned_complete_package_bytes'] <= 1_000_000_000
+          assert row['university_exam_mastery_passed'] is False
+          assert row['highschool_level_passed'] is False
+          assert row['university_exam_mastery']['completion_allowed'] is False
+          PY
+      - name: Upload baseline evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: university-exam-mastery-baseline-results
+          path: minimal-predictive-lm/results/jmmlu_exam_baseline.json
+          retention-days: 30
