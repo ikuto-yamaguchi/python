@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from .sparc_highschool_counterfactual import CounterfactualNarrativeLearner, CounterfactualResult
-from .sparc_highschool_general import World
+from .sparc_highschool_general import Edit, Program, World
 
 
 @dataclass(frozen=True)
@@ -46,6 +46,7 @@ class NarrativeAlignedLearner(CounterfactualNarrativeLearner):
         self.branch_factual_mismatches = 0
         self.branch_unchanged = 0
         self.complete_alignments_found = 0
+        self.slot_bound_arithmetic_executions = 0
 
     @staticmethod
     def _single_number(world: World):
@@ -53,6 +54,74 @@ class NarrativeAlignedLearner(CounterfactualNarrativeLearner):
         if world.facts or len(values) != 1:
             return None
         return next(iter(values.items()))
+
+    @classmethod
+    def _derive_edits(cls, before: World, after: World, atoms: tuple[str, ...]) -> tuple[Edit, ...]:
+        """Turn visible arithmetic magnitudes into reusable execution slots.
+
+        The inherited inducer identifies whether a transition is additive or
+        multiplicative.  The magnitude is not stored as a training-example constant:
+        it is bound from the same surface slot at execution time.  This mechanism is
+        shared by calculation, planning, causal rollout and narrative alignment.
+        """
+        inherited = super()._derive_edits(before, after, atoms)
+        edits: list[Edit] = []
+        for edit in inherited:
+            if edit.kind == "add_const" and edit.delta is not None:
+                magnitude = str(abs(edit.delta))
+                edits.append(
+                    Edit(
+                        "add_from_slot",
+                        edit.relation,
+                        edit.subject_slot,
+                        object_slot=cls._slot_for(magnitude, atoms),
+                        factor=1 if edit.delta >= 0 else -1,
+                    )
+                )
+            elif edit.kind == "mul_const" and edit.factor is not None:
+                magnitude = str(abs(edit.factor))
+                edits.append(
+                    Edit(
+                        "mul_from_slot",
+                        edit.relation,
+                        edit.subject_slot,
+                        object_slot=cls._slot_for(magnitude, atoms),
+                        factor=1 if edit.factor >= 0 else -1,
+                    )
+                )
+            else:
+                edits.append(edit)
+        return tuple(edits)
+
+    @classmethod
+    def _execute(cls, world: World, program: Program, bindings: tuple[str, ...]) -> World:
+        facts = set(world.facts)
+        numbers = world.number_map()
+        for edit in program.edits:
+            subject = cls._binding(bindings, edit.subject_slot)
+            if edit.kind in {"add_fact", "remove_fact"}:
+                obj = cls._binding(bindings, edit.object_slot)
+                fact = (subject, edit.relation, obj)
+                facts.add(fact) if edit.kind == "add_fact" else facts.discard(fact)
+            elif edit.kind == "delete_number":
+                numbers.pop((subject, edit.relation), None)
+            elif edit.kind == "set_from_slot":
+                numbers[(subject, edit.relation)] = int(cls._binding(bindings, edit.object_slot))
+            elif edit.kind in {"add_const", "add_from_slot"}:
+                key = (subject, edit.relation)
+                if key not in numbers:
+                    raise ValueError("missing numeric state")
+                delta = int(edit.delta or 0) if edit.kind == "add_const" else int(cls._binding(bindings, edit.object_slot)) * int(edit.factor or 1)
+                numbers[key] += delta
+            elif edit.kind in {"mul_const", "mul_from_slot"}:
+                key = (subject, edit.relation)
+                if key not in numbers:
+                    raise ValueError("missing numeric state")
+                factor = int(edit.factor or 1) if edit.kind == "mul_const" else int(cls._binding(bindings, edit.object_slot)) * int(edit.factor or 1)
+                numbers[key] *= factor
+            else:
+                raise ValueError(f"unknown edit {edit.kind}")
+        return World.from_parts(facts, numbers)
 
     def _program_identity(self, sentence: str) -> str | None:
         rows = self._rank(sentence)
@@ -165,6 +234,7 @@ class NarrativeAlignedLearner(CounterfactualNarrativeLearner):
                     if comparison.counterfactual.world == comparison.factual.world:
                         self.branch_unchanged += 1
                         continue
+                    self.slot_bound_arithmetic_executions += 1
                     candidates.append(NarrativeAlignmentResult(True, start_world, end_world, path.actions, (clause,), position, comparison, path.ignored, "shared-sequence-world-alignment"))
 
         self.complete_alignments_found += len(candidates)
@@ -189,6 +259,8 @@ class NarrativeAlignedLearner(CounterfactualNarrativeLearner):
             "preseparated_action_lists_supplied": False,
             "phrase_exception_table_used": False,
             "joint_sequence_alignment": True,
+            "slot_bound_arithmetic": True,
+            "slot_bound_arithmetic_executions": self.slot_bound_arithmetic_executions,
             "narratives_aligned": self.narratives_aligned,
             "narrative_abstentions": self.narrative_abstentions,
             "narrative_sentences_read": self.narrative_sentences_read,
