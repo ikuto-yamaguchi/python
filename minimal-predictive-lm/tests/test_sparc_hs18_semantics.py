@@ -22,6 +22,18 @@ def test_modifier_order_handles_purpose_nearest_noun() -> None:
     assert resolver.answer(prompt).output == "(B)"
 
 
+def test_modifier_order_does_not_intercept_clause_choices() -> None:
+    resolver = EnglishModifierOrderResolver()
+    prompt = (
+        "Sentence: Bailey planned to meet the director at their office\n"
+        "Options:\n"
+        "(A) The office was the director's office\n"
+        "(B) The office was Bailey's office\n"
+        "(C) Ambiguous"
+    )
+    assert resolver.answer(prompt).output is None
+
+
 def test_conjunctive_abnormal_action_is_a_cause() -> None:
     engine = GenericCausalJudgement()
     prompt = (
@@ -32,6 +44,16 @@ def test_conjunctive_abnormal_action_is_a_cause() -> None:
     assert engine.answer(prompt).output == "Yes"
 
 
+def test_normal_conjunct_is_not_selected_when_other_conjunct_is_abnormal() -> None:
+    engine = GenericCausalJudgement()
+    prompt = (
+        "The device fails if both the black and red switches are on. The black switch is "
+        "supposed to be on, while the red switch is not supposed to be on. Both are on and "
+        "the device fails. Did the black switch cause the failure?\nOptions:\n- Yes\n- No"
+    )
+    assert engine.answer(prompt).output == "No"
+
+
 def test_redundant_ordinary_sufficient_condition_is_not_selected() -> None:
     engine = GenericCausalJudgement()
     prompt = (
@@ -40,6 +62,16 @@ def test_redundant_ordinary_sufficient_condition_is_not_selected() -> None:
         "connecting battery B cause the lamp to light?\nOptions:\n- Yes\n- No"
     )
     assert engine.answer(prompt).output == "No"
+
+
+def test_last_question_is_used_after_quoted_question() -> None:
+    engine = GenericCausalJudgement()
+    prompt = (
+        "The technician asked, 'Did the machine fail yesterday?' The machine fails if two "
+        "users log in. Daniel was told not to log in, but Daniel and Claire logged in and it "
+        "failed. Did Daniel cause the failure?\nOptions:\n- Yes\n- No"
+    )
+    assert engine.answer(prompt).output == "Yes"
 
 
 def test_accident_blocks_intention_not_physical_causation() -> None:
