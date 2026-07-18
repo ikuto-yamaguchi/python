@@ -1,0 +1,65 @@
+name: SPARC-HS19 raw schema gate
+
+on:
+  push:
+    branches:
+      - research/sparc-hs16-university-gate
+    paths:
+      - "sparc_hs16/sparc_hs16/raw_schema.py"
+      - "sparc_hs16/run_raw_schema_pilot.py"
+      - "sparc_hs16/tests/test_raw_schema.py"
+      - ".github/workflows/sparc-hs19.yml"
+  pull_request:
+    paths:
+      - "sparc_hs16/sparc_hs16/raw_schema.py"
+      - "sparc_hs16/run_raw_schema_pilot.py"
+      - "sparc_hs16/tests/test_raw_schema.py"
+      - ".github/workflows/sparc-hs19.yml"
+  workflow_dispatch:
+
+jobs:
+  raw-schema:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sparc_hs16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run all unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Run raw-language concept and scaling pilot
+        run: python run_raw_schema_pilot.py | tee raw_schema_report.json
+      - name: Verify role induction, useful scaling and efficiency
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path("raw_schema_report.json").read_text())
+          rows = {row["budget_mb"]: row for row in report["budget_evaluations"]}
+          assert report["surface_ngram_baseline_accuracy"] < 0.70
+          assert rows[16]["overall_accuracy"] < 0.95
+          assert rows[64]["overall_accuracy"] == 1.0
+          assert rows[256]["overall_accuracy"] == 1.0
+          assert rows[64]["overall_accuracy"] > rows[16]["overall_accuracy"] + 0.20
+          assert rows[64]["managed_storage_bytes"] == 64 * 1024 * 1024
+          assert rows[256]["managed_storage_bytes"] == 256 * 1024 * 1024
+          assert rows[64]["estimated_active_storage_bytes_per_query"] < 64
+          assert rows[256]["estimated_active_storage_bytes_per_query"] < 64
+          assert rows[64]["p95_latency_ms"] < 5.0
+          assert rows[64]["learned_context_gates"] == 2
+          assert rows[64]["gate_serialized_bytes"] < 4096
+          assert report["task_specific_field_parser"] is False
+          assert report["transformer_used"] is False
+          assert report["backpropagation_used"] is False
+          assert report["actual_weak_smartphone_measurement"] is False
+          assert report["general_intelligence_discovered"] is False
+          assert report["university_exam_mastery_passed"] is False
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sparc-hs19-raw-schema-report
+          path: sparc_hs16/raw_schema_report.json
