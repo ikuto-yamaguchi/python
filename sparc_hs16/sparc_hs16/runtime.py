@@ -14,12 +14,7 @@ from .router import SparseMechanismRouter, build_bootstrap_router
 
 
 class AdaptiveSparcRuntime:
-    """Integrated sparse runtime with acquired executable mechanisms.
-
-    The runtime combines bounded dialogue state, fact memory, verified symbolic
-    mechanisms, programs induced from demonstrations, proof-producing Japanese
-    reading, exact bounded constraint solving, and a learned sparse router.
-    """
+    """Integrated sparse runtime with acquired executable mechanisms."""
 
     def __init__(
         self,
@@ -64,6 +59,7 @@ class AdaptiveSparcRuntime:
     def solve(self, text: str) -> SolveResult:
         started = time.perf_counter()
         route, route_confidence = self.router.predict(text)
+        route_note = f"route={route}:{route_confidence:.3f}"
 
         if route == "constraints" or self.ordering_solver.can_handle(text):
             constrained = self.ordering_solver.solve(text)
@@ -71,10 +67,10 @@ class AdaptiveSparcRuntime:
                 elapsed = (time.perf_counter() - started) * 1000
                 return SolveResult(
                     answer=constrained.answer,
-                    mechanism=(
-                        f"learned-route:{route}:{route_confidence:.3f};"
-                        "exact-ordering-constraints:" + "|".join(constrained.proof)
-                    ),
+                    mechanism="exact-ordering-constraints:"
+                    + "|".join(constrained.proof)
+                    + ";"
+                    + route_note,
                     confidence=1.0,
                     elapsed_ms=elapsed,
                 )
@@ -85,10 +81,10 @@ class AdaptiveSparcRuntime:
                 elapsed = (time.perf_counter() - started) * 1000
                 return SolveResult(
                     answer=reading.answer,
-                    mechanism=(
-                        f"learned-route:{route}:{route_confidence:.3f};"
-                        "proof-japanese-reading:" + "|".join(reading.proof)
-                    ),
+                    mechanism="proof-japanese-reading:"
+                    + "|".join(reading.proof)
+                    + ";"
+                    + route_note,
                     confidence=reading.confidence,
                     elapsed_ms=elapsed,
                 )
@@ -100,10 +96,7 @@ class AdaptiveSparcRuntime:
                 elapsed = (time.perf_counter() - started) * 1000
                 return SolveResult(
                     answer=f"{value}です。",
-                    mechanism=(
-                        f"learned-route:{route}:{route_confidence:.3f};"
-                        f"induced-program:{program.expression}"
-                    ),
+                    mechanism=f"induced-program:{program.expression};{route_note}",
                     confidence=min(1.0, 0.7 + program_route_score),
                     elapsed_ms=elapsed,
                 )
