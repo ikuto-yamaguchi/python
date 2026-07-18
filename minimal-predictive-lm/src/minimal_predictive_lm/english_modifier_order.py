@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import dataclass
 import re
 
@@ -14,11 +15,10 @@ class ModifierOrderPrediction:
 class EnglishModifierOrderResolver:
     """Score English prenominal modifiers by semantic distance from the noun.
 
-    The resolver does not receive a benchmark or axis name.  It recognizes two or
-    more candidate noun phrases and prefers the phrase whose modifier classes follow
-    the ordinary English ordering tendency:
-
-    evaluation, size, age, shape, colour, origin, material, purpose.
+    Eligibility is structural rather than benchmark-name based: alternatives must be
+    permutations of the same short noun phrase and share the same head noun.  This
+    prevents the resolver from consuming ordinary multiple-choice clauses such as
+    pronoun-reference questions.
     """
 
     _OPINION = frozenset(
@@ -55,6 +55,7 @@ class EnglishModifierOrderResolver:
     )
 
     _OPTION = re.compile(r"^\s*(?:\(([A-Z])\)|([A-Z])[.)])\s+(.+?)\s*$")
+    _WORD = re.compile(r"^[A-Za-z]+(?:-[A-Za-z]+)*$")
 
     @property
     def description_bits(self) -> int:
@@ -67,7 +68,7 @@ class EnglishModifierOrderResolver:
             | self._ORIGIN
             | self._MATERIAL
         )
-        return 8 * (320 + sum(len(word) + 1 for word in words))
+        return 8 * (520 + sum(len(word) + 1 for word in words))
 
     @staticmethod
     def _clean(token: str) -> str:
@@ -105,9 +106,22 @@ class EnglishModifierOrderResolver:
             if classes[left] > classes[right]
         )
         unknown = sum(value == 8 for value in classes)
-        # Unknown modifiers are not automatically wrong, but a phrase whose known
-        # modifiers are correctly ordered is preferred over one that scrambles them.
         return inversions, unknown, classes
+
+    def _eligible_phrases(self, options: list[tuple[str, str]]) -> bool:
+        if len(options) != 2:
+            return False
+        token_rows = [phrase.split() for _label, phrase in options]
+        if any(not 2 <= len(tokens) <= 9 for tokens in token_rows):
+            return False
+        if any(any(self._WORD.fullmatch(token) is None for token in tokens) for tokens in token_rows):
+            return False
+        cleaned = [[self._clean(token) for token in tokens] for tokens in token_rows]
+        if cleaned[0][-1] != cleaned[1][-1]:
+            return False
+        # A modifier-order comparison rearranges the same lexical material.  Clause
+        # choices use different words and therefore fall through to later solvers.
+        return Counter(cleaned[0]) == Counter(cleaned[1])
 
     def answer(self, prompt: str) -> ModifierOrderPrediction:
         options: list[tuple[str, str]] = []
@@ -115,11 +129,11 @@ class EnglishModifierOrderResolver:
             match = self._OPTION.match(line)
             if match:
                 options.append((match.group(1) or match.group(2), match.group(3)))
-        if len(options) < 2:
+        if not self._eligible_phrases(options):
             return ModifierOrderPrediction(None, len(prompt), len(options))
         scored = [(self._score(phrase), label) for label, phrase in options]
         scored.sort(key=lambda row: row[0])
-        if len(scored) > 1 and scored[0][0][:2] == scored[1][0][:2]:
+        if scored[0][0][:2] == scored[1][0][:2]:
             return ModifierOrderPrediction(None, len(prompt) + len(options), len(options))
         return ModifierOrderPrediction(
             f"({scored[0][1]})",
