@@ -33,6 +33,21 @@ class LongTemporalNarrativeLearnerTests(unittest.TestCase):
         learner.learn_independent_numeric_documents(numeric_corpus())
         return learner
 
+    @staticmethod
+    def fact_program():
+        return Program(
+            "P",
+            (),
+            (Edit("add_fact", "R", 0, 1),),
+            {
+                "<V0>は<V1>である",
+                "<V0>というものは<V1>に分類される",
+                "歴史上の<V0>は一つの<V1>だった",
+                "<V1>の仲間に数えられるものが<V0>だ",
+                "<V0>を分類すると<V1>に入る",
+            },
+        )
+
     def test_discovers_delayed_events_with_distractors(self):
         learner = self.make_learner()
         result = learner.learn_long_chronological_documents(long_corpus())
@@ -45,22 +60,35 @@ class LongTemporalNarrativeLearnerTests(unittest.TestCase):
         self.assertFalse(report["event_boundaries_supplied"])
 
     def test_aligns_partial_literal_boundaries_without_global_replacement(self):
-        program = Program(
-            "P",
-            (),
-            (Edit("add_fact", "R", 0, 1),),
-            {
-                "歴史上の<V0>は一つの<V1>だった",
-                "<V1>の仲間に数えられるものが<V0>だ",
-                "<V0>は<V1>である",
-            },
-        )
         bindings, score, reads = LongTemporalNarrativeLearner._schema_bind(
-            program, "歴史上の鎌倉幕府は政権の仲間に数えられる"
+            self.fact_program(), "歴史上の鎌倉幕府は政権の仲間に数えられる"
         )
         self.assertEqual(bindings, ("鎌倉幕府", "政権"))
         self.assertGreaterEqual(score, 0.76)
         self.assertGreater(reads, 0)
+
+    def test_slot_order_anchor_lattice_composes_all_unseen_boundaries(self):
+        program = self.fact_program()
+        cases = {
+            "酸素は気体に分類される": ("酸素", "気体"),
+            "歴史上の鎌倉幕府は政権の仲間に数えられる": ("鎌倉幕府", "政権"),
+            "正方形というものは図形である": ("正方形", "図形"),
+            "銅を分類すると金属だった": ("銅", "金属"),
+        }
+        for text, expected in cases.items():
+            with self.subTest(text=text):
+                bindings, score, reads = LongTemporalNarrativeLearner._schema_bind(program, text)
+                self.assertEqual(bindings, expected)
+                self.assertGreaterEqual(score, 0.80)
+                self.assertGreater(reads, 0)
+
+    def test_reversed_surface_order_keeps_semantic_roles(self):
+        program = self.fact_program()
+        bindings, score, _reads = LongTemporalNarrativeLearner._schema_bind(
+            program, "金属の仲間に数えられるものが銅だ"
+        )
+        self.assertEqual(bindings, ("銅", "金属"))
+        self.assertGreaterEqual(score, 0.80)
 
     def test_handles_interleaved_observations_by_latent_state_key(self):
         learner = self.make_learner()
