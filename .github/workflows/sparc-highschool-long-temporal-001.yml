@@ -12,10 +12,13 @@ on:
       - "minimal-predictive-lm/src/minimal_predictive_lm/sparc_highschool_narrative_alignment_gate.py"
       - "minimal-predictive-lm/src/minimal_predictive_lm/sparc_highschool_grounded_explanation.py"
       - "minimal-predictive-lm/src/minimal_predictive_lm/sparc_highschool_grounded_explanation_gate.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/sparc_highschool_causal_provenance.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/sparc_highschool_causal_provenance_gate.py"
       - "minimal-predictive-lm/tests/test_sparc_highschool_long_temporal.py"
       - "minimal-predictive-lm/tests/test_sparc_highschool_counterfactual.py"
       - "minimal-predictive-lm/tests/test_sparc_highschool_narrative_alignment.py"
       - "minimal-predictive-lm/tests/test_sparc_highschool_grounded_explanation.py"
+      - "minimal-predictive-lm/tests/test_sparc_highschool_causal_provenance.py"
       - ".github/workflows/sparc-highschool-long-temporal-001.yml"
   workflow_dispatch:
 
@@ -42,12 +45,14 @@ jobs:
           NARRATIVE_EXIT=${PIPESTATUS[0]}
           python -m unittest discover -s minimal-predictive-lm/tests -p 'test_sparc_highschool_grounded_explanation.py' -v 2>&1 | tee artifacts/sparc-highschool-long-temporal-001/tests-explanation.log
           EXPLANATION_EXIT=${PIPESTATUS[0]}
-          test "$LONG_EXIT" = "0" -a "$CF_EXIT" = "0" -a "$NARRATIVE_EXIT" = "0" -a "$EXPLANATION_EXIT" = "0"
+          python -m unittest discover -s minimal-predictive-lm/tests -p 'test_sparc_highschool_causal_provenance.py' -v 2>&1 | tee artifacts/sparc-highschool-long-temporal-001/tests-provenance.log
+          PROVENANCE_EXIT=${PIPESTATUS[0]}
+          test "$LONG_EXIT" = "0" -a "$CF_EXIT" = "0" -a "$NARRATIVE_EXIT" = "0" -a "$EXPLANATION_EXIT" = "0" -a "$PROVENANCE_EXIT" = "0"
           echo $? > artifacts/sparc-highschool-long-temporal-001/tests.exit
           exit 0
       - name: Run expanded integrated gate
         continue-on-error: true
-        run: python -m minimal_predictive_lm.sparc_highschool_grounded_explanation_gate --output-dir artifacts/sparc-highschool-long-temporal-001 2>&1 | tee artifacts/sparc-highschool-long-temporal-001/gate.log
+        run: python -m minimal_predictive_lm.sparc_highschool_causal_provenance_gate --output-dir artifacts/sparc-highschool-long-temporal-001 2>&1 | tee artifacts/sparc-highschool-long-temporal-001/gate.log
       - name: Upload results or diagnostics
         if: always()
         uses: actions/upload-artifact@v4
@@ -63,7 +68,7 @@ jobs:
           root = Path("artifacts/sparc-highschool-long-temporal-001")
           if root.joinpath("tests.exit").read_text().strip() != "0":
               raise SystemExit("integrated unit tests failed")
-          report = json.loads(root.joinpath("SPARC-highschool-general-grounded-explanation.json").read_text())
+          report = json.loads(root.joinpath("SPARC-highschool-general-causal-provenance.json").read_text())
           if not report["passed"]:
               raise SystemExit("expanded integrated gate failed")
           if not report["aggregate_improved"] or not report["no_regression"]:
