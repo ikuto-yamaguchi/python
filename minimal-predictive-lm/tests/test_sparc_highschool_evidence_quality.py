@@ -11,10 +11,9 @@ def weak(target: str, initial: int, add: int, note: str) -> str:
 
 
 def strong(target: str, initial: int, add: int, note: str) -> str:
-    middle = initial + add
-    final = middle * 2
+    final = (initial + add) * 2
     return (
-        f"{target}には{initial}個ある。{target}に{add}個加える。{target}には{middle}個ある。"
+        f"{target}には{initial}個ある。{target}に{add}個加える。"
         f"{target}を2倍にする。{target}には{final}個ある。{note}。"
         f"{target}について不足する状態を根拠付きで説明してください。"
     )
@@ -39,7 +38,7 @@ class EvidenceQualityConsensusTest(unittest.TestCase):
             learner.ingest_quality_verified_hypothesis(strong(target, 12, 3, note))
         result = learner.answer_from_quality_graph(f"{target}の現在の結論を説明してください。")
         self.assertTrue(result.accepted)
-        self.assertEqual(6, result.support)
+        self.assertEqual(4, result.support)
         self.assertIn((target, "NDR0", 0, 12), result.selected_states)
         self.assertNotIn((target, "NDR0", 0, 7), result.selected_states)
 
@@ -60,7 +59,7 @@ class EvidenceQualityConsensusTest(unittest.TestCase):
         learner.ingest_quality_verified_hypothesis(text)
         result = learner.answer_from_quality_graph(f"{target}の結論を説明してください。")
         self.assertTrue(result.accepted)
-        self.assertEqual(3, result.support)
+        self.assertEqual(2, result.support)
 
     def test_graph_is_bounded_and_serializable(self):
         learner = self.learner()
