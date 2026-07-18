@@ -12,7 +12,7 @@ concurrency:
 jobs:
   jmmlu-zero-shot-baseline:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -22,6 +22,14 @@ jobs:
         run: python -m pip install -e minimal-predictive-lm pytest
       - name: Contract and loader tests
         run: python -m pytest -q minimal-predictive-lm/tests/test_university_exam_mastery.py
+      - name: Reuse frozen mobile public-transfer artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: mobile-public-dialogue-results
+          path: /tmp/mobile-public
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ikuto-yamaguchi/python
+          run-id: 29634782012
       - name: Acquire frozen public training references
         run: |
           git clone --depth 1 https://github.com/nlp-waseda/chain-of-thought-ja-dataset.git /tmp/cot-ja
@@ -56,6 +64,8 @@ jobs:
             public_data/university_exam/jnli-train.jsonl \
             public_data/university_exam/jnli-valid.jsonl \
             /tmp/jmmlu \
+            --reference-artifact /tmp/mobile-public/mobile_public_transfer.mpmobile \
+            --reference-report /tmp/mobile-public/mobile_public_transfer.json \
             --output-dir results
       - name: Enforce honest target and resource boundaries
         working-directory: minimal-predictive-lm
@@ -71,6 +81,7 @@ jobs:
           assert row['protocol']['jmmlu_examples_used_for_configuration_selection'] == 0
           assert row['protocol']['subject_name_visible_to_model'] is False
           assert row['protocol']['exact_training_prompt_overlap'] == 0
+          assert row['protocol']['frozen_reference_artifact_used'] is True
           assert row['resources']['planned_complete_package_bytes'] <= 1_000_000_000
           assert row['university_exam_mastery_passed'] is False
           assert row['highschool_level_passed'] is False
