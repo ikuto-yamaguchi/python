@@ -23,7 +23,9 @@ class LatentStateGraphLearner(ImplicitWorldLearner):
 
     Each learned numeric event is the same sparse affine edge used by forward
     execution. Observations may anchor any node, and exact values propagate both
-    forward and backward. No task label, domain label, or phrase exception is used.
+    forward and backward. Disconnected transition components without observations
+    are ignored, while observation-only components remain fixed world context.
+    No task label, domain label, or phrase exception is used.
     """
 
     def __init__(self, **kwargs):
@@ -34,6 +36,9 @@ class LatentStateGraphLearner(ImplicitWorldLearner):
         self.latent_constraint_reads = 0
         self.latent_forward_checks = 0
         self.latent_verification_failures = 0
+        self.latent_anchored_components = 0
+        self.latent_unanchored_components_skipped = 0
+        self.latent_fixed_observation_components = 0
 
     @staticmethod
     def _forward(value: int, scale: int, offset: int) -> int:
@@ -47,6 +52,20 @@ class LatentStateGraphLearner(ImplicitWorldLearner):
         if numerator % scale:
             return None
         return numerator // scale
+
+    def _abstain(self, mechanism: str, initial: World | None = None, world: World | None = None,
+                 actions: tuple[str, ...] = ()) -> LatentStateGraphResult:
+        self.latent_graph_abstentions += 1
+        return LatentStateGraphResult(
+            False,
+            initial or World(),
+            world or World(),
+            actions,
+            (),
+            "",
+            False,
+            mechanism,
+        )
 
     def infer_latent_state_graph(self, text: str) -> LatentStateGraphResult:
         sentences = tuple(self._sentences(text))
@@ -65,28 +84,56 @@ class LatentStateGraphLearner(ImplicitWorldLearner):
                 transitions.append((index, sentence, key, scale, offset, program_id))
         self.latent_constraint_reads += len(sentences) + len(transitions) + len(observations)
 
-        keys = {key for _i, key, _v in observations} | {key for _i, _s, key, _a, _b, _p in transitions}
+        keys = {key for _i, key, _v in observations} | {
+            key for _i, _s, key, _a, _b, _p in transitions
+        }
         if not keys:
-            self.latent_graph_abstentions += 1
-            return LatentStateGraphResult(False, World(), World(), (), (), "", False, "abstain-empty-latent-state-graph")
+            return self._abstain("abstain-empty-latent-state-graph")
+
+        observations_by_key: dict[tuple[str, str], list[tuple[int, int]]] = {}
+        for index, key, value in observations:
+            observations_by_key.setdefault(key, []).append((index, value))
 
         solved_by_key: dict[tuple[str, str], list[int]] = {}
-        action_rows: list[tuple[int, str]] = []
         observed_nodes: set[tuple[tuple[str, str], int]] = set()
+        active_transition_keys: set[tuple[str, str]] = set()
+
         for key in sorted(keys):
-            edges = [row for row in transitions if row[2] == key]
-            edges.sort(key=lambda row: row[0])
-            if not edges:
+            edges = sorted(
+                (row for row in transitions if row[2] == key),
+                key=lambda row: row[0],
+            )
+            anchors = observations_by_key.get(key, [])
+
+            # A transition component with no observation has no evidential anchor.
+            # It is irrelevant to a separately anchored chain and must not force
+            # whole-document abstention.
+            if edges and not anchors:
+                self.latent_unanchored_components_skipped += 1
                 continue
-            values: list[int | None] = [None] * (len(edges) + 1)
-            for observation_index, observation_key, observed_value in observations:
-                if observation_key != key:
+
+            # Numeric context without a transition is a fixed world component.
+            # Preserve it during replay, but do not claim it as a recovered state.
+            if not edges:
+                if not anchors:
                     continue
+                distinct = {value for _index, value in anchors}
+                if len(distinct) != 1:
+                    return self._abstain("abstain-conflicting-fixed-observations")
+                value = next(iter(distinct))
+                solved_by_key[key] = [value]
+                observed_nodes.add((key, 0))
+                self.latent_fixed_observation_components += 1
+                continue
+
+            self.latent_anchored_components += 1
+            active_transition_keys.add(key)
+            values: list[int | None] = [None] * (len(edges) + 1)
+            for observation_index, observed_value in anchors:
                 node = sum(1 for edge in edges if edge[0] < observation_index)
                 current = values[node]
                 if current is not None and current != observed_value:
-                    self.latent_graph_abstentions += 1
-                    return LatentStateGraphResult(False, World(), World(), (), (), "", False, "abstain-conflicting-latent-observations")
+                    return self._abstain("abstain-conflicting-latent-observations")
                 values[node] = observed_value
                 observed_nodes.add((key, node))
 
@@ -101,42 +148,48 @@ class LatentStateGraphLearner(ImplicitWorldLearner):
                             values[edge_index + 1] = candidate
                             changed = True
                         elif right != candidate:
-                            self.latent_graph_abstentions += 1
-                            return LatentStateGraphResult(False, World(), World(), (), (), "", False, "abstain-inconsistent-latent-transition")
+                            return self._abstain("abstain-inconsistent-latent-transition")
                     elif right is not None:
                         candidate = self._backward(right, scale, offset)
                         if candidate is None:
-                            self.latent_graph_abstentions += 1
-                            return LatentStateGraphResult(False, World(), World(), (), (), "", False, "abstain-nonintegral-latent-transition")
+                            return self._abstain("abstain-nonintegral-latent-transition")
                         values[edge_index] = candidate
                         changed = True
 
             if any(value is None for value in values):
-                self.latent_graph_abstentions += 1
-                return LatentStateGraphResult(False, World(), World(), (), (), "", False, "abstain-underconstrained-latent-state-graph")
+                return self._abstain("abstain-underconstrained-anchored-latent-state-graph")
             solved_by_key[key] = [int(value) for value in values]
-            action_rows.extend((row[0], row[1]) for row in edges)
 
-        if not solved_by_key:
-            self.latent_graph_abstentions += 1
-            return LatentStateGraphResult(False, World(), World(), (), (), "", False, "abstain-no-solved-latent-chain")
+        if not active_transition_keys:
+            return self._abstain("abstain-no-solved-latent-chain")
 
-        initial = World.from_parts(numbers={key: values[0] for key, values in solved_by_key.items()})
+        initial = World.from_parts(
+            numbers={key: values[0] for key, values in solved_by_key.items()}
+        )
         world = initial
-        edge_cursor = {key: 0 for key in solved_by_key}
+        edge_cursor = {key: 0 for key in active_transition_keys}
         ordered_actions: list[str] = []
         observation_map: dict[int, list[tuple[tuple[str, str], int]]] = {}
         for index, key, value in observations:
-            observation_map.setdefault(index, []).append((key, value))
-        transition_map = {index: (sentence, key) for index, sentence, key, _a, _b, _p in transitions if key in solved_by_key}
+            if key in solved_by_key:
+                observation_map.setdefault(index, []).append((key, value))
+        transition_map = {
+            index: (sentence, key)
+            for index, sentence, key, _a, _b, _p in transitions
+            if key in active_transition_keys
+        }
 
-        for index, sentence in enumerate(sentences):
+        for index, _sentence in enumerate(sentences):
             if index in transition_map:
                 action, key = transition_map[index]
                 applied = self.apply(action, world)
                 if not applied.accepted:
-                    self.latent_graph_abstentions += 1
-                    return LatentStateGraphResult(False, initial, world, tuple(ordered_actions), (), "", False, "abstain-latent-forward-application")
+                    return self._abstain(
+                        "abstain-latent-forward-application",
+                        initial,
+                        world,
+                        tuple(ordered_actions),
+                    )
                 world = applied.world
                 ordered_actions.append(action)
                 edge_cursor[key] += 1
@@ -144,27 +197,58 @@ class LatentStateGraphLearner(ImplicitWorldLearner):
                 self.latent_forward_checks += 1
                 if world.number_map().get(key) != expected:
                     self.latent_verification_failures += 1
-                    return LatentStateGraphResult(False, initial, world, tuple(ordered_actions), (), "", False, "abstain-latent-node-verification")
+                    return self._abstain(
+                        "abstain-latent-node-verification",
+                        initial,
+                        world,
+                        tuple(ordered_actions),
+                    )
             for key, value in observation_map.get(index, ()):
                 self.latent_forward_checks += 1
                 if world.number_map().get(key) != value:
                     self.latent_verification_failures += 1
-                    return LatentStateGraphResult(False, initial, world, tuple(ordered_actions), (), "", False, "abstain-latent-observation-verification")
+                    return self._abstain(
+                        "abstain-latent-observation-verification",
+                        initial,
+                        world,
+                        tuple(ordered_actions),
+                    )
 
         recovered: list[tuple[str, str, int, int]] = []
         for (subject, relation), values in sorted(solved_by_key.items()):
+            if (subject, relation) not in active_transition_keys:
+                continue
             for node, value in enumerate(values):
                 if ((subject, relation), node) not in observed_nodes:
                     recovered.append((subject, relation, node, value))
         if not recovered:
-            self.latent_graph_abstentions += 1
-            return LatentStateGraphResult(False, initial, world, tuple(ordered_actions), (), "", False, "abstain-no-latent-state-recovered")
+            return self._abstain(
+                "abstain-no-latent-state-recovered",
+                initial,
+                world,
+                tuple(ordered_actions),
+            )
 
         self.latent_graphs_solved += 1
         self.latent_state_nodes_recovered += len(recovered)
-        summary = "、".join(f"{subject}の時点{node}は{value}" for subject, _relation, node, value in recovered)
-        answer = f"同じ世界遷移を前後から照合すると、{summary}です。全ての観測位置まで順方向に再実行し、矛盾がないことを検算しました。"
-        return LatentStateGraphResult(True, initial, world, tuple(ordered_actions), tuple(recovered), answer, True, "shared-bidirectional-latent-state-graph")
+        summary = "、".join(
+            f"{subject}の時点{node}は{value}"
+            for subject, _relation, node, value in recovered
+        )
+        answer = (
+            f"同じ世界遷移を前後から照合すると、{summary}です。"
+            "全ての観測位置まで順方向に再実行し、矛盾がないことを検算しました。"
+        )
+        return LatentStateGraphResult(
+            True,
+            initial,
+            world,
+            tuple(ordered_actions),
+            tuple(recovered),
+            answer,
+            True,
+            "shared-bidirectional-latent-state-graph",
+        )
 
     def report(self):
         result = super().report()
@@ -176,5 +260,8 @@ class LatentStateGraphLearner(ImplicitWorldLearner):
             "latent_constraint_reads": self.latent_constraint_reads,
             "latent_forward_checks": self.latent_forward_checks,
             "latent_verification_failures": self.latent_verification_failures,
+            "latent_anchored_components": self.latent_anchored_components,
+            "latent_unanchored_components_skipped": self.latent_unanchored_components_skipped,
+            "latent_fixed_observation_components": self.latent_fixed_observation_components,
         })
         return result
