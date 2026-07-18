@@ -145,6 +145,29 @@ jobs:
           assert report["gradient_backpropagation_used"] is False
           assert report["university_exam_mastery_passed"] is False
           PY
+      - name: Run SPARC-HS17 cortico-hippocampal transfer pilot
+        run: python run_brain_loop_pilot.py | tee brain_loop_report.json
+      - name: Verify brain-inspired cross-world transfer
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("brain_loop_report.json").read_text())
+          assert report["unique_hidden_combinations"] == 120
+          assert report["correct"] == 120
+          assert report["accuracy"] == 1.0
+          assert report["exact_table_unseen_baseline_accuracy"] <= 0.34
+          assert report["transfer_advantage_points"] >= 60.0
+          assert report["persistence_ok"] is True
+          assert report["delayed_reward_replay_ok"] is True
+          assert report["serialized_bytes"] < 1_000_000_000
+          assert report["same_learning_rule_all_worlds"] is True
+          assert report["task_specific_solver_inside_model"] is False
+          assert report["transformer_used"] is False
+          assert report["backpropagation_used"] is False
+          assert report["general_intelligence_discovered"] is False
+          assert report["university_exam_mastery_passed"] is False
+          PY
       - uses: actions/upload-artifact@v4
         with:
           name: sparc-hs16-reports
@@ -156,3 +179,4 @@ jobs:
             sparc_hs16/conversation_report.json
             sparc_hs16/constraint_report.json
             sparc_hs16/router_report.json
+            sparc_hs16/brain_loop_report.json
