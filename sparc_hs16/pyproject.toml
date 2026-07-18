@@ -1,0 +1,8 @@
+[project]
+name = "sparc-hs16"
+version = "0.1.0"
+description = "Non-Transformer sparse-program university-exam gate baseline"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
