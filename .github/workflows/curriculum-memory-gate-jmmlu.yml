@@ -53,11 +53,13 @@ jobs:
       - name: Train and cross-validate the subject-blind gate
         working-directory: minimal-predictive-lm
         run: |
+          set -o pipefail
           python -m minimal_predictive_lm.curriculum_gate_jmmlu_experiment \
             /tmp/mobile-public/mobile_public_transfer.mpmobile \
-            /tmp/curriculum-memory/curriculum_memory.zlib \
+            /tmp/curriculum-memory/minimal-predictive-lm/results/curriculum_memory.zlib \
             /tmp/jmmlu \
-            --output-dir results
+            --output-dir results \
+            2>&1 | tee ../curriculum-gate-experiment.log
       - name: Enforce out-of-fold improvement and resource boundaries
         working-directory: minimal-predictive-lm
         run: |
@@ -90,6 +92,7 @@ jobs:
           path: |
             minimal-predictive-lm/results/curriculum_gate_junit.xml
             minimal-predictive-lm/results/curriculum_gate_unit.log
+            curriculum-gate-experiment.log
             minimal-predictive-lm/results/curriculum_memory_gate.zlib
             minimal-predictive-lm/results/curriculum_gate_jmmlu.json
           retention-days: 30
