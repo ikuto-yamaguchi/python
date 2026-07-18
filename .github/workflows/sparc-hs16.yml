@@ -110,6 +110,24 @@ jobs:
           assert report["transformer_used"] is False
           assert report["university_exam_mastery_passed"] is False
           PY
+      - name: Run 300-case exact ordering-constraint pilot
+        run: python run_constraint_pilot.py | tee constraint_report.json
+      - name: Verify exact solutions, ambiguity and contradiction
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("constraint_report.json").read_text())
+          assert report["correct"] == 300
+          assert report["unseen_cases"] == 300
+          assert report["accuracy"] == 1.0
+          assert report["contradiction_detected"] is True
+          assert report["ambiguity_detected"] is True
+          assert report["proof_attached"] is True
+          assert report["adaptive_runtime_bytes"] < 20_000
+          assert report["transformer_used"] is False
+          assert report["university_exam_mastery_passed"] is False
+          PY
       - uses: actions/upload-artifact@v4
         with:
           name: sparc-hs16-reports
@@ -119,3 +137,4 @@ jobs:
             sparc_hs16/adaptive_report.json
             sparc_hs16/reading_report.json
             sparc_hs16/conversation_report.json
+            sparc_hs16/constraint_report.json
