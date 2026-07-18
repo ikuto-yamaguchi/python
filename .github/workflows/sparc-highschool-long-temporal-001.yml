@@ -18,6 +18,8 @@ on:
       - "minimal-predictive-lm/src/minimal_predictive_lm/sparc_highschool_intervention_lattice_gate.py"
       - "minimal-predictive-lm/src/minimal_predictive_lm/sparc_highschool_implicit_world.py"
       - "minimal-predictive-lm/src/minimal_predictive_lm/sparc_highschool_implicit_world_gate.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/sparc_highschool_latent_state_graph.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/sparc_highschool_latent_state_graph_gate.py"
       - "minimal-predictive-lm/tests/test_sparc_highschool_long_temporal.py"
       - "minimal-predictive-lm/tests/test_sparc_highschool_counterfactual.py"
       - "minimal-predictive-lm/tests/test_sparc_highschool_narrative_alignment.py"
@@ -25,6 +27,7 @@ on:
       - "minimal-predictive-lm/tests/test_sparc_highschool_causal_provenance.py"
       - "minimal-predictive-lm/tests/test_sparc_highschool_intervention_lattice.py"
       - "minimal-predictive-lm/tests/test_sparc_highschool_implicit_world.py"
+      - "minimal-predictive-lm/tests/test_sparc_highschool_latent_state_graph.py"
       - ".github/workflows/sparc-highschool-long-temporal-001.yml"
   workflow_dispatch:
 
@@ -57,12 +60,14 @@ jobs:
           LATTICE_EXIT=${PIPESTATUS[0]}
           python -m unittest discover -s minimal-predictive-lm/tests -p 'test_sparc_highschool_implicit_world.py' -v 2>&1 | tee artifacts/sparc-highschool-long-temporal-001/tests-implicit-world.log
           IMPLICIT_EXIT=${PIPESTATUS[0]}
-          test "$LONG_EXIT" = "0" -a "$CF_EXIT" = "0" -a "$NARRATIVE_EXIT" = "0" -a "$EXPLANATION_EXIT" = "0" -a "$PROVENANCE_EXIT" = "0" -a "$LATTICE_EXIT" = "0" -a "$IMPLICIT_EXIT" = "0"
+          python -m unittest discover -s minimal-predictive-lm/tests -p 'test_sparc_highschool_latent_state_graph.py' -v 2>&1 | tee artifacts/sparc-highschool-long-temporal-001/tests-latent-state-graph.log
+          LATENT_EXIT=${PIPESTATUS[0]}
+          test "$LONG_EXIT" = "0" -a "$CF_EXIT" = "0" -a "$NARRATIVE_EXIT" = "0" -a "$EXPLANATION_EXIT" = "0" -a "$PROVENANCE_EXIT" = "0" -a "$LATTICE_EXIT" = "0" -a "$IMPLICIT_EXIT" = "0" -a "$LATENT_EXIT" = "0"
           echo $? > artifacts/sparc-highschool-long-temporal-001/tests.exit
           exit 0
       - name: Run expanded integrated gate
         continue-on-error: true
-        run: python -m minimal_predictive_lm.sparc_highschool_implicit_world_gate --output-dir artifacts/sparc-highschool-long-temporal-001 2>&1 | tee artifacts/sparc-highschool-long-temporal-001/gate.log
+        run: python -m minimal_predictive_lm.sparc_highschool_latent_state_graph_gate --output-dir artifacts/sparc-highschool-long-temporal-001 2>&1 | tee artifacts/sparc-highschool-long-temporal-001/gate.log
       - name: Upload results or diagnostics
         if: always()
         uses: actions/upload-artifact@v4
@@ -78,7 +83,7 @@ jobs:
           root = Path("artifacts/sparc-highschool-long-temporal-001")
           if root.joinpath("tests.exit").read_text().strip() != "0":
               raise SystemExit("integrated unit tests failed")
-          report = json.loads(root.joinpath("SPARC-highschool-general-implicit-world.json").read_text())
+          report = json.loads(root.joinpath("SPARC-highschool-general-latent-state-graph.json").read_text())
           if not report["passed"]:
               raise SystemExit("expanded integrated gate failed")
           if not report["aggregate_improved"] or not report["no_regression"]:
