@@ -13,37 +13,38 @@ from .mobile_sparse_core import MAX_MODEL_PACKAGE_BYTES, MOBILE_1GB_PROFILE
 
 CAPABILITY_ID = "SPARC-HS18-CAUSAL-MODIFIER-INTEGRATION"
 CAUSAL_BLOB_SHA1 = "7b6f3590a0c191244e5704e18d691d46268ac923"
-FINAL_START = 120
 FINAL_COUNT = 40
 
 
-def build_final_causal_holdout() -> object:
+def build_final_causal_holdout() -> tuple[object, int]:
     payload = base.download_verified_git_blob(
         f"{base.BBH_BASE_URL}/causal_judgement.json", CAUSAL_BLOB_SHA1
     )
     rows = json.loads(payload.decode("utf-8")).get("examples")
-    if not isinstance(rows, list) or len(rows) < FINAL_START + FINAL_COUNT:
+    if not isinstance(rows, list) or len(rows) < 160:
         raise ValueError("causal source is unexpectedly small")
+    start = len(rows) - FINAL_COUNT
+    if start < 160:
+        raise ValueError("causal tail overlaps the inspected development region")
     examples = tuple(
         BenchmarkExample(
-            f"bbh_causal_final_{index:03d}",
+            f"bbh_causal_tail_{index:03d}",
             "causal_judgement_final_holdout",
             str(item["input"]),
             str(item["target"]),
             "exact",
         )
-        for index, item in enumerate(
-            rows[FINAL_START : FINAL_START + FINAL_COUNT], start=FINAL_START
-        )
+        for index, item in enumerate(rows[start:], start=start)
     )
-    return build_manifest(
-        name="sparc-hs18-causal-final-holdout",
-        split=f"verified-{FINAL_START}-{FINAL_START + FINAL_COUNT - 1}",
+    manifest = build_manifest(
+        name="sparc-hs18-causal-uninspected-tail",
+        split=f"verified-tail-{start}-{len(rows)-1}",
         source="https://github.com/suzgunmirac/BIG-Bench-Hard/tree/main/bbh",
         license_id="MIT",
         public=True,
         examples=examples,
     )
+    return manifest, start
 
 
 def run_gate() -> dict[str, object]:
@@ -56,7 +57,7 @@ def run_gate() -> dict[str, object]:
 
     manifest = base.build_integrated_manifest()
     blind = base.axis_blind_manifest(manifest)
-    final_holdout = build_final_causal_holdout()
+    final_holdout, final_start = build_final_causal_holdout()
     final_blind = base.axis_blind_manifest(final_holdout)
     policy = base._policy()
     baseline_report = base.run_command_adapter(
@@ -69,15 +70,15 @@ def run_gate() -> dict[str, object]:
     report = base.run_command_adapter(
         blind,
         policy,
-        model_id="sparc-hs18-generic-causal-modifier-worker",
-        command=(sys.executable, "-m", "minimal_predictive_lm.sparc_hs18_worker"),
+        model_id="sparc-hs18-v2-generic-causal-modifier-worker",
+        command=(sys.executable, "-m", "minimal_predictive_lm.sparc_hs18_worker_v2"),
         timeout_seconds=900.0,
     )
     final_report = base.run_command_adapter(
         final_blind,
         policy,
-        model_id="sparc-hs18-frozen-causal-final",
-        command=(sys.executable, "-m", "minimal_predictive_lm.sparc_hs18_worker"),
+        model_id="sparc-hs18-v2-frozen-causal-tail",
+        command=(sys.executable, "-m", "minimal_predictive_lm.sparc_hs18_worker_v2"),
         timeout_seconds=300.0,
     )
     baseline_score = base.score_axis_blind_predictions(manifest, baseline_report.predictions)
@@ -116,9 +117,9 @@ def run_gate() -> dict[str, object]:
             "examples": len(manifest.examples),
             "axes": len(axes),
             "axis_visible_to_worker": False,
-            "worker": "minimal_predictive_lm.sparc_hs18_worker",
-            "development_public_causal_targets_inspected": 40,
-            "final_causal_start": FINAL_START,
+            "worker": "minimal_predictive_lm.sparc_hs18_worker_v2",
+            "development_public_causal_targets_inspected": 80,
+            "final_causal_start": final_start,
             "final_causal_count": FINAL_COUNT,
             "final_targets_inspected_before_freeze": 0,
             "final_targets_used_for_training": 0,
@@ -146,9 +147,10 @@ def run_gate() -> dict[str, object]:
         "mobile_device_gate_passed": False,
         "highschool_level_passed": False,
         "claim_boundary": (
-            "The first causal slice is a disclosed development set. A separate frozen "
-            "120-159 causal slice tests transfer. Even a passing result does not establish "
-            "broad Japanese high-school intelligence or weak-phone device speed."
+            "Causal examples 0-39 and the former 120-159 diagnostic slice are disclosed "
+            "development evidence. The last 40 source examples were frozen before their "
+            "targets were inspected. Passing still would not establish broad Japanese "
+            "high-school intelligence or weak-phone device speed."
         ),
     }
 
@@ -165,7 +167,7 @@ def render_markdown(result: dict[str, object]) -> str:
             f"- Integrated: **{score['correct']}/{score['examples']} ({100 * score['overall_accuracy']:.2f}%)**",
             f"- Adjective order: **{axes['adjective_order']['correct']}/40**",
             f"- Development causal: **{axes['causal_judgement']['correct']}/40**",
-            f"- Frozen causal 120-159: **{final['correct']}/40**",
+            f"- Frozen causal tail: **{final['correct']}/40**",
             f"- Gain over HS17: **+{result['gain_correct']}**",
             f"- Planned mobile package: **{result['resources']['planned_complete_mobile_package_bytes']} bytes**",
             "",
