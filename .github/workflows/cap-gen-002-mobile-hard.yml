@@ -1,0 +1,59 @@
+name: cap-gen-002-mobile-hard
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+  workflow_dispatch:
+
+jobs:
+  mobile-hard-cap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Python tests
+        run: >-
+          python -m pytest -q
+          minimal-predictive-lm/tests/test_mobile_sparse_core.py
+      - name: Run mobile hard gate
+        working-directory: minimal-predictive-lm
+        run: python -m minimal_predictive_lm.mobile_hard_gate
+      - name: Compile allocation-free C99 kernel
+        run: >-
+          cc -O3 -std=c11 -Wall -Wextra -Werror
+          -DMPM_MOBILE_KERNEL_TEST_MAIN
+          minimal-predictive-lm/native/mobile_sparse_kernel.c
+          -o /tmp/mobile_sparse_kernel_test
+      - name: Execute native kernel test
+        run: /tmp/mobile_sparse_kernel_test
+      - name: Enforce absolute constraints and honest claims
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          row = json.loads(Path("results/cap_gen_002_mobile_hard.json").read_text())
+          static = row["static_profile"]
+          assert row["mechanism_passed"] is True
+          assert static["package_bytes"] <= 1_000_000_000
+          assert static["active_weight_bytes_per_step"] <= 4_000_000
+          assert static["macs_per_byte_step"] <= 2_000_000
+          assert row["mobile_device_gate_passed"] is False
+          assert row["highschool_level_passed"] is False
+          PY
+      - name: Exercise chat shell
+        run: mpm-mobile-chat --once 'モデルサイズの上限は？'
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: cap-gen-002-mobile-hard-results
+          path: |
+            minimal-predictive-lm/results/cap_gen_002_mobile_hard.json
+            minimal-predictive-lm/results/cap_gen_002_mobile_hard.md
+          retention-days: 14

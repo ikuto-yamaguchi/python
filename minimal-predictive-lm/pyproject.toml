@@ -93,6 +93,8 @@ sparc-hs13-chat = "minimal_predictive_lm.sparc_hs13_cli:main"
 sparc-hs13-exp = "minimal_predictive_lm.sparc_hs13_experiment:main"
 sparc-hs15-chat = "minimal_predictive_lm.sparc_hs15_cli:main"
 sparc-hs15-exp = "minimal_predictive_lm.sparc_hs15_experiment:main"
+mpm-mobile-chat = "minimal_predictive_lm.mobile_chat_cli:main"
+mpm-mobile-gate = "minimal_predictive_lm.mobile_hard_gate:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
