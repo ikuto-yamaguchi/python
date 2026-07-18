@@ -1,0 +1,47 @@
+name: SPARC-HS16 strict gate
+
+on:
+  push:
+    branches:
+      - research/sparc-hs16-university-gate
+    paths:
+      - "sparc_hs16/**"
+      - ".github/workflows/sparc-hs16.yml"
+  pull_request:
+    paths:
+      - "sparc_hs16/**"
+      - ".github/workflows/sparc-hs16.yml"
+  workflow_dispatch:
+
+jobs:
+  pilot:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sparc_hs16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Run 404-case pilot
+        run: python run_pilot.py | tee pilot_report.json
+      - name: Verify truthful gate state
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("pilot_report.json").read_text())
+          assert report["correct"] == 404
+          assert report["total"] == 404
+          assert report["artifact_bytes"] <= 1_000_000_000
+          assert report["mobile_device_gate_passed"] is True
+          assert report["university_exam_mastery_passed"] is False
+          assert report["highschool_level_passed"] is False
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sparc-hs16-pilot-report
+          path: sparc_hs16/pilot_report.json
