@@ -32,8 +32,16 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
     max_entity_reads = 0
     examples = []
     for index in range(20):
-        asked = f"質問対象{index}"
-        distractor = f"別対象{index}"
+        base = f"質問対象{index}"
+        # Exercise both directions of overlapping induced names without a
+        # name-specific exception: sometimes the requested entity is longer,
+        # sometimes the distractor is longer.
+        if index % 2:
+            asked = f"{base}0"
+            distractor = base
+        else:
+            asked = base
+            distractor = f"{base}0"
         asked_initial = 8 + index
         asked_add = 2 + index % 3
         asked_middle = asked_initial + asked_add
@@ -60,7 +68,7 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
             and all(subject == asked for subject, _node, _value in selected)
             and result.mechanism == "shared-question-grounded-world-graph"
             and "検算" in result.answer
-            and distractor not in result.answer
+            and f"{distractor}について" not in result.answer
             and reads <= 4
         )
         correct += int(passed)
@@ -80,7 +88,15 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
     model = learner.report()
     peak_rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024
     wall_seconds = time.perf_counter() - started
-    estimated_ops = previous["estimated_sparse_operations"] + max_feature_reads * 20 + learner.question_entity_reads + learner.question_selected_states
+    estimated_ops = (
+        previous["estimated_sparse_operations"]
+        + max_feature_reads * 20
+        + learner.question_entity_reads
+        + learner.question_selected_states
+        + learner.latent_constraint_reads
+        + learner.latent_forward_checks
+        + learner.latent_state_nodes_recovered
+    )
     no_regression = all(axes[name]["correct"] >= row["correct"] and axes[name]["total"] == row["total"] for name, row in previous["axes"].items())
     improved = total_correct / total > baseline_correct / baseline_total and percentages[axis_name] > 0 and no_regression
     efficient = model["serialized_bytes"] <= 131072 and peak_rss <= 536870912 and wall_seconds <= 20.0 and max_candidates <= 16 and max_entity_reads <= 4
@@ -110,7 +126,7 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
         "structural_integration_passed": improved and efficient,
         "highschool_level_passed": False,
         "passed": improved and efficient,
-        "claim_boundary": "The shared learner now grounds an unlabeled Japanese question to exactly one evidence-supported world component and returns only verified latent states. Evaluation remains controlled synthetic Japanese; real textbooks and natural open dialogue remain unproven.",
+        "claim_boundary": "The shared learner now grounds an unlabeled Japanese question to exactly one evidence-supported world component using maximal induced entity spans and returns only verified latent states. Evaluation remains controlled synthetic Japanese; real textbooks and natural open dialogue remain unproven.",
     }
     (output / "SPARC-highschool-general-question-grounding.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     (output / "SPARC-highschool-general-question-grounding.model.zlib").write_bytes(learner.to_bytes())
