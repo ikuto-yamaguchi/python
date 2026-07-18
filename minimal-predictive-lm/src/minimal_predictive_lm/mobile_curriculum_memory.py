@@ -62,6 +62,64 @@ def _unit(values: Sequence[float]) -> list[float]:
     return [(value - mean) / scale for value in values]
 
 
+def _occurrences(text: str, needle: str) -> tuple[int, ...]:
+    if not needle:
+        return ()
+    return tuple(
+        index
+        for index in range(max(0, len(text) - len(needle) + 1))
+        if text.startswith(needle, index)
+    )
+
+
+def _relation_proximity(stem: str, option: str, document: str) -> float:
+    """Measure whether an option occurs near the relation expressed by a question.
+
+    This is learned-task agnostic: relation cues are the longest character spans
+    shared by the question and the retrieved document, not a hand-written list of
+    benchmark verbs. It distinguishes, for example, an input material from a
+    nearby emitted product when both names occur in the same science paragraph.
+    """
+
+    normalized_stem = _normalize(stem)
+    normalized_option = _normalize(option)
+    normalized_document = _normalize(document)
+    option_positions = _occurrences(normalized_document, normalized_option)
+    if not option_positions:
+        return 0.0
+
+    candidates: set[str] = set()
+    for width in range(6, 1, -1):
+        for index in range(max(0, len(normalized_stem) - width + 1)):
+            cue = normalized_stem[index : index + width]
+            if cue in normalized_option or cue not in normalized_document:
+                continue
+            candidates.add(cue)
+    selected: list[str] = []
+    for cue in sorted(candidates, key=lambda value: (-len(value), value)):
+        if any(cue in stronger for stronger in selected):
+            continue
+        selected.append(cue)
+        if len(selected) >= 12:
+            break
+
+    score = 0.0
+    for cue in selected:
+        cue_positions = _occurrences(normalized_document, cue)
+        if not cue_positions:
+            continue
+        distance = min(
+            abs(
+                (option_position + len(normalized_option) / 2.0)
+                - (cue_position + len(cue) / 2.0)
+            )
+            for option_position in option_positions
+            for cue_position in cue_positions
+        )
+        score += len(cue) ** 2 / (1.0 + distance)
+    return score
+
+
 class QuantizedCurriculumMemory:
     """Sparse offline knowledge memory for weak-phone retrieval.
 
@@ -205,7 +263,10 @@ class QuantizedCurriculumMemory:
                     retrieval_score + 0.08 * support + 20.0 * coverage
                 )
                 if normalized_option and normalized_option in self.snippets[doc_id]:
-                    score += 80.0 * rank_weight
+                    score += 60.0 * rank_weight
+                score += 120.0 * rank_weight * _relation_proximity(
+                    stem, option, self.snippets[doc_id]
+                )
             raw_scores.append(score)
         normalized = _unit(raw_scores)
         index = max(range(len(options)), key=lambda item: normalized[item]) if options else 0
@@ -233,6 +294,7 @@ class QuantizedCurriculumMemory:
             "estimated_active_bytes": self.max_active_postings * 8,
             "paged_sparse": True,
             "document_local_support": True,
+            "local_relation_scoring": True,
         }
 
     def to_bytes(self) -> bytes:
