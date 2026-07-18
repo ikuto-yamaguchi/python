@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 from collections import defaultdict
 import csv
-from dataclasses import asdict
 import hashlib
 import json
 from pathlib import Path
@@ -15,6 +14,7 @@ from .cic_choice_data import ChoiceExample, load_choice_dataset
 from .cic_choice_model import choice_accuracy
 from .cic_multidomain_train import train_multidomain
 from .mobile_sparse_core import MAX_MODEL_PACKAGE_BYTES, MOBILE_1GB_PROFILE
+from .mobile_unified_artifact import MobileUnifiedArtifact
 from .university_exam_mastery_contract import UniversityExamMasteryContract
 
 
@@ -99,16 +99,47 @@ def run_baseline(
     jnli_test_path: str | Path,
     jmmlu_root: str | Path,
     *,
+    reference_artifact: str | Path | None = None,
+    reference_report: str | Path | None = None,
     output_dir: str | Path = "results",
 ) -> dict[str, object]:
     started = time.perf_counter()
-    trained = train_multidomain(
-        mawps_path,
-        commonsense_train_path,
-        commonsense_test_path,
-        jnli_train_path,
-        jnli_test_path,
-    )
+    if reference_artifact is None:
+        trained = train_multidomain(
+            mawps_path,
+            commonsense_train_path,
+            commonsense_test_path,
+            jnli_train_path,
+            jnli_test_path,
+        )
+        reasoning = trained.artifact
+        planned_package = (
+            MOBILE_1GB_PROFILE.package_bytes() + len(reasoning.to_bytes()) + 128 * 1024
+        )
+        training_reference: dict[str, object] = {
+            "source": "trained_in_this_run",
+            "selected_config": trained.selected_config,
+            "jcommonsenseqa_correct": trained.commonsense_correct,
+            "jcommonsenseqa_total": trained.commonsense_test_rows,
+            "jnli_correct": trained.jnli_correct,
+            "jnli_total": trained.jnli_test_rows,
+            "mawps_correct": trained.math_correct,
+            "mawps_total": trained.math_total,
+        }
+    else:
+        unified = MobileUnifiedArtifact.load(reference_artifact)
+        reasoning = unified.reasoning
+        planned_package = unified.planned_complete_package_bytes()
+        training_reference = {
+            "source": "frozen_mobile_public_transfer_artifact",
+            "artifact_path": str(reference_artifact),
+            "artifact_metadata": unified.metadata,
+        }
+        if reference_report is not None:
+            training_reference["frozen_report"] = json.loads(
+                Path(reference_report).read_text(encoding="utf-8")
+            )
+
     subjects = load_jmmlu(jmmlu_root)
     training_rows = (
         load_choice_dataset(commonsense_train_path)
@@ -124,9 +155,12 @@ def run_baseline(
     high_school_correct = 0
     high_school_items = 0
     for subject, rows in sorted(subjects.items()):
-        correct, total, work = choice_accuracy(trained.artifact.choice, rows)
+        correct, total, work = choice_accuracy(reasoning.choice, rows)
         accuracy = correct / total if total else 0.0
-        is_high_school = subject.startswith(HIGH_SCHOOL_SUBJECT_PREFIXES) or subject in HIGH_SCHOOL_SUBJECTS
+        is_high_school = (
+            subject.startswith(HIGH_SCHOOL_SUBJECT_PREFIXES)
+            or subject in HIGH_SCHOOL_SUBJECTS
+        )
         subject_scores[subject] = {
             "correct": correct,
             "total": total,
@@ -151,8 +185,7 @@ def run_baseline(
         ),
         key=lambda item: (item[1], item[0]),
     )[:10]
-    artifact_bytes = len(trained.artifact.to_bytes())
-    planned_package = MOBILE_1GB_PROFILE.package_bytes() + artifact_bytes + 128 * 1024
+    artifact_bytes = len(reasoning.to_bytes())
     contract = UniversityExamMasteryContract.evaluate({})
     checks = {
         "jmmlu_56_subjects_present": len(subject_scores) == 56,
@@ -179,6 +212,7 @@ def run_baseline(
             "jmmlu_examples_used_for_configuration_selection": 0,
             "subject_name_visible_to_model": False,
             "exact_training_prompt_overlap": exact_overlap,
+            "frozen_reference_artifact_used": reference_artifact is not None,
         },
         "overall": {
             "correct": total_correct,
@@ -200,15 +234,7 @@ def run_baseline(
             }
             for subject, accuracy, correct, total in weakest
         ],
-        "training_reference": {
-            "selected_config": trained.selected_config,
-            "jcommonsenseqa_correct": trained.commonsense_correct,
-            "jcommonsenseqa_total": trained.commonsense_test_rows,
-            "jnli_correct": trained.jnli_correct,
-            "jnli_total": trained.jnli_test_rows,
-            "mawps_correct": trained.math_correct,
-            "mawps_total": trained.math_total,
-        },
+        "training_reference": training_reference,
         "resources": {
             "recurrent_profile_bytes": MOBILE_1GB_PROFILE.package_bytes(),
             "reasoning_artifact_bytes": artifact_bytes,
@@ -249,6 +275,8 @@ def main() -> None:
     parser.add_argument("jnli_train")
     parser.add_argument("jnli_test")
     parser.add_argument("jmmlu_root")
+    parser.add_argument("--reference-artifact")
+    parser.add_argument("--reference-report")
     parser.add_argument("--output-dir", default="results")
     args = parser.parse_args()
     print(
@@ -260,6 +288,8 @@ def main() -> None:
                 args.jnli_train,
                 args.jnli_test,
                 args.jmmlu_root,
+                reference_artifact=args.reference_artifact,
+                reference_report=args.reference_report,
                 output_dir=args.output_dir,
             ),
             ensure_ascii=False,
