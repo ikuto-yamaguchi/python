@@ -25,6 +25,7 @@ class InterventionLatticeLearnerTest(unittest.TestCase):
             "別の進め方では分析箱を3倍にする。"
             "どの操作が結果へ寄与し、互いにどう作用したか説明せよ。"
         )
+        branch_rollouts_before = learner.branch_rollouts
         result = learner.explain_interaction_narrative(text)
         self.assertTrue(result.accepted)
         self.assertTrue(result.verified)
@@ -35,6 +36,7 @@ class InterventionLatticeLearnerTest(unittest.TestCase):
         self.assertEqual("shared-sparse-prefix-intervention-lattice", result.mechanism)
         self.assertEqual(7, learner.intervention_transition_expansions)
         self.assertEqual(0, learner.intervention_rollouts)
+        self.assertEqual(branch_rollouts_before, learner.branch_rollouts)
 
     def test_abstains_without_verified_shared_world_alignment(self):
         learner = self.learner()
