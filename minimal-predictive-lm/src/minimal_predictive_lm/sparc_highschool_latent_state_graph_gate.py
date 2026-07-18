@@ -13,6 +13,15 @@ from .sparc_highschool_long_temporal_gate import _long_corpus
 from .sparc_highschool_numeric_stream_gate import _numeric_corpus
 
 
+def _subject_value(world, subject: str) -> int | None:
+    rows = [
+        value
+        for (row_subject, _relation), value in world.number_map().items()
+        if row_subject == subject
+    ]
+    return rows[0] if len(rows) == 1 else None
+
+
 def run_gate(output_dir: str | Path) -> dict[str, object]:
     output = Path(output_dir)
     output.mkdir(parents=True, exist_ok=True)
@@ -77,9 +86,9 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
             and expected.issubset(recovered)
             and result.mechanism == "shared-bidirectional-latent-state-graph"
             and "検算" in result.answer
-            and result.initial_world.number_map().get((fixed, "count")) == fixed_value
-            and result.final_world.number_map().get((fixed, "count")) == fixed_value
-            and (unrelated, "count") not in result.initial_world.number_map()
+            and _subject_value(result.initial_world, fixed) == fixed_value
+            and _subject_value(result.final_world, fixed) == fixed_value
+            and _subject_value(result.initial_world, unrelated) is None
             and skipped == 1
             and fixed_components == 1
             and reads <= 42
