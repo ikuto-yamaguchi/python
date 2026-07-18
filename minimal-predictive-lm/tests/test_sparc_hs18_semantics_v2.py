@@ -1,8 +1,8 @@
-from minimal_predictive_lm.generic_causal_judgement_v2 import GenericCausalJudgementV2
+from minimal_predictive_lm.generic_causal_judgement_v3 import GenericCausalJudgementV3
 
 
 def test_intentional_harm_differs_from_unwanted_benefit() -> None:
-    engine = GenericCausalJudgementV2()
+    engine = GenericCausalJudgementV3()
     harm = (
         "The manager knows the project will harm the river. He does not care and decides "
         "to start it. The river is harmed. Did the manager intentionally harm the river?\n"
@@ -18,7 +18,7 @@ def test_intentional_harm_differs_from_unwanted_benefit() -> None:
 
 
 def test_late_second_contributor_is_selected() -> None:
-    engine = GenericCausalJudgementV2()
+    engine = GenericCausalJudgementV3()
     prompt = (
         "If two users are logged in, an email is sent. Alice logs in at 9:00. Zoe logs in "
         "at 9:30 when Alice is already logged in. Immediately an email is sent. Did Zoe "
@@ -28,7 +28,7 @@ def test_late_second_contributor_is_selected() -> None:
 
 
 def test_probability_changes_normal_causal_selection() -> None:
-    engine = GenericCausalJudgementV2()
+    engine = GenericCausalJudgementV3()
     unlikely = (
         "Joe wins iff he draws green from the first box and blue from the second. It is "
         "unlikely that he gets green from the first box. He draws both and wins. Did Joe's "
@@ -40,7 +40,7 @@ def test_probability_changes_normal_causal_selection() -> None:
 
 
 def test_normal_and_abnormal_fertilizers_are_distinguished() -> None:
-    engine = GenericCausalJudgementV2()
+    engine = GenericCausalJudgementV3()
     story = (
         "Plants dry if both chemical A and chemical B are applied. Alex followed the "
         "instructions and used only A. Benni used B instead even though the instruction "
