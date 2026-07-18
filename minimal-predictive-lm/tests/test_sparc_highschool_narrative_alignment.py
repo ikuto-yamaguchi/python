@@ -26,6 +26,15 @@ class NarrativeAlignmentTests(unittest.TestCase):
         self.assertEqual(26, next(iter(result.comparison.factual.world.number_map().values())))
         self.assertEqual(30, next(iter(result.comparison.counterfactual.world.number_map().values())))
 
+    def test_embedded_replacement_is_selected_by_world_consistency(self):
+        learner = self.learner()
+        result = learner.infer_counterfactual_narrative(
+            "青箱には10個ある。青箱に3個加える。青箱を2倍にする。青箱には26個ある。別の案として青箱に5個加える。"
+        )
+        self.assertTrue(result.accepted)
+        self.assertEqual(("青箱に5個加える",), result.replacement_actions)
+        self.assertEqual(30, next(iter(result.comparison.counterfactual.world.number_map().values())))
+
     def test_abstains_when_two_replacements_are_equally_supported(self):
         learner = self.learner()
         result = learner.infer_counterfactual_narrative(
