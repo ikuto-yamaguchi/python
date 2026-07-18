@@ -28,15 +28,7 @@ class _Path:
 
 
 class NarrativeAlignedLearner(CounterfactualNarrativeLearner):
-    """Jointly align observations, events and alternatives in one narrative.
-
-    No task name, relation name, intervention index or pre-separated action list is
-    supplied.  All sentence decisions share the same latent program bank and world
-    executor.  Instead of greedily accepting each locally executable sentence, a
-    sparse sequence lattice keeps only complete paths whose accumulated transition
-    exactly explains a later observation.  The same lattice then constrains the
-    alternative event and immutable counterfactual branch.
-    """
+    """Jointly align observations, events and alternatives in one narrative."""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -47,6 +39,10 @@ class NarrativeAlignedLearner(CounterfactualNarrativeLearner):
         self.embedded_clauses_recovered = 0
         self.sequence_states_expanded = 0
         self.sequence_paths_pruned = 0
+        self.endpoint_pairs_considered = 0
+        self.complete_paths_found = 0
+        self.replacement_options_found = 0
+        self.complete_alignments_found = 0
 
     @staticmethod
     def _single_number(world: World):
@@ -64,13 +60,6 @@ class NarrativeAlignedLearner(CounterfactualNarrativeLearner):
         return rows[0][1].program_id
 
     def _executable_candidates(self, sentence: str, world: World) -> tuple[tuple[str, str, World], ...]:
-        """Return semantically distinct executable suffixes for one sentence.
-
-        Discourse framing is not recognized by a phrase table.  Every suffix is
-        proposed by the shared program ranker and validated by the shared executor.
-        Candidates producing the same program and successor world are equivalent;
-        the longest surface realization is retained.
-        """
         equivalent: dict[tuple[str, World], tuple[int, str, str, World]] = {}
         for start in range(len(sentence)):
             clause = sentence[start:]
@@ -96,7 +85,6 @@ class NarrativeAlignedLearner(CounterfactualNarrativeLearner):
         *,
         max_paths_per_world: int = 2,
     ) -> tuple[_Path, ...]:
-        """Solve sentence selection and state evolution as one sparse lattice."""
         frontier: dict[World, list[_Path]] = {start_world: [_Path(start_world, (), (), 0)]}
         for sentence in sentences:
             next_frontier: dict[World, list[_Path]] = {}
@@ -105,14 +93,7 @@ class NarrativeAlignedLearner(CounterfactualNarrativeLearner):
                     self.sequence_states_expanded += 1
                     choices = [_Path(path.world, path.actions, path.programs, path.ignored + 1)]
                     for clause, pid, successor in self._executable_candidates(sentence, path.world):
-                        choices.append(
-                            _Path(
-                                successor,
-                                path.actions + (clause,),
-                                path.programs + (pid,),
-                                path.ignored,
-                            )
-                        )
+                        choices.append(_Path(successor, path.actions + (clause,), path.programs + (pid,), path.ignored))
                     for choice in choices:
                         bucket = next_frontier.setdefault(choice.world, [])
                         signature = (choice.actions, choice.programs)
@@ -147,13 +128,10 @@ class NarrativeAlignedLearner(CounterfactualNarrativeLearner):
                 end_i, end_key, _end_value, end_world = observations[right_index]
                 if key != end_key or end_i <= start_i + 1:
                     continue
-
+                self.endpoint_pairs_considered += 1
                 paths = self._aligned_paths(sentences[start_i + 1 : end_i], start_world, end_world)
-                semantic_paths = {
-                    (path.programs, path.world): path
-                    for path in paths
-                    if path.actions and path.world == end_world
-                }
+                semantic_paths = {(path.programs, path.world): path for path in paths if path.actions and path.world == end_world}
+                self.complete_paths_found += len(semantic_paths)
                 if len(semantic_paths) != 1:
                     continue
                 path = next(iter(semantic_paths.values()))
@@ -169,43 +147,21 @@ class NarrativeAlignedLearner(CounterfactualNarrativeLearner):
                             prefix_world = prefix_result.world
                         else:
                             for clause, replacement_pid, successor in self._executable_candidates(sentence, prefix_world):
-                                if replacement_pid != factual_pid:
-                                    continue
-                                replacements[(position, replacement_pid, successor)] = (clause, replacement_pid, successor)
+                                if replacement_pid == factual_pid:
+                                    replacements[(position, replacement_pid, successor)] = (clause, replacement_pid, successor)
+                self.replacement_options_found += len(replacements)
 
                 for (position, _pid, _successor), (clause, _replacement_pid, _world) in replacements.items():
-                    comparison = self.compare_intervention(
-                        start_world,
-                        path.actions,
-                        intervention_at=position,
-                        replacement_actions=(clause,),
-                    )
+                    comparison = self.compare_intervention(start_world, path.actions, intervention_at=position, replacement_actions=(clause,))
                     if not comparison.accepted or comparison.factual.world != end_world:
                         continue
                     if comparison.counterfactual.world == comparison.factual.world:
                         continue
-                    candidates.append(
-                        NarrativeAlignmentResult(
-                            True,
-                            start_world,
-                            end_world,
-                            path.actions,
-                            (clause,),
-                            position,
-                            comparison,
-                            path.ignored,
-                            "shared-sequence-world-alignment",
-                        )
-                    )
+                    candidates.append(NarrativeAlignmentResult(True, start_world, end_world, path.actions, (clause,), position, comparison, path.ignored, "shared-sequence-world-alignment"))
 
+        self.complete_alignments_found += len(candidates)
         unique = {
-            (
-                row.initial_world,
-                row.observed_world,
-                row.comparison.factual.world if row.comparison else World(),
-                row.comparison.counterfactual.world if row.comparison else World(),
-                row.intervention_at,
-            ): row
+            (row.initial_world, row.observed_world, row.comparison.factual.world if row.comparison else World(), row.comparison.counterfactual.world if row.comparison else World(), row.intervention_at): row
             for row in candidates
         }
         if len(unique) != 1:
@@ -214,27 +170,27 @@ class NarrativeAlignedLearner(CounterfactualNarrativeLearner):
         result = next(iter(unique.values()))
         self.narratives_aligned += 1
         self.narrative_sentences_ignored += result.ignored_sentences
-        self.embedded_clauses_recovered += sum(
-            int(action not in sentences) for action in result.factual_actions + result.replacement_actions
-        )
+        self.embedded_clauses_recovered += sum(int(action not in sentences) for action in result.factual_actions + result.replacement_actions)
         return result
 
     def report(self):
         result = super().report()
-        result.update(
-            {
-                "unlabeled_narrative_alignment": True,
-                "intervention_index_supplied": False,
-                "preseparated_action_lists_supplied": False,
-                "phrase_exception_table_used": False,
-                "joint_sequence_alignment": True,
-                "narratives_aligned": self.narratives_aligned,
-                "narrative_abstentions": self.narrative_abstentions,
-                "narrative_sentences_read": self.narrative_sentences_read,
-                "narrative_sentences_ignored": self.narrative_sentences_ignored,
-                "embedded_clauses_recovered": self.embedded_clauses_recovered,
-                "sequence_states_expanded": self.sequence_states_expanded,
-                "sequence_paths_pruned": self.sequence_paths_pruned,
-            }
-        )
+        result.update({
+            "unlabeled_narrative_alignment": True,
+            "intervention_index_supplied": False,
+            "preseparated_action_lists_supplied": False,
+            "phrase_exception_table_used": False,
+            "joint_sequence_alignment": True,
+            "narratives_aligned": self.narratives_aligned,
+            "narrative_abstentions": self.narrative_abstentions,
+            "narrative_sentences_read": self.narrative_sentences_read,
+            "narrative_sentences_ignored": self.narrative_sentences_ignored,
+            "embedded_clauses_recovered": self.embedded_clauses_recovered,
+            "sequence_states_expanded": self.sequence_states_expanded,
+            "sequence_paths_pruned": self.sequence_paths_pruned,
+            "endpoint_pairs_considered": self.endpoint_pairs_considered,
+            "complete_paths_found": self.complete_paths_found,
+            "replacement_options_found": self.replacement_options_found,
+            "complete_alignments_found": self.complete_alignments_found,
+        })
         return result
