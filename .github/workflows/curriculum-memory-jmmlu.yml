@@ -38,9 +38,11 @@ jobs:
       - name: Acquire Japanese curriculum corpus without exam targets
         working-directory: minimal-predictive-lm
         run: |
+          set -o pipefail
           python -m minimal_predictive_lm.japanese_curriculum_corpus \
             --output results/japanese_curriculum.jsonl \
-            --results-per-query 30
+            --results-per-query 30 \
+            2>&1 | tee ../curriculum-corpus.log
       - name: Acquire frozen JMMLU development diagnostic
         run: |
           curl -L --fail --retry 3 \
@@ -99,6 +101,7 @@ jobs:
           path: |
             minimal-predictive-lm/results/curriculum_memory_junit.xml
             minimal-predictive-lm/results/curriculum_memory_unit.log
+            curriculum-corpus.log
             minimal-predictive-lm/results/japanese_curriculum.jsonl.report.json
             minimal-predictive-lm/results/curriculum_memory.zlib
             minimal-predictive-lm/results/curriculum_memory_jmmlu.json
