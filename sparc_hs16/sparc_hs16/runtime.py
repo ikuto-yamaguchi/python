@@ -5,6 +5,7 @@ import time
 from pathlib import Path
 from typing import Iterable
 
+from .constraints import JapaneseOrderingSolver
 from .conversation import ConsistentConversationEngine, ConversationReply, ConversationState
 from .induction import NumericDemonstration, NumericMechanismBank
 from .model import SolveResult, SparseMemory, SparcHS16
@@ -15,8 +16,8 @@ class AdaptiveSparcRuntime:
     """Integrated sparse runtime with acquired executable mechanisms.
 
     The runtime combines bounded dialogue state, fact memory, verified symbolic
-    mechanisms, programs induced from demonstrations, and a proof-producing
-    Japanese passage reasoner behind one serialized artifact.
+    mechanisms, programs induced from demonstrations, proof-producing Japanese
+    reading, and exact bounded constraint solving behind one artifact.
     """
 
     def __init__(
@@ -25,12 +26,14 @@ class AdaptiveSparcRuntime:
         numeric_bank: NumericMechanismBank | None = None,
         reading_reasoner: JapaneseReadingReasoner | None = None,
         conversation: ConsistentConversationEngine | None = None,
+        ordering_solver: JapaneseOrderingSolver | None = None,
     ) -> None:
         self.base = base or SparcHS16()
         self.numeric_bank = numeric_bank or NumericMechanismBank(self.base.memory)
         self.numeric_bank.memory = self.base.memory
         self.reading_reasoner = reading_reasoner or JapaneseReadingReasoner()
         self.conversation = conversation or ConsistentConversationEngine()
+        self.ordering_solver = ordering_solver or JapaneseOrderingSolver()
 
     @property
     def memory(self) -> SparseMemory:
@@ -54,6 +57,17 @@ class AdaptiveSparcRuntime:
 
     def solve(self, text: str) -> SolveResult:
         started = time.perf_counter()
+
+        if self.ordering_solver.can_handle(text):
+            constrained = self.ordering_solver.solve(text)
+            if constrained is not None:
+                elapsed = (time.perf_counter() - started) * 1000
+                return SolveResult(
+                    answer=constrained.answer,
+                    mechanism="exact-ordering-constraints:" + "|".join(constrained.proof),
+                    confidence=1.0,
+                    elapsed_ms=elapsed,
+                )
 
         if self.reading_reasoner.can_handle(text):
             reading = self.reading_reasoner.solve(text)
@@ -80,7 +94,7 @@ class AdaptiveSparcRuntime:
 
     def to_dict(self) -> dict:
         return {
-            "format": "adaptive-sparc-hs16-v3",
+            "format": "adaptive-sparc-hs16-v4",
             "memory": self.base.memory.to_dict(),
             "numeric_mechanisms": self.numeric_bank.to_dict(),
             "conversation": self.conversation.state.to_dict(),
@@ -91,6 +105,9 @@ class AdaptiveSparcRuntime:
                 "bounded_conversation_state": True,
                 "explicit_correction_semantics": True,
                 "preference_contradiction_resolution": True,
+                "exact_ordering_constraints": True,
+                "multiple_solution_detection": True,
+                "inconsistent_constraint_detection": True,
             },
             "architecture": {
                 "transformer_used": False,
@@ -113,6 +130,7 @@ class AdaptiveSparcRuntime:
             "adaptive-sparc-hs16-v1",
             "adaptive-sparc-hs16-v2",
             "adaptive-sparc-hs16-v3",
+            "adaptive-sparc-hs16-v4",
         }:
             raise ValueError("unsupported adaptive runtime artifact")
         memory = SparseMemory.from_dict(data["memory"])
