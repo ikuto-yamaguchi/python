@@ -42,6 +42,9 @@ class NarrativeAlignedLearner(CounterfactualNarrativeLearner):
         self.endpoint_pairs_considered = 0
         self.complete_paths_found = 0
         self.replacement_options_found = 0
+        self.branch_validation_rejected = 0
+        self.branch_factual_mismatches = 0
+        self.branch_unchanged = 0
         self.complete_alignments_found = 0
 
     @staticmethod
@@ -77,14 +80,7 @@ class NarrativeAlignedLearner(CounterfactualNarrativeLearner):
         rows = sorted(equivalent.values(), key=lambda row: (row[0], row[2], row[1]))
         return tuple((clause, pid, successor) for _start, clause, pid, successor in rows)
 
-    def _aligned_paths(
-        self,
-        sentences: tuple[str, ...],
-        start_world: World,
-        end_world: World,
-        *,
-        max_paths_per_world: int = 2,
-    ) -> tuple[_Path, ...]:
+    def _aligned_paths(self, sentences: tuple[str, ...], start_world: World, end_world: World, *, max_paths_per_world: int = 2) -> tuple[_Path, ...]:
         frontier: dict[World, list[_Path]] = {start_world: [_Path(start_world, (), (), 0)]}
         for sentence in sentences:
             next_frontier: dict[World, list[_Path]] = {}
@@ -92,8 +88,10 @@ class NarrativeAlignedLearner(CounterfactualNarrativeLearner):
                 for path in paths:
                     self.sequence_states_expanded += 1
                     choices = [_Path(path.world, path.actions, path.programs, path.ignored + 1)]
-                    for clause, pid, successor in self._executable_candidates(sentence, path.world):
-                        choices.append(_Path(successor, path.actions + (clause,), path.programs + (pid,), path.ignored))
+                    choices.extend(
+                        _Path(successor, path.actions + (clause,), path.programs + (pid,), path.ignored)
+                        for clause, pid, successor in self._executable_candidates(sentence, path.world)
+                    )
                     for choice in choices:
                         bucket = next_frontier.setdefault(choice.world, [])
                         signature = (choice.actions, choice.programs)
@@ -138,24 +136,34 @@ class NarrativeAlignedLearner(CounterfactualNarrativeLearner):
 
                 replacements: dict[tuple[int, str, World], tuple[str, str, World]] = {}
                 for sentence in sentences[end_i + 1 :]:
+                    prefix_world = start_world
+                    prefix_worlds = [start_world]
+                    valid_prefix = True
+                    for action in path.actions:
+                        prefix_result = self.apply(action, prefix_world)
+                        if not prefix_result.accepted:
+                            valid_prefix = False
+                            break
+                        prefix_world = prefix_result.world
+                        prefix_worlds.append(prefix_world)
+                    if not valid_prefix:
+                        continue
                     for position, factual_pid in enumerate(path.programs):
-                        prefix_world = start_world
-                        for action in path.actions[:position]:
-                            prefix_result = self.apply(action, prefix_world)
-                            if not prefix_result.accepted:
-                                break
-                            prefix_world = prefix_result.world
-                        else:
-                            for clause, replacement_pid, successor in self._executable_candidates(sentence, prefix_world):
-                                if replacement_pid == factual_pid:
-                                    replacements[(position, replacement_pid, successor)] = (clause, replacement_pid, successor)
+                        for clause, replacement_pid, successor in self._executable_candidates(sentence, prefix_worlds[position]):
+                            if replacement_pid == factual_pid:
+                                replacements[(position, replacement_pid, successor)] = (clause, replacement_pid, successor)
                 self.replacement_options_found += len(replacements)
 
                 for (position, _pid, _successor), (clause, _replacement_pid, _world) in replacements.items():
                     comparison = self.compare_intervention(start_world, path.actions, intervention_at=position, replacement_actions=(clause,))
-                    if not comparison.accepted or comparison.factual.world != end_world:
+                    if not comparison.accepted:
+                        self.branch_validation_rejected += 1
+                        continue
+                    if comparison.factual.world != end_world:
+                        self.branch_factual_mismatches += 1
                         continue
                     if comparison.counterfactual.world == comparison.factual.world:
+                        self.branch_unchanged += 1
                         continue
                     candidates.append(NarrativeAlignmentResult(True, start_world, end_world, path.actions, (clause,), position, comparison, path.ignored, "shared-sequence-world-alignment"))
 
@@ -191,6 +199,9 @@ class NarrativeAlignedLearner(CounterfactualNarrativeLearner):
             "endpoint_pairs_considered": self.endpoint_pairs_considered,
             "complete_paths_found": self.complete_paths_found,
             "replacement_options_found": self.replacement_options_found,
+            "branch_validation_rejected": self.branch_validation_rejected,
+            "branch_factual_mismatches": self.branch_factual_mismatches,
+            "branch_unchanged": self.branch_unchanged,
             "complete_alignments_found": self.complete_alignments_found,
         })
         return result
