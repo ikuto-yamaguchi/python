@@ -22,6 +22,7 @@ class EvidenceLineageConsensusTest(unittest.TestCase):
             max_evidence_components=4,
             max_hypotheses_per_target=3,
             max_lineages=8,
+            lineage_similarity_threshold=0.50,
         )
         learner.learn_independent_documents(_corpus(), min_support=4)
         learner.learn_independent_numeric_documents(_numeric_corpus())
