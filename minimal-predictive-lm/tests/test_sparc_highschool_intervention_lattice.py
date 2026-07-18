@@ -32,6 +32,9 @@ class InterventionLatticeLearnerTest(unittest.TestCase):
         self.assertIn((0, 1, 2), result.pairwise_interactions)
         self.assertIn("増幅相互作用", result.answer)
         self.assertIn("検算", result.answer)
+        self.assertEqual("shared-sparse-prefix-intervention-lattice", result.mechanism)
+        self.assertEqual(7, learner.intervention_transition_expansions)
+        self.assertEqual(0, learner.intervention_rollouts)
 
     def test_abstains_without_verified_shared_world_alignment(self):
         learner = self.learner()
@@ -51,6 +54,7 @@ class InterventionLatticeLearnerTest(unittest.TestCase):
         self.assertTrue(result.accepted)
         self.assertEqual((4, 9, 3), result.contributions)
         self.assertIn((0, 1, 2), result.pairwise_interactions)
+        self.assertLessEqual(restored.intervention_transition_expansions, 7)
 
 
 if __name__ == "__main__":
