@@ -62,6 +62,33 @@ class DiscourseEvidenceWorkspaceTest(unittest.TestCase):
         self.assertFalse(stale.accepted)
         self.assertEqual((), self.learner._discourse_focus)
 
+    def test_unsupported_explicit_target_clears_focus(self):
+        self.learner.answer_discourse_grounded_world(
+            self.body + "系列Aについて不足する状態を説明してください。"
+        )
+        unsupported = self.learner.answer_discourse_grounded_world(
+            self.body + "系列Cについて同じ根拠を説明してください。"
+        )
+        stale = self.learner.answer_discourse_grounded_world(
+            self.body + "続けて根拠を説明してください。"
+        )
+        self.assertFalse(unsupported.accepted)
+        self.assertEqual("abstain-unsupported-explicit-discourse-target", unsupported.mechanism)
+        self.assertFalse(stale.accepted)
+        self.assertEqual((), self.learner._discourse_focus)
+
+    def test_unsupported_short_turn_clears_focus(self):
+        self.learner.answer_discourse_grounded_world(
+            self.body + "系列Aについて不足する状態を説明してください。"
+        )
+        unsupported = self.learner.answer_discourse_grounded_world("続けて説明してください。")
+        stale = self.learner.answer_discourse_grounded_world(
+            self.body + "続けて根拠を説明してください。"
+        )
+        self.assertFalse(unsupported.accepted)
+        self.assertFalse(stale.accepted)
+        self.assertEqual((), self.learner._discourse_focus)
+
 
 if __name__ == "__main__":
     unittest.main()
