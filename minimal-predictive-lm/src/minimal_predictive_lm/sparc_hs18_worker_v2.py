@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from . import sparc_hs18_worker as base
-from .generic_causal_judgement_v2 import GenericCausalJudgementV2
+from .generic_causal_judgement_v3 import GenericCausalJudgementV3
 
 
-base.GenericCausalJudgement = GenericCausalJudgementV2
+base.GenericCausalJudgement = GenericCausalJudgementV3
 main = base.main
 
 
