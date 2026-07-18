@@ -1,0 +1,84 @@
+name: curriculum-memory-jmmlu
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+  workflow_dispatch:
+
+concurrency:
+  group: curriculum-memory-jmmlu-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  curriculum-memory-development:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pytest
+      - name: Sparse-memory unit tests
+        run: python -m pytest -q minimal-predictive-lm/tests/test_mobile_curriculum_memory.py
+      - name: Reuse frozen mobile public-transfer artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: mobile-public-dialogue-results
+          path: /tmp/mobile-public
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ikuto-yamaguchi/python
+          run-id: 29634782012
+      - name: Acquire Japanese curriculum corpus without exam targets
+        working-directory: minimal-predictive-lm
+        run: |
+          python -m minimal_predictive_lm.japanese_curriculum_corpus \
+            --output results/japanese_curriculum.jsonl \
+            --results-per-query 30
+      - name: Acquire frozen JMMLU development diagnostic
+        run: |
+          curl -L --fail --retry 3 \
+            https://huggingface.co/datasets/nlp-waseda/JMMLU/resolve/main/JMMLU.zip \
+            -o /tmp/JMMLU.zip
+          mkdir -p /tmp/jmmlu
+          unzip -q /tmp/JMMLU.zip -d /tmp/jmmlu
+      - name: Build compact curriculum memory and evaluate
+        working-directory: minimal-predictive-lm
+        run: |
+          python -m minimal_predictive_lm.curriculum_memory_jmmlu_experiment \
+            /tmp/mobile-public/mobile_public_transfer.mpmobile \
+            results/japanese_curriculum.jsonl \
+            /tmp/jmmlu \
+            --output-dir results
+      - name: Enforce resource and contamination boundaries
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          row = json.loads(Path('results/curriculum_memory_jmmlu.json').read_text())
+          protocol = row['protocol']
+          assert row['experiment_protocol_passed'] is True
+          assert protocol['jmmlu_is_development_benchmark'] is True
+          assert protocol['strict_unseen_jmmlu_claim_allowed'] is False
+          assert protocol['individual_jmmlu_targets_inspected_by_builder'] == 0
+          assert protocol['official_common_test_targets_used'] == 0
+          assert protocol['subject_name_visible_to_model'] is False
+          assert row['memory']['serialized_bytes'] <= 80_000_000
+          assert row['memory']['estimated_active_bytes'] <= 128 * 1024
+          assert row['resources']['planned_complete_package_bytes'] <= 1_000_000_000
+          assert row['university_exam_mastery_passed'] is False
+          assert row['highschool_level_passed'] is False
+          assert row['mobile_device_gate_passed'] is False
+          PY
+      - name: Upload curriculum-memory evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: curriculum-memory-jmmlu-results
+          path: |
+            minimal-predictive-lm/results/japanese_curriculum.jsonl.report.json
+            minimal-predictive-lm/results/curriculum_memory.zlib
+            minimal-predictive-lm/results/curriculum_memory_jmmlu.json
+          retention-days: 30
