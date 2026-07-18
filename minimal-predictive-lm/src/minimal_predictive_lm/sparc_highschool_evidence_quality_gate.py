@@ -67,14 +67,19 @@ def run_gate(output_dir: str | Path) -> dict[str, object]:
         stamp = time.perf_counter()
         for note in (f"北側の伝聞記録{index}", f"西側の間接記録{index}", f"旧帳簿の再構成{index}"):
             learner.ingest_quality_verified_hypothesis(_weak(target, weak_initial, add, note))
-        for note in (f"独立測定系列一{index}", f"独立測定系列二{index}"):
+        for note in (
+            f"山岳観測所{index}の光学計器による原簿",
+            f"沿岸研究船{index}の重量センサー再測定",
+        ):
             learner.ingest_quality_verified_hypothesis(_strong(target, strong_initial, add, note))
         before_reads = learner.hypothesis_reads
         before_quality_reads = learner.quality_reads
         resolved = learner.answer_from_quality_graph(f"{target}の現在の結論を説明してください。")
         hypothesis_reads = learner.hypothesis_reads - before_reads
         quality_reads = learner.quality_reads - before_quality_reads
-        learner.ingest_quality_verified_hypothesis(_strong(stable, stable_initial, add + 1, f"別地域の直接観測{index}"))
+        learner.ingest_quality_verified_hypothesis(
+            _strong(stable, stable_initial, add + 1, f"河川監視塔{index}の流量計による直接観測")
+        )
         stable_result = learner.answer_from_quality_graph(f"{stable}の結論を説明してください。")
         inference_seconds += time.perf_counter() - stamp
 
