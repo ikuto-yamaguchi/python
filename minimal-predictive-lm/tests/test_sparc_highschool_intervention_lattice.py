@@ -25,7 +25,20 @@ class InterventionLatticeLearnerTest(unittest.TestCase):
             "別の進め方では分析箱を3倍にする。"
             "どの操作が結果へ寄与し、互いにどう作用したか説明せよ。"
         )
-        branch_rollouts_before = learner.branch_rollouts
+
+        # Narrative grounding legitimately uses inherited branch rollouts. Audit only
+        # the sparse intervention lattice boundary so those upstream shared-learning
+        # operations are not confused with restarted intervention rollouts.
+        original_lattice = learner._shared_omission_lattice
+        lattice_audits: list[tuple[int, int]] = []
+
+        def audited_lattice(initial, actions):
+            before = learner.branch_rollouts
+            worlds = original_lattice(initial, actions)
+            lattice_audits.append((before, learner.branch_rollouts))
+            return worlds
+
+        learner._shared_omission_lattice = audited_lattice
         result = learner.explain_interaction_narrative(text)
         self.assertTrue(result.accepted)
         self.assertTrue(result.verified)
@@ -36,7 +49,8 @@ class InterventionLatticeLearnerTest(unittest.TestCase):
         self.assertEqual("shared-sparse-prefix-intervention-lattice", result.mechanism)
         self.assertEqual(7, learner.intervention_transition_expansions)
         self.assertEqual(0, learner.intervention_rollouts)
-        self.assertEqual(branch_rollouts_before, learner.branch_rollouts)
+        self.assertEqual(1, len(lattice_audits))
+        self.assertEqual(lattice_audits[0][0], lattice_audits[0][1])
 
     def test_abstains_without_verified_shared_world_alignment(self):
         learner = self.learner()
