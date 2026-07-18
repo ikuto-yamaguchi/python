@@ -10,6 +10,7 @@ from .conversation import ConsistentConversationEngine, ConversationReply, Conve
 from .induction import NumericDemonstration, NumericMechanismBank
 from .model import SolveResult, SparseMemory, SparcHS16
 from .reading import JapaneseReadingReasoner
+from .router import SparseMechanismRouter, build_bootstrap_router
 
 
 class AdaptiveSparcRuntime:
@@ -17,7 +18,7 @@ class AdaptiveSparcRuntime:
 
     The runtime combines bounded dialogue state, fact memory, verified symbolic
     mechanisms, programs induced from demonstrations, proof-producing Japanese
-    reading, and exact bounded constraint solving behind one artifact.
+    reading, exact bounded constraint solving, and a learned sparse router.
     """
 
     def __init__(
@@ -27,6 +28,7 @@ class AdaptiveSparcRuntime:
         reading_reasoner: JapaneseReadingReasoner | None = None,
         conversation: ConsistentConversationEngine | None = None,
         ordering_solver: JapaneseOrderingSolver | None = None,
+        router: SparseMechanismRouter | None = None,
     ) -> None:
         self.base = base or SparcHS16()
         self.numeric_bank = numeric_bank or NumericMechanismBank(self.base.memory)
@@ -34,6 +36,7 @@ class AdaptiveSparcRuntime:
         self.reading_reasoner = reading_reasoner or JapaneseReadingReasoner()
         self.conversation = conversation or ConsistentConversationEngine()
         self.ordering_solver = ordering_solver or JapaneseOrderingSolver()
+        self.router = router or build_bootstrap_router()
 
     @property
     def memory(self) -> SparseMemory:
@@ -55,49 +58,64 @@ class AdaptiveSparcRuntime:
         self.conversation.state.append("assistant", solved.answer)
         return ConversationReply(solved.answer, solved.mechanism, solved.confidence)
 
+    def route(self, text: str) -> tuple[str, float]:
+        return self.router.predict(text)
+
     def solve(self, text: str) -> SolveResult:
         started = time.perf_counter()
+        route, route_confidence = self.router.predict(text)
 
-        if self.ordering_solver.can_handle(text):
+        if route == "constraints" or self.ordering_solver.can_handle(text):
             constrained = self.ordering_solver.solve(text)
             if constrained is not None:
                 elapsed = (time.perf_counter() - started) * 1000
                 return SolveResult(
                     answer=constrained.answer,
-                    mechanism="exact-ordering-constraints:" + "|".join(constrained.proof),
+                    mechanism=(
+                        f"learned-route:{route}:{route_confidence:.3f};"
+                        "exact-ordering-constraints:" + "|".join(constrained.proof)
+                    ),
                     confidence=1.0,
                     elapsed_ms=elapsed,
                 )
 
-        if self.reading_reasoner.can_handle(text):
+        if route == "reading" or self.reading_reasoner.can_handle(text):
             reading = self.reading_reasoner.solve(text)
             if reading is not None:
                 elapsed = (time.perf_counter() - started) * 1000
                 return SolveResult(
                     answer=reading.answer,
-                    mechanism="proof-japanese-reading:" + "|".join(reading.proof),
+                    mechanism=(
+                        f"learned-route:{route}:{route_confidence:.3f};"
+                        "proof-japanese-reading:" + "|".join(reading.proof)
+                    ),
                     confidence=reading.confidence,
                     elapsed_ms=elapsed,
                 )
 
-        learned = self.numeric_bank.solve(text)
-        if learned is not None:
-            value, program, route_score = learned
-            elapsed = (time.perf_counter() - started) * 1000
-            return SolveResult(
-                answer=f"{value}です。",
-                mechanism=f"induced-program:{program.expression}",
-                confidence=min(1.0, 0.7 + route_score),
-                elapsed_ms=elapsed,
-            )
+        if route == "numeric" or self.numeric_bank.programs:
+            learned = self.numeric_bank.solve(text)
+            if learned is not None:
+                value, program, program_route_score = learned
+                elapsed = (time.perf_counter() - started) * 1000
+                return SolveResult(
+                    answer=f"{value}です。",
+                    mechanism=(
+                        f"learned-route:{route}:{route_confidence:.3f};"
+                        f"induced-program:{program.expression}"
+                    ),
+                    confidence=min(1.0, 0.7 + program_route_score),
+                    elapsed_ms=elapsed,
+                )
         return self.base.solve(text)
 
     def to_dict(self) -> dict:
         return {
-            "format": "adaptive-sparc-hs16-v4",
+            "format": "adaptive-sparc-hs16-v5",
             "memory": self.base.memory.to_dict(),
             "numeric_mechanisms": self.numeric_bank.to_dict(),
             "conversation": self.conversation.state.to_dict(),
+            "mechanism_router": self.router.to_dict(),
             "capabilities": {
                 "proof_japanese_reading": True,
                 "relation_transitive_closure": True,
@@ -108,6 +126,7 @@ class AdaptiveSparcRuntime:
                 "exact_ordering_constraints": True,
                 "multiple_solution_detection": True,
                 "inconsistent_constraint_detection": True,
+                "learned_sparse_mechanism_routing": True,
             },
             "architecture": {
                 "transformer_used": False,
@@ -131,6 +150,7 @@ class AdaptiveSparcRuntime:
             "adaptive-sparc-hs16-v2",
             "adaptive-sparc-hs16-v3",
             "adaptive-sparc-hs16-v4",
+            "adaptive-sparc-hs16-v5",
         }:
             raise ValueError("unsupported adaptive runtime artifact")
         memory = SparseMemory.from_dict(data["memory"])
@@ -139,7 +159,9 @@ class AdaptiveSparcRuntime:
         conversation = ConsistentConversationEngine(
             ConversationState.from_dict(data.get("conversation", {}))
         )
-        return cls(base=base, numeric_bank=bank, conversation=conversation)
+        router_data = data.get("mechanism_router")
+        router = SparseMechanismRouter.from_dict(router_data) if router_data else build_bootstrap_router()
+        return cls(base=base, numeric_bank=bank, conversation=conversation, router=router)
 
     def serialized_bytes(self) -> int:
         return len(
