@@ -22,7 +22,7 @@ jobs:
         run: python -m pip install -e minimal-predictive-lm pytest
       - name: Semantic unit tests
         run: python -m pytest -q minimal-predictive-lm/tests/test_sparc_hs18_semantics.py
-      - name: Run identical axis-blind 600-question gate
+      - name: Run axis-blind development and frozen causal gates
         working-directory: minimal-predictive-lm
         run: |
           set -o pipefail
@@ -49,9 +49,12 @@ jobs:
           assert row['score']['correct'] >= 581
           assert row['axis_scores']['adjective_order']['correct'] >= 36
           assert row['axis_scores']['causal_judgement']['correct'] >= 30
+          assert row['final_uninspected_causal']['score']['correct'] >= 28
           assert row['resources']['planned_complete_mobile_package_bytes'] <= 1_000_000_000
           assert row['protocol']['axis_visible_to_worker'] is False
-          assert row['protocol']['public_targets_used_for_training'] == 0
+          assert row['protocol']['development_public_causal_targets_inspected'] == 40
+          assert row['protocol']['final_targets_inspected_before_freeze'] == 0
+          assert row['protocol']['final_targets_used_for_training'] == 0
           assert row['mobile_device_gate_passed'] is False
           assert row['highschool_level_passed'] is False
           PY
