@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-from http.client import HTTPResponse
 import json
 from pathlib import Path
 import time
@@ -18,22 +17,88 @@ USER_AGENT = (
     "minimal-predictive-lm-research/1.0 "
     "(https://github.com/ikuto-yamaguchi/python; curriculum-memory research)"
 )
+
+# Fine-grained curriculum topics deliberately replace a few broad searches.  This
+# reduces duplicate pages and gives every entrance-exam domain multiple retrieval
+# anchors without using any exam question or target answer.
 CURRICULUM_QUERIES = (
-    "高校 数学 代数 幾何 確率 統計",
-    "高校 物理 力学 電磁気 波動 熱力学",
-    "高校 化学 無機化学 有機化学 化学反応",
-    "高校 生物 遺伝 生態 細胞 進化",
-    "地学 天文学 地質 気象",
-    "日本史 古代 中世 近世 近代 現代",
-    "世界史 古代 中世 近代 現代",
-    "地理 地形 気候 人口 産業",
-    "公共 政治 経済 倫理 法律",
-    "情報科学 アルゴリズム データ構造 ネットワーク",
-    "国語 現代文 古文 漢文 文法",
-    "英語 文法 語彙 読解",
-    "論理学 命題 推論 誤謬",
-    "心理学 社会学 哲学",
-    "医学 解剖 生理 遺伝 栄養",
+    # Mathematics
+    "代数 方程式 不等式 因数分解",
+    "二次関数 指数関数 対数関数 三角関数",
+    "微分 積分 極限 数列",
+    "平面幾何 空間幾何 ベクトル",
+    "確率 統計 確率分布 推定",
+    "整数論 素数 合同式 組合せ数学",
+    # Physics
+    "力学 運動方程式 運動量 エネルギー",
+    "円運動 万有引力 単振動",
+    "熱力学 気体 状態方程式 エントロピー",
+    "波動 音波 光波 干渉 回折",
+    "電場 電位 コンデンサ 直流回路",
+    "磁場 電磁誘導 交流回路",
+    "原子物理 量子力学 放射線",
+    # Chemistry
+    "原子構造 周期表 化学結合",
+    "物質量 化学反応式 酸化還元",
+    "酸 塩基 中和 平衡 電離",
+    "熱化学 反応速度 化学平衡",
+    "無機化学 金属 非金属 錯体",
+    "有機化学 炭化水素 官能基 高分子",
+    # Biology and earth science
+    "細胞 生体膜 酵素 代謝",
+    "遺伝 DNA RNA タンパク質",
+    "進化 系統分類 生物多様性",
+    "生態系 個体群 物質循環",
+    "人体 恒常性 神経 内分泌 免疫",
+    "地質 岩石 鉱物 プレートテクトニクス",
+    "地震 火山 地層 地球史",
+    "気象 大気 海洋 気候",
+    "天文学 太陽系 恒星 銀河 宇宙論",
+    # Japanese language and literature
+    "現代文 論説文 小説 読解 要約",
+    "日本語 文法 品詞 敬語 修辞",
+    "古文 文法 助動詞 敬語 和歌",
+    "漢文 句法 漢詩 中国古典",
+    "日本文学 古典文学 近代文学 現代文学",
+    # English and linguistics
+    "英語 文法 時制 仮定法 関係詞",
+    "英語 語彙 熟語 語源",
+    "英語 読解 英作文 翻訳",
+    "言語学 音韻論 統語論 意味論 語用論",
+    # History
+    "日本史 縄文 弥生 古墳 飛鳥 奈良",
+    "日本史 平安 鎌倉 室町 戦国",
+    "日本史 江戸 幕藩体制 産業 文化",
+    "日本史 明治 大正 昭和 戦後",
+    "世界史 古代文明 ギリシャ ローマ",
+    "世界史 中世ヨーロッパ イスラム 世界",
+    "世界史 近世 大航海時代 宗教改革",
+    "世界史 市民革命 産業革命 帝国主義",
+    "世界史 世界大戦 冷戦 現代史",
+    # Geography, civics, ethics
+    "地理 地形 気候 土壌 植生",
+    "地理 人口 都市 農業 工業 貿易",
+    "地理 地図 GIS 統計 資料読解",
+    "政治 日本国憲法 国会 内閣 裁判所",
+    "政治 国際関係 国際連合 安全保障",
+    "経済 市場 価格 金融 財政",
+    "経済 国民所得 景気 国際経済",
+    "法律 民法 刑法 行政法 国際法",
+    "倫理 哲学 思想 宗教",
+    "論理学 命題 推論 誤謬 科学的方法",
+    # Information and communication
+    "情報科学 アルゴリズム データ構造",
+    "プログラミング Python C言語 計算量",
+    "データベース 情報検索 機械学習",
+    "コンピュータネットワーク インターネット セキュリティ",
+    "情報理論 符号化 暗号",
+    "コミュニケーション 対話 説明 議論 面接",
+    "文章作法 小論文 論証 批判的思考",
+    # Health and society
+    "医学 解剖学 生理学 病理学",
+    "栄養 健康 公衆衛生 疫学",
+    "心理学 認知 発達 社会心理学",
+    "社会学 文化 家族 労働 教育",
 )
 
 
@@ -94,8 +159,8 @@ def _get_json(
 def acquire_curriculum(
     output_path: str | Path,
     *,
-    results_per_query: int = 30,
-    delay_seconds: float = 1.0,
+    results_per_query: int = 20,
+    delay_seconds: float = 0.75,
 ) -> dict[str, object]:
     documents: dict[int, KnowledgeDocument] = {}
     query_records: list[dict[str, object]] = []
@@ -112,7 +177,7 @@ def acquire_curriculum(
                 "gsrlimit": results_per_query,
                 "prop": "extracts|info",
                 "explaintext": 1,
-                "exintro": 1,
+                "exchars": 3500,
                 "inprop": "url",
                 "redirects": 1,
             }
@@ -130,7 +195,7 @@ def acquire_curriculum(
                 title = str(raw.get("title", "")).strip()
                 extract = str(raw.get("extract", "")).strip()
                 source = str(raw.get("fullurl", ""))
-                if page_id <= 0 or len(extract) < 120:
+                if page_id <= 0 or len(extract) < 160:
                     continue
                 documents[page_id] = KnowledgeDocument(title, extract, source)
                 accepted += 1
@@ -160,14 +225,16 @@ def acquire_curriculum(
             )
     digest = hashlib.sha256(output.read_bytes()).hexdigest()
     report = {
-        "capability_id": "JAPANESE-CURRICULUM-CORPUS-001",
+        "capability_id": "JAPANESE-CURRICULUM-CORPUS-002",
         "queries": query_records,
+        "query_count": len(CURRICULUM_QUERIES),
         "documents": len(ordered),
         "bytes": output.stat().st_size,
         "sha256": digest,
         "source": WIKIPEDIA_API,
         "rate_limit_retries": total_retries,
         "request_delay_seconds": delay_seconds,
+        "max_extract_chars": 3500,
         "target_exam_questions_used": 0,
         "target_exam_answers_used": 0,
         "development_corpus_passed": len(ordered) >= 250,
@@ -200,7 +267,7 @@ def load_curriculum(path: str | Path) -> list[KnowledgeDocument]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", default="results/japanese_curriculum.jsonl")
-    parser.add_argument("--results-per-query", type=int, default=30)
+    parser.add_argument("--results-per-query", type=int, default=20)
     args = parser.parse_args()
     print(
         json.dumps(
