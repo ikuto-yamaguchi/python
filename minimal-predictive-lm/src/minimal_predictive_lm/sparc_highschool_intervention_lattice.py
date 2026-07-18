@@ -57,12 +57,14 @@ class InterventionLatticeLearner(CausalProvenanceLearner):
         The graph key is only (processed position, omitted indices). A transition
         that keeps the next action executes exactly one learned event from the
         cached prefix world; an omission transition reuses that world directly.
+        Sparse transition expansions are measured separately from inherited
+        counterfactual branch rollouts so the resource report remains interpretable.
         """
         frontier: dict[frozenset[int], object] = {frozenset(): initial}
         for index, action in enumerate(actions):
             next_frontier: dict[frozenset[int], object] = {}
             for omitted, world in frontier.items():
-                kept = self.rollout(world, (action,))
+                kept = self.apply(action, world)
                 self.intervention_transition_expansions += 1
                 if not kept.accepted:
                     return None
