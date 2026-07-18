@@ -6,7 +6,10 @@ on:
     paths:
       - "minimal-predictive-lm/src/minimal_predictive_lm/sparc_highschool_long_temporal.py"
       - "minimal-predictive-lm/src/minimal_predictive_lm/sparc_highschool_long_temporal_gate.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/sparc_highschool_counterfactual.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/sparc_highschool_counterfactual_gate.py"
       - "minimal-predictive-lm/tests/test_sparc_highschool_long_temporal.py"
+      - "minimal-predictive-lm/tests/test_sparc_highschool_counterfactual.py"
       - ".github/workflows/sparc-highschool-long-temporal-001.yml"
   workflow_dispatch:
 
@@ -25,12 +28,16 @@ jobs:
         run: |
           mkdir -p artifacts/sparc-highschool-long-temporal-001
           set +e
-          python -m unittest discover -s minimal-predictive-lm/tests -p 'test_sparc_highschool_long_temporal.py' -v 2>&1 | tee artifacts/sparc-highschool-long-temporal-001/tests.log
-          echo ${PIPESTATUS[0]} > artifacts/sparc-highschool-long-temporal-001/tests.exit
+          python -m unittest discover -s minimal-predictive-lm/tests -p 'test_sparc_highschool_long_temporal.py' -v 2>&1 | tee artifacts/sparc-highschool-long-temporal-001/tests-long.log
+          LONG_EXIT=${PIPESTATUS[0]}
+          python -m unittest discover -s minimal-predictive-lm/tests -p 'test_sparc_highschool_counterfactual.py' -v 2>&1 | tee artifacts/sparc-highschool-long-temporal-001/tests-counterfactual.log
+          CF_EXIT=${PIPESTATUS[0]}
+          test "$LONG_EXIT" = "0" -a "$CF_EXIT" = "0"
+          echo $? > artifacts/sparc-highschool-long-temporal-001/tests.exit
           exit 0
-      - name: Run integrated gate
+      - name: Run expanded integrated gate
         continue-on-error: true
-        run: python -m minimal_predictive_lm.sparc_highschool_long_temporal_gate --output-dir artifacts/sparc-highschool-long-temporal-001 2>&1 | tee artifacts/sparc-highschool-long-temporal-001/gate.log
+        run: python -m minimal_predictive_lm.sparc_highschool_counterfactual_gate --output-dir artifacts/sparc-highschool-long-temporal-001 2>&1 | tee artifacts/sparc-highschool-long-temporal-001/gate.log
       - name: Upload results or diagnostics
         if: always()
         uses: actions/upload-artifact@v4
@@ -45,8 +52,10 @@ jobs:
           from pathlib import Path
           root = Path("artifacts/sparc-highschool-long-temporal-001")
           if root.joinpath("tests.exit").read_text().strip() != "0":
-              raise SystemExit("long temporal unit tests failed")
-          report = json.loads(root.joinpath("SPARC-highschool-general-long-temporal.json").read_text())
+              raise SystemExit("integrated unit tests failed")
+          report = json.loads(root.joinpath("SPARC-highschool-general-counterfactual.json").read_text())
           if not report["passed"]:
-              raise SystemExit("long temporal integrated gate failed")
+              raise SystemExit("expanded integrated gate failed")
+          if not report["aggregate_improved"] or not report["no_regression"]:
+              raise SystemExit("promotion rule failed")
           PY
