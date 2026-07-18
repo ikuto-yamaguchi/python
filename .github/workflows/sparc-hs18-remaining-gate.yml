@@ -29,11 +29,11 @@ jobs:
             minimal-predictive-lm/tests/test_sparc_hs18_semantics_v2.py \
             --junitxml=minimal-predictive-lm/results/hs18_semantic_junit.xml \
             2>&1 | tee minimal-predictive-lm/results/hs18_semantic_unit.log
-      - name: Run axis-blind development and individually-uninspected causal tail
+      - name: Train development-only causal ranker and run frozen gates
         working-directory: minimal-predictive-lm
         run: |
           set -o pipefail
-          python -m minimal_predictive_lm.sparc_hs18_remaining_gate_v2 2>&1 | tee ../sparc-hs18-remaining-gate.log
+          python -m minimal_predictive_lm.sparc_hs18_learned_gate 2>&1 | tee ../sparc-hs18-remaining-gate.log
       - name: Upload report
         if: always()
         uses: actions/upload-artifact@v4
@@ -42,11 +42,13 @@ jobs:
           path: |
             minimal-predictive-lm/results/hs18_semantic_junit.xml
             minimal-predictive-lm/results/hs18_semantic_unit.log
+            minimal-predictive-lm/results/hs18_learned_causal_ranker.zlib
+            minimal-predictive-lm/results/hs18_learned_causal_training.json
             minimal-predictive-lm/results/sparc_hs18_remaining_gate.json
             minimal-predictive-lm/results/sparc_hs18_remaining_gate.md
             sparc-hs18-remaining-gate.log
           retention-days: 14
-      - name: Enforce capability, mobile, and disclosure boundaries
+      - name: Enforce capability, mobile, learning, and disclosure boundaries
         if: always()
         working-directory: minimal-predictive-lm
         run: |
@@ -55,6 +57,7 @@ jobs:
           from pathlib import Path
           row = json.loads(Path('results/sparc_hs18_remaining_gate.json').read_text())
           protocol = row['protocol']
+          learned = row['learned_causal_ranker']
           assert row['passed'] is True
           assert row['score']['correct'] >= 581
           assert row['axis_scores']['adjective_order']['correct'] >= 36
@@ -62,12 +65,16 @@ jobs:
           assert row['final_uninspected_causal']['score']['correct'] >= 28
           assert row['resources']['planned_complete_mobile_package_bytes'] <= 1_000_000_000
           assert protocol['axis_visible_to_worker'] is False
-          assert protocol['development_public_causal_target_labels_inspected_at_least'] >= 52
+          assert protocol['causal_ranker_selection_train_rows'] == 120
+          assert protocol['causal_ranker_selection_validation_rows'] == 22
+          assert protocol['causal_ranker_final_training_rows'] == 142
+          assert protocol['causal_ranker_tail_targets_used'] == 0
           assert protocol['highest_individual_target_index_inspected'] == 141
           assert protocol['final_individual_target_labels_inspected_before_freeze'] == 0
-          assert protocol['final_targets_used_for_training'] == 0
           assert protocol['aggregate_score_leakage_from_prior_120_159_run'] is True
           assert protocol['strict_unseen_holdout_claim_allowed'] is False
+          assert learned['serialized_bytes'] < 4_000_000
+          assert row['checks']['causal_ranker_uses_development_only'] is True
           assert row['mobile_device_gate_passed'] is False
           assert row['highschool_level_passed'] is False
           PY
