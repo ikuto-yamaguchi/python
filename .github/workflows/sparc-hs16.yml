@@ -58,9 +58,27 @@ jobs:
           assert report["task_specific_formulas_supplied"] is False
           assert report["university_exam_mastery_passed"] is False
           PY
+      - name: Run 604-case adaptive runtime pilot
+        run: python run_adaptive_pilot.py | tee adaptive_report.json
+      - name: Verify one-artifact adaptive runtime
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("adaptive_report.json").read_text())
+          assert report["correct"] == 604
+          assert report["total"] == 604
+          assert report["accuracy"] == 1.0
+          assert report["adaptive_runtime_bytes"] < 10_000
+          assert len(report["induced_programs"]) == 2
+          assert report["mobile_device_gate_passed"] is True
+          assert report["university_exam_mastery_passed"] is False
+          assert report["highschool_level_passed"] is False
+          PY
       - uses: actions/upload-artifact@v4
         with:
           name: sparc-hs16-reports
           path: |
             sparc_hs16/pilot_report.json
             sparc_hs16/induction_report.json
+            sparc_hs16/adaptive_report.json
