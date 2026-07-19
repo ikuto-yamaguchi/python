@@ -1,0 +1,29 @@
+name: SPARC-HS21 diagnostic
+
+on:
+  push:
+    branches:
+      - research/sparc-hs16-university-gate
+    paths:
+      - "sparc_hs16/run_dialogue_planner_diagnostic.py"
+      - "sparc_hs16/sparc_hs16/dialogue_planner.py"
+      - ".github/workflows/sparc-hs21-debug.yml"
+  workflow_dispatch:
+
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sparc_hs16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Capture dialogue planner diagnostics
+        run: python run_dialogue_planner_diagnostic.py | tee dialogue_planner_diagnostic.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sparc-hs21-diagnostic
+          path: sparc_hs16/dialogue_planner_diagnostic.json
