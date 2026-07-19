@@ -130,10 +130,19 @@ class EvidenceFactorReliabilityConsensusLearner(EvidenceReliabilityConsensusLear
     def answer_from_factor_reliability_graph(self, question: str) -> HypothesisConsensusResult:
         entities = tuple(self._hypothesis_order)
         targets = self._question_targets(question, entities)
-        if len(targets) != 1:
+        unsupported = self._unsupported_entity_mentions(question, entities)
+        reused = False
+        if unsupported:
+            self._hypothesis_focus = None
+            return self._h_abstain("abstain-unsupported-factor-reliability-target")
+        if len(targets) == 1:
+            target = targets[0]
+        elif len(targets) == 0 and self._hypothesis_focus in self._hypotheses:
+            target = self._hypothesis_focus  # type: ignore[assignment]
+            reused = True
+        else:
             self._hypothesis_focus = None
             return self._h_abstain("abstain-ambiguous-factor-reliability-query")
-        target = targets[0]
         rows = self._hypotheses[target]
         self.hypothesis_reads += len(rows)
         ranked = [
@@ -144,17 +153,19 @@ class EvidenceFactorReliabilityConsensusLearner(EvidenceReliabilityConsensusLear
         if not ranked or ranked[0][0] <= 0 or sum(row[0] == ranked[0][0] for row in ranked) != 1:
             self._hypothesis_focus = None
             return self._h_abstain("abstain-unresolved-factor-reliability-conflict")
+        self._hypothesis_focus = target
         states = tuple(ranked[0][2]["states"])
         details = "、".join(f"時点{node}は{value}" for _subject, _relation, node, value in states)
+        focus_note = "直前の検算済み焦点を再利用し、" if reused else ""
         return HypothesisConsensusResult(
             True,
             target,
             states,
-            f"{target}は{details}です。資料全体ではなく、複数論点で再現した共有由来特徴を有界に合成した支持が一意に最大です。",
+            f"{target}は{details}です。{focus_note}資料全体ではなく、複数論点で再現した共有由来特徴を有界に合成した支持が一意に最大です。",
             "shared-bounded-verified-source-factor-reliability-graph",
             ranked[0][0],
             len(ranked),
-            False,
+            reused,
         )
 
     def factor_reliability_graph_bytes(self) -> bytes:
