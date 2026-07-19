@@ -39,9 +39,15 @@ def _compact(text: str) -> str:
 
 
 def _normalize_clause(text: str, limit: int = 48) -> str:
-    value = re.sub(r"^(?:今日は|昨日|最近|そういえば)", "", _compact(text))
-    value = re.sub(r"(?:だったよ|だよ|なんだ|でさ|だね|です|ます|よ|ね|さ)$", "", value)
+    value = re.sub(r"^(?:今日は|昨日|最近|そういえば)", "", _compact(text)).lstrip("、,")
+    value = re.sub(r"(?:だったよ|だよ|なんだ|んだ|でさ|だね|です|ます|よ|ね|さ)$", "", value)
     return value[:limit]
+
+
+def _option_label(text: str) -> str:
+    value = _normalize_clause(text, 32)
+    value = re.sub(r"(?:を)?(?:直す|改善する|伸ばす|進める|強化する)$", "", value)
+    return value or _normalize_clause(text, 32)
 
 
 def _char_ngrams(text: str, n: int = 2) -> set[str]:
@@ -140,6 +146,9 @@ class CandidateGenerator:
         topic = frame.topic or (frame.key_terms[0] if frame.key_terms else None)
         dimensions = _TOPIC_DIMENSIONS.get(frame.topic or "", ())
         context_summary = summary
+        event_summary = summary
+        if frame.timing:
+            event_summary = summary.replace(frame.timing, "", 1).lstrip("に、,")
         prior_text = ""
         if state.current_topic and state.current_topic in state.topics:
             propositions = state.topics[state.current_topic].propositions
@@ -160,18 +169,22 @@ class CandidateGenerator:
                 feared_outcome = _normalize_clause(previous_conflict.group(2), 28)
                 chosen_action = _normalize_clause(previous_conflict.group(3), 24)
 
-        choice_source = " ".join(value for value in (prior_text, frame.text) if value)
         alternatives: tuple[str, str] | None = None
-        for pattern in (
-            r"(.{2,28}?)と(.{2,28}?)のどちら",
-            r"(.{2,28}?)か[、,]?(.{2,28}?)か(?:で迷|迷って|どっち|どちら)",
-        ):
-            choice_match = re.search(pattern, _compact(choice_source))
-            if choice_match:
-                alternatives = (
-                    _normalize_clause(choice_match.group(1), 28),
-                    _normalize_clause(choice_match.group(2), 28),
-                )
+        for choice_source in (frame.text, prior_text):
+            if not choice_source:
+                continue
+            for pattern in (
+                r"(.{2,28}?)と(.{2,28}?)のどちら",
+                r"(.{2,28}?)か[、,]?(.{2,28}?)か(?:で迷|迷って|どっち|どちら)",
+            ):
+                choice_match = re.search(pattern, _compact(choice_source))
+                if choice_match:
+                    alternatives = (
+                        _normalize_clause(choice_match.group(1), 28),
+                        _normalize_clause(choice_match.group(2), 28),
+                    )
+                    break
+            if alternatives:
                 break
 
         if base.act == "empathize":
@@ -191,7 +204,7 @@ class CandidateGenerator:
                 actor_focus = f"{frame.actor}とのやり取り" if frame.actor else (topic or "その出来事")
                 candidates.extend((
                     Candidate(
-                        f"{summary}んだね。{actor_focus}で気力まで削られた感じかな。体の疲れと気持ちの疲れ、今はどちらが大きい？",
+                        f"『{summary}』という状況なんだね。{actor_focus}で気力まで削られた感じかな。体の疲れと気持ちの疲れ、今はどちらが大きい？",
                         "specific-empathy",
                     ),
                     Candidate(
@@ -209,13 +222,19 @@ class CandidateGenerator:
                 ))
             if frame.timing and (frame.actor or frame.topic in {"仕事", "上司"} or "直前" in frame.timing):
                 candidates.append(Candidate(
-                    f"{frame.timing}に{summary}のは対応しづらいね。予定が崩れたことと、相手に断りにくかったことのどちらが大きかった？",
+                    f"{frame.timing}に{event_summary}のは対応しづらいね。予定が崩れたことと、相手に断りにくかったことのどちらが大きかった？",
                     "timing-impact",
                 ))
             if frame.emotion == "positive":
                 candidates.append(Candidate(
                     f"{summary}のはちゃんと前進だね。何が効いたのか一つでも言葉にしておくと、次も再現しやすくなる。今回は何がいちばん良かった？",
                     "celebrate-and-consolidate",
+                ))
+            if topic in {"ランニング", "マラソン"} and frame.question_type in {"question", "opinion"} and "息" in context_summary and "脚" in context_summary:
+                candidates.append(Candidate(
+                    "息は保てているのに脚だけ動かなくなるなら、心肺より脚の局所疲労か、前半のペースが速すぎる可能性が高そう。"
+                    "まず前半を少し落とし、脚が重くなり始める距離が後ろへずれるか比べると切り分けやすい。",
+                    "causal-hypothesis",
                 ))
             if dimensions:
                 left, right = dimensions[0], dimensions[1]
@@ -225,7 +244,7 @@ class CandidateGenerator:
                 ))
             candidates.extend((
                 Candidate(
-                    f"{context_summary}んだね。そこでは『何が起きたか』より『何が予想と違ったか』が気になる。いちばん意外だったのはどこ？",
+                    f"『{context_summary}』ということなんだね。そこでは『何が起きたか』より『何が予想と違ったか』が気になる。いちばん意外だったのはどこ？",
                     "prediction-error-focus",
                 ),
                 Candidate(
@@ -265,10 +284,12 @@ class CandidateGenerator:
                     foundation, enhancement = left_option, right_option
                 else:
                     foundation, enhancement = left_option, right_option
+                foundation_label = _option_label(foundation)
+                enhancement_label = _option_label(enhancement)
                 candidates.append(Candidate(
-                    f"今の情報なら、まず{foundation}を優先する。{enhancement}を伸ばしても、"
-                    f"{foundation}が弱いと良さを受け取ってもらえないから。{foundation}の最低基準を通した後に、"
-                    f"{enhancement}を伸ばす順番がいいと思う。",
+                    f"今の情報なら、まず『{foundation}』を優先する。『{enhancement}』を進めても、"
+                    f"{foundation_label}が弱いと良さを受け取ってもらえないから。{foundation_label}の最低基準を通した後に、"
+                    f"{enhancement_label}を伸ばす順番がいいと思う。",
                     "ordered-choice",
                 ))
             candidates.append(Candidate(
@@ -353,7 +374,8 @@ class ResponseCritic:
             "conflict-empathy": 2.0,
             "counterfactual-advice": 3.0,
             "ordered-choice": 3.0,
-            "commitment-experiment": 2.5,
+            "commitment-experiment": 5.0,
+            "causal-hypothesis": 4.0,
         }.get(candidate.strategy, 0.0)
         if strategy_bonus:
             score += strategy_bonus
