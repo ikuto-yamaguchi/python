@@ -97,17 +97,26 @@ class EvidenceReliabilityConsensusTest(unittest.TestCase):
         scored_lineages = set(learner._reliability)
         self.assertTrue(scored_lineages)
 
-        for index in range(6):
+        distinct_contexts = (
+            "砂丘の風紋を高高度気球から撮影した気象班の原簿",
+            "深海熱水孔の化学組成を潜水艇で採取した海洋班の原簿",
+            "古代木簡の年輪を放射光で解析した考古班の原簿",
+            "極域氷床の亀裂音を地中マイクで収録した雪氷班の原簿",
+            "火山灰粒子の偏光像を航空機上で測定した地質班の原簿",
+            "森林樹冠の蒸散量を衛星分光器で追跡した生態班の原簿",
+        )
+        for index, context in enumerate(distinct_contexts):
             new_target = f"流入論点{index}Z"
-            learner.ingest_reliability_verified_hypothesis(
-                strong(new_target, index + 5, 2, f"固有観測施設{index}による独立測定記録")
-            )
+            learner.ingest_reliability_verified_hypothesis(strong(new_target, index + 5, 2, context))
 
         learner.reliability_graph_bytes()
+        active_lineages = set(learner._lineages)
+        actually_evicted = scored_lineages - active_lineages
+        self.assertTrue(actually_evicted)
         self.assertLessEqual(len(learner._reliability), learner.max_lineages)
-        self.assertTrue(set(learner._reliability).issubset(learner._lineages))
+        self.assertTrue(set(learner._reliability).issubset(active_lineages))
         self.assertTrue(learner._reliability_settled_targets.issubset(learner._hypotheses))
-        self.assertTrue(scored_lineages.isdisjoint(learner._reliability))
+        self.assertTrue(actually_evicted.isdisjoint(learner._reliability))
 
     def test_reset_clears_graph_local_accounting(self):
         learner = self.learner()
