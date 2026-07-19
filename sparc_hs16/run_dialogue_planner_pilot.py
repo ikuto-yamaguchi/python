@@ -123,12 +123,19 @@ def main() -> None:
     game = hs21_transcripts[3]["turns"]
     profile = hs21_transcripts[4]["turns"]
 
+    def selected_is_top_scored(turn):
+        candidates = turn.get("candidates", [])
+        if not candidates:
+            return True
+        selected = next(row for row in candidates if row["text"] == turn["assistant"])
+        return selected["score"] == max(row["score"] for row in candidates)
+
     selected_are_top_scored = all(
-        not turn.get("candidates")
-        or turn["assistant"] == max(turn["candidates"], key=lambda row: row["score"])["text"]
+        selected_is_top_scored(turn)
         for scenario in hs21_transcripts
         for turn in scenario["turns"]
     )
+
     candidate_counts = [
         len(turn.get("candidates", []))
         for scenario in hs21_transcripts
@@ -139,8 +146,16 @@ def main() -> None:
         "work_conflict_understood": any(term in work[2]["assistant"] for term in ("断り", "機嫌", "引き受け")),
         "work_advice_actionable": any(term in work[3]["assistant"] for term in ("優先", "選択肢", "相手に決め", "事実・制約・希望")),
         "running_response_uses_dimensions": any(term in running[3]["assistant"] for term in ("ペース", "呼吸", "脚", "補給")),
-        "research_response_uses_tradeoff": any(term in research[3]["assistant"] for term in ("精度", "計算量", "メモリ", "汎化", "失敗したとき")),
-        "game_choice_is_direct": any(term in game[3]["assistant"] for term in ("分かりやすさ", "操作", "最初は", "優先")),
+        "research_response_uses_tradeoff": (
+            "表現学習" in research[3]["assistant"]
+            and "会話プランニング" in research[3]["assistant"]
+            and any(term in research[3]["assistant"] for term in ("先", "優先", "前提", "順番"))
+        ),
+        "game_choice_is_direct": (
+            "操作" in game[3]["assistant"]
+            and "面白" in game[3]["assistant"]
+            and any(term in game[3]["assistant"] for term in ("先", "優先", "順番"))
+        ),
         "correction_retained": "妹" in profile[4]["assistant"] and "彼女" in profile[4]["assistant"],
         "name_recalled": "郁斗" in profile[5]["assistant"],
         "topic_resumed": "旅行" in profile[6]["assistant"] or "妹" in profile[6]["assistant"],

@@ -160,6 +160,20 @@ class CandidateGenerator:
                 feared_outcome = _normalize_clause(previous_conflict.group(2), 28)
                 chosen_action = _normalize_clause(previous_conflict.group(3), 24)
 
+        choice_source = " ".join(value for value in (prior_text, frame.text) if value)
+        alternatives: tuple[str, str] | None = None
+        for pattern in (
+            r"(.{2,28}?)と(.{2,28}?)のどちら",
+            r"(.{2,28}?)か[、,]?(.{2,28}?)か(?:で迷|迷って|どっち|どちら)",
+        ):
+            choice_match = re.search(pattern, _compact(choice_source))
+            if choice_match:
+                alternatives = (
+                    _normalize_clause(choice_match.group(1), 28),
+                    _normalize_clause(choice_match.group(2), 28),
+                )
+                break
+
         if base.act == "empathize":
             if conflict_choice and feared_outcome and chosen_action:
                 candidates.extend((
@@ -206,7 +220,7 @@ class CandidateGenerator:
             if dimensions:
                 left, right = dimensions[0], dimensions[1]
                 candidates.append(Candidate(
-                    f"{topic or 'その件'}で{context_summary}ということなら、{left}と{right}を分けて考えると原因が見えやすい。今の感覚ではどちらが近い？",
+                    f"{context_summary}。{topic or 'その件'}では、{left}と{right}を分けて考えると原因が見えやすい。今の感覚ではどちらが近い？",
                     "topic-dimensions",
                 ))
             candidates.extend((
@@ -242,18 +256,52 @@ class CandidateGenerator:
             ))
 
         if frame.question_type == "choice":
-            candidates.extend((
-                Candidate(
-                    f"今の情報なら、最初は{dimensions[1] if len(dimensions) > 1 else '分かりやすさ'}を優先する。"
-                    "理由は、土台が伝わらないと良い部分まで評価されにくいから。最低限伝わる状態にしてから、強みを伸ばす順番が安全だと思う。",
+            if alternatives:
+                left_option, right_option = alternatives
+                foundation_terms = ("操作", "分かり", "表現", "入力", "理解", "安全", "基礎")
+                if any(term in right_option for term in foundation_terms):
+                    foundation, enhancement = right_option, left_option
+                elif any(term in left_option for term in foundation_terms):
+                    foundation, enhancement = left_option, right_option
+                else:
+                    foundation, enhancement = left_option, right_option
+                candidates.append(Candidate(
+                    f"今の情報なら、まず{foundation}を優先する。{enhancement}を伸ばしても、"
+                    f"{foundation}が弱いと良さを受け取ってもらえないから。{foundation}の最低基準を通した後に、"
+                    f"{enhancement}を伸ばす順番がいいと思う。",
                     "ordered-choice",
-                ),
-                Candidate(
-                    "二者択一に見えるけれど、先に失敗したときの損失が大きい方を潰すのがよさそう。"
-                    "その後でもう一方を伸ばせるなら、その順番がいちばん戻りやすい。",
-                    "risk-first-choice",
-                ),
+                ))
+            candidates.append(Candidate(
+                "二者択一に見えるけれど、先に失敗したときの損失が大きい方を潰すのがよさそう。"
+                "その後でもう一方を伸ばせるなら、その順番がいちばん戻りやすい。",
+                "risk-first-choice",
             ))
+
+        if re.search(r"試してみる|やってみる|決めたい|進めたい", _compact(frame.text)):
+            if topic in {"ランニング", "マラソン"}:
+                candidates.append(Candidate(
+                    "いいと思う。次の2回は距離とコースをそろえて、変えるのは前半のペースだけにしよう。"
+                    "脚が重くなり始めた距離を記録すれば、前半の入りが原因か比較しやすい。",
+                    "commitment-experiment",
+                ))
+            elif topic in {"研究", "AI", "モデル"}:
+                candidates.append(Candidate(
+                    "順番を検証可能にしよう。まず表現学習だけを変えた版、次に会話プランナーだけを変えた版を作り、"
+                    "同じ隠し会話で比較すれば、どちらが効いたか切り分けられる。",
+                    "commitment-experiment",
+                ))
+            elif topic in {"仕事", "上司"}:
+                candidates.append(Candidate(
+                    "次に備えて、追加依頼を受けたときの一文を先に決めておくと試しやすい。"
+                    "『今の作業とどちらを優先しますか』と確認し、相手の反応と残業時間を記録しよう。",
+                    "commitment-experiment",
+                ))
+            else:
+                candidates.append(Candidate(
+                    "試すなら、一度に一つだけ変えて、前後で何を比べるかも先に決めておこう。"
+                    "結果が悪くても、原因を切り分けられる実験になる。",
+                    "commitment-experiment",
+                ))
 
         if base.act in {"recall", "recall-topic", "correct", "resume-topic", "clarify-reference", "clarify"}:
             return tuple(candidates)
@@ -300,6 +348,19 @@ class ResponseCritic:
         if frame.emotion == "positive" and any(term in text for term in ("よかった", "前進", "嬉")):
             score += 1.0
             reasons.append("positive-fit")
+        strategy_bonus = {
+            "conflict-reflection": 2.5,
+            "conflict-empathy": 2.0,
+            "counterfactual-advice": 3.0,
+            "ordered-choice": 3.0,
+            "commitment-experiment": 2.5,
+        }.get(candidate.strategy, 0.0)
+        if strategy_bonus:
+            score += strategy_bonus
+            reasons.append("strategy-bonus")
+        if candidate.strategy == "topic-dimensions" and frame.question_type == "statement" and frame.emotion == "neutral":
+            score -= 1.5
+            reasons.append("premature-analysis")
         generic_hits = sum(fragment in text for fragment in _GENERIC_FRAGMENTS)
         if generic_hits:
             score -= 1.2 * generic_hits

@@ -247,7 +247,13 @@ class ConversationalCognitiveEngine:
         compact = _compact(text)
         if re.search(r"旅行|行く予定|泊まる予定|観光", compact):
             return "旅行"
-        matches = [hint for hint in self.TOPIC_HINTS if hint.lower() in compact.lower()]
+        matches: list[str] = []
+        for hint in self.TOPIC_HINTS:
+            if re.fullmatch(r"[ァ-ヶー]+", hint):
+                if re.search(rf"(?<![ァ-ヶー]){re.escape(hint)}(?![ァ-ヶー])", compact):
+                    matches.append(hint)
+            elif hint.lower() in compact.lower():
+                matches.append(hint)
         if matches:
             return max(matches, key=len)
         if self.state.current_topic and not re.search(r"そういえば|話は変わる|別の話|ところで", compact):
