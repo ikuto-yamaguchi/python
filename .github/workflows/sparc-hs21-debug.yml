@@ -27,8 +27,14 @@ jobs:
         with:
           python-version: "3.12"
       - name: Capture dialogue planner diagnostics
-        run: python run_dialogue_planner_diagnostic.py | tee dialogue_planner_diagnostic.json
+        shell: bash
+        run: |
+          set -o pipefail
+          python run_dialogue_planner_diagnostic.py | tee dialogue_planner_diagnostic.json
+          test -s dialogue_planner_diagnostic.json
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: sparc-hs21-diagnostic
           path: sparc_hs16/dialogue_planner_diagnostic.json
+          if-no-files-found: warn
