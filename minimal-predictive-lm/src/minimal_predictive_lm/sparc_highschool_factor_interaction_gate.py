@@ -21,11 +21,16 @@ from .sparc_highschool_numeric_stream_gate import _numeric_corpus
 
 
 def _note(method: str, environment: str, index: int, round_index: int) -> str:
-    return (
-        f"{method}方式の{method}回路と{method}経路を使用した。"
-        f"独立背景記録{index}-{round_index}を参照した。"
-        f"{environment}環境の{environment}室と{environment}条件で測定した"
-    )
+    del index, round_index
+    method_terms = {
+        "青": "青方式青回路青経路青配線青記録",
+        "赤": "赤方式赤回路赤経路赤配線赤記録",
+    }
+    environment_terms = {
+        "甲": "甲環境甲室甲条件甲温度甲記録",
+        "乙": "乙環境乙室乙条件乙温度乙記録",
+    }
+    return f"{method_terms[method]}。{environment_terms[environment]}"
 
 
 def _base_kwargs() -> dict[str, object]:
