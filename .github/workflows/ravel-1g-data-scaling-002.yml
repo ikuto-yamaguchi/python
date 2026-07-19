@@ -1,0 +1,163 @@
+name: ravel-1g-data-scaling-002
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/ravel_1g_model.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/ravel_public_curriculum.py"
+      - ".github/workflows/ravel-1g-data-scaling-002.yml"
+  workflow_dispatch:
+
+jobs:
+  scale-real-data-at-990mb:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm pyarrow
+
+      - name: Acquire 32K deterministic Wikipedia documents
+        run: |
+          set -o pipefail
+          mkdir -p artifacts/ravel-1g-data-scaling-002
+          curl -L --fail --retry 3 --retry-all-errors \
+            'https://huggingface.co/datasets/fujiki/llm-japanese-dataset_wikipedia/resolve/main/data/train-00000-of-00002-fe13897027598519.parquet?download=true' \
+            -o /tmp/japanese-wikipedia.parquet
+          python -m minimal_predictive_lm.ravel_public_curriculum \
+            --parquet /tmp/japanese-wikipedia.parquet \
+            --output artifacts/ravel-1g-data-scaling-002/public-curriculum-32k.jsonl \
+            --max-documents 32000 \
+            2>&1 | tee artifacts/ravel-1g-data-scaling-002/corpus.log
+
+      - name: Acquire JMMLU diagnostic
+        run: |
+          curl -L --fail --retry 3 --retry-all-errors \
+            https://huggingface.co/datasets/nlp-waseda/JMMLU/resolve/main/JMMLU.zip \
+            -o /tmp/JMMLU.zip
+          mkdir -p /tmp/jmmlu
+          unzip -q /tmp/JMMLU.zip -d /tmp/jmmlu
+
+      - name: Train 990MB with 320 documents
+        run: |
+          set -o pipefail
+          mkdir -p artifacts/ravel-1g-data-scaling-002/data-320
+          python -m minimal_predictive_lm.ravel_1g_model \
+            --corpus artifacts/ravel-1g-data-scaling-002/public-curriculum-32k.jsonl \
+            --jmmlu-root /tmp/jmmlu \
+            --model artifacts/ravel-1g-data-scaling-002/ravel-320.bin \
+            --output-dir artifacts/ravel-1g-data-scaling-002/data-320 \
+            --max-documents 320 \
+            2>&1 | tee artifacts/ravel-1g-data-scaling-002/data-320.log
+          rm -f artifacts/ravel-1g-data-scaling-002/ravel-320.bin
+
+      - name: Train 990MB with 3,200 documents
+        run: |
+          set -o pipefail
+          mkdir -p artifacts/ravel-1g-data-scaling-002/data-3200
+          python -m minimal_predictive_lm.ravel_1g_model \
+            --corpus artifacts/ravel-1g-data-scaling-002/public-curriculum-32k.jsonl \
+            --jmmlu-root /tmp/jmmlu \
+            --model artifacts/ravel-1g-data-scaling-002/ravel-3200.bin \
+            --output-dir artifacts/ravel-1g-data-scaling-002/data-3200 \
+            --max-documents 3200 \
+            2>&1 | tee artifacts/ravel-1g-data-scaling-002/data-3200.log
+          rm -f artifacts/ravel-1g-data-scaling-002/ravel-3200.bin
+
+      - name: Train 990MB with 32,000 documents
+        run: |
+          set -o pipefail
+          mkdir -p artifacts/ravel-1g-data-scaling-002/data-32000
+          python -m minimal_predictive_lm.ravel_1g_model \
+            --corpus artifacts/ravel-1g-data-scaling-002/public-curriculum-32k.jsonl \
+            --jmmlu-root /tmp/jmmlu \
+            --model artifacts/ravel-1g-data-scaling-002/ravel-32000.bin \
+            --output-dir artifacts/ravel-1g-data-scaling-002/data-32000 \
+            --max-documents 32000 \
+            2>&1 | tee artifacts/ravel-1g-data-scaling-002/data-32000.log
+
+      - name: Decide data scaling
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path("artifacts/ravel-1g-data-scaling-002")
+          points = []
+          for count in (320, 3200, 32000):
+              report = json.loads(
+                  (root / f"data-{count}" / "ravel-1g-end-to-end-001.json").read_text()
+              )
+              assert report["resources"]["logical_model_bytes"] == 990000000
+              assert report["resources"]["complete_package_bytes"] <= 1000000000
+              assert report["jmmlu"]["total"] == 7536
+              assert report["protocol"]["jmmlu_targets_used_for_training"] == 0
+              points.append(
+                  {
+                      "documents": count,
+                      "sentences": report["training"]["sentences"],
+                      "tokens": report["training"]["tokens"],
+                      "accuracy": report["jmmlu"]["accuracy"],
+                      "correct": report["jmmlu"]["correct"],
+                      "training_seconds": report["training"]["elapsed_seconds"],
+                      "evaluation_seconds": report["jmmlu"]["elapsed_seconds"],
+                      "max_active_reads": report["resources"]["max_active_reads_observed"],
+                      "region_stats": report["resources"]["region_stats"],
+                  }
+              )
+
+          monotonic = all(
+              right["accuracy"] >= left["accuracy"]
+              for left, right in zip(points, points[1:])
+          )
+          result = {
+              "capability_id": "RAVEL-1G-DATA-SCALING-002",
+              "points": points,
+              "accuracy_monotonic": monotonic,
+              "gain_320_to_32000": points[-1]["accuracy"] - points[0]["accuracy"],
+              "route_supported": bool(
+                  monotonic
+                  and points[-1]["accuracy"] > points[0]["accuracy"]
+                  and points[-1]["accuracy"] > 0.25
+              ),
+              "highschool_level_acquired": False,
+          }
+          (root / "ravel-1g-data-scaling-002.json").write_text(
+              json.dumps(result, ensure_ascii=False, indent=2) + "\n"
+          )
+          print(json.dumps(result, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Package final trained 990MB model
+        run: |
+          cp artifacts/ravel-1g-data-scaling-002/data-32000/ravel-1g.manifest.json \
+            artifacts/ravel-1g-data-scaling-002/ravel-32000.manifest.json
+          sha256sum artifacts/ravel-1g-data-scaling-002/ravel-32000.bin \
+            > artifacts/ravel-1g-data-scaling-002/ravel-32000.sha256
+          tar --sparse -czf artifacts/ravel-1g-data-scaling-002/ravel-32000-model.tar.gz \
+            -C artifacts/ravel-1g-data-scaling-002 \
+            ravel-32000.bin ravel-32000.manifest.json ravel-32000.sha256
+          ls -lh artifacts/ravel-1g-data-scaling-002/ravel-32000-model.tar.gz
+
+      - name: Upload data-scaling evidence and model
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ravel-1g-data-scaling-002-results
+          path: |
+            artifacts/ravel-1g-data-scaling-002/ravel-1g-data-scaling-002.json
+            artifacts/ravel-1g-data-scaling-002/ravel-32000-model.tar.gz
+            artifacts/ravel-1g-data-scaling-002/ravel-32000.manifest.json
+            artifacts/ravel-1g-data-scaling-002/ravel-32000.sha256
+            artifacts/ravel-1g-data-scaling-002/public-curriculum-32k.jsonl.report.json
+            artifacts/ravel-1g-data-scaling-002/data-320/ravel-1g-end-to-end-001.json
+            artifacts/ravel-1g-data-scaling-002/data-3200/ravel-1g-end-to-end-001.json
+            artifacts/ravel-1g-data-scaling-002/data-32000/ravel-1g-end-to-end-001.json
+            artifacts/ravel-1g-data-scaling-002/*.log
+          retention-days: 30
