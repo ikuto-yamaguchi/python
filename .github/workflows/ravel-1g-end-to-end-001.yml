@@ -1,0 +1,174 @@
+name: ravel-1g-end-to-end-001
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/ravel_1g_model.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/ravel_public_curriculum.py"
+      - "minimal-predictive-lm/tests/test_ravel_1g_model.py"
+      - ".github/workflows/ravel-1g-end-to-end-001.yml"
+  workflow_dispatch:
+
+jobs:
+  train-and-evaluate-ravel-1g:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm
+
+      - name: Unit tests
+        run: |
+          python -m unittest \
+            minimal-predictive-lm/tests/test_ravel_1g_model.py -v
+
+      - name: Acquire public Japanese curriculum
+        run: |
+          mkdir -p artifacts/ravel-1g-end-to-end-001
+          python -m minimal_predictive_lm.ravel_public_curriculum \
+            --output artifacts/ravel-1g-end-to-end-001/public-curriculum.jsonl \
+            --results-per-query 10 \
+            --max-documents 320 \
+            | tee artifacts/ravel-1g-end-to-end-001/corpus.log
+
+      - name: Acquire disclosed JMMLU diagnostic
+        run: |
+          curl -L --fail --retry 3 \
+            https://huggingface.co/datasets/nlp-waseda/JMMLU/resolve/main/JMMLU.zip \
+            -o /tmp/JMMLU.zip
+          mkdir -p /tmp/jmmlu
+          unzip -q /tmp/JMMLU.zip -d /tmp/jmmlu
+
+      - name: Train and evaluate 16MB scale
+        run: |
+          mkdir -p artifacts/ravel-1g-end-to-end-001/scale-16mb
+          python -m minimal_predictive_lm.ravel_1g_model \
+            --corpus artifacts/ravel-1g-end-to-end-001/public-curriculum.jsonl \
+            --jmmlu-root /tmp/jmmlu \
+            --model artifacts/ravel-1g-end-to-end-001/ravel-16mb.bin \
+            --output-dir artifacts/ravel-1g-end-to-end-001/scale-16mb \
+            --logical-bytes 16000000 \
+            | tee artifacts/ravel-1g-end-to-end-001/scale-16mb.log
+
+      - name: Train and evaluate 128MB scale
+        run: |
+          mkdir -p artifacts/ravel-1g-end-to-end-001/scale-128mb
+          python -m minimal_predictive_lm.ravel_1g_model \
+            --corpus artifacts/ravel-1g-end-to-end-001/public-curriculum.jsonl \
+            --jmmlu-root /tmp/jmmlu \
+            --model artifacts/ravel-1g-end-to-end-001/ravel-128mb.bin \
+            --output-dir artifacts/ravel-1g-end-to-end-001/scale-128mb \
+            --logical-bytes 128000000 \
+            | tee artifacts/ravel-1g-end-to-end-001/scale-128mb.log
+
+      - name: Train and evaluate actual 990MB model
+        run: |
+          mkdir -p artifacts/ravel-1g-end-to-end-001/scale-990mb
+          python -m minimal_predictive_lm.ravel_1g_model \
+            --corpus artifacts/ravel-1g-end-to-end-001/public-curriculum.jsonl \
+            --jmmlu-root /tmp/jmmlu \
+            --model artifacts/ravel-1g-end-to-end-001/ravel-1g.bin \
+            --output-dir artifacts/ravel-1g-end-to-end-001/scale-990mb \
+            | tee artifacts/ravel-1g-end-to-end-001/scale-990mb.log
+
+      - name: Build scaling decision and enforce research integrity
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path("artifacts/ravel-1g-end-to-end-001")
+          points = []
+          for name in ("scale-16mb", "scale-128mb", "scale-990mb"):
+              report = json.loads(
+                  (root / name / "ravel-1g-end-to-end-001.json").read_text()
+              )
+              points.append(
+                  {
+                      "scale": name,
+                      "logical_model_bytes": report["resources"]["logical_model_bytes"],
+                      "accuracy": report["jmmlu"]["accuracy"],
+                      "correct": report["jmmlu"]["correct"],
+                      "total": report["jmmlu"]["total"],
+                      "training_documents": report["training"]["documents"],
+                      "training_sentences": report["training"]["sentences"],
+                      "max_active_reads": report["resources"]["max_active_reads_observed"],
+                      "complete_package_bytes": report["resources"]["complete_package_bytes"],
+                  }
+              )
+              assert report["experiment_completed"] is True
+              assert report["protocol"]["jmmlu_targets_used_for_training"] == 0
+              assert report["jmmlu"]["total"] == 7536
+              assert report["highschool_level_passed"] is False
+
+          corpus = json.loads(
+              (root / "public-curriculum.jsonl.report.json").read_text()
+          )
+          assert corpus["documents"] >= 160
+          assert points[-1]["logical_model_bytes"] == 990000000
+          assert points[-1]["complete_package_bytes"] <= 1000000000
+          assert points[-1]["max_active_reads"] <= 8256
+
+          monotonic = all(
+              right["accuracy"] >= left["accuracy"]
+              for left, right in zip(points, points[1:])
+          )
+          result = {
+              "capability_id": "RAVEL-1G-SCALING-DECISION-001",
+              "points": points,
+              "accuracy_monotonic": monotonic,
+              "gain_16mb_to_990mb": points[-1]["accuracy"] - points[0]["accuracy"],
+              "highschool_level_acquired": False,
+              "route_supported_by_this_run": bool(
+                  monotonic
+                  and points[-1]["accuracy"] > points[0]["accuracy"]
+                  and points[-1]["accuracy"] > 0.25
+              ),
+              "claim_boundary": (
+                  "A positive result only supports scaling of this RAVEL prototype on "
+                  "JMMLU. It does not establish proofs, essays, listening, interviews, "
+                  "long dialogue, or perfect university-exam mastery."
+              ),
+          }
+          (root / "ravel-1g-scaling-decision-001.json").write_text(
+              json.dumps(result, ensure_ascii=False, indent=2) + "\n"
+          )
+          print(json.dumps(result, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Package the trained 990MB model
+        run: |
+          cp artifacts/ravel-1g-end-to-end-001/scale-990mb/ravel-1g.manifest.json \
+            artifacts/ravel-1g-end-to-end-001/ravel-1g.manifest.json
+          sha256sum artifacts/ravel-1g-end-to-end-001/ravel-1g.bin \
+            > artifacts/ravel-1g-end-to-end-001/ravel-1g.sha256
+          tar --sparse -czf artifacts/ravel-1g-end-to-end-001/ravel-1g-model.tar.gz \
+            -C artifacts/ravel-1g-end-to-end-001 \
+            ravel-1g.bin ravel-1g.manifest.json ravel-1g.sha256
+          rm -f artifacts/ravel-1g-end-to-end-001/ravel-16mb.bin
+          rm -f artifacts/ravel-1g-end-to-end-001/ravel-128mb.bin
+          ls -lh artifacts/ravel-1g-end-to-end-001/ravel-1g-model.tar.gz
+
+      - name: Upload trained model and evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ravel-1g-end-to-end-001-results
+          path: |
+            artifacts/ravel-1g-end-to-end-001/ravel-1g-model.tar.gz
+            artifacts/ravel-1g-end-to-end-001/ravel-1g.manifest.json
+            artifacts/ravel-1g-end-to-end-001/ravel-1g.sha256
+            artifacts/ravel-1g-end-to-end-001/ravel-1g-scaling-decision-001.json
+            artifacts/ravel-1g-end-to-end-001/public-curriculum.jsonl.report.json
+            artifacts/ravel-1g-end-to-end-001/scale-16mb/ravel-1g-end-to-end-001.json
+            artifacts/ravel-1g-end-to-end-001/scale-128mb/ravel-1g-end-to-end-001.json
+            artifacts/ravel-1g-end-to-end-001/scale-990mb/ravel-1g-end-to-end-001.json
+            artifacts/ravel-1g-end-to-end-001/*.log
+          retention-days: 30
