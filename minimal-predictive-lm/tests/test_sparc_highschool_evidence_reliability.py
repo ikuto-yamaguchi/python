@@ -85,6 +85,22 @@ class EvidenceReliabilityConsensusTest(unittest.TestCase):
         self.assertEqual(3, learner.reliability_consolidations)
         self.assertGreater(learner.reliability_writes, 0)
 
+    def test_reset_clears_graph_local_accounting(self):
+        learner = self.learner()
+        self.calibrate(learner)
+        learner.answer_from_reliability_graph("校正論点0Aの現在の結論を説明してください。")
+        self.assertGreater(learner.reliability_reads, 0)
+        self.assertGreater(learner.reliability_writes, 0)
+        self.assertEqual(3, learner.reliability_consolidations)
+
+        learner.reset_reliability_graph()
+
+        self.assertEqual({}, learner._reliability)
+        self.assertEqual(set(), learner._reliability_settled_targets)
+        self.assertEqual(0, learner.reliability_reads)
+        self.assertEqual(0, learner.reliability_writes)
+        self.assertEqual(0, learner.reliability_consolidations)
+
 
 if __name__ == "__main__":
     unittest.main()
