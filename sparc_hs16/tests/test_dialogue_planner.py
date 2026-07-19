@@ -10,7 +10,8 @@ class DialoguePlannerTests(unittest.TestCase):
         engine = PlannedConversationalEngine()
         reply = engine.respond("今日は仕事でかなり疲れたよ。")
         self.assertGreaterEqual(len(engine.last_candidates), 3)
-        self.assertEqual(reply.text, engine.last_candidates[0].text)
+        selected = next(candidate for candidate in engine.last_candidates if candidate.text == reply.text)
+        self.assertEqual(selected.score, max(candidate.score for candidate in engine.last_candidates))
         self.assertTrue(any(reason.startswith("strategy=") for reason in reply.evidence))
 
     def test_advice_is_actionable_and_uses_active_topic(self) -> None:
