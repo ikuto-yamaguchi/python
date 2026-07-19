@@ -44,6 +44,41 @@ def _note(index):
     return f"{token}方式{token}回路{token}環境{token}条件{token}記録"
 
 
+def _resolved_target_lineage(learner, target):
+    """Return the target-local verified lineage with the strongest learned pair signal.
+
+    The integrated learner already contains many unrelated one-shot documents. Selecting a
+    lineage globally by pair count measures corpus density instead of the interaction learned
+    for this target. Restricting the readout to non-conflicted lineages attached to the target
+    keeps the gate task-agnostic while testing the shared evidence path that was just updated.
+    """
+    candidates = {
+        lineage_id
+        for record in learner._hypotheses.get(target, {}).values()
+        for lineage_id in tuple(record["lineage_ids"])
+        if (lineage_id, target) not in learner._lineage_conflicts
+        and learner._interaction_pairs(lineage_id)
+    }
+    if not candidates:
+        return None
+    return max(
+        candidates,
+        key=lambda lineage_id: (
+            sum(
+                1
+                for pair in learner._interaction_pairs(lineage_id)
+                if learner._factor_interactions.get(pair, 0) != 0
+            ),
+            sum(
+                abs(learner._factor_interactions.get(pair, 0))
+                for pair in learner._interaction_pairs(lineage_id)
+            ),
+            len(learner._interaction_pairs(lineage_id)),
+            lineage_id,
+        ),
+    )
+
+
 def _resolve_once(learner, index):
     target = f"単発相互作用校正論点{index}"
     truth = 20 + index
@@ -53,15 +88,10 @@ def _resolve_once(learner, index):
     learner.ingest_interaction_verified_hypothesis(_strong(target, truth, 3, note))
     learner.ingest_interaction_verified_hypothesis(_weak(target, truth, 3, f"独立再測定班{index}"))
     ok = learner.consolidate_verified_target_interactions(target)
-    lineages = [
-        lineage_id
-        for lineage_id in learner._lineages
-        if learner._interaction_pairs(lineage_id)
-    ]
-    if not lineages:
+    lineage_id = _resolved_target_lineage(learner, target)
+    if lineage_id is None:
         return ok, 0, False, 0
-    best = max(lineages, key=lambda lineage_id: len(learner._interaction_pairs(lineage_id)))
-    adjustment, conflict, active = learner._interaction_signal(best)
+    adjustment, conflict, active = learner._interaction_signal(lineage_id)
     return ok, adjustment, conflict, active
 
 
