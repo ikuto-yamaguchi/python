@@ -38,9 +38,20 @@ class EvidenceReliabilityConsensusLearner(EvidenceQualityConsensusLearner):
         self.last_reliability = EvidenceReliabilityStats("", "", 0, 0)
 
     def reset_reliability_graph(self) -> None:
+        """Reset both bounded graph state and graph-local accounting.
+
+        The reliability graph is evaluated as an independent episode. Keeping
+        counters from an earlier episode makes later gate cases depend on test
+        order even though their graph state has been cleared. Resetting the
+        accounting together with the graph preserves the shared mechanism while
+        making resource and consolidation measurements episode-local.
+        """
         self.reset_quality_graph()
         self._reliability.clear()
         self._reliability_settled_targets.clear()
+        self.reliability_reads = 0
+        self.reliability_writes = 0
+        self.reliability_consolidations = 0
         self.last_reliability = EvidenceReliabilityStats("", "", 0, 0)
 
     def ingest_reliability_verified_hypothesis(self, text: str) -> HypothesisConsensusResult:
