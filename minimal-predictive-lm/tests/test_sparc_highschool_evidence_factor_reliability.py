@@ -96,9 +96,18 @@ class EvidenceFactorReliabilityTests(unittest.TestCase):
             f"{target}と未知要素論点99の結論を比較してください。"
         )
         self.assertFalse(mixed.accepted)
-        self.assertEqual(mixed.reason, "abstain-unsupported-factor-reliability-target")
+        self.assertEqual(
+            mixed.mechanism,
+            "abstain-unsupported-factor-reliability-target",
+        )
+        self.assertEqual(mixed.target, "")
+        self.assertEqual(mixed.selected_states, ())
         follow_up = learner.answer_from_factor_reliability_graph("続けて説明してください。")
         self.assertFalse(follow_up.accepted)
+        self.assertEqual(
+            follow_up.mechanism,
+            "abstain-ambiguous-factor-reliability-query",
+        )
 
     def test_factor_graph_is_bounded_and_resettable(self):
         learner = _learner()
