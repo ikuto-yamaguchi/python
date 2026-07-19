@@ -1,0 +1,63 @@
+name: SPARC-HS20 dialogue cognition gate
+
+on:
+  push:
+    branches:
+      - research/sparc-hs16-university-gate
+    paths:
+      - "sparc_hs16/sparc_hs16/dialogue_cognition.py"
+      - "sparc_hs16/run_dialogue_cognition_pilot.py"
+      - "sparc_hs16/tests/test_dialogue_cognition.py"
+      - ".github/workflows/sparc-hs20.yml"
+  pull_request:
+    paths:
+      - "sparc_hs16/sparc_hs16/dialogue_cognition.py"
+      - "sparc_hs16/run_dialogue_cognition_pilot.py"
+      - "sparc_hs16/tests/test_dialogue_cognition.py"
+      - ".github/workflows/sparc-hs20.yml"
+  workflow_dispatch:
+
+jobs:
+  dialogue-cognition:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sparc_hs16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run all unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Run actual Japanese multi-turn dialogue
+        run: python run_dialogue_cognition_pilot.py | tee dialogue_report.json
+      - name: Verify context, correction, emotion and truthful boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path("dialogue_report.json").read_text())
+          assert report["passed_checks"] == report["total_checks"] == 16
+          assert report["automatic_score"] == 1.0
+          assert report["scenario_count"] == 4
+          assert report["turn_count"] == 25
+          assert report["session_profile_persistence"] is True
+          assert report["legacy_engine_coverage"] < 0.50
+          assert report["p95_latency_ms"] < 5.0
+          assert report["state_bytes"] < 100_000
+          assert report["human_transcript_review_required"] is True
+          assert report["claim_boundary"]["open_domain_natural_conversation_proven"] is False
+          assert report["claim_boundary"]["highschool_level_communication_proven"] is False
+          assert report["claim_boundary"]["general_intelligence_discovered"] is False
+          assert Path("dialogue_transcript.json").exists()
+          assert Path("dialogue_transcript.md").exists()
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sparc-hs20-dialogue-transcript
+          path: |
+            sparc_hs16/dialogue_report.json
+            sparc_hs16/dialogue_transcript.json
+            sparc_hs16/dialogue_transcript.md

@@ -1,0 +1,57 @@
+name: SPARC-HS18 neurosearch gate
+
+on:
+  push:
+    branches:
+      - research/sparc-hs16-university-gate
+    paths:
+      - "sparc_hs16/**"
+      - ".github/workflows/sparc-hs18.yml"
+  pull_request:
+    paths:
+      - "sparc_hs16/**"
+      - ".github/workflows/sparc-hs18.yml"
+  workflow_dispatch:
+
+jobs:
+  neurosearch:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sparc_hs16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run all unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Run 16MB to 64MB to 256MB prototype search
+        run: python run_neurosearch_pilot.py | tee neurosearch_report.json
+      - name: Verify fixed-budget mechanism search and truthful boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("neurosearch_report.json").read_text())
+          assert report["actual_256mb_budget_tested"] is True
+          assert report["candidate_architecture_found"] is True
+          assert report["winner"]["name"] == "planning_hybrid"
+          assert report["winner"]["budget_mb"] == 256
+          assert report["winner"]["total_budget_bytes"] == 256 * 1024 * 1024
+          assert report["winner"]["allocated_cortex_bytes"] == int(256 * 1024 * 1024 * 0.75)
+          assert report["winner"]["one_shot_accuracy"] == 1.0
+          assert report["winner"]["delayed_planning_accuracy"] == 1.0
+          assert report["winner_advantage_over_atomic_points"] >= 25.0
+          assert report["same_learning_code_all_prototypes"] is True
+          assert report["task_specific_solver_inside_model"] is False
+          assert report["transformer_used"] is False
+          assert report["backpropagation_used"] is False
+          assert report["raw_language_concept_learning_passed"] is False
+          assert report["general_intelligence_discovered"] is False
+          assert report["highschool_level_passed"] is False
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sparc-hs18-neurosearch-report
+          path: sparc_hs16/neurosearch_report.json

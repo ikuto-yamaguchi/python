@@ -1,0 +1,46 @@
+name: SPARC-HS21 diagnostic
+
+on:
+  push:
+    branches:
+      - research/sparc-hs16-university-gate
+    paths:
+      - "sparc_hs16/run_dialogue_planner_diagnostic.py"
+      - "sparc_hs16/sparc_hs16/dialogue_planner.py"
+      - ".github/workflows/sparc-hs21-debug.yml"
+  pull_request:
+    paths:
+      - "sparc_hs16/run_dialogue_planner_diagnostic.py"
+      - "sparc_hs16/sparc_hs16/dialogue_planner.py"
+      - ".github/workflows/sparc-hs21-debug.yml"
+  workflow_dispatch:
+
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sparc_hs16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Capture dialogue planner diagnostics
+        shell: bash
+        run: |
+          set +e
+          python run_dialogue_planner_diagnostic.py > dialogue_planner_diagnostic.json 2> dialogue_planner_error.log
+          status=$?
+          echo "$status" > dialogue_planner_exit_code.txt
+          cat dialogue_planner_error.log
+          exit 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sparc-hs21-diagnostic
+          path: |
+            sparc_hs16/dialogue_planner_diagnostic.json
+            sparc_hs16/dialogue_planner_error.log
+            sparc_hs16/dialogue_planner_exit_code.txt
+          if-no-files-found: error

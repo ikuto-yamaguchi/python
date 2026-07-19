@@ -1,0 +1,73 @@
+name: SPARC-HS21 dialogue planner gate
+
+on:
+  push:
+    branches:
+      - research/sparc-hs16-university-gate
+    paths:
+      - "sparc_hs16/sparc_hs16/dialogue_planner.py"
+      - "sparc_hs16/run_dialogue_planner_pilot.py"
+      - "sparc_hs16/tests/test_dialogue_planner.py"
+      - ".github/workflows/sparc-hs21.yml"
+  pull_request:
+    paths:
+      - "sparc_hs16/sparc_hs16/dialogue_planner.py"
+      - "sparc_hs16/run_dialogue_planner_pilot.py"
+      - "sparc_hs16/tests/test_dialogue_planner.py"
+      - ".github/workflows/sparc-hs21.yml"
+  workflow_dispatch:
+
+jobs:
+  dialogue-planner:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sparc_hs16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run all unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Run HS20 versus HS21 actual dialogue comparison
+        shell: bash
+        run: |
+          set -o pipefail
+          python run_dialogue_planner_pilot.py | tee dialogue_planner_console.json
+          test -s dialogue_planner_report.json
+          test -s dialogue_planner_transcript.md
+      - name: Verify grounding, planning, diversity and truthful boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path("dialogue_planner_report.json").read_text())
+          failed = [name for name, passed in report["checks"].items() if not passed]
+          print("failed_checks=", failed)
+          assert report["passed_checks"] == report["total_checks"], failed
+          assert report["automatic_score"] == 1.0
+          assert report["average_candidate_count"] >= 2.0
+          assert report["hs21_generic_rate"] < report["hs20_generic_rate"]
+          assert report["hs21_average_reply_chars"] > report["hs20_average_reply_chars"] + 8.0
+          assert report["p95_latency_ms"] < 5.0
+          assert report["state_and_candidates_bytes"] < 100_000
+          assert report["architecture"]["multi_candidate_generation"] is True
+          assert report["architecture"]["relevance_specificity_affect_critic"] is True
+          assert report["architecture"]["transformer_used"] is False
+          assert report["architecture"]["backpropagation_used"] is False
+          assert report["human_transcript_review_required"] is True
+          assert report["claim_boundary"]["open_domain_natural_conversation_proven"] is False
+          assert report["claim_boundary"]["highschool_level_communication_proven"] is False
+          assert report["claim_boundary"]["general_intelligence_discovered"] is False
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sparc-hs21-dialogue-planner-report
+          path: |
+            sparc_hs16/dialogue_planner_report.json
+            sparc_hs16/dialogue_planner_transcript.md
+            sparc_hs16/dialogue_planner_console.json
+          if-no-files-found: warn

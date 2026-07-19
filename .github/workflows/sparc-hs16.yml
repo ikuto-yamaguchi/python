@@ -1,0 +1,182 @@
+name: SPARC-HS16 strict gate
+
+on:
+  push:
+    branches:
+      - research/sparc-hs16-university-gate
+    paths:
+      - "sparc_hs16/**"
+      - ".github/workflows/sparc-hs16.yml"
+  pull_request:
+    paths:
+      - "sparc_hs16/**"
+      - ".github/workflows/sparc-hs16.yml"
+  workflow_dispatch:
+
+jobs:
+  pilot:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sparc_hs16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Run 404-case integrated pilot
+        run: python run_pilot.py | tee pilot_report.json
+      - name: Verify truthful integrated gate state
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("pilot_report.json").read_text())
+          assert report["correct"] == 404
+          assert report["total"] == 404
+          assert report["artifact_bytes"] <= 1_000_000_000
+          assert report["mobile_device_gate_passed"] is True
+          assert report["university_exam_mastery_passed"] is False
+          assert report["highschool_level_passed"] is False
+          PY
+      - name: Run autonomous program-induction pilot
+        run: python run_induction_pilot.py | tee induction_report.json
+      - name: Verify induced transfer and truthful claim boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("induction_report.json").read_text())
+          assert report["correct"] == 200
+          assert report["unseen_cases"] == 200
+          assert report["accuracy"] == 1.0
+          assert report["serialized_program_bank_bytes"] < 10_000
+          assert report["transformer_used"] is False
+          assert report["gradient_training_used"] is False
+          assert report["task_specific_formulas_supplied"] is False
+          assert report["university_exam_mastery_passed"] is False
+          PY
+      - name: Run 604-case adaptive runtime pilot
+        run: python run_adaptive_pilot.py | tee adaptive_report.json
+      - name: Verify one-artifact adaptive runtime
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("adaptive_report.json").read_text())
+          assert report["correct"] == 604
+          assert report["total"] == 604
+          assert report["accuracy"] == 1.0
+          assert report["adaptive_runtime_bytes"] < 100_000
+          assert len(report["induced_programs"]) == 2
+          assert report["mobile_device_gate_passed"] is True
+          assert report["university_exam_mastery_passed"] is False
+          assert report["highschool_level_passed"] is False
+          PY
+      - name: Run 500-case proof Japanese reading pilot
+        run: python run_reading_pilot.py | tee reading_report.json
+      - name: Verify unseen Japanese relations, causes and abstention
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("reading_report.json").read_text())
+          assert report["correct"] == 500
+          assert report["unseen_cases"] == 500
+          assert report["accuracy"] == 1.0
+          assert report["adaptive_runtime_bytes"] < 100_000
+          assert report["unsupported_question_abstained"] is True
+          assert report["proof_attached"] is True
+          assert report["transformer_used"] is False
+          assert report["university_exam_mastery_passed"] is False
+          PY
+      - name: Run 900-check correction-aware conversation pilot
+        run: python run_conversation_pilot.py | tee conversation_report.json
+      - name: Verify bounded long conversation state
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("conversation_report.json").read_text())
+          assert report["correct"] == 900
+          assert report["turn_checks"] == 900
+          assert report["accuracy"] == 1.0
+          assert report["history_bound_respected"] is True
+          assert report["persistence_ok"] is True
+          assert report["contradiction_free_preferences"] is True
+          assert report["artifact_bytes"] < 100_000
+          assert report["transformer_used"] is False
+          assert report["university_exam_mastery_passed"] is False
+          PY
+      - name: Run 300-case exact ordering-constraint pilot
+        run: python run_constraint_pilot.py | tee constraint_report.json
+      - name: Verify exact solutions, ambiguity and contradiction
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("constraint_report.json").read_text())
+          assert report["correct"] == 300
+          assert report["unseen_cases"] == 300
+          assert report["accuracy"] == 1.0
+          assert report["contradiction_detected"] is True
+          assert report["ambiguity_detected"] is True
+          assert report["proof_attached"] is True
+          assert report["adaptive_runtime_bytes"] < 100_000
+          assert report["transformer_used"] is False
+          assert report["university_exam_mastery_passed"] is False
+          PY
+      - name: Run 500-case learned sparse-router pilot
+        run: python run_router_pilot.py | tee router_report.json
+      - name: Verify learned routing and persistence
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("router_report.json").read_text())
+          assert report["correct"] == 500
+          assert report["unseen_cases"] == 500
+          assert report["accuracy"] == 1.0
+          assert report["persistence_ok"] is True
+          assert report["router_bytes"] < 200_000
+          assert report["transformer_used"] is False
+          assert report["gradient_backpropagation_used"] is False
+          assert report["university_exam_mastery_passed"] is False
+          PY
+      - name: Run SPARC-HS17 cortico-hippocampal transfer pilot
+        run: python run_brain_loop_pilot.py | tee brain_loop_report.json
+      - name: Verify brain-inspired cross-world transfer
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("brain_loop_report.json").read_text())
+          assert report["unique_hidden_combinations"] == 120
+          assert report["correct"] == 120
+          assert report["accuracy"] == 1.0
+          assert report["exact_table_unseen_baseline_accuracy"] <= 0.34
+          assert report["transfer_advantage_points"] >= 60.0
+          assert report["persistence_ok"] is True
+          assert report["delayed_reward_replay_ok"] is True
+          assert report["serialized_bytes"] < 1_000_000_000
+          assert report["same_learning_rule_all_worlds"] is True
+          assert report["task_specific_solver_inside_model"] is False
+          assert report["transformer_used"] is False
+          assert report["backpropagation_used"] is False
+          assert report["general_intelligence_discovered"] is False
+          assert report["university_exam_mastery_passed"] is False
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sparc-hs16-reports
+          path: |
+            sparc_hs16/pilot_report.json
+            sparc_hs16/induction_report.json
+            sparc_hs16/adaptive_report.json
+            sparc_hs16/reading_report.json
+            sparc_hs16/conversation_report.json
+            sparc_hs16/constraint_report.json
+            sparc_hs16/router_report.json
+            sparc_hs16/brain_loop_report.json
