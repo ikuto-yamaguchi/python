@@ -20,8 +20,11 @@ class EvidenceFactorReliabilityConsensusLearner(EvidenceReliabilityConsensusLear
     Whole-document lineages are too coarse: one operator, instrument, condition, or
     citation component may recur inside otherwise different source descriptions.
     This layer reuses the sparse provenance features already induced by the shared
-    lineage mechanism and learns bounded reproducibility per feature. No source-name
-    table, task/domain label, phrase exception, or problem-specific router is used.
+    lineage mechanism and learns bounded reproducibility per feature. Both verified
+    support and verified contradiction participate in later consensus; otherwise a
+    repeatedly falsified factor could never suppress a superficially strong source.
+    No source-name table, task/domain label, phrase exception, or problem-specific
+    router is used.
     """
 
     def __init__(self, max_factor_score: int = 4, max_factor_entries: int = 2048, **kwargs):
@@ -108,11 +111,28 @@ class EvidenceFactorReliabilityConsensusLearner(EvidenceReliabilityConsensusLear
         self.last_factor_reliability = EvidenceFactorReliabilityStats(target, rewarded, contradicted)
         return True
 
-    def _factor_multiplier(self, lineage_id: str) -> int:
+    def _factor_adjustment(self, lineage_id: str) -> int:
+        """Return a bounded signed contrast from verified shared factors.
+
+        Neutral features are excluded from the denominator so ubiquitous Japanese
+        fragments cannot wash out a repeatedly verified or falsified source factor.
+        The score remains bounded and sparse; no dense attention or extra candidate
+        expansion is introduced.
+        """
         features = tuple(self._lineages.get(lineage_id, {}).get("features", ()))
         self.factor_reads += len(features)
-        positive = [max(0, self._factor_reliability.get(int(feature), 0)) for feature in features]
-        return 1 + (sum(positive) // max(1, len(positive)))
+        scores = [self._factor_reliability.get(int(feature), 0) for feature in features]
+        active = [score for score in scores if score != 0]
+        if not active:
+            return 0
+        total = sum(active)
+        # Truncate toward zero to avoid a one-count negative rounding bias.
+        adjustment = int(total / len(active))
+        return max(-self.max_factor_score, min(self.max_factor_score, adjustment))
+
+    def _factor_multiplier(self, lineage_id: str) -> int:
+        """Compatibility view for positive reproducibility used by older reports."""
+        return 1 + max(0, self._factor_adjustment(lineage_id))
 
     def _factor_weighted_support(self, target: str, state_key: str) -> int:
         record = self._hypotheses.get(target, {}).get(state_key)
@@ -124,7 +144,11 @@ class EvidenceFactorReliabilityConsensusLearner(EvidenceReliabilityConsensusLear
             if (lineage_id, target) in self._lineage_conflicts:
                 continue
             quality = self._quality.get((lineage_id, target, state_key), 0)
-            total += quality * self._factor_multiplier(lineage_id)
+            adjustment = self._factor_adjustment(lineage_id)
+            if adjustment >= 0:
+                total += quality * (1 + adjustment)
+            else:
+                total += max(0, quality + adjustment)
         return total
 
     def answer_from_factor_reliability_graph(self, question: str) -> HypothesisConsensusResult:
@@ -161,8 +185,8 @@ class EvidenceFactorReliabilityConsensusLearner(EvidenceReliabilityConsensusLear
             True,
             target,
             states,
-            f"{target}は{details}です。{focus_note}資料全体ではなく、複数論点で再現した共有由来特徴を有界に合成した支持が一意に最大です。",
-            "shared-bounded-verified-source-factor-reliability-graph",
+            f"{target}は{details}です。{focus_note}複数論点で検算された共有由来特徴の支持と反証を符号付きで有界合成した結果、支持が一意に最大です。",
+            "shared-bounded-signed-verified-source-factor-reliability-graph",
             ranked[0][0],
             len(ranked),
             reused,
@@ -175,5 +199,6 @@ class EvidenceFactorReliabilityConsensusLearner(EvidenceReliabilityConsensusLear
             "factor_reliability": sorted(self._factor_reliability.items()),
             "max_factor_score": self.max_factor_score,
             "max_factor_entries": self.max_factor_entries,
+            "signed_factor_consensus": True,
         }
         return json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
