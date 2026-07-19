@@ -54,8 +54,25 @@ class EvidenceReliabilityConsensusLearner(EvidenceQualityConsensusLearner):
         self.reliability_consolidations = 0
         self.last_reliability = EvidenceReliabilityStats("", "", 0, 0)
 
+    def _prune_reliability_graph(self) -> None:
+        """Keep derived reliability state aligned with bounded parent graphs."""
+        active_lineages = set(self._lineages)
+        for lineage_id in tuple(self._reliability):
+            if lineage_id not in active_lineages:
+                self._reliability.pop(lineage_id, None)
+        self._reliability_settled_targets.intersection_update(self._hypotheses)
+
+    def _evict_lineage(self) -> None:
+        """Evict inherited lineage state and its derived reliability score together."""
+        before = set(self._lineages)
+        super()._evict_lineage()
+        for lineage_id in before.difference(self._lineages):
+            self._reliability.pop(lineage_id, None)
+
     def ingest_reliability_verified_hypothesis(self, text: str) -> HypothesisConsensusResult:
-        return self.ingest_quality_verified_hypothesis(text)
+        result = self.ingest_quality_verified_hypothesis(text)
+        self._prune_reliability_graph()
+        return result
 
     def consolidate_verified_target(self, target: str) -> bool:
         """Update lineage reproducibility only after a unique local quality winner.
@@ -64,6 +81,7 @@ class EvidenceReliabilityConsensusLearner(EvidenceQualityConsensusLearner):
         strict positive margin are required, preventing a single unopposed document
         from bootstrapping its own reputation.
         """
+        self._prune_reliability_graph()
         if target in self._reliability_settled_targets:
             return False
         rows = self._hypotheses.get(target, {})
@@ -168,6 +186,7 @@ class EvidenceReliabilityConsensusLearner(EvidenceQualityConsensusLearner):
         )
 
     def reliability_graph_bytes(self) -> bytes:
+        self._prune_reliability_graph()
         payload = {
             "quality": json.loads(self.quality_graph_bytes().decode("utf-8")),
             "reliability": sorted(self._reliability.items()),
