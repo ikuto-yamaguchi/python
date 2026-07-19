@@ -31,7 +31,12 @@ jobs:
       - name: Run all unit tests
         run: python -m unittest discover -s tests -v
       - name: Run HS20 versus HS21 actual dialogue comparison
-        run: python run_dialogue_planner_pilot.py | tee dialogue_planner_console.json
+        shell: bash
+        run: |
+          set -o pipefail
+          python run_dialogue_planner_pilot.py | tee dialogue_planner_console.json
+          test -s dialogue_planner_report.json
+          test -s dialogue_planner_transcript.md
       - name: Verify grounding, planning, diversity and truthful boundary
         run: |
           python - <<'PY'
@@ -39,7 +44,9 @@ jobs:
           from pathlib import Path
 
           report = json.loads(Path("dialogue_planner_report.json").read_text())
-          assert report["passed_checks"] == report["total_checks"]
+          failed = [name for name, passed in report["checks"].items() if not passed]
+          print("failed_checks=", failed)
+          assert report["passed_checks"] == report["total_checks"], failed
           assert report["automatic_score"] == 1.0
           assert report["average_candidate_count"] >= 2.0
           assert report["hs21_generic_rate"] < report["hs20_generic_rate"]
@@ -56,8 +63,11 @@ jobs:
           assert report["claim_boundary"]["general_intelligence_discovered"] is False
           PY
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: sparc-hs21-dialogue-planner-report
           path: |
             sparc_hs16/dialogue_planner_report.json
             sparc_hs16/dialogue_planner_transcript.md
+            sparc_hs16/dialogue_planner_console.json
+          if-no-files-found: warn
