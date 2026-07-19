@@ -23,15 +23,17 @@ def strong(target: str, initial: int, add: int, note: str) -> str:
 
 
 class EvidenceReliabilityConsensusTest(unittest.TestCase):
-    def learner(self):
-        learner = EvidenceReliabilityConsensusLearner(
-            max_evidence_components=8,
-            max_hypotheses_per_target=3,
-            max_lineages=12,
-            lineage_similarity_threshold=0.50,
-            max_quality_weight=3,
-            max_reliability_score=4,
-        )
+    def learner(self, **overrides):
+        options = {
+            "max_evidence_components": 8,
+            "max_hypotheses_per_target": 3,
+            "max_lineages": 12,
+            "lineage_similarity_threshold": 0.50,
+            "max_quality_weight": 3,
+            "max_reliability_score": 4,
+        }
+        options.update(overrides)
+        learner = EvidenceReliabilityConsensusLearner(**options)
         learner.learn_independent_documents(_corpus(), min_support=4)
         learner.learn_independent_numeric_documents(_numeric_corpus())
         learner.learn_long_chronological_documents(_long_corpus())
@@ -84,6 +86,28 @@ class EvidenceReliabilityConsensusTest(unittest.TestCase):
         self.assertLessEqual(len(payload), 65536)
         self.assertEqual(3, learner.reliability_consolidations)
         self.assertGreater(learner.reliability_writes, 0)
+
+    def test_evicted_lineages_and_targets_do_not_leak_reliability_state(self):
+        learner = self.learner(max_evidence_components=2, max_lineages=3)
+        target = "境界校正論点A"
+        learner.ingest_reliability_verified_hypothesis(strong(target, 12, 2, "北部研究所の独立測定"))
+        learner.ingest_reliability_verified_hypothesis(strong(target, 7, 2, "南部研究所の独立測定"))
+        learner.ingest_reliability_verified_hypothesis(strong(target, 7, 2, "中央監査所の独立再測定"))
+        self.assertTrue(learner.consolidate_verified_target(target))
+        scored_lineages = set(learner._reliability)
+        self.assertTrue(scored_lineages)
+
+        for index in range(6):
+            new_target = f"流入論点{index}Z"
+            learner.ingest_reliability_verified_hypothesis(
+                strong(new_target, index + 5, 2, f"固有観測施設{index}による独立測定記録")
+            )
+
+        learner.reliability_graph_bytes()
+        self.assertLessEqual(len(learner._reliability), learner.max_lineages)
+        self.assertTrue(set(learner._reliability).issubset(learner._lineages))
+        self.assertTrue(learner._reliability_settled_targets.issubset(learner._hypotheses))
+        self.assertTrue(scored_lineages.isdisjoint(learner._reliability))
 
     def test_reset_clears_graph_local_accounting(self):
         learner = self.learner()
