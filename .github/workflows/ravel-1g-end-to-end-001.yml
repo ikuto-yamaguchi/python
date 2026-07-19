@@ -26,17 +26,19 @@ jobs:
 
       - name: Unit tests
         run: |
-          python -m unittest \
-            minimal-predictive-lm/tests/test_ravel_1g_model.py -v
+          python -m unittest discover \
+            -s minimal-predictive-lm/tests \
+            -p 'test_ravel_1g_model.py' -v
 
       - name: Acquire public Japanese curriculum
         run: |
+          set -o pipefail
           mkdir -p artifacts/ravel-1g-end-to-end-001
           python -m minimal_predictive_lm.ravel_public_curriculum \
             --output artifacts/ravel-1g-end-to-end-001/public-curriculum.jsonl \
             --results-per-query 10 \
             --max-documents 320 \
-            | tee artifacts/ravel-1g-end-to-end-001/corpus.log
+            2>&1 | tee artifacts/ravel-1g-end-to-end-001/corpus.log
 
       - name: Acquire disclosed JMMLU diagnostic
         run: |
@@ -48,6 +50,7 @@ jobs:
 
       - name: Train and evaluate 16MB scale
         run: |
+          set -o pipefail
           mkdir -p artifacts/ravel-1g-end-to-end-001/scale-16mb
           python -m minimal_predictive_lm.ravel_1g_model \
             --corpus artifacts/ravel-1g-end-to-end-001/public-curriculum.jsonl \
@@ -55,10 +58,11 @@ jobs:
             --model artifacts/ravel-1g-end-to-end-001/ravel-16mb.bin \
             --output-dir artifacts/ravel-1g-end-to-end-001/scale-16mb \
             --logical-bytes 16000000 \
-            | tee artifacts/ravel-1g-end-to-end-001/scale-16mb.log
+            2>&1 | tee artifacts/ravel-1g-end-to-end-001/scale-16mb.log
 
       - name: Train and evaluate 128MB scale
         run: |
+          set -o pipefail
           mkdir -p artifacts/ravel-1g-end-to-end-001/scale-128mb
           python -m minimal_predictive_lm.ravel_1g_model \
             --corpus artifacts/ravel-1g-end-to-end-001/public-curriculum.jsonl \
@@ -66,17 +70,18 @@ jobs:
             --model artifacts/ravel-1g-end-to-end-001/ravel-128mb.bin \
             --output-dir artifacts/ravel-1g-end-to-end-001/scale-128mb \
             --logical-bytes 128000000 \
-            | tee artifacts/ravel-1g-end-to-end-001/scale-128mb.log
+            2>&1 | tee artifacts/ravel-1g-end-to-end-001/scale-128mb.log
 
       - name: Train and evaluate actual 990MB model
         run: |
+          set -o pipefail
           mkdir -p artifacts/ravel-1g-end-to-end-001/scale-990mb
           python -m minimal_predictive_lm.ravel_1g_model \
             --corpus artifacts/ravel-1g-end-to-end-001/public-curriculum.jsonl \
             --jmmlu-root /tmp/jmmlu \
             --model artifacts/ravel-1g-end-to-end-001/ravel-1g.bin \
             --output-dir artifacts/ravel-1g-end-to-end-001/scale-990mb \
-            | tee artifacts/ravel-1g-end-to-end-001/scale-990mb.log
+            2>&1 | tee artifacts/ravel-1g-end-to-end-001/scale-990mb.log
 
       - name: Build scaling decision and enforce research integrity
         run: |
