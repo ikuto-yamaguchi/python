@@ -125,9 +125,7 @@ class EvidenceFactorReliabilityConsensusLearner(EvidenceReliabilityConsensusLear
         active = [score for score in scores if score != 0]
         if not active:
             return 0
-        total = sum(active)
-        # Truncate toward zero to avoid a one-count negative rounding bias.
-        adjustment = int(total / len(active))
+        adjustment = int(sum(active) / len(active))
         return max(-self.max_factor_score, min(self.max_factor_score, adjustment))
 
     def _factor_multiplier(self, lineage_id: str) -> int:
@@ -186,7 +184,7 @@ class EvidenceFactorReliabilityConsensusLearner(EvidenceReliabilityConsensusLear
             target,
             states,
             f"{target}は{details}です。{focus_note}複数論点で検算された共有由来特徴の支持と反証を符号付きで有界合成した結果、支持が一意に最大です。",
-            "shared-bounded-signed-verified-source-factor-reliability-graph",
+            "shared-bounded-verified-source-factor-reliability-graph",
             ranked[0][0],
             len(ranked),
             reused,
