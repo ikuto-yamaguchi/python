@@ -232,7 +232,7 @@ class CandidateGenerator:
         if base.act in {"recall", "recall-topic", "correct", "resume-topic", "clarify-reference", "clarify"}:
             return tuple(candidates)
 
-        return tuple(dict.fromkeys((candidate.text, candidate.strategy)) and candidates)
+        return tuple(candidates)
 
 
 class ResponseCritic:
