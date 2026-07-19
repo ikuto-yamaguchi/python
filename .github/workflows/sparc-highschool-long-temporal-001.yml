@@ -63,7 +63,7 @@ jobs:
           exit 0
       - name: Run expanded integrated gate
         continue-on-error: true
-        run: python -m minimal_predictive_lm.sparc_highschool_signed_factor_consensus_gate --output-dir artifacts/sparc-highschool-long-temporal-001 2>&1 | tee artifacts/sparc-highschool-long-temporal-001/gate.log
+        run: python -m minimal_predictive_lm.sparc_highschool_factor_conflict_gate --output-dir artifacts/sparc-highschool-long-temporal-001 2>&1 | tee artifacts/sparc-highschool-long-temporal-001/gate.log
       - name: Upload results or diagnostics
         if: always()
         uses: actions/upload-artifact@v4
@@ -79,7 +79,7 @@ jobs:
           root = Path("artifacts/sparc-highschool-long-temporal-001")
           if root.joinpath("tests.exit").read_text().strip() != "0":
               raise SystemExit("integrated unit tests failed")
-          report = json.loads(root.joinpath("SPARC-highschool-general-signed-factor-consensus.json").read_text())
+          report = json.loads(root.joinpath("SPARC-highschool-general-factor-conflict-abstention.json").read_text())
           if not report["passed"]:
               raise SystemExit("expanded integrated gate failed")
           if not report["aggregate_improved"] or not report["no_regression"]:
