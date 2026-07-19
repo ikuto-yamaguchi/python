@@ -64,6 +64,48 @@ class SignedFactorConsensusTests(unittest.TestCase):
         self.assertTrue(any(score < 0 for score in learner._factor_reliability.values()))
         self.assertIn("支持と反証", result.answer)
 
+    def test_materially_mixed_verified_factors_trigger_selective_abstention(self):
+        learner = self._learner()
+        good_factor = "共通の校正済み光学回路による直接測定"
+        bad_factor = "共通の未校正推定回路による間接算出"
+        for index in range(4):
+            target = f"混合帰属校正論点{index}"
+            truth = 15 + index
+            add = 2 + index % 2
+            learner.ingest_factor_verified_hypothesis(
+                _strong(target, truth + 9, add, f"独立誤差背景{index}と{bad_factor}")
+            )
+            learner.ingest_factor_verified_hypothesis(
+                _strong(target, truth, add, f"独立観測背景{index}と{good_factor}")
+            )
+            learner.ingest_factor_verified_hypothesis(
+                _weak(target, truth, add, f"第三者監査{index}による別系統確認")
+            )
+            self.assertTrue(learner.consolidate_verified_target_factors(target))
+
+        target = "未知混合帰属論点"
+        truth = 29
+        wrong = 38
+        add = 3
+        learner.ingest_factor_verified_hypothesis(
+            _weak(target, truth, add, "新規監査班による単一点の直接確認")
+        )
+        learner.ingest_factor_verified_hypothesis(
+            _strong(target, wrong, add, f"複合測定工程で{good_factor}と{bad_factor}を併用")
+        )
+        conflicted = []
+        for record in learner._hypotheses[target].values():
+            for lineage_id in record["lineage_ids"]:
+                conflicted.append(learner._factor_signal(lineage_id)[1])
+        self.assertIn(True, conflicted)
+        result = learner.answer_from_factor_reliability_graph(
+            f"{target}の現在の結論を説明してください。"
+        )
+        self.assertFalse(result.accepted)
+        self.assertEqual(result.mechanism, "abstain-conflicted-factor-attribution")
+        self.assertEqual(result.selected_states, ())
+        self.assertEqual(learner.factor_conflict_abstentions, 1)
+
     def test_signed_graph_remains_bounded_and_serializable(self):
         learner = self._learner()
         learner._factor_reliability.update({index: (-1 if index % 2 else 1) for index in range(2500)})
