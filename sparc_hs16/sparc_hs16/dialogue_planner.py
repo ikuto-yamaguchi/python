@@ -40,7 +40,7 @@ def _compact(text: str) -> str:
 
 def _normalize_clause(text: str, limit: int = 48) -> str:
     value = re.sub(r"^(?:今日は|昨日|最近|そういえば)", "", _compact(text))
-    value = re.sub(r"(?:だよ|なんだ|でさ|だね|です|ます)$", "", value)
+    value = re.sub(r"(?:だったよ|だよ|なんだ|でさ|だね|です|ます|よ|ね|さ)$", "", value)
     return value[:limit]
 
 
@@ -139,17 +139,37 @@ class CandidateGenerator:
         summary = _normalize_clause(frame.text)
         topic = frame.topic or (frame.key_terms[0] if frame.key_terms else None)
         dimensions = _TOPIC_DIMENSIONS.get(frame.topic or "", ())
+        context_summary = summary
+        prior_text = ""
+        if state.current_topic and state.current_topic in state.topics:
+            propositions = state.topics[state.current_topic].propositions
+            if len(propositions) >= 2:
+                prior_text = propositions[-2]
+                if frame.question_type != "statement":
+                    context_summary = _normalize_clause(prior_text)
+        conflict_choice = frame.conflict_choice
+        feared_outcome = frame.feared_outcome
+        chosen_action = frame.chosen_action
+        if prior_text and not (conflict_choice and feared_outcome and chosen_action):
+            previous_conflict = re.search(
+                r"(.{1,18}?)(?:たら|ると)(.{1,28}?)(?:そう|かも)(?:で|だから)[、,]?(?:結局)?(.{1,24})",
+                _compact(prior_text),
+            )
+            if previous_conflict:
+                conflict_choice = _normalize_clause(previous_conflict.group(1), 20)
+                feared_outcome = _normalize_clause(previous_conflict.group(2), 28)
+                chosen_action = _normalize_clause(previous_conflict.group(3), 24)
 
         if base.act == "empathize":
-            if frame.conflict_choice and frame.feared_outcome and frame.chosen_action:
+            if conflict_choice and feared_outcome and chosen_action:
                 candidates.extend((
                     Candidate(
-                        f"{frame.feared_outcome}のが気になって、{frame.chosen_action}んだね。"
+                        f"{feared_outcome}のが気になって、{chosen_action}んだね。"
                         f"選択そのものより、断りにくい状況に置かれたことが消耗したんじゃない？",
                         "conflict-empathy",
                     ),
                     Candidate(
-                        f"{summary}んだね。{frame.feared_outcome}ことと、{frame.chosen_action}ことのどちらが今は重い？",
+                        f"{summary}んだね。{feared_outcome}ことと、{chosen_action}ことのどちらが今は重い？",
                         "contrast-question",
                     ),
                 ))
@@ -167,7 +187,13 @@ class CandidateGenerator:
                 ))
 
         if base.act in {"acknowledge", "explore", "celebrate"}:
-            if frame.timing:
+            if conflict_choice and feared_outcome and chosen_action:
+                candidates.append(Candidate(
+                    f"{feared_outcome}のが気になって、{chosen_action}んだね。"
+                    "断るか引き受けるかの二択に追い込まれたこと自体が負担だったように見える。",
+                    "conflict-reflection",
+                ))
+            if frame.timing and (frame.actor or frame.topic in {"仕事", "上司"} or "直前" in frame.timing):
                 candidates.append(Candidate(
                     f"{frame.timing}に{summary}のは対応しづらいね。予定が崩れたことと、相手に断りにくかったことのどちらが大きかった？",
                     "timing-impact",
@@ -180,26 +206,26 @@ class CandidateGenerator:
             if dimensions:
                 left, right = dimensions[0], dimensions[1]
                 candidates.append(Candidate(
-                    f"{summary}ということなら、{left}と{right}を分けて考えると原因が見えやすい。今の感覚ではどちらが近い？",
+                    f"{topic or 'その件'}で{context_summary}ということなら、{left}と{right}を分けて考えると原因が見えやすい。今の感覚ではどちらが近い？",
                     "topic-dimensions",
                 ))
             candidates.extend((
                 Candidate(
-                    f"{summary}んだね。そこでは『何が起きたか』より『何が予想と違ったか』が気になる。いちばん意外だったのはどこ？",
+                    f"{context_summary}んだね。そこでは『何が起きたか』より『何が予想と違ったか』が気になる。いちばん意外だったのはどこ？",
                     "prediction-error-focus",
                 ),
                 Candidate(
-                    f"{summary}という状況なんだね。次に変えたいのは結果そのもの、それともそこに至る過程？",
+                    f"{context_summary}という状況なんだね。次に変えたいのは結果そのもの、それともそこに至る過程？",
                     "goal-focus",
                 ),
             ))
 
         if base.act == "advise" or frame.question_type == "advice":
-            if frame.conflict_choice and frame.feared_outcome and frame.chosen_action:
+            if conflict_choice and feared_outcome and chosen_action:
                 candidates.append(Candidate(
-                    f"次は『{frame.conflict_choice}か{frame.chosen_action}か』の二択にしないのがよさそう。"
+                    f"次は『{conflict_choice}か{chosen_action}か』の二択にしないのがよさそう。"
                     "今抱えている予定と追加依頼を並べて、どちらを優先するか相手に決めてもらえば、"
-                    f"{frame.feared_outcome}リスクを抑えながら全部を背負わずに済む。",
+                    f"{feared_outcome}リスクを抑えながら全部を背負わずに済む。",
                     "counterfactual-advice",
                 ))
             candidates.extend((
