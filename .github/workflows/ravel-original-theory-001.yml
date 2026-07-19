@@ -1,0 +1,48 @@
+name: ravel-original-theory-001
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+    paths:
+      - "minimal-predictive-lm/docs/ravel_intelligence_theory_001.md"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/ravel_event_algebra.py"
+      - "minimal-predictive-lm/tests/test_ravel_event_algebra.py"
+      - ".github/workflows/ravel-original-theory-001.yml"
+  workflow_dispatch:
+
+jobs:
+  validate-ravel-core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm
+      - name: Unit tests
+        run: |
+          python -m unittest discover \
+            -s minimal-predictive-lm/tests \
+            -p 'test_ravel_event_algebra.py' \
+            -v
+      - name: Reject completion claims
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          theory = Path('minimal-predictive-lm/docs/ravel_intelligence_theory_001.md').read_text()
+          required = [
+              'RAVEL-1G',
+              'Reversible Event Algebra',
+              'Recursive Macro Compiler',
+              'R1',
+              'R5',
+              '990 MB',
+          ]
+          missing = [item for item in required if item not in theory]
+          if missing:
+              raise SystemExit(f'missing theory commitments: {missing}')
+          if '高校生級モデルそのものではない' not in theory:
+              raise SystemExit('prototype claim boundary was removed')
+          PY
