@@ -8,6 +8,11 @@ on:
       - "sparc_hs16/run_dialogue_planner_diagnostic.py"
       - "sparc_hs16/sparc_hs16/dialogue_planner.py"
       - ".github/workflows/sparc-hs21-debug.yml"
+  pull_request:
+    paths:
+      - "sparc_hs16/run_dialogue_planner_diagnostic.py"
+      - "sparc_hs16/sparc_hs16/dialogue_planner.py"
+      - ".github/workflows/sparc-hs21-debug.yml"
   workflow_dispatch:
 
 jobs:
