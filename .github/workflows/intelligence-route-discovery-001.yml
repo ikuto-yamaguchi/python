@@ -1,0 +1,65 @@
+name: intelligence-route-discovery-001
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/intelligence_route_discovery.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/latent_world_route_experiment.py"
+      - "minimal-predictive-lm/tests/test_intelligence_route_discovery.py"
+      - ".github/workflows/intelligence-route-discovery-001.yml"
+  workflow_dispatch:
+
+jobs:
+  discover-route:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm
+      - name: Unit tests
+        run: python -m unittest discover -s minimal-predictive-lm/tests -p 'test_intelligence_route_discovery.py' -v
+      - name: Run route-discovery experiment
+        run: |
+          mkdir -p artifacts/intelligence-route-discovery-001
+          python -m minimal_predictive_lm.intelligence_route_discovery \
+            --output-dir artifacts/intelligence-route-discovery-001 \
+            | tee artifacts/intelligence-route-discovery-001/run.log
+      - name: Run latent-world program experiment
+        run: |
+          python -m minimal_predictive_lm.latent_world_route_experiment \
+            --output-dir artifacts/intelligence-route-discovery-001 \
+            | tee artifacts/intelligence-route-discovery-001/latent-world.log
+      - name: Enforce research integrity, not artificial success
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path("artifacts/intelligence-route-discovery-001")
+          report = json.loads(root.joinpath("intelligence-route-discovery-001.json").read_text())
+          latent = json.loads(root.joinpath("latent-world-program-route-001.json").read_text())
+          if not report["research_gate_passed"]:
+              raise SystemExit("route-discovery integrity failed")
+          if report["highschool_level_passed"] or latent["highschool_level_passed"]:
+              raise SystemExit("route experiments must not claim completion")
+          if len(report["scale_measurements"]) != 12:
+              raise SystemExit("expected four families at three scales")
+          if len(latent["scale_results"]) != 3:
+              raise SystemExit("expected three evidence scales for latent programs")
+          for verdict in report["families"]:
+              if verdict["route_go"] and verdict["failed_requirements"]:
+                  raise SystemExit("invalid go verdict")
+          if latent["latent_program_component_go"] and not all(latent["component_checks"].values()):
+              raise SystemExit("invalid latent component verdict")
+          PY
+      - name: Upload route evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: intelligence-route-discovery-001-results
+          path: artifacts/intelligence-route-discovery-001
+          retention-days: 90
