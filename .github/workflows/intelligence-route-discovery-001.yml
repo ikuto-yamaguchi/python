@@ -5,6 +5,7 @@ on:
     branches: [research/minimal-compute-lm]
     paths:
       - "minimal-predictive-lm/src/minimal_predictive_lm/intelligence_route_discovery.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/latent_world_route_experiment.py"
       - "minimal-predictive-lm/tests/test_intelligence_route_discovery.py"
       - ".github/workflows/intelligence-route-discovery-001.yml"
   workflow_dispatch:
@@ -28,22 +29,32 @@ jobs:
           python -m minimal_predictive_lm.intelligence_route_discovery \
             --output-dir artifacts/intelligence-route-discovery-001 \
             | tee artifacts/intelligence-route-discovery-001/run.log
+      - name: Run latent-world program experiment
+        run: |
+          python -m minimal_predictive_lm.latent_world_route_experiment \
+            --output-dir artifacts/intelligence-route-discovery-001 \
+            | tee artifacts/intelligence-route-discovery-001/latent-world.log
       - name: Enforce research integrity, not artificial success
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-          path = Path("artifacts/intelligence-route-discovery-001/intelligence-route-discovery-001.json")
-          report = json.loads(path.read_text())
+          root = Path("artifacts/intelligence-route-discovery-001")
+          report = json.loads(root.joinpath("intelligence-route-discovery-001.json").read_text())
+          latent = json.loads(root.joinpath("latent-world-program-route-001.json").read_text())
           if not report["research_gate_passed"]:
               raise SystemExit("route-discovery integrity failed")
-          if report["highschool_level_passed"]:
-              raise SystemExit("route experiment must not claim completion")
+          if report["highschool_level_passed"] or latent["highschool_level_passed"]:
+              raise SystemExit("route experiments must not claim completion")
           if len(report["scale_measurements"]) != 12:
               raise SystemExit("expected four families at three scales")
+          if len(latent["scale_results"]) != 3:
+              raise SystemExit("expected three evidence scales for latent programs")
           for verdict in report["families"]:
               if verdict["route_go"] and verdict["failed_requirements"]:
                   raise SystemExit("invalid go verdict")
+          if latent["latent_program_component_go"] and not all(latent["component_checks"].values()):
+              raise SystemExit("invalid latent component verdict")
           PY
       - name: Upload route evidence
         if: always()
