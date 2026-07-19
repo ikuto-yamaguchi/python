@@ -22,7 +22,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install
-        run: python -m pip install -e minimal-predictive-lm
+        run: python -m pip install -e minimal-predictive-lm pyarrow
 
       - name: Unit tests
         run: |
@@ -30,19 +30,22 @@ jobs:
             -s minimal-predictive-lm/tests \
             -p 'test_ravel_1g_model.py' -v
 
-      - name: Acquire public Japanese curriculum
+      - name: Acquire fixed public Japanese Wikipedia shard
         run: |
           set -o pipefail
           mkdir -p artifacts/ravel-1g-end-to-end-001
+          curl -L --fail --retry 3 --retry-all-errors \
+            'https://huggingface.co/datasets/fujiki/llm-japanese-dataset_wikipedia/resolve/main/data/train-00000-of-00002-fe13897027598519.parquet?download=true' \
+            -o /tmp/japanese-wikipedia.parquet
           python -m minimal_predictive_lm.ravel_public_curriculum \
+            --parquet /tmp/japanese-wikipedia.parquet \
             --output artifacts/ravel-1g-end-to-end-001/public-curriculum.jsonl \
-            --results-per-query 10 \
             --max-documents 320 \
             2>&1 | tee artifacts/ravel-1g-end-to-end-001/corpus.log
 
       - name: Acquire disclosed JMMLU diagnostic
         run: |
-          curl -L --fail --retry 3 \
+          curl -L --fail --retry 3 --retry-all-errors \
             https://huggingface.co/datasets/nlp-waseda/JMMLU/resolve/main/JMMLU.zip \
             -o /tmp/JMMLU.zip
           mkdir -p /tmp/jmmlu
@@ -116,7 +119,8 @@ jobs:
           corpus = json.loads(
               (root / "public-curriculum.jsonl.report.json").read_text()
           )
-          assert corpus["documents"] >= 160
+          assert corpus["documents"] == 320
+          assert corpus["target_exam_questions_used"] == 0
           assert points[-1]["logical_model_bytes"] == 990000000
           assert points[-1]["complete_package_bytes"] <= 1000000000
           assert points[-1]["max_active_reads"] <= 8256
