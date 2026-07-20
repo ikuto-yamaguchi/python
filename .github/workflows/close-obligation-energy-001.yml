@@ -66,11 +66,23 @@ jobs:
           if not model_files or max(p.stat().st_size for p in model_files) < 100_000_000:
               raise SystemExit("missing actual frozen Japanese Mamba model")
           PY
-      - name: Upload model and communication evidence
+      - name: Upload Japanese communication evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: close-obligation-energy-001-results
-          path: artifacts/close-obligation-energy-001
+          name: close-obligation-energy-001-evidence
+          path: |
+            artifacts/close-obligation-energy-001/close-obligation-energy-001.json
+            artifacts/close-obligation-energy-001/close-obligation-energy-001.md
+            artifacts/close-obligation-energy-001/close-obligation-energy-head.pt
+            artifacts/close-obligation-energy-001/run.log
+          retention-days: 90
+          compression-level: 6
+      - name: Upload actual model package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: close-obligation-energy-001-model
+          path: artifacts/close-obligation-energy-001/model-package
           retention-days: 90
           compression-level: 1
