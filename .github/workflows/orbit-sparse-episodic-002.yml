@@ -1,0 +1,57 @@
+name: orbit-sparse-episodic-002
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/orbit_sparse_episodic.py"
+      - "minimal-predictive-lm/tests/test_orbit_sparse_episodic.py"
+      - "minimal-predictive-lm/docs/research/orbit-sparse-episodic-002.md"
+      - ".github/workflows/orbit-sparse-episodic-002.yml"
+  workflow_dispatch:
+
+jobs:
+  falsify-sparse-episodic-reactivation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm
+      - name: Unit tests
+        run: python -m unittest minimal-predictive-lm/tests/test_orbit_sparse_episodic.py -v
+      - name: Run falsification
+        run: |
+          python -m minimal_predictive_lm.orbit_sparse_episodic \
+            --output-dir artifacts/orbit-sparse-episodic-002
+      - name: Enforce honest evidence
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path(
+              "artifacts/orbit-sparse-episodic-002/orbit-sparse-episodic-002.json"
+          ).read_text())
+          if report["highschool_level_passed"]:
+              raise SystemExit("narrow episodic experiment cannot claim completion")
+          aggregate = report["aggregate"]
+          if aggregate["median_model_bytes"] >= 1_000_000:
+              raise SystemExit("model unexpectedly exceeded sparse-memory budget")
+          if aggregate["max_candidates"] > report["architecture"]["capacity"]:
+              raise SystemExit("readout is no longer capacity bounded")
+          if aggregate["min_accuracy"] >= 0.90:
+              raise SystemExit("held-out paraphrase falsification unexpectedly disappeared; inspect leakage")
+          if any(report["integrated_gate"].values()):
+              raise SystemExit("unmeasured integrated capability was marked passed")
+          PY
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: orbit-sparse-episodic-002-results
+          path: artifacts/orbit-sparse-episodic-002
+          retention-days: 90
