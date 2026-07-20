@@ -23,6 +23,27 @@ __all__ = [
 ]
 
 
+def _non_affine_rejection() -> dict[str, object]:
+    learner = OrbitLearner(minimum_support=3, minimum_fraction=0.75)
+    rows = []
+    for index, value in enumerate((3, 4, 5, 6, 7, 8, 9, 10)):
+        entity = f"非線形対象{index}"
+        rows.append(
+            TransitionEpisode(
+                f"{entity} を二乗変換する",
+                {entity: value},
+                {entity: value * value},
+                f"quadratic:{index}",
+            )
+        )
+    discovered = learner.fit(tuple(rows))
+    return {
+        "episodes": len(rows),
+        "discovered_affine_orbits": discovered,
+        "rejected": discovered == 0,
+    }
+
+
 def run_experiment(output_dir: str | Path) -> dict[str, object]:
     scales = [evaluate_scale(value, 5000 + value) for value in (4, 32, 256)]
     noisy = evaluate_scale(256, 9090, noise_rate=0.08)
@@ -56,6 +77,7 @@ def run_experiment(output_dir: str | Path) -> dict[str, object]:
         "second_observation_resolved": second_result is not None,
         "transport_after_resolution_correct": final_prediction.after == {entity: 31},
     }
+    non_affine = _non_affine_rejection()
 
     checks = {
         "six_mechanism_orbits_discovered": largest.orbit_count == len(MECHANISMS),
@@ -72,6 +94,7 @@ def run_experiment(output_dir: str | Path) -> dict[str, object]:
         "reuse_ratio_above_99_percent": largest.reuse_ratio >= 0.99,
         "eight_percent_noise_keeps_90_percent_accuracy": noisy.heldout_accuracy >= 0.90,
         "ambiguous_alias_abstains_then_resolves": all(ambiguity.values()),
+        "non_affine_mechanism_is_rejected": bool(non_affine["rejected"]),
         "model_under_one_megabyte": largest.orbit_bytes <= 1_000_000,
     }
     report = {
@@ -92,6 +115,7 @@ def run_experiment(output_dir: str | Path) -> dict[str, object]:
         "scale_results": [asdict(row) for row in scales],
         "noise_result": asdict(noisy),
         "ambiguity_result": ambiguity,
+        "non_affine_rejection": non_affine,
         "scaling_diagnostics": {
             "fingerprint_programs_at_largest_scale": largest.training_episodes,
             "orbit_programs_at_largest_scale": largest.orbit_count,
