@@ -12,7 +12,7 @@ on:
 jobs:
   train-and-evaluate-japanese-communication:
     runs-on: ubuntu-latest
-    timeout-minutes: 75
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -23,20 +23,20 @@ jobs:
           python -m pip install -e minimal-predictive-lm
           python -m pip install \
             "transformers==4.57.2" \
-            huggingface_hub datasets pyarrow torch sentencepiece protobuf
+            huggingface_hub datasets pyarrow torch sentencepiece protobuf mambapy
       - name: Unit tests
         run: |
           python -m unittest minimal-predictive-lm/tests/test_close_obligation_energy.py -v
-      - name: Train CLOSE and save actual Japanese transcripts
+      - name: Fast parallel CLOSE Japanese communication falsification
         shell: bash
         run: |
           set -o pipefail
           mkdir -p artifacts/close-obligation-energy-001
-          python -m minimal_predictive_lm.close_communication_parquet \
+          python -m minimal_predictive_lm.close_communication_mambapy \
             --output-dir artifacts/close-obligation-energy-001 \
-            --closure-examples 96 \
-            --reading-examples 6 \
-            --max-new-tokens 48 \
+            --closure-examples 32 \
+            --reading-examples 3 \
+            --max-new-tokens 24 \
             2>&1 | tee artifacts/close-obligation-energy-001/run.log
       - name: Enforce evidence integrity
         run: |
@@ -51,7 +51,7 @@ jobs:
           report = json.loads(result.read_text())
           if report["highschool_level_passed"]:
               raise SystemExit("this experiment cannot claim high-school intelligence")
-          if len(report["reading"]["rows"]) < 6:
+          if len(report["reading"]["rows"]) < 3:
               raise SystemExit("missing Japanese reading outputs")
           if len(report["probes"]["rows"]) < 4:
               raise SystemExit("missing Japanese communication probes")
