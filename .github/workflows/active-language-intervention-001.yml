@@ -1,0 +1,41 @@
+name: active-language-intervention-001
+on:
+  push:
+    branches: [research/active-language-intervention-001]
+  pull_request:
+    branches: [research/minimal-compute-lm]
+  workflow_dispatch:
+jobs:
+  experiment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Unit tests
+        run: |
+          cd minimal-predictive-lm
+          python -m pip install pytest
+          PYTHONPATH=src pytest -q tests/test_active_language_intervention.py
+      - name: Run clean experiment
+        run: |
+          cd minimal-predictive-lm
+          PYTHONPATH=src python -S src/minimal_predictive_lm/active_language_intervention.py > active_language_intervention_report.json
+      - name: Verify claim boundary
+        run: |
+          cd minimal-predictive-lm
+          python - <<'PY'
+          import json
+          r=json.load(open('active_language_intervention_report.json',encoding='utf-8'))
+          assert r['integrated_gate_score']==0.0
+          assert r['highschool_level_passed'] is False
+          assert r['completion'] is False
+          assert r['summary']['unseen_mean']==0.0
+          assert r['summary']['decoy_mean']==1.0
+          assert r['summary']['max_model_bytes']<1_000_000_000
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: active-language-intervention-001
+          path: minimal-predictive-lm/active_language_intervention_report.json
