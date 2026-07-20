@@ -1,0 +1,42 @@
+name: active-identity-intervention-001
+
+on:
+  push:
+    branches:
+      - research/active-identity-intervention-001
+  pull_request:
+    branches:
+      - research/minimal-compute-lm
+
+jobs:
+  experiment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Unit tests
+        working-directory: minimal-predictive-lm
+        run: PYTHONPATH=src python -m unittest discover -s tests -p 'test_active_identity_intervention.py' -v
+      - name: Run measured experiment
+        working-directory: minimal-predictive-lm
+        run: PYTHONPATH=src python -S -m minimal_predictive_lm.active_identity_intervention
+      - name: Enforce claim boundary
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          import json
+          report = json.load(open('active_identity_intervention_report.json', encoding='utf-8'))
+          assert report['identifiable_unique_rate'] == 1.0
+          assert report['duplicate_ambiguity_preserved_rate'] == 1.0
+          assert report['integrated_gate_score'] == 0.0
+          assert report['highschool_level_passed'] is False
+          assert report['completion'] is False
+          assert report['max_model_bytes'] < 1_000_000_000
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: active-identity-intervention-001-report
+          path: minimal-predictive-lm/active_identity_intervention_report.json

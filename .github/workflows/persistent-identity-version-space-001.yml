@@ -1,0 +1,40 @@
+name: persistent-identity-version-space-001
+
+on:
+  pull_request:
+    paths:
+      - 'minimal-predictive-lm/src/minimal_predictive_lm/persistent_identity.py'
+      - 'minimal-predictive-lm/tests/test_persistent_identity.py'
+      - '.github/workflows/persistent-identity-version-space-001.yml'
+  workflow_dispatch:
+
+jobs:
+  experiment:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: minimal-predictive-lm
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install test dependency
+        run: python -m pip install pytest
+      - name: Unit tests
+        run: PYTHONPATH=src pytest -q tests/test_persistent_identity.py
+      - name: Run experiment
+        run: PYTHONPATH=src python -S -m minimal_predictive_lm.persistent_identity
+      - name: Enforce claim boundary
+        run: |
+          python - <<'PY'
+          import json
+          report=json.load(open('persistent_identity_report.json', encoding='utf-8'))
+          assert report['summary']['candidate_supported'] is False
+          assert report['summary']['highschool_level_passed'] is False
+          assert report['summary']['integrated_gate_mean'] == 0.0
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: persistent-identity-version-space-001
+          path: minimal-predictive-lm/persistent_identity_report.json
