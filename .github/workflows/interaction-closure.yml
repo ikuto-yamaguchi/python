@@ -1,0 +1,38 @@
+name: interaction-closure-falsification
+
+on:
+  push:
+    branches:
+      - research/interaction-closure-dialogue-001
+  pull_request:
+    paths:
+      - 'sparc_hs16/**'
+      - '.github/workflows/interaction-closure.yml'
+  workflow_dispatch:
+
+jobs:
+  falsify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: sparc_hs16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Multi-seed scaling and resource measurement
+        run: /usr/bin/time -v python run_interaction_closure_pilot.py 2> resource_time.txt
+      - name: Show report
+        run: |
+          cat interaction_closure_report.json
+          cat resource_time.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: interaction-closure-report
+          path: |
+            sparc_hs16/interaction_closure_report.json
+            sparc_hs16/resource_time.txt
