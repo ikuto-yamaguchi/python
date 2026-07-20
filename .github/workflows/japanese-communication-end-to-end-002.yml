@@ -13,7 +13,7 @@ on:
 jobs:
   train-character-sparse-dialogue:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -25,18 +25,18 @@ jobs:
           python -m pip install torch datasets pyarrow
       - name: Unit tests
         run: python -m unittest minimal-predictive-lm/tests/test_japanese_sparse_memory_model.py -v
-      - name: Train and generate real Japanese transcripts
+      - name: Fast end-to-end Japanese falsification
         shell: bash
         run: |
           set -o pipefail
           mkdir -p artifacts/japanese-communication-end-to-end-002
           python -m minimal_predictive_lm.japanese_communication_experiment_002 \
             --output-dir artifacts/japanese-communication-end-to-end-002 \
-            --train-examples 5000 \
-            --valid-examples 400 \
-            --epochs 2 \
-            --embedding-dim 128 \
-            --hidden-dim 256 \
+            --train-examples 1500 \
+            --valid-examples 200 \
+            --epochs 1 \
+            --embedding-dim 96 \
+            --hidden-dim 192 \
             | tee artifacts/japanese-communication-end-to-end-002/run.log
       - name: Enforce transcript evidence
         run: |
@@ -60,6 +60,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: japanese-communication-end-to-end-002-results
+          name: japanese-communication-end-to-end-002-fast-results
           path: artifacts/japanese-communication-end-to-end-002
           retention-days: 90
