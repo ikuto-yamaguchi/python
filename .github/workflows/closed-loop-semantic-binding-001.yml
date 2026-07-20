@@ -1,0 +1,33 @@
+name: closed-loop-semantic-binding-001
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+  workflow_dispatch:
+jobs:
+  experiment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Unit tests
+        working-directory: minimal-predictive-lm
+        run: python -m unittest tests.test_closed_loop_semantic_binding
+      - name: Experiment
+        working-directory: minimal-predictive-lm
+        run: PYTHONPATH=src python -S run_closed_loop_semantic_binding.py
+      - name: Claim boundary
+        working-directory: minimal-predictive-lm
+        run: python - <<'PY'
+import json
+r=json.load(open('closed_loop_semantic_binding_report.json'))
+assert r['highschool_level_passed'] is False
+assert r['native_japanese_communication_passed'] is False
+assert r['completion'] is False
+assert not any(r['integrated_gate'].values())
+PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: closed-loop-semantic-binding-001
+          path: minimal-predictive-lm/closed_loop_semantic_binding_report.json
