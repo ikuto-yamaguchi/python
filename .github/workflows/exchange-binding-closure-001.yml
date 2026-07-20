@@ -1,0 +1,54 @@
+name: exchange-binding-closure-001
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/exchange_binding_closure.py"
+      - "minimal-predictive-lm/tests/test_exchange_binding_closure.py"
+      - "minimal-predictive-lm/docs/research/exchange-binding-closure-001.md"
+      - ".github/workflows/exchange-binding-closure-001.yml"
+  workflow_dispatch:
+
+jobs:
+  falsify-exchange-binding:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm
+      - name: Unit tests
+        run: python -m unittest minimal-predictive-lm/tests/test_exchange_binding_closure.py -v
+      - name: Run scaling and integrated gate
+        run: |
+          python -m minimal_predictive_lm.exchange_binding_closure \
+            --output-dir artifacts/exchange-binding-closure-001
+      - name: Enforce honest claim boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path(
+              "artifacts/exchange-binding-closure-001/exchange-binding-closure-001.json"
+          ).read_text())
+          if report["highschool_level_passed"] or report["native_japanese_communication_passed"]:
+              raise SystemExit("narrow exchange experiment cannot claim completion")
+          aggregate = report["aggregate"]
+          if aggregate["max_model_bytes"] >= 1_000_000_000:
+              raise SystemExit("model exceeded 1GB")
+          if aggregate["max_reads"] > 32:
+              raise SystemExit("readout bound violated")
+          if any(result["candidate_count"] != 1 for result in report["results"]):
+              raise SystemExit("candidate generation contract violated")
+          PY
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exchange-binding-closure-001-results
+          path: artifacts/exchange-binding-closure-001
+          retention-days: 90
