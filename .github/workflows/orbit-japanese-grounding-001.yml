@@ -1,0 +1,59 @@
+name: orbit-japanese-grounding-001
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/orbit_japanese_grounding*.py"
+      - "minimal-predictive-lm/tests/test_orbit_japanese_grounding.py"
+      - "minimal-predictive-lm/docs/research/orbit-japanese-grounding-001.md"
+      - ".github/workflows/orbit-japanese-grounding-001.yml"
+  workflow_dispatch:
+
+jobs:
+  ground-and-falsify-japanese-orbits:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm
+      - name: Unit tests
+        run: python -m unittest minimal-predictive-lm/tests/test_orbit_japanese_grounding.py -v
+      - name: Run Japanese grounding experiment
+        run: |
+          mkdir -p artifacts/orbit-japanese-grounding-001
+          python -m minimal_predictive_lm.orbit_japanese_grounding \
+            --output-dir artifacts/orbit-japanese-grounding-001
+      - name: Enforce evidence integrity
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path(
+              "artifacts/orbit-japanese-grounding-001/orbit-japanese-grounding-001.json"
+          ).read_text())
+          if report["highschool_level_passed"]:
+              raise SystemExit("narrow grounding experiment cannot claim completion")
+          if not all(report["checks"].values()):
+              raise SystemExit(f"integrity checks failed: {report['checks']}")
+          if report["base"]["patterns"] != 6:
+              raise SystemExit("base operator library changed unexpectedly")
+          if report["dialogue"]["patterns"] != 8:
+              raise SystemExit("dialogue operator library changed unexpectedly")
+          if min(report["base"]["results"].values()) < 1.0:
+              raise SystemExit("base transfer regression")
+          if min(report["dialogue"]["results"].values()) < 1.0:
+              raise SystemExit("dialogue transfer regression")
+          PY
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: orbit-japanese-grounding-001-results
+          path: artifacts/orbit-japanese-grounding-001
+          retention-days: 90
