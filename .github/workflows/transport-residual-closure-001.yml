@@ -1,0 +1,45 @@
+name: transport-residual-closure-001
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/transport_residual_closure.py"
+      - "minimal-predictive-lm/tests/test_transport_residual_closure.py"
+      - ".github/workflows/transport-residual-closure-001.yml"
+  workflow_dispatch:
+
+jobs:
+  falsify-transport-residual-closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm
+      - name: Unit tests
+        run: python -m unittest minimal-predictive-lm/tests/test_transport_residual_closure.py -v
+      - name: Run experiment
+        run: python -m minimal_predictive_lm.transport_residual_closure --output-dir artifacts/transport-residual-closure-001
+      - name: Enforce honest claims
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('artifacts/transport-residual-closure-001/transport-residual-closure-001.json').read_text())
+          assert report['under_1gb']
+          assert report['largest_scale']['candidate_count'] == 1
+          assert report['architecture']['stored_complete_answers'] is False
+          assert report['architecture']['problem_specific_branching'] is False
+          assert report['highschool_level_passed'] is False
+          assert report['native_japanese_communication_passed'] is False
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: transport-residual-closure-001-results
+          path: artifacts/transport-residual-closure-001
+          retention-days: 90
