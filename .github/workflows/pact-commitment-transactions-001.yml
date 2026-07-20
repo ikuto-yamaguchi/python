@@ -1,0 +1,70 @@
+name: pact-commitment-transactions-001
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/pact_*.py"
+      - "minimal-predictive-lm/tests/test_pact_commitment_compiler.py"
+      - ".github/workflows/pact-commitment-transactions-001.yml"
+  workflow_dispatch:
+
+jobs:
+  train-and-evaluate-japanese-communication:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: |
+          python -m pip install -e minimal-predictive-lm
+          python -m pip install torch datasets pyarrow janome
+      - name: Unit tests
+        run: |
+          python -m unittest minimal-predictive-lm/tests/test_pact_commitment_compiler.py -v
+      - name: Train PACT and save actual Japanese transcripts
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p artifacts/pact-commitment-transactions-001
+          python -m minimal_predictive_lm.pact_communication_experiment \
+            --output-dir artifacts/pact-commitment-transactions-001 \
+            --train-examples 8000 \
+            --valid-examples 600 \
+            --epochs 4 \
+            --hash-buckets 8192 \
+            --embedding-dim 64 \
+            | tee artifacts/pact-commitment-transactions-001/run.log
+      - name: Enforce evidence integrity
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path("artifacts/pact-commitment-transactions-001")
+          path = root / "pact-commitment-transactions-001.json"
+          if not path.exists():
+              raise SystemExit("missing result JSON")
+          report = json.loads(path.read_text())
+          if report["highschool_level_passed"]:
+              raise SystemExit("this experiment cannot claim high-school intelligence")
+          if len(report["heldout"]["rows"]) < 80:
+              raise SystemExit("missing held-out transcripts")
+          if len(report["dialogues"]["rows"]) < 24:
+              raise SystemExit("missing Japanese MT-Bench transcripts")
+          if len(report["probes"]["rows"]) < 6:
+              raise SystemExit("missing communication probes")
+          if not (root / report["checkpoint"]).exists():
+              raise SystemExit("missing trained checkpoint")
+          if report["training"]["total_bytes"] >= 1_000_000_000:
+              raise SystemExit("package exceeds decimal 1GB")
+          PY
+      - name: Upload model and communication evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pact-commitment-transactions-001-results
+          path: artifacts/pact-commitment-transactions-001
+          retention-days: 90
