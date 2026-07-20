@@ -1,0 +1,68 @@
+name: japanese-communication-end-to-end-001
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/japanese_dialogue_model.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/japanese_communication_experiment.py"
+      - "minimal-predictive-lm/tests/test_japanese_dialogue_model.py"
+      - ".github/workflows/japanese-communication-end-to-end-001.yml"
+  workflow_dispatch:
+
+jobs:
+  train-and-test-real-japanese:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install package and training dependencies
+        run: |
+          python -m pip install -e minimal-predictive-lm
+          python -m pip install torch datasets pyarrow
+      - name: Unit tests
+        run: |
+          python -m unittest minimal-predictive-lm/tests/test_japanese_dialogue_model.py -v
+      - name: Train two real Japanese generators and save all outputs
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p artifacts/japanese-communication-end-to-end-001
+          python -m minimal_predictive_lm.japanese_communication_experiment \
+            --output-dir artifacts/japanese-communication-end-to-end-001 \
+            --train-examples 3000 \
+            --valid-examples 300 \
+            --epochs 1 \
+            --embedding-dim 96 \
+            --hidden-dim 192 \
+            | tee artifacts/japanese-communication-end-to-end-001/run.log
+      - name: Enforce honest end-to-end evidence
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path("artifacts/japanese-communication-end-to-end-001")
+          report = json.loads(root.joinpath("japanese-communication-end-to-end-001.json").read_text())
+          if report["highschool_level_passed"]:
+              raise SystemExit("this first real-output experiment cannot claim high-school intelligence")
+          for name in ("plain_seq2seq", "dialogue_cycle"):
+              result = report["results"][name]
+              if len(result["evaluation"]["heldout"]) < 40:
+                  raise SystemExit(f"missing held-out Japanese generations for {name}")
+              if len(result["evaluation"]["dialogues"]) < 24:
+                  raise SystemExit(f"missing two-turn Japanese transcripts for {name}")
+              if not root.joinpath(result["checkpoint"]).exists():
+                  raise SystemExit(f"missing trained checkpoint for {name}")
+          if "Actual two-turn outputs" not in root.joinpath("japanese-communication-end-to-end-001.md").read_text():
+              raise SystemExit("transcripts were not rendered")
+          PY
+      - name: Upload trained models and actual Japanese transcripts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: japanese-communication-end-to-end-001-results
+          path: artifacts/japanese-communication-end-to-end-001
+          retention-days: 90
