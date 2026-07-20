@@ -74,6 +74,22 @@ class OrbitInterventionTransportTests(unittest.TestCase):
         self.assertGreater(result.residual_rate, 0.04)
         self.assertLess(result.residual_rate, 0.12)
 
+    def test_non_affine_surface_is_not_forced_into_affine_orbit(self) -> None:
+        learner = OrbitLearner(minimum_support=3, minimum_fraction=0.75)
+        rows = []
+        for index, value in enumerate((3, 4, 5, 6, 7, 8, 9, 10)):
+            entity = f"非線形対象{index}"
+            rows.append(
+                TransitionEpisode(
+                    f"{entity} を二乗変換する",
+                    {entity: value},
+                    {entity: value * value},
+                    f"quadratic:{index}",
+                )
+            )
+        self.assertEqual(learner.fit(tuple(rows)), 0)
+        self.assertEqual(len(learner.orbits), 0)
+
     def test_serialization_remains_small(self) -> None:
         learner = OrbitLearner(minimum_support=3, minimum_fraction=0.75)
         learner.fit(build_training(64, 11000))
