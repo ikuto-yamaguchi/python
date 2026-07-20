@@ -1,0 +1,54 @@
+name: generative-interaction-grammar-001
+
+on:
+  pull_request:
+    branches: [research/sparc-hs16-university-gate]
+    paths:
+      - "sparc_hs16/sparc_hs16/generative_interaction_grammar.py"
+      - "sparc_hs16/run_generative_interaction_grammar.py"
+      - "sparc_hs16/tests/test_generative_interaction_grammar.py"
+      - ".github/workflows/generative-interaction-grammar-001.yml"
+  workflow_dispatch:
+
+jobs:
+  falsify-direct-japanese-generation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Unit tests
+        working-directory: sparc_hs16
+        run: python -m unittest tests/test_generative_interaction_grammar.py -v
+      - name: Run multi-seed scaling and integrated gate
+        working-directory: sparc_hs16
+        run: python run_generative_interaction_grammar.py
+      - name: Enforce honest claim boundary
+        working-directory: sparc_hs16
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("generative_interaction_grammar_report.json").read_text())
+          if report["highschool_level_passed"]:
+              raise SystemExit("narrow experiment cannot claim high-school intelligence")
+          if report["native_japanese_communication_passed"]:
+              raise SystemExit("narrow experiment cannot claim native communication")
+          if not report["under_1gb"]:
+              raise SystemExit("resource constraint violated")
+          if any(row["candidate_count"] != 1 for row in report["runs"]):
+              raise SystemExit("candidate ranking leaked into direct generation")
+          if report["architecture"]["external_llm"] or report["architecture"]["retrieval_augmented_generation"]:
+              raise SystemExit("forbidden capability proxy")
+          PY
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: generative-interaction-grammar-001-results
+          path: |
+            sparc_hs16/generative_interaction_grammar_report.json
+            sparc_hs16/generative_interaction_grammar_transcript.md
+          retention-days: 90
