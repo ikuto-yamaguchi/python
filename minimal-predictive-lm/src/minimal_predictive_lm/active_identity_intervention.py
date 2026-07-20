@@ -7,7 +7,7 @@ import random
 import resource
 import statistics
 import time
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
 
@@ -125,8 +125,6 @@ def run_identity_experiment(object_count: int, seed: int, *, duplicated_signatur
 
 
 def integrated_japanese_gate() -> dict[str, bool]:
-    # The active identity operator has no Japanese parser, world inducer, planner,
-    # or realizer. All capability claims therefore remain false by construction.
     return {
         "free_dialogue": False,
         "instruction_following": False,
@@ -181,7 +179,7 @@ def build_report() -> dict:
         "next_bottleneck": (
             "induce useful intervention dimensions and executable probes from raw Japanese interaction, rather than receiving a probe table"
         ),
-        "rows": [row.__dict__ for row in results],
+        "rows": [asdict(row) for row in results],
     }
     return report
 
