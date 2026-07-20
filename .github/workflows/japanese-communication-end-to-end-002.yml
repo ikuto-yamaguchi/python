@@ -1,0 +1,65 @@
+name: japanese-communication-end-to-end-002
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/japanese_sparse_memory_model.py"
+      - "minimal-predictive-lm/src/minimal_predictive_lm/japanese_communication_experiment_002.py"
+      - "minimal-predictive-lm/tests/test_japanese_sparse_memory_model.py"
+      - ".github/workflows/japanese-communication-end-to-end-002.yml"
+  workflow_dispatch:
+
+jobs:
+  train-character-sparse-dialogue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: |
+          python -m pip install -e minimal-predictive-lm
+          python -m pip install torch datasets pyarrow
+      - name: Unit tests
+        run: python -m unittest minimal-predictive-lm/tests/test_japanese_sparse_memory_model.py -v
+      - name: Train and generate real Japanese transcripts
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p artifacts/japanese-communication-end-to-end-002
+          python -m minimal_predictive_lm.japanese_communication_experiment_002 \
+            --output-dir artifacts/japanese-communication-end-to-end-002 \
+            --train-examples 5000 \
+            --valid-examples 400 \
+            --epochs 2 \
+            --embedding-dim 128 \
+            --hidden-dim 256 \
+            | tee artifacts/japanese-communication-end-to-end-002/run.log
+      - name: Enforce transcript evidence
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path("artifacts/japanese-communication-end-to-end-002")
+          report = json.loads(root.joinpath("japanese-communication-end-to-end-002.json").read_text())
+          if report["highschool_level_passed"]:
+              raise SystemExit("cannot claim high-school intelligence")
+          for name in ("sparse_plain", "sparse_cycle"):
+              result = report["results"][name]
+              if len(result["evaluation"]["heldout"]) < 40:
+                  raise SystemExit("missing held-out outputs")
+              if len(result["evaluation"]["dialogues"]) < 24:
+                  raise SystemExit("missing two-turn transcripts")
+              if not root.joinpath(result["checkpoint"]).exists():
+                  raise SystemExit("missing checkpoint")
+          PY
+      - name: Upload models and transcripts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: japanese-communication-end-to-end-002-results
+          path: artifacts/japanese-communication-end-to-end-002
+          retention-days: 90
