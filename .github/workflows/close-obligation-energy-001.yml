@@ -37,7 +37,7 @@ jobs:
             --closure-examples 96 \
             --reading-examples 6 \
             --max-new-tokens 48 \
-            | tee artifacts/close-obligation-energy-001/run.log
+            2>&1 | tee artifacts/close-obligation-energy-001/run.log
       - name: Enforce evidence integrity
         run: |
           python - <<'PY'
