@@ -1,0 +1,76 @@
+name: close-obligation-energy-001
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/close_*.py"
+      - "minimal-predictive-lm/tests/test_close_obligation_energy.py"
+      - ".github/workflows/close-obligation-energy-001.yml"
+  workflow_dispatch:
+
+jobs:
+  train-and-evaluate-japanese-communication:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: |
+          python -m pip install -e minimal-predictive-lm
+          python -m pip install \
+            "transformers==4.57.2" \
+            huggingface_hub datasets pyarrow torch sentencepiece protobuf
+      - name: Unit tests
+        run: |
+          python -m unittest minimal-predictive-lm/tests/test_close_obligation_energy.py -v
+      - name: Train CLOSE and save actual Japanese transcripts
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p artifacts/close-obligation-energy-001
+          python -m minimal_predictive_lm.close_communication_experiment \
+            --output-dir artifacts/close-obligation-energy-001 \
+            --closure-examples 96 \
+            --reading-examples 6 \
+            --max-new-tokens 48 \
+            | tee artifacts/close-obligation-energy-001/run.log
+      - name: Enforce evidence integrity
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path("artifacts/close-obligation-energy-001")
+          result = root / "close-obligation-energy-001.json"
+          if not result.exists():
+              raise SystemExit("missing CLOSE result JSON")
+          report = json.loads(result.read_text())
+          if report["highschool_level_passed"]:
+              raise SystemExit("this experiment cannot claim high-school intelligence")
+          if len(report["reading"]["rows"]) < 6:
+              raise SystemExit("missing Japanese reading outputs")
+          if len(report["probes"]["rows"]) < 4:
+              raise SystemExit("missing Japanese communication probes")
+          if len(report["mtbench"]["rows"]) < 2:
+              raise SystemExit("missing Japanese MT-Bench transcripts")
+          if report["package_bytes"] >= 1_000_000_000:
+              raise SystemExit("package exceeds decimal 1GB")
+          head = root / "close-obligation-energy-head.pt"
+          if not head.exists():
+              raise SystemExit("missing trained closure head")
+          model_files = [p for p in (root / "model-package").rglob("*.bin")]
+          if not model_files or max(p.stat().st_size for p in model_files) < 100_000_000:
+              raise SystemExit("missing actual frozen Japanese Mamba model")
+          PY
+      - name: Upload model and communication evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: close-obligation-energy-001-results
+          path: artifacts/close-obligation-energy-001
+          retention-days: 90
+          compression-level: 1
