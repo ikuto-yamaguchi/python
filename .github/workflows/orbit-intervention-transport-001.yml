@@ -1,0 +1,61 @@
+name: orbit-intervention-transport-001
+
+on:
+  pull_request:
+    branches: [research/minimal-compute-lm]
+    paths:
+      - "minimal-predictive-lm/src/minimal_predictive_lm/orbit_*.py"
+      - "minimal-predictive-lm/tests/test_orbit_intervention_transport.py"
+      - "minimal-predictive-lm/docs/research/orbit-intervention-transport-001.md"
+      - ".github/workflows/orbit-intervention-transport-001.yml"
+  workflow_dispatch:
+
+jobs:
+  discover-and-falsify-orbit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: python -m pip install -e minimal-predictive-lm
+      - name: Unit tests
+        run: |
+          python -m unittest \
+            minimal-predictive-lm/tests/test_orbit_intervention_transport.py -v
+      - name: Run intervention-transport experiment
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p artifacts/orbit-intervention-transport-001
+          python -m minimal_predictive_lm.orbit_intervention_transport \
+            --output-dir artifacts/orbit-intervention-transport-001 \
+            | tee artifacts/orbit-intervention-transport-001/run.log
+      - name: Enforce evidence integrity
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path("artifacts/orbit-intervention-transport-001/orbit-intervention-transport-001.json")
+          report = json.loads(path.read_text())
+          if report["highschool_level_passed"]:
+              raise SystemExit("controlled experiment cannot claim completion")
+          if not report["principle_component_supported"]:
+              raise SystemExit("ORBIT component was falsified")
+          if not all(report["checks"].values()):
+              raise SystemExit("ORBIT integrity check failed")
+          counts = [row["orbit_count"] for row in report["scale_results"]]
+          if counts != [6, 6, 6]:
+              raise SystemExit(f"mechanism library grew with data: {counts}")
+          if report["scaling_diagnostics"]["program_compression_ratio"] < 500:
+              raise SystemExit("insufficient compression over fingerprints")
+          PY
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: orbit-intervention-transport-001-results
+          path: artifacts/orbit-intervention-transport-001
+          retention-days: 90
