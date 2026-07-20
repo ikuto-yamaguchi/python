@@ -30,7 +30,7 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p artifacts/pact-commitment-transactions-001
-          python -m minimal_predictive_lm.pact_communication_experiment \
+          python -m minimal_predictive_lm.pact_communication_fast \
             --output-dir artifacts/pact-commitment-transactions-001 \
             --train-examples 4000 \
             --valid-examples 400 \
