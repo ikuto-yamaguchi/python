@@ -19,7 +19,7 @@ jobs:
           python-version: '3.11'
       - name: Unit tests
         working-directory: minimal-predictive-lm
-        run: python -m unittest tests.test_active_identity_intervention -v
+        run: PYTHONPATH=src python -m unittest discover -s tests -p 'test_active_identity_intervention.py' -v
       - name: Run measured experiment
         working-directory: minimal-predictive-lm
         run: PYTHONPATH=src python -S -m minimal_predictive_lm.active_identity_intervention
