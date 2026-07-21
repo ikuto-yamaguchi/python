@@ -1,0 +1,45 @@
+{
+  "hypothesis": "Open-Set Discourse Event Segmentation with Multi-Channel Predictive Memory",
+  "seeds": [1, 7, 19],
+  "event_counts": [48, 192, 768],
+  "summary_768": {
+    "seen": {
+      "temporal": {"retrieval_accuracy": 0.2, "event_pair_precision": 0.19942322986675187, "event_pair_recall": 1.0, "event_pair_f1": 0.3324658241957897, "segments": 768, "stored_utterances": 2695.3333333333335, "model_bytes": 879764.3333333334, "training_seconds": 0.019445131333213794, "inference_ms": 4.3423438999980135, "mean_reads": 8.0},
+      "multi": {"retrieval_accuracy": 0.16666666666666666, "event_pair_precision": 0.008024310344845388, "event_pair_recall": 0.16536458333333334, "event_pair_f1": 0.01530462738260424, "segments": 773, "stored_utterances": 2695.3333333333335, "model_bytes": 919116.6666666666, "training_seconds": 0.15557776866671702, "inference_ms": 4.239725166689823, "mean_reads": 8.0, "peak_hypotheses": 7, "reversible_rejections": 5}
+    },
+    "held": {
+      "temporal": {"retrieval_accuracy": 0.06666666666666667, "event_pair_f1": 0.3324658241957897},
+      "multi": {"retrieval_accuracy": 0.23333333333333334, "event_pair_precision": 0.008081016969708595, "event_pair_recall": 0.16666666666666666, "event_pair_f1": 0.015413384107828708, "model_bytes": 955466, "training_seconds": 0.15250922766669342, "inference_ms": 4.296411499990427}
+    },
+    "long_gap": {
+      "temporal": {"retrieval_accuracy": 0.13333333333333333, "event_pair_f1": 0.0},
+      "multi": {"retrieval_accuracy": 0.1, "event_pair_f1": 0.0, "model_bytes": 1022337.6666666666, "training_seconds": 1.0308618123334174, "inference_ms": 4.519151999981356}
+    },
+    "topic_shift": {
+      "temporal": {"retrieval_accuracy": 0.03333333333333333, "event_pair_f1": 0.0},
+      "multi": {"retrieval_accuracy": 0.03333333333333333, "event_pair_precision": 0.009444394480645078, "event_pair_recall": 0.10286458333333333, "event_pair_f1": 0.01729851484695708, "reversible_rejections": 71.66666666666667}
+    },
+    "combined": {
+      "temporal": {"retrieval_accuracy": 0.06666666666666667, "event_pair_f1": 0.3324658241957897},
+      "multi": {"retrieval_accuracy": 0.23333333333333334, "event_pair_precision": 0.008081016969708595, "event_pair_recall": 0.16666666666666666, "event_pair_f1": 0.015413384107828708}
+    },
+    "one_shot": {"temporal": 1.0, "multi": 1.0},
+    "interference_latest": {"temporal": 0.0, "multi": 0.0}
+  },
+  "scaling_notes": {
+    "48_multi_seen_model_bytes": 65898,
+    "192_multi_seen_model_bytes": 232766.66666666666,
+    "768_multi_seen_model_bytes": 919116.6666666666,
+    "48_multi_seen_event_f1": 0.01698041279864238,
+    "192_multi_seen_event_f1": 0.016042327800624805,
+    "768_multi_seen_event_f1": 0.01530462738260424
+  },
+  "peak_rss_kib_runtime_included": 486176,
+  "estimated_complexity": "update O(HG), recall O(SG), H<=7, top-8 segment reads",
+  "leakage_audit": "The initial evaluator-label leakage implementation was rejected. Final learner uses raw text, temporal order and generic consistency only; hidden labels are evaluator-only.",
+  "free_japanese_integrated_gate": 0.0,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
