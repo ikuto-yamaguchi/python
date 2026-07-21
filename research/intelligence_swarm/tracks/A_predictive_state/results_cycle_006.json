@@ -1,0 +1,29 @@
+{
+  "hypothesis": "Entropy-Matched Multi-Turn Predictive Repair Programs",
+  "seeds": [1, 7, 19],
+  "train_sizes": [32, 128, 512],
+  "summary_512": {
+    "k2_known": {"accuracy": 1.0, "turns": 1.0, "acquired_bits": 1.0, "ideal_bits": 1.0, "ms_per_dialogue": 0.1089},
+    "k3_known": {"accuracy": 1.0, "turns": 1.6722, "acquired_bits": 1.5850, "ideal_bits": 1.5850, "ms_per_dialogue": 0.1816},
+    "k4_known": {"accuracy": 1.0, "turns": 2.0537, "acquired_bits": 2.0, "ideal_bits": 2.0, "ms_per_dialogue": 0.2272},
+    "k5_known": {"accuracy": 1.0, "turns": 2.4093, "acquired_bits": 2.3219, "ideal_bits": 2.3219, "ms_per_dialogue": 0.2799},
+    "k6_known": {"accuracy": 1.0, "turns": 2.6222, "acquired_bits": 2.5850, "ideal_bits": 2.5850, "ms_per_dialogue": 0.3186},
+    "k8_known": {"accuracy": 1.0, "abstention": 0.0, "turns": 3.1426, "acquired_bits": 3.0, "ideal_bits": 3.0, "ms_per_dialogue": 0.4090},
+    "k8_held": {"accuracy": 0.1074, "abstention": 0.0, "turns": 2.6889, "acquired_bits": 3.0, "remaining": 1.0},
+    "k8_uninformative": {"accuracy": 0.0, "abstention": 1.0, "turns": 1.0, "acquired_bits": 0.0, "remaining": 8.0},
+    "k8_mixed": {"accuracy": 0.2315, "abstention": 0.4833, "turns": 2.3222, "acquired_bits": 1.8935, "remaining": 3.1981},
+    "one_shot": {"accuracy": 0.2222, "abstention": 0.7778, "turns": 1.0, "acquired_bits": 0.9472},
+    "cost_aware": {"accuracy": 1.0, "abstention": 0.0, "turns": 2.1537, "acquired_bits": 2.0876},
+    "model_bytes": 514,
+    "feedback_patterns": 12
+  },
+  "peak_rss_kib_runtime_included": 305300,
+  "candidate_futures_given": true,
+  "fixed_semantic_slots": false,
+  "external_model": false,
+  "free_japanese_integrated_gate": 0.0,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
