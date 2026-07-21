@@ -1,0 +1,31 @@
+{
+  "hypothesis": "Scope-Contrastive Factor Proposal with Reversible Attractor Selection",
+  "seeds": [1, 7, 19],
+  "train_sizes": [24, 48, 96],
+  "evaluation_examples_per_split_per_seed": 20,
+  "candidate_limit": 32,
+  "max_sweeps": 8,
+  "summary_at_train_size_96": {
+    "seen_flat": {"accuracy": 0.0, "abstention": 0.3, "latency_ms": 0.17816590000165888, "mean_sweeps": 1.0, "active_candidates": 1.0, "margin": 0.0},
+    "seen_attractor": {"accuracy": 0.0, "abstention": 1.0, "latency_ms": 16.300484733339243, "mean_sweeps": 2.0, "active_candidates": 24.0, "margin": 0.0},
+    "held_context_attractor": {"accuracy": 0.0, "abstention": 1.0, "latency_ms": 16.456075283341914, "mean_sweeps": 2.0, "active_candidates": 24.0, "margin": 0.0},
+    "held_command_attractor": {"accuracy": 0.0, "abstention": 1.0, "latency_ms": 18.03146073333816, "mean_sweeps": 2.0, "active_candidates": 24.0, "margin": 0.0},
+    "nested_attractor": {"accuracy": 0.0, "abstention": 1.0, "latency_ms": 23.71261083333896, "mean_sweeps": 2.0, "active_candidates": 32.0, "margin": 0.0},
+    "nested_held_attractor": {"accuracy": 0.0, "abstention": 1.0, "latency_ms": 24.11127810000077, "mean_sweeps": 2.0, "active_candidates": 32.0, "margin": 0.0},
+    "multi_paragraph_attractor": {"accuracy": 0.0, "abstention": 1.0, "latency_ms": 18.84961858333251, "mean_sweeps": 2.0, "active_candidates": 32.0, "margin": 0.0},
+    "plan_change_flat": {"accuracy": 0.0, "abstention": 0.31666666666666665, "latency_ms": 0.6247837166711179, "mean_sweeps": 1.0, "active_candidates": 1.0, "margin": 0.0},
+    "plan_change_attractor": {"accuracy": 0.18333333333333332, "abstention": 0.2833333333333333, "latency_ms": 20.689230583328328, "mean_sweeps": 2.0, "active_candidates": 32.0, "margin": 0.053806053981271564},
+    "model_bytes": 54618,
+    "training_seconds": 0.0011328096666147758,
+    "command_views": 26,
+    "scope_views": 126.33333333333333,
+    "peak_rss_kib_runtime_included": 13764
+  },
+  "estimated_scoring_complexity": "O(S*H*(C+B)); H<=32, C<=48, B<=64 per branch",
+  "status": "falsified",
+  "falsification": "Sentence-span scope variation did not produce semantically non-isomorphic executable candidates. Candidate recall collapsed, margins were zero on all ordinary splits, and relaxation converged to total abstention. The only positive plan-change signal depended on a surface recency marker and did not preserve normal capability.",
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
