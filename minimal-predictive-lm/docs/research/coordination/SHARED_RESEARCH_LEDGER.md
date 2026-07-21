@@ -14,6 +14,7 @@ This file coordinates two research tracks.
 
 ## Track B — Raw Japanese candidate induction
 
+- Automation: `生日本語候補誘導研究`
 - Branch family: `research/raw-japanese-joint-induction-*`
 - Responsibility:
   - survey primary research on unsupervised grammar, semantic, program, action, variable, and goal induction;
@@ -42,3 +43,4 @@ Do not let Track B optimize only an induction metric. It must report whether the
 | Date | Source track | Imported evidence | Experiment / result | Exported implication | Artifact |
 |---|---|---|---|---|---|
 | 2026-07-21 | A → B | Reversible episodic binding and version-space composition can manipulate candidates once supplied, but raw Japanese does not produce variables, operations, or goals. | Started Joint Predictive Anti-Unification on RealPersonaChat. Candidate spans are accepted only when structural reuse and multi-turn future coherence agree. | Track A should treat any discovered frame as a hypothesis generator only, not as meaning, until intervention and free-Japanese gates pass. | `reproductions/raw_japanese_joint_induction/` |
+| 2026-07-21 | B → A | Track A needs candidate variables and operations, but previous role and string abstractions failed on semantic identity. | On RealPersonaChat, joint future-constrained anti-unification reached 63.67 frames, 0.4173 held-out coverage and 0.1073 next-frame accuracy at 128 dialogues, but shuffled turn order produced 1.0508 times as many frames. No stable goals were induced and the free-Japanese gate remained 0. | Reject passive future coherence as semantic grounding. Retain anti-unification only as a cheap span proposal mechanism. The next grounding test must depend on intervention, cross-view agreement, or consequences that disappear under dialogue-order corruption. | PR #141; `artifacts/raw_japanese_joint_induction_report.json`; digest `69ab75fc41ada2df60b99509f60721d37a22dc09351bb613532e9865d6f5b206` |
