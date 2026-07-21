@@ -1,0 +1,42 @@
+{
+  "hypothesis": "Cross-Episode Permutation-Complete Anti-Unification",
+  "seeds": [1, 7, 19],
+  "train_sizes": [60, 180, 360],
+  "summary_360": {
+    "proposal_quality": {
+      "candidate_recall": 0.6101851851851852,
+      "candidate_precision": 0.5678546901077719,
+      "mean_candidates": 1.075
+    },
+    "single_episode": {
+      "seen": {"accuracy": 1.0, "ms": 0.15920665833340938, "program_reads": 27.666666666666668},
+      "held_order": {"accuracy": 0.0, "ms": 0.15502719166736117},
+      "held_lexeme": {"accuracy": 0.0, "ms": 0.15480631111207308},
+      "nested": {"accuracy": 0.0, "ms": 0.15702728055531326},
+      "subject_omission": {"accuracy": 0.0, "ms": 0.1559675277778499},
+      "alternate_state": {"accuracy": 0.0, "ms": 0.12138351389062842},
+      "model_bytes": 5451.333333333333,
+      "programs": 27.666666666666668,
+      "raw_candidates": 387
+    },
+    "cross_episode": {
+      "seen": {"accuracy": 1.0, "ms": 0.08430784166648664, "program_reads": 12.666666666666666},
+      "held_order": {"accuracy": 0.0, "ms": 0.07881996388934769},
+      "held_lexeme": {"accuracy": 0.0, "ms": 0.08449321666780128},
+      "nested": {"accuracy": 0.0, "ms": 0.07927018333349325},
+      "subject_omission": {"accuracy": 0.0, "ms": 0.07865516388897555},
+      "alternate_state": {"accuracy": 0.0, "ms": 0.05615190833370636},
+      "model_bytes": 2835.6666666666665,
+      "programs": 12.666666666666666,
+      "raw_candidates": 387,
+      "accepted_candidates": 12.666666666666666
+    }
+  },
+  "peak_rss_kib_runtime_included": 308468,
+  "estimated_complexity": "train O(N L^2); infer O(P L), P consolidated programs",
+  "free_japanese_integrated_gate": 0.0,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
