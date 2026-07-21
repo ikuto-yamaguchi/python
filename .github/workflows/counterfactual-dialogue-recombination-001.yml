@@ -1,0 +1,40 @@
+name: counterfactual-dialogue-recombination-001
+on:
+  pull_request:
+    paths:
+      - 'minimal-predictive-lm/src/minimal_predictive_lm/counterfactual_dialogue_recombination.py'
+      - 'minimal-predictive-lm/tests/test_counterfactual_dialogue_recombination.py'
+      - '.github/workflows/counterfactual-dialogue-recombination-001.yml'
+  workflow_dispatch:
+jobs:
+  experiment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Unit tests
+        working-directory: minimal-predictive-lm
+        run: PYTHONPATH=src python -S -m unittest tests.test_counterfactual_dialogue_recombination
+      - name: Run experiment
+        working-directory: minimal-predictive-lm
+        run: PYTHONPATH=src /usr/bin/time -v python -S -m minimal_predictive_lm.counterfactual_dialogue_recombination 2> resource.txt | tee stdout.json
+      - name: Claim boundary
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          import json
+          r=json.load(open('counterfactual_dialogue_recombination_report.json'))
+          assert r['completion'] is False
+          assert r['highschool_level_passed'] is False
+          assert all(v is False for v in r['integrated_gate'].values())
+          assert r['scaling']['1024']['decoy_accept'] >= 0.75
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: counterfactual-dialogue-recombination-001
+          path: |
+            minimal-predictive-lm/counterfactual_dialogue_recombination_report.json
+            minimal-predictive-lm/stdout.json
+            minimal-predictive-lm/resource.txt
