@@ -1,0 +1,25 @@
+{
+  "hypothesis": "Bidirectional Executable MDL Operation Quotient",
+  "aggregate": {
+    "60": {
+      "surface": {"seen": 0.17333333333333334, "order": 0.16666666666666669, "synonym": 0.19333333333333333, "rename": 0, "rename_synonym": 0, "confound": 0.48, "bytes": 9362.333333333334, "units": 66, "train_s": 5.590333330474095e-06, "seen_ms": 1.5137490866666665, "seen_reads": 66, "seen_margin": 0.22},
+      "literal_graph": {"seen": 0.96, "order": 0, "synonym": 0, "rename": 0.9666666666666667, "rename_synonym": 0, "confound": 0.9933333333333333, "bytes": 1785.6666666666667, "units": 18, "train_s": 0.0031735613332178523, "seen_ms": 0.29972454666666665, "seen_reads": 18, "seen_margin": 0.96},
+      "bidirectional_mdl": {"seen": 0.96, "order": 0, "synonym": 0, "rename": 0.9666666666666667, "rename_synonym": 0, "confound": 0.9933333333333333, "bytes": 1443.6666666666667, "units": 8.666666666666666, "train_s": 0.003347367333390139, "seen_ms": 0.14236912666666665, "seen_reads": 18.333333333333332, "seen_margin": 1.0054666666666667}
+    },
+    "180": {
+      "surface": {"seen": 0.14, "order": 0.23333333333333334, "synonym": 0.18000000000000002, "rename": 0, "rename_synonym": 0, "confound": 0.49333333333333335, "bytes": 27452, "units": 195, "train_s": 1.0278333320457023e-05, "seen_ms": 4.685316719999999, "seen_reads": 195, "seen_margin": 0.16},
+      "literal_graph": {"seen": 1, "order": 0, "synonym": 0, "rename": 1, "rename_synonym": 0, "confound": 1, "bytes": 3172, "units": 29, "train_s": 0.009174979666719688, "seen_ms": 0.47184956, "seen_reads": 29, "seen_margin": 1},
+      "bidirectional_mdl": {"seen": 1, "order": 0, "synonym": 0, "rename": 1, "rename_synonym": 0, "confound": 1, "bytes": 2551.6666666666665, "units": 13.666666666666666, "train_s": 0.009614000666412418, "seen_ms": 0.315922, "seen_reads": 28.666666666666668, "seen_margin": 1.2167999999999999}
+    },
+    "360": {
+      "surface": {"seen": 0.16, "order": 0.22666666666666666, "synonym": 0.17333333333333334, "rename": 0, "rename_synonym": 0, "confound": 0.5, "bytes": 54884.666666666664, "units": 390, "train_s": 1.6480333367023075e-05, "seen_ms": 8.576287, "seen_reads": 390, "seen_margin": 0.16666666666666669},
+      "literal_graph": {"seen": 1, "order": 0, "synonym": 0, "rename": 1, "rename_synonym": 0, "confound": 1, "bytes": 4674.333333333333, "units": 38.666666666666664, "train_s": 0.01822609933348455, "seen_ms": 0.6559782533333334, "seen_reads": 38.666666666666664, "seen_margin": 1},
+      "bidirectional_mdl": {"seen": 1, "order": 0, "synonym": 0, "rename": 1, "rename_synonym": 0, "confound": 1, "bytes": 3826.6666666666665, "units": 18.666666666666668, "train_s": 0.019605662666738983, "seen_ms": 0.57209142, "seen_reads": 38.333333333333336, "seen_margin": 1.3493333333333333}
+    }
+  },
+  "peak_rss_kib_runtime_included": 288576,
+  "audit": {"model_sees_entity_list": false, "model_sees_value_list": false, "fixed_semantic_slots": false, "external_llm_or_rag": false, "dataset_is_controlled_synthetic": true},
+  "seeds": [1, 7, 19],
+  "training_sizes": [60, 180, 360],
+  "eval_per_split_per_seed": 50
+}
