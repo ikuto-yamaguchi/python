@@ -1,0 +1,45 @@
+{
+  "hypothesis": "Mechanism-Factored Intervention Tensor with Counterfactual Completion",
+  "seeds": [1, 7, 19],
+  "train_sizes": [48, 192, 768],
+  "rank_ablation": [1, 3, 6],
+  "largest_rank1_mean": {
+    "seen_accuracy": 1.0,
+    "unseen_context_accuracy": 0.2875,
+    "unseen_context_abstention": 0.5763888888888888,
+    "subject_omission_accuracy": 1.0,
+    "multi_paragraph_accuracy": 1.0,
+    "plan_change_accuracy": 1.0,
+    "counterfactual_completion_accuracy": 1.0,
+    "order_counterfactual_accuracy": 0.0,
+    "model_bytes": 1520,
+    "factor_nodes": 6,
+    "training_seconds": 0.00021636033322162498,
+    "seen_inference_ms": 0.019415038888976395,
+    "multi_paragraph_inference_ms": 0.04770527499999844,
+    "candidate_reads": 1.0
+  },
+  "largest_rank3_mean": {
+    "seen_accuracy": 1.0,
+    "unseen_context_accuracy": 0.2694444444444445,
+    "counterfactual_completion_accuracy": 1.0,
+    "order_counterfactual_accuracy": 0.0,
+    "model_bytes": 1520,
+    "factor_nodes": 6
+  },
+  "largest_rank6_mean": {
+    "seen_accuracy": 0.8083333333333333,
+    "unseen_context_accuracy": 0.2972222222222222,
+    "counterfactual_completion_accuracy": 0.8333333333333334,
+    "order_counterfactual_accuracy": 0.0,
+    "model_bytes": 1520,
+    "factor_nodes": 6
+  },
+  "peak_rss_kib_runtime_included": 295268,
+  "estimated_complexity": "train O(NG); inference O(CG), C<=6; sparse rank reads 1/3/6",
+  "falsification": "Known-context missing-cell completion was perfect, but unseen-context zero-shot was 0.2875 and order counterfactual was 0.0. The nodes are surface-context prototypes, not compositional causal mechanisms.",
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
