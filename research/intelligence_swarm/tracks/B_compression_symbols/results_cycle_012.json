@@ -1,0 +1,46 @@
+{
+  "hypothesis": "Relation-Preservation Anti-Unification with Contrastive Multi-Field States",
+  "seeds": [1, 7, 19],
+  "train_sizes": [32, 96, 192],
+  "summary_192": {
+    "proposal_single": {"recall": 0.1909722222, "precision": 0.1495104320, "mean_candidates": 1.2760416667},
+    "proposal_contrastive": {"recall": 0.0902777778, "precision": 0.1448390677, "mean_candidates": 0.6267361111},
+    "single_change": {
+      "seen": {"accuracy": 0.375, "preservation_rate": 0.375, "ms": 0.8049155833, "reads": 14.0, "candidates": 0.625},
+      "held_order": {"accuracy": 0.0}, "held_lexeme": {"accuracy": 0.0},
+      "nested": {"accuracy": 0.3333333333}, "subject_omission": {"accuracy": 0.0},
+      "alternate_state": {"accuracy": 0.0}, "alternate_state_inverse": {"accuracy": 0.0},
+      "three_objects": {"accuracy": 0.2916666667},
+      "model_bytes": 8181, "programs": 14.0, "raw_candidates": 245.0
+    },
+    "contrastive_no_preservation": {
+      "seen": {"accuracy": 0.375, "preservation_rate": 0.375, "ms": 0.5461860000, "reads": 9.3333333333, "candidates": 0.4722222222},
+      "held_order": {"accuracy": 0.0}, "held_lexeme": {"accuracy": 0.0},
+      "nested": {"accuracy": 0.3333333333}, "subject_omission": {"accuracy": 0.0},
+      "alternate_state": {"accuracy": 0.0}, "alternate_state_inverse": {"accuracy": 0.0},
+      "three_objects": {"accuracy": 0.2916666667},
+      "model_bytes": 5469, "programs": 9.3333333333, "raw_candidates": 120.3333333333
+    },
+    "relation_preservation": {
+      "seen": {"accuracy": 0.375, "preservation_rate": 0.375, "ms": 0.5469059722, "reads": 9.3333333333, "candidates": 0.4722222222},
+      "held_order": {"accuracy": 0.0}, "held_lexeme": {"accuracy": 0.0},
+      "nested": {"accuracy": 0.3333333333}, "subject_omission": {"accuracy": 0.0},
+      "alternate_state": {"accuracy": 0.0}, "alternate_state_inverse": {"accuracy": 0.0},
+      "three_objects": {"accuracy": 0.2916666667},
+      "model_bytes": 5469, "programs": 9.3333333333, "raw_candidates": 120.3333333333
+    }
+  },
+  "per_seed_192": [
+    {"seed": 1, "single_recall": 0.2135416667, "single_precision": 0.1614173228, "contrastive_recall": 0.0729166667, "contrastive_precision": 0.1176470588, "seen_accuracy": 0.375, "nested_accuracy": 0.25, "three_objects_accuracy": 0.2916666667, "model_bytes": 7827, "programs": 13, "seen_ms": 0.86616125},
+    {"seed": 7, "single_recall": 0.1822916667, "single_precision": 0.1405622490, "contrastive_recall": 0.1041666667, "contrastive_precision": 0.1470588235, "seen_accuracy": 0.2916666667, "nested_accuracy": 0.375, "three_objects_accuracy": 0.3333333333, "model_bytes": 5186, "programs": 9, "seen_ms": 0.4488261250},
+    {"seed": 19, "single_recall": 0.1770833333, "single_precision": 0.1465517241, "contrastive_recall": 0.09375, "contrastive_precision": 0.1698113208, "seen_accuracy": 0.4583333333, "nested_accuracy": 0.375, "three_objects_accuracy": 0.25, "model_bytes": 3394, "programs": 6, "seen_ms": 0.3257305417}
+  ],
+  "peak_rss_kib_runtime_included": 309776,
+  "estimated_complexity": "train O(N L^2 + C); infer O(P C L^3), capped spans 5/6",
+  "search_explosion": "Initial exhaustive inference exceeded 120 seconds; final implementation used direct prefix/suffix binding and capped overlap candidates.",
+  "free_japanese_integrated_gate": 0.0,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
