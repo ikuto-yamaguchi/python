@@ -1,0 +1,31 @@
+name: Reversible episodic binding
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "minimal-predictive-lm/reproductions/reversible_episodic_binding/**"
+      - ".github/workflows/reversible-episodic-binding.yml"
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: minimal-predictive-lm/reproductions/reversible_episodic_binding
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: python -m pip install numpy pytest
+      - name: Counterexample tests
+        run: python -m pytest -q test_reversible_episodic_binding.py
+      - name: Multi-seed scaling experiment
+        run: python reversible_episodic_binding.py --output artifacts/reversible_episodic_binding_report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reversible-episodic-binding-report
+          path: minimal-predictive-lm/reproductions/reversible_episodic_binding/artifacts/reversible_episodic_binding_report.json
