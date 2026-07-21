@@ -1,0 +1,44 @@
+{
+  "hypothesis": "Predictive Evidence-Channel Change-Point States",
+  "seeds": [1, 7, 19],
+  "stream_length_per_seed_per_scenario": 1200,
+  "warmup_per_seed": 180,
+  "scenarios": ["stable", "abrupt", "speaker", "temporary", "gradual", "held"],
+  "methods": ["static", "decay", "change_point"],
+  "summary_3_seed_mean": {
+    "static": {
+      "stable": {"accuracy_all": 0.6602777778, "coverage": 0.6602777778, "selective_accuracy": 1.0, "wrong_commit_rate": 0.0, "ms_per_episode": 0.0917355928, "model_bytes": 935},
+      "abrupt": {"accuracy_all": 0.3055555556, "coverage": 0.6602777778, "selective_accuracy": 0.4625156303, "wrong_commit_rate": 0.3547222222, "first20_post_change_accuracy": 0.0},
+      "speaker": {"accuracy_all": 0.5161111111, "coverage": 0.6602777778, "selective_accuracy": 0.7816302952, "wrong_commit_rate": 0.1441666667, "first20_post_change_accuracy": 0.55},
+      "temporary": {"accuracy_all": 0.5305555556, "coverage": 0.6602777778, "selective_accuracy": 0.8035642264, "wrong_commit_rate": 0.1297222222, "first20_post_change_accuracy": 0.0},
+      "gradual": {"accuracy_all": 0.3277777778, "coverage": 0.6630555556, "selective_accuracy": 0.4945679843, "wrong_commit_rate": 0.3352777778},
+      "held": {"accuracy_all": 0.2955555556, "coverage": 0.2955555556, "selective_accuracy": 1.0, "wrong_commit_rate": 0.0, "model_bytes": 1481}
+    },
+    "decay": {
+      "stable": {"accuracy_all": 0.6602777778, "coverage": 0.6602777778, "selective_accuracy": 1.0, "wrong_commit_rate": 0.0, "ms_per_episode": 0.0930443150, "model_bytes": 934},
+      "abrupt": {"accuracy_all": 0.6002777778, "coverage": 0.6602777778, "selective_accuracy": 0.9091028800, "wrong_commit_rate": 0.06, "first20_post_change_accuracy": 0.0},
+      "speaker": {"accuracy_all": 0.5136111111, "coverage": 0.6602777778, "selective_accuracy": 0.7778869695, "wrong_commit_rate": 0.1466666667, "first20_post_change_accuracy": 0.55},
+      "temporary": {"accuracy_all": 0.5616666667, "coverage": 0.6602777778, "selective_accuracy": 0.8506352107, "wrong_commit_rate": 0.0986111111, "first20_post_change_accuracy": 0.55},
+      "gradual": {"accuracy_all": 0.5591666667, "coverage": 0.6630555556, "selective_accuracy": 0.8432858595, "wrong_commit_rate": 0.1038888889},
+      "held": {"accuracy_all": 0.2955555556, "coverage": 0.2955555556, "selective_accuracy": 1.0, "wrong_commit_rate": 0.0, "model_bytes": 1480}
+    },
+    "change_point": {
+      "stable": {"accuracy_all": 0.6602777778, "coverage": 0.6602777778, "selective_accuracy": 1.0, "wrong_commit_rate": 0.0, "ms_per_episode": 0.0048745019, "model_bytes": 2819, "change_count": 0.0, "rollback_count": 0.0},
+      "abrupt": {"accuracy_all": 0.6302777778, "coverage": 0.6602777778, "selective_accuracy": 0.9545514400, "wrong_commit_rate": 0.03, "first20_post_change_accuracy": 0.05, "change_count": 18.0, "rollback_count": 0.0},
+      "speaker": {"accuracy_all": 0.6502777778, "coverage": 0.6602777778, "selective_accuracy": 0.9848504800, "wrong_commit_rate": 0.01, "first20_post_change_accuracy": 0.7666666667, "change_count": 6.0, "rollback_count": 0.0},
+      "temporary": {"accuracy_all": 0.6002777778, "coverage": 0.6602777778, "selective_accuracy": 0.9091028800, "wrong_commit_rate": 0.06, "first20_post_change_accuracy": 0.75, "change_count": 36.0, "rollback_count": 0.0},
+      "gradual": {"accuracy_all": 0.5458333333, "coverage": 0.6486111111, "selective_accuracy": 0.8414803470, "wrong_commit_rate": 0.1027777778, "change_count": 18.6666666667, "rollback_count": 17.3333333333, "ms_per_episode": 0.0061927019},
+      "held": {"accuracy_all": 0.2955555556, "coverage": 0.2955555556, "selective_accuracy": 1.0, "wrong_commit_rate": 0.0, "model_bytes": 4535, "ms_per_episode": 0.0066429572}
+    }
+  },
+  "candidate_reads": 5.0,
+  "runtime_seconds": 4.34771193,
+  "peak_rss_kib_runtime_included": 309428,
+  "estimated_complexity": "interpret O(PG), sparse local state update O(1), P<=15",
+  "outcome_contains_target_value": false,
+  "free_japanese_integrated_gate": 0.0,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
