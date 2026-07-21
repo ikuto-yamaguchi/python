@@ -1,0 +1,14 @@
+{
+  "aggregate": {
+    "32": {"passive_accuracy": 0.4069444444, "active_no_query_accuracy": 0.2430555556, "active_accuracy": 0.675, "active_reads": 6.45, "query_rate": 0.7208333333, "states": 14, "model_bytes": 1512, "peak_rss_kib": 306924, "eval_seconds": 0.0023853653, "inconsistent_reply_abstention": 1.0},
+    "128": {"passive_accuracy": 0.3833333333, "active_no_query_accuracy": 0.2569444444, "active_accuracy": 0.7694444444, "active_reads": 7.4305555556, "query_rate": 0.7430555556, "states": 16, "model_bytes": 1624, "peak_rss_kib": 306924, "eval_seconds": 0.0023649917, "inconsistent_reply_abstention": 1.0},
+    "512": {"passive_accuracy": 0.4361111111, "active_no_query_accuracy": 0.2708333333, "active_accuracy": 0.7888888889, "active_reads": 7.0833333333, "query_rate": 0.7291666667, "states": 16, "model_bytes": 1624, "peak_rss_kib": 306924, "eval_seconds": 0.0023960317, "inconsistent_reply_abstention": 1.0}
+  },
+  "claim_boundary": {
+    "highschool_level_passed": false,
+    "native_japanese_communication_passed": false,
+    "weak_smartphone_verified": false,
+    "completion": false,
+    "open_set_structure_induction_passed": false
+  }
+}
