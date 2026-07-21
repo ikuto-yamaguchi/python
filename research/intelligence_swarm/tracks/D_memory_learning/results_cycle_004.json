@@ -1,0 +1,19 @@
+{
+  "hypothesis": "Maintain multiple boundary/binding hypotheses during sleep consolidation and revoke schemas contradicted by later cross-view evidence.",
+  "aggregate": {
+    "48": {
+      "SingleBoundaryMemory": {"seen":1,"consolidated_view":0,"latest_after_interference":1,"reversible_rejection":1,"added":3,"revoked":3,"schemas":6,"bindings":170,"model_bytes":9663,"train_seconds":0.0013281283,"inference_ms":0.00285822,"query_reads":3,"peak_rss_kib":287388},
+      "UncertainSleepMemory": {"seen":1,"consolidated_view":1,"latest_after_interference":1,"reversible_rejection":1,"added":10,"revoked":7,"schemas":9,"bindings":260,"model_bytes":14627,"train_seconds":0.0014494303,"inference_ms":0.0025128033,"query_reads":3,"peak_rss_kib":287388}
+    },
+    "180": {
+      "SingleBoundaryMemory": {"seen":1,"consolidated_view":0,"latest_after_interference":1,"reversible_rejection":1,"added":3,"revoked":3,"schemas":6,"bindings":170,"model_bytes":9663,"train_seconds":0.0053645417,"inference_ms":0.0025324967,"query_reads":3,"peak_rss_kib":287388},
+      "UncertainSleepMemory": {"seen":1,"consolidated_view":1,"latest_after_interference":1,"reversible_rejection":1,"added":10,"revoked":7,"schemas":9,"bindings":260,"model_bytes":14627,"train_seconds":0.0045757657,"inference_ms":0.0025801367,"query_reads":3,"peak_rss_kib":287388}
+    },
+    "540": {
+      "SingleBoundaryMemory": {"seen":1,"consolidated_view":0,"latest_after_interference":1,"reversible_rejection":1,"added":3,"revoked":3,"schemas":6,"bindings":170,"model_bytes":9793,"train_seconds":0.0139480273,"inference_ms":0.0028408933,"query_reads":3,"peak_rss_kib":287388},
+      "UncertainSleepMemory": {"seen":1,"consolidated_view":1,"latest_after_interference":1,"reversible_rejection":1,"added":10,"revoked":7,"schemas":9,"bindings":260,"model_bytes":14817,"train_seconds":0.0150139957,"inference_ms":0.0027518567,"query_reads":3,"peak_rss_kib":287388}
+    }
+  },
+  "seeds": [1,7,19],
+  "claim": {"highschool_level_passed":false,"native_japanese_communication_passed":false,"weak_smartphone_verified":false,"completion":false}
+}
