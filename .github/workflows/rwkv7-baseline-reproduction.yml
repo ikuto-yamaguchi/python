@@ -1,0 +1,41 @@
+name: RWKV-7 matched baseline reproduction
+
+on:
+  pull_request:
+    paths:
+      - "minimal-predictive-lm/reproductions/rwkv7_x070/**"
+      - ".github/workflows/rwkv7-baseline-reproduction.yml"
+  workflow_dispatch:
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install CPU PyTorch and pytest
+        run: pip install --index-url https://download.pytorch.org/whl/cpu torch pytest
+      - name: Unit tests
+        run: pytest -q minimal-predictive-lm/reproductions/rwkv7_x070/test_baseline_reproduction.py
+      - name: Run reproduction
+        run: |
+          python minimal-predictive-lm/reproductions/rwkv7_x070/baseline_reproduction.py \
+            --output artifacts/rwkv7_baseline_report.json
+      - name: Guard claim boundary
+        run: |
+          python - <<'PY'
+          import json
+          report = json.load(open('artifacts/rwkv7_baseline_report.json', encoding='utf-8'))
+          scope = report['comparison_scope']
+          assert scope['completion'] is False
+          assert scope['highschool_level_passed'] is False
+          assert scope['native_japanese_communication_passed'] is False
+          assert report['interpretation']['rwkv7_unique_advantage_observed'] is False
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rwkv7-baseline-reproduction-report
+          path: artifacts/rwkv7_baseline_report.json
