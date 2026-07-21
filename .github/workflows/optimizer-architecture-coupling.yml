@@ -1,0 +1,46 @@
+name: Optimizer architecture coupling
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "minimal-predictive-lm/reproductions/sequence_architecture_map/**"
+      - ".github/workflows/optimizer-architecture-coupling.yml"
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: minimal-predictive-lm/reproductions/sequence_architecture_map
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install CPU dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Unit and quick integration tests
+        env:
+          OMP_NUM_THREADS: "1"
+          MKL_NUM_THREADS: "1"
+        run: |
+          python -m pytest -q test_optimizer_coupling.py
+          python optimizer_coupling.py --quick --output artifacts/optimizer_coupling_quick.json
+      - name: Full optimizer architecture sweep
+        env:
+          OMP_NUM_THREADS: "1"
+          MKL_NUM_THREADS: "1"
+        run: python optimizer_coupling.py --output artifacts/optimizer_coupling_report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: optimizer-architecture-coupling-reports
+          path: |
+            minimal-predictive-lm/reproductions/sequence_architecture_map/artifacts/optimizer_coupling_report.json
+            minimal-predictive-lm/reproductions/sequence_architecture_map/artifacts/optimizer_coupling_report.jsonl
+            minimal-predictive-lm/reproductions/sequence_architecture_map/artifacts/optimizer_coupling_quick.json
