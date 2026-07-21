@@ -1,0 +1,41 @@
+name: RWKV-7 x070 reproduction
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "minimal-predictive-lm/reproductions/rwkv7_x070/**"
+      - ".github/workflows/rwkv7-x070-reproduction.yml"
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: minimal-predictive-lm/reproductions/rwkv7_x070
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install CPU dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Unit tests
+        env:
+          OMP_NUM_THREADS: "1"
+          MKL_NUM_THREADS: "1"
+        run: python -m pytest -q test_rwkv7_reproduction.py
+      - name: Reproduction experiment
+        env:
+          OMP_NUM_THREADS: "1"
+          MKL_NUM_THREADS: "1"
+        run: python rwkv7_reproduction.py --output artifacts/rwkv7_reproduction_report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rwkv7-x070-reproduction-report
+          path: minimal-predictive-lm/reproductions/rwkv7_x070/artifacts/rwkv7_reproduction_report.json
