@@ -1,0 +1,30 @@
+{
+  "hypothesis": "Scope-Fork Predictive Programs with Counterfactual Evidence Scheduling",
+  "seeds": [1, 7, 19],
+  "train_sizes": [64, 256, 1024],
+  "summary_1024": {
+    "literal": {"candidate_recall": 1.0, "immediate_accuracy": 1.0, "active_accuracy": 1.0, "wrong_commit_rate": 0.0, "mean_candidates": 2.0, "mean_probes": 1.0, "ms_per_example": 0.021037131249812546},
+    "quote": {"candidate_recall": 1.0, "immediate_accuracy": 1.0, "active_accuracy": 1.0, "wrong_commit_rate": 0.0, "mean_candidates": 3.0, "mean_probes": 1.0, "ms_per_example": 0.02643068750002679},
+    "negation": {"candidate_recall": 1.0, "immediate_accuracy": 1.0, "active_accuracy": 1.0, "wrong_commit_rate": 0.0, "mean_candidates": 2.0, "mean_probes": 1.0, "ms_per_example": 0.021116791666801287},
+    "correction": {"candidate_recall": 1.0, "immediate_accuracy": 1.0, "active_accuracy": 1.0, "wrong_commit_rate": 0.0, "mean_candidates": 2.0, "mean_probes": 1.0, "ms_per_example": 0.02212334166671326},
+    "nested": {"candidate_recall": 1.0, "immediate_accuracy": 1.0, "active_accuracy": 1.0, "wrong_commit_rate": 0.0, "mean_candidates": 4.0, "mean_probes": 1.0, "ms_per_example": 0.03285437916663211},
+    "paragraph": {"candidate_recall": 1.0, "immediate_accuracy": 1.0, "active_accuracy": 1.0, "wrong_commit_rate": 0.0, "mean_candidates": 2.0, "mean_probes": 1.0, "ms_per_example": 0.023402656250241332},
+    "plan": {"candidate_recall": 1.0, "immediate_accuracy": 1.0, "active_accuracy": 1.0, "wrong_commit_rate": 0.0, "mean_candidates": 2.0, "mean_probes": 1.0, "ms_per_example": 0.024486710416734187},
+    "ambiguous": {"candidate_recall": 1.0, "immediate_accuracy": 0.5375, "active_accuracy": 1.0, "wrong_commit_rate": 0.4625, "mean_candidates": 2.0, "mean_probes": 1.4625, "ms_per_example": 0.019678062499976317},
+    "held_scope": {"candidate_recall": 1.0, "immediate_accuracy": 0.0, "active_accuracy": 1.0, "wrong_commit_rate": 1.0, "mean_candidates": 2.0, "mean_probes": 2.0, "ms_per_example": 0.02222560208312944},
+    "held_retraction": {"candidate_recall": 1.0, "immediate_accuracy": 0.0, "active_accuracy": 1.0, "wrong_commit_rate": 1.0, "mean_candidates": 2.0, "mean_probes": 2.0, "ms_per_example": 0.02141955416676093},
+    "unmarked": {"candidate_recall": 0.0, "immediate_accuracy": 0.0},
+    "model_bytes": 139,
+    "training_seconds": 0.013861215666667684,
+    "weights": [0.0, 0.04, 0.0, -0.04463937156191125, 0.0, 0.06]
+  },
+  "generic_probe_reveals_target_value": false,
+  "estimated_complexity": "proposal O(L), rank O(HF), active O(min(H,4)); H<=4 in benchmark",
+  "peak_rss_kib_runtime_included": 390788,
+  "free_japanese_integrated_gate": 0.0,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false,
+  "note": "The reproduction command regenerates the full raw per-seed result set; this committed file retains the aggregate measurements used in the report."
+}
