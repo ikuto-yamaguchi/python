@@ -1,0 +1,28 @@
+{
+  "hypothesis": "Variable-preserving intervention quotient",
+  "claim": {
+    "completion": false,
+    "highschool_level_passed": false,
+    "native_japanese_communication_passed": false,
+    "weak_smartphone_verified": false
+  },
+  "aggregate": {
+    "surface": {
+      "32": {"normal": 0.45416666666666666, "rename": 0.0, "paraphrase": 0.11666666666666667, "confound_abstain": 0.0, "composition": 0.0, "model_bytes": 3868, "peak_rss_kib": 393852, "train_s": 0.0001147836666556638, "infer_ms": 0.39164218333288164, "candidate_reads": 32, "rules": 32},
+      "128": {"normal": 0.9166666666666666, "rename": 0.0, "paraphrase": 0.11666666666666667, "confound_abstain": 0.0, "composition": 0.0, "model_bytes": 15399, "peak_rss_kib": 393852, "train_s": 0.00037457600001289393, "infer_ms": 1.542707420840846, "candidate_reads": 128, "rules": 128},
+      "512": {"normal": 1.0, "rename": 0.0, "paraphrase": 0.11666666666666667, "confound_abstain": 0.0, "composition": 0.0, "model_bytes": 61633, "peak_rss_kib": 393852, "train_s": 0.0015371433333560465, "infer_ms": 6.900916545832085, "candidate_reads": 512, "rules": 512}
+    },
+    "quotient": {
+      "32": {"normal": 1.0, "rename": 1.0, "paraphrase": 0.0, "confound_abstain": 0.0, "composition": 1.0, "model_bytes": 253, "peak_rss_kib": 393852, "train_s": 0.0010229459999967123, "infer_ms": 0.024840904172644212, "candidate_reads": 3, "rules": 3},
+      "128": {"normal": 1.0, "rename": 1.0, "paraphrase": 0.0, "confound_abstain": 0.0, "composition": 1.0, "model_bytes": 253, "peak_rss_kib": 393852, "train_s": 0.0037220939999921634, "infer_ms": 0.02497048750456088, "candidate_reads": 3, "rules": 3},
+      "512": {"normal": 1.0, "rename": 1.0, "paraphrase": 0.0, "confound_abstain": 0.0, "composition": 1.0, "model_bytes": 253, "peak_rss_kib": 393852, "train_s": 0.016903202333348116, "infer_ms": 0.025331170832032512, "candidate_reads": 3, "rules": 3}
+    }
+  },
+  "seeds": [1, 7, 19],
+  "scales": [32, 128, 512],
+  "falsification": {
+    "unseen_paraphrase": 0.0,
+    "confound_abstention": 0.0,
+    "interpretation": "Identity-preserving state edits generalize across unseen object names and compose, but the mechanism does not identify operation meaning or causal necessity."
+  }
+}
