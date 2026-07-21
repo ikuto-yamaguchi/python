@@ -1,0 +1,41 @@
+{
+  "hypothesis": "Signed Retrieval-Interference Jacobian with Reconsolidation Eligibility Traces",
+  "seeds": [1, 7, 19],
+  "event_counts": [16, 48, 96],
+  "summary_96": {
+    "seen": {
+      "positive": {"retrieval": 0.1666666667, "event_f1": 0.3170568763, "segments": 165.0, "model_bytes": 98636.33, "train_seconds": 0.3169230380, "infer_ms": 1.6632450417},
+      "signed": {"retrieval": 0.1666666667, "event_f1": 0.6092206855, "segments": 186.0, "model_bytes": 109130.67, "train_seconds": 0.1493562670, "infer_ms": 1.5398104583}
+    },
+    "held": {
+      "positive": {"retrieval": 0.2083333333, "event_f1": 0.2752042831},
+      "signed": {"retrieval": 0.1666666667, "event_f1": 0.6239844435}
+    },
+    "long_gap": {
+      "positive": {"retrieval": 0.125, "event_f1": 0.0492053938, "segments": 931.33, "model_bytes": 318793.0, "infer_ms": 5.8219420417},
+      "signed": {"retrieval": 0.1666666667, "event_f1": 0.6615651292, "segments": 2014.33, "model_bytes": 477064.33, "infer_ms": 12.1303150417}
+    },
+    "topic_shift": {
+      "positive": {"retrieval": 0.1666666667, "event_f1": 0.2049879343},
+      "signed": {"retrieval": 0.125, "event_f1": 0.4124220039}
+    },
+    "contradiction": {
+      "positive": {"retrieval": 0.0833333333, "event_f1": 0.2317924847},
+      "signed": {"retrieval": 0.25, "event_f1": 0.5674376425}
+    },
+    "combined": {
+      "positive": {"retrieval": 0.2083333333, "event_f1": 0.2752042831},
+      "signed": {"retrieval": 0.1666666667, "event_f1": 0.6239844435}
+    },
+    "one_shot": {"positive": 1.0, "signed": 1.0},
+    "interference_latest": {"positive": 0.0, "signed": 1.0}
+  },
+  "peak_rss_kib_runtime_included": 301300,
+  "complexity": "local update O(HQG), recall top-8 O(SG), eligibility O(1)",
+  "learner_uses_hidden_labels": false,
+  "free_japanese_gate": 0.0,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
