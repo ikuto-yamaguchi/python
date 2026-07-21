@@ -1,0 +1,25 @@
+{
+  "hypothesis": "Identity-factored executable event programs can reuse one causal transition across action/no-op/reverse/other/composition branches without a predefined entity/value ontology.",
+  "aggregate": {
+    "32": {
+      "surface": {"seen": 0.075, "rename": 0.0, "held_syntax": 0.125, "pre_observation_noop": 0.025, "reverse": 0.0916666667, "other_identity": 0.1, "two_step": 0.1, "model_bytes": 5554.0, "train_seconds": 0.000005424, "inference_ms": 2.0960010833, "candidate_reads": 40.0, "programs": 0.0},
+      "binding_branch": {"seen": 0.925, "rename": 0.9083333333, "held_syntax": 0.0, "pre_observation_noop": 0.0, "reverse": 0.85, "other_identity": 0.95, "two_step": 0.8666666667, "model_bytes": 2465.6666666667, "train_seconds": 0.0034885283, "inference_ms": 0.2993830333, "candidate_reads": 11.0, "programs": 5.3333333333}
+    },
+    "128": {
+      "surface": {"seen": 0.1833333333, "rename": 0.0, "held_syntax": 0.3083333333, "pre_observation_noop": 0.0, "reverse": 0.2166666667, "other_identity": 0.1833333333, "two_step": 0.2416666667, "model_bytes": 17743.3333333333, "train_seconds": 0.0000116097, "inference_ms": 6.617731575, "candidate_reads": 128.0, "programs": 0.0},
+      "binding_branch": {"seen": 1.0, "rename": 1.0, "held_syntax": 0.0, "pre_observation_noop": 0.0, "reverse": 1.0, "other_identity": 1.0, "two_step": 1.0, "model_bytes": 3786.6666666667, "train_seconds": 0.010938575, "inference_ms": 0.6627367167, "candidate_reads": 27.0, "programs": 6.0}
+    },
+    "512": {
+      "surface": {"seen": 0.1833333333, "rename": 0.0, "held_syntax": 0.3083333333, "pre_observation_noop": 0.0, "reverse": 0.2166666667, "other_identity": 0.1833333333, "two_step": 0.2416666667, "model_bytes": 17743.3333333333, "train_seconds": 0.000016746, "inference_ms": 6.6144423917, "candidate_reads": 128.0, "programs": 0.0},
+      "binding_branch": {"seen": 1.0, "rename": 1.0, "held_syntax": 0.0, "pre_observation_noop": 0.0, "reverse": 1.0, "other_identity": 1.0, "two_step": 1.0, "model_bytes": 4677.6666666667, "train_seconds": 0.0477435567, "inference_ms": 1.030221875, "candidate_reads": 40.6666666667, "programs": 6.0}
+    }
+  },
+  "peak_rss_kib": 308772,
+  "seeds": [1, 7, 19],
+  "training_sizes": [32, 128, 512],
+  "evaluation_items_per_metric_per_seed": 40,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
