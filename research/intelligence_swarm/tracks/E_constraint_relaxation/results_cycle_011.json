@@ -1,0 +1,29 @@
+{
+  "hypothesis": "Adaptive Factor Acquisition by Residual Equivalence Splitting",
+  "seeds": [1, 7, 19],
+  "sizes": [60, 180, 540],
+  "summary_540": {
+    "seen": {
+      "whole": {"accuracy": 0.0, "convergence_rate": 0.0, "mean_residual": 9.6099, "mean_factors": 0.0, "mean_factor_evals": 31.1370, "mean_sweeps": 1.0, "active_candidates": 31.1370, "ms_per_query": 0.00444},
+      "full": {"accuracy": 1.0, "convergence_rate": 1.0, "mean_residual": 1.0, "mean_factors": 6.0, "mean_factor_evals": 217.9593, "mean_sweeps": 6.0, "active_candidates": 31.1370, "ms_per_query": 0.01200},
+      "adaptive": {"accuracy": 1.0, "convergence_rate": 1.0, "mean_residual": 1.0, "mean_factors": 2.1259, "mean_factor_evals": 102.8574, "mean_sweeps": 2.1259, "active_candidates": 31.1370, "ms_per_query": 0.04750}
+    },
+    "ambiguous": {"whole_accuracy": 0.0, "full_accuracy": 1.0, "adaptive_accuracy": 1.0, "adaptive_mean_factors": 2.1519, "adaptive_factor_evals": 103.9543},
+    "nested": {"whole_accuracy": 0.0, "full_accuracy": 1.0, "adaptive_accuracy": 1.0, "adaptive_mean_factors": 2.1821},
+    "counterfactual": {"whole_accuracy": 0.0, "full_accuracy": 1.0, "adaptive_accuracy": 1.0, "adaptive_mean_factors": 2.1556},
+    "revision": {"whole_accuracy": 0.0, "full_accuracy": 1.0, "adaptive_accuracy": 1.0, "adaptive_mean_factors": 2.1401},
+    "unmarked": {
+      "whole": {"accuracy": 0.0, "convergence_rate": 0.0, "mean_residual": 6.1673, "mean_factor_evals": 24.0},
+      "full": {"accuracy": 0.0, "convergence_rate": 0.0, "mean_residual": 0.0, "mean_factors": 6.0, "mean_factor_evals": 168.0},
+      "adaptive": {"accuracy": 0.0, "convergence_rate": 0.7617, "mean_residual": 0.7617, "mean_factors": 1.2765, "mean_factor_evals": 63.7691, "mean_sweeps": 1.2765, "active_candidates": 24.0, "ms_per_query": 0.02769}
+    }
+  },
+  "model_bytes": 135,
+  "peak_rss_kib_runtime_included": 296664,
+  "complexity": "whole O(H); full O(HF); adaptive O(H + sum residual*remaining factors), F=6, sweeps<=4",
+  "free_japanese_integrated_gate": 0.0,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
