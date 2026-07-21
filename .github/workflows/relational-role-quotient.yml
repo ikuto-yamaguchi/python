@@ -1,0 +1,31 @@
+name: Relational role quotient
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "minimal-predictive-lm/reproductions/relational_role_quotient/**"
+      - ".github/workflows/relational-role-quotient.yml"
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: minimal-predictive-lm/reproductions/relational_role_quotient
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: python -m pip install numpy pytest
+      - name: Unit tests
+        run: python -m pytest -q
+      - name: Multi-seed scaling experiment
+        run: python relational_role_quotient.py --output artifacts/relational_role_quotient_report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: relational-role-quotient-report
+          path: minimal-predictive-lm/reproductions/relational_role_quotient/artifacts/relational_role_quotient_report.json
