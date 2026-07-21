@@ -1,0 +1,17 @@
+{
+  "hypothesis": "Effect-Conditioned Primitive MDL with Held-Lexeme Bridging",
+  "seeds": [1, 7, 19],
+  "train_sizes": [60, 180, 360],
+  "by_train_size": {
+    "60": {"seen":{"literal":0.8916666666666666,"effect":0.8305555555555556},"held_order":0.15277777777777776,"unseen_lexeme_zero_shot":0.37222222222222223,"unseen_lexeme_one_shot":0.39444444444444443,"wrong_effect_bridge":0.10277777777777777,"rename_one_shot":0.38055555555555554,"nested":0.0,"subject_omission":0.25277777777777777,"noop":1.0,"alternate_state_format":0.0,"effect_bytes":2494.6666666666665,"bridged_bytes":2787,"primitive_count":7,"surface_fragment_count":16,"bridged_fragment_count":19,"one_shot_inference_ms":0.11792808611011828,"training_examples":72},
+    "180": {"seen":{"literal":0.8972222222222223,"effect":0.8388888888888889},"held_order":0.17500000000000002,"unseen_lexeme_zero_shot":0.3416666666666667,"unseen_lexeme_one_shot":0.4222222222222222,"wrong_effect_bridge":0.17222222222222222,"rename_one_shot":0.44166666666666665,"nested":0.0,"subject_omission":0.3194444444444445,"noop":1.0,"alternate_state_format":0.0,"effect_bytes":2801.6666666666665,"bridged_bytes":3090.6666666666665,"primitive_count":7.666666666666667,"surface_fragment_count":20.333333333333332,"bridged_fragment_count":23.333333333333332,"one_shot_inference_ms":0.1428719000008035,"training_examples":216},
+    "360": {"seen":{"literal":0.8944444444444445,"effect":0.7333333333333333},"held_order":0.18888888888888888,"unseen_lexeme_zero_shot":0.3333333333333333,"unseen_lexeme_one_shot":0.4916666666666667,"wrong_effect_bridge":0.10833333333333334,"rename_one_shot":0.5,"nested":0.0,"subject_omission":0.2972222222222222,"noop":1.0,"alternate_state_format":0.0,"effect_bytes":2985,"bridged_bytes":3271,"primitive_count":8,"surface_fragment_count":23,"bridged_fragment_count":26,"one_shot_inference_ms":0.15458540277677457,"training_examples":432}
+  },
+  "peak_rss_kib_runtime_included": 397020,
+  "estimated_operations": "O(P*F*G) scoring; P latent effects, F fragments/effect, G query ngrams",
+  "free_japanese_integrated_gate": 0.0,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
