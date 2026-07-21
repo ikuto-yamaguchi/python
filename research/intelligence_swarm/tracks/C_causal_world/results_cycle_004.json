@@ -1,0 +1,88 @@
+{
+  "hypothesis": "Open-set contrast bundles can induce causal event skeletons without predefined value/entity sets.",
+  "aggregate": {
+    "32": {
+      "action_only": {
+        "seen": 0.5333333333333333,
+        "rename": 0.5555555555555555,
+        "held_syntax": 0.0,
+        "confound_rejection": 1.0,
+        "model_bytes": 1603.6666666666667,
+        "train_seconds": 0.002272065666668747,
+        "inference_ms": 0.009446311111184337,
+        "rules": 15.333333333333334,
+        "rejected": 4.0,
+        "candidate_reads": 15.333333333333334
+      },
+      "full_contrast": {
+        "seen": 0.5333333333333333,
+        "rename": 0.5555555555555555,
+        "held_syntax": 0.0,
+        "confound_rejection": 1.0,
+        "model_bytes": 1603.6666666666667,
+        "train_seconds": 0.002331521666680677,
+        "inference_ms": 0.009595483333334364,
+        "rules": 15.333333333333334,
+        "rejected": 4.0,
+        "candidate_reads": 15.333333333333334
+      }
+    },
+    "128": {
+      "action_only": {
+        "seen": 0.6555555555555556,
+        "rename": 0.6805555555555557,
+        "held_syntax": 0.0,
+        "confound_rejection": 1.0,
+        "model_bytes": 2211.0,
+        "train_seconds": 0.00958629266666359,
+        "inference_ms": 0.011063322222229192,
+        "rules": 21.0,
+        "rejected": 16.0,
+        "candidate_reads": 21.0
+      },
+      "full_contrast": {
+        "seen": 0.6555555555555556,
+        "rename": 0.6805555555555557,
+        "held_syntax": 0.0,
+        "confound_rejection": 1.0,
+        "model_bytes": 2211.0,
+        "train_seconds": 0.010059878000002223,
+        "inference_ms": 0.013125069444520755,
+        "rules": 21.0,
+        "rejected": 16.0,
+        "candidate_reads": 21.0
+      }
+    },
+    "512": {
+      "action_only": {
+        "seen": 0.6555555555555556,
+        "rename": 0.6805555555555557,
+        "held_syntax": 0.0,
+        "confound_rejection": 1.0,
+        "model_bytes": 2211.0,
+        "train_seconds": 0.035327215666654865,
+        "inference_ms": 0.011270447222244684,
+        "rules": 21.0,
+        "rejected": 64.0,
+        "candidate_reads": 21.0
+      },
+      "full_contrast": {
+        "seen": 0.6555555555555556,
+        "rename": 0.6805555555555557,
+        "held_syntax": 0.0,
+        "confound_rejection": 1.0,
+        "model_bytes": 2211.0,
+        "train_seconds": 0.03506896833333902,
+        "inference_ms": 0.011060377777896391,
+        "rules": 21.0,
+        "rejected": 64.0,
+        "candidate_reads": 21.0
+      }
+    }
+  },
+  "peak_rss_kib": 292588,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
