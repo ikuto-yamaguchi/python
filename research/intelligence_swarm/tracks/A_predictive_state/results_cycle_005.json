@@ -1,0 +1,67 @@
+{
+  "hypothesis": "Self-Predicting Reply-State Programs without Outcome Leakage",
+  "seeds": [1, 7, 19],
+  "train_sizes": [32, 128, 512],
+  "evaluation_examples_per_split_per_seed": 160,
+  "evidence_contains_target_value": false,
+  "summary_512": {
+    "direct": {
+      "immediate": 1.0,
+      "revised_known_feedback": 1.0,
+      "revised_held_feedback": 1.0,
+      "uninformative_abstention": 0.6083333333333333,
+      "ms_per_query_all_modes": 1.4769131479166475
+    },
+    "ordinal": {
+      "immediate": 1.0,
+      "revised_known_feedback": 1.0,
+      "revised_held_feedback": 1.0,
+      "uninformative_abstention": 0.6625,
+      "ms_per_query_all_modes": 1.4615549145833147
+    },
+    "neg": {
+      "immediate": 0.0,
+      "revised_known_feedback": 1.0,
+      "revised_held_feedback": 1.0,
+      "uninformative_abstention": 0.6770833333333334,
+      "ms_per_query_all_modes": 1.5724374145833053
+    },
+    "corr": {
+      "immediate": 1.0,
+      "revised_known_feedback": 1.0,
+      "revised_held_feedback": 1.0,
+      "uninformative_abstention": 0.6770833333333334,
+      "ms_per_query_all_modes": 1.461511204166636
+    },
+    "held": {
+      "immediate": 0.6479166666666667,
+      "revised_known_feedback": 1.0,
+      "revised_held_feedback": 1.0,
+      "uninformative_abstention": 0.6437499999999999,
+      "ms_per_query_all_modes": 1.4762973875000658
+    },
+    "three_way": {
+      "immediate": 0.18333333333333332,
+      "revised_known_feedback": 0.18333333333333332,
+      "revised_held_feedback": 0.18333333333333332,
+      "uninformative_abstention": 1.0,
+      "ms_per_query_all_modes": 1.4980472791666106
+    },
+    "model_bytes": 1251,
+    "reply_pattern_count": 24,
+    "feedback_pattern_count": 6,
+    "candidate_reads": 5
+  },
+  "scaling": {
+    "32": {"model_bytes": 1045, "reply_pattern_count": 17.333333333333332},
+    "128": {"model_bytes": 1228, "reply_pattern_count": 23.333333333333332},
+    "512": {"model_bytes": 1251, "reply_pattern_count": 24}
+  },
+  "peak_rss_kib_runtime_included": 310284,
+  "free_japanese_integrated_gate": 0.0,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false,
+  "reproduction": "python self_predicting_reply_state.py --output results_cycle_005_full.json"
+}
