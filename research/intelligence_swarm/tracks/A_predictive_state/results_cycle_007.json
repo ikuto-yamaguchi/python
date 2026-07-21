@@ -1,0 +1,92 @@
+{
+  "hypothesis": "Reliability-Calibrated Active Predictive States with Reversible Evidence Channels",
+  "seeds": [1, 7, 19],
+  "train_sizes": [64, 256, 1024],
+  "candidate_counts": [2, 4, 8],
+  "summary_1024": {
+    "naive": {
+      "model_bytes": 1009,
+      "prototype_count": 12,
+      "k2": {
+        "known_accuracy": 1.0,
+        "held_wrong_commit": 0.3722222222,
+        "nonanswer_wrong_commit": 0.325,
+        "adversarial_wrong_commit": 0.8125,
+        "drift_wrong_commit": 1.0,
+        "rollback_success": 1.0,
+        "ms_per_dialogue": 0.1212875139
+      },
+      "k8": {
+        "known_accuracy": 1.0,
+        "known_coverage": 1.0,
+        "known_mean_turns": 3.0,
+        "held_wrong_commit": 0.7652777778,
+        "nonanswer_wrong_commit": 0.2416666667,
+        "adversarial_wrong_commit": 0.9958333333,
+        "drift_wrong_commit": 1.0,
+        "rollback_success": 1.0,
+        "ms_per_dialogue": 0.3629156264
+      }
+    },
+    "calibrated": {
+      "model_bytes": 1009,
+      "prototype_count": 12,
+      "k2": {
+        "known_accuracy_all": 0.6416666667,
+        "known_coverage": 0.6416666667,
+        "known_selective_accuracy": 1.0,
+        "held_wrong_commit": 0.0,
+        "held_abstention": 1.0,
+        "nonanswer_wrong_commit": 0.0,
+        "nonanswer_abstention": 1.0,
+        "adversarial_wrong_commit": 0.0,
+        "adversarial_abstention": 1.0,
+        "drift_wrong_commit": 0.6416666667,
+        "rollback_success_over_all_episodes": 0.6416666667,
+        "ms_per_dialogue": 0.1233772222
+      },
+      "k4": {
+        "known_accuracy_all": 0.4597222222,
+        "known_coverage": 0.4597222222,
+        "known_selective_accuracy": 1.0,
+        "held_wrong_commit": 0.0,
+        "adversarial_wrong_commit": 0.0,
+        "drift_wrong_commit": 0.4597222222
+      },
+      "k8": {
+        "known_accuracy_all": 0.3208333333,
+        "known_coverage": 0.3208333333,
+        "known_selective_accuracy": 1.0,
+        "known_mean_turns": 2.1666666667,
+        "held_wrong_commit": 0.0,
+        "held_abstention": 1.0,
+        "nonanswer_wrong_commit": 0.0,
+        "nonanswer_abstention": 1.0,
+        "adversarial_wrong_commit": 0.0,
+        "adversarial_abstention": 1.0,
+        "drift_wrong_commit": 0.3208333333,
+        "drift_coverage": 0.3208333333,
+        "rollback_success_over_all_episodes": 0.6916666667,
+        "candidate_reads": 4.0864967141,
+        "ms_per_dialogue": 0.2669206306
+      }
+    }
+  },
+  "scale_check": {
+    "model_bytes_64": 1009,
+    "model_bytes_256": 1009,
+    "model_bytes_1024": 1009,
+    "calibrated_k8_known_coverage_64": 0.3208333333,
+    "calibrated_k8_known_coverage_256": 0.3208333333,
+    "calibrated_k8_known_coverage_1024": 0.3208333333,
+    "calibrated_k8_held_wrong_commit_all_sizes": 0.0
+  },
+  "peak_rss_kib_runtime_included": 389892,
+  "estimated_complexity": "train O(NG); infer O(PG), top-5 sparse reads; dialogue O(log K) turns when evidence is accepted",
+  "delayed_evidence_contains_target_value": false,
+  "free_japanese_integrated_gate": 0.0,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
