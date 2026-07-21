@@ -1,0 +1,46 @@
+name: Raw Japanese joint induction
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "minimal-predictive-lm/reproductions/raw_japanese_joint_induction/**"
+      - "minimal-predictive-lm/docs/research/coordination/**"
+      - ".github/workflows/raw-japanese-joint-induction.yml"
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout research repository
+        uses: actions/checkout@v4
+
+      - name: Checkout RealPersonaChat
+        uses: actions/checkout@v4
+        with:
+          repository: nu-dialogue/real-persona-chat
+          path: external/real-persona-chat
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Tests
+        working-directory: minimal-predictive-lm/reproductions/raw_japanese_joint_induction
+        run: |
+          python -m pip install pytest
+          python -m pytest -q
+
+      - name: Natural Japanese scaling experiment
+        working-directory: minimal-predictive-lm/reproductions/raw_japanese_joint_induction
+        run: |
+          python joint_predictive_induction.py \
+            --corpus ../../../external/real-persona-chat/real_persona_chat/dialogues \
+            --scales 16 64 256 \
+            --output artifacts/raw_japanese_joint_induction_report.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: raw-japanese-joint-induction-report
+          path: minimal-predictive-lm/reproductions/raw_japanese_joint_induction/artifacts/raw_japanese_joint_induction_report.json
