@@ -1,0 +1,54 @@
+{
+  "cycle": 3,
+  "experiment": "Open-View Sleep Consolidation",
+  "hypothesis": "Unknown surface views can remain as fast provisional hypotheses and be consolidated into slow write/read schemas only after repeated cross-view corroboration across distinct episodes.",
+  "scales": [48, 180, 540],
+  "seeds": [1, 7, 19],
+  "aggregate_540": {
+    "closed_memory": {
+      "oneshot": 0.6666666667,
+      "isolated_unseen_before_sleep": 0.0,
+      "corroborated_unseen_after_sleep": 0.0,
+      "novel_fourth_syntax": 0.0,
+      "latest_after_interference": 0.0,
+      "model_bytes": 28664,
+      "query_reads": 6,
+      "inference_ms": 0.012651,
+      "schemas": 3,
+      "added_views": 0
+    },
+    "sleep_memory": {
+      "oneshot": 0.6666666667,
+      "isolated_unseen_before_sleep": 0.0,
+      "corroborated_unseen_after_sleep": 0.6666666667,
+      "novel_fourth_syntax": 0.0,
+      "latest_after_interference": 0.6666666667,
+      "bad_pair_rejection": 1.0,
+      "model_bytes": 32749,
+      "query_reads": 6,
+      "inference_ms": 0.0124543,
+      "schemas": 3,
+      "added_views": 2,
+      "bindings": 624
+    }
+  },
+  "resource_summary": {
+    "training_seconds_mean_540": 0.0324224,
+    "peak_rss_kib_runtime_included": 398024,
+    "native_smartphone_measurement": false
+  },
+  "falsification": "Repeated cross-view corroboration consolidated two of three unseen surface views, but a third relation failed because character-level anti-unification absorbed a function particle into the value boundary. A single isolated unseen construction and an entirely novel fourth construction remained zero. The mechanism therefore learns a corroborated new surface view, not open-ended Japanese semantics, pronoun resolution, reasoning, planning, generation or general continual learning.",
+  "inherited_evidence": [
+    "A cycle 2: unresolved hypotheses sometimes need new observations rather than more internal iterations",
+    "B cycle 3: cross-view agreement helps some synonyms but surface prototype storage is not structural abstraction",
+    "C cycle 3: action/no-action contrast is only a downstream audit until open-set boundaries exist",
+    "E cycle 2: factor weighting cannot help when candidate structures do not diverge"
+  ],
+  "next": "Boundary-uncertain sleep consolidation: retain multiple anonymous boundary and binding hypotheses, and consolidate only a hypothesis whose reconstruction, cross-view recurrence, query behavior, intervention identity preservation and low-interference score all agree.",
+  "claim": {
+    "highschool_level_passed": false,
+    "native_japanese_communication_passed": false,
+    "weak_smartphone_verified": false,
+    "completion": false
+  }
+}
