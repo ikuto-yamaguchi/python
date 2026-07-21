@@ -1,0 +1,32 @@
+{
+  "hypothesis": "Intervention-Equivalence Condition Quotient with One-Shot Effect Bridging",
+  "seeds": [1, 7, 19],
+  "train_sizes": [32, 128, 512],
+  "evaluation_per_split": 120,
+  "summary_512": {
+    "seen": {"prototype_accuracy": 0.9750, "quotient_zero_accuracy": 1.0, "bridge_accuracy": 1.0},
+    "held_context": {"prototype_accuracy": 0.5611, "quotient_zero_accuracy": 0.2833, "quotient_zero_abstention": 0.7167, "bridge_accuracy": 1.0},
+    "held_command": {"prototype_accuracy": 1.0, "quotient_zero_accuracy": 1.0, "bridge_accuracy": 1.0},
+    "both_held": {"prototype_accuracy": 0.4694, "quotient_zero_accuracy": 0.2556, "quotient_zero_abstention": 0.7444, "bridge_accuracy": 1.0},
+    "subject_omission": {"prototype_accuracy": 0.9917, "quotient_zero_accuracy": 1.0, "bridge_accuracy": 1.0},
+    "multi_paragraph": {"prototype_accuracy": 0.9806, "quotient_zero_accuracy": 1.0, "bridge_accuracy": 1.0}
+  },
+  "resources_512": {
+    "prototype_bytes": 95783.3,
+    "quotient_bytes": 347,
+    "bridge_bytes": 486,
+    "condition_nodes": 2,
+    "surface_residues": 6,
+    "candidate_reads": 2,
+    "quotient_inference_ms_per_query": 0.0733,
+    "bridge_exact_lookup_ms_per_query": 0.00047,
+    "peak_rss_kib_runtime_included": 294448,
+    "estimated_complexity": "train O(NG), inference O(CG), C=2"
+  },
+  "falsification": "One-shot success uses an observed action/no-op outcome to attach the new surface context. The two branch labels are fixed by the experiment, held-context zero-shot remains 0.2833, and subject-omission/multi-paragraph scores do not demonstrate discourse understanding because branch prediction reads only the context residue.",
+  "free_japanese_integrated_gate": 0.0,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
