@@ -1,0 +1,39 @@
+{
+  "hypothesis": "Multi-Timescale Predictive Evidence Semantics with Structural Drift Causes",
+  "seeds": [1, 7, 19],
+  "train_sizes": [64, 256, 512],
+  "scaling": {
+    "64": {"static": {"model_bytes": 8016, "prototype_count": 88.33333333333333}, "multi": {"model_bytes": 81840.33333333333, "prototype_count": 1179}},
+    "256": {"static": {"model_bytes": 8016, "prototype_count": 88.33333333333333}, "multi": {"model_bytes": 94421.33333333333, "prototype_count": 1359}},
+    "512": {"static": {"model_bytes": 8016, "prototype_count": 88.33333333333333}, "multi": {"model_bytes": 111867.66666666667, "prototype_count": 1596.6666666666667}}
+  },
+  "summary_512": {
+    "static": {
+      "stable": {"accuracy_all": 1.0, "coverage": 1.0, "selective_accuracy": 1.0, "wrong_commit_rate": 0.0, "abstention_rate": 0.0, "mean_reads": 5.0, "ms_per_episode": 0.5235050055550042},
+      "abrupt": {"accuracy_all": 1.0, "coverage": 1.0, "selective_accuracy": 1.0, "wrong_commit_rate": 0.0, "abstention_rate": 0.0, "mean_reads": 5.0, "ms_per_episode": 0.5556066311116107},
+      "speaker": {"accuracy_all": 0.9633333333333334, "coverage": 1.0, "selective_accuracy": 0.9633333333333334, "wrong_commit_rate": 0.03666666666666667, "abstention_rate": 0.0, "mean_reads": 5.0, "ms_per_episode": 0.5552321677770224},
+      "episode": {"accuracy_all": 0.8, "coverage": 1.0, "selective_accuracy": 0.8, "wrong_commit_rate": 0.2, "abstention_rate": 0.0, "mean_reads": 5.0, "ms_per_episode": 0.5476258044447807},
+      "scope": {"accuracy_all": 0.9511111111111111, "coverage": 1.0, "selective_accuracy": 0.9511111111111111, "wrong_commit_rate": 0.04888888888888889, "abstention_rate": 0.0, "mean_reads": 5.0, "ms_per_episode": 0.7397174433334739},
+      "gradual": {"accuracy_all": 0.971111111111111, "coverage": 1.0, "selective_accuracy": 0.971111111111111, "wrong_commit_rate": 0.028888888888888888, "abstention_rate": 0.0, "mean_reads": 5.0, "ms_per_episode": 0.5519043388893705},
+      "held": {"accuracy_all": 0.7822222222222223, "coverage": 0.991111111111111, "selective_accuracy": 0.7892157970457747, "wrong_commit_rate": 0.20888888888888887, "abstention_rate": 0.008888888888888889, "mean_reads": 4.955555555555556, "ms_per_episode": 1.0845038466666463}
+    },
+    "multi": {
+      "stable": {"accuracy_all": 0.7755555555555556, "coverage": 0.7755555555555556, "selective_accuracy": 1.0, "wrong_commit_rate": 0.0, "abstention_rate": 0.22444444444444445, "mean_reads": 9.495555555555557, "ms_per_episode": 1.0087178611108054},
+      "abrupt": {"accuracy_all": 0.8022222222222222, "coverage": 0.81, "selective_accuracy": 0.9904473304473305, "wrong_commit_rate": 0.0077777777777777776, "abstention_rate": 0.19, "mean_reads": 10.783333333333333, "ms_per_episode": 1.049953015554921},
+      "speaker": {"accuracy_all": 0.7666666666666667, "coverage": 0.8155555555555556, "selective_accuracy": 0.9400654655167506, "wrong_commit_rate": 0.048888888888888885, "abstention_rate": 0.18444444444444444, "mean_reads": 11.03111111111111, "ms_per_episode": 1.0476504877770922},
+      "episode": {"accuracy_all": 0.6433333333333333, "coverage": 0.8088888888888889, "selective_accuracy": 0.7949732386428949, "wrong_commit_rate": 0.16555555555555557, "abstention_rate": 0.1911111111111111, "mean_reads": 11.313333333333333, "ms_per_episode": 1.0258051722222363},
+      "scope": {"accuracy_all": 0.2922222222222222, "coverage": 0.4255555555555556, "selective_accuracy": 0.687167006469218, "wrong_commit_rate": 0.13333333333333333, "abstention_rate": 0.5744444444444444, "mean_reads": 11.987777777777778, "ms_per_episode": 1.5629404444446966},
+      "gradual": {"accuracy_all": 0.77, "coverage": 0.8866666666666667, "selective_accuracy": 0.8711807528961821, "wrong_commit_rate": 0.11666666666666667, "abstention_rate": 0.11333333333333333, "mean_reads": 11.786666666666667, "ms_per_episode": 1.2336541566668933},
+      "held": {"accuracy_all": 0.49444444444444446, "coverage": 0.6822222222222223, "selective_accuracy": 0.7234454422660394, "wrong_commit_rate": 0.18777777777777777, "abstention_rate": 0.31777777777777777, "mean_reads": 11.593333333333334, "ms_per_episode": 2.204973996666316}
+    }
+  },
+  "multi_state_counts": {"forks": 119, "rollbacks": 769},
+  "delayed_evidence_contains_target_value": false,
+  "estimated_complexity": "update O(1)+prototype append; infer O((Pg+Ps+Pe)G), top-12 reads",
+  "peak_rss_kib_runtime_included": 397632,
+  "free_japanese_integrated_gate": 0.0,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
