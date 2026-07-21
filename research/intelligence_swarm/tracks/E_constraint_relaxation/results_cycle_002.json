@@ -1,0 +1,23 @@
+{
+  "experiment": "learned_constraint_factor_induction",
+  "hypothesis": "Self-supervised local factor reliabilities induced from reconstruction, identity preservation, inverse consistency and no-action contrast can replace hand-written surface constraints in sparse relaxation.",
+  "seeds": [1, 7, 19],
+  "train_sizes": [48, 192, 768],
+  "aggregate": {
+    "48": {
+      "hand_surface": {"plan": 0.7111111111, "unseen": 0.25, "confound_abstain": 0.1125, "model_bytes": 17851, "train_s": 0.0031471037, "infer_ms": 0.5417718778, "iterations": 1.6138888889, "active_candidates": 12, "convergence": 0.7361111111, "factor_count": 2, "peak_rss_kib_runtime_included": 295357.3333},
+      "learned_factors": {"plan": 0.7111111111, "unseen": 0.25, "confound_abstain": 0.1125, "model_bytes": 17851, "train_s": 0.0023406627, "infer_ms": 0.5724993361, "iterations": 1.6138888889, "active_candidates": 12, "convergence": 0.7361111111, "factor_count": 2, "peak_rss_kib_runtime_included": 295357.3333}
+    },
+    "192": {
+      "hand_surface": {"plan": 0.7944444444, "unseen": 0.25, "confound_abstain": 0.0, "model_bytes": 70945.3333, "train_s": 0.008716594, "infer_ms": 1.9519788806, "iterations": 1.6722222222, "active_candidates": 12, "convergence": 0.7944444444, "factor_count": 2, "peak_rss_kib_runtime_included": 296140},
+      "learned_factors": {"plan": 0.7944444444, "unseen": 0.25, "confound_abstain": 0.0, "model_bytes": 70945.3333, "train_s": 0.0090551083, "infer_ms": 2.1444897472, "iterations": 1.6722222222, "active_candidates": 12, "convergence": 0.7944444444, "factor_count": 2, "peak_rss_kib_runtime_included": 296140}
+    },
+    "768": {
+      "hand_surface": {"plan": 0.8, "unseen": 0.25, "confound_abstain": 0.0, "model_bytes": 282642.6667, "train_s": 0.0367532983, "infer_ms": 7.9464503056, "iterations": 1.6777777778, "active_candidates": 12, "convergence": 0.8, "factor_count": 2, "peak_rss_kib_runtime_included": 299152},
+      "learned_factors": {"plan": 0.8, "unseen": 0.25, "confound_abstain": 0.0, "model_bytes": 282642.6667, "train_s": 0.0342827043, "infer_ms": 7.8332136917, "iterations": 1.6777777778, "active_candidates": 12, "convergence": 0.8, "factor_count": 2, "peak_rss_kib_runtime_included": 299152}
+    }
+  },
+  "verdict": "falsified_factor_weight_learning_without_open_set_factor_graph_proposals",
+  "falsification": "Learned factor reliabilities produced the same candidate rankings and capability metrics as hand-written surface energy. Unseen syntax remained 0.25 and confound abstention collapsed to 0 at larger scales. The bottleneck is candidate factor-graph generation, not factor weighting.",
+  "claim": {"highschool_level_passed": false, "native_japanese_communication_passed": false, "weak_smartphone_verified": false, "completion": false}
+}
