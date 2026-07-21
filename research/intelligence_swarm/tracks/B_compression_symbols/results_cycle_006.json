@@ -1,0 +1,26 @@
+{
+  "hypothesis": "Role-Factored Multi-View MDL Encoder",
+  "seeds": [1, 7, 19],
+  "train_sizes": [60, 180, 360],
+  "summary_360": {
+    "seen": {"literal_accuracy": 1.0, "role_accuracy": 1.0},
+    "held_order": {"literal_accuracy": 0.0, "role_accuracy": 0.4777777777777778, "role_abstention": 0.5222222222222223},
+    "unseen_synonym": {"literal_accuracy": 0.0, "role_accuracy": 0.0, "role_abstention": 1.0},
+    "rename": {"literal_accuracy": 1.0, "role_accuracy": 1.0},
+    "rename_held_order": {"literal_accuracy": 0.0, "role_accuracy": 0.4777777777777778, "role_abstention": 0.5222222222222223},
+    "noop": {"literal_accuracy": 1.0, "role_accuracy": 1.0},
+    "literal_bytes": 18157,
+    "role_bytes": 144725,
+    "literal_units": 456,
+    "role_units": 462,
+    "role_patterns": 6,
+    "role_ms_per_query_seen": 1.4115456694450284,
+    "role_ms_per_query_held_order": 1.8919601749997936
+  },
+  "peak_rss_kib_runtime_included": 303756,
+  "free_japanese_integrated_gate": 0.0,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
