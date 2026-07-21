@@ -1,0 +1,58 @@
+{
+  "hypothesis": "Role-Structured Conditional Attractor Graphs",
+  "seeds": [1, 7, 19],
+  "train_sizes": [48, 192, 384],
+  "summary_384": {
+    "flat": {
+      "seen_accuracy": 0.5388888888888889,
+      "action_accuracy": 1.0,
+      "blocked_accuracy": 0.0,
+      "rename_accuracy": 0.5333333333333333,
+      "held_command_accuracy": 0.0,
+      "held_context_accuracy": 0.5166666666666666,
+      "nested_accuracy": 0.0,
+      "multi_paragraph_accuracy": 0.0,
+      "plan_change_accuracy": 0.0,
+      "seen_margin": 0.0,
+      "active_candidates": 1,
+      "mean_sweeps": 1.0,
+      "model_bytes": 979,
+      "training_seconds": 0.018659937666598125,
+      "seen_inference_ms": 0.12913409444510965,
+      "operation_views": 9
+    },
+    "role_attractor": {
+      "seen_accuracy": 0.9972222222222222,
+      "seen_abstention": 0.002777777777777778,
+      "action_accuracy": 1.0,
+      "blocked_accuracy": 0.9888888888888889,
+      "blocked_abstention": 0.011111111111111112,
+      "rename_accuracy": 0.9944444444444445,
+      "held_command_accuracy": 0.0,
+      "held_context_accuracy": 0.15555555555555556,
+      "held_context_abstention": 0.6722222222222223,
+      "nested_accuracy": 0.0,
+      "multi_paragraph_accuracy": 0.0,
+      "plan_change_accuracy": 0.0,
+      "seen_margin": 0.3522979342360909,
+      "blocked_margin": 0.33338595537793125,
+      "active_candidates": 2,
+      "mean_sweeps": 1.4583333333333333,
+      "model_bytes": 140641.33333333334,
+      "training_seconds": 0.08567508199985241,
+      "seen_inference_ms": 0.4758344222232659,
+      "operation_views": 9
+    }
+  },
+  "scale_summary": {
+    "48": {"role_seen_accuracy": 0.6305555555555555, "role_blocked_accuracy": 0.55, "role_model_bytes": 18953},
+    "192": {"role_seen_accuracy": 0.9777777777777777, "role_blocked_accuracy": 0.9666666666666667, "role_model_bytes": 71552.66666666667},
+    "384": {"role_seen_accuracy": 0.9972222222222222, "role_blocked_accuracy": 0.9888888888888889, "role_model_bytes": 140641.33333333334}
+  },
+  "peak_rss_kib_runtime_included": 310100,
+  "free_japanese_integrated_gate": 0.0,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
