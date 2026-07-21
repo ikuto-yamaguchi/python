@@ -1,0 +1,28 @@
+{
+  "hypothesis": "Dialogue-Closed Predictive State Revision",
+  "seeds": [1, 7, 19],
+  "train_sizes": [32, 128, 512],
+  "summary": {
+    "32": {
+      "literal": {"direct": 1.0, "ordinal": 0.0, "negation": 0.0, "correction": 1.0, "held_reply": 0.2222, "latency_ms": 0.00065, "model_bytes": 38, "candidate_reads": 2},
+      "reply_program": {"direct": 1.0, "ordinal": 0.7306, "negation": 0.0, "correction": 1.0, "held_reply": 0.4889, "latency_ms": 0.1258, "model_bytes": 4475.3, "candidate_reads": 5},
+      "closed_loop": {"direct": 1.0, "ordinal": 1.0, "negation": 0.7750, "correction": 1.0, "held_reply": 0.9361, "latency_ms": 0.1643, "model_bytes": 4475.3, "candidate_reads": 5}
+    },
+    "128": {
+      "literal": {"direct": 1.0, "ordinal": 0.0, "negation": 0.0, "correction": 1.0, "held_reply": 0.2056, "latency_ms": 0.00049, "model_bytes": 38, "candidate_reads": 2},
+      "reply_program": {"direct": 1.0, "ordinal": 1.0, "negation": 0.0, "correction": 1.0, "held_reply": 0.6194, "latency_ms": 0.4398, "model_bytes": 16839.3, "candidate_reads": 5},
+      "closed_loop": {"direct": 1.0, "ordinal": 1.0, "negation": 1.0, "correction": 1.0, "held_reply": 0.8694, "latency_ms": 0.4503, "model_bytes": 16839.3, "candidate_reads": 5}
+    },
+    "512": {
+      "literal": {"direct": 1.0, "ordinal": 0.0, "negation": 0.0, "correction": 1.0, "held_reply": 0.1750, "latency_ms": 0.00049, "model_bytes": 38, "candidate_reads": 2},
+      "reply_program": {"direct": 1.0, "ordinal": 1.0, "negation": 0.0, "correction": 1.0, "held_reply": 0.6333, "latency_ms": 1.7557, "model_bytes": 66637.7, "candidate_reads": 5},
+      "closed_loop": {"direct": 1.0, "ordinal": 1.0, "negation": 1.0, "correction": 1.0, "held_reply": 0.7972, "latency_ms": 2.0413, "model_bytes": 66637.7, "candidate_reads": 5}
+    }
+  },
+  "peak_rss_kib_runtime_included": 393244,
+  "free_japanese_integrated_gate": 0.0,
+  "weak_smartphone_verified": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "completion": false
+}
