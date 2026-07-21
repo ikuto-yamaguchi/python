@@ -26,6 +26,7 @@ jobs:
           python -m pytest -q test_delayed_counterfactual_consolidation.py
       - name: Multi-seed scaling and counterexamples
         run: |
+          mkdir -p artifacts
           /usr/bin/time -v python delayed_counterfactual_consolidation.py \
             --output artifacts/delayed_counterfactual_consolidation.json \
             2> artifacts/process_resource.txt
