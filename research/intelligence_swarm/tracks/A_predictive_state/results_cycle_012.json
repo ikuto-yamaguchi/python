@@ -1,0 +1,24 @@
+{
+  "hypothesis": "Null-Calibrated Predictive Classes with Learned Probe Programs",
+  "seeds": [1, 7, 19],
+  "train_sizes": [32, 96, 192],
+  "largest_setting": {
+    "seen": {
+      "candidate_recall": 0.638888888888889,
+      "fixed": {"accuracy": 0.31666666666666665, "wrong_commit": 0.6833333333333333, "null_rate": 0.0, "mean_probes": 5.5055555555555555, "ms_per_example": 2.213753816666516, "model_bytes": 11671.333333333334},
+      "learned": {"accuracy": 0.02777777777777778, "wrong_commit": 0.9722222222222222, "null_rate": 0.0, "mean_probes": 5.833333333333333, "ms_per_example": 2.2131162611104727, "model_bytes": 11655.666666666666},
+      "learned_null": {"accuracy": 0.016666666666666666, "wrong_commit": 0.0, "null_rate": 0.9833333333333333, "mean_probes": 5.833333333333333, "ms_per_example": 2.2247280333304946, "model_bytes": 11655.666666666666}
+    },
+    "paraphrase": {"candidate_recall": 0.0, "fixed_wrong_commit": 1.0, "learned_wrong_commit": 1.0, "learned_null_wrong_commit": 0.0, "learned_null_rate": 1.0},
+    "nested": {"candidate_recall": 0.0, "fixed_wrong_commit": 1.0, "learned_wrong_commit": 1.0, "learned_null_wrong_commit": 0.0, "learned_null_rate": 1.0},
+    "subject_omission": {"candidate_recall": 0.0, "fixed_wrong_commit": 1.0, "learned_wrong_commit": 1.0, "learned_null_wrong_commit": 0.0, "learned_null_rate": 1.0},
+    "distractor": {"candidate_recall": 0.005555555555555556, "fixed_accuracy": 0.005555555555555556, "fixed_wrong_commit": 0.9944444444444445, "learned_wrong_commit": 1.0, "learned_null_wrong_commit": 0.0, "learned_null_rate": 1.0},
+    "out_set": {"candidate_recall": 0.0, "fixed_wrong_commit": 1.0, "learned_wrong_commit": 1.0, "learned_null_wrong_commit": 0.0, "learned_null_rate": 1.0, "fixed_mean_probes": 4.0, "learned_null_mean_probes": 3.0, "learned_null_ms_per_example": 1.2444652555536273}
+  },
+  "peak_rss_kib_runtime_included": 301264,
+  "estimated_complexity": "proposal O(L^2), probe generation O(H^2), active update O(PH), H<=32,P<=8",
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
