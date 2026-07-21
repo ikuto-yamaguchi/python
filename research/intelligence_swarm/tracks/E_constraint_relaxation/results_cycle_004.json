@@ -1,0 +1,41 @@
+{
+  "hypothesis": "Counterfactual World-Branch Proposal with Executable Relaxation",
+  "seeds": [1, 7, 19],
+  "train_sizes": [48, 192, 768],
+  "evaluation_items_per_split_per_seed": 40,
+  "summary_768": {
+    "model_bytes": 41067,
+    "programs": 767,
+    "scalar": {
+      "seen_accuracy": 0.95,
+      "seen_abstention": 0.05,
+      "unseen_accuracy_oracle_candidate_probe": 0.925,
+      "unseen_abstention": 0.075,
+      "confound_accuracy": 0.0,
+      "confound_abstention": 1.0,
+      "mean_sweeps": 0.6388888889,
+      "mean_active_candidates": 3.1944444444,
+      "mean_margin": 0.0770391413
+    },
+    "branch": {
+      "seen_accuracy": 0.0,
+      "seen_abstention": 1.0,
+      "unseen_accuracy_oracle_candidate_probe": 0.0,
+      "unseen_abstention": 1.0,
+      "confound_accuracy": 0.0,
+      "confound_abstention": 1.0,
+      "mean_sweeps": 0.6388888889,
+      "mean_active_candidates": 3.1944444444,
+      "mean_margin": 2.5555555556
+    }
+  },
+  "elapsed_seconds": 0.820537924,
+  "python_peak_bytes": 863745,
+  "peak_rss_kib_runtime_included": 296104,
+  "interpretation": "Executable cross-world energy rejected all normal cases because episode identity was embedded in the surface edit program, so the same operation could not be rebound to another object. Confound abstention was therefore non-selective and is not a success.",
+  "candidate_generation_caveat": "The probe includes an oracle-derived executable candidate to isolate relaxation quality from proposal recall. It is not evidence of open-set Japanese candidate generation.",
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
