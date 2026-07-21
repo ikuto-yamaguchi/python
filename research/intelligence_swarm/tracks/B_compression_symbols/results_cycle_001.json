@@ -1,0 +1,35 @@
+{
+  "cycle": 1,
+  "hypothesis": "Corpus-global MDL anchors can generate unseen variable spans as reversible residuals without pairwise anti-unification.",
+  "seeds": [1, 7, 19],
+  "mean": {
+    "nonce_span_f1": 0.9453013456844725,
+    "nonce_exact": 0.5750000000000001,
+    "paraphrase_span_f1": 0.7340923413712315,
+    "paraphrase_exact": 0.0,
+    "pair_anti_unification_nonce_f1": 0.8450974635243211,
+    "pair_anti_unification_paraphrase_f1": 0.7096051705596308,
+    "serialized_model_bytes": 6032,
+    "training_seconds": 0.013046658666671837,
+    "inference_latency_ms": 0.050743108333333335,
+    "peak_rss_kib_python_runtime_included": 395172,
+    "induced_anchor_count": 235
+  },
+  "per_seed": [
+    {"seed": 1, "nonce_f1": 0.9427573836552164, "nonce_exact": 0.55, "paraphrase_f1": 0.731767847162584, "paraphrase_exact": 0.0, "model_bytes": 5769},
+    {"seed": 7, "nonce_f1": 0.944266272298393, "nonce_exact": 0.55, "paraphrase_f1": 0.733799291690596, "paraphrase_exact": 0.0, "model_bytes": 6092},
+    {"seed": 19, "nonce_f1": 0.9488803810998083, "nonce_exact": 0.625, "paraphrase_f1": 0.7367098852605145, "paraphrase_exact": 0.0, "model_bytes": 6235}
+  ],
+  "ablations": [
+    {"min_count": 2, "context_diversity": 1, "nonce_f1": 0.9154555455223025, "paraphrase_f1": 0.7223553408904285, "model_bytes": 8089, "anchors": 300},
+    {"min_count": 4, "context_diversity": 1, "nonce_f1": 0.9154555455223025, "paraphrase_f1": 0.7223553408904285, "model_bytes": 8089, "anchors": 300},
+    {"min_count": 4, "context_diversity": 3, "nonce_f1": 0.9453013456844725, "paraphrase_f1": 0.7340923413712315, "model_bytes": 6032, "anchors": 235},
+    {"min_count": 8, "context_diversity": 3, "nonce_f1": 0.9453013456844725, "paraphrase_f1": 0.7281658472153323, "model_bytes": 3409.3333333333335, "anchors": 139.33333333333334}
+  ],
+  "claim_boundary": {
+    "highschool_level_passed": false,
+    "native_japanese_communication_passed": false,
+    "weak_smartphone_verified": false,
+    "free_generation_passed": false
+  }
+}
