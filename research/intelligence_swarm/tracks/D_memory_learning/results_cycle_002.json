@@ -1,0 +1,52 @@
+{
+  "cycle": 2,
+  "hypothesis": "Answer-free cross-view predictive rebinding induces anonymous write/read schemas from co-referring surface views without answer spans.",
+  "scales": [48, 180, 540],
+  "seeds": [1, 7, 19],
+  "aggregate_540": {
+    "raw": {
+      "oneshot": 0.0,
+      "paraphrase": 0.0,
+      "unseen_syntax": 0.0,
+      "omission_abstain": 1.0,
+      "latest_after_interference": 0.0,
+      "model_bytes": 110571,
+      "latency_ms": 0.0003305749891700948,
+      "candidate_reads": 60.5
+    },
+    "answer_supervised": {
+      "oneshot": 0.6666666666666666,
+      "paraphrase": 0.0,
+      "unseen_syntax": 0.0,
+      "omission_abstain": 1.0,
+      "latest_after_interference": 0.0,
+      "model_bytes": 36880,
+      "latency_ms": 0.01459831388375379,
+      "candidate_reads": 540
+    },
+    "cross_view": {
+      "oneshot": 1.0,
+      "paraphrase": 1.0,
+      "unseen_syntax": 0.0,
+      "omission_abstain": 1.0,
+      "latest_after_interference": 1.0,
+      "model_bytes": 44515,
+      "latency_ms": 0.012376050000916116,
+      "candidate_reads": 6,
+      "views": 3,
+      "query_links": 6,
+      "bindings": 986
+    }
+  },
+  "resource_summary": {
+    "peak_rss_kib_runtime_included": 291612,
+    "train_seconds_all_models_mean_540": 0.0411147
+  },
+  "falsification": "Seen cross-view paraphrases transferred, but completely unseen statement syntax remained zero for every seed and scale. The mechanism therefore learns closed-set view equivalence, not open-ended Japanese structure or semantics.",
+  "claim": {
+    "highschool_level_passed": false,
+    "native_japanese_communication_passed": false,
+    "weak_smartphone_verified": false,
+    "completion": false
+  }
+}
