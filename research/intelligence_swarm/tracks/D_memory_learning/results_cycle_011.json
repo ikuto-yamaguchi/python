@@ -1,0 +1,54 @@
+{
+  "hypothesis": "Retrieval-Jacobian Boundary Credit with Sparse Semantic Replay",
+  "seeds": [1, 7, 19],
+  "event_counts": [48, 192, 384],
+  "max_scale_summary": {
+    "seen": {
+      "surprise": {"retrieval": 0.0, "event_precision": 0.05597180354076899, "event_recall": 0.6568287037037037, "event_f1": 0.06580976144110849, "segments": 476.3333333333333, "model_bytes": 187670, "compressed_model_bytes": 163367, "compressed_retrieval": 0.0, "train_seconds": 0.03343197899994266, "infer_ms": 1.4695271249820507, "reads": 8.0, "mean_abs_credit": 0, "nonzero_credit_rate": 0.0},
+      "jacobian": {"retrieval": 0.16666666666666666, "event_precision": 0.13755150885442252, "event_recall": 0.5085358796296297, "event_f1": 0.1732846262125032, "segments": 663.3333333333334, "model_bytes": 315706, "compressed_model_bytes": 272025.3333333333, "compressed_retrieval": 0.125, "train_seconds": 0.16088527966667243, "infer_ms": 2.1901294583320428, "reads": 8.0, "mean_abs_credit": 0.08170074475146166, "nonzero_credit_rate": 0.1466249691641822}
+    },
+    "held": {
+      "surprise": {"retrieval": 0.25, "event_precision": 0.05291817161198524, "event_recall": 0.6414930555555556, "event_f1": 0.051586715095546826, "segments": 482.6666666666667, "model_bytes": 190349.33333333334, "compressed_model_bytes": 173881.33333333334, "compressed_retrieval": 0.08333333333333333, "train_seconds": 0.034236209000027884, "infer_ms": 1.476408708337355, "reads": 8.0, "mean_abs_credit": 0, "nonzero_credit_rate": 0.0},
+      "jacobian": {"retrieval": 0.2916666666666667, "event_precision": 0.00918501875454796, "event_recall": 0.6458333333333333, "event_f1": 0.017611270535794393, "segments": 464.6666666666667, "model_bytes": 232533.33333333334, "compressed_model_bytes": 201929.33333333334, "compressed_retrieval": 0.16666666666666666, "train_seconds": 0.21428169300012692, "infer_ms": 1.5846912499834314, "reads": 8.0, "mean_abs_credit": 0.07471556693041109, "nonzero_credit_rate": 0.11211158086293921}
+    },
+    "long_gap": {
+      "surprise": {"retrieval": 0.0, "event_precision": 0.0, "event_recall": 0.0, "event_f1": 0.0, "segments": 4178.333333333333, "model_bytes": 1218866, "compressed_model_bytes": 1213962.6666666667, "compressed_retrieval": 0.0, "train_seconds": 0.10329924333336749, "infer_ms": 17.153591249988647, "reads": 8.0, "mean_abs_credit": 0, "nonzero_credit_rate": 0.0},
+      "jacobian": {"retrieval": 0.08333333333333333, "event_precision": 0.015095249806681529, "event_recall": 0.17505787037037038, "event_f1": 0.027783084615068225, "segments": 3968.3333333333335, "model_bytes": 1291174.3333333333, "compressed_model_bytes": 1277677, "compressed_retrieval": 0.08333333333333333, "train_seconds": 0.25741860733326877, "infer_ms": 12.284710416679445, "reads": 8.0, "mean_abs_credit": 0.021441040208395223, "nonzero_credit_rate": 0.02231868330620365}
+    },
+    "topic_shift": {
+      "surprise": {"retrieval": 0.0, "event_precision": 0.07830176507272499, "event_recall": 0.35431134259259256, "event_f1": 0.10750121898892058, "segments": 1022.6666666666666, "model_bytes": 422648.6666666667, "compressed_model_bytes": 361555, "compressed_retrieval": 0.0, "train_seconds": 0.03097123866655238, "infer_ms": 3.3255294166754843, "reads": 8.0, "mean_abs_credit": 0, "nonzero_credit_rate": 0.0},
+      "jacobian": {"retrieval": 0.041666666666666664, "event_precision": 0.04882896810383538, "event_recall": 0.7009548611111112, "event_f1": 0.06877971052406225, "segments": 472.6666666666667, "model_bytes": 244093, "compressed_model_bytes": 201483.66666666666, "compressed_retrieval": 0.0, "train_seconds": 0.22687355300013223, "infer_ms": 1.572391500019421, "reads": 8.0, "mean_abs_credit": 0.05835580729367383, "nonzero_credit_rate": 0.0914767882932997}
+    },
+    "combined": {
+      "surprise": {"retrieval": 0.25, "event_precision": 0.05291817161198524, "event_recall": 0.6414930555555556, "event_f1": 0.051586715095546826, "segments": 482.6666666666667, "model_bytes": 190349.33333333334, "compressed_model_bytes": 173881.33333333334, "compressed_retrieval": 0.08333333333333333, "train_seconds": 0.03556981133321339, "infer_ms": 1.5968507916568342, "reads": 8.0, "mean_abs_credit": 0, "nonzero_credit_rate": 0.0},
+      "jacobian": {"retrieval": 0.2916666666666667, "event_precision": 0.00918501875454796, "event_recall": 0.6458333333333333, "event_f1": 0.017611270535794393, "segments": 464.6666666666667, "model_bytes": 232533.33333333334, "compressed_model_bytes": 201929.33333333334, "compressed_retrieval": 0.16666666666666666, "train_seconds": 0.21378435466673787, "infer_ms": 1.574870208325289, "reads": 8.0, "mean_abs_credit": 0.07471556693041109, "nonzero_credit_rate": 0.11211158086293921}
+    },
+    "one_shot": {"surprise": 1.0, "jacobian": 1.0},
+    "interference": {"surprise": 0.0, "jacobian": 0.0}
+  },
+  "scaling": {
+    "48": {
+      "seen": {"retrieval": 0.25, "event_f1": 0.238944974435808, "model_bytes": 52097.333333333336, "compressed_model_bytes": 44840.666666666664, "infer_ms": 0.3571227083511985, "train_seconds": 0.014997976333385546, "segments": 115.33333333333333},
+      "held": {"retrieval": 0.3333333333333333, "event_f1": 0.13604390235969183, "model_bytes": 43668, "compressed_model_bytes": 39157, "infer_ms": 0.2997386249982507, "train_seconds": 0.016657971666669862, "segments": 94.33333333333333},
+      "long_gap": {"retrieval": 0.0, "event_f1": 0.022649323405796753, "model_bytes": 161468.33333333334, "compressed_model_bytes": 159907, "infer_ms": 1.3461477083372604, "train_seconds": 0.02928268999979385, "segments": 497}
+    },
+    "192": {
+      "seen": {"retrieval": 0.2916666666666667, "event_f1": 0.1785931487908301, "model_bytes": 176125, "compressed_model_bytes": 152054.33333333334, "infer_ms": 1.2078732083485495, "train_seconds": 0.0739653633333243, "segments": 373.6666666666667},
+      "held": {"retrieval": 0.375, "event_f1": 0.14211990813736175, "model_bytes": 152394.33333333334, "compressed_model_bytes": 134027.33333333334, "infer_ms": 1.0207891666785447, "train_seconds": 0.08796481599983963, "segments": 315.3333333333333},
+      "long_gap": {"retrieval": 0.08333333333333333, "event_f1": 0.026756024776667525, "model_bytes": 643851.6666666666, "compressed_model_bytes": 636598.6666666666, "infer_ms": 5.833927499982868, "train_seconds": 0.12971334633311926, "segments": 1965.3333333333333}
+    },
+    "384": {
+      "seen": {"retrieval": 0.16666666666666666, "event_f1": 0.1732846262125032, "model_bytes": 315706, "compressed_model_bytes": 272025.3333333333, "infer_ms": 2.1901294583320428, "train_seconds": 0.16088527966667243, "segments": 663.3333333333334},
+      "held": {"retrieval": 0.2916666666666667, "event_f1": 0.017611270535794393, "model_bytes": 232533.33333333334, "compressed_model_bytes": 201929.33333333334, "infer_ms": 1.5846912499834314, "train_seconds": 0.21428169300012692, "segments": 464.6666666666667},
+      "long_gap": {"retrieval": 0.08333333333333333, "event_f1": 0.027783084615068225, "model_bytes": 1291174.3333333333, "compressed_model_bytes": 1277677, "infer_ms": 12.284710416679445, "train_seconds": 0.25741860733326877, "segments": 3968.3333333333335}
+    }
+  },
+  "peak_rss_kib_runtime_included": 529248,
+  "complexity": "update O(HSQG) local-window self-supervised counterfactual retrieval; recall top-8 O(SG)",
+  "learner_uses_hidden_labels": false,
+  "free_japanese_gate": 0.0,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
