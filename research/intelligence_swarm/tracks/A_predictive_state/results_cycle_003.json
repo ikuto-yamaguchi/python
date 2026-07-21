@@ -1,0 +1,13 @@
+{
+  "hypothesis": "Generate a confirmation utterance from the minimal predictive disagreement between executable future candidates, without pre-specified latent factor axes.",
+  "aggregate": {
+    "32": {"passive_accuracy": 0.3314814814814815, "no_query_accuracy": 0, "active_accuracy": 0.65, "query_validity": 1, "held_syntax_accuracy": 0.8592592592592593, "ordinal_reply_accuracy": 0, "three_way_accuracy": 0.6722222222222222, "passive_reads": 2.8314814814814815, "no_query_reads": 2.8314814814814815, "active_reads": 3.4814814814814814, "active_query_rate": 1, "program_count": 11.333333333333334, "model_bytes": 13996.666666666666, "evaluation_seconds": 0.05802155233353309, "peak_rss_kib_runtime_included": 395456, "free_japanese_integrated_gate": 0.0},
+    "128": {"passive_accuracy": 0.3388888888888889, "no_query_accuracy": 0, "active_accuracy": 0.6925925925925926, "query_validity": 1, "held_syntax_accuracy": 0.9777777777777777, "ordinal_reply_accuracy": 0, "three_way_accuracy": 0.6555555555555556, "passive_reads": 3, "no_query_reads": 3, "active_reads": 3.6925925925925926, "active_query_rate": 1, "program_count": 12, "model_bytes": 56012, "evaluation_seconds": 0.18694852333343684, "peak_rss_kib_runtime_included": 395456, "free_japanese_integrated_gate": 0.0},
+    "512": {"passive_accuracy": 0.3388888888888889, "no_query_accuracy": 0, "active_accuracy": 0.6907407407407408, "query_validity": 1, "held_syntax_accuracy": 1, "ordinal_reply_accuracy": 0, "three_way_accuracy": 0.662962962962963, "passive_reads": 3, "no_query_reads": 3, "active_reads": 3.6907407407407407, "active_query_rate": 1, "program_count": 12, "model_bytes": 224438.33333333334, "evaluation_seconds": 0.7030994626666143, "peak_rss_kib_runtime_included": 395456, "free_japanese_integrated_gate": 0.0}
+  },
+  "seeds": [1, 7, 19],
+  "scales": [32, 128, 512],
+  "verdict": "partial_support_as_literal_binary_query_proposer_but_open_set_dialogue_hypothesis_falsified",
+  "falsification": "The query proposer removes fixed q0/q1 factor axes, but it only quotes literal differences between top-two executable surface futures. It cannot interpret ordinal replies, resolve more than two candidates, decide whether a query is worth its cost, or improve the free-Japanese integrated gate. Candidate programs remain surface-edit prototypes and model bytes scale approximately linearly with examples.",
+  "claim": {"highschool_level_passed": false, "native_japanese_communication_passed": false, "weak_smartphone_verified": false, "completion": false}
+}
