@@ -1,0 +1,50 @@
+{
+  "hypothesis": "Open-Set Factor Graph Proposal and Contrastive Relaxation",
+  "seeds": [1, 7, 19],
+  "training_episodes_per_seed": 12,
+  "evaluation_episodes_per_split_per_seed": 8,
+  "aggregate": {
+    "greedy": {
+      "seen_accuracy": 0.0,
+      "unseen_syntax_accuracy": 0.0,
+      "confound_accuracy": 0.041666666666666664,
+      "confound_abstention": 0.16666666666666666,
+      "model_bytes": 835.0,
+      "training_seconds": 0.004677410000264596,
+      "inference_latency_ms": 7.315526916651531,
+      "iterations": 1.0,
+      "active_candidates": 19.25,
+      "prototype_count": 6.666666666666667
+    },
+    "relax_no_contrast": {
+      "seen_accuracy": 0.0,
+      "unseen_syntax_accuracy": 0.0,
+      "confound_accuracy": 0.041666666666666664,
+      "confound_abstention": 1.0,
+      "model_bytes": 4561.666666666667,
+      "training_seconds": 0.004924802000005002,
+      "inference_latency_ms": 20.5406745833064,
+      "iterations": 2.0,
+      "active_candidates": 19.25,
+      "prototype_count": 36.666666666666664
+    },
+    "open_factor_relax": {
+      "seen_accuracy": 0.0,
+      "unseen_syntax_accuracy": 0.0,
+      "confound_accuracy": 0.041666666666666664,
+      "confound_abstention": 1.0,
+      "model_bytes": 4569.0,
+      "training_seconds": 0.004648104000049595,
+      "inference_latency_ms": 20.52041408332646,
+      "iterations": 2.0,
+      "active_candidates": 19.25,
+      "prototype_count": 36.666666666666664
+    }
+  },
+  "peak_rss_kib_runtime_included": 281440,
+  "falsification": "Structurally different boundary and binding candidates did not contain a reliable semantic execution program. Contrastive scalar factors produced the same ranking and metrics as relaxation without contrast. Perfect confound abstention was global margin collapse, not selective contradiction detection.",
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
