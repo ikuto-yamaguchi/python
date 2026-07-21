@@ -1,0 +1,31 @@
+name: Future-invariant span induction
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "minimal-predictive-lm/reproductions/future_invariant_span_induction/**"
+      - ".github/workflows/future-invariant-span-induction.yml"
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: minimal-predictive-lm/reproductions/future_invariant_span_induction
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Tests
+        run: |
+          python -m pip install pytest
+          python -m pytest -q
+      - name: Experiment
+        run: python future_invariant_span_induction.py --output artifacts/report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: future-invariant-span-induction-report
+          path: minimal-predictive-lm/reproductions/future_invariant_span_induction/artifacts/report.json
