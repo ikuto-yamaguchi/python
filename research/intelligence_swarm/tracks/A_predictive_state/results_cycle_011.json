@@ -1,0 +1,29 @@
+{
+  "hypothesis": "Predictive-Equivalence Scope Classes with Shared Active Probes",
+  "seeds": [1, 7, 19],
+  "train_sizes": [64, 256, 512],
+  "aggregate_512": {
+    "seen": {"candidate_recall": 0.977778, "immediate": 0.044444, "sequential_accuracy": 0.977778, "shared_accuracy": 0.977778, "shared_abstention": 0.022222, "false_commit": 0.0, "mean_sequential_probes": 9.311111, "mean_shared_probes": 4.572222, "mean_predictive_classes": 23.927778, "mean_candidates": 24, "ms_per_example_all_methods": 1.7997},
+    "paraphrase": {"candidate_recall": 0.0, "immediate": 0.0, "sequential_accuracy": 0.0, "shared_accuracy": 0.0, "shared_abstention": 1.0, "false_commit": 0.0, "mean_sequential_probes": 0, "mean_shared_probes": 0, "mean_predictive_classes": 23.994444, "mean_candidates": 24, "ms_per_example_all_methods": 0.943281},
+    "unknown_words": {"candidate_recall": 1.0, "immediate": 0.061111, "sequential_accuracy": 1.0, "shared_accuracy": 1.0, "shared_abstention": 0.0, "false_commit": 0.0, "mean_sequential_probes": 8.383333, "mean_shared_probes": 4.644444, "mean_predictive_classes": 23.905556, "mean_candidates": 24, "ms_per_example_all_methods": 2.074188},
+    "nested": {"candidate_recall": 0.0, "immediate": 0.0, "sequential_accuracy": 0.0, "shared_accuracy": 0.0, "shared_abstention": 1.0, "false_commit": 0.0, "mean_sequential_probes": 0, "mean_shared_probes": 0, "mean_predictive_classes": 23.983333, "mean_candidates": 24, "ms_per_example_all_methods": 1.053866},
+    "subject_omission": {"candidate_recall": 0.022222, "immediate": 0.0, "sequential_accuracy": 0.022222, "shared_accuracy": 0.022222, "shared_abstention": 0.977778, "false_commit": 0.0, "mean_sequential_probes": 0.5, "mean_shared_probes": 0.105556, "mean_predictive_classes": 23.977778, "mean_candidates": 24, "ms_per_example_all_methods": 0.845618},
+    "distractor": {"candidate_recall": 0.216667, "immediate": 0.0, "sequential_accuracy": 0.216667, "shared_accuracy": 0.216667, "shared_abstention": 0.783333, "false_commit": 0.0, "mean_sequential_probes": 3.638889, "mean_shared_probes": 0.994444, "mean_predictive_classes": 23.994444, "mean_candidates": 24, "ms_per_example_all_methods": 1.332348},
+    "combined": {"candidate_recall": 1.0, "immediate": 0.061111, "sequential_accuracy": 1.0, "shared_accuracy": 0.983333, "shared_abstention": 0.016667, "false_commit": 0.0, "mean_sequential_probes": 8.861111, "mean_shared_probes": 4.666667, "mean_predictive_classes": 23.894444, "mean_candidates": 24, "ms_per_example_all_methods": 2.303616}
+  },
+  "per_seed_512": [
+    {"seed": 1, "model_bytes": 4305, "seen": {"candidate_recall": 1.0, "shared_accuracy": 1.0, "mean_sequential_probes": 8.8, "mean_shared_probes": 4.6, "false_commit": 0.0}, "unknown_words": {"candidate_recall": 1.0, "shared_accuracy": 1.0, "mean_sequential_probes": 8.966667, "mean_shared_probes": 4.716667, "false_commit": 0.0}, "paraphrase": {"candidate_recall": 0.0, "shared_accuracy": 0.0}, "nested": {"candidate_recall": 0.0, "shared_accuracy": 0.0}, "subject_omission": {"candidate_recall": 0.033333, "shared_accuracy": 0.033333}, "combined": {"candidate_recall": 1.0, "shared_accuracy": 0.983333, "mean_sequential_probes": 8.616667, "mean_shared_probes": 4.716667, "false_commit": 0.0}},
+    {"seed": 7, "model_bytes": 4305, "seen": {"candidate_recall": 0.966667, "shared_accuracy": 0.966667, "mean_sequential_probes": 9.883333, "mean_shared_probes": 4.566667, "false_commit": 0.0}, "unknown_words": {"candidate_recall": 1.0, "shared_accuracy": 1.0, "mean_sequential_probes": 8.566667, "mean_shared_probes": 4.583333, "false_commit": 0.0}, "paraphrase": {"candidate_recall": 0.0, "shared_accuracy": 0.0}, "nested": {"candidate_recall": 0.0, "shared_accuracy": 0.0}, "subject_omission": {"candidate_recall": 0.016667, "shared_accuracy": 0.016667}, "combined": {"candidate_recall": 1.0, "shared_accuracy": 0.983333, "mean_sequential_probes": 9.233333, "mean_shared_probes": 4.583333, "false_commit": 0.0}},
+    {"seed": 19, "model_bytes": 4303, "seen": {"candidate_recall": 0.966667, "shared_accuracy": 0.966667, "mean_sequential_probes": 9.25, "mean_shared_probes": 4.55, "false_commit": 0.0}, "unknown_words": {"candidate_recall": 1.0, "shared_accuracy": 1.0, "mean_sequential_probes": 7.616667, "mean_shared_probes": 4.633333, "false_commit": 0.0}, "paraphrase": {"candidate_recall": 0.0, "shared_accuracy": 0.0}, "nested": {"candidate_recall": 0.0, "shared_accuracy": 0.0}, "subject_omission": {"candidate_recall": 0.016667, "shared_accuracy": 0.016667}, "combined": {"candidate_recall": 1.0, "shared_accuracy": 0.983333, "mean_sequential_probes": 8.733333, "mean_shared_probes": 4.7, "false_commit": 0.0}}
+  ],
+  "model_bytes": 4304.333333333333,
+  "bigram_types": 411,
+  "peak_rss_kib_runtime_included": 303332,
+  "estimated_complexity": "proposal O(L^2), class build O(HC), active O(C*H*logH), C=12, H<=24",
+  "target_value_in_probe_response": false,
+  "free_japanese_integrated_gate": 0.0,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
