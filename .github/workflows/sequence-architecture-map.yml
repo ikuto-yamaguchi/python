@@ -1,0 +1,48 @@
+name: Sequence architecture map
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "minimal-predictive-lm/reproductions/sequence_architecture_map/**"
+      - ".github/workflows/sequence-architecture-map.yml"
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: minimal-predictive-lm/reproductions/sequence_architecture_map
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install CPU dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Unit and quick integration tests
+        env:
+          OMP_NUM_THREADS: "1"
+          MKL_NUM_THREADS: "1"
+        run: python -m pytest -q test_architecture_map.py
+      - name: Matched-budget architecture sweep
+        env:
+          OMP_NUM_THREADS: "1"
+          MKL_NUM_THREADS: "1"
+        run: python architecture_map.py --output artifacts/architecture_map_report.json
+      - name: Learnability controls
+        env:
+          OMP_NUM_THREADS: "1"
+          MKL_NUM_THREADS: "1"
+        run: python capacity_control.py --output artifacts/capacity_control_report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sequence-architecture-map-reports
+          path: |
+            minimal-predictive-lm/reproductions/sequence_architecture_map/artifacts/*.json
+            minimal-predictive-lm/reproductions/sequence_architecture_map/artifacts/*.jsonl
