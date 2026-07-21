@@ -1,0 +1,32 @@
+[
+  {
+    "seed": 1,
+    "train_seconds": 0.0023146539999743254,
+    "peak_rss_kib": 277744,
+    "results": {
+      "raw_episode": {"oneshot": 0.0, "paraphrase": 0.0, "interference_latest": 0.0, "latency_ms": 0.00007594167262444292, "model_bytes": 32120, "schemas": 0, "bindings": 0},
+      "rebinding": {"oneshot": 1.0, "paraphrase": 0.0, "interference_latest": 1.0, "latency_ms": 0.005502149991798433, "model_bytes": 24242, "schemas": 3, "bindings": 170},
+      "no_consolidation": {"oneshot": 0.0, "paraphrase": 0.0, "interference_latest": 0.0, "latency_ms": 0.00016563332678742881, "model_bytes": 15276, "schemas": 0, "bindings": 0}
+    }
+  },
+  {
+    "seed": 7,
+    "train_seconds": 0.0023612070001490792,
+    "peak_rss_kib": 277744,
+    "results": {
+      "raw_episode": {"oneshot": 0.0, "paraphrase": 0.0, "interference_latest": 0.0, "latency_ms": 0.00008907499591259693, "model_bytes": 32120, "schemas": 0, "bindings": 0},
+      "rebinding": {"oneshot": 1.0, "paraphrase": 0.0, "interference_latest": 1.0, "latency_ms": 0.004906124987276901, "model_bytes": 24242, "schemas": 3, "bindings": 170},
+      "no_consolidation": {"oneshot": 0.0, "paraphrase": 0.0, "interference_latest": 0.0, "latency_ms": 0.00015248333321930355, "model_bytes": 15276, "schemas": 0, "bindings": 0}
+    }
+  },
+  {
+    "seed": 19,
+    "train_seconds": 0.002380738000056226,
+    "peak_rss_kib": 277744,
+    "results": {
+      "raw_episode": {"oneshot": 0.0, "paraphrase": 0.0, "interference_latest": 0.0, "latency_ms": 0.0000792583364273014, "model_bytes": 32120, "schemas": 0, "bindings": 0},
+      "rebinding": {"oneshot": 1.0, "paraphrase": 0.0, "interference_latest": 1.0, "latency_ms": 0.004530599998512723, "model_bytes": 24242, "schemas": 3, "bindings": 170},
+      "no_consolidation": {"oneshot": 0.0, "paraphrase": 0.0, "interference_latest": 0.0, "latency_ms": 0.0001538499892224839, "model_bytes": 15276, "schemas": 0, "bindings": 0}
+    }
+  }
+]
