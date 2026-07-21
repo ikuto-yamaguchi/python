@@ -1,5 +1,5 @@
 from __future__ import annotations
-import argparse, json, math, random, resource, time
+import argparse, hashlib, json, math, random, resource, time
 from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Iterable
@@ -12,12 +12,15 @@ T2I={t:i for i,t in enumerate(TOKENS)}
 V=len(TOKENS)
 NAMES=["葵","蓮","凛","空"]; COLORS=["赤","青","緑","白"]
 
+def _stable_hash(text):
+    return int.from_bytes(hashlib.blake2b(text.encode("utf-8"), digest_size=8).digest(), "little")
+
 def feat(history, dim=64):
     x=np.zeros(dim,np.float32)
     for n in (1,2,3):
         for i in range(max(0,len(history)-8), len(history)-n+1):
             s="|".join(history[i:i+n])
-            h=hash((n,s)) & 0xffffffff
+            h=_stable_hash(f"{n}:{s}")
             x[h%dim]+=1.0 if (h>>8)&1 else -1.0
     norm=np.linalg.norm(x)
     return x/(norm+1e-6)
