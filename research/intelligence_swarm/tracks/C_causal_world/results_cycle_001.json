@@ -1,0 +1,65 @@
+{
+  "cycle": 1,
+  "hypothesis": "Intervention-stable residual event programs should be accepted only when the same utterance family induces a consistent sparse state transition across diverse objects and contexts.",
+  "scales": [32, 128, 512],
+  "seeds": [1, 7, 19],
+  "aggregate_512": {
+    "lexical": {
+      "normal": 0.6333333333,
+      "rename": 0.6833333333,
+      "paraphrase": 0.375,
+      "confounded_accuracy": 0.5583333333,
+      "confounded_abstention": 0.0,
+      "plan": 0.1111111111,
+      "omission": 0.6111111111,
+      "free_gate": 0.0,
+      "model_bytes": 97333.6667,
+      "peak_rss_kib": 302340,
+      "train_seconds": 0.00754653,
+      "inference_ms": 3.28784499,
+      "candidate_reads": 512.0,
+      "graph_nodes": 3.0,
+      "graph_edges": 512.0
+    },
+    "residual": {
+      "normal": 0.3888888889,
+      "rename": 0.4,
+      "paraphrase": 0.3916666667,
+      "confounded_accuracy": 0.4583333333,
+      "confounded_abstention": 0.0,
+      "plan": 0.0,
+      "omission": 0.3444444444,
+      "free_gate": 0.0,
+      "model_bytes": 97334.6667,
+      "peak_rss_kib": 302340,
+      "train_seconds": 0.007345695,
+      "inference_ms": 3.17432282,
+      "candidate_reads": 3.0,
+      "graph_nodes": 3.0,
+      "graph_edges": 512.0
+    },
+    "intervention": {
+      "normal": 0.3555555556,
+      "rename": 0.3916666667,
+      "paraphrase": 0.3666666667,
+      "confounded_accuracy": 0.475,
+      "confounded_abstention": 0.8083333333,
+      "plan": 0.0,
+      "omission": 0.3444444444,
+      "free_gate": 0.0,
+      "model_bytes": 97338.6667,
+      "peak_rss_kib": 302340,
+      "train_seconds": 0.007277499,
+      "inference_ms": 3.20045034,
+      "candidate_reads": 3.0,
+      "graph_nodes": 3.0,
+      "graph_edges": 512.0
+    }
+  },
+  "claim": {
+    "highschool_level_passed": false,
+    "native_japanese_communication_passed": false,
+    "weak_smartphone_verified": false,
+    "completion": false
+  }
+}
