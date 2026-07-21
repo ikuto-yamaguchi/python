@@ -1,0 +1,37 @@
+{
+  "hypothesis": "Compositional Binding MDL with Contrastive Views",
+  "aggregate": {
+    "60": {
+      "prototype": {"seen": 0.0916666667, "order": 0.0916666667, "synonym": 0.1222222222, "rename": 0.1555555556, "confound": 0.8722222222, "bytes": 7534, "graphs": 60, "train_s": 0.0000036053, "seen_ms": 0.7384260667, "seen_reads": 60},
+      "binding_mdl": {"seen": 0.8305555556, "order": 0.6472222222, "synonym": 0.0, "rename": 0.0, "confound": 0.0, "bytes": 1702, "graphs": 18.3333333333, "train_s": 0.0013539827, "seen_ms": 0.1790060556, "seen_reads": 18.3333333333}
+    },
+    "240": {
+      "prototype": {"seen": 0.1, "order": 0.1361111111, "synonym": 0.1166666667, "rename": 0.1, "confound": 0.8666666667, "bytes": 30045.3333333333, "graphs": 240, "train_s": 0.0000067697, "seen_ms": 2.8715648917, "seen_reads": 240},
+      "binding_mdl": {"seen": 0.8305555556, "order": 0.6472222222, "synonym": 0.0, "rename": 0.0, "confound": 0.0, "bytes": 2566, "graphs": 26.6666666667, "train_s": 0.00472733, "seen_ms": 0.2469941278, "seen_reads": 26.6666666667}
+    },
+    "720": {
+      "prototype": {"seen": 0.1111111111, "order": 0.1361111111, "synonym": 0.1444444444, "rename": 0.1055555556, "confound": 0.8583333333, "bytes": 90064, "graphs": 720, "train_s": 0.0000211843, "seen_ms": 8.7578423917, "seen_reads": 720},
+      "binding_mdl": {"seen": 0.8305555556, "order": 0.6472222222, "synonym": 0.0, "rename": 0.0, "confound": 0.0, "bytes": 4049, "graphs": 40.6666666667, "train_s": 0.0143611413, "seen_ms": 0.4253547444, "seen_reads": 40.6666666667}
+    }
+  },
+  "seeds": [1, 7, 19],
+  "train_sizes": [60, 240, 720],
+  "evaluation_examples_per_split_per_seed": 120,
+  "peak_rss_kib_runtime_included": 308692,
+  "verdict": "partial_support_for_executable_graph_compression_but_open_set_symbol_induction_falsified",
+  "falsification": "Anonymous executable binding graphs substantially improved seen and word-order transfer while reducing storage, reads and latency, but unseen synonyms, open-set entity/value rename and selective confound abstention were all zero. Literal predicates and exact shared substrings remain embedded in graph induction, so semantic operation equivalence, causal necessity and free Japanese intelligence were not learned.",
+  "inherited_evidence": [
+    "A cycle 3: useful candidates must generate distinguishable executable futures",
+    "C cycle 3: action/no-action contrast is downstream until open-set boundaries exist",
+    "D cycle 3: boundary uncertainty should remain provisional until corroborated",
+    "E cycle 3: boundary variants are not structurally different unless they generate different world branches",
+    "B cycle 3: storing surface prototypes inside quotient classes causes linear memory growth"
+  ],
+  "next": "Bidirectional Executable MDL Operation Quotient: separate latent operation nodes from surface-view decoders, retain multiple reversible binding candidates, and jointly encode action/no-action/inverse/alternate-target world branches.",
+  "claim": {
+    "highschool_level_passed": false,
+    "native_japanese_communication_passed": false,
+    "weak_smartphone_verified": false,
+    "completion": false
+  }
+}
