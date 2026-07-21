@@ -1,0 +1,76 @@
+{
+  "hypothesis": "Counterexample-Guided Role Boundary Refinement with Cross-Form Execution",
+  "seeds": [1, 7, 19],
+  "train_sizes": [30, 90, 180],
+  "summary": {
+    "30": {
+      "proposal_baseline": {"recall": 0.9, "precision": 0.25380080464196086, "mean_candidates": 3.5555555555555554},
+      "proposal_refined": {"recall": 0.9, "precision": 0.25380080464196086, "mean_candidates": 3.5555555555555554},
+      "counterexample_refine": {
+        "seen": {"accuracy": 0.0, "ms": 0.713381766666051, "reads": 11.0, "candidates": 235.73333333333335},
+        "held_order": {"accuracy": 0.0, "ms": 0.7314416666664177, "reads": 11.0, "candidates": 198.4},
+        "held_lexeme": {"accuracy": 0.0, "ms": 0.6187459666657938, "reads": 11.0, "candidates": 182.4},
+        "nested": {"accuracy": 0.0, "ms": 0.6839877666673525, "reads": 11.0, "candidates": 199.46666666666667},
+        "subject_omission": {"accuracy": 0.0, "ms": 0.0022812666666519967, "reads": 11.0, "candidates": 0.0},
+        "alternate_state": {"accuracy": 0.0, "ms": 0.41089901666566675, "reads": 11.0, "candidates": 208.0},
+        "alternate_state_inverse": {"accuracy": 0.0, "ms": 0.655831249999513, "reads": 11.0, "candidates": 185.6},
+        "model_bytes": 3070.6666666666665, "programs": 11.0, "raw_candidates": 106.66666666666667, "rejected_counterexamples": 21.666666666666668
+      }
+    },
+    "90": {
+      "proposal_baseline": {"recall": 0.9037037037037037, "precision": 0.259047070966624, "mean_candidates": 3.4962962962962965},
+      "proposal_refined": {"recall": 0.9037037037037037, "precision": 0.259047070966624, "mean_candidates": 3.4962962962962965},
+      "counterexample_refine": {
+        "seen": {"accuracy": 0.0, "ms": 1.2642279500018578, "reads": 21.666666666666668, "candidates": 396.8},
+        "held_order": {"accuracy": 0.0, "ms": 1.1578802833336492, "reads": 21.666666666666668, "candidates": 318.93333333333334},
+        "held_lexeme": {"accuracy": 0.0, "ms": 1.1643410333334714, "reads": 21.666666666666668, "candidates": 363.73333333333335},
+        "nested": {"accuracy": 0.0, "ms": 1.2272583166672273, "reads": 21.666666666666668, "candidates": 342.4},
+        "subject_omission": {"accuracy": 0.0, "ms": 0.007147450000388744, "reads": 21.666666666666668, "candidates": 1.0666666666666667},
+        "alternate_state": {"accuracy": 0.0, "ms": 0.7006003000005497, "reads": 21.666666666666668, "candidates": 337.06666666666666},
+        "alternate_state_inverse": {"accuracy": 0.0, "ms": 1.0585779666665, "reads": 21.666666666666668, "candidates": 317.8666666666667},
+        "model_bytes": 6113.333333333333, "programs": 21.666666666666668, "raw_candidates": 314.6666666666667, "rejected_counterexamples": 64.33333333333333
+      }
+    },
+    "180": {
+      "proposal_baseline": {"recall": 0.9037037037037037, "precision": 0.2599906478833446, "mean_candidates": 3.4833333333333334},
+      "proposal_refined": {"recall": 0.9037037037037037, "precision": 0.2599906478833446, "mean_candidates": 3.4833333333333334},
+      "cross_episode": {
+        "seen": {"accuracy": 0.0, "ms": 1.6958792166661851, "reads": 26.666666666666668, "candidates": 478.93333333333334},
+        "held_order": {"accuracy": 0.0, "ms": 1.6377007666667016, "reads": 26.666666666666668, "candidates": 419.2},
+        "held_lexeme": {"accuracy": 0.0, "ms": 1.3844958666661948, "reads": 26.666666666666668, "candidates": 405.3333333333333},
+        "nested": {"accuracy": 0.0, "ms": 1.649550649999772, "reads": 26.666666666666668, "candidates": 424.53333333333336},
+        "subject_omission": {"accuracy": 0.0, "ms": 0.0059815166669826185, "reads": 26.666666666666668, "candidates": 0.0},
+        "alternate_state": {"accuracy": 0.0, "ms": 0.9278501833335895, "reads": 26.666666666666668, "candidates": 395.73333333333335},
+        "alternate_state_inverse": {"accuracy": 0.0, "ms": 1.4974439333343526, "reads": 26.666666666666668, "candidates": 423.46666666666664},
+        "model_bytes": 7612, "programs": 26.666666666666668, "raw_candidates": 627, "rejected_counterexamples": 0
+      },
+      "boundary_refine_no_ce": {
+        "seen": {"accuracy": 0.0, "ms": 1.5583174499994357, "reads": 26.666666666666668, "candidates": 478.93333333333334},
+        "held_order": {"accuracy": 0.0, "ms": 1.5547368166674385, "reads": 26.666666666666668, "candidates": 419.2},
+        "held_lexeme": {"accuracy": 0.0, "ms": 1.3614744666663607, "reads": 26.666666666666668, "candidates": 405.3333333333333},
+        "nested": {"accuracy": 0.0, "ms": 1.7687224166669087, "reads": 26.666666666666668, "candidates": 424.53333333333336},
+        "subject_omission": {"accuracy": 0.0, "ms": 0.006640699999138633, "reads": 26.666666666666668, "candidates": 0.0},
+        "alternate_state": {"accuracy": 0.0, "ms": 0.8480944833327916, "reads": 26.666666666666668, "candidates": 395.73333333333335},
+        "alternate_state_inverse": {"accuracy": 0.0, "ms": 1.5174085500007095, "reads": 26.666666666666668, "candidates": 423.46666666666664},
+        "model_bytes": 7612, "programs": 26.666666666666668, "raw_candidates": 627, "rejected_counterexamples": 0
+      },
+      "counterexample_refine": {
+        "seen": {"accuracy": 0.0, "ms": 1.748793049999146, "reads": 26.666666666666668, "candidates": 478.93333333333334},
+        "held_order": {"accuracy": 0.0, "ms": 1.5840092333339346, "reads": 26.666666666666668, "candidates": 419.2},
+        "held_lexeme": {"accuracy": 0.0, "ms": 1.3318230333330423, "reads": 26.666666666666668, "candidates": 405.3333333333333},
+        "nested": {"accuracy": 0.0, "ms": 1.6303698500005719, "reads": 26.666666666666668, "candidates": 424.53333333333336},
+        "subject_omission": {"accuracy": 0.0, "ms": 0.0058466500007625655, "reads": 26.666666666666668, "candidates": 0.0},
+        "alternate_state": {"accuracy": 0.0, "ms": 0.920433649999571, "reads": 26.666666666666668, "candidates": 395.73333333333335},
+        "alternate_state_inverse": {"accuracy": 0.0, "ms": 1.5106842666673022, "reads": 26.666666666666668, "candidates": 423.46666666666664},
+        "model_bytes": 7612, "programs": 26.666666666666668, "raw_candidates": 627, "rejected_counterexamples": 119.66666666666667
+      }
+    }
+  },
+  "peak_rss_kib_runtime_included": 309496,
+  "estimated_complexity": "train O(N L^2 + C^2); infer O(P L^3), capped value/old spans at 8",
+  "free_japanese_integrated_gate": 0.0,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
