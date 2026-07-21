@@ -1,0 +1,20 @@
+{
+  "summary": {
+    "48": {
+      "exact": {"variant":0.0,"unseen":0.0,"pronoun":0.0,"direct":0.0,"distractor":0.0,"online":0.023248041923980788,"train_s":0.008298114666710413,"inference_ms":0.3170651194447297,"model_bytes":4698.666666666667,"reads":12,"revoked":0},
+      "self_grouped": {"variant":0.0,"unseen":0.0,"pronoun":0.0,"direct":0.0,"distractor":0.0,"online":0.0,"train_s":0.019632072333327717,"inference_ms":0.7030223305554905,"model_bytes":9981.666666666666,"reads":12,"revoked":43}
+    },
+    "180": {
+      "exact": {"variant":0.0,"unseen":0.0,"pronoun":0.0,"direct":0.0,"distractor":0.0,"online":0.006098908224345905,"train_s":0.11429184466639224,"inference_ms":1.1698305972231537,"model_bytes":17506.333333333332,"reads":12,"revoked":0},
+      "self_grouped": {"variant":0.0,"unseen":0.0,"pronoun":0.0,"direct":0.0,"distractor":0.0,"online":0.0,"train_s":0.2613757326666928,"inference_ms":2.5197739861116335,"model_bytes":37491,"reads":12,"revoked":38.333333333333336}
+    },
+    "540": {
+      "exact": {"variant":0.0,"unseen":0.0,"pronoun":0.0,"direct":0.0,"distractor":0.0,"online":0.002047063662653349,"train_s":1.0076767579998887,"inference_ms":3.4160867638888703,"model_bytes":52057,"reads":12,"revoked":0},
+      "self_grouped": {"variant":0.0,"unseen":0.0,"pronoun":0.0,"direct":0.0,"distractor":0.0,"online":0.0,"train_s":2.202953028999976,"inference_ms":7.418675038888978,"model_bytes":111427,"reads":12,"revoked":33.666666666666664}
+    },
+    "peak_rss_kib": 308468
+  },
+  "run_count": 9,
+  "seeds": [1,7,19],
+  "training_sizes": [48,180,540]
+}
