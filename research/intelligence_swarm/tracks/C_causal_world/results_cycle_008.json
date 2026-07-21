@@ -1,0 +1,40 @@
+{
+  "hypothesis": "Latent Effect-Factor Discovery from Multi-Operation Intervention Signatures",
+  "seeds": [1, 7, 19],
+  "train_sizes": [40, 120, 360],
+  "summary": {
+    "360": {
+      "surface": {
+        "seen": {"accuracy": 1.0, "abstention": 0.0, "mean_margin": 0.5227850043310702, "ms_per_bundle": 0.03254577333336783},
+        "held_context": {"accuracy": 0.4633333333333333, "abstention": 0.24666666666666667, "mean_margin": 0.0772699746471441, "ms_per_bundle": 0.036397786667142405},
+        "held_command": {"accuracy": 1.0, "abstention": 0.0, "mean_margin": 0.5394203855740342, "ms_per_bundle": 0.03906719666626183},
+        "held_both": {"accuracy": 0.4411111111111111, "abstention": 0.2833333333333333, "mean_margin": 0.07880531028831526, "ms_per_bundle": 0.042724696666785654},
+        "alt_state": {"accuracy": 1.0, "abstention": 0.0, "mean_margin": 0.5288274598952493, "ms_per_bundle": 0.038172113333227266},
+        "subject_omission": {"accuracy": 1.0, "abstention": 0.0, "mean_margin": 0.5136085728524192, "ms_per_bundle": 0.03979001666645369},
+        "plan_change": {"accuracy": 1.0, "abstention": 0.0, "mean_margin": 0.5314316426231575, "ms_per_bundle": 0.03572628333283016}
+      },
+      "signature_only": {
+        "seen": {"accuracy": 0.0, "abstention": 1.0, "mean_margin": 0.0, "ms_per_bundle": 0.0005664133323080023},
+        "held_context": {"accuracy": 0.0, "abstention": 1.0, "mean_margin": 0.0, "ms_per_bundle": 0.0006241566666176368},
+        "held_command": {"accuracy": 0.0, "abstention": 1.0, "mean_margin": 0.0, "ms_per_bundle": 0.0005245566664295135},
+        "held_both": {"accuracy": 0.0, "abstention": 1.0, "mean_margin": 0.0, "ms_per_bundle": 0.0007655633339709311},
+        "alt_state": {"accuracy": 0.0, "abstention": 1.0, "mean_margin": 0.0, "ms_per_bundle": 0.0006184566662644405},
+        "subject_omission": {"accuracy": 0.0, "abstention": 1.0, "mean_margin": 0.0, "ms_per_bundle": 0.0006603133336587538},
+        "plan_change": {"accuracy": 0.0, "abstention": 1.0, "mean_margin": 0.0, "ms_per_bundle": 0.0007438033336863251}
+      },
+      "one_shot_bridge": {"accuracy": 1.0, "abstention": 0.0, "mean_margin": 1.0, "ms_per_bundle": 0.0017677433334029047},
+      "wrong_bridge": {"accuracy": 0.6022222222222222, "abstention": 0.0, "mean_margin": 1.0, "ms_per_bundle": 0.0015944033331531198},
+      "model_bytes": 12966,
+      "bridged_model_bytes": 13492,
+      "factor_nodes": 5,
+      "bridge_entries": 10
+    }
+  },
+  "estimated_complexity": "train O(N*O*G); infer O(C*G + O), discovered C<=5, O=3",
+  "peak_rss_kib_runtime_included": 391148,
+  "free_japanese_integrated_gate": 0.0,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
