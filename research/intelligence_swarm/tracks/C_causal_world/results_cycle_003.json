@@ -1,0 +1,43 @@
+{
+  "cycle": 3,
+  "hypothesis": "Contrastive Intervention Necessity Graph",
+  "largest_scale": 512,
+  "seeds": [1, 7, 19],
+  "correlation": {
+    "normal": 0.3111111111,
+    "rename": 0.0,
+    "paraphrase": 0.3111111111,
+    "confound_reject": 0.0,
+    "reverse": 0.3444444444,
+    "two_step": 0.3333333333,
+    "model_bytes": 148212,
+    "train_seconds": 0.0000047,
+    "inference_ms": 5.1282,
+    "rules": 1024,
+    "reads": 1024
+  },
+  "contrastive_necessity": {
+    "normal": 1.0,
+    "rename": 1.0,
+    "paraphrase": 1.0,
+    "confound_reject_after_observation": 1.0,
+    "reverse": 1.0,
+    "two_step": 0.6722222222,
+    "model_bytes": 14044.33,
+    "train_seconds": 0.0110,
+    "inference_ms": 2.6458,
+    "rules": 3,
+    "reads": 3
+  },
+  "peak_rss_kib_runtime_included": 394208,
+  "strict_audit": {
+    "passed": false,
+    "reason": "Target-value extraction uses the finite VALUES list and the data generator uses three fixed state surface patterns. Positive scores therefore depend on a hidden finite ontology and cannot count as open-set Japanese causal induction."
+  },
+  "claims": {
+    "highschool_level_passed": false,
+    "native_japanese_communication_passed": false,
+    "weak_smartphone_verified": false,
+    "completion": false
+  }
+}
