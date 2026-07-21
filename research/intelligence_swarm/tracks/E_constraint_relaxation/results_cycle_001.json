@@ -1,0 +1,11 @@
+{
+  "hypothesis": "Joint sparse constraint relaxation over candidate edit programs improves multi-step consistency beyond one-pass retrieval.",
+  "aggregate": {
+    "32": {"greedy_plan":0.1083333333,"relax_plan":0.3708333333,"paraphrase":0.4,"rename":0.8222222222,"conflict_abstention":0.4583333333,"model_bytes":7867,"peak_rss_kib":295436,"train_seconds":0.0004455927,"inference_ms_plan":0.5396332583,"iterations":1.6833333333,"active_candidates":12},
+    "128": {"greedy_plan":0.15,"relax_plan":0.4041666667,"paraphrase":0.4111111111,"rename":0.9111111111,"conflict_abstention":0.625,"model_bytes":30423,"peak_rss_kib":296486.6667,"train_seconds":0.0017980103,"inference_ms_plan":1.8083348417,"iterations":1.4916666667,"active_candidates":12},
+    "512": {"greedy_plan":0.2458333333,"relax_plan":0.8208333333,"paraphrase":0.5666666667,"rename":0.9333333333,"conflict_abstention":0.7916666667,"model_bytes":120787.6667,"peak_rss_kib":298156,"train_seconds":0.0061111413,"inference_ms_plan":6.5665653292,"iterations":1.6375,"active_candidates":12}
+  },
+  "seeds": [1,7,19],
+  "claim": {"highschool_level_passed":false,"native_japanese_communication_passed":false,"weak_smartphone_verified":false,"completion":false},
+  "falsification": "The gain depends on artificial templated Japanese, literal edit candidates, and a hand-fixed surface-frame preservation energy. It does not induce semantic factors, unseen operations, free generation, dialogue, reading, counterfactual reasoning, or continual learning."
+}
