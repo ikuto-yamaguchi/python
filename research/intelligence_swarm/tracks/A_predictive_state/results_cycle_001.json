@@ -1,0 +1,39 @@
+{
+  "hypothesis": "Histories should be compressed into predictive-equivalence states defined by future utterance distributions.",
+  "verdict": "falsified_as_general_intelligence_path",
+  "scales": [32, 128, 512],
+  "seeds": [1, 7, 19],
+  "aggregate_512": {
+    "lexical_history": {
+      "normal": 0.860484797980498,
+      "paraphrase": 0.07110226332953368,
+      "rename": 0.320816449745307,
+      "no_change": 0.3506582524309132,
+      "shuffled_order": 0.35396691233514455,
+      "candidate_reads": 1536.0,
+      "model_bytes": 1345806,
+      "train_seconds": 0.10779134433333581,
+      "latency_ms": 1.2387732655555637
+    },
+    "predictive_state": {
+      "normal": 0.550218480844096,
+      "paraphrase": 0.04630761229940112,
+      "rename": 0.30712445785819803,
+      "no_change": 0.22851265509632496,
+      "shuffled_order": 0.20862020469004736,
+      "candidate_reads": 49.666666666666664,
+      "states": 49.666666666666664,
+      "model_bytes": 78370,
+      "train_seconds": 4.789157650000003,
+      "latency_ms": 0.09382566222222345
+    }
+  },
+  "peak_rss_kib_runtime_included": 395920,
+  "free_japanese_gate": 0.0,
+  "claim": {
+    "highschool_level_passed": false,
+    "native_japanese_communication_passed": false,
+    "weak_smartphone_verified": false,
+    "completion": false
+  }
+}
