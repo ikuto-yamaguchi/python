@@ -24,7 +24,9 @@ jobs:
       - name: Unit tests
         run: python -m pytest -q
       - name: Multi-seed scaling experiment
-        run: python relational_role_quotient.py --output artifacts/relational_role_quotient_report.json
+        run: |
+          mkdir -p artifacts
+          python relational_role_quotient.py --output artifacts/relational_role_quotient_report.json
       - uses: actions/upload-artifact@v4
         with:
           name: relational-role-quotient-report
