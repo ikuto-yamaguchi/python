@@ -1,0 +1,27 @@
+name: Broad architecture reproduction
+
+on:
+  pull_request:
+    paths:
+      - 'minimal-predictive-lm/reproductions/broad_architecture_map/**'
+      - '.github/workflows/broad-architecture-reproduction-001.yml'
+  workflow_dispatch:
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Run broad comparison
+        run: |
+          python minimal-predictive-lm/reproductions/broad_architecture_map/broad_benchmark.py \
+            --output artifacts/broad_architecture_report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: broad-architecture-report
+          path: artifacts/broad_architecture_report.json
