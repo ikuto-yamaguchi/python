@@ -1,0 +1,87 @@
+{
+  "hypothesis": "Order-Sensitive Mechanism Edge Automata from Intervention Deltas",
+  "seeds": [1, 7, 19],
+  "train_sizes": [32, 128, 512],
+  "summary": {
+    "32": {
+      "base": {
+        "seen": {"accuracy": 0.40555555555555556, "abstention": 0.0, "ms": 0.5245950166669091},
+        "held_context": {"accuracy": 0.4111111111111111, "abstention": 0.0, "ms": 0.5354916333342569},
+        "held_command": {"accuracy": 0.48333333333333334, "abstention": 0.0, "ms": 0.5304633166651406},
+        "held_both": {"accuracy": 0.36666666666666664, "abstention": 0.0, "ms": 0.5308156833330536},
+        "order_counterfactual": {"accuracy": 0.2722222222222222, "abstention": 0.0, "ms": 0.5237204555555763},
+        "alternate_state": {"accuracy": 0.43333333333333335, "abstention": 0.0, "ms": 0.5305969111102766},
+        "model_bytes": 14946.666666666666
+      },
+      "mechanism": {
+        "seen": {"accuracy": 0.5888888888888889, "abstention": 0.0, "ms": 0.09393695555420183},
+        "held_context": {"accuracy": 0.65, "abstention": 0.0, "ms": 0.09281414444457267},
+        "held_command": {"accuracy": 0.6444444444444445, "abstention": 0.0, "ms": 0.09095815000061218},
+        "held_both": {"accuracy": 0.6611111111111111, "abstention": 0.0, "ms": 0.08892425555460351},
+        "order_counterfactual": {"accuracy": 0.5888888888888889, "abstention": 0.0, "ms": 0.1136825388888004},
+        "alternate_state": {"accuracy": 0.6611111111111111, "abstention": 0.0, "ms": 0.08979923888874611},
+        "model_bytes": 1469.3333333333333,
+        "effect_symbols": 7,
+        "command_clusters": 1.3333333333333333,
+        "transition_edges": 4.666666666666667,
+        "candidate_reads": 1.3333333333333333
+      }
+    },
+    "128": {
+      "base": {
+        "seen": {"accuracy": 0.45555555555555555, "abstention": 0.0, "ms": 2.0500254611116966},
+        "held_context": {"accuracy": 0.4, "abstention": 0.0, "ms": 2.147732533333308},
+        "held_command": {"accuracy": 0.4222222222222222, "abstention": 0.0, "ms": 2.144219427778656},
+        "held_both": {"accuracy": 0.4222222222222222, "abstention": 0.0, "ms": 2.143035677776576},
+        "order_counterfactual": {"accuracy": 0.25555555555555554, "abstention": 0.0, "ms": 2.116298649999256},
+        "alternate_state": {"accuracy": 0.31666666666666665, "abstention": 0.0, "ms": 2.170610227776453},
+        "model_bytes": 59290
+      },
+      "mechanism": {
+        "seen": {"accuracy": 0.6833333333333333, "abstention": 0.0, "ms": 0.0918797944450489},
+        "held_context": {"accuracy": 0.6611111111111111, "abstention": 0.0, "ms": 0.09729352777741143},
+        "held_command": {"accuracy": 0.6611111111111111, "abstention": 0.0, "ms": 0.09152967777860492},
+        "held_both": {"accuracy": 0.6444444444444445, "abstention": 0.0, "ms": 0.09008907222273087},
+        "order_counterfactual": {"accuracy": 0.6333333333333333, "abstention": 0.0, "ms": 0.12000047222247506},
+        "alternate_state": {"accuracy": 0.5833333333333334, "abstention": 0.0, "ms": 0.08988610555509997},
+        "model_bytes": 1950.6666666666667,
+        "effect_symbols": 15.333333333333334,
+        "command_clusters": 1.3333333333333333,
+        "transition_edges": 10,
+        "candidate_reads": 1.3333333333333333
+      }
+    },
+    "512": {
+      "base": {
+        "seen": {"accuracy": 0.3833333333333333, "abstention": 0.0, "ms": 8.280756877777801},
+        "held_context": {"accuracy": 0.4222222222222222, "abstention": 0.0, "ms": 8.520058033332134},
+        "held_command": {"accuracy": 0.2833333333333333, "abstention": 0.0, "ms": 8.353759666667631},
+        "held_both": {"accuracy": 0.40555555555555556, "abstention": 0.0, "ms": 8.611299877777077},
+        "order_counterfactual": {"accuracy": 0.3111111111111111, "abstention": 0.0, "ms": 8.20414105000206},
+        "alternate_state": {"accuracy": 0.3888888888888889, "abstention": 0.0, "ms": 8.129020183332614},
+        "model_bytes": 235258.33333333334
+      },
+      "mechanism": {
+        "seen": {"accuracy": 0.6611111111111111, "abstention": 0.0, "ms": 0.09610495555610517},
+        "held_context": {"accuracy": 0.6444444444444444, "abstention": 0.0, "ms": 0.09380699444566036},
+        "held_command": {"accuracy": 0.55, "abstention": 0.0, "ms": 0.09226423333327854},
+        "held_both": {"accuracy": 0.6166666666666667, "abstention": 0.0, "ms": 0.09053460000056172},
+        "order_counterfactual": {"accuracy": 0.6333333333333333, "abstention": 0.0, "ms": 0.10405413888747717},
+        "alternate_state": {"accuracy": 0.6611111111111111, "abstention": 0.0, "ms": 0.08970445555607715},
+        "model_bytes": 2320.3333333333335,
+        "effect_symbols": 21,
+        "command_clusters": 1.3333333333333333,
+        "transition_edges": 19.333333333333332,
+        "candidate_reads": 1.3333333333333333
+      }
+    }
+  },
+  "full_seconds": 12.610012273000166,
+  "peak_rss_kib_runtime_included": 396888,
+  "estimated_complexity": "train O(N*K*P), infer O(T*C*G), sparse transition lookup O(1)",
+  "free_japanese_integrated_gate": 0.0,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
