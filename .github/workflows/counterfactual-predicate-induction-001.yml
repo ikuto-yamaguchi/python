@@ -1,0 +1,38 @@
+name: counterfactual-predicate-induction-001
+
+on:
+  pull_request:
+    paths:
+      - 'minimal-predictive-lm/**'
+      - '.github/workflows/counterfactual-predicate-induction-001.yml'
+  workflow_dispatch:
+
+jobs:
+  experiment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Unit tests
+        working-directory: minimal-predictive-lm
+        run: python -m pytest tests/test_counterfactual_predicate_induction.py -q
+      - name: Run measured experiment
+        working-directory: minimal-predictive-lm
+        run: python -S run_counterfactual_predicate_induction.py
+      - name: Verify claim boundary
+        working-directory: minimal-predictive-lm
+        run: |
+          python - <<'PY'
+          import json
+          data=json.load(open('counterfactual_predicate_induction_report.json'))
+          boundary=data['claim_boundary']
+          assert boundary['highschool_level_passed'] is False
+          assert boundary['native_japanese_communication_passed'] is False
+          assert boundary['completion'] is False
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: counterfactual-predicate-induction-001-report
+          path: minimal-predictive-lm/counterfactual_predicate_induction_report.json
