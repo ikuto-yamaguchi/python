@@ -1,0 +1,24 @@
+{
+  "hypothesis": "Invariant Counterfactual Probe Graphs from Cross-World Locality",
+  "seeds": [1, 7, 19],
+  "sizes": [6, 18, 36],
+  "largest_summary": {
+    "seen": {"accuracy": 0.05555555555555555, "wrong_commit": 0.16666666666666666, "null_rate": 0.7777777777777778, "candidate_recall": 0.05555555555555555, "mean_probes": 0.2222222222222222, "mean_candidates": 16.0, "model_bytes": 389, "training_seconds": 0.08244565866668079, "inference_ms": 1.9054470555804275},
+    "paraphrase": {"accuracy": 0.0, "wrong_commit": 0.05555555555555555, "null_rate": 0.9444444444444444, "candidate_recall": 0.2222222222222222, "mean_probes": 0.4444444444444444, "mean_candidates": 16.0, "model_bytes": 389, "training_seconds": 0.08356655533331529, "inference_ms": 1.7498283333326172},
+    "rename": {"accuracy": 0.05555555555555555, "wrong_commit": 0.1111111111111111, "null_rate": 0.8333333333333334, "candidate_recall": 0.4444444444444444, "mean_probes": 0.5555555555555556, "mean_candidates": 16.0, "model_bytes": 389, "training_seconds": 0.08290390799993475, "inference_ms": 1.636717222229183},
+    "alternate": {"accuracy": 0.1111111111111111, "wrong_commit": 0.2222222222222222, "null_rate": 0.6666666666666666, "candidate_recall": 0.1111111111111111, "mean_probes": 0.3333333333333333, "mean_candidates": 16.0, "model_bytes": 389, "training_seconds": 0.0826248263335098, "inference_ms": 1.4076398888644488},
+    "nested": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "candidate_recall": 0.0, "mean_probes": 0.16666666666666666, "mean_candidates": 16.0, "model_bytes": 389, "training_seconds": 0.0828693273335072, "inference_ms": 2.3554466666711154},
+    "omitted": {"accuracy": 0.0, "wrong_commit": 0.2777777777777778, "null_rate": 0.7222222222222222, "candidate_recall": 0.0, "mean_probes": 0.3333333333333333, "mean_candidates": 16.0, "model_bytes": 389, "training_seconds": 0.08430813533338248, "inference_ms": 1.6431756666608837},
+    "paragraph": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "candidate_recall": 0.0, "mean_probes": 0.05555555555555555, "mean_candidates": 16.0, "model_bytes": 389, "training_seconds": 0.08215008966665967, "inference_ms": 2.709826888879737}
+  },
+  "ablation_increment": "zero: all/partition/locality were identical on every principal metric",
+  "probe_library": ["future_check", "drop_target", "rebind_target", "swap", "drop_value", "rebind_value"],
+  "peak_rss_kib_runtime_included": 111512,
+  "estimated_complexity": "proposal O(L^2), training O(NPH), inference O(PH), H<=16, P<=6",
+  "hidden_labels_used_by_learner": false,
+  "scaling_note": "Initial larger configuration timed out; final controlled test used train sizes 6/18/36 and six test examples per split.",
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
