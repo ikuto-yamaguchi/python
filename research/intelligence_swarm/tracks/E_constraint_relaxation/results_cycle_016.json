@@ -1,0 +1,44 @@
+{
+  "hypothesis": "Open-Basis Residual Discovery from Raw Outcome Compression",
+  "seeds": [1, 7, 19],
+  "train_sizes": [30, 90, 180],
+  "max_size_summary": {
+    "marked": {
+      "global": {"accuracy":1.0,"wrong_commit":0.0,"null_rate":0.0,"candidate_recall":1.0,"mean_sweeps":1.0,"mean_active":1.0,"mean_factor_evals":1.0,"model_bytes":121,"training_seconds":0.003533181333447525,"inference_ms":0.06308860000293255,"basis_count":0},
+      "random_basis": {"accuracy":1.0,"wrong_commit":0.0,"null_rate":0.0,"candidate_recall":1.0,"mean_sweeps":1.0,"mean_active":1.0,"mean_factor_evals":8.0,"model_bytes":5308,"training_seconds":0.0036113876667513978,"inference_ms":0.10409348889071326,"basis_count":8},
+      "raw_basis": {"accuracy":1.0,"wrong_commit":0.0,"null_rate":0.0,"candidate_recall":1.0,"mean_sweeps":1.0,"mean_active":1.0,"mean_factor_evals":8.0,"model_bytes":5268.666666666667,"training_seconds":0.0061099583334301615,"inference_ms":0.10449110000081419,"basis_count":8},
+      "oracle": {"accuracy":1.0,"wrong_commit":0.0,"null_rate":0.0,"candidate_recall":1.0,"mean_sweeps":1.0,"mean_active":1.0,"mean_factor_evals":1.0,"model_bytes":121,"training_seconds":0.003379630333104918,"inference_ms":0.020018399997449404,"basis_count":0}
+    },
+    "unmarked": {
+      "global": {"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"candidate_recall":0.0,"mean_sweeps":1.0555555555555556,"mean_active":7.944444444444445,"mean_factor_evals":8.0,"model_bytes":121,"training_seconds":0.03854427133319405,"inference_ms":0.7586937888896096,"basis_count":0},
+      "random_basis": {"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"candidate_recall":0.0,"mean_sweeps":1.6222222222222222,"mean_active":6.055555555555555,"mean_factor_evals":64.0,"model_bytes":11175.666666666666,"training_seconds":0.0384940153333749,"inference_ms":1.642989466669557,"basis_count":8},
+      "raw_basis": {"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"candidate_recall":0.0,"mean_sweeps":1.0777777777777777,"mean_active":7.911111111111111,"mean_factor_evals":64.0,"model_bytes":10160.666666666666,"training_seconds":0.0644002473331966,"inference_ms":1.5773215777800134,"basis_count":8},
+      "oracle": {"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"candidate_recall":0.0,"mean_sweeps":1.0,"mean_active":8.0,"mean_factor_evals":8.0,"model_bytes":121,"training_seconds":0.03811356666665233,"inference_ms":0.4170448888847507,"basis_count":0}
+    },
+    "nested": {
+      "global": {"accuracy":0.0,"wrong_commit":0.17777777777777778,"null_rate":0.8222222222222223,"candidate_recall":0.0,"mean_sweeps":1.9777777777777776,"mean_active":3.533333333333333,"mean_factor_evals":8.0,"model_bytes":121,"training_seconds":0.06988953733328647,"inference_ms":1.1529894333307311,"basis_count":0},
+      "random_basis": {"accuracy":0.0,"wrong_commit":0.12222222222222222,"null_rate":0.8777777777777778,"candidate_recall":0.0,"mean_sweeps":2.0,"mean_active":2.8666666666666667,"mean_factor_evals":64.0,"model_bytes":11858.666666666666,"training_seconds":0.06993602966667822,"inference_ms":2.0926469888864734,"basis_count":8},
+      "raw_basis": {"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"candidate_recall":0.0,"mean_sweeps":1.9777777777777779,"mean_active":2.9555555555555557,"mean_factor_evals":64.0,"model_bytes":9140,"training_seconds":0.09820475099983621,"inference_ms":2.0252964111174756,"basis_count":8},
+      "oracle": {"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"candidate_recall":0.0,"mean_sweeps":1.7333333333333334,"mean_active":4.688888888888889,"mean_factor_evals":8.0,"model_bytes":121,"training_seconds":0.06993765566676302,"inference_ms":0.7648925444502513,"basis_count":0}
+    },
+    "plan": {
+      "global": {"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"candidate_recall":0.0,"mean_sweeps":1.7777777777777777,"mean_active":6.911111111111111,"mean_factor_evals":8.0,"model_bytes":121,"training_seconds":0.07680896833335282,"inference_ms":1.2574459222226626,"basis_count":0},
+      "random_basis": {"accuracy":0.0,"wrong_commit":0.08888888888888889,"null_rate":0.9111111111111111,"candidate_recall":0.0,"mean_sweeps":1.9333333333333333,"mean_active":4.211111111111111,"mean_factor_evals":64.0,"model_bytes":12800,"training_seconds":0.07655328233340697,"inference_ms":2.322398466665416,"basis_count":8},
+      "raw_basis": {"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"candidate_recall":0.0,"mean_sweeps":1.9,"mean_active":4.555555555555555,"mean_factor_evals":64.0,"model_bytes":8231.333333333334,"training_seconds":0.1111808443335273,"inference_ms":2.189248811115855,"basis_count":8},
+      "oracle": {"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"candidate_recall":0.0,"mean_sweeps":1.0,"mean_active":8.0,"mean_factor_evals":8.0,"model_bytes":121,"training_seconds":0.07744010233333636,"inference_ms":0.8422800555561277,"basis_count":0}
+    },
+    "long": {
+      "global": {"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"candidate_recall":0.0,"mean_sweeps":1.8111111111111111,"mean_active":5.677777777777777,"mean_factor_evals":8.0,"model_bytes":121,"training_seconds":0.11192896200009272,"inference_ms":1.6628334888941432,"basis_count":0},
+      "random_basis": {"accuracy":0.0,"wrong_commit":0.17777777777777776,"null_rate":0.8222222222222222,"candidate_recall":0.0,"mean_sweeps":1.8777777777777778,"mean_active":3.533333333333333,"mean_factor_evals":64.0,"model_bytes":12357,"training_seconds":0.1121563166669451,"inference_ms":2.6543832555489644,"basis_count":8},
+      "raw_basis": {"accuracy":0.0,"wrong_commit":0.3,"null_rate":0.7000000000000001,"candidate_recall":0.0,"mean_sweeps":1.8444444444444446,"mean_active":3.3333333333333335,"mean_factor_evals":64.0,"model_bytes":7738,"training_seconds":0.15705359266667074,"inference_ms":2.5502670333278528,"basis_count":8},
+      "oracle": {"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"candidate_recall":0.0,"mean_sweeps":1.0,"mean_active":8.0,"mean_factor_evals":8.0,"model_bytes":121,"training_seconds":0.11194873133323806,"inference_ms":1.2345502444481502,"basis_count":0}
+    }
+  },
+  "peak_rss_kib_runtime_included": 167880,
+  "estimated_complexity": "proposal O(L^2), raw signature O(HL), basis O(BH), relaxation O(SH)",
+  "hidden_labels_used_by_learner": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
