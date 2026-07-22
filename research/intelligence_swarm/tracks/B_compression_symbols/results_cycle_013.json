@@ -1,0 +1,31 @@
+{
+  "hypothesis": "Adversarial Misapplication Programs with Relation-Contrastive MDL",
+  "seeds": [1, 7, 19],
+  "sizes": [48, 144, 432],
+  "largest_summary": {
+    "execution_only": {
+      "seen": {"accuracy": 0.030555555555555558, "model_bytes": 3343.6666666666665, "programs": 64, "raw_candidates": 6600, "rejected": 2393.3333333333335, "train_seconds": 0.019313462999889452, "infer_ms": 0.0062829333336998795, "reads": 5.411111111111111},
+      "held_order": {"accuracy": 0.016666666666666666, "infer_ms": 0.005847899999227795, "reads": 3.8444444444444446},
+      "held_lexeme": {"accuracy": 0.030555555555555558, "infer_ms": 0.0066297500009366355, "reads": 5.411111111111111},
+      "nested": {"accuracy": 0.030555555555555558, "infer_ms": 0.006878588888210086, "reads": 5.411111111111111},
+      "subject_omission": {"accuracy": 0.0, "infer_ms": 0.0031300027785619022, "reads": 0.0},
+      "alternate_state": {"accuracy": 0.030555555555555558, "infer_ms": 0.006773319444164372, "reads": 5.411111111111111},
+      "combined": {"accuracy": 0.016666666666666666, "infer_ms": 0.006112508333444566, "reads": 3.8444444444444446}
+    },
+    "adversarial": {
+      "seen": {"accuracy": 0.030555555555555558, "model_bytes": 3343.6666666666665, "programs": 64, "raw_candidates": 6600, "rejected": 2628, "train_seconds": 0.022629207999974216, "infer_ms": 0.006532936111448685, "reads": 5.411111111111111},
+      "held_order": {"accuracy": 0.016666666666666666, "infer_ms": 0.0061953277774288535, "reads": 3.8444444444444446},
+      "held_lexeme": {"accuracy": 0.030555555555555558, "infer_ms": 0.006484530556210504, "reads": 5.411111111111111},
+      "nested": {"accuracy": 0.030555555555555558, "infer_ms": 0.007147036112403132, "reads": 5.411111111111111},
+      "subject_omission": {"accuracy": 0.0, "infer_ms": 0.0029294555550526034, "reads": 0.0},
+      "alternate_state": {"accuracy": 0.030555555555555558, "infer_ms": 0.006671083332952953, "reads": 5.411111111111111},
+      "combined": {"accuracy": 0.016666666666666666, "infer_ms": 0.006077236111600036, "reads": 3.8444444444444446}
+    }
+  },
+  "peak_rss_kib_runtime_included": 14712,
+  "estimated_complexity": "train O(NL^2+C), infer O(PL), P<=64",
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
