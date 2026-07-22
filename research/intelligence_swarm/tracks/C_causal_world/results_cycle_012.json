@@ -1,0 +1,28 @@
+{
+  "hypothesis": "Relation-Selective State Variable Discovery from Preservation Contrasts",
+  "seeds": [1,7,19],
+  "sizes": [48,192,512],
+  "summary": {
+    "48": {
+      "whole": {"seen":{"accuracy":0.20555555555555555,"ms":0.4565520666662653},"rename":{"accuracy":0.1638888888888889,"ms":0.3841190972221082},"alternate_state":{"accuracy":0.16666666666666666,"ms":0.4425330888883157},"held_command":{"accuracy":0.18611111111111112,"ms":0.3519542111108523},"subject_omission":{"accuracy":0.19444444444444445,"ms":0.44117520555523193},"multi_paragraph":{"accuracy":0.17222222222222222,"ms":0.7711219944446334},"plan_change":{"accuracy":0.09444444444444444,"ms":0.8213030000004236},"model_bytes":25073.333333333332,"programs":48,"proposals":0},
+      "contrast": {"seen":{"accuracy":0.39166666666666666,"ms":0.35228298611084735},"rename":{"accuracy":0.34444444444444444,"ms":0.3088440805552434},"alternate_state":{"accuracy":0.4166666666666667,"ms":0.3544399138888821},"held_command":{"accuracy":0.3027777777777778,"ms":0.27813609166666237},"subject_omission":{"accuracy":0.33611111111111114,"ms":0.35379474444425796},"multi_paragraph":{"accuracy":0.3611111111111111,"ms":0.5846732916672358},"plan_change":{"accuracy":0.3277777777777778,"ms":0.5140054388890449},"model_bytes":35272.333333333336,"programs":5,"proposals":95},
+      "no_preservation": {"seen":{"accuracy":0.39166666666666666,"ms":0.3645982444450308},"rename":{"accuracy":0.34444444444444444,"ms":0.3026011666665656},"alternate_state":{"accuracy":0.4166666666666667,"ms":0.34671069444445696},"held_command":{"accuracy":0.3027777777777778,"ms":0.2618606194441024},"subject_omission":{"accuracy":0.33611111111111114,"ms":0.34733731388882916},"multi_paragraph":{"accuracy":0.3611111111111111,"ms":0.5599394222220629},"plan_change":{"accuracy":0.3277777777777778,"ms":0.5211348305553858},"model_bytes":35272.333333333336,"programs":5,"proposals":95}
+    },
+    "192": {
+      "whole": {"seen":{"accuracy":0.2361111111111111,"ms":1.686316483333409},"rename":{"accuracy":0.24166666666666667,"ms":1.4544532250005837},"alternate_state":{"accuracy":0.275,"ms":1.7124332222219132},"held_command":{"accuracy":0.2361111111111111,"ms":1.240213027777928},"subject_omission":{"accuracy":0.175,"ms":1.624280852778131},"multi_paragraph":{"accuracy":0.19722222222222222,"ms":2.8320822611116605},"plan_change":{"accuracy":0.13333333333333333,"ms":2.9643561749992386},"model_bytes":99361.33333333333,"programs":192,"proposals":0},
+      "contrast": {"seen":{"accuracy":0.4527777777777778,"ms":0.7826111111108326},"rename":{"accuracy":0.44166666666666665,"ms":0.6614146888889788},"alternate_state":{"accuracy":0.4222222222222222,"ms":0.7821039305560539},"held_command":{"accuracy":0.41944444444444445,"ms":0.5818745305557766},"subject_omission":{"accuracy":0.5472222222222223,"ms":0.7547200527767473},"multi_paragraph":{"accuracy":0.41944444444444445,"ms":1.2516848888891572},"plan_change":{"accuracy":0.45555555555555555,"ms":1.1175522083331342},"model_bytes":81427,"programs":9,"proposals":385},
+      "no_preservation": {"seen":{"accuracy":0.4527777777777778,"ms":0.7930358722224659},"rename":{"accuracy":0.44166666666666665,"ms":0.6640810999998494},"alternate_state":{"accuracy":0.4222222222222222,"ms":0.7939721361108494},"held_command":{"accuracy":0.41944444444444445,"ms":0.5854036333333725},"subject_omission":{"accuracy":0.5472222222222223,"ms":0.7646568138896883},"multi_paragraph":{"accuracy":0.41944444444444445,"ms":1.2677566916674248},"plan_change":{"accuracy":0.45555555555555555,"ms":1.128956547222515},"model_bytes":81427,"programs":9,"proposals":385}
+    },
+    "512": {
+      "whole": {"seen":{"accuracy":0.20277777777777778,"ms":4.531966263889191},"rename":{"accuracy":0.23055555555555557,"ms":3.8417958694443164},"alternate_state":{"accuracy":0.25,"ms":4.528301480555305},"held_command":{"accuracy":0.25,"ms":3.3757730666662966},"subject_omission":{"accuracy":0.1638888888888889,"ms":4.416302936111075},"multi_paragraph":{"accuracy":0.24444444444444444,"ms":8.056524713889404},"plan_change":{"accuracy":0.14444444444444443,"ms":8.40930755833382},"model_bytes":265853,"programs":512,"proposals":0},
+      "contrast": {"seen":{"accuracy":0.55,"ms":0.969703902777989},"rename":{"accuracy":0.475,"ms":0.843181841667552},"alternate_state":{"accuracy":0.45555555555555555,"ms":0.9767081888892587},"held_command":{"accuracy":0.4388888888888889,"ms":0.6965521805568642},"subject_omission":{"accuracy":0.4666666666666667,"ms":0.909541627778607},"multi_paragraph":{"accuracy":0.4388888888888889,"ms":1.5097459277778096},"plan_change":{"accuracy":0.4888888888888889,"ms":1.346531333333208},"model_bytes":97524.33333333333,"programs":9,"proposals":1049},
+      "no_preservation": {"seen":{"accuracy":0.55,"ms":0.9481695055556985},"rename":{"accuracy":0.475,"ms":0.8027896916663243},"alternate_state":{"accuracy":0.45555555555555555,"ms":0.9460316249999323},"held_command":{"accuracy":0.4388888888888889,"ms":0.7052489833325934},"subject_omission":{"accuracy":0.4666666666666667,"ms":0.916648108333599},"multi_paragraph":{"accuracy":0.4388888888888889,"ms":1.5078750166664021},"plan_change":{"accuracy":0.4888888888888889,"ms":1.3469866833329687},"model_bytes":97524.33333333333,"programs":9,"proposals":1049}
+    }
+  },
+  "peak_rss_kib_runtime_included":314544,
+  "estimated_complexity":"train O(N L^2), infer O(P G + P L), capped spans/programs",
+  "highschool_level_passed":false,
+  "native_japanese_communication_passed":false,
+  "weak_smartphone_verified":false,
+  "completion":false
+}

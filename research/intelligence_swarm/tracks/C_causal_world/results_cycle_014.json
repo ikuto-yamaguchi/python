@@ -1,0 +1,70 @@
+{
+  "hypothesis": "Temporal Co-Reference Object Nodes from Intervention Persistence Signatures",
+  "seeds": [1, 7, 19],
+  "train_sequences": [12, 36, 72],
+  "sequence_length": 4,
+  "largest_summary": {
+    "surface": {
+      "seen_accuracy": 0.003472222222222222,
+      "rename_accuracy": 0.0,
+      "alternate_state_accuracy": 0.010416666666666666,
+      "held_command_accuracy": 0.017361111111111112,
+      "subject_omission_accuracy": 0.006944444444444444,
+      "multi_paragraph_accuracy": 0.010416666666666666,
+      "plan_change_accuracy": 0.020833333333333332,
+      "model_bytes": 145273.33333333334,
+      "nodes": 288,
+      "seen_inference_ms": 1.1817825555555415
+    },
+    "temporal_only": {
+      "seen_accuracy": 0.0,
+      "rename_accuracy": 0.0,
+      "alternate_state_accuracy": 0.0,
+      "held_command_accuracy": 0.0,
+      "subject_omission_accuracy": 0.0,
+      "multi_paragraph_accuracy": 0.0,
+      "plan_change_accuracy": 0.0,
+      "model_bytes": 104750,
+      "nodes": 47.666666666666664,
+      "raw_interventions": 288,
+      "merges": 240.33333333333334,
+      "seen_inference_ms": 2.026182732638758
+    },
+    "persistence": {
+      "seen_accuracy": 0.0,
+      "rename_accuracy": 0.0,
+      "alternate_state_accuracy": 0.0,
+      "held_command_accuracy": 0.0,
+      "subject_omission_accuracy": 0.0,
+      "multi_paragraph_accuracy": 0.0,
+      "plan_change_accuracy": 0.0,
+      "model_bytes": 25820,
+      "nodes": 3.6666666666666665,
+      "raw_interventions": 288,
+      "merges": 284.3333333333333,
+      "seen_inference_ms": 0.3298104131944276,
+      "rename_inference_ms": 0.3344341562499211,
+      "multi_paragraph_inference_ms": 0.44717474999996415
+    },
+    "no_temporal": {
+      "seen_accuracy": 0.0,
+      "rename_accuracy": 0.0,
+      "alternate_state_accuracy": 0.0,
+      "held_command_accuracy": 0.0,
+      "subject_omission_accuracy": 0.0,
+      "multi_paragraph_accuracy": 0.0,
+      "plan_change_accuracy": 0.0,
+      "model_bytes": 47626.666666666664,
+      "nodes": 10,
+      "raw_interventions": 288,
+      "merges": 278,
+      "seen_inference_ms": 0.6807668368056241
+    }
+  },
+  "peak_rss_kib_runtime_included": 115052,
+  "estimated_complexity": "train O(N T H G), infer O(H C G), H<=64",
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
