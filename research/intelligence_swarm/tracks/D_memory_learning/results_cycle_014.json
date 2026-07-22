@@ -1,0 +1,46 @@
+{
+  "hypothesis": "Object-Relation Address Discovery by Cross-Query Write/Read Invariance",
+  "seeds": [1, 7, 19],
+  "sizes": [24, 72, 216],
+  "max_size_summary": {
+    "seen": {
+      "surface": {"write_accuracy": 0.8966049383, "address_read_accuracy": 0.2638888889, "wrong_object_read_rate": 0.0, "model_bytes": 56596, "training_seconds": 0.3155312290, "inference_ms": 2.9266369306, "units": 216, "mean_reads": 1.0, "rejected": 0},
+      "program": {"write_accuracy": 0.0416666667, "address_read_accuracy": 0.2638888889, "wrong_object_read_rate": 0.0138888889, "model_bytes": 3130, "training_seconds": 0.0397999833, "inference_ms": 2.9236118750, "units": 6, "mean_reads": 0.0447530864, "rejected": 0},
+      "cross_query": {"write_accuracy": 0.1064814815, "address_read_accuracy": 0.2638888889, "wrong_object_read_rate": 0.0138888889, "model_bytes": 6594.6666666667, "training_seconds": 0.1046980903, "inference_ms": 2.9088349444, "units": 16.6666666667, "mean_reads": 0.1126543210, "rejected": 0}
+    },
+    "held": {
+      "surface": {"write_accuracy": 0.8966049383, "address_read_accuracy": 0.2638888889, "wrong_object_read_rate": 0.0, "model_bytes": 54529, "training_seconds": 0.2707687983, "inference_ms": 2.9175220000, "units": 216, "mean_reads": 1.0, "rejected": 0},
+      "program": {"write_accuracy": 0.0555555556, "address_read_accuracy": 0.2777777778, "wrong_object_read_rate": 0.0, "model_bytes": 3926.3333333333, "training_seconds": 0.0530252513, "inference_ms": 2.9194771111, "units": 9, "mean_reads": 0.0555555556, "rejected": 0},
+      "cross_query": {"write_accuracy": 0.1450617284, "address_read_accuracy": 0.2777777778, "wrong_object_read_rate": 0.0, "model_bytes": 7749.6666666667, "training_seconds": 0.1277378527, "inference_ms": 2.9172482639, "units": 22, "mean_reads": 0.1450617284, "rejected": 0}
+    },
+    "alternate": {
+      "surface": {"write_accuracy": 0.8966049383, "address_read_accuracy": 0.2638888889, "wrong_object_read_rate": 0.0, "model_bytes": 55300, "training_seconds": 0.3167951680, "inference_ms": 2.9654834444, "units": 216, "mean_reads": 1.0, "rejected": 0},
+      "program": {"write_accuracy": 0.0416666667, "address_read_accuracy": 0.2777777778, "wrong_object_read_rate": 0.0416666667, "model_bytes": 3153, "training_seconds": 0.0404078250, "inference_ms": 2.9440178472, "units": 6, "mean_reads": 0.0447530864, "rejected": 0},
+      "cross_query": {"write_accuracy": 0.1080246914, "address_read_accuracy": 0.2777777778, "wrong_object_read_rate": 0.0277777778, "model_bytes": 6594, "training_seconds": 0.1062427153, "inference_ms": 2.9486148056, "units": 17, "mean_reads": 0.1141975309, "rejected": 0}
+    },
+    "omitted": {
+      "surface": {"write_accuracy": 0.4413580247, "address_read_accuracy": 0.1388888889, "wrong_object_read_rate": 0.0, "model_bytes": 54652, "training_seconds": 0.2671263807, "inference_ms": 2.9346241944, "units": 216, "mean_reads": 1.0, "rejected": 0},
+      "program": {"write_accuracy": 0.0324074074, "address_read_accuracy": 0.2777777778, "wrong_object_read_rate": 0.0, "model_bytes": 962, "training_seconds": 0.0211299917, "inference_ms": 2.9032883750, "units": 3, "mean_reads": 0.0324074074, "rejected": 0},
+      "cross_query": {"write_accuracy": 0.1049382716, "address_read_accuracy": 0.2777777778, "wrong_object_read_rate": 0.0, "model_bytes": 2869.3333333333, "training_seconds": 0.0753724127, "inference_ms": 2.9207263333, "units": 11.3333333333, "mean_reads": 0.1049382716, "rejected": 0}
+    },
+    "long": {
+      "surface": {"write_accuracy": 0.9151234568, "address_read_accuracy": 0.2638888889, "wrong_object_read_rate": 0.0, "model_bytes": 56428.3333333333, "training_seconds": 0.3137139690, "inference_ms": 2.9263060000, "units": 216, "mean_reads": 1.0, "rejected": 0},
+      "program": {"write_accuracy": 0.0509259259, "address_read_accuracy": 0.2638888889, "wrong_object_read_rate": 0.0138888889, "model_bytes": 3190, "training_seconds": 0.0408578097, "inference_ms": 2.9345657500, "units": 6, "mean_reads": 0.0555555556, "rejected": 0},
+      "cross_query": {"write_accuracy": 0.1080246914, "address_read_accuracy": 0.2777777778, "wrong_object_read_rate": 0.0138888889, "model_bytes": 6580, "training_seconds": 0.1113525343, "inference_ms": 2.9241742222, "units": 17, "mean_reads": 0.1141975309, "rejected": 0}
+    },
+    "combined": {
+      "surface": {"write_accuracy": 0.8966049383, "address_read_accuracy": 0.2638888889, "wrong_object_read_rate": 0.0, "model_bytes": 54529, "training_seconds": 0.2739565353, "inference_ms": 2.9703633333, "units": 216, "mean_reads": 1.0, "rejected": 0},
+      "program": {"write_accuracy": 0.0555555556, "address_read_accuracy": 0.2777777778, "wrong_object_read_rate": 0.0, "model_bytes": 3926.3333333333, "training_seconds": 0.0530873440, "inference_ms": 2.9236001806, "units": 9, "mean_reads": 0.0555555556, "rejected": 0},
+      "cross_query": {"write_accuracy": 0.1450617284, "address_read_accuracy": 0.2777777778, "wrong_object_read_rate": 0.0, "model_bytes": 7749.6666666667, "training_seconds": 0.1287229477, "inference_ms": 2.9013590000, "units": 22, "mean_reads": 0.1450617284, "rejected": 0}
+    },
+    "one_shot": {"surface": 1.0, "program": 1.0, "cross_query": 1.0},
+    "interference": {"surface": 1.0, "program": 1.0, "cross_query": 1.0}
+  },
+  "peak_rss_kib_runtime_included": 14904,
+  "estimated_complexity": "learn O(NPG + NQG), write O(PG), read O(MG)",
+  "learner_hidden_labels": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
