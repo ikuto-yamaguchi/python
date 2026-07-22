@@ -1,0 +1,49 @@
+{
+  "hypothesis": "Causal-Survival Probe Programs with Counterfactual Outcome Partitions",
+  "seeds": [1, 7, 19],
+  "sizes": [60, 180, 540],
+  "largest_size_summary": {
+    "seen": {
+      "hash": {"candidate_recall": 1.0, "accuracy": 0.4154320988, "wrong_commit": 0.3203703704, "abstain": 0.2641975309, "mean_probes": 0.7358024691, "mean_candidates": 2.0, "inference_ms": 0.0164127870},
+      "causal": {"candidate_recall": 1.0, "accuracy": 1.0, "wrong_commit": 0.0, "abstain": 0.0, "mean_probes": 1.0, "mean_candidates": 2.0, "inference_ms": 0.0278773333},
+      "causal_null": {"candidate_recall": 1.0, "accuracy": 1.0, "wrong_commit": 0.0, "abstain": 0.0, "null_rate": 0.0, "mean_probes": 1.0, "inference_ms": 0.0284392037}
+    },
+    "ambiguous": {
+      "hash": {"candidate_recall": 1.0, "accuracy": 0.0376543210, "wrong_commit": 0.4450617284, "abstain": 0.5172839506, "mean_probes": 2.4006172840, "mean_candidates": 12.0, "inference_ms": 0.0725726840},
+      "causal": {"candidate_recall": 1.0, "accuracy": 0.1487654321, "wrong_commit": 0.0, "abstain": 0.8512345679, "mean_probes": 1.8623456790, "mean_candidates": 12.0, "inference_ms": 0.1511481259},
+      "causal_null": {"candidate_recall": 1.0, "accuracy": 0.1487654321, "wrong_commit": 0.0, "abstain": 0.8512345679, "null_rate": 0.0, "mean_probes": 1.8623456790, "inference_ms": 0.1568536407}
+    },
+    "nested": {
+      "hash": {"candidate_recall": 1.0, "accuracy": 0.0635802469, "wrong_commit": 0.6456790123, "abstain": 0.2907407407, "mean_probes": 1.8802469136, "mean_candidates": 6.0, "inference_ms": 0.0447555944},
+      "causal": {"candidate_recall": 1.0, "accuracy": 0.2018518519, "wrong_commit": 0.0, "abstain": 0.7981481481, "mean_probes": 1.2895061728, "mean_candidates": 6.0, "inference_ms": 0.0948390444},
+      "causal_null": {"candidate_recall": 1.0, "accuracy": 0.2018518519, "wrong_commit": 0.0, "abstain": 0.7981481481, "null_rate": 0.0, "mean_probes": 1.2895061728, "inference_ms": 0.0977850883}
+    },
+    "paraphrase": {
+      "hash": {"candidate_recall": 0.0, "accuracy": 0.0, "wrong_commit": 0.2012345679, "abstain": 0.7987654321, "mean_probes": 2.8777777778, "mean_candidates": 24.0, "inference_ms": 0.3536786889},
+      "causal": {"candidate_recall": 0.0, "accuracy": 0.0, "wrong_commit": 0.0, "abstain": 1.0, "mean_probes": 0.5574074074, "mean_candidates": 24.0, "inference_ms": 0.6568823599},
+      "causal_null": {"candidate_recall": 0.0, "accuracy": 0.0, "wrong_commit": 0.0, "abstain": 1.0, "null_rate": 0.0, "mean_probes": 0.5574074074, "inference_ms": 0.7240123377}
+    },
+    "subject_omission": {
+      "hash": {"candidate_recall": 0.0, "accuracy": 0.0, "wrong_commit": 0.3919753086, "abstain": 0.6080246914, "mean_probes": 2.7549382716, "mean_candidates": 24.0, "inference_ms": 0.2117535117},
+      "causal": {"candidate_recall": 0.0, "accuracy": 0.0, "wrong_commit": 0.0, "abstain": 1.0, "mean_probes": 0.2629629630, "mean_candidates": 24.0, "inference_ms": 0.1926612611},
+      "causal_null": {"candidate_recall": 0.0, "accuracy": 0.0, "wrong_commit": 0.0, "abstain": 1.0, "null_rate": 1.0, "mean_probes": 0.2629629630, "inference_ms": 0.1931884321}
+    },
+    "paragraph": {
+      "hash": {"candidate_recall": 0.0, "accuracy": 0.0, "wrong_commit": 0.2333333333, "abstain": 0.7666666667, "mean_probes": 2.7382716049, "mean_candidates": 24.0, "inference_ms": 0.2407228160},
+      "causal": {"candidate_recall": 0.0, "accuracy": 0.0, "wrong_commit": 0.0, "abstain": 1.0, "mean_probes": 1.1425925926, "mean_candidates": 24.0, "inference_ms": 0.2648665383},
+      "causal_null": {"candidate_recall": 0.0, "accuracy": 0.0, "wrong_commit": 0.0, "abstain": 1.0, "null_rate": 0.8024691358, "mean_probes": 1.1425925926, "inference_ms": 0.2780103512}
+    },
+    "outset": {
+      "hash": {"candidate_recall": 0.0, "accuracy": 0.0, "wrong_commit": 0.0, "abstain": 1.0, "mean_probes": 1.0, "mean_candidates": 24.0, "inference_ms": 0.1799508210},
+      "causal": {"candidate_recall": 0.0, "accuracy": 0.0, "wrong_commit": 0.0, "abstain": 1.0, "mean_probes": 0.0, "mean_candidates": 24.0, "inference_ms": 0.1875963747},
+      "causal_null": {"candidate_recall": 0.0, "accuracy": 0.0, "wrong_commit": 0.0, "abstain": 1.0, "null_rate": 1.0, "mean_probes": 0.0, "inference_ms": 0.1963329852}
+    }
+  },
+  "model_bytes": 110,
+  "peak_rss_kib_runtime_included": 110988,
+  "estimated_complexity": "proposal O(L^2), probe selection O(PH), recursive update O(PH); H<=24,P<=5",
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
