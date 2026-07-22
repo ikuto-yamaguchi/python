@@ -1,0 +1,40 @@
+{
+  "hypothesis": "Event-Regime Discovery from Intervention Commutativity Breaks",
+  "seeds": [1, 7, 19],
+  "event_counts": [8, 16, 24],
+  "summary_24": {
+    "seen": {
+      "surface": {"boundary_f1": 0.3697839451264059, "next_state_accuracy": 0.84375, "order_counterfactual_accuracy": 0.5166666666666666, "model_bytes": 43629, "training_seconds": 0.04335086300000057, "inference_ms": 0.627035666666763, "regime_count": 50, "edges": 96},
+      "regime_no_comm": {"boundary_f1": 0.07999999999999681, "next_state_accuracy": 1.0, "order_counterfactual_accuracy": 0.7928571428571428, "model_bytes": 44710.666666666664, "training_seconds": 0.08583451566664735, "inference_ms": 0.9127454513890854, "regime_count": 1, "edges": 96},
+      "regime_comm": {"boundary_f1": 0.19943019943019197, "next_state_accuracy": 1.0, "order_counterfactual_accuracy": 0.7095238095238096, "model_bytes": 44718.333333333336, "training_seconds": 0.06390569499997885, "inference_ms": 0.6403530416668622, "regime_count": 2.6666666666666665, "edges": 96},
+      "regime_no_support": {"boundary_f1": 0.222222222222214, "next_state_accuracy": 1.0, "order_counterfactual_accuracy": 0.7095238095238096, "model_bytes": 44719.666666666664, "training_seconds": 0.06392213166666731, "inference_ms": 0.6215932013887087, "regime_count": 3, "edges": 96}
+    },
+    "alternate": {
+      "surface": {"boundary_f1": 0.3697839451264059, "next_state_accuracy": 0.84375, "order_counterfactual_accuracy": 0.5166666666666666},
+      "regime_no_comm": {"boundary_f1": 0.07999999999999681, "next_state_accuracy": 1.0, "order_counterfactual_accuracy": 0.7928571428571428},
+      "regime_comm": {"boundary_f1": 0.19943019943019197, "next_state_accuracy": 1.0, "order_counterfactual_accuracy": 0.7095238095238096}
+    },
+    "omitted": {
+      "surface": {"boundary_f1": 0.4999999999999898, "next_state_accuracy": 0.5138888888888888, "order_counterfactual_accuracy": 0.2},
+      "regime_no_comm": {"boundary_f1": 0.07999999999999681, "next_state_accuracy": 0.9965277777777778, "order_counterfactual_accuracy": 0.8023809523809524},
+      "regime_comm": {"boundary_f1": 0.17663817663816997, "next_state_accuracy": 0.9965277777777778, "order_counterfactual_accuracy": 0.7547619047619047}
+    },
+    "paragraph": {
+      "surface": {"boundary_f1": 0.37373162636319956, "next_state_accuracy": 0.951388888888889, "order_counterfactual_accuracy": 0.5870870870870871},
+      "regime_no_comm": {"boundary_f1": 0.07999999999999681, "next_state_accuracy": 1.0, "order_counterfactual_accuracy": 0.6609109109109109},
+      "regime_comm": {"boundary_f1": 0.19780219780219047, "next_state_accuracy": 1.0, "order_counterfactual_accuracy": 0.5332832832832832}
+    },
+    "plan": {
+      "surface": {"boundary_f1": 0.3620976342556983, "next_state_accuracy": 0.8555555555555555, "order_counterfactual_accuracy": 0.4708812260536398},
+      "regime_no_comm": {"boundary_f1": 0.07999999999999681, "next_state_accuracy": 1.0, "order_counterfactual_accuracy": 0.6739463601532567},
+      "regime_comm": {"boundary_f1": 0.20017913121360728, "next_state_accuracy": 1.0, "order_counterfactual_accuracy": 0.6398467432950191}
+    }
+  },
+  "peak_rss_kib_runtime_included": 113668,
+  "estimated_complexity": "learn O(NK G), infer O(KG), counterfactual O(NK); K bounded by 64 local edits",
+  "learner_hidden_labels": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
