@@ -1,0 +1,50 @@
+{
+  "hypothesis": "Identity-Selective Intervention Partitions with Null Object Nodes",
+  "seeds": [1, 7, 19],
+  "sizes": [48, 144, 432],
+  "summary_432": {
+    "seen": {
+      "surface": {"accuracy": 0.9750, "model_bytes": 129542.33, "inference_ms": 5.3767},
+      "partition": {"accuracy": 1.0000, "nodes": 36, "model_bytes": 4951, "inference_ms": 0.0208},
+      "selective": {"accuracy": 1.0000, "nodes": 36, "model_bytes": 4951, "training_seconds": 0.0110, "inference_ms": 0.0203, "mean_candidates": 1.1417},
+      "selective_null": {"accuracy": 1.0000, "null_rate": 0.0000}
+    },
+    "held": {
+      "surface": {"accuracy": 0.0000},
+      "partition": {"accuracy": 0.0000, "null_rate": 1.0000},
+      "selective": {"accuracy": 0.0000, "null_rate": 1.0000},
+      "selective_null": {"accuracy": 0.0000, "null_rate": 1.0000}
+    },
+    "alternate": {
+      "surface": {"accuracy": 0.0000},
+      "partition": {"accuracy": 0.0000, "null_rate": 1.0000},
+      "selective": {"accuracy": 0.0000, "null_rate": 1.0000},
+      "selective_null": {"accuracy": 0.0000, "null_rate": 1.0000}
+    },
+    "omitted": {
+      "surface": {"accuracy": 0.0000},
+      "partition": {"accuracy": 0.0000, "null_rate": 1.0000},
+      "selective": {"accuracy": 0.0000, "null_rate": 1.0000},
+      "selective_null": {"accuracy": 0.0000, "null_rate": 1.0000}
+    },
+    "paragraph": {
+      "surface": {"accuracy": 0.0000},
+      "partition": {"accuracy": 0.0000, "null_rate": 1.0000},
+      "selective": {"accuracy": 0.0000, "null_rate": 1.0000},
+      "selective_null": {"accuracy": 0.0000, "null_rate": 1.0000}
+    },
+    "plan_change": {
+      "surface": {"accuracy": 0.0139},
+      "partition": {"accuracy": 0.0000},
+      "selective": {"accuracy": 0.0000},
+      "selective_null": {"accuracy": 0.0000}
+    }
+  },
+  "peak_rss_kib_runtime_included": 111588,
+  "estimated_complexity": "learn O(NQG), infer O(HCG), C<=3",
+  "learner_hidden_labels": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
