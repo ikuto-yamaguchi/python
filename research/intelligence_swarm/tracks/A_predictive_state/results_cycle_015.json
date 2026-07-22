@@ -1,0 +1,60 @@
+{
+  "hypothesis": "Self-Generated Probe Programs from Prediction-Error Gradients",
+  "seeds": [1, 7, 19],
+  "sizes": [30, 90, 180],
+  "summary_180": {
+    "seen": {
+      "all_surgery": {"candidate_recall": 1.0, "accuracy": 1.0, "wrong_commit": 0.0, "abstain": 0.0, "null_rate": 0.0, "mean_probes": 2.0, "mean_candidates": 32.0, "inference_ms": 2.4012739148146363},
+      "learned": {"candidate_recall": 1.0, "accuracy": 1.0, "wrong_commit": 0.0, "abstain": 0.0, "null_rate": 0.0, "mean_probes": 2.0, "mean_candidates": 32.0, "inference_ms": 1.3901402314820221}
+    },
+    "ambiguous": {
+      "all_surgery": {"candidate_recall": 1.0, "accuracy": 1.0, "wrong_commit": 0.0, "abstain": 0.0, "null_rate": 0.0, "mean_probes": 2.0, "mean_candidates": 32.0, "inference_ms": 1.6157327833331727},
+      "learned": {"candidate_recall": 1.0, "accuracy": 1.0, "wrong_commit": 0.0, "abstain": 0.0, "null_rate": 0.0, "mean_probes": 2.0, "mean_candidates": 32.0, "inference_ms": 1.3823825666661462}
+    },
+    "nested": {
+      "all_surgery": {"candidate_recall": 1.0, "accuracy": 1.0, "wrong_commit": 0.0, "abstain": 0.0, "null_rate": 0.0, "mean_probes": 2.0, "mean_candidates": 32.0, "inference_ms": 1.5843004370363243},
+      "learned": {"candidate_recall": 1.0, "accuracy": 1.0, "wrong_commit": 0.0, "abstain": 0.0, "null_rate": 0.0, "mean_probes": 2.0, "mean_candidates": 32.0, "inference_ms": 1.377678775926412}
+    },
+    "paraphrase": {
+      "all_surgery": {"candidate_recall": 0.0, "accuracy": 0.0, "wrong_commit": 0.0, "abstain": 1.0, "null_rate": 0.0, "mean_probes": 1.0, "mean_candidates": 32.0, "inference_ms": 1.8901455351851837},
+      "learned": {"candidate_recall": 0.0, "accuracy": 0.0, "wrong_commit": 0.0, "abstain": 1.0, "null_rate": 0.0, "mean_probes": 1.0, "mean_candidates": 32.0, "inference_ms": 1.1660711814826115}
+    },
+    "subject_omission": {
+      "all_surgery": {"candidate_recall": 0.0, "accuracy": 0.0, "wrong_commit": 0.0, "abstain": 1.0, "null_rate": 0.0, "mean_probes": 1.0, "mean_candidates": 32.0, "inference_ms": 1.0913594129626156},
+      "learned": {"candidate_recall": 0.0, "accuracy": 0.0, "wrong_commit": 0.0, "abstain": 1.0, "null_rate": 0.0, "mean_probes": 1.0, "mean_candidates": 32.0, "inference_ms": 0.9082995240735019}
+    },
+    "paragraph": {
+      "all_surgery": {"candidate_recall": 0.0, "accuracy": 0.0, "wrong_commit": 0.0, "abstain": 1.0, "null_rate": 0.0, "mean_probes": 1.0, "mean_candidates": 32.0, "inference_ms": 1.1981745277782667},
+      "learned": {"candidate_recall": 0.0, "accuracy": 0.0, "wrong_commit": 0.0, "abstain": 1.0, "null_rate": 0.0, "mean_probes": 1.0, "mean_candidates": 32.0, "inference_ms": 0.9759509648153687}
+    },
+    "outset": {
+      "all_surgery": {"candidate_recall": 0.0, "accuracy": 0.0, "wrong_commit": 0.0, "abstain": 1.0, "null_rate": 1.0, "mean_probes": 1.0, "mean_candidates": 32.0, "inference_ms": 1.002389025924694},
+      "learned": {"candidate_recall": 0.0, "accuracy": 0.0, "wrong_commit": 0.0, "abstain": 1.0, "null_rate": 1.0, "mean_probes": 1.0, "mean_candidates": 32.0, "inference_ms": 0.8365123462959269}
+    }
+  },
+  "probe_library_consistency": {
+    "all_three_seeds_identical_top12": true,
+    "top12": [
+      {"probe": {"op": "drop_target", "index": 0}, "score": 21.61152127601895, "survival": 1.0, "gain": 30.0, "support": 540},
+      {"probe": {"op": "drop_target", "index": 1}, "score": 21.61152127601895, "survival": 1.0, "gain": 30.0, "support": 540},
+      {"probe": {"op": "drop_target", "index": 2}, "score": 21.61152127601895, "survival": 1.0, "gain": 30.0, "support": 540},
+      {"probe": {"op": "drop_target", "index": 3}, "score": 21.61152127601895, "survival": 1.0, "gain": 30.0, "support": 540},
+      {"probe": {"op": "drop_value", "index": 0}, "score": 18.190321344177114, "survival": 1.0, "gain": 17.0, "support": 540},
+      {"probe": {"op": "drop_value", "index": 1}, "score": 18.190321344177114, "survival": 1.0, "gain": 17.0, "support": 540},
+      {"probe": {"op": "drop_value", "index": 2}, "score": 18.190321344177114, "survival": 1.0, "gain": 17.0, "support": 540},
+      {"probe": {"op": "drop_value", "index": 3}, "score": 18.190321344177114, "survival": 1.0, "gain": 17.0, "support": 540},
+      {"probe": {"op": "rebind_value", "index": 0}, "score": 18.190321344177114, "survival": 1.0, "gain": 17.0, "support": 540},
+      {"probe": {"op": "rebind_value", "index": 1}, "score": 18.190321344177114, "survival": 1.0, "gain": 17.0, "support": 540},
+      {"probe": {"op": "rebind_value", "index": 2}, "score": 18.190321344177114, "survival": 1.0, "gain": 17.0, "support": 540},
+      {"probe": {"op": "rebind_value", "index": 3}, "score": 18.190321344177114, "survival": 1.0, "gain": 17.0, "support": 540}
+    ]
+  },
+  "model_bytes": 2123,
+  "peak_rss_kib_runtime_included": 111496,
+  "estimated_complexity": "proposal O(L^2), surgery proposal O(HK), training O(NHK), inference O(PH); H<=32,P<=12",
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false,
+  "note": "Full per-size/per-seed raw results are regenerated by the included script."
+}
