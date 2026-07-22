@@ -4,45 +4,40 @@
   "sizes": [60, 180, 360],
   "summary_360": {
     "seen": {
-      "global": {"candidate_recall": 1.0, "accuracy": 0.787962962962963, "wrong_commit": 0.1675925925925926, "null_rate": 0.0, "flat_rate": 0.044444444444444446, "convergence_rate": 1.0, "mean_sweeps": 2, "mean_active": 1.0555555555555556, "model_bytes": 651, "latency_ms": 0.5391280398149084, "candidate_mean": 16},
-      "wrong": {"candidate_recall": 1.0, "accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 0.0, "flat_rate": 1.0, "convergence_rate": 1.0, "mean_sweeps": 2, "mean_active": 2.837037037037037, "model_bytes": 340, "latency_ms": 0.29538073518543334, "candidate_mean": 16},
-      "bipartite": {"candidate_recall": 1.0, "accuracy": 0.9740740740740741, "wrong_commit": 0.012962962962962963, "null_rate": 0.0, "flat_rate": 0.012962962962962963, "convergence_rate": 1.0, "mean_sweeps": 2, "mean_active": 1.0129629629629628, "model_bytes": 384, "latency_ms": 0.3255708611113227, "candidate_mean": 16}
-    },
-    "unknown": {
-      "global": {"candidate_recall": 1.0, "accuracy": 0.787962962962963, "wrong_commit": 0.1675925925925926, "null_rate": 0.0, "flat_rate": 0.044444444444444446, "convergence_rate": 1.0, "mean_sweeps": 2, "mean_active": 1.0555555555555556, "model_bytes": 651, "latency_ms": 0.5378441500001658, "candidate_mean": 16},
-      "wrong": {"candidate_recall": 1.0, "accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 0.0, "flat_rate": 1.0, "convergence_rate": 1.0, "mean_sweeps": 2, "mean_active": 2.837037037037037, "model_bytes": 340, "latency_ms": 0.29210335648157426, "candidate_mean": 16},
-      "bipartite": {"candidate_recall": 1.0, "accuracy": 0.9740740740740741, "wrong_commit": 0.012962962962962963, "null_rate": 0.0, "flat_rate": 0.012962962962962963, "convergence_rate": 1.0, "mean_sweeps": 2, "mean_active": 1.0129629629629628, "model_bytes": 384, "latency_ms": 0.31998077314778195, "candidate_mean": 16}
+      "global": {"candidate_recall":1.0,"accuracy":0.8269,"wrong_commit":0.1389,"null_rate":0.0,"flat_rate":0.0343,"convergence_rate":1.0,"mean_sweeps":2.0,"mean_active":1.0343,"model_bytes":651,"latency_ms":0.4315,"candidate_mean":16},
+      "wrong": {"candidate_recall":1.0,"accuracy":0.0,"wrong_commit":0.0,"null_rate":0.0,"flat_rate":1.0,"convergence_rate":1.0,"mean_sweeps":2.0,"mean_active":2.84,"model_bytes":340,"latency_ms":0.2031,"candidate_mean":16},
+      "bipartite": {"candidate_recall":1.0,"accuracy":0.9778,"wrong_commit":0.0093,"null_rate":0.0,"flat_rate":0.0130,"convergence_rate":1.0,"mean_sweeps":2.0,"mean_active":1.013,"model_bytes":384,"latency_ms":0.2274,"candidate_mean":16}
     },
     "nested": {
-      "global": {"candidate_recall": 1.0, "accuracy": 0.725, "wrong_commit": 0.2657407407407408, "null_rate": 0.0, "flat_rate": 0.009259259259259259, "convergence_rate": 1.0, "mean_sweeps": 2, "mean_active": 1.0092592592592593, "model_bytes": 651, "latency_ms": 0.6410218398143654, "candidate_mean": 16},
-      "wrong": {"candidate_recall": 1.0, "accuracy": 0.10092592592592593, "wrong_commit": 0.7185185185185184, "null_rate": 0.0, "flat_rate": 0.18055555555555555, "convergence_rate": 1.0, "mean_sweeps": 2, "mean_active": 1.2074074074074075, "model_bytes": 340, "latency_ms": 0.3419566888889373, "candidate_mean": 16},
-      "bipartite": {"candidate_recall": 1.0, "accuracy": 0.9342592592592592, "wrong_commit": 0.05092592592592592, "null_rate": 0.0, "flat_rate": 0.014814814814814815, "convergence_rate": 1.0, "mean_sweeps": 2, "mean_active": 1.0148148148148148, "model_bytes": 384, "latency_ms": 0.3742680481482071, "candidate_mean": 16}
+      "global": {"candidate_recall":1.0,"accuracy":0.7222,"wrong_commit":0.2593,"null_rate":0.0,"flat_rate":0.0185,"convergence_rate":1.0,"mean_sweeps":2.0,"mean_active":1.0185,"model_bytes":651,"latency_ms":0.5473,"candidate_mean":16},
+      "wrong": {"candidate_recall":1.0,"accuracy":0.1074,"wrong_commit":0.6898,"null_rate":0.0,"flat_rate":0.2028,"convergence_rate":1.0,"mean_sweeps":2.0,"mean_active":1.23,"model_bytes":340,"latency_ms":0.2758,"candidate_mean":16},
+      "bipartite": {"candidate_recall":1.0,"accuracy":0.9500,"wrong_commit":0.0398,"null_rate":0.0,"flat_rate":0.0102,"convergence_rate":1.0,"mean_sweeps":2.0,"mean_active":1.0102,"model_bytes":384,"latency_ms":0.3014,"candidate_mean":16}
     },
     "counterfactual": {
-      "global": {"candidate_recall": 1.0, "accuracy": 0.787962962962963, "wrong_commit": 0.1675925925925926, "null_rate": 0.0, "flat_rate": 0.044444444444444446, "convergence_rate": 1.0, "mean_sweeps": 2, "mean_active": 1.0555555555555556, "model_bytes": 651, "latency_ms": 0.5409776120363522, "candidate_mean": 16},
-      "wrong": {"candidate_recall": 1.0, "accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 0.0, "flat_rate": 1.0, "convergence_rate": 1.0, "mean_sweeps": 2, "mean_active": 2.837037037037037, "model_bytes": 340, "latency_ms": 0.28392992777778797, "candidate_mean": 16},
-      "bipartite": {"candidate_recall": 1.0, "accuracy": 0.9740740740740741, "wrong_commit": 0.012962962962962963, "null_rate": 0.0, "flat_rate": 0.012962962962962963, "convergence_rate": 1.0, "mean_sweeps": 2, "mean_active": 1.0129629629629628, "model_bytes": 384, "latency_ms": 0.3137665212964041, "candidate_mean": 16}
+      "global": {"candidate_recall":1.0,"accuracy":0.8269,"wrong_commit":0.1389,"null_rate":0.0,"flat_rate":0.0343,"convergence_rate":1.0,"mean_sweeps":2.0,"mean_active":1.0343,"model_bytes":651,"latency_ms":0.4315,"candidate_mean":16},
+      "wrong": {"candidate_recall":1.0,"accuracy":0.0,"wrong_commit":0.0,"null_rate":0.0,"flat_rate":1.0,"convergence_rate":1.0,"mean_sweeps":2.0,"mean_active":2.84,"model_bytes":340,"latency_ms":0.2031,"candidate_mean":16},
+      "bipartite": {"candidate_recall":1.0,"accuracy":0.9778,"wrong_commit":0.0093,"null_rate":0.0,"flat_rate":0.0130,"convergence_rate":1.0,"mean_sweeps":2.0,"mean_active":1.013,"model_bytes":384,"latency_ms":0.2274,"candidate_mean":16}
     },
     "plan": {
-      "global": {"candidate_recall": 1.0, "accuracy": 0.8101851851851851, "wrong_commit": 0.15462962962962962, "null_rate": 0.0, "flat_rate": 0.03518518518518518, "convergence_rate": 1.0, "mean_sweeps": 2, "mean_active": 1.0425925925925927, "model_bytes": 651, "latency_ms": 0.5360578953707739, "candidate_mean": 16},
-      "wrong": {"candidate_recall": 1.0, "accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 0.0, "flat_rate": 1.0, "convergence_rate": 1.0, "mean_sweeps": 2, "mean_active": 2.8777777777777778, "model_bytes": 340, "latency_ms": 0.3059874990737154, "candidate_mean": 16},
-      "bipartite": {"candidate_recall": 1.0, "accuracy": 0.9694444444444444, "wrong_commit": 0.012962962962962963, "null_rate": 0.0, "flat_rate": 0.017592592592592594, "convergence_rate": 1.0, "mean_sweeps": 2, "mean_active": 1.0175925925925926, "model_bytes": 384, "latency_ms": 0.3350774879625836, "candidate_mean": 16}
+      "global": {"candidate_recall":1.0,"accuracy":0.8019,"wrong_commit":0.1694,"null_rate":0.0,"flat_rate":0.0287,"convergence_rate":1.0,"mean_sweeps":2.0,"mean_active":1.0287,"model_bytes":651,"latency_ms":0.4487,"candidate_mean":16},
+      "wrong": {"candidate_recall":1.0,"accuracy":0.0,"wrong_commit":0.0,"null_rate":0.0,"flat_rate":1.0,"convergence_rate":1.0,"mean_sweeps":2.0,"mean_active":2.85,"model_bytes":340,"latency_ms":0.2188,"candidate_mean":16},
+      "bipartite": {"candidate_recall":1.0,"accuracy":0.9787,"wrong_commit":0.0111,"null_rate":0.0,"flat_rate":0.0102,"convergence_rate":1.0,"mean_sweeps":2.0,"mean_active":1.0102,"model_bytes":384,"latency_ms":0.2444,"candidate_mean":16}
     },
     "long": {
-      "global": {"candidate_recall": 1.0, "accuracy": 0.7842592592592592, "wrong_commit": 0.1685185185185185, "null_rate": 0.0, "flat_rate": 0.04722222222222222, "convergence_rate": 1.0, "mean_sweeps": 2, "mean_active": 1.0546296296296296, "model_bytes": 651, "latency_ms": 0.6305375537033763, "candidate_mean": 16},
-      "wrong": {"candidate_recall": 1.0, "accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 0.0, "flat_rate": 1.0, "convergence_rate": 1.0, "mean_sweeps": 2, "mean_active": 2.846296296296296, "model_bytes": 340, "latency_ms": 0.32177411851871845, "candidate_mean": 16},
-      "bipartite": {"candidate_recall": 1.0, "accuracy": 0.9712962962962963, "wrong_commit": 0.014814814814814815, "null_rate": 0.0, "flat_rate": 0.013888888888888888, "convergence_rate": 1.0, "mean_sweeps": 2, "mean_active": 1.0138888888888888, "model_bytes": 384, "latency_ms": 0.35497336018495307, "candidate_mean": 16}
+      "global": {"candidate_recall":1.0,"accuracy":0.8148,"wrong_commit":0.1491,"null_rate":0.0,"flat_rate":0.0361,"convergence_rate":1.0,"mean_sweeps":2.0,"mean_active":1.0361,"model_bytes":651,"latency_ms":0.5211,"candidate_mean":16},
+      "wrong": {"candidate_recall":1.0,"accuracy":0.0,"wrong_commit":0.0,"null_rate":0.0,"flat_rate":1.0,"convergence_rate":1.0,"mean_sweeps":2.0,"mean_active":2.86,"model_bytes":340,"latency_ms":0.2530,"candidate_mean":16},
+      "bipartite": {"candidate_recall":1.0,"accuracy":0.9796,"wrong_commit":0.0083,"null_rate":0.0,"flat_rate":0.0120,"convergence_rate":1.0,"mean_sweeps":2.0,"mean_active":1.012,"model_bytes":384,"latency_ms":0.2769,"candidate_mean":16}
     },
     "unmarked": {
-      "global": {"candidate_recall": 0.0, "accuracy": 0.0, "wrong_commit": 0.9518518518518518, "null_rate": 0.0, "flat_rate": 0.04814814814814815, "convergence_rate": 1.0, "mean_sweeps": 2, "mean_active": 1.049074074074074, "model_bytes": 651, "latency_ms": 0.6610649953699976, "candidate_mean": 16},
-      "wrong": {"candidate_recall": 0.0, "accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "flat_rate": 0.1638888888888889, "convergence_rate": 1.0, "mean_sweeps": 2, "mean_active": 1.1953703703703704, "model_bytes": 340, "latency_ms": 0.3905542351853236, "candidate_mean": 16},
-      "bipartite": {"candidate_recall": 0.0, "accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "flat_rate": 0.05555555555555555, "convergence_rate": 1.0, "mean_sweeps": 2, "mean_active": 1.0629629629629629, "model_bytes": 384, "latency_ms": 0.41754025092578323, "candidate_mean": 16}
+      "global": {"candidate_recall":0.0,"accuracy":0.0,"wrong_commit":0.9454,"null_rate":0.0,"flat_rate":0.0546,"convergence_rate":1.0,"mean_sweeps":2.0,"mean_active":1.0546,"model_bytes":651,"latency_ms":0.5807,"candidate_mean":16},
+      "wrong": {"candidate_recall":0.0,"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"flat_rate":0.1667,"convergence_rate":1.0,"mean_sweeps":2.0,"mean_active":1.20,"model_bytes":340,"latency_ms":0.3498,"candidate_mean":16},
+      "bipartite": {"candidate_recall":0.0,"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"flat_rate":0.0685,"convergence_rate":1.0,"mean_sweeps":2.0,"mean_active":1.07,"model_bytes":384,"latency_ms":0.3752,"candidate_mean":16}
     }
   },
-  "peak_rss_kib_runtime_included": 112252,
+  "peak_rss_kib_runtime_included": 112036,
   "estimated_complexity": "proposal O(L^2), relaxation O(S*(H+R)), local update O(R*degree); H<=16,S<=4",
-  "candidate_edges": ["target", "value", "direction", "scope", "address"],
-  "residual_causes": ["reconstruct", "preserve", "inverse", "revision", "recall"],
+  "candidate_edges": ["target","value","direction","scope","address"],
+  "residual_causes": ["reconstruct","preserve","inverse","revision","recall"],
   "highschool_level_passed": false,
   "native_japanese_communication_passed": false,
   "weak_smartphone_verified": false,
