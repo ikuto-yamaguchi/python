@@ -1,0 +1,27 @@
+{
+  "hypothesis": "Self-Induced Residual Cause Nodes by Minimal Edge Surgery",
+  "seeds": [1, 7, 19],
+  "sizes": [60, 180, 360],
+  "largest_summary": {
+    "seen": {"global": 0.7907, "shuffled": 0.7944, "oracle": 0.8046, "self": 0.8102, "self_map_exact": 1.0, "self_factor_evals": 79.0},
+    "ambiguous": {"global": 0.5481, "shuffled": 0.5593, "oracle": 0.5713, "self": 0.5639, "self_map_exact": 1.0, "self_factor_evals": 60.0},
+    "nested": {"global": 0.6093, "shuffled": 0.6324, "oracle": 0.6352, "self": 0.6296, "self_map_exact": 1.0, "self_factor_evals": 69.8},
+    "counterfactual": {"global": 0.8213, "shuffled": 0.8000, "oracle": 0.8259, "self": 0.8250, "self_map_exact": 1.0, "self_factor_evals": 79.1},
+    "plan": {"global": 0.4389, "shuffled": 0.4509, "oracle": 0.4481, "self": 0.4565, "self_map_exact": 1.0, "self_factor_evals": 50.0},
+    "long": {"global": 0.6046, "shuffled": 0.6472, "oracle": 0.6380, "self": 0.6481, "self_map_exact": 1.0, "self_factor_evals": 79.0},
+    "noise": {"global": 0.3796, "shuffled": 0.4259, "oracle": 0.4389, "self": 0.4435, "self_map_exact": 0.9991, "self_factor_evals": 79.1},
+    "unmarked": {"global": 0.0, "shuffled": 0.0, "oracle": 0.0, "self": 0.0, "candidate_recall": 0.0}
+  },
+  "model_bytes": 144,
+  "peak_rss_kib_runtime_included": 111176,
+  "candidate_cap": 16,
+  "edge_count": 5,
+  "residual_count": 5,
+  "sweep_cap": 4,
+  "estimated_complexity": "proposal O(L^2); surgery O(HER); relaxation O(SHR)",
+  "status": "falsified_with_limited_signal",
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
