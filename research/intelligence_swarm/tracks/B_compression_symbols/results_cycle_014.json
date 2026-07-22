@@ -1,0 +1,45 @@
+{
+  "hypothesis": "Clause-Lattice Misapplication Execution with Relation Quotient Induction",
+  "seeds": [1, 7, 19],
+  "sizes": [48, 144, 432],
+  "peak_rss_kib_runtime_included": 298488,
+  "estimated_complexity": "proposal O(N C^2), execution O(P C), P<=32, clause lattice O(L)",
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false,
+  "summary_432": {
+    "clause": {
+      "seen": {"accuracy": 0.06333333333333334, "model_bytes": 4717, "programs": 32, "quotients": 0, "raw_candidates": 4378, "rejected": 143.33333333333334, "train_seconds": 0.2043783543332817, "infer_ms": 0.009339306666333869, "reads": 0.20666666666666667},
+      "held_order": {"accuracy": 0.0, "model_bytes": 4717, "programs": 32, "quotients": 0, "raw_candidates": 4378, "rejected": 143.33333333333334, "train_seconds": 0.20568188033333476, "infer_ms": 0.003243010000915092, "reads": 0.0},
+      "held_lexeme": {"accuracy": 0.02666666666666667, "model_bytes": 4717, "programs": 32, "quotients": 0, "raw_candidates": 4378, "rejected": 143.33333333333334, "train_seconds": 0.1953736090000954, "infer_ms": 0.008962826667205567, "reads": 0.15666666666666668},
+      "nested": {"accuracy": 0.06333333333333334, "model_bytes": 4717, "programs": 32, "quotients": 0, "raw_candidates": 4378, "rejected": 143.33333333333334, "train_seconds": 0.19704311200014976, "infer_ms": 0.009537823333024184, "reads": 0.20666666666666667},
+      "omitted": {"accuracy": 0.0, "model_bytes": 4717, "programs": 32, "quotients": 0, "raw_candidates": 4378, "rejected": 143.33333333333334, "train_seconds": 0.19431614833320054, "infer_ms": 0.005540023331983927, "reads": 0.043333333333333335},
+      "alternate": {"accuracy": 0.0, "model_bytes": 4717, "programs": 32, "quotients": 0, "raw_candidates": 4378, "rejected": 143.33333333333334, "train_seconds": 0.1950158536666701, "infer_ms": 0.008119730002060047, "reads": 0.0},
+      "freeform": {"accuracy": 0.0, "model_bytes": 4717, "programs": 32, "quotients": 0, "raw_candidates": 4378, "rejected": 143.33333333333334, "train_seconds": 0.19634855666663498, "infer_ms": 0.0032187799994668844, "reads": 0.0}
+    },
+    "misapply": {
+      "seen": {"accuracy": 0.25333333333333335, "model_bytes": 5751.333333333333, "programs": 32, "quotients": 0, "raw_candidates": 4378, "rejected": 3891.3333333333335, "train_seconds": 0.22686847100006466, "infer_ms": 0.007490296666219365, "reads": 0.42},
+      "held_order": {"accuracy": 0.0, "model_bytes": 5751.333333333333, "programs": 32, "quotients": 0, "raw_candidates": 4378, "rejected": 3891.3333333333335, "train_seconds": 0.23058267499997478, "infer_ms": 0.00273534333397644, "reads": 0.0},
+      "held_lexeme": {"accuracy": 0.18, "model_bytes": 5751.333333333333, "programs": 32, "quotients": 0, "raw_candidates": 4378, "rejected": 3891.3333333333335, "train_seconds": 0.2265776009999172, "infer_ms": 0.009196176665682287, "reads": 0.38666666666666666},
+      "nested": {"accuracy": 0.25333333333333335, "model_bytes": 5751.333333333333, "programs": 32, "quotients": 0, "raw_candidates": 4378, "rejected": 3891.3333333333335, "train_seconds": 0.22566100833334227, "infer_ms": 0.0075463499994536205, "reads": 0.42},
+      "omitted": {"accuracy": 0.0, "model_bytes": 5751.333333333333, "programs": 32, "quotients": 0, "raw_candidates": 4378, "rejected": 3891.3333333333335, "train_seconds": 0.23363742733348167, "infer_ms": 0.002518986667989035, "reads": 0.0},
+      "alternate": {"accuracy": 0.0, "model_bytes": 5751.333333333333, "programs": 32, "quotients": 0, "raw_candidates": 4378, "rejected": 3891.3333333333335, "train_seconds": 0.22537522466685309, "infer_ms": 0.006282646666780541, "reads": 0.0},
+      "freeform": {"accuracy": 0.0, "model_bytes": 5751.333333333333, "programs": 32, "quotients": 0, "raw_candidates": 4378, "rejected": 3891.3333333333335, "train_seconds": 0.22907631199996104, "infer_ms": 0.003164549998473376, "reads": 0.0}
+    },
+    "quotient": {
+      "seen": {"accuracy": 0.09666666666666668, "model_bytes": 4573.666666666667, "programs": 23.333333333333332, "quotients": 23.333333333333332, "raw_candidates": 4378, "rejected": 3891.3333333333335, "train_seconds": 0.22804607266683283, "infer_ms": 0.004335400000551696, "reads": 0.15},
+      "held_order": {"accuracy": 0.0, "model_bytes": 4573.666666666667, "programs": 23.333333333333332, "quotients": 23.333333333333332, "raw_candidates": 4378, "rejected": 3891.3333333333335, "train_seconds": 0.2270428043331473, "infer_ms": 0.0019369099997372057, "reads": 0.0},
+      "held_lexeme": {"accuracy": 0.21333333333333335, "model_bytes": 4573.666666666667, "programs": 23.333333333333332, "quotients": 23.333333333333332, "raw_candidates": 4378, "rejected": 3891.3333333333335, "train_seconds": 0.22644628066685377, "infer_ms": 0.0086863333308429, "reads": 0.42333333333333334},
+      "nested": {"accuracy": 0.09666666666666668, "model_bytes": 4573.666666666667, "programs": 23.333333333333332, "quotients": 23.333333333333332, "raw_candidates": 4378, "rejected": 3891.3333333333335, "train_seconds": 0.2300010840000747, "infer_ms": 0.004408059999150282, "reads": 0.15},
+      "omitted": {"accuracy": 0.0, "model_bytes": 4573.666666666667, "programs": 23.333333333333332, "quotients": 23.333333333333332, "raw_candidates": 4378, "rejected": 3891.3333333333335, "train_seconds": 0.23169411066677034, "infer_ms": 0.0018395833315783723, "reads": 0.0},
+      "alternate": {"accuracy": 0.0, "model_bytes": 4573.666666666667, "programs": 23.333333333333332, "quotients": 23.333333333333332, "raw_candidates": 4378, "rejected": 3891.3333333333335, "train_seconds": 0.23564091800002038, "infer_ms": 0.003750570000799295, "reads": 0.0},
+      "freeform": {"accuracy": 0.0, "model_bytes": 4573.666666666667, "programs": 23.333333333333332, "quotients": 23.333333333333332, "raw_candidates": 4378, "rejected": 3891.3333333333335, "train_seconds": 0.22814569866674597, "infer_ms": 0.0022838566671149843, "reads": 0.0}
+    }
+  },
+  "per_seed_accuracy_432": [
+    {"seed": 1, "clause": {"seen": 0.04, "held_order": 0.0, "held_lexeme": 0.04, "nested": 0.04, "omitted": 0.0, "alternate": 0.0, "freeform": 0.0}, "misapply": {"seen": 0.18, "held_order": 0.0, "held_lexeme": 0.27, "nested": 0.18, "omitted": 0.0, "alternate": 0.0, "freeform": 0.0}, "quotient": {"seen": 0.1, "held_order": 0.0, "held_lexeme": 0.23, "nested": 0.1, "omitted": 0.0, "alternate": 0.0, "freeform": 0.0}},
+    {"seed": 7, "clause": {"seen": 0.05, "held_order": 0.0, "held_lexeme": 0.02, "nested": 0.05, "omitted": 0.0, "alternate": 0.0, "freeform": 0.0}, "misapply": {"seen": 0.26, "held_order": 0.0, "held_lexeme": 0.11, "nested": 0.26, "omitted": 0.0, "alternate": 0.0, "freeform": 0.0}, "quotient": {"seen": 0.14, "held_order": 0.0, "held_lexeme": 0.21, "nested": 0.14, "omitted": 0.0, "alternate": 0.0, "freeform": 0.0}},
+    {"seed": 19, "clause": {"seen": 0.1, "held_order": 0.0, "held_lexeme": 0.02, "nested": 0.1, "omitted": 0.0, "alternate": 0.0, "freeform": 0.0}, "misapply": {"seen": 0.32, "held_order": 0.0, "held_lexeme": 0.16, "nested": 0.32, "omitted": 0.0, "alternate": 0.0, "freeform": 0.0}, "quotient": {"seen": 0.05, "held_order": 0.0, "held_lexeme": 0.2, "nested": 0.05, "omitted": 0.0, "alternate": 0.0, "freeform": 0.0}}
+  ]
+}
