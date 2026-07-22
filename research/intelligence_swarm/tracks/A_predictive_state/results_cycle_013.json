@@ -1,0 +1,30 @@
+{
+  "hypothesis": "Survival-Calibrated Active Probe Programs with Coverage-Constrained Null States",
+  "seeds": [1, 7, 19],
+  "train_sizes": [64, 256, 1024],
+  "largest_train_summary": {
+    "seen": {
+      "candidate_recall": 0.1648148148148148,
+      "entropy": {"accuracy": 0.009259259259259259, "wrong_commit": 0.25555555555555554, "null_rate": 0.0, "mean_probes": 3.964814814814815},
+      "survival": {"accuracy": 0.009259259259259259, "wrong_commit": 0.4740740740740741, "null_rate": 0.0, "mean_probes": 3.9703703703703703},
+      "survival_null": {"accuracy": 0.009259259259259259, "wrong_commit": 0.4740740740740741, "null_rate": 0.5166666666666666, "mean_probes": 3.9703703703703703, "ms_per_example": 0.3651363148146966, "model_bytes": 334.6666666666667}
+    },
+    "paraphrase": {"candidate_recall": 0.17222222222222222, "entropy_wrong_commit": 0.2796296296296297, "survival_wrong_commit": 0.17592592592592593, "survival_null_rate": 0.8240740740740741},
+    "nested": {"candidate_recall": 0.08888888888888889, "entropy_accuracy": 0.02962962962962963, "survival_wrong_commit": 0.2351851851851852, "survival_null_rate": 0.7351851851851852},
+    "subject_omission": {"candidate_recall": 0.0, "survival_wrong_commit": 0.3037037037037037, "survival_null_rate": 0.6962962962962963},
+    "out_set": {"candidate_recall": 0.0, "entropy_wrong_commit": 0.32407407407407407, "survival_wrong_commit": 0.17407407407407408, "survival_null_rate": 0.825925925925926}
+  },
+  "probe_survival_stats": {
+    "delete": {"correct_survive": 265, "trials": 265, "false_removed": 2322, "false_total": 6095},
+    "swap_left": {"correct_survive": 265, "trials": 265, "false_removed": 2932, "false_total": 6095},
+    "swap_right": {"correct_survive": 265, "trials": 265, "false_removed": 2531, "false_total": 6095},
+    "reverse": {"correct_survive": 265, "trials": 265, "false_removed": 2449, "false_total": 6095}
+  },
+  "peak_rss_kib_runtime_included": 389352,
+  "estimated_complexity": "proposal O(L^2), active O(PH), H<=24, P<=4",
+  "learner_hidden_target_access": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
