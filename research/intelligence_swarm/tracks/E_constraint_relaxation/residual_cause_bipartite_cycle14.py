@@ -1,7 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from collections import Counter
-import argparse, json, math, pickle, random, resource, statistics, time
+import argparse, hashlib, json, math, pickle, random, resource, statistics, time
 
 # Controlled falsification probe. Learner sees raw Japanese text, candidate spans,
 # and generic binary residual outcomes. Hidden semantic IDs are evaluator-only.
@@ -29,6 +29,10 @@ ROUTING={
  'recall':('address','target'),
 }
 WRONG_ROUTING={c:EDGE_NAMES for c in CAUSE_NAMES}
+
+def stable_int(*parts):
+    data='\x1f'.join(map(str,parts)).encode('utf-8')
+    return int.from_bytes(hashlib.blake2b(data,digest_size=8).digest(),'big')
 
 def quoted_spans(s):
     out=[]; start=None
@@ -93,7 +97,7 @@ def make_example(rng,mode):
     for i,c in enumerate(cands):
         if truth is None:
             for cause in CAUSE_NAMES:
-                if ((hash((text,i,cause)) & 7) < 3): causes[cause].append(i)
+                if ((stable_int(text,i,cause) & 7) < 3): causes[cause].append(i)
         else:
             if c.value!=truth.value: causes['reconstruct'].append(i)
             if c.target!=truth.target or c.address!=truth.address: causes['preserve'].append(i)
@@ -104,10 +108,10 @@ def make_example(rng,mode):
     for cause in CAUSE_NAMES:
         kept=[]
         for i in causes[cause]:
-            if (hash((text,cause,i,'drop')) & 15) >= 4: kept.append(i)
+            if (stable_int(text,cause,i,'drop') & 15) >= 4: kept.append(i)
         noisy=set(kept)
         for i in range(len(cands)):
-            if i not in noisy and (hash((text,cause,i,'add')) & 31) < 4:
+            if i not in noisy and (stable_int(text,cause,i,'add') & 31) < 4:
                 noisy.add(i)
         causes[cause]=sorted(noisy)
     return Example(text,cands,truth,causes,marked)
