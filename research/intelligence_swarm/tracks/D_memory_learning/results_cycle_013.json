@@ -1,0 +1,47 @@
+{
+  "hypothesis": "Paraphrase-Invariant Write/Read Programs with Contrastive Eligibility Consolidation",
+  "seeds": [1, 7, 19],
+  "sizes": [24, 72, 216],
+  "summary_216": {
+    "seen": {
+      "surface": {"write_accuracy": 0.7438271605, "read_accuracy": 0.3333333333, "model_bytes": 55180.3333, "training_seconds": 0.2135415703, "inference_ms": 0.1376697917, "programs": 216, "mean_reads": 1.0},
+      "program": {"write_accuracy": 0.0632716049, "read_accuracy": 0.0416666667, "model_bytes": 4964.3333, "training_seconds": 0.0557592087, "inference_ms": 0.135446, "programs": 9, "mean_reads": 0.1712962963},
+      "contrastive": {"write_accuracy": 0.0632716049, "read_accuracy": 0.0416666667, "model_bytes": 4964.3333, "training_seconds": 0.0556000927, "inference_ms": 0.1376798333, "programs": 9, "mean_reads": 0.1712962963}
+    },
+    "held": {
+      "surface": {"write_accuracy": 0.5509259259, "read_accuracy": 0.1666666667, "model_bytes": 54423, "training_seconds": 0.200014817, "inference_ms": 0.1343474167, "programs": 216, "mean_reads": 1.0},
+      "program": {"write_accuracy": 0.0447530864, "read_accuracy": 0.0416666667, "model_bytes": 3288, "training_seconds": 0.0383382497, "inference_ms": 0.1304599167, "programs": 6, "mean_reads": 0.1419753086},
+      "contrastive": {"write_accuracy": 0.0447530864, "read_accuracy": 0.0416666667, "model_bytes": 3288, "training_seconds": 0.0385565613, "inference_ms": 0.1319216667, "programs": 6, "mean_reads": 0.1419753086}
+    },
+    "alternate": {
+      "surface": {"write_accuracy": 0.7438271605, "read_accuracy": 0.3333333333},
+      "program": {"write_accuracy": 0.0663580247, "read_accuracy": 0.0416666667},
+      "contrastive": {"write_accuracy": 0.0663580247, "read_accuracy": 0.0416666667}
+    },
+    "omitted": {
+      "surface": {"write_accuracy": 0.1033950617, "read_accuracy": 0.0},
+      "program": {"write_accuracy": 0.0462962963, "read_accuracy": 0.0416666667},
+      "contrastive": {"write_accuracy": 0.0354938272, "read_accuracy": 0.0416666667}
+    },
+    "long": {
+      "surface": {"write_accuracy": 0.7793209877, "read_accuracy": 0.5},
+      "program": {"write_accuracy": 0.0478395062, "read_accuracy": 0.0416666667},
+      "contrastive": {"write_accuracy": 0.0478395062, "read_accuracy": 0.0416666667}
+    },
+    "combined": {
+      "surface": {"write_accuracy": 0.5509259259, "read_accuracy": 0.1666666667},
+      "program": {"write_accuracy": 0.0447530864, "read_accuracy": 0.0416666667},
+      "contrastive": {"write_accuracy": 0.0447530864, "read_accuracy": 0.0416666667}
+    },
+    "one_shot": {"surface": 1.0, "program": 1.0, "contrastive": 1.0},
+    "interference": {"surface": 0.0, "program": 0.0, "contrastive": 0.0}
+  },
+  "peak_rss_kib_runtime_included": 14584,
+  "estimated_complexity": "learn O(NPG), write O(PG), read O(MG)",
+  "learner_hidden_labels": false,
+  "free_japanese_integrated_gate": 0.0,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
