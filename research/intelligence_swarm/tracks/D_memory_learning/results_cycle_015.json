@@ -1,0 +1,42 @@
+{
+  "hypothesis": "Bidirectional Query-Write Address Nodes with Local Binding Competition",
+  "seeds": [1, 7, 19],
+  "sizes": [24, 72, 216],
+  "summary_216": {
+    "seen": {
+      "episodic": {"write_accuracy": 0.8966049383, "read_accuracy": 0.2638888889, "model_bytes": 72333, "inference_ms": 5.2101, "units": 216},
+      "write_only": {"write_accuracy": 0.0200617284, "read_accuracy": 0.0, "wrong_object_rate": 0.4027777778, "abstain_rate": 0.5972222222, "model_bytes": 6437.6667, "units": 2.6667},
+      "bidirectional": {"write_accuracy": 0.0200617284, "read_accuracy": 0.0, "wrong_object_rate": 0.4027777778, "abstain_rate": 0.5972222222, "model_bytes": 6437.6667, "training_seconds": 0.2249, "inference_ms": 0.0661, "units": 2.6667, "mean_write_candidates": 2.2870, "mean_read_candidates": 2.6667},
+      "no_competition": {"write_accuracy": 0.0200617284, "read_accuracy": 0.0833333333, "wrong_object_rate": 0.875, "abstain_rate": 0.0}
+    },
+    "held": {
+      "episodic": {"write_accuracy": 0.8966049383, "read_accuracy": 0.25},
+      "bidirectional": {"write_accuracy": 0.0, "read_accuracy": 0.0, "abstain_rate": 1.0, "units": 0}
+    },
+    "alternate": {
+      "episodic": {"write_accuracy": 0.8966049383, "read_accuracy": 0.2638888889},
+      "bidirectional": {"write_accuracy": 0.0138888889, "read_accuracy": 0.0416666667, "wrong_object_rate": 0.6388888889, "abstain_rate": 0.2777777778}
+    },
+    "omitted": {
+      "episodic": {"write_accuracy": 0.4413580247, "read_accuracy": 0.1388888889},
+      "bidirectional": {"write_accuracy": 0.0123456790, "read_accuracy": 0.0833333333, "wrong_object_rate": 0.875}
+    },
+    "long": {
+      "episodic": {"write_accuracy": 0.9151234568, "read_accuracy": 0.2638888889},
+      "bidirectional": {"write_accuracy": 0.0169753086, "read_accuracy": 0.0277777778, "abstain_rate": 0.5}
+    },
+    "combined": {
+      "episodic": {"write_accuracy": 0.8966049383, "read_accuracy": 0.25},
+      "bidirectional": {"write_accuracy": 0.0, "read_accuracy": 0.0, "abstain_rate": 1.0, "units": 0}
+    },
+    "one_shot": {"episodic": 1.0, "bidirectional": 0.0},
+    "interference": {"episodic": 0.6666666667, "bidirectional": 0.0}
+  },
+  "peak_rss_kib_runtime_included": 159824,
+  "estimated_complexity": "proposal O(L^2), learn O(NHG), write/read O(HG), H<=24 per episode before consolidation",
+  "learner_hidden_labels": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
