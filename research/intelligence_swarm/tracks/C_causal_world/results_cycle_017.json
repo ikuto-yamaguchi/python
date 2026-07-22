@@ -1,0 +1,47 @@
+{
+  "hypothesis": "Latent-State-Specific Operation Algebra from Cross-Context Commutator Signatures",
+  "seeds": [1, 7, 19],
+  "sizes": [48, 144, 432],
+  "summary_max_size": {
+    "432": {
+      "seen": {
+        "surface": {"accuracy": 0.1419753086419753, "counterfactual_order_accuracy": 0.6666666666666667, "families": 17.666666666666668, "ops": 64, "model_bytes": 9914.333333333334, "training_seconds": 0.0018186173333371396, "inference_ms": 0.011698535493845742, "mean_candidates": 0.1697530864197531},
+        "single": {"accuracy": 0.1419753086419753, "counterfactual_order_accuracy": 0.6666666666666667, "families": 21.666666666666668, "ops": 64, "model_bytes": 9917.666666666666, "training_seconds": 0.007286767666660883, "inference_ms": 0.01156525154325338, "mean_candidates": 0.1697530864197531},
+        "cross_context": {"accuracy": 0.1419753086419753, "counterfactual_order_accuracy": 0.6666666666666667, "families": 23.333333333333332, "ops": 64, "model_bytes": 9931, "training_seconds": 0.17563291666666223, "inference_ms": 0.01185273148151129, "mean_candidates": 0.1697530864197531}
+      },
+      "held": {
+        "surface": {"accuracy": 0.0, "counterfactual_order_accuracy": 0.6428571428571428, "families": 17.666666666666668, "ops": 64, "model_bytes": 9914.333333333334, "training_seconds": 0.0018415680000032353, "inference_ms": 0.007335768518549842, "mean_candidates": 0.0},
+        "single": {"accuracy": 0.0, "counterfactual_order_accuracy": 0.6428571428571428, "families": 21.666666666666668, "ops": 64, "model_bytes": 9917.666666666666, "training_seconds": 0.007340303999995967, "inference_ms": 0.007404604938285628, "mean_candidates": 0.0},
+        "cross_context": {"accuracy": 0.0, "counterfactual_order_accuracy": 0.6428571428571428, "families": 23.333333333333332, "ops": 64, "model_bytes": 9931, "training_seconds": 0.17718155633332344, "inference_ms": 0.007475606481476422, "mean_candidates": 0.0}
+      },
+      "alternate": {
+        "surface": {"accuracy": 0.0, "counterfactual_order_accuracy": 0.6428571428571428, "families": 17.666666666666668, "ops": 64, "model_bytes": 9914.333333333334, "training_seconds": 0.0018389240000071065, "inference_ms": 0.00786858179013257, "mean_candidates": 0.0},
+        "single": {"accuracy": 0.0, "counterfactual_order_accuracy": 0.6428571428571428, "families": 21.666666666666668, "ops": 64, "model_bytes": 9917.666666666666, "training_seconds": 0.00742695633333786, "inference_ms": 0.007915503086413034, "mean_candidates": 0.0},
+        "cross_context": {"accuracy": 0.0, "counterfactual_order_accuracy": 0.6428571428571428, "families": 23.333333333333332, "ops": 64, "model_bytes": 9931, "training_seconds": 0.1784232993333319, "inference_ms": 0.008260010802441235, "mean_candidates": 0.0}
+      },
+      "omitted": {
+        "surface": {"accuracy": 0.0, "counterfactual_order_accuracy": 0.6428571428571428, "families": 17.666666666666668, "ops": 64, "model_bytes": 9914.333333333334, "training_seconds": 0.0018652103333257248, "inference_ms": 0.007370419753122891, "mean_candidates": 0.0},
+        "single": {"accuracy": 0.0, "counterfactual_order_accuracy": 0.6428571428571428, "families": 21.666666666666668, "ops": 64, "model_bytes": 9917.666666666666, "training_seconds": 0.007442366000001736, "inference_ms": 0.007367467592576692, "mean_candidates": 0.0},
+        "cross_context": {"accuracy": 0.0, "counterfactual_order_accuracy": 0.6428571428571428, "families": 23.333333333333332, "ops": 64, "model_bytes": 9931, "training_seconds": 0.17769829766665643, "inference_ms": 0.007383123456825048, "mean_candidates": 0.0}
+      },
+      "paragraph": {
+        "surface": {"accuracy": 0.0, "counterfactual_order_accuracy": 0.6652777777777777, "families": 17.666666666666668, "ops": 64, "model_bytes": 9914.333333333334, "training_seconds": 0.001869970666679895, "inference_ms": 0.008146263888901498, "mean_candidates": 0.0},
+        "single": {"accuracy": 0.0, "counterfactual_order_accuracy": 0.6652777777777777, "families": 21.666666666666668, "ops": 64, "model_bytes": 9917.666666666666, "training_seconds": 0.007426438999990144, "inference_ms": 0.008419324074107991, "mean_candidates": 0.0},
+        "cross_context": {"accuracy": 0.0, "counterfactual_order_accuracy": 0.6652777777777777, "families": 23.333333333333332, "ops": 64, "model_bytes": 9931, "training_seconds": 0.17910999866667035, "inference_ms": 0.00844477623456405, "mean_candidates": 0.0}
+      },
+      "plan": {
+        "surface": {"accuracy": 0.0, "counterfactual_order_accuracy": 0.6326728826728827, "families": 17.666666666666668, "ops": 64, "model_bytes": 9914.333333333334, "training_seconds": 0.0018564036666646189, "inference_ms": 0.007756888888883676, "mean_candidates": 0.0},
+        "single": {"accuracy": 0.0, "counterfactual_order_accuracy": 0.6326728826728827, "families": 21.666666666666668, "ops": 64, "model_bytes": 9917.666666666666, "training_seconds": 0.007413482999993448, "inference_ms": 0.0077502253086227085, "mean_candidates": 0.0},
+        "cross_context": {"accuracy": 0.0, "counterfactual_order_accuracy": 0.6326728826728827, "families": 23.333333333333332, "ops": 64, "model_bytes": 9931, "training_seconds": 0.17679572333332771, "inference_ms": 0.007919955246885971, "mean_candidates": 0.0}
+      }
+    }
+  },
+  "peak_rss_kib_runtime_included": 160048,
+  "estimated_complexity": "fit O(PKC G), inference O(PG), P<=64, K<=12, C<=24",
+  "hidden_labels_used_by_learner": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false,
+  "note": "Full raw per-seed results are reproducible by running the committed script; this file retains the maximum-size aggregate."
+}
