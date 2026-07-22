@@ -1,0 +1,55 @@
+{
+  "hypothesis": "Dual-Residual Null Attractors with Intervention-Calibrated Energy",
+  "seeds": [1, 7, 19],
+  "sizes": [120, 360, 1080],
+  "summary_1080": {
+    "in_set": {
+      "single": {"accuracy": 0.00030864197530864197, "wrong_commit": 0.0, "null_rate": 0.0, "flat_rate": 0.9996913580246913, "divergence_rate": 0.0, "mean_sweeps": 1, "mean_active": 10, "mean_factors": 0, "ms_per_example": 0.02233264598766865},
+      "dual": {"accuracy": 0.16882716049382718, "wrong_commit": 0.8311728395061728, "null_rate": 0.0, "flat_rate": 0.0, "divergence_rate": 0.0, "mean_sweeps": 1.9996913580246913, "mean_active": 7.034876543209877, "mean_factors": 0.9996913580246913, "ms_per_example": 0.04537874290123823},
+      "dual_calibrated": {"accuracy": 0.00030864197530864197, "wrong_commit": 0.0, "null_rate": 0.0, "flat_rate": 0.9996913580246913, "divergence_rate": 0.0, "mean_sweeps": 1, "mean_active": 10, "mean_factors": 0, "ms_per_example": 0.03206577746913535}
+    },
+    "ambiguity": {
+      "single": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 0.0, "flat_rate": 1.0, "divergence_rate": 0.0, "mean_sweeps": 1, "mean_active": 10, "mean_factors": 0, "ms_per_example": 0.023035611419737805},
+      "dual": {"accuracy": 0.16080246913580246, "wrong_commit": 0.8391975308641976, "null_rate": 0.0, "flat_rate": 0.0, "divergence_rate": 0.0, "mean_sweeps": 2, "mean_active": 7.387037037037037, "mean_factors": 1, "ms_per_example": 0.04577431172840708},
+      "dual_calibrated": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 0.0, "flat_rate": 1.0, "divergence_rate": 0.0, "mean_sweeps": 1, "mean_active": 10, "mean_factors": 0, "ms_per_example": 0.03275653425926622}
+    },
+    "counterfactual": {
+      "single": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 0.0, "flat_rate": 1.0, "divergence_rate": 0.0, "mean_sweeps": 1, "mean_active": 10, "mean_factors": 0, "ms_per_example": 0.023014051543178305},
+      "dual": {"accuracy": 0.1648148148148148, "wrong_commit": 0.8351851851851851, "null_rate": 0.0, "flat_rate": 0.0, "divergence_rate": 0.0, "mean_sweeps": 2, "mean_active": 7.008641975308642, "mean_factors": 1, "ms_per_example": 0.04651463703704366},
+      "dual_calibrated": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 0.0, "flat_rate": 1.0, "divergence_rate": 0.0, "mean_sweeps": 1, "mean_active": 10, "mean_factors": 0, "ms_per_example": 0.033244973148173054}
+    },
+    "plan_change": {
+      "single": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 0.0, "flat_rate": 1.0, "divergence_rate": 0.0, "mean_sweeps": 1, "mean_active": 10, "mean_factors": 0, "ms_per_example": 0.02314590061727431},
+      "dual": {"accuracy": 0.10432098765432099, "wrong_commit": 0.895679012345679, "null_rate": 0.0, "flat_rate": 0.0, "divergence_rate": 0.0, "mean_sweeps": 2, "mean_active": 9.135493827160493, "mean_factors": 1, "ms_per_example": 0.05126117253088023},
+      "dual_calibrated": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 0.0, "flat_rate": 1.0, "divergence_rate": 0.0, "mean_sweeps": 1, "mean_active": 10, "mean_factors": 0, "ms_per_example": 0.03322604135803365}
+    },
+    "noise": {
+      "single": {"accuracy": 0.00030864197530864197, "wrong_commit": 0.0, "null_rate": 0.0, "flat_rate": 0.9996913580246913, "divergence_rate": 0.0, "mean_sweeps": 1, "mean_active": 10, "mean_factors": 0, "ms_per_example": 0.02346307777782229},
+      "dual": {"accuracy": 0.06574074074074074, "wrong_commit": 0.3611111111111111, "null_rate": 0.5731481481481482, "flat_rate": 0.0, "divergence_rate": 0.0, "mean_sweeps": 1.5530864197530865, "mean_active": 8.364506172839507, "mean_factors": 0.5530864197530865, "ms_per_example": 0.037924995370380646},
+      "dual_calibrated": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 0.4469135802469136, "flat_rate": 0.5530864197530865, "divergence_rate": 0.0, "mean_sweeps": 1, "mean_active": 10, "mean_factors": 0, "ms_per_example": 0.030349440740732137}
+    },
+    "proposal_missing": {
+      "single": {"accuracy": 0.0, "wrong_commit": 0.0006172839506172839, "null_rate": 0.0, "flat_rate": 0.9993827160493828, "divergence_rate": 0.0, "mean_sweeps": 1, "mean_active": 10, "mean_factors": 0, "ms_per_example": 0.02642717345679645},
+      "dual": {"accuracy": 0.0, "wrong_commit": 0.8361111111111111, "null_rate": 0.1638888888888889, "flat_rate": 0.0, "divergence_rate": 0.0, "mean_sweeps": 1.946604938271605, "mean_active": 6.867592592592593, "mean_factors": 0.946604938271605, "ms_per_example": 0.04813447962964199},
+      "dual_calibrated": {"accuracy": 0.0, "wrong_commit": 0.0006172839506172839, "null_rate": 0.05277777777777778, "flat_rate": 0.946604938271605, "divergence_rate": 0.0, "mean_sweeps": 1, "mean_active": 10, "mean_factors": 0, "ms_per_example": 0.03434776049380442}
+    },
+    "unmarked": {
+      "single": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "flat_rate": 0.0, "divergence_rate": 0.0, "mean_sweeps": 1, "mean_active": 0, "mean_factors": 0, "ms_per_example": 0.00010554320987218354},
+      "dual": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "flat_rate": 0.0, "divergence_rate": 0.0, "mean_sweeps": 1, "mean_active": 0, "mean_factors": 0, "ms_per_example": 0.00007520308641935284},
+      "dual_calibrated": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "flat_rate": 0.0, "divergence_rate": 0.0, "mean_sweeps": 1, "mean_active": 0, "mean_factors": 0, "ms_per_example": 0.00007155432101430883}
+    },
+    "resource": {
+      "single": {"model_bytes": 180},
+      "dual": {"model_bytes": 197},
+      "dual_calibrated": {"model_bytes": 189}
+    }
+  },
+  "peak_rss_kib_runtime_included": 160292,
+  "estimated_complexity": "proposal O(L²); relaxation O(SHF), H<=10, F<=5, S<=4",
+  "candidate_space_supplied_for_controlled_tests": true,
+  "free_japanese_integrated_gate": 0.0,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
