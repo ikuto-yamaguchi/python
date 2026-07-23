@@ -1,0 +1,56 @@
+{
+  "cycle": 29,
+  "hypothesis": "Cross-Input Discriminating Experiments from Program-Composed Probe States",
+  "seeds": [1, 7, 19],
+  "train_size": 288,
+  "split": {"induction": 0.7, "probe": 0.3, "final_test_per_mode": 24},
+  "controls": {
+    "final_test_outcomes_used_for_selection": false,
+    "probe_partition_independent_from_induction": true,
+    "fixed_ontology_in_learner": false,
+    "external_llm": false,
+    "rag": false
+  },
+  "averages": {
+    "seen": {
+      "graph": {"accuracy": 0.0, "wrong_commit": 0.0, "commit_rate": 0.0, "pair_recall": 0.013888888888888888},
+      "probe": {"accuracy": 0.06944444444444445, "wrong_commit": 0.0, "commit_rate": 0.06944444444444445, "pair_recall": 0.013888888888888888, "mean_candidates": 8.61111111111111, "mean_probe_evidence": 1.2222222222222223},
+      "shuffle": {"accuracy": 0.0, "wrong_commit": 0.0, "commit_rate": 0.0, "pair_recall": 0.013888888888888888},
+      "mdl": {"accuracy": 0.06944444444444445, "wrong_commit": 0.0, "commit_rate": 0.06944444444444445, "pair_recall": 0.013888888888888888}
+    },
+    "order": {"graph_accuracy": 0.0, "probe_accuracy": 0.041666666666666664, "shuffle_accuracy": 0.0, "mdl_accuracy": 0.041666666666666664},
+    "lexeme": {"graph_accuracy": 0.0, "probe_accuracy": 0.041666666666666664, "shuffle_accuracy": 0.0, "mdl_accuracy": 0.041666666666666664},
+    "rename": {"graph_accuracy": 0.0, "probe_accuracy": 0.0, "shuffle_accuracy": 0.0, "mdl_accuracy": 0.0},
+    "alternate": {"graph_accuracy": 0.0, "probe_accuracy": 0.0, "shuffle_accuracy": 0.0, "mdl_accuracy": 0.0},
+    "nested": {"graph_accuracy": 0.0, "probe_accuracy": 0.041666666666666664, "shuffle_accuracy": 0.0, "mdl_accuracy": 0.041666666666666664},
+    "omitted": {"graph_accuracy": 0.0, "probe_accuracy": 0.0, "shuffle_accuracy": 0.0, "mdl_accuracy": 0.0},
+    "paragraph": {"graph_accuracy": 0.0, "probe_accuracy": 0.041666666666666664, "shuffle_accuracy": 0.0, "mdl_accuracy": 0.041666666666666664}
+  },
+  "diagnostics": {
+    "triangles": 64.0,
+    "probe_audits": 402.6666666666667,
+    "probe_discriminations": 153.0,
+    "global_preferences": 97.66666666666667,
+    "context_preferences": 114.66666666666667,
+    "raw_candidates": 1326.6666666666667,
+    "triangle_audits": 1794.3333333333333,
+    "description_bits_literal": 283045.3333333333,
+    "description_bits_mdl": 24664.0,
+    "model_bytes_probe": 8811.666666666666,
+    "training_seconds_probe": 0.38988411133334466,
+    "inference_ms_seen_probe": 4.772427680555166,
+    "inference_ms_nested_probe": 8.202,
+    "inference_ms_paragraph_probe": 17.406,
+    "peak_rss_kib_runtime_included": 111904
+  },
+  "seed_seen_audit": {
+    "1": {"probe_accuracy": 0.08333333333333333, "probe_wrong": 0.0, "shuffle_accuracy": 0.0},
+    "7": {"probe_accuracy": 0.041666666666666664, "probe_wrong": 0.0, "shuffle_accuracy": 0.0},
+    "19": {"probe_accuracy": 0.08333333333333333, "probe_wrong": 0.0, "shuffle_accuracy": 0.0}
+  },
+  "estimated_complexity": "candidate O(NL^2), triangle audit O(NKoKv), probe pair audit O(VT^2), inference O(TL^2+T^2)",
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
