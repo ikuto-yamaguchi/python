@@ -1,0 +1,37 @@
+{
+  "cycle": 29,
+  "hypothesis": "Outcome-Blind Positive Witness Birth from Source-Only Mechanism Transport",
+  "seeds": [1, 7, 19],
+  "sizes": [48, 144, 288],
+  "summary_288": {
+    "seen": {"surface": 0.2777777778, "transport": 0.2777777778, "fiber": 0.2777777778},
+    "held": {"surface": 0.2013888889, "transport": 0.2013888889, "fiber": 0.2013888889},
+    "rename": {"surface": 0.2013888889, "transport": 0.2013888889, "fiber": 0.2013888889},
+    "alternate": {"surface": 0.2013888889, "transport": 0.2013888889, "fiber": 0.2013888889},
+    "omitted": {"surface": 0.0, "transport": 0.0, "fiber": 0.0},
+    "paragraph": {"surface": 0.1666666667, "transport": 0.1666666667, "fiber": 0.1666666667},
+    "plan": {"surface": 0.1458333333, "transport": 0.1458333333, "fiber": 0.1458333333},
+    "counterfactual": {"surface": 0.2013888889, "transport": 0.2013888889, "fiber": 0.2013888889}
+  },
+  "diagnostics": {
+    "programs": 64.0,
+    "eligible_programs": 51.6666666667,
+    "mechanism_links": 3.0,
+    "positive_executions": 158.6666666667,
+    "wrong_executions": 1.6666666667,
+    "sequential_coverage": 0.1276595745,
+    "sequential_conditional_accuracy": 0.3285714286,
+    "model_bytes": 10534.0,
+    "training_seconds": 0.007299692,
+    "inference_ms": 0.020096924,
+    "peak_rss_kib_runtime_included": 167448
+  },
+  "estimated_complexity": "program extraction O(NL), source-only audit O(PN), link grouping O(P), inference O(PL), P<=64",
+  "target_outcome_used_at_inference": false,
+  "hidden_labels_used_by_learner": false,
+  "status": "strongly_falsified_with_outcome_leakage_removed",
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
