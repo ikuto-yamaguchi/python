@@ -1,0 +1,40 @@
+{
+  "hypothesis": "Latent State Anchors from Bidirectional Before/After Transport Residuals",
+  "seeds": [1, 7, 19],
+  "sizes": [48, 144, 432],
+  "reported_summary_size": 432,
+  "summary": {
+    "seen": {
+      "surface": {"accuracy": 0.09104938, "null_rate": 0.90895062, "mean_candidates": 0.09722222, "cf_coverage": 0.00308642, "rules": 64, "anchors": 0, "model_bytes": 8466.33, "training_seconds": 0.00194579, "inference_ms": 0.01227327},
+      "anchor_no_bidir": {"accuracy": 0.21604938, "null_rate": 0.78395062, "mean_candidates": 0.55864198, "cf_coverage": 0.00154321, "rules": 64, "anchors": 32, "anchor_members": 358.67, "transport_ok": 88, "null_transports": 18600, "model_bytes": 52394, "training_seconds": 0.01180082, "inference_ms": 0.10487137},
+      "anchor_bidir": {"accuracy": 0.06172840, "null_rate": 0.93827160, "mean_candidates": 0.07407407, "cf_coverage": 0.00154321, "rules": 64, "anchors": 32, "anchor_members": 78.33, "transport_ok": 57, "null_transports": 20639, "model_bytes": 23934.67, "training_seconds": 0.02814026, "inference_ms": 0.02586850}
+    },
+    "held": {
+      "surface": {"accuracy": 0.0, "cf_coverage": 0.0},
+      "anchor_no_bidir": {"accuracy": 0.0, "cf_coverage": 0.0},
+      "anchor_bidir": {"accuracy": 0.0, "cf_coverage": 0.0}
+    },
+    "alternate": {
+      "surface": {"accuracy": 0.10802469, "cf_coverage": 0.00462963},
+      "anchor_no_bidir": {"accuracy": 0.22993827, "cf_coverage": 0.00771605},
+      "anchor_bidir": {"accuracy": 0.07407407, "cf_coverage": 0.00462963}
+    },
+    "rename": {
+      "surface": {"accuracy": 0.11574074, "cf_coverage": 0.00154321},
+      "anchor_no_bidir": {"accuracy": 0.17438272, "cf_coverage": 0.00617284},
+      "anchor_bidir": {"accuracy": 0.06944444, "cf_coverage": 0.00154321}
+    },
+    "omitted": {"surface": {"accuracy": 0.0}, "anchor_no_bidir": {"accuracy": 0.0}, "anchor_bidir": {"accuracy": 0.0}},
+    "paragraph": {"surface": {"accuracy": 0.0}, "anchor_no_bidir": {"accuracy": 0.0}, "anchor_bidir": {"accuracy": 0.0}},
+    "plan": {"surface": {"accuracy": 0.0}, "anchor_no_bidir": {"accuracy": 0.0}, "anchor_bidir": {"accuracy": 0.0}},
+    "free_state": {"surface": {"accuracy": 0.0}, "anchor_no_bidir": {"accuracy": 0.0}, "anchor_bidir": {"accuracy": 0.0}}
+  },
+  "peak_rss_kib_runtime_included": 112644,
+  "estimated_complexity": "fit O(PNG), transport audit O(APNG), inference O(APG), P<=64, A<=32",
+  "hidden_labels_used_by_learner": false,
+  "validation": "py_compile passed; a second full rerun reproduced all deterministic accuracy, coverage, graph-size and transport-count metrics",
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
