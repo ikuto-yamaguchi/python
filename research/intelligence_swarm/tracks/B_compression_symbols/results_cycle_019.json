@@ -1,0 +1,50 @@
+{
+  "hypothesis": "Anonymous Failure-Cause Quotients from Minimal Counterexample Hitting Sets",
+  "seeds": [1, 7, 19],
+  "sizes": [48, 144, 432],
+  "summary_432": {
+    "seen": {
+      "executable": {"accuracy": 0.6888888888888889, "wrong_commit": 0.02777777777777778, "candidate_execution_recall": 0.6888888888888889, "description_bits": 9208, "cause_count": 0, "model_bytes": 38905.333333333336, "training_seconds": 0.015402988333335088, "inference_ms": 0.05611712222288487},
+      "episode_exception": {"accuracy": 0.6888888888888889, "wrong_commit": 0.02777777777777778, "candidate_execution_recall": 0.6888888888888889, "description_bits": 12637, "cause_count": 0, "model_bytes": 38912.333333333336, "training_seconds": 0.014843284333286041, "inference_ms": 0.055561516666734354},
+      "anonymous_quotient": {"accuracy": 0.6888888888888889, "wrong_commit": 0.0, "candidate_execution_recall": 0.6888888888888889, "description_bits": 12309.333333333334, "cause_count": 4.666666666666667, "model_bytes": 38939, "training_seconds": 0.019388261999968865, "inference_ms": 0.053148824998869616}
+    },
+    "held_order": {
+      "executable": {"accuracy": 0.0, "wrong_commit": 0.0, "candidate_execution_recall": 0.0, "description_bits": 9208, "cause_count": 0, "model_bytes": 38905.333333333336, "training_seconds": 0.014691722999941703, "inference_ms": 0.014916283333200732},
+      "episode_exception": {"accuracy": 0.0, "wrong_commit": 0.0, "candidate_execution_recall": 0.0, "description_bits": 12637, "cause_count": 0, "model_bytes": 38912.333333333336, "training_seconds": 0.01506525066664229, "inference_ms": 0.014882038888370313},
+      "anonymous_quotient": {"accuracy": 0.0, "wrong_commit": 0.0, "candidate_execution_recall": 0.0, "description_bits": 12309.333333333334, "cause_count": 4.666666666666667, "model_bytes": 38939, "training_seconds": 0.01942475333332065, "inference_ms": 0.014879538888281887}
+    },
+    "held_lexeme": {
+      "executable": {"accuracy": 0.0, "wrong_commit": 0.0, "candidate_execution_recall": 0.0, "description_bits": 9208, "cause_count": 0, "model_bytes": 38905.333333333336, "training_seconds": 0.014607494000150231, "inference_ms": 0.014513630555433742},
+      "episode_exception": {"accuracy": 0.0, "wrong_commit": 0.0, "candidate_execution_recall": 0.0, "description_bits": 12637, "cause_count": 0, "model_bytes": 38912.333333333336, "training_seconds": 0.015604357666688884, "inference_ms": 0.014482058333619029},
+      "anonymous_quotient": {"accuracy": 0.0, "wrong_commit": 0.0, "candidate_execution_recall": 0.0, "description_bits": 12309.333333333334, "cause_count": 4.666666666666667, "model_bytes": 38939, "training_seconds": 0.020116286666810385, "inference_ms": 0.014586658333984006}
+    },
+    "nested": {
+      "executable": {"accuracy": 0.6888888888888889, "wrong_commit": 0.02777777777777778, "candidate_execution_recall": 0.6888888888888889, "description_bits": 9208, "cause_count": 0, "model_bytes": 38905.333333333336, "training_seconds": 0.014551103333208934, "inference_ms": 0.061329247224269544},
+      "episode_exception": {"accuracy": 0.6888888888888889, "wrong_commit": 0.02777777777777778, "candidate_execution_recall": 0.6888888888888889, "description_bits": 12637, "cause_count": 0, "model_bytes": 38912.333333333336, "training_seconds": 0.014671262666828019, "inference_ms": 0.060420452777836746},
+      "anonymous_quotient": {"accuracy": 0.6888888888888889, "wrong_commit": 0.0, "candidate_execution_recall": 0.6888888888888889, "description_bits": 12309.333333333334, "cause_count": 4.666666666666667, "model_bytes": 38939, "training_seconds": 0.0194653000001684, "inference_ms": 0.05844199166757688}
+    },
+    "omitted": {
+      "executable": {"accuracy": 0.0, "wrong_commit": 0.0, "candidate_execution_recall": 0.0, "description_bits": 9208, "cause_count": 0, "model_bytes": 38905.333333333336, "training_seconds": 0.014622673333178682, "inference_ms": 0.014725561111895836},
+      "episode_exception": {"accuracy": 0.0, "wrong_commit": 0.0, "candidate_execution_recall": 0.0, "description_bits": 12637, "cause_count": 0, "model_bytes": 38912.333333333336, "training_seconds": 0.014666315333367189, "inference_ms": 0.01445429166501021},
+      "anonymous_quotient": {"accuracy": 0.0, "wrong_commit": 0.0, "candidate_execution_recall": 0.0, "description_bits": 12309.333333333334, "cause_count": 4.666666666666667, "model_bytes": 38939, "training_seconds": 0.019404476666598686, "inference_ms": 0.014491097222920264}
+    },
+    "alternate": {
+      "executable": {"accuracy": 0.0, "wrong_commit": 0.0, "candidate_execution_recall": 0.0, "description_bits": 9208, "cause_count": 0, "model_bytes": 38905.333333333336, "training_seconds": 0.014656633999948099, "inference_ms": 0.015655272222324535},
+      "episode_exception": {"accuracy": 0.0, "wrong_commit": 0.0, "candidate_execution_recall": 0.0, "description_bits": 12637, "cause_count": 0, "model_bytes": 38912.333333333336, "training_seconds": 0.014616774666592391, "inference_ms": 0.015533530555937128},
+      "anonymous_quotient": {"accuracy": 0.0, "wrong_commit": 0.0, "candidate_execution_recall": 0.0, "description_bits": 12309.333333333334, "cause_count": 4.666666666666667, "model_bytes": 38939, "training_seconds": 0.01955702233347741, "inference_ms": 0.015843855555885966}
+    },
+    "freeform": {
+      "executable": {"accuracy": 0.6888888888888889, "wrong_commit": 0.02777777777777778, "candidate_execution_recall": 0.6888888888888889, "description_bits": 9208, "cause_count": 0, "model_bytes": 38905.333333333336, "training_seconds": 0.014735988333238007, "inference_ms": 0.0649206055552693},
+      "episode_exception": {"accuracy": 0.6888888888888889, "wrong_commit": 0.02777777777777778, "candidate_execution_recall": 0.6888888888888889, "description_bits": 12637, "cause_count": 0, "model_bytes": 38912.333333333336, "training_seconds": 0.014750319666745781, "inference_ms": 0.06481956944526246},
+      "anonymous_quotient": {"accuracy": 0.6888888888888889, "wrong_commit": 0.0, "candidate_execution_recall": 0.6888888888888889, "description_bits": 12309.333333333334, "cause_count": 4.666666666666667, "model_bytes": 38939, "training_seconds": 0.01973806799999996, "inference_ms": 0.06212084166590002}
+    }
+  },
+  "peak_rss_kib_runtime_included": 112064,
+  "estimated_complexity": "proposal O(NC^2), behavior O(PN), predicate induction O(PND), greedy hitting O(PKW), inference O(PL)",
+  "hidden_labels_used_by_learner": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false,
+  "note": "Full raw arrays are reproduced by the committed script; this artifact stores maximum-size three-seed aggregates."
+}
