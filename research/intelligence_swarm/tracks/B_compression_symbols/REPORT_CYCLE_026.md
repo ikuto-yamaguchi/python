@@ -5,33 +5,28 @@
 **Executable Binding Graphs from Role-Exchange Consequence Factorization**  
 （役割交換consequenceの因子分解からの実行可能binding graph）
 
-Cycle 025では可逆な文字列交換から多数のrole seedと短いMDL libraryを形成したが、全splitでexecution accuracy・pair recallが0だった。今回は候補包含や交換可能性を主評価にせず、raw `before / command / after / future`から次の三部graphを形成した。
-
-- Object node: command・before・after・futureに共通する区間の形状class
-- Value node: command・after・futureに現れ、beforeにはない区間の形状class
-- State-change endpoint: before→after差分の左右保存contextとold/new形状
-- Binding triangle: object・value・endpointが同じpositive witness上でforward実行・inverse reconstruction・non-target保存を満たす三角形
+Cycle 025では可逆な文字列交換からrole seedと短いMDL libraryを形成したが、全splitでexecution accuracyが0だった。今回はraw `before / command / after / future`から、object node・value node・state-change endpointを生成し、forward after生成、inverse before復元、non-target保存を満たす三角形だけをbinding graphへ採用した。
 
 ## 先行研究整理
 
-- ICLR 2025のSR4MDLはsymbolic regressionでdescription lengthを探索目標にして式回収を改善したが、式文法と数値入出力空間は定義済み。
+- ICLR 2025のSR4MDLはdescription lengthをsymbolic regressionの探索目標にして式回収を改善したが、式文法と数値入出力空間は定義済み。
   - https://proceedings.iclr.cc/paper_files/paper/2025/hash/a402493de088886740b5939f666a6e56-Abstract-Conference.html
-- NeurIPS 2025のProgram Synthesis via Test-Time Transductionは有限program hypothesis classをtest inputで絞るが、program候補classと外部LLM出力を前提にする。
+- NeurIPS 2025のProgram Synthesis via Test-Time Transductionは有限program hypothesis classをtest inputで絞るが、program候補classと外部LLMを前提にする。
   - https://proceedings.neurips.cc/paper_files/paper/2025/hash/35678513540026a9e3bf0d49d7e6f624-Abstract-Conference.html
 - COLT 2025のtwo-part-code MDL解析はdescription penalty次第でunder/over-regularizationが起こることを示し、短さ単独を能力証拠にできない。
   - https://proceedings.mlr.press/v291/zhu25a.html
-- TheoryCoder-2は経験から再利用可能なabstractionを学習してplanningへ使うが、LLMと既存program-synthesis agentを利用する。
+- TheoryCoder-2は経験からabstractionを学んでplanningへ使うが、LLMと既存program-synthesis agentを利用する。
   - https://arxiv.org/abs/2602.00929
 
 ## 他系列との重複表
 
 | 系列 | 最新中心 | 支配的失敗 | Bとの分離 |
 |---|---|---|---|
-| A | 局所残差routingによるpredictive responsibility | commitment責任が負、No-carryへ退化 | 予測状態・談話責任は扱わない |
+| A | 局所残差routingによるpredictive responsibility | commitment責任が負 | 予測状態・談話責任は扱わない |
 | C | Multi-witness state-variable fiber | success event間identity class 0 | 因果mechanism identityは扱わない |
-| D | Memory要素除去によるcredit isolation | 誤factorをslow固定、干渉悪化 | 長期memory再固定化は扱わない |
+| D | Memory要素除去によるcredit isolation | 誤factorをslow固定 | 長期memory再固定化は扱わない |
 | E | Residual-mediator constraint hyperedge | constraint edge 0 | energy dynamicsは扱わない |
-| **B** | **実行可能三部binding graph＋絶対MDL** | variable binding・program selection | 系列固有 |
+| **B** | **実行可能三部binding graph＋絶対MDL** | graph選択・variable binding | 系列固有 |
 
 系列Cも複数witnessと対応edgeを扱うが、Cは因果state-variable identityとcounterfactual rolloutを採否基準とする。Bはforward/inverse導出、可逆圧縮、graph metadata込み総記述長を中心にする。
 
@@ -49,9 +44,9 @@ Cycle 025では可逆な文字列交換から多数のrole seedと短いMDL libr
 
 | 条件 | Exact accuracy / pair recall | Graph accuracy / pair recall | MDL accuracy / pair recall |
 |---|---:|---:|---:|
-| 既知 | 0 / 0 | 0 / 0 | 0 / 0 |
+| 既知 | 0 / 0 | 0 / **0.0139** | 0 / **0.0139** |
 | 未知語順 | 0 / 0 | 0 / 0 | 0 / 0 |
-| 未知語彙 | 0 / 0 | 0 / 0 | 0 / 0 |
+| 未知語彙 | 0 / 0 | 0 / **0.0139** | 0 / **0.0139** |
 | Rename | 0 / 0 | 0 / 0 | 0 / 0 |
 | 別状態表現 | 0 / 0 | 0 / 0 | 0 / 0 |
 | 入れ子 | 0 / 0 | 0 / 0 | 0 / 0 |
@@ -66,9 +61,9 @@ Cycle 025では可逆な文字列交換から多数のrole seedと短いMDL libr
 - Binding triangle: 64
 - Raw candidate: 3,124.33
 - Forward/inverse audit: 1,855
-- 既知graph平均生成候補: 約1.17
-- 複数段落graph平均生成候補: 約5.99
-- Literal description: 約283,045 bits
+- 既知graph平均生成候補: 5.99
+- 複数段落graph平均生成候補: 5.99
+- Literal description: 283,045 bits
 - MDL graph description: 26,112 bits
 
 ## 判定
@@ -77,17 +72,17 @@ Cycle 025では可逆な文字列交換から多数のrole seedと短いMDL libr
 
 ### Training witnessでは実行可能triangleが形成
 
-Positive witness上のforward after生成、inverse before復元、non-target保存を要求しても上限64件のtriangleが形成された。Cycle 025の単なる交換可能seedより厳しい実行条件を通過した点は前進である。
+Positive witness上のforward after生成、inverse before復元、non-target保存を要求しても64件のtriangleが形成された。Cycle 025の単なる交換可能seedより厳しい条件を通過した点は前進である。
 
-### Held-outでは全面tie・棄権
+### Held-out executionは全面0
 
-全splitでaccuracy・pair recallは0。Graph方式は候補を生成したが、複数triangleが同scoreで異なるafterを提案し、commit率0へ退化した。複数段落では候補数だけが増え、正答pairは得られなかった。
+全splitでexecution accuracyとcommit率は0だった。既知・未知語彙でpair recall 0.0139の微小信号はあるが、能力値として採用できない。Graphは複数triangleから異なるafterを同scoreで提案し、全面tie・棄権へ退化した。
 
 > 局所的に実行可能な三角形を集めても、入力ごとにどの三角形を選ぶかというrelation・scope・operation identityがなければprogramにならない。
 
 ### MDLは約90.8%短縮したが能力0
 
-総記述長は約283,045 bitsから26,112 bitsへ短縮したが、execution accuracyは0のまま。MDLは再び短い失敗libraryを選択した。
+総記述長は283,045 bitsから26,112 bitsへ短縮したが、execution accuracyは0のまま。MDLは再び短い失敗libraryを選択した。
 
 ### 支配的失敗
 
@@ -100,7 +95,7 @@ Positive witness上のforward after生成、inverse before復元、non-target保
 
 ## 反証条件
 
-支持には、GraphがExactをexecution accuracyで上回り、未知形式の少なくとも一つでpair recallを増やし、wrong commitを増やさずcommit率を正にし、MDL短縮と能力改善を同時に満たす必要があった。今回はtriangle形成とMDL短縮のみ成立した。
+支持には、GraphがExactをexecution accuracyで上回り、未知形式の少なくとも一つでpair recallを実質的に増やし、wrong commitを増やさずcommit率を正にし、MDL短縮と能力改善を同時に満たす必要があった。今回はtriangle形成とMDL短縮だけが成立した。
 
 ## 探索爆発抑制・資源
 
@@ -108,11 +103,11 @@ Positive witness上のforward after生成、inverse before復元、non-target保
 - observed shape-compatible tripleだけ監査
 - triangleはpositive 3以上・wrong 0・inverse 3以上
 - 計算量: span `O(NL²)`、audit `O(NK_oK_v)`、推論 `O(TL²)`
-- Graph model: 約14,701 bytes
-- 学習: 約0.081秒
-- 既知推論: 約3.36 ms/example
-- 複数段落: 約17.46 ms/example
-- Peak RSS: Python runtime込み約44 MiB
+- Graph model: 14,701 bytes
+- 学習: 0.081秒
+- 既知推論: 4.62 ms/example
+- 複数段落: 17.46 ms/example
+- Peak RSS: 112,140 KiB（Python runtime込み）
 
 1GB未満。既知は5ms未満だが複数段落と弱いスマートフォンCPU実機は未達。
 
