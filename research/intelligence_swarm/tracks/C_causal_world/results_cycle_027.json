@@ -1,0 +1,32 @@
+{
+  "hypothesis": "Multi-Witness State-Variable Fibers from Positive Intervention Alignment",
+  "seeds": [1, 7, 19],
+  "sizes": [48, 144, 288],
+  "summary_288": {
+    "seen": {"surface_accuracy": 0.29166666666666663, "fiber_accuracy": 0.29166666666666663, "graph_accuracy": 0.29166666666666663, "null_rate": 0.7083333333333334},
+    "held": {"surface_accuracy": 0.16666666666666669, "fiber_accuracy": 0.16666666666666669, "graph_accuracy": 0.16666666666666669, "null_rate": 0.8333333333333334},
+    "rename": {"surface_accuracy": 0.18055555555555555, "fiber_accuracy": 0.18055555555555555, "graph_accuracy": 0.18055555555555555, "null_rate": 0.8194444444444444},
+    "alternate": {"surface_accuracy": 0.2013888888888889, "fiber_accuracy": 0.2013888888888889, "graph_accuracy": 0.2013888888888889, "null_rate": 0.798611111111111},
+    "omitted": {"surface_accuracy": 0.0, "fiber_accuracy": 0.0, "graph_accuracy": 0.0, "null_rate": 1.0},
+    "paragraph": {"surface_accuracy": 0.21527777777777776, "fiber_accuracy": 0.21527777777777776, "graph_accuracy": 0.21527777777777776, "null_rate": 0.7847222222222222},
+    "plan": {"surface_accuracy": 0.1736111111111111, "fiber_accuracy": 0.1736111111111111, "graph_accuracy": 0.1736111111111111, "null_rate": 0.826388888888889},
+    "counterfactual": {"surface_accuracy": 0.16666666666666669, "fiber_accuracy": 0.16666666666666669, "graph_accuracy": 0.16666666666666669, "null_rate": 0.8333333333333334},
+    "events": 64,
+    "fibers": 0,
+    "fiber_members": 0,
+    "graph_edges": 0,
+    "mean_positive_witnesses": 1.2135416666666667,
+    "sequential_coverage": 0.1276595744680851,
+    "sequential_conditional_accuracy": 0.32857142857142857,
+    "model_bytes": 9757,
+    "training_seconds": 0.011131875333376229,
+    "inference_ms": 0.054752624999802414
+  },
+  "peak_rss_kib_runtime_included": 160200,
+  "estimated_complexity": "event extraction O(NL), witness audit O(PN), necessity O(PNF), fiber partition O(P), graph O(C^2), inference O(PL)",
+  "hidden_labels_used_by_learner": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
