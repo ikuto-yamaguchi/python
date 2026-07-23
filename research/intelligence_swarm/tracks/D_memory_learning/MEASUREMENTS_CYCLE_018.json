@@ -1,0 +1,41 @@
+{
+  "hypothesis": "Bridge-Episode Alias Equivalence by Reversible State-Trajectory Transport",
+  "seeds": [1, 7, 19],
+  "train_sizes": [12, 24, 48],
+  "max_train_summary": {
+    "seen": {
+      "none": {"write_accuracy": 0.6666666667, "read_accuracy": 0.375, "wrong_read": 0.625, "links": 58.0, "slow_links": 0.0, "model_bytes": 17648.6667, "training_seconds": 0.0008968173, "inference_ms": 1.8706089305, "fast_updates": 0.0},
+      "bidir": {"write_accuracy": 0.6666666667, "read_accuracy": 0.375, "wrong_read": 0.625, "links": 58.0, "slow_links": 0.0, "model_bytes": 17649.6667, "training_seconds": 0.0008912987, "inference_ms": 1.9228345833, "fast_updates": 0.0},
+      "slow": {"write_accuracy": 0.6666666667, "read_accuracy": 0.375, "wrong_read": 0.625, "links": 58.0, "slow_links": 0.0, "model_bytes": 17648.6667, "training_seconds": 0.0009120697, "inference_ms": 1.9495756667, "fast_updates": 0.0}
+    },
+    "held": {
+      "none": {"write_accuracy": 0.9027777778, "read_accuracy": 0.2916666667, "wrong_read": 0.7083333333, "links": 68.3333333333, "slow_links": 0.6666666667, "model_bytes": 18724.3333, "training_seconds": 0.0009787017, "inference_ms": 1.8372815834, "fast_updates": 2.6666666667},
+      "bidir": {"write_accuracy": 0.9027777778, "read_accuracy": 0.2916666667, "wrong_read": 0.7083333333, "links": 68.3333333333, "slow_links": 0.6666666667, "model_bytes": 18725.3333, "training_seconds": 0.0009581977, "inference_ms": 4.02018725, "fast_updates": 2.6666666667},
+      "slow": {"write_accuracy": 0.9027777778, "read_accuracy": 0.2916666667, "wrong_read": 0.7083333333, "links": 68.3333333333, "slow_links": 0.6666666667, "model_bytes": 18724.3333, "training_seconds": 0.000961853, "inference_ms": 4.0633499861, "fast_updates": 2.6666666667}
+    },
+    "rename": {
+      "none": {"write_accuracy": 0.6461988304, "read_accuracy": 0.3333333333, "wrong_read": 0.6666666667, "links": 95.6666666667, "slow_links": 1.6666666667, "model_bytes": 25939.3333, "training_seconds": 0.001606079, "inference_ms": 2.8335964949, "fast_updates": 66.6666666667},
+      "bidir": {"write_accuracy": 0.6822612086, "read_accuracy": 0.2916666667, "wrong_read": 0.7083333333, "links": 95.6666666667, "slow_links": 1.6666666667, "model_bytes": 25940.3333, "training_seconds": 0.001621398, "inference_ms": 10.604024567, "fast_updates": 66.6666666667},
+      "slow": {"write_accuracy": 0.6822612086, "read_accuracy": 0.2916666667, "wrong_read": 0.7083333333, "links": 95.6666666667, "slow_links": 1.6666666667, "model_bytes": 25939.3333, "training_seconds": 0.0015995353, "inference_ms": 10.6971056109, "fast_updates": 66.6666666667}
+    },
+    "alternate": {
+      "none": {"write_accuracy": 0.6805555556, "read_accuracy": 0.1666666667, "wrong_read": 0.3333333333, "links": 46.3333333333, "slow_links": 0.0, "model_bytes": 15542.3333, "training_seconds": 0.0008054177, "inference_ms": 1.7837774167, "fast_updates": 0.0},
+      "bidir": {"write_accuracy": 0.6805555556, "read_accuracy": 0.1666666667, "wrong_read": 0.3333333333, "links": 46.3333333333, "slow_links": 0.0, "model_bytes": 15543.3333, "training_seconds": 0.000804744, "inference_ms": 1.8358370972, "fast_updates": 0.0},
+      "slow": {"write_accuracy": 0.6805555556, "read_accuracy": 0.1666666667, "wrong_read": 0.3333333333, "links": 46.3333333333, "slow_links": 0.0, "model_bytes": 15542.3333, "training_seconds": 0.0007971453, "inference_ms": 1.8609840833, "fast_updates": 0.0}
+    },
+    "combined": {
+      "none": {"write_accuracy": 0.6554580897, "read_accuracy": 0.3333333333, "wrong_read": 0.6666666667, "links": 80.6666666667, "slow_links": 1.6666666667, "model_bytes": 23222.3333, "training_seconds": 0.0014517533, "inference_ms": 2.7369583248, "fast_updates": 66.6666666667},
+      "bidir": {"write_accuracy": 0.6822612086, "read_accuracy": 0.2916666667, "wrong_read": 0.7083333333, "links": 80.6666666667, "slow_links": 1.6666666667, "model_bytes": 23223.3333, "training_seconds": 0.0015279797, "inference_ms": 10.4009315685, "fast_updates": 66.6666666667},
+      "slow": {"write_accuracy": 0.6822612086, "read_accuracy": 0.2916666667, "wrong_read": 0.7083333333, "links": 80.6666666667, "slow_links": 1.6666666667, "model_bytes": 23222.3333, "training_seconds": 0.0014690527, "inference_ms": 10.5250788187, "fast_updates": 66.6666666667}
+    },
+    "one_shot": {"none": 1.0, "bidir": 1.0, "slow": 1.0},
+    "interference": {"none": 1.0, "bidir": 1.0, "slow": 1.0}
+  },
+  "peak_rss_kib_runtime_included": 111360,
+  "estimated_complexity": "bridge O(NWH), read/write O(EKG), E<=64",
+  "hidden_labels_used_by_learner": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
