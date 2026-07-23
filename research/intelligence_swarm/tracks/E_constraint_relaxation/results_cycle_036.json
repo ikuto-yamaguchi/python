@@ -1,0 +1,69 @@
+{
+  "cycle": 36,
+  "hypothesis": "Residual-Transported Node Birth from Hyperedge Frustration Gradients",
+  "seeds": [1,7,19],
+  "summary": {
+    "model": {
+      "none": {"hyperedges":13.333333333333334,"birth_signatures":19.333333333333332,"birth_trials":516,"birth_accept":113.66666666666667,"audit":72,"train_s":0.2329824149999998,"bytes":10136},
+      "edge": {"hyperedges":13.333333333333334,"birth_signatures":19.333333333333332,"birth_trials":516,"birth_accept":113.66666666666667,"audit":72,"train_s":0.22359556866679972,"bytes":10136},
+      "birth": {"hyperedges":13.333333333333334,"birth_signatures":19.333333333333332,"birth_trials":516,"birth_accept":113.66666666666667,"audit":72,"train_s":0.22379737666657698,"bytes":10131},
+      "shuffle": {"hyperedges":15,"birth_signatures":21.333333333333332,"birth_trials":497.6666666666667,"birth_accept":92,"audit":71.66666666666667,"train_s":0.22005582699997225,"bytes":11600}
+    },
+    "seen": {
+      "none":{"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":16,"mean_sweeps":2,"max_sweeps":2,"mean_active":16,"mean_born_active":0,"convergence_rate":1.0,"inference_ms":4.635087041644208},
+      "edge":{"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":16,"mean_sweeps":2,"max_sweeps":2,"mean_active":14.25,"mean_born_active":0,"convergence_rate":1.0,"inference_ms":7.374244375000671},
+      "birth":{"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":23.541666666666668,"mean_sweeps":2,"max_sweeps":2,"mean_active":10.458333333333334,"mean_born_active":5.958333333333333,"convergence_rate":1.0,"inference_ms":21.06726225000936},
+      "shuffle":{"accuracy":0.0,"wrong_commit":0.125,"null_rate":0.875,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":21.291666666666668,"mean_sweeps":2,"max_sweeps":2,"mean_active":8.125,"mean_born_active":2.5,"convergence_rate":1.0,"inference_ms":20.0674212083148}
+    },
+    "unknown": {
+      "none":{"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":16,"mean_sweeps":2,"max_sweeps":2,"mean_active":16,"mean_born_active":0,"convergence_rate":1.0,"inference_ms":5.436837583336758},
+      "edge":{"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":16,"mean_sweeps":2,"max_sweeps":2,"mean_active":11.208333333333334,"mean_born_active":0,"convergence_rate":1.0,"inference_ms":8.121660833334468},
+      "birth":{"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":39.041666666666664,"mean_sweeps":2,"max_sweeps":2,"mean_active":15.875,"mean_born_active":15.875,"convergence_rate":1.0,"inference_ms":29.330161666659176},
+      "shuffle":{"accuracy":0.0,"wrong_commit":0.125,"null_rate":0.875,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":33.166666666666664,"mean_sweeps":2,"max_sweeps":2,"mean_active":9.166666666666666,"mean_born_active":9.166666666666666,"convergence_rate":1.0,"inference_ms":26.433041291663056}
+    },
+    "ambiguous": {
+      "none":{"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":16,"mean_sweeps":2,"max_sweeps":2,"mean_active":16,"mean_born_active":0,"convergence_rate":1.0,"inference_ms":4.645210583343366},
+      "edge":{"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":16,"mean_sweeps":2,"max_sweeps":2,"mean_active":12.125,"mean_born_active":0,"convergence_rate":1.0,"inference_ms":7.073120874982426},
+      "birth":{"accuracy":0.0,"wrong_commit":0.08333333333333333,"null_rate":0.9166666666666666,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":25.041666666666668,"mean_sweeps":2,"max_sweeps":2,"mean_active":12.083333333333334,"mean_born_active":6.833333333333333,"convergence_rate":1.0,"inference_ms":21.716926291693046},
+      "shuffle":{"accuracy":0.0,"wrong_commit":0.08333333333333333,"null_rate":0.9166666666666666,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":25.791666666666668,"mean_sweeps":2,"max_sweeps":2,"mean_active":12.041666666666666,"mean_born_active":5.583333333333333,"convergence_rate":1.0,"inference_ms":21.83859612498888}
+    },
+    "nested": {
+      "none":{"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":16,"mean_sweeps":2,"max_sweeps":2,"mean_active":16,"mean_born_active":0,"convergence_rate":1.0,"inference_ms":4.754368833346234},
+      "edge":{"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":16,"mean_sweeps":2,"max_sweeps":2,"mean_active":16,"mean_born_active":0,"convergence_rate":1.0,"inference_ms":7.807059416696423},
+      "birth":{"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":16,"mean_sweeps":2,"max_sweeps":2,"mean_active":16,"mean_born_active":0,"convergence_rate":1.0,"inference_ms":20.65010912499095},
+      "shuffle":{"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":16,"mean_sweeps":2,"max_sweeps":2,"mean_active":15.916666666666666,"mean_born_active":0,"convergence_rate":1.0,"inference_ms":20.60172166666992}
+    },
+    "omitted": {
+      "none":{"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":16,"mean_sweeps":2,"max_sweeps":2,"mean_active":16,"mean_born_active":0,"convergence_rate":1.0,"inference_ms":4.546508874985496},
+      "edge":{"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":16,"mean_sweeps":2,"max_sweeps":2,"mean_active":16,"mean_born_active":0,"convergence_rate":1.0,"inference_ms":7.601830249977108},
+      "birth":{"accuracy":0.0,"wrong_commit":0.041666666666666664,"null_rate":0.9583333333333334,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":16.166666666666668,"mean_sweeps":2,"max_sweeps":2,"mean_active":14.833333333333334,"mean_born_active":0.16666666666666666,"convergence_rate":1.0,"inference_ms":19.804063791658184},
+      "shuffle":{"accuracy":0.0,"wrong_commit":0.041666666666666664,"null_rate":0.9583333333333334,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":16.166666666666668,"mean_sweeps":2,"max_sweeps":2,"mean_active":14.791666666666666,"mean_born_active":0.125,"convergence_rate":1.0,"inference_ms":19.82811691666105}
+    },
+    "paragraph": {
+      "none":{"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":16,"mean_sweeps":2,"max_sweeps":2,"mean_active":16,"mean_born_active":0,"convergence_rate":1.0,"inference_ms":4.9111184999901525},
+      "edge":{"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":16,"mean_sweeps":2,"max_sweeps":2,"mean_active":16,"mean_born_active":0,"convergence_rate":1.0,"inference_ms":8.57573954167871},
+      "birth":{"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":16,"mean_sweeps":2,"max_sweeps":2,"mean_active":16,"mean_born_active":0,"convergence_rate":1.0,"inference_ms":20.696157083326245},
+      "shuffle":{"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":16,"mean_sweeps":2,"max_sweeps":2,"mean_active":16,"mean_born_active":0,"convergence_rate":1.0,"inference_ms":21.33203833333634}
+    },
+    "plan": {
+      "none":{"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":16,"mean_sweeps":2,"max_sweeps":2,"mean_active":16,"mean_born_active":0,"convergence_rate":1.0,"inference_ms":4.954467916661542},
+      "edge":{"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":16,"mean_sweeps":2,"max_sweeps":2,"mean_active":15.041666666666666,"mean_born_active":0,"convergence_rate":1.0,"inference_ms":7.70190154167949},
+      "birth":{"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":16,"mean_sweeps":2,"max_sweeps":2,"mean_active":15.041666666666666,"mean_born_active":0,"convergence_rate":1.0,"inference_ms":20.599430333315166},
+      "shuffle":{"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":16,"mean_sweeps":2,"max_sweeps":2,"mean_active":16,"mean_born_active":0,"convergence_rate":1.0,"inference_ms":19.990346333315756}
+    },
+    "counterfactual": {
+      "none":{"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":16,"mean_sweeps":2,"max_sweeps":2,"mean_active":16,"mean_born_active":0,"convergence_rate":1.0,"inference_ms":5.230563291680331},
+      "edge":{"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":16,"mean_sweeps":2,"max_sweeps":2,"mean_active":16,"mean_born_active":0,"convergence_rate":1.0,"inference_ms":8.323646875017706},
+      "birth":{"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":16,"mean_sweeps":2,"max_sweeps":2,"mean_active":16,"mean_born_active":0,"convergence_rate":1.0,"inference_ms":20.87492187498204},
+      "shuffle":{"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"exact_boundary_recall":0.0,"pair_recall":0.0,"mean_candidates":16,"mean_sweeps":2,"max_sweeps":2,"mean_active":16,"mean_born_active":0,"convergence_rate":1.0,"inference_ms":22.238711666659583}
+    }
+  },
+  "peak_rss_kib_runtime_included":111564,
+  "estimated_complexity":"candidate O(L^4) capped, hyperedge audit O(QHL^2), node birth O(QHM L^2), relaxation O(SH)",
+  "final_test_outcomes_used_for_ranking":false,
+  "highschool_level_passed":false,
+  "native_japanese_communication_passed":false,
+  "weak_smartphone_verified":false,
+  "completion":false,
+  "note":"Committed artifact stores the complete 3-seed aggregate; rerun command regenerates per-seed raw measurements."
+}
