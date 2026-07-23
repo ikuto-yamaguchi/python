@@ -1,0 +1,31 @@
+{
+  "cycle": 38,
+  "hypothesis": "Active Replay Query Synthesis for Disagreement-Seeking Memory Address Birth",
+  "seeds": [1, 7, 19],
+  "summary": {
+    "base_addresses": 64,
+    "passive": {"queries": 24, "disagreement": 0, "description_bits": 10813.333333333334, "families": 0},
+    "random": {"queries": 24, "disagreement": 3447.6666666666665, "description_bits": 10408, "families": 0},
+    "active": {"queries": 24, "disagreement": 3298, "description_bits": 10258.666666666666, "families": 0},
+    "shuffled_active": {"queries": 24, "disagreement": 2945.3333333333335, "description_bits": 10293.333333333334, "families": 0},
+    "all_conditions_closed_accuracy": 0,
+    "all_conditions_null_rate": 1,
+    "one_shot_closed_cycle": 0,
+    "interference_before": 0,
+    "interference_after": 0,
+    "latest_value_recall": 0,
+    "model_bytes": 2292,
+    "training_seconds": 0.0033303360000900284,
+    "inference_ms": 0.00008047000164879137,
+    "peak_rss_kib_runtime_included": 111164
+  },
+  "conditions": ["seen", "held", "rename", "alternate", "omitted", "paragraph", "free"],
+  "estimated_complexity": "induction O(NL^2), active replay O(BP^2Q), quotient O(PQ log P), inference O(FPL)",
+  "fixed_ontology_or_handwritten_slots_used_by_model": false,
+  "rag_or_external_llm_used": false,
+  "final_outcome_used_for_candidate_ranking": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
