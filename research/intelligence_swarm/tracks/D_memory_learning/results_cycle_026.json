@@ -1,0 +1,28 @@
+{
+  "hypothesis": "Counterfactual Credit Isolation by Memory-Element Removal before Reconsolidation",
+  "seeds": [1, 7, 19],
+  "sizes": [24, 36, 48],
+  "summary_max_48": {
+    "seen": {
+      "support": {"read_accuracy": 0.25, "wrong_read": 0.6527777778, "write_accuracy": 0.2083333333, "wrong_write": 0.6388888889},
+      "removal": {"read_accuracy": 0.25, "wrong_read": 0.6527777778, "write_accuracy": 0.2083333333, "wrong_write": 0.6388888889, "positive_binding_credit": 1.6666666667, "negative_binding_credit": 1.3333333333, "mean_binding_credit": 0.0043590669, "removal_audits": 64, "updates": 691, "model_bytes": 3585, "training_seconds": 0.1784186397, "inference_ms": 0.1231909444},
+      "slow": {"read_accuracy": 0.0, "wrong_read": 0.0, "write_accuracy": 0.0, "wrong_write": 0.0833333333, "slow_objects": 0.3333333333, "slow_relations": 0.3333333333, "slow_values": 1.0, "slow_bindings": 0.0}
+    },
+    "held": {"support_read": 0.2777777778, "support_wrong": 0.6111111111, "removal_read": 0.2777777778, "removal_wrong": 0.6111111111, "slow_read": 0.0},
+    "rename": {"support_read": 0.3055555556, "support_wrong": 0.5555555556, "removal_read": 0.3055555556, "removal_wrong": 0.5555555556, "slow_read": 0.0},
+    "alternate": {"support_read": 0.2222222222, "support_wrong": 0.5694444444, "removal_read": 0.2222222222, "removal_wrong": 0.5694444444, "slow_read": 0.0},
+    "omitted": {"support_read": 0.2916666667, "support_wrong": 0.625, "removal_read": 0.2916666667, "removal_wrong": 0.625, "slow_read": 0.0},
+    "paragraph": {"support_read": 0.25, "support_wrong": 0.6527777778, "removal_read": 0.25, "removal_wrong": 0.6527777778, "slow_read": 0.0},
+    "domain": {"support_read": 0.2638888889, "support_wrong": 0.625, "removal_read": 0.2638888889, "removal_wrong": 0.625, "slow_read": 0.0},
+    "one_shot": {"support": {"read": 1.0, "write": 0.6666666667}, "removal": {"read": 1.0, "write": 0.6666666667}, "slow": {"read": 0.0, "write": 0.0}},
+    "interference": {"support": 0.2777777778, "removal": 0.2777777778, "slow": 0.0},
+    "latest_recall": {"support": 0.1388888889, "removal": 0.1388888889, "slow": 0.0}
+  },
+  "peak_rss_kib_runtime_included": 118168,
+  "estimated_complexity": "candidate O(NL^2), removal audit O((O+R+V+B)SNB), inference O(BL)",
+  "hidden_labels_used_by_learner": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
