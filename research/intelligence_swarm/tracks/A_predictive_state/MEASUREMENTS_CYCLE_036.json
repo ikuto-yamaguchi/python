@@ -1,0 +1,32 @@
+{
+  "cycle": 36,
+  "hypothesis": "Reciprocal Boundary Birth from Cross-View Predictive Error Transport",
+  "seeds": [1, 7, 19],
+  "conditions": ["seen", "order", "lexeme", "nested", "omitted", "paragraph", "plan", "counterfactual"],
+  "summary": {
+    "all_conditions": {
+      "fixed": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "rules": 13.0, "mean_active": 2.6666666667},
+      "oneway": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "rules": 0.0, "transport_steps": 80.6666666667, "probe_audits": 511.3333333333},
+      "reciprocal": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "rules": 0.0, "transport_steps": 80.6666666667, "probe_audits": 511.3333333333},
+      "shuffle": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "rules": 0.0, "transport_steps": 64.6666666667, "probe_audits": 522.0}
+    },
+    "resources": {
+      "reciprocal_model_bytes": 136,
+      "reciprocal_training_seconds": 0.007508355,
+      "seen_inference_ms": 0.0046638333,
+      "paragraph_inference_ms": 0.0046594444,
+      "peak_rss_kib_runtime_included": 168052
+    }
+  },
+  "seed_seen_metrics": {
+    "1": {"fixed_rules": 11, "oneway_steps": 80, "reciprocal_steps": 80, "shuffle_steps": 70, "reciprocal_rules": 0},
+    "7": {"fixed_rules": 11, "oneway_steps": 81, "reciprocal_steps": 81, "shuffle_steps": 62, "reciprocal_rules": 0},
+    "19": {"fixed_rules": 17, "oneway_steps": 81, "reciprocal_steps": 81, "shuffle_steps": 62, "reciprocal_rules": 0}
+  },
+  "estimated_complexity": "candidate O(L^2) bounded 24; transport O(QSHM); inference O(R)",
+  "final_test_outcome_used_for_ranking": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
