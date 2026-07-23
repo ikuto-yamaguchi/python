@@ -1,0 +1,82 @@
+{
+  "cycle": 28,
+  "hypothesis": "Cross-Encoded Residual Routing by Predictive Information Exclusion",
+  "seeds": [1, 7, 19],
+  "summary": {
+    "seen": {
+      "no_carry_pair_recall": 1.0,
+      "unconditional_pair_recall": 1.0,
+      "cross_encoded_pair_recall": 1.0,
+      "cross_encoded_accuracy": 0.0,
+      "cross_encoded_carry_rate": 0.028986,
+      "cross_encoded_wrong_carry": 0.014493,
+      "cross_encoded_inference_ms": 0.717839
+    },
+    "rename": {
+      "no_carry_pair_recall": 1.0,
+      "unconditional_pair_recall": 1.0,
+      "cross_encoded_pair_recall": 1.0,
+      "cross_encoded_accuracy": 0.0,
+      "cross_encoded_carry_rate": 0.014493,
+      "cross_encoded_wrong_carry": 0.0
+    },
+    "nested": {
+      "no_carry_pair_recall": 1.0,
+      "unconditional_pair_recall": 1.0,
+      "cross_encoded_pair_recall": 1.0,
+      "cross_encoded_accuracy": 0.0,
+      "cross_encoded_carry_rate": 0.057971,
+      "cross_encoded_wrong_carry": 0.043478
+    },
+    "omitted": {
+      "no_carry_object_recall": 0.0,
+      "no_carry_pair_recall": 0.0,
+      "unconditional_pair_recall": 1.0,
+      "cross_encoded_object_recall": 0.043478,
+      "cross_encoded_pair_recall": 0.043478,
+      "cross_encoded_accuracy": 0.0,
+      "cross_encoded_carry_rate": 0.043478,
+      "cross_encoded_continuation_hit": 0.043478,
+      "cross_encoded_wrong_carry": 0.0,
+      "cross_encoded_inference_ms": 0.708167
+    },
+    "switchmix": {
+      "no_carry_pair_recall": 0.478261,
+      "unconditional_pair_recall": 1.0,
+      "cross_encoded_pair_recall": 0.478261,
+      "cross_encoded_accuracy": 0.0,
+      "cross_encoded_carry_rate": 0.0,
+      "cross_encoded_wrong_carry": 0.0
+    },
+    "paragraph": {
+      "no_carry_pair_recall": 1.0,
+      "unconditional_pair_recall": 1.0,
+      "cross_encoded_pair_recall": 1.0,
+      "cross_encoded_accuracy": 0.0,
+      "cross_encoded_carry_rate": 0.028986,
+      "cross_encoded_wrong_carry": 0.014493,
+      "cross_encoded_inference_ms": 0.873089
+    },
+    "plan": {
+      "no_carry_pair_recall": 1.0,
+      "unconditional_pair_recall": 1.0,
+      "cross_encoded_pair_recall": 1.0,
+      "cross_encoded_accuracy": 0.0,
+      "cross_encoded_carry_rate": 0.028986,
+      "cross_encoded_continuation_hit": 0.0,
+      "cross_encoded_wrong_carry": 0.028986
+    }
+  },
+  "route_prototypes_mean": 1.666667,
+  "model_bytes_mean": 9599.333333,
+  "training_seconds_mean": 0.098758,
+  "peak_rss_kib_runtime_included": 161852,
+  "estimated_complexity": "encoding O(L), sparse projection O(BD), routing O(R), candidate spans O(L^2), pairing O(KoKv)",
+  "hidden_labels_used_by_learner": false,
+  "current_turn_after_future_used_for_route_selection": false,
+  "direct_lexical_overlap_used_in_route_score": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
