@@ -1,0 +1,24 @@
+{
+  "hypothesis": "Role-Separated Residual Transport with Counterfactual Factor Swaps",
+  "seeds": [1, 7, 19],
+  "sizes": [12],
+  "summary": {
+    "seen": {"object_recall": 1.0, "value_recall": 0.0, "pair_recall": 0.0, "accuracy": 0.0, "swap_wrong_commit": 1.0, "swap_null_wrong_commit": 0.0, "swap_null_rate": 1.0, "swap_inference_ms": 10.457333888887712},
+    "unseen": {"object_recall": 0.0, "value_recall": 0.0, "pair_recall": 0.0, "accuracy": 0.0, "swap_wrong_commit": 1.0, "swap_null_wrong_commit": 0.0, "swap_null_rate": 1.0, "swap_inference_ms": 10.562211444449884},
+    "nested": {"object_recall": 0.0, "value_recall": 0.0, "pair_recall": 0.0, "accuracy": 0.0, "swap_wrong_commit": 1.0, "swap_null_wrong_commit": 0.0, "swap_null_rate": 1.0, "swap_inference_ms": 11.427388444442638},
+    "omitted": {"object_recall": 0.0, "value_recall": 0.0, "pair_recall": 0.0, "accuracy": 0.0, "swap_wrong_commit": 1.0, "swap_null_wrong_commit": 0.0, "swap_null_rate": 1.0, "swap_inference_ms": 10.696076666666462},
+    "paragraph": {"object_recall": 0.1111111111111111, "value_recall": 0.0, "pair_recall": 0.0, "accuracy": 0.0, "swap_wrong_commit": 1.0, "swap_null_wrong_commit": 0.0, "swap_null_rate": 1.0, "swap_inference_ms": 12.574959666671425},
+    "plan": {"object_recall": 0.7777777777777778, "value_recall": 0.0, "pair_recall": 0.0, "accuracy": 0.0, "swap_wrong_commit": 1.0, "swap_null_wrong_commit": 0.0, "swap_null_rate": 1.0, "swap_inference_ms": 12.07180266665849},
+    "counterfactual": {"object_recall": 0.0, "value_recall": 0.0, "pair_recall": 0.0, "accuracy": 0.0, "swap_wrong_commit": 1.0, "swap_null_wrong_commit": 0.0, "swap_null_rate": 1.0, "swap_inference_ms": 11.82798899999524}
+  },
+  "prototype_count": 41,
+  "model_bytes": 3006,
+  "training_seconds": 0.04835180233334313,
+  "peak_rss_kib_runtime_included": 111244,
+  "estimated_complexity": "proposal O(L^2), swap fit O(NWHF), relaxation O(SHF), H<=48,S<=4",
+  "hidden_labels_used_by_learner": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
