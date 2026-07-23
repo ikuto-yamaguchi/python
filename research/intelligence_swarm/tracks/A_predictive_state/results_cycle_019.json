@@ -1,0 +1,26 @@
+{
+  "hypothesis": "Dual-View Boundary Birth from Independent Persistence and Change Predictions",
+  "seeds": [1, 7, 19],
+  "train_episodes": 24,
+  "test_examples_per_split_per_seed": 8,
+  "summary": {
+    "seen": {"object_recall": 0.0, "value_recall": 0.0, "pair_recall": 0.0, "accuracy": 0.0, "null_rate": 1.0, "inference_ms": 3.9054892499924185},
+    "held": {"object_recall": 0.0, "value_recall": 0.0, "pair_recall": 0.0, "accuracy": 0.0, "null_rate": 1.0, "inference_ms": 3.9474105000181225},
+    "rename": {"object_recall": 0.0, "value_recall": 0.0, "pair_recall": 0.0, "accuracy": 0.0, "null_rate": 1.0, "inference_ms": 4.176791291664965},
+    "alternate": {"object_recall": 1.0, "value_recall": 0.0, "pair_recall": 0.0, "accuracy": 0.0, "null_rate": 1.0, "inference_ms": 4.47685670832243},
+    "nested": {"object_recall": 0.0, "value_recall": 0.0, "pair_recall": 0.0, "accuracy": 0.0, "null_rate": 1.0, "inference_ms": 5.7457503750129035},
+    "omitted": {"object_recall": 0.0, "value_recall": 0.0, "pair_recall": 0.0, "accuracy": 0.0, "null_rate": 1.0, "inference_ms": 3.7585486666671386},
+    "paragraph": {"object_recall": 0.0, "value_recall": 0.0, "pair_recall": 0.0, "accuracy": 0.0, "null_rate": 1.0, "inference_ms": 7.203828583328686},
+    "plan": {"object_recall": 0.0, "value_recall": 0.0, "pair_recall": 0.0, "accuracy": 0.0, "null_rate": 1.0, "inference_ms": 6.70838495833929}
+  },
+  "model_bytes_mean": 32474.333333333332,
+  "training_seconds_mean": 0.01434004933344113,
+  "peak_rss_kib_runtime_included": 112644,
+  "estimated_complexity": "fit O(NL^2G), inference O(L^2G + KpKc), Kp,Kc<=6",
+  "hidden_labels_used_by_learner": false,
+  "status": "strongly_falsified",
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
