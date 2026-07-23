@@ -1,0 +1,25 @@
+{
+  "cycle": 30,
+  "hypothesis": "Operator-Centered Predictive State Birth from Recurrent Error-Cancellation Loops",
+  "seeds": [1, 7, 19],
+  "summary": {
+    "seen": {"onepass": {"accuracy": 0.0, "null": 1.0}, "carry": {"accuracy": 0.0, "null": 1.0}, "recurrent": {"accuracy": 0.0, "wrong_commit": 0.0, "null": 1.0, "pair_recall": 0.0, "operators": 1.0, "model_bytes": 351.6666666666667, "training_seconds": 0.0010695373333267828, "inference_ms": 0.6598900864210683}},
+    "order": {"onepass": {"accuracy": 0.0, "null": 1.0}, "carry": {"accuracy": 0.0, "null": 1.0}, "recurrent": {"accuracy": 0.0, "null": 1.0, "pair_recall": 0.0, "inference_ms": 0.6328578518537985}},
+    "lexeme": {"onepass": {"accuracy": 0.0, "null": 1.0}, "carry": {"accuracy": 0.0, "null": 1.0}, "recurrent": {"accuracy": 0.0, "null": 1.0, "pair_recall": 0.0, "inference_ms": 0.6783795185168138}},
+    "rename": {"onepass": {"accuracy": 0.0, "null": 1.0}, "carry": {"accuracy": 0.0, "null": 1.0}, "recurrent": {"accuracy": 0.0, "null": 1.0, "pair_recall": 0.0, "inference_ms": 0.7560116296302528}},
+    "nested": {"onepass": {"accuracy": 0.0, "null": 1.0}, "carry": {"accuracy": 0.0, "null": 1.0}, "recurrent": {"accuracy": 0.0, "null": 1.0, "pair_recall": 0.0, "inference_ms": 0.8789733950565009}},
+    "omitted": {"onepass": {"accuracy": 0.0, "null": 1.0}, "carry": {"accuracy": 0.0, "null": 1.0}, "recurrent": {"accuracy": 0.0, "null": 1.0, "pair_recall": 0.0, "inference_ms": 0.52090225925962}},
+    "switchmix": {"onepass": {"accuracy": 0.0, "null": 1.0}, "carry": {"accuracy": 0.0, "null": 1.0}, "recurrent": {"accuracy": 0.0, "null": 1.0, "pair_recall": 0.0, "inference_ms": 0.622235950619075}},
+    "paragraph": {"onepass": {"accuracy": 0.0, "null": 1.0}, "carry": {"accuracy": 0.0, "null": 1.0}, "recurrent": {"accuracy": 0.0, "null": 1.0, "pair_recall": 0.0, "inference_ms": 1.3325895432096588}},
+    "plan": {"onepass": {"accuracy": 0.0, "null": 1.0}, "carry": {"accuracy": 0.0, "null": 1.0}, "recurrent": {"accuracy": 0.0, "null": 1.0, "pair_recall": 0.0, "inference_ms": 1.2713852839500939}},
+    "counterfactual": {"onepass": {"accuracy": 0.0, "null": 1.0}, "carry": {"accuracy": 0.0, "null": 1.0}, "recurrent": {"accuracy": 0.0, "null": 1.0, "pair_recall": 0.0, "inference_ms": 2.012954666668767}}
+  },
+  "peak_rss_kib_runtime_included": 160100,
+  "estimated_complexity": "operator induction O(NL), proposal O(OVPL), recurrent relaxation O(SH)",
+  "current_turn_after_future_used_for_selection": false,
+  "fixed_ontology_or_handwritten_slots_used_by_model": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
