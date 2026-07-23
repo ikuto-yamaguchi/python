@@ -1,0 +1,26 @@
+{
+  "cycle": 29,
+  "hypothesis": "Functional Endpoint Birth from Cross-Channel Intervention Response Kernels",
+  "seeds": [1, 7, 19],
+  "summary": {
+    "seen": {"surface": {"accuracy": 0.0, "wrong_read": 0.0, "null_rate": 1.0, "inference_ms": 0.007236314820181212}, "kernel": {"accuracy": 0.018518518518518517, "wrong_read": 0.24074074074074073, "null_rate": 0.7407407407407407, "inference_ms": 16.36825733333825}, "slow": {"accuracy": 0.018518518518518517, "wrong_read": 0.24074074074074073, "null_rate": 0.7407407407407407, "inference_ms": 9.165702814807783}},
+    "held": {"surface": {"accuracy": 0.0, "wrong_read": 0.0, "null_rate": 1.0, "inference_ms": 0.006687370370383616}, "kernel": {"accuracy": 0.018518518518518517, "wrong_read": 0.24074074074074073, "null_rate": 0.7407407407407407, "inference_ms": 16.333832944442122}, "slow": {"accuracy": 0.018518518518518517, "wrong_read": 0.24074074074074073, "null_rate": 0.7407407407407407, "inference_ms": 8.85372005554759}},
+    "rename": {"surface": {"accuracy": 0.0, "wrong_read": 0.0, "null_rate": 1.0, "inference_ms": 0.006221500000349436}, "kernel": {"accuracy": 0.0, "wrong_read": 0.3333333333333333, "null_rate": 0.6666666666666666, "inference_ms": 21.04717264815345}, "slow": {"accuracy": 0.0, "wrong_read": 0.3333333333333333, "null_rate": 0.6666666666666666, "inference_ms": 11.18298281481758}},
+    "alternate": {"surface": {"accuracy": 0.0, "wrong_read": 0.0, "null_rate": 1.0, "inference_ms": 0.006179592589803549}, "kernel": {"accuracy": 0.018518518518518517, "wrong_read": 0.05555555555555555, "null_rate": 0.9259259259259259, "inference_ms": 11.417990185186175}, "slow": {"accuracy": 0.037037037037037035, "wrong_read": 0.2037037037037037, "null_rate": 0.7592592592592593, "inference_ms": 6.395668314822884}},
+    "omitted": {"surface": {"accuracy": 0.0, "wrong_read": 0.0, "null_rate": 1.0, "inference_ms": 0.006779907397247842}, "kernel": {"accuracy": 0.018518518518518517, "wrong_read": 0.24074074074074073, "null_rate": 0.7407407407407407, "inference_ms": 15.466487240734784}, "slow": {"accuracy": 0.018518518518518517, "wrong_read": 0.24074074074074073, "null_rate": 0.7407407407407407, "inference_ms": 8.359445870366}},
+    "paragraph": {"surface": {"accuracy": 0.0, "wrong_read": 0.0, "null_rate": 1.0, "inference_ms": 0.006174185189054157}, "kernel": {"accuracy": 0.018518518518518517, "wrong_read": 0.24074074074074073, "null_rate": 0.7407407407407407, "inference_ms": 16.893691499995434}, "slow": {"accuracy": 0.018518518518518517, "wrong_read": 0.24074074074074073, "null_rate": 0.7407407407407407, "inference_ms": 9.364129055560017}},
+    "free": {"surface": {"accuracy": 0.0, "wrong_read": 0.0, "null_rate": 1.0, "inference_ms": 0.00637633332155895}, "kernel": {"accuracy": 0.018518518518518517, "wrong_read": 0.24074074074074073, "null_rate": 0.7407407407407407, "inference_ms": 17.078979796308516}, "slow": {"accuracy": 0.018518518518518517, "wrong_read": 0.24074074074074073, "null_rate": 0.7407407407407407, "inference_ms": 9.345669333335401}},
+    "diag": {"surface": {"model_bytes": 3038, "memory": 26.333333333333332, "slow_memory": 14.333333333333334, "updates": 162, "training_seconds": 0.014391654666572625}, "kernel": {"model_bytes": 3037, "memory": 26.333333333333332, "slow_memory": 14.333333333333334, "updates": 162, "training_seconds": 0.014116748666613907}, "slow": {"model_bytes": 3030, "memory": 26.333333333333332, "slow_memory": 14.333333333333334, "updates": 162, "training_seconds": 0.01388946033330285}},
+    "one_shot": {"surface": 1.0, "kernel": 1.0, "slow": 0.0},
+    "interference": {"surface": 0.037037037037037035, "kernel": 0.07407407407407407, "slow": 0.07407407407407407},
+    "latest": {"surface": 0.07407407407407407, "kernel": 0.037037037037037035, "slow": 0.037037037037037035}
+  },
+  "peak_rss_kib_runtime_included": 168160,
+  "estimated_complexity": "segment O(NL), response audit O(NSC), read O(BCL), B<=64",
+  "fixed_value_inventory_used_by_learner": false,
+  "test_answers_used_for_retrieval": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
