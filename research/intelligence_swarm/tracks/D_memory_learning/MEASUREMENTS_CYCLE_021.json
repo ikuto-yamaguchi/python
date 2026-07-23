@@ -1,0 +1,56 @@
+{
+  "hypothesis": "Tri-Factor Endpoint Memory with Independent Object, Relation, and Value Reconsolidation",
+  "seeds": [1, 7, 19],
+  "sizes": [6, 12],
+  "summary_12": {
+    "seen": {
+      "joint": {"write_accuracy": 1.0, "read_accuracy": 0.5661375661, "wrong_read": 0.4338624339, "model_bytes": 3820.0, "inference_ms": 5.266},
+      "tri": {"write_accuracy": 0.9722222222, "read_accuracy": 0.5476190476, "wrong_read": 0.1269841270, "null_rate": 0.3253968254, "model_bytes": 32676.3333, "object_nodes": 6.0, "relation_nodes": 6.0, "value_nodes": 9.3333, "bindings": 12.0, "slow_bindings": 0.0, "training_seconds": 0.0061208767, "inference_ms": 0.2006886270},
+      "slow": {"write_accuracy": 0.0, "read_accuracy": 0.0, "wrong_read": 0.0, "null_rate": 1.0, "slow_bindings": 0.0}
+    },
+    "paraphrase": {
+      "joint": {"write_accuracy": 1.0, "read_accuracy": 0.6044973545, "wrong_read": 0.3955026455},
+      "tri": {"write_accuracy": 0.8888888889, "read_accuracy": 0.3538359788, "wrong_read": 0.1005291005, "object_nodes": 5.0, "relation_nodes": 6.0, "value_nodes": 7.3333, "slow_bindings": 0.0},
+      "slow": {"write_accuracy": 0.0, "read_accuracy": 0.0}
+    },
+    "rename": {
+      "joint": {"write_accuracy": 1.0, "read_accuracy": 0.4857142857, "wrong_read": 0.5142857143},
+      "tri": {"write_accuracy": 0.9166666667, "read_accuracy": 0.5206349206, "wrong_read": 0.2031746032, "object_nodes": 8.3333, "relation_nodes": 5.3333, "value_nodes": 10.0, "slow_bindings": 0.0},
+      "slow": {"write_accuracy": 0.0, "read_accuracy": 0.0}
+    },
+    "alternate": {
+      "joint": {"write_accuracy": 0.3333333333, "read_accuracy": 0.3412698413, "wrong_read": 0.6587301587},
+      "tri": {"write_accuracy": 0.3333333333, "read_accuracy": 0.3492063492, "wrong_read": 0.2645502646, "object_nodes": 3.3333, "relation_nodes": 1.6667, "value_nodes": 2.3333, "slow_bindings": 0.0},
+      "slow": {"write_accuracy": 0.0, "read_accuracy": 0.0}
+    },
+    "omitted": {
+      "joint": {"write_accuracy": 0.9166666667, "read_accuracy": 0.6541005291, "wrong_read": 0.3458994709},
+      "tri": {"write_accuracy": 0.8333333333, "read_accuracy": 0.4636243386, "wrong_read": 0.1699735450, "object_nodes": 6.3333, "relation_nodes": 6.0, "value_nodes": 6.3333, "slow_bindings": 0.0},
+      "slow": {"write_accuracy": 0.0, "read_accuracy": 0.0}
+    },
+    "long": {
+      "joint": {"write_accuracy": 0.8055555556, "read_accuracy": 0.5714285714, "wrong_read": 0.4285714286},
+      "tri": {"write_accuracy": 0.7777777778, "read_accuracy": 0.4761904762, "wrong_read": 0.2222222222, "object_nodes": 6.3333, "relation_nodes": 5.6667, "value_nodes": 8.0, "slow_bindings": 0.0},
+      "slow": {"write_accuracy": 0.0, "read_accuracy": 0.0}
+    },
+    "combined": {
+      "joint": {"write_accuracy": 0.5, "read_accuracy": 0.5396825397, "wrong_read": 0.4603174603},
+      "tri": {"write_accuracy": 0.4722222222, "read_accuracy": 0.2222222222, "wrong_read": 0.2698412698, "object_nodes": 4.0, "relation_nodes": 3.6667, "value_nodes": 5.0, "slow_bindings": 0.0},
+      "slow": {"write_accuracy": 0.0, "read_accuracy": 0.0}
+    },
+    "domain": {
+      "joint": {"write_accuracy": 1.0, "read_accuracy": 0.6759259259, "wrong_read": 0.3240740741},
+      "tri": {"write_accuracy": 0.6944444444, "read_accuracy": 0.3055555556, "wrong_read": 0.0, "null_rate": 0.6944444444, "object_nodes": 3.6667, "relation_nodes": 5.0, "value_nodes": 8.6667, "bindings": 12.0, "slow_bindings": 0.0, "inference_ms": 0.2279726296},
+      "slow": {"write_accuracy": 0.0, "read_accuracy": 0.0}
+    },
+    "one_shot": {"joint": 1.0, "tri": 1.0, "slow": 0.0},
+    "interference": {"joint": 0.4574074074, "tri": 0.3685185185, "slow": 0.0}
+  },
+  "peak_rss_kib_runtime_included": 116520,
+  "estimated_complexity": "proposal O(L^2), endpoint matching O((O+R+V)G), sparse read/write O(kBG), B<=96",
+  "hidden_labels_used_by_learner": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
