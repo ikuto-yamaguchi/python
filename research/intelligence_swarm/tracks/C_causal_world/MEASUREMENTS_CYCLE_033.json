@@ -1,0 +1,27 @@
+{
+  "cycle": 33,
+  "hypothesis": "Boundary-Faithful Mechanism Families from Minimal Intervention Supports",
+  "seeds": [1, 7, 19],
+  "summary": {
+    "seen": {"surface_accuracy": 0.0, "minimal_accuracy": 0.0, "minimal_exact_boundary": 0.0, "shuffle_accuracy": 0.0, "minimal_null": 1.0, "minimal_candidates": 2.3333333333, "minimal_inference_ms": 0.5970146481},
+    "order": {"surface_accuracy": 0.0, "minimal_accuracy": 0.0, "minimal_exact_boundary": 0.0, "shuffle_accuracy": 0.0, "minimal_null": 1.0, "minimal_candidates": 2.3333333333, "minimal_inference_ms": 0.7282511481},
+    "lexeme": {"surface_accuracy": 0.0, "minimal_accuracy": 0.0, "minimal_exact_boundary": 0.0, "shuffle_accuracy": 0.0, "minimal_null": 1.0, "minimal_candidates": 2.3333333333, "minimal_inference_ms": 0.5910028519},
+    "rename": {"surface_accuracy": 0.0, "minimal_accuracy": 0.0, "minimal_exact_boundary": 0.0, "shuffle_accuracy": 0.0, "minimal_null": 1.0, "minimal_candidates": 2.3333333333, "minimal_inference_ms": 0.6543497037},
+    "omitted": {"surface_accuracy": 0.0, "minimal_accuracy": 0.0, "minimal_exact_boundary": 0.0, "shuffle_accuracy": 0.0, "minimal_null": 1.0, "minimal_candidates": 2.7777777778, "minimal_inference_ms": 0.4610820370},
+    "paragraph": {"surface_accuracy": 0.0, "minimal_accuracy": 0.0, "minimal_exact_boundary": 0.0, "shuffle_accuracy": 0.0, "minimal_null": 1.0, "minimal_candidates": 2.3333333333, "minimal_inference_ms": 1.4014268148},
+    "plan": {"surface_accuracy": 0.0, "minimal_accuracy": 0.0, "minimal_exact_boundary": 0.0, "shuffle_accuracy": 0.0, "minimal_null": 1.0, "minimal_candidates": 6.3888888889, "minimal_inference_ms": 0.8322340000},
+    "counterfactual": {"surface_accuracy": 0.0, "minimal_accuracy": 0.0, "minimal_exact_boundary": 0.0, "shuffle_accuracy": 0.0, "minimal_null": 1.0, "minimal_candidates": 2.3333333333, "minimal_inference_ms": 1.1186806667}
+  },
+  "signatures": 32,
+  "minimal_support_families": 1,
+  "model_bytes": 1211.6666666667,
+  "training_seconds": 0.4450605170,
+  "peak_rss_kib_runtime_included": 111044,
+  "estimated_complexity": "signature birth O(NL), boundary candidate O(SVL), support contraction O(QSVL), inference O(SVL)",
+  "final_test_outcomes_used_for_selection": false,
+  "fixed_ontology_or_handwritten_slots_used_by_model": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
