@@ -1,0 +1,23 @@
+{
+  "hypothesis": "Active Query Disambiguation over Surprise-Synchronized Predictive Cells",
+  "seeds": [1,7,19],
+  "sizes": [24,72,144],
+  "summary_144": {
+    "seen": {"pair_recall":0.2361111111,"passive_accuracy":0.0,"active_accuracy":0.2361111111,"active_wrong":0.7638888889,"active_null_wrong":0.0,"mean_queries":1.2222222222,"state_updates":1.2222222222,"initial_candidates":16.0,"final_candidates":1.0},
+    "held": {"pair_recall":0.375,"passive_accuracy":0.0,"active_accuracy":0.375,"active_wrong":0.4166666667,"active_null_wrong":0.0,"mean_queries":1.4027777778,"state_updates":1.1944444444,"initial_candidates":16.0,"final_candidates":4.125},
+    "rename": {"pair_recall":0.3472222222,"passive_accuracy":0.0,"active_accuracy":0.2916666667,"active_wrong":0.3611111111,"active_null_wrong":0.0,"mean_queries":1.3888888889,"state_updates":1.1666666667,"initial_candidates":16.0,"final_candidates":4.6527777778},
+    "alternate": {"pair_recall":0.2361111111,"passive_accuracy":0.0,"active_accuracy":0.2361111111,"active_wrong":0.7638888889,"active_null_wrong":0.0,"mean_queries":1.2083333333,"state_updates":1.2083333333,"initial_candidates":16.0,"final_candidates":1.0},
+    "nested": {"pair_recall":0.0,"active_accuracy":0.0,"active_wrong":0.3888888889,"active_null_wrong":0.0,"mean_queries":0.6527777778},
+    "omitted": {"pair_recall":0.0,"active_accuracy":0.0,"active_wrong":0.7222222222,"active_null_wrong":0.0,"mean_queries":1.0},
+    "paragraph": {"pair_recall":0.0,"active_accuracy":0.0,"active_wrong":0.1944444444,"active_null_wrong":0.0,"mean_queries":0.6388888889},
+    "plan": {"pair_recall":0.0,"active_accuracy":0.0,"active_wrong":0.125,"active_null_wrong":0.0,"mean_queries":0.9305555556}
+  },
+  "resources": {"model_bytes":12434.6666667,"predictive_states":64,"training_seconds":0.011555672,"inference_ms_seen":7.705124778,"inference_ms_held":7.896498639,"inference_ms_rename":7.758239389,"inference_ms_paragraph":2.510851611,"peak_rss_kib_runtime_included":111632},
+  "estimated_complexity":"char prediction O(NL), cell alignment O(Hc(Hb+Ha+Hf)), active query O(QH), Q<=5 H<=16",
+  "hidden_labels_used_by_learner":false,
+  "oracle_used_only_as_environment_observation":true,
+  "highschool_level_passed":false,
+  "native_japanese_communication_passed":false,
+  "weak_smartphone_verified":false,
+  "completion":false
+}
