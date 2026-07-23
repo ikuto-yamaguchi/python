@@ -1,0 +1,87 @@
+{
+  "hypothesis": "Constraint-Edge Birth from Cross-Candidate Energy Credit before Commutator Tests",
+  "seeds": [1, 7, 19],
+  "training_bundles": 24,
+  "environments_per_bundle": 4,
+  "candidate_caps": {"object": 4, "value": 4, "pair": 16},
+  "summary": {
+    "seen": {
+      "base": {"accuracy": 0.5833333333333334, "wrong_commit": 0.4166666666666667, "null_rate": 0.0, "object_recall": 0.5833333333333334, "value_recall": 1.0, "pair_recall": 0.5833333333333334, "mean_sweeps": 2.0, "mean_active": 1.0833333333333333, "mean_candidates": 10.055555555555555},
+      "edge": {"accuracy": 0.5833333333333334, "wrong_commit": 0.4166666666666667, "null_rate": 0.0, "object_recall": 0.5833333333333334, "value_recall": 1.0, "pair_recall": 0.5833333333333334, "mean_sweeps": 2.0, "mean_active": 1.0833333333333333, "mean_candidates": 10.055555555555555, "edge_count": 0, "mean_edge_weight": 0.0, "model_bytes": 133, "training_seconds": 0.501129792333335, "inference_ms": 5.832514777777871},
+      "edge_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0}
+    },
+    "unseen": {
+      "base_accuracy": 0.2222222222222222,
+      "edge_accuracy": 0.2222222222222222,
+      "edge_pair_recall": 0.2222222222222222,
+      "edge_null_rate": 1.0,
+      "edge_count": 0
+    },
+    "ambiguous": {
+      "base_accuracy": 0.0,
+      "edge_accuracy": 0.0,
+      "object_recall": 0.5833333333333334,
+      "value_recall": 0.0,
+      "pair_recall": 0.0,
+      "edge_null_rate": 1.0,
+      "edge_count": 0
+    },
+    "nested": {
+      "base_accuracy": 0.0,
+      "edge_accuracy": 0.0,
+      "object_recall": 0.25,
+      "value_recall": 0.3611111111111111,
+      "pair_recall": 0.0,
+      "edge_null_rate": 1.0,
+      "edge_count": 0
+    },
+    "omitted": {
+      "base_accuracy": 0.027777777777777776,
+      "edge_accuracy": 0.027777777777777776,
+      "object_recall": 0.027777777777777776,
+      "value_recall": 1.0,
+      "pair_recall": 0.027777777777777776,
+      "edge_null_rate": 1.0,
+      "edge_count": 0
+    },
+    "paragraph": {
+      "base_accuracy": 0.0,
+      "edge_accuracy": 0.0,
+      "object_recall": 0.3888888888888889,
+      "value_recall": 0.33333333333333337,
+      "pair_recall": 0.0,
+      "edge_null_rate": 1.0,
+      "edge_count": 0
+    },
+    "plan": {
+      "base_accuracy": 0.0,
+      "edge_accuracy": 0.0,
+      "object_recall": 0.5555555555555556,
+      "value_recall": 0.0,
+      "pair_recall": 0.0,
+      "edge_null_rate": 1.0,
+      "edge_count": 0
+    },
+    "counterfactual": {
+      "base_accuracy": 0.0,
+      "edge_accuracy": 0.0,
+      "object_recall": 0.25,
+      "value_recall": 0.0,
+      "pair_recall": 0.0,
+      "edge_null_rate": 1.0,
+      "edge_count": 0
+    }
+  },
+  "per_seed_edge_counts": {
+    "1": {"seen": 0, "unseen": 0, "ambiguous": 0, "nested": 0, "omitted": 0, "paragraph": 0, "plan": 0, "counterfactual": 0},
+    "7": {"seen": 0, "unseen": 0, "ambiguous": 0, "nested": 0, "omitted": 0, "paragraph": 0, "plan": 0, "counterfactual": 0},
+    "19": {"seen": 0, "unseen": 0, "ambiguous": 0, "nested": 0, "omitted": 0, "paragraph": 0, "plan": 0, "counterfactual": 0}
+  },
+  "peak_rss_kib_runtime_included": 40828,
+  "estimated_complexity": "candidate O(L^2), edge credit O(NEH^2), relaxation O(SH), E=4,H<=16,S<=6",
+  "hidden_labels_used_by_learner": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
