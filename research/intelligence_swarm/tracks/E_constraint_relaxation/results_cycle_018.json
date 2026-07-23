@@ -1,0 +1,51 @@
+{
+  "hypothesis": "Responsibility-Localized Frustration Flow with Reversible Candidate Birth",
+  "seeds": [1, 7, 19],
+  "sizes": [24],
+  "summary": {
+    "24": {
+      "seen": {
+        "global": {"accuracy": 0.0, "wrong_commit": 1.0, "null_rate": 0.0, "candidate_recall": 0.0, "mean_sweeps": 2.0, "mean_active": 3.1666666666666665, "reversible_birth_rate": 1.0, "convergence_rate": 1.0, "model_bytes": 188, "training_seconds": 0.505791617333216, "inference_ms": 16.794092666638484},
+        "localized": {"accuracy": 0.0, "wrong_commit": 1.0, "null_rate": 0.0, "candidate_recall": 0.0, "mean_sweeps": 2.0, "mean_active": 5.0, "reversible_birth_rate": 1.0, "convergence_rate": 1.0, "model_bytes": 191, "training_seconds": 0.021480468000239245, "inference_ms": 1.6428806110929548},
+        "localized_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "candidate_recall": 0.0, "mean_sweeps": 2.0, "mean_active": 5.0, "reversible_birth_rate": 1.0, "convergence_rate": 1.0, "model_bytes": 196, "training_seconds": 0.021464774666734836, "inference_ms": 1.6705848888705077}
+      },
+      "unseen": {
+        "global": {"accuracy": 0.0, "wrong_commit": 1.0, "null_rate": 0.0, "candidate_recall": 0.0, "mean_sweeps": 2.0, "mean_active": 3.2777777777777777, "reversible_birth_rate": 1.0, "convergence_rate": 1.0, "model_bytes": 188, "training_seconds": 0.5073348449997562, "inference_ms": 20.716516722207718},
+        "localized": {"accuracy": 0.0, "wrong_commit": 0.2777777777777778, "null_rate": 0.7222222222222222, "candidate_recall": 0.0, "mean_sweeps": 1.2777777777777777, "mean_active": 2.2222222222222223, "reversible_birth_rate": 0.2777777777777778, "convergence_rate": 1.0, "model_bytes": 191, "training_seconds": 0.021327872333282965, "inference_ms": 0.9402083888845583},
+        "localized_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "candidate_recall": 0.0, "mean_sweeps": 1.2777777777777777, "mean_active": 2.2222222222222223, "reversible_birth_rate": 0.2777777777777778, "convergence_rate": 1.0, "model_bytes": 196, "training_seconds": 0.021772994333332463, "inference_ms": 0.9441221110996089}
+      },
+      "nested": {
+        "global": {"accuracy": 0.0, "wrong_commit": 1.0, "null_rate": 0.0, "candidate_recall": 0.0, "mean_sweeps": 2.0, "mean_active": 7.555555555555555, "reversible_birth_rate": 1.0, "convergence_rate": 1.0, "model_bytes": 188, "training_seconds": 0.5005595016665817, "inference_ms": 23.790899944464805},
+        "localized": {"accuracy": 0.0, "wrong_commit": 0.5555555555555556, "null_rate": 0.4444444444444444, "candidate_recall": 0.0, "mean_sweeps": 1.5555555555555556, "mean_active": 1.1111111111111112, "reversible_birth_rate": 0.0, "convergence_rate": 1.0, "model_bytes": 191, "training_seconds": 0.02175713699989501, "inference_ms": 0.6511033333380409},
+        "localized_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "candidate_recall": 0.0, "mean_sweeps": 1.5555555555555556, "mean_active": 1.1111111111111112, "reversible_birth_rate": 0.0, "convergence_rate": 1.0, "model_bytes": 196, "training_seconds": 0.021306714666631404, "inference_ms": 0.6481942778009397}
+      },
+      "omitted": {
+        "global": {"accuracy": 0.0, "wrong_commit": 1.0, "null_rate": 0.0, "candidate_recall": 0.0, "mean_sweeps": 2.0, "mean_active": 1.7222222222222223, "reversible_birth_rate": 1.0, "convergence_rate": 1.0, "model_bytes": 188, "training_seconds": 0.5040403333332506, "inference_ms": 23.38118844447005},
+        "localized": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "candidate_recall": 0.0, "mean_sweeps": 1.0, "mean_active": 0.0, "reversible_birth_rate": 0.0, "convergence_rate": 1.0, "model_bytes": 191, "training_seconds": 0.021495205999902584, "inference_ms": 0.3977376110873997},
+        "localized_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "candidate_recall": 0.0, "mean_sweeps": 1.0, "mean_active": 0.0, "reversible_birth_rate": 0.0, "convergence_rate": 1.0, "model_bytes": 196, "training_seconds": 0.021506636999977975, "inference_ms": 0.40284361112854744}
+      },
+      "paragraph": {
+        "global": {"accuracy": 0.0, "wrong_commit": 1.0, "null_rate": 0.0, "candidate_recall": 0.0, "mean_sweeps": 2.0, "mean_active": 7.111111111111111, "reversible_birth_rate": 1.0, "convergence_rate": 1.0, "model_bytes": 188, "training_seconds": 0.5171199006666333, "inference_ms": 26.833311166658152},
+        "localized": {"accuracy": 0.0, "wrong_commit": 1.0, "null_rate": 0.0, "candidate_recall": 0.0, "mean_sweeps": 2.0, "mean_active": 8.0, "reversible_birth_rate": 0.0, "convergence_rate": 1.0, "model_bytes": 191, "training_seconds": 0.025510311333467445, "inference_ms": 2.5078849444576514},
+        "localized_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "candidate_recall": 0.0, "mean_sweeps": 2.0, "mean_active": 8.0, "reversible_birth_rate": 0.0, "convergence_rate": 1.0, "model_bytes": 196, "training_seconds": 0.024150101000183593, "inference_ms": 2.959724722232851}
+      },
+      "plan": {
+        "global": {"accuracy": 0.0, "wrong_commit": 1.0, "null_rate": 0.0, "candidate_recall": 0.0, "mean_sweeps": 2.0, "mean_active": 7.055555555555555, "reversible_birth_rate": 1.0, "convergence_rate": 1.0, "model_bytes": 188, "training_seconds": 0.5193154226665987, "inference_ms": 19.066671666678303},
+        "localized": {"accuracy": 0.0, "wrong_commit": 1.0, "null_rate": 0.0, "candidate_recall": 0.0, "mean_sweeps": 2.0, "mean_active": 4.388888888888889, "reversible_birth_rate": 1.0, "convergence_rate": 1.0, "model_bytes": 191, "training_seconds": 0.021454878333467303, "inference_ms": 1.5997912222347723},
+        "localized_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "candidate_recall": 0.0, "mean_sweeps": 2.0, "mean_active": 4.388888888888889, "reversible_birth_rate": 1.0, "convergence_rate": 1.0, "model_bytes": 196, "training_seconds": 0.021446052333279415, "inference_ms": 1.619463333301812}
+      },
+      "counterfactual": {
+        "global": {"accuracy": 0.0, "wrong_commit": 1.0, "null_rate": 0.0, "candidate_recall": 0.0, "mean_sweeps": 2.0, "mean_active": 5.333333333333333, "reversible_birth_rate": 1.0, "convergence_rate": 1.0, "model_bytes": 188, "training_seconds": 0.499166645666719, "inference_ms": 22.13203994448223},
+        "localized": {"accuracy": 0.0, "wrong_commit": 0.16666666666666666, "null_rate": 0.8333333333333334, "candidate_recall": 0.0, "mean_sweeps": 1.1666666666666667, "mean_active": 0.888888888888889, "reversible_birth_rate": 0.16666666666666666, "convergence_rate": 1.0, "model_bytes": 191, "training_seconds": 0.02141857033332902, "inference_ms": 0.5923507778031004},
+        "localized_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "candidate_recall": 0.0, "mean_sweeps": 1.1666666666666667, "mean_active": 0.888888888888889, "reversible_birth_rate": 0.16666666666666666, "convergence_rate": 1.0, "model_bytes": 196, "training_seconds": 0.021569994666757946, "inference_ms": 0.5978061111212204}
+      }
+    }
+  },
+  "peak_rss_kib_runtime_included": 110796,
+  "estimated_complexity": "substring O(L^2), localized birth O(Ht Hv F), relaxation O(SHF), H<=12,S<=4",
+  "hidden_labels_used_by_learner": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
