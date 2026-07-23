@@ -1,0 +1,59 @@
+{
+  "hypothesis": "Success-Conditioned Event Identity from Factorized Intervention Target Signatures",
+  "seeds": [1, 7, 19],
+  "sizes": [48, 144, 288],
+  "summary_288": {
+    "seen": {
+      "surface": {"accuracy": 0.29166666666666663, "wrong_commit": 0.0, "null_rate": 0.7083333333333334, "mean_candidates": 0.2986111111111111, "events": 64, "eligible_events": 2.3333333333333335, "identity_classes": 0, "identity_members": 0, "edges": 0, "model_bytes": 11060.666666666666, "training_seconds": 0.009843884666660566, "inference_ms": 0.05155214583337416},
+      "success": {"accuracy": 0.29166666666666663, "wrong_commit": 0.0, "null_rate": 0.7083333333333334, "mean_candidates": 0.2986111111111111, "events": 64, "eligible_events": 2.3333333333333335, "identity_classes": 0, "identity_members": 0, "edges": 0, "model_bytes": 11061.666666666666, "training_seconds": 0.00986022933333667, "inference_ms": 0.05119084722229575},
+      "graph": {"accuracy": 0.29166666666666663, "wrong_commit": 0.0, "null_rate": 0.7083333333333334, "mean_candidates": 0.2986111111111111, "events": 64, "eligible_events": 2.3333333333333335, "identity_classes": 0, "identity_members": 0, "edges": 0, "model_bytes": 11058.666666666666, "training_seconds": 0.010180242333333922, "inference_ms": 0.05614529861119877}
+    },
+    "held": {
+      "surface": {"accuracy": 0.16666666666666669, "wrong_commit": 0.0, "null_rate": 0.8333333333333334, "mean_candidates": 0.16666666666666669, "events": 64, "eligible_events": 2.3333333333333335, "identity_classes": 0, "identity_members": 0, "edges": 0},
+      "success": {"accuracy": 0.16666666666666669, "wrong_commit": 0.0, "null_rate": 0.8333333333333334, "mean_candidates": 0.16666666666666669, "events": 64, "eligible_events": 2.3333333333333335, "identity_classes": 0, "identity_members": 0, "edges": 0},
+      "graph": {"accuracy": 0.16666666666666669, "wrong_commit": 0.0, "null_rate": 0.8333333333333334, "mean_candidates": 0.16666666666666669, "events": 64, "eligible_events": 2.3333333333333335, "identity_classes": 0, "identity_members": 0, "edges": 0}
+    },
+    "rename": {
+      "surface": {"accuracy": 0.18055555555555555, "wrong_commit": 0.0, "null_rate": 0.8194444444444444, "mean_candidates": 0.18055555555555555, "events": 64, "eligible_events": 2.3333333333333335, "identity_classes": 0, "identity_members": 0, "edges": 0},
+      "success": {"accuracy": 0.18055555555555555, "wrong_commit": 0.0, "null_rate": 0.8194444444444444, "mean_candidates": 0.18055555555555555, "events": 64, "eligible_events": 2.3333333333333335, "identity_classes": 0, "identity_members": 0, "edges": 0},
+      "graph": {"accuracy": 0.18055555555555555, "wrong_commit": 0.0, "null_rate": 0.8194444444444444, "mean_candidates": 0.18055555555555555, "events": 64, "eligible_events": 2.3333333333333335, "identity_classes": 0, "identity_members": 0, "edges": 0}
+    },
+    "alternate": {
+      "surface": {"accuracy": 0.2013888888888889, "wrong_commit": 0.0, "null_rate": 0.798611111111111, "mean_candidates": 0.2013888888888889, "events": 64, "eligible_events": 2.3333333333333335, "identity_classes": 0, "identity_members": 0, "edges": 0},
+      "success": {"accuracy": 0.2013888888888889, "wrong_commit": 0.0, "null_rate": 0.798611111111111, "mean_candidates": 0.2013888888888889, "events": 64, "eligible_events": 2.3333333333333335, "identity_classes": 0, "identity_members": 0, "edges": 0},
+      "graph": {"accuracy": 0.2013888888888889, "wrong_commit": 0.0, "null_rate": 0.798611111111111, "mean_candidates": 0.2013888888888889, "events": 64, "eligible_events": 2.3333333333333335, "identity_classes": 0, "identity_members": 0, "edges": 0}
+    },
+    "omitted": {
+      "surface": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "mean_candidates": 0.0, "events": 64, "eligible_events": 2.3333333333333335, "identity_classes": 0, "identity_members": 0, "edges": 0},
+      "success": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "mean_candidates": 0.0, "events": 64, "eligible_events": 2.3333333333333335, "identity_classes": 0, "identity_members": 0, "edges": 0},
+      "graph": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "mean_candidates": 0.0, "events": 64, "eligible_events": 2.3333333333333335, "identity_classes": 0, "identity_members": 0, "edges": 0}
+    },
+    "paragraph": {
+      "surface": {"accuracy": 0.21527777777777776, "wrong_commit": 0.0, "null_rate": 0.7847222222222222, "mean_candidates": 0.21527777777777776, "events": 64, "eligible_events": 2.3333333333333335, "identity_classes": 0, "identity_members": 0, "edges": 0},
+      "success": {"accuracy": 0.21527777777777776, "wrong_commit": 0.0, "null_rate": 0.7847222222222222, "mean_candidates": 0.21527777777777776, "events": 64, "eligible_events": 2.3333333333333335, "identity_classes": 0, "identity_members": 0, "edges": 0},
+      "graph": {"accuracy": 0.21527777777777776, "wrong_commit": 0.0, "null_rate": 0.7847222222222222, "mean_candidates": 0.21527777777777776, "events": 64, "eligible_events": 2.3333333333333335, "identity_classes": 0, "identity_members": 0, "edges": 0}
+    },
+    "plan": {
+      "surface": {"accuracy": 0.1736111111111111, "wrong_commit": 0.0, "null_rate": 0.826388888888889, "mean_candidates": 0.1736111111111111, "events": 64, "eligible_events": 2.3333333333333335, "identity_classes": 0, "identity_members": 0, "edges": 0},
+      "success": {"accuracy": 0.1736111111111111, "wrong_commit": 0.0, "null_rate": 0.826388888888889, "mean_candidates": 0.1736111111111111, "events": 64, "eligible_events": 2.3333333333333335, "identity_classes": 0, "identity_members": 0, "edges": 0},
+      "graph": {"accuracy": 0.1736111111111111, "wrong_commit": 0.0, "null_rate": 0.826388888888889, "mean_candidates": 0.1736111111111111, "events": 64, "eligible_events": 2.3333333333333335, "identity_classes": 0, "identity_members": 0, "edges": 0}
+    },
+    "counterfactual": {
+      "surface": {"accuracy": 0.16666666666666669, "wrong_commit": 0.0, "null_rate": 0.8333333333333334, "mean_candidates": 0.16666666666666669, "events": 64, "eligible_events": 2.3333333333333335, "identity_classes": 0, "identity_members": 0, "edges": 0},
+      "success": {"accuracy": 0.16666666666666669, "wrong_commit": 0.0, "null_rate": 0.8333333333333334, "mean_candidates": 0.16666666666666669, "events": 64, "eligible_events": 2.3333333333333335, "identity_classes": 0, "identity_members": 0, "edges": 0},
+      "graph": {"accuracy": 0.16666666666666669, "wrong_commit": 0.0, "null_rate": 0.8333333333333334, "mean_candidates": 0.16666666666666669, "events": 64, "eligible_events": 2.3333333333333335, "identity_classes": 0, "identity_members": 0, "edges": 0}
+    },
+    "sequential": {
+      "surface": {"coverage": 0.1276595744680851, "accuracy_conditional": 0.32857142857142857},
+      "success": {"coverage": 0.1276595744680851, "accuracy_conditional": 0.32857142857142857},
+      "graph": {"coverage": 0.1276595744680851, "accuracy_conditional": 0.32857142857142857}
+    }
+  },
+  "peak_rss_kib_runtime_included": 111552,
+  "estimated_complexity": "event extraction O(NL), positive replay O(PNE), factor swaps O(PSF), partition O(P), graph O(C^2), inference O(PL)",
+  "hidden_labels_used_by_learner": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
