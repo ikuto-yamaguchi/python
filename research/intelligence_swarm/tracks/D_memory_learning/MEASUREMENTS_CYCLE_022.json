@@ -1,0 +1,27 @@
+{
+  "hypothesis": "Value-Change Equivalence Classes from Cross-Surface Write Consequences",
+  "seeds": [1, 7, 19],
+  "train_sizes": [24, 72, 144],
+  "summary_144": {
+    "seen": {
+      "trace": {"write_accuracy": 0.24074074074074076, "read_accuracy": 0.2037037037037037, "wrong_read": 0.7962962962962963},
+      "class": {"write_accuracy": 0.24074074074074076, "read_accuracy": 0.0, "wrong_read": 1.0, "classes": 12.0, "slow_classes": 10.666666666666666},
+      "slow": {"write_accuracy": 0.24074074074074076, "read_accuracy": 0.0, "wrong_read": 1.0, "model_bytes": 16964.333333333332, "training_seconds": 0.003576613666666617, "inference_ms": 0.3457444583333319}
+    },
+    "held": {"trace_write": 0.24074074074074076, "class_write": 0.24074074074074076, "trace_read": 0.2037037037037037, "class_read": 0.0},
+    "rename": {"trace_write": 0.18518518518518517, "class_write": 0.18518518518518517, "trace_read": 0.2037037037037037, "class_read": 0.0},
+    "alternate": {"trace_write": 0.0, "class_write": 0.0, "trace_read": 0.14814814814814814, "class_read": 0.0},
+    "omitted": {"trace_write": 0.0, "class_write": 0.0, "trace_read": 0.2037037037037037, "class_read": 0.0},
+    "paragraph": {"trace_write": 0.24074074074074076, "class_write": 0.24074074074074076, "trace_read": 0.2037037037037037, "class_read": 0.0},
+    "domain": {"trace_write": 0.24074074074074076, "class_write": 0.24074074074074076, "trace_read": 0.2037037037037037, "class_read": 0.0},
+    "one_shot": {"trace": 1.0, "class": 1.0, "slow": 1.0},
+    "interference": {"trace": 0.05555555555555555, "class": 0.0, "slow": 0.0}
+  },
+  "peak_rss_kib_runtime_included": 160136,
+  "estimated_complexity": "trace extraction O(NL), consequence grouping O(T), read/write O(TL), T<=96",
+  "hidden_labels_used_by_learner": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
