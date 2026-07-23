@@ -1,0 +1,30 @@
+{
+  "cycle": 32,
+  "hypothesis": "Mechanism-Family Birth from Cross-Input Intervention Equivalence Classes",
+  "seeds": [1, 7, 19],
+  "data_split_per_seed": {"induction": 48, "independent_probe": 24, "final_test_per_mode": 12},
+  "summary": {
+    "seen": {"surface_accuracy": 0.0, "family_accuracy": 0.4722222222, "graph_accuracy": 0.4722222222, "shuffle_accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 0.5277777778, "exact_target_value_recall": 0.0, "mean_candidates": 0.4722222222, "inference_ms": 0.50532225},
+    "order": {"surface_accuracy": 0.0, "family_accuracy": 0.4722222222, "graph_accuracy": 0.4722222222, "shuffle_accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 0.5277777778, "exact_target_value_recall": 0.0},
+    "lexeme": {"surface_accuracy": 0.0, "family_accuracy": 0.4722222222, "graph_accuracy": 0.4722222222, "shuffle_accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 0.5277777778, "exact_target_value_recall": 0.0},
+    "rename": {"surface_accuracy": 0.0, "family_accuracy": 0.4722222222, "graph_accuracy": 0.4722222222, "shuffle_accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 0.5277777778, "exact_target_value_recall": 0.0},
+    "alternate": {"surface_accuracy": 0.0, "family_accuracy": 0.4722222222, "graph_accuracy": 0.4722222222, "shuffle_accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 0.5277777778, "exact_target_value_recall": 0.0},
+    "nested": {"surface_accuracy": 0.0, "family_accuracy": 0.4722222222, "graph_accuracy": 0.4722222222, "shuffle_accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 0.5277777778, "exact_target_value_recall": 0.0},
+    "omitted": {"surface_accuracy": 0.0, "family_accuracy": 0.5, "graph_accuracy": 0.5, "shuffle_accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 0.5, "exact_target_value_recall": 0.0},
+    "paragraph": {"surface_accuracy": 0.0, "family_accuracy": 0.3888888889, "graph_accuracy": 0.3888888889, "shuffle_accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 0.6111111111, "exact_target_value_recall": 0.0, "inference_ms": 0.8379},
+    "plan": {"surface_accuracy": 0.0, "family_accuracy": 0.0, "graph_accuracy": 0.0, "shuffle_accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_target_value_recall": 0.0},
+    "counterfactual": {"surface_accuracy": 0.0, "family_accuracy": 0.4722222222, "graph_accuracy": 0.4722222222, "shuffle_accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 0.5277777778, "exact_target_value_recall": 0.0}
+  },
+  "seed_seen_family_accuracy": {"1": 0.5833333333, "7": 0.5, "19": 0.3333333333},
+  "graph_scale": {"operator_signatures_mean": 20.6666666667, "mechanism_families_mean": 1.0, "family_members_mean": 2.0, "probe_audits_mean": 6684.6666666667},
+  "model_bytes_mean": 1243.3333333333,
+  "training_seconds_mean": 0.760767308,
+  "peak_rss_kib_runtime_included": 111712,
+  "estimated_complexity": "signature birth O(NL), probe response O(QSVL), family partition O(SQ log S), inference O(SVL)",
+  "final_test_outcomes_used_for_selection": false,
+  "fixed_ontology_or_handwritten_slots_used_by_model": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
