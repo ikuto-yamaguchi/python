@@ -1,0 +1,28 @@
+{
+  "hypothesis": "Second-Order Context Nonterminals from Derivation-Graph Bisimulation",
+  "seeds": [1, 7, 19],
+  "train_sizes": [48, 144, 288],
+  "test_examples_per_split_per_seed": 60,
+  "summary_288": {
+    "seen": {
+      "executable": {"accuracy": 0.6666666667, "wrong_commit": 0.0388888889, "candidate_execution_recall": 0.6666666667, "model_bytes": 24932.67, "training_seconds": 0.0106156, "inference_ms": 0.0307537, "programs": 32, "context_nonterminals": 0, "merges": 0, "description_bits": 9128},
+      "substitution": {"accuracy": 0.6111111111, "wrong_commit": 0.0388888889, "candidate_execution_recall": 0.6111111111, "model_bytes": 24986.33, "training_seconds": 0.0105640, "inference_ms": 0.0294057, "programs": 32, "context_nonterminals": 0, "merges": 0, "description_bits": 9082.67},
+      "context_bisim": {"accuracy": 0.6666666667, "wrong_commit": 0.0388888889, "candidate_execution_recall": 0.6666666667, "model_bytes": 24935.67, "training_seconds": 0.0107884, "inference_ms": 0.0294551, "programs": 32, "context_nonterminals": 0, "merges": 0, "description_bits": 9128}
+    },
+    "held_order": {"executable_accuracy": 0.0, "substitution_accuracy": 0.0, "context_bisim_accuracy": 0.0},
+    "held_lexeme": {"executable_accuracy": 0.0, "substitution_accuracy": 0.0, "context_bisim_accuracy": 0.0},
+    "rename": {"executable_accuracy": 0.0, "substitution_accuracy": 0.0, "context_bisim_accuracy": 0.0},
+    "nested": {"executable_accuracy": 0.6666666667, "substitution_accuracy": 0.6111111111, "context_bisim_accuracy": 0.6666666667},
+    "omitted": {"executable_accuracy": 0.0, "substitution_accuracy": 0.0, "context_bisim_accuracy": 0.0},
+    "alternate": {"executable_accuracy": 0.0, "substitution_accuracy": 0.0, "context_bisim_accuracy": 0.0},
+    "freeform": {"executable_accuracy": 0.6666666667, "substitution_accuracy": 0.6111111111, "context_bisim_accuracy": 0.6666666667}
+  },
+  "raw_candidates": 288,
+  "peak_rss_kib_runtime_included": 111876,
+  "estimated_complexity": "proposal O(NC^2), behavior O(PN), bisimulation quotient O(P), inference O((P+G)L)",
+  "hidden_labels_used_by_learner": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
