@@ -1,0 +1,63 @@
+{
+  "hypothesis": "Predictive Test-Cell Co-Creation by Residual Backprojection with Discourse Carry",
+  "seeds": [1, 7, 19],
+  "sizes": [24, 48, 72],
+  "primary_summary_size_72": {
+    "seen": {
+      "base": {"accuracy":0.1666666667,"object_recall":0.5,"value_recall":0.25,"initial_pair_recall":0.1666666667,"post_pair_recall":0.1666666667,"wrong":0.8333333333,"null":0.0,"backprojection_paths":0.0,"active_pairs":16.0,"residual_windows":18.0,"model_bytes":11905.3333333333,"training_seconds":0.005201337,"inference_ms":5.986799667,"predictive_states":64},
+      "backprojection": {"accuracy":0.1666666667,"object_recall":0.6666666667,"value_recall":0.25,"initial_pair_recall":0.1666666667,"post_pair_recall":0.1666666667,"wrong":0.8333333333,"null":0.0,"backprojection_paths":154.6666666667,"active_pairs":9.125,"residual_windows":18.0,"model_bytes":11915.3333333333,"training_seconds":0.00559038,"inference_ms":13.062702125,"predictive_states":64},
+      "carry": {"accuracy":0.2083333333,"object_recall":0.75,"value_recall":0.25,"initial_pair_recall":0.1666666667,"post_pair_recall":0.2083333333,"wrong":0.7916666667,"null":0.0,"backprojection_paths":154.6666666667,"active_pairs":15.2916666667,"residual_windows":18.0,"model_bytes":11906.3333333333,"training_seconds":0.005179188,"inference_ms":12.865351667,"predictive_states":64},
+      "carry_null": {"accuracy":0.0833333333,"object_recall":0.75,"value_recall":0.25,"initial_pair_recall":0.1666666667,"post_pair_recall":0.2083333333,"wrong":0.0,"null":0.9166666667,"backprojection_paths":154.6666666667,"active_pairs":15.2916666667,"residual_windows":18.0,"model_bytes":11911.3333333333,"training_seconds":0.005074929,"inference_ms":13.397537208,"predictive_states":64}
+    },
+    "held": {
+      "base": {"accuracy":0.4166666667,"object_recall":0.5416666667,"value_recall":0.625,"initial_pair_recall":0.4166666667,"post_pair_recall":0.4166666667,"wrong":0.5833333333,"null":0.0,"backprojection_paths":0.0,"active_pairs":16.0,"residual_windows":18.0,"model_bytes":11905.3333333333,"training_seconds":0.005064057,"inference_ms":5.620669375,"predictive_states":64},
+      "backprojection": {"accuracy":0.5416666667,"object_recall":0.75,"value_recall":0.625,"initial_pair_recall":0.4166666667,"post_pair_recall":0.5416666667,"wrong":0.4583333333,"null":0.0,"backprojection_paths":160.3333333333,"active_pairs":6.875,"residual_windows":18.0,"model_bytes":11915.3333333333,"training_seconds":0.005072439,"inference_ms":12.417209458,"predictive_states":64},
+      "carry": {"accuracy":0.5416666667,"object_recall":0.7083333333,"value_recall":0.625,"initial_pair_recall":0.4166666667,"post_pair_recall":0.5416666667,"wrong":0.4583333333,"null":0.0,"backprojection_paths":160.3333333333,"active_pairs":13.0,"residual_windows":18.0,"model_bytes":11906.3333333333,"training_seconds":0.005099743,"inference_ms":12.549051125,"predictive_states":64},
+      "carry_null": {"accuracy":0.4583333333,"object_recall":0.7083333333,"value_recall":0.625,"initial_pair_recall":0.4166666667,"post_pair_recall":0.5416666667,"wrong":0.0,"null":0.5416666667,"backprojection_paths":160.3333333333,"active_pairs":13.0,"residual_windows":18.0,"model_bytes":11911.3333333333,"training_seconds":0.00554729,"inference_ms":12.607233125,"predictive_states":64}
+    },
+    "rename": {
+      "base": {"accuracy":0.2916666667,"object_recall":0.4583333333,"value_recall":0.625,"initial_pair_recall":0.375,"post_pair_recall":0.375,"wrong":0.7083333333,"null":0.0,"backprojection_paths":0.0,"active_pairs":16.0,"residual_windows":18.0,"model_bytes":11905.3333333333,"training_seconds":0.005102233,"inference_ms":5.827564042,"predictive_states":64},
+      "backprojection": {"accuracy":0.2916666667,"object_recall":0.625,"value_recall":0.625,"initial_pair_recall":0.375,"post_pair_recall":0.4166666667,"wrong":0.7083333333,"null":0.0,"backprojection_paths":168.2916666667,"active_pairs":8.75,"residual_windows":18.0,"model_bytes":11915.3333333333,"training_seconds":0.005055297,"inference_ms":12.922002708,"predictive_states":64},
+      "carry": {"accuracy":0.2916666667,"object_recall":0.5833333333,"value_recall":0.625,"initial_pair_recall":0.375,"post_pair_recall":0.375,"wrong":0.7083333333,"null":0.0,"backprojection_paths":168.2916666667,"active_pairs":16.125,"residual_windows":18.0,"model_bytes":11906.3333333333,"training_seconds":0.005148873,"inference_ms":13.428594125,"predictive_states":64},
+      "carry_null": {"accuracy":0.25,"object_recall":0.5833333333,"value_recall":0.625,"initial_pair_recall":0.375,"post_pair_recall":0.375,"wrong":0.0,"null":0.75,"backprojection_paths":168.2916666667,"active_pairs":16.125,"residual_windows":18.0,"model_bytes":11911.3333333333,"training_seconds":0.005261009,"inference_ms":13.787428125,"predictive_states":64}
+    },
+    "alternate": {
+      "base": {"accuracy":0.1666666667,"object_recall":0.5,"value_recall":0.25,"initial_pair_recall":0.1666666667,"post_pair_recall":0.1666666667,"wrong":0.8333333333,"null":0.0,"backprojection_paths":0.0,"active_pairs":16.0,"residual_windows":18.0,"model_bytes":11905.3333333333,"training_seconds":0.005120918,"inference_ms":5.709822042,"predictive_states":64},
+      "backprojection": {"accuracy":0.25,"object_recall":0.8333333333,"value_recall":0.25,"initial_pair_recall":0.1666666667,"post_pair_recall":0.25,"wrong":0.75,"null":0.0,"backprojection_paths":120.0833333333,"active_pairs":7.25,"residual_windows":18.0,"model_bytes":11915.3333333333,"training_seconds":0.005465028,"inference_ms":12.750845708,"predictive_states":64},
+      "carry": {"accuracy":0.25,"object_recall":0.7916666667,"value_recall":0.25,"initial_pair_recall":0.1666666667,"post_pair_recall":0.25,"wrong":0.75,"null":0.0,"backprojection_paths":120.0833333333,"active_pairs":13.875,"residual_windows":18.0,"model_bytes":11906.3333333333,"training_seconds":0.005145608,"inference_ms":12.903607125,"predictive_states":64},
+      "carry_null": {"accuracy":0.0833333333,"object_recall":0.7916666667,"value_recall":0.25,"initial_pair_recall":0.1666666667,"post_pair_recall":0.25,"wrong":0.0,"null":0.9166666667,"backprojection_paths":120.0833333333,"active_pairs":13.875,"residual_windows":18.0,"model_bytes":11911.3333333333,"training_seconds":0.005257437,"inference_ms":12.341054458,"predictive_states":64}
+    },
+    "nested": {
+      "base": {"accuracy":0.0,"object_recall":0.0833333333,"value_recall":0.0833333333,"initial_pair_recall":0.0,"post_pair_recall":0.0,"wrong":1.0,"null":0.0,"backprojection_paths":0.0,"active_pairs":13.0,"residual_windows":18.0,"model_bytes":11905.3333333333,"training_seconds":0.005449999,"inference_ms":3.585371917,"predictive_states":64},
+      "backprojection": {"accuracy":0.0833333333,"object_recall":0.4583333333,"value_recall":0.0833333333,"initial_pair_recall":0.0,"post_pair_recall":0.0833333333,"wrong":0.9166666667,"null":0.0,"backprojection_paths":130.125,"active_pairs":5.7916666667,"residual_windows":18.0,"model_bytes":11915.3333333333,"training_seconds":0.005069001,"inference_ms":9.098542833,"predictive_states":64},
+      "carry": {"accuracy":0.0833333333,"object_recall":0.5416666667,"value_recall":0.0833333333,"initial_pair_recall":0.0,"post_pair_recall":0.0833333333,"wrong":0.9166666667,"null":0.0,"backprojection_paths":130.125,"active_pairs":12.375,"residual_windows":18.0,"model_bytes":11906.3333333333,"training_seconds":0.005086941,"inference_ms":9.432239208,"predictive_states":64},
+      "carry_null": {"accuracy":0.0833333333,"object_recall":0.5416666667,"value_recall":0.0833333333,"initial_pair_recall":0.0,"post_pair_recall":0.0833333333,"wrong":0.0,"null":0.9166666667,"backprojection_paths":130.125,"active_pairs":12.375,"residual_windows":18.0,"model_bytes":11911.3333333333,"training_seconds":0.005090126,"inference_ms":9.358908375,"predictive_states":64}
+    },
+    "omitted": {
+      "base": {"accuracy":0.0,"object_recall":0.0,"value_recall":0.75,"initial_pair_recall":0.0,"post_pair_recall":0.0,"wrong":1.0,"null":0.0,"backprojection_paths":0.0,"active_pairs":16.0,"residual_windows":18.0,"model_bytes":11905.3333333333,"training_seconds":0.005078204,"inference_ms":5.617825625,"predictive_states":64},
+      "backprojection": {"accuracy":0.2916666667,"object_recall":0.3333333333,"value_recall":0.75,"initial_pair_recall":0.0,"post_pair_recall":0.2916666667,"wrong":0.7083333333,"null":0.0,"backprojection_paths":151.4166666667,"active_pairs":8.2916666667,"residual_windows":18.0,"model_bytes":11915.3333333333,"training_seconds":0.005080244,"inference_ms":12.235295167,"predictive_states":64},
+      "carry": {"accuracy":0.2916666667,"object_recall":0.3333333333,"value_recall":0.75,"initial_pair_recall":0.0,"post_pair_recall":0.2916666667,"wrong":0.7083333333,"null":0.0,"backprojection_paths":151.4166666667,"active_pairs":11.5,"residual_windows":18.0,"model_bytes":11906.3333333333,"training_seconds":0.005050287,"inference_ms":12.284249833,"predictive_states":64},
+      "carry_null": {"accuracy":0.2916666667,"object_recall":0.3333333333,"value_recall":0.75,"initial_pair_recall":0.0,"post_pair_recall":0.2916666667,"wrong":0.0,"null":0.7083333333,"backprojection_paths":151.4166666667,"active_pairs":11.5,"residual_windows":18.0,"model_bytes":11911.3333333333,"training_seconds":0.005117369,"inference_ms":12.321588125,"predictive_states":64}
+    },
+    "paragraph": {
+      "base": {"accuracy":0.0,"object_recall":0.0833333333,"value_recall":0.0416666667,"initial_pair_recall":0.0,"post_pair_recall":0.0,"wrong":1.0,"null":0.0,"backprojection_paths":0.0,"active_pairs":11.625,"residual_windows":18.0,"model_bytes":11905.3333333333,"training_seconds":0.005160226,"inference_ms":3.044785167,"predictive_states":64},
+      "backprojection": {"accuracy":0.0416666667,"object_recall":0.4166666667,"value_recall":0.0416666667,"initial_pair_recall":0.0,"post_pair_recall":0.0416666667,"wrong":0.9583333333,"null":0.0,"backprojection_paths":125.0,"active_pairs":6.5833333333,"residual_windows":18.0,"model_bytes":11915.3333333333,"training_seconds":0.005166616,"inference_ms":8.184656,"predictive_states":64},
+      "carry": {"accuracy":0.0416666667,"object_recall":0.4166666667,"value_recall":0.0416666667,"initial_pair_recall":0.0,"post_pair_recall":0.0416666667,"wrong":0.9583333333,"null":0.0,"backprojection_paths":125.0,"active_pairs":13.0416666667,"residual_windows":18.0,"model_bytes":11906.3333333333,"training_seconds":0.005213628,"inference_ms":8.510645583,"predictive_states":64},
+      "carry_null": {"accuracy":0.0416666667,"object_recall":0.4166666667,"value_recall":0.0416666667,"initial_pair_recall":0.0,"post_pair_recall":0.0416666667,"wrong":0.0,"null":0.9583333333,"backprojection_paths":125.0,"active_pairs":13.0416666667,"residual_windows":18.0,"model_bytes":11911.3333333333,"training_seconds":0.005157836,"inference_ms":8.49111075,"predictive_states":64}
+    },
+    "plan": {
+      "base": {"accuracy":0.0,"object_recall":0.1666666667,"value_recall":0.0,"initial_pair_recall":0.0,"post_pair_recall":0.0,"wrong":1.0,"null":0.0,"backprojection_paths":0.0,"active_pairs":12.7083333333,"residual_windows":18.0,"model_bytes":11905.3333333333,"training_seconds":0.005154988,"inference_ms":4.216008,"predictive_states":64},
+      "backprojection": {"accuracy":0.0,"object_recall":0.5416666667,"value_recall":0.0,"initial_pair_recall":0.0,"post_pair_recall":0.0,"wrong":1.0,"null":0.0,"backprojection_paths":122.125,"active_pairs":5.2916666667,"residual_windows":18.0,"model_bytes":11915.3333333333,"training_seconds":0.006390503,"inference_ms":9.315847083,"predictive_states":64},
+      "carry": {"accuracy":0.0,"object_recall":0.5833333333,"value_recall":0.0,"initial_pair_recall":0.0,"post_pair_recall":0.0,"wrong":1.0,"null":0.0,"backprojection_paths":122.125,"active_pairs":10.0,"residual_windows":18.0,"model_bytes":11906.3333333333,"training_seconds":0.005118093,"inference_ms":9.36906425,"predictive_states":64},
+      "carry_null": {"accuracy":0.0,"object_recall":0.5833333333,"value_recall":0.0,"initial_pair_recall":0.0,"post_pair_recall":0.0,"wrong":0.0,"null":1.0,"backprojection_paths":122.125,"active_pairs":10.0,"residual_windows":18.0,"model_bytes":11911.3333333333,"training_seconds":0.005311714,"inference_ms":9.386318583,"predictive_states":64}
+    }
+  },
+  "peak_rss_kib_runtime_included": 112132,
+  "estimated_complexity": "char prediction O(NL), residual windows O(WL), backprojection O(W(C+B)), sparse pairing O(KoKv), Ko,Kv<=8 W<=18",
+  "hidden_labels_used_by_learner": false,
+  "environment_observation_uses_hidden_state_only_to_generate_raw_outcomes": true,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
