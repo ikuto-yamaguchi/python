@@ -1,0 +1,48 @@
+{
+  "cycle": 31,
+  "hypothesis": "Probe-Conditioned Symbol Birth from Minimal Equivalence-Class Splits",
+  "seeds": [1, 7, 19],
+  "train_examples": 288,
+  "induction_examples": 190,
+  "probe_pool_examples": 98,
+  "active_probe_budget": 16,
+  "summary": {
+    "seen": {"graph_accuracy": 0.013888888888888888, "probe_accuracy": 0.06944444444444445, "symbol_accuracy": 0.09722222222222221, "shuffle_symbol_accuracy": 0.027777777777777776, "symbol_wrong_commit": 0.0, "probe_pair_recall": 0.05555555555555555, "symbol_pair_recall": 0.041666666666666664, "symbol_mean_candidates": 11.222222222222221},
+    "order": {"graph_accuracy": 0.013888888888888888, "probe_accuracy": 0.041666666666666664, "symbol_accuracy": 0.08333333333333333, "shuffle_symbol_accuracy": 0.0, "symbol_wrong_commit": 0.0, "probe_pair_recall": 0.06944444444444445, "symbol_pair_recall": 0.041666666666666664, "symbol_mean_candidates": 11.555555555555555},
+    "lexeme": {"graph_accuracy": 0.013888888888888888, "probe_accuracy": 0.041666666666666664, "symbol_accuracy": 0.08333333333333333, "shuffle_symbol_accuracy": 0.0, "symbol_wrong_commit": 0.0, "probe_pair_recall": 0.05555555555555555, "symbol_pair_recall": 0.041666666666666664, "symbol_mean_candidates": 10.666666666666668},
+    "rename": {"graph_accuracy": 0.0, "probe_accuracy": 0.0, "symbol_accuracy": 0.0, "shuffle_symbol_accuracy": 0.0, "symbol_wrong_commit": 0.0, "probe_pair_recall": 0.0, "symbol_pair_recall": 0.0, "symbol_mean_candidates": 11.152777777777779},
+    "alternate": {"graph_accuracy": 0.0, "probe_accuracy": 0.0, "symbol_accuracy": 0.0, "shuffle_symbol_accuracy": 0.0, "symbol_wrong_commit": 0.0, "probe_pair_recall": 0.0, "symbol_pair_recall": 0.0, "symbol_mean_candidates": 0.0},
+    "nested": {"graph_accuracy": 0.013888888888888888, "probe_accuracy": 0.041666666666666664, "symbol_accuracy": 0.08333333333333333, "shuffle_symbol_accuracy": 0.0, "symbol_wrong_commit": 0.0, "probe_pair_recall": 0.041666666666666664, "symbol_pair_recall": 0.013888888888888888, "symbol_mean_candidates": 11.555555555555555},
+    "omitted": {"graph_accuracy": 0.0, "probe_accuracy": 0.0, "symbol_accuracy": 0.0, "shuffle_symbol_accuracy": 0.0, "symbol_wrong_commit": 0.0, "probe_pair_recall": 0.0, "symbol_pair_recall": 0.0, "symbol_mean_candidates": 3.0},
+    "paragraph": {"graph_accuracy": 0.013888888888888888, "probe_accuracy": 0.041666666666666664, "symbol_accuracy": 0.08333333333333333, "shuffle_symbol_accuracy": 0.0, "symbol_wrong_commit": 0.0, "probe_pair_recall": 0.0, "symbol_pair_recall": 0.0, "symbol_mean_candidates": 11.88888888888889}
+  },
+  "diagnostics": {
+    "triangles": 64,
+    "selected_probes": 13.666666666666666,
+    "discriminations": 126,
+    "symbols": 16.666666666666668,
+    "symbol_members": 56.333333333333336,
+    "probe_description_bits": 24861.333333333332,
+    "symbol_description_bits": 26522,
+    "literal_description_bits": 283506.6666666667,
+    "model_bytes": 8570,
+    "training_seconds": 0.5051382980000957,
+    "inference_ms_seen": 8.637371833335314,
+    "inference_ms_nested": 12.939050083335562,
+    "inference_ms_paragraph": 23.327954902773246,
+    "peak_rss_kib_runtime_included": 160256
+  },
+  "seed_seen": {
+    "1": {"probe_accuracy": 0.0, "symbol_accuracy": 0.08333333333333333, "shuffle_symbol_accuracy": 0.0},
+    "7": {"probe_accuracy": 0.16666666666666666, "symbol_accuracy": 0.16666666666666666, "shuffle_symbol_accuracy": 0.08333333333333333},
+    "19": {"probe_accuracy": 0.041666666666666664, "symbol_accuracy": 0.041666666666666664, "shuffle_symbol_accuracy": 0.0}
+  },
+  "estimated_complexity": "triangle O(NKoKv), response O(VT), equivalence grouping O(TV log T), inference O(TL^2+T^2)",
+  "final_test_outcome_used": false,
+  "probe_pool_independent": true,
+  "fixed_ontology_or_handwritten_slots_used_by_model": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
