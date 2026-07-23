@@ -1,0 +1,40 @@
+{
+  "cycle": 34,
+  "hypothesis": "Multi-Value Intervention Fibers from Non-Target Invariance Cross-Tests",
+  "seeds": [1, 7, 19],
+  "methods": ["single", "multi", "no_invariance", "shuffle"],
+  "summary": {
+    "seen": {"single_accuracy": 0.0, "multi_accuracy": 0.0, "multi_exact_boundary": 0.0, "multi_wrong_commit": 0.0, "multi_mean_candidates": 17.07, "shuffle_accuracy": 0.0},
+    "order": {"multi_accuracy": 0.0, "multi_exact_boundary": 0.0, "multi_wrong_commit": 0.0, "multi_mean_candidates": 17.32},
+    "lexeme": {"multi_accuracy": 0.0, "multi_exact_boundary": 0.0, "multi_wrong_commit": 0.0, "multi_mean_candidates": 17.12},
+    "rename": {"multi_accuracy": 0.0, "multi_exact_boundary": 0.0, "multi_wrong_commit": 0.0, "multi_mean_candidates": 17.07},
+    "alternate": {"multi_accuracy": 0.0, "multi_exact_boundary": 0.0, "multi_wrong_commit": 0.0, "multi_mean_candidates": 0.0},
+    "alternate2": {"multi_accuracy": 0.0, "multi_exact_boundary": 0.0, "multi_wrong_commit": 0.0, "multi_mean_candidates": 0.0},
+    "nested": {"multi_accuracy": 0.0, "multi_exact_boundary": 0.0, "multi_wrong_commit": 0.0, "multi_mean_candidates": 17.54},
+    "omitted": {"multi_accuracy": 0.0, "multi_exact_boundary": 0.0, "multi_wrong_commit": 0.0, "multi_mean_candidates": 16.90},
+    "paragraph": {"multi_accuracy": 0.0, "multi_exact_boundary": 0.0, "multi_wrong_commit": 0.0833, "multi_mean_candidates": 14.22},
+    "plan": {"multi_accuracy": 0.0, "multi_exact_boundary": 0.0, "multi_wrong_commit": 0.0, "multi_mean_candidates": 21.33},
+    "counterfactual": {"multi_accuracy": 0.0, "multi_exact_boundary": 0.0, "multi_wrong_commit": 0.0, "multi_mean_candidates": 17.78}
+  },
+  "diagnostics": {
+    "multi_value_fibers": 2.0,
+    "single_value_fibers": 2.33,
+    "shuffle_fibers": 0.0,
+    "fiber_values": 16.67,
+    "raw_signatures": 9.33,
+    "probe_audits": 5044.67,
+    "non_target_checks": 11.0,
+    "model_bytes": 576,
+    "training_seconds": 0.120974,
+    "seen_inference_ms": 0.827,
+    "paragraph_inference_ms": 1.172,
+    "peak_rss_kib_runtime_included": 111040
+  },
+  "estimated_complexity": "signature O(NL), multi-value probe O(FQVL), inference O(FVL)",
+  "final_test_outcomes_used_for_ranking": false,
+  "hidden_labels_used_only_for_evaluation": true,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
