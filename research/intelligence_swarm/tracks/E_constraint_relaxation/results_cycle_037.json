@@ -1,0 +1,36 @@
+{
+  "cycle": 37,
+  "hypothesis": "Constraint-Synergy Attractors from Selective Sensor Lesion Fields",
+  "seeds": [1, 7, 19],
+  "model": {
+    "none": {"synergy_hyperedges": 0, "single_sensor_entries": 56.6666666667, "audit": 96, "training_seconds": 0.0294019833, "model_bytes": 5675.6666666667},
+    "additive": {"synergy_hyperedges": 0, "single_sensor_entries": 56.6666666667, "audit": 96, "training_seconds": 0.0274350863, "model_bytes": 5679.6666666667},
+    "synergy": {"synergy_hyperedges": 0, "single_sensor_entries": 56.6666666667, "audit": 96, "training_seconds": 0.0249658463, "model_bytes": 5670.6666666667},
+    "channel_shuffle": {"synergy_hyperedges": 0, "single_sensor_entries": 64, "audit": 96, "training_seconds": 0.2769248120, "model_bytes": 5854},
+    "lesion_future": {"synergy_hyperedges": 0, "single_sensor_entries": 56.6666666667, "audit": 96, "training_seconds": 0.0260812227, "model_bytes": 5684.6666666667}
+  },
+  "summary": {
+    "seen": {"none": [0,0,1,12,0.687664], "additive": [0,0,1,5.444444,4.658620], "synergy": [0,0,1,12,6.448188], "channel_shuffle": [0,0,1,12,6.607120], "lesion_future": [0,0,1,12,6.524390]},
+    "unknown": {"none": [0,0,1,12,0.774328], "additive": [0,0,1,6.666667,5.191546], "synergy": [0,0,1,12,7.324239], "channel_shuffle": [0,0,1,12,7.526847], "lesion_future": [0,0,1,12,7.835141]},
+    "ambiguous": {"none": [0,0,1,12,0.747899], "additive": [0,0,1,5.055556,4.998641], "synergy": [0,0,1,12,7.406511], "channel_shuffle": [0,0,1,12,7.408119], "lesion_future": [0,0,1,12,6.851118]},
+    "nested": {"none": [0,0,1,12,0.826767], "additive": [0,0,1,10.111111,7.266728], "synergy": [0,0,1,12,8.109614], "channel_shuffle": [0,0,1,12,7.598941], "lesion_future": [0,0,1,12,8.003984]},
+    "omitted": {"none": [0,0,1,12,0.606746], "additive": [0,0,1,12,5.760833], "synergy": [0,0,1,12,6.473892], "channel_shuffle": [0,0,1,12,6.037827], "lesion_future": [0,0,1,12,5.598121]},
+    "paragraph": {"none": [0,0,1,12,1.034349], "additive": [0,0,1,12,10.476670], "synergy": [0,0,1,12,10.314235], "channel_shuffle": [0,0,1,12,10.908102], "lesion_future": [0,0,1,12,9.263348]},
+    "plan": {"none": [0,0,1,12,0.925278], "additive": [0,0,1,7.111111,7.084283], "synergy": [0,0,1,12,9.632012], "channel_shuffle": [0,0,1,12,9.155140], "lesion_future": [0,0,1,12,9.123437]},
+    "counterfactual": {"none": [0,0,1,12,1.167497], "additive": [0,0,1,12,11.933585], "synergy": [0,0,1,12,12.032759], "channel_shuffle": [0,0,1,12,11.650627], "lesion_future": [0,0,1,12,11.566483]}
+  },
+  "summary_vector_fields": ["accuracy", "wrong_commit", "null_rate", "mean_active", "inference_ms"],
+  "mean_sweeps": 2,
+  "max_sweeps": 2,
+  "convergence_rate": 1.0,
+  "mean_candidates": 12,
+  "exact_boundary_recall": 0,
+  "object_value_pair_recall": 0,
+  "peak_rss_kib_runtime_included": 111336,
+  "estimated_complexity": "candidate O(L^4) capped, sensor audit O(QH), synergy O(QH*sum C(5,k)), relaxation O(SH)",
+  "final_test_outcomes_used_for_ranking": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
