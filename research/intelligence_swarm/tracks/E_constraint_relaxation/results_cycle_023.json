@@ -1,0 +1,57 @@
+{
+  "hypothesis": "Environment-Decoupled Factor Birth from Intervention-Invariant Energy Responses",
+  "seeds": [1, 7, 19],
+  "sizes": [48],
+  "summary": {
+    "48": {
+      "base": {
+        "base": {"accuracy": 0.888888888888889, "wrong_commit": 0.1111111111111111, "null_rate": 0.0, "object_recall": 1.0, "value_recall": 1.0, "pair_recall": 1.0, "mean_sweeps": 2.0, "mean_active": 1.1111111111111112, "mean_candidates": 41.80555555555556, "prototype_count": 0, "model_bytes": 112, "training_seconds": 0.0000007507, "inference_ms": 1.9256556944482226},
+        "invariant": {"accuracy": 0.888888888888889, "wrong_commit": 0.1111111111111111, "null_rate": 0.0, "object_recall": 1.0, "value_recall": 1.0, "pair_recall": 1.0, "mean_sweeps": 2.0, "mean_active": 1.1111111111111112, "mean_candidates": 41.80555555555556, "prototype_count": 18.666666666666668, "model_bytes": 1556.3333333333333, "training_seconds": 0.2571381330000501, "inference_ms": 1.940084611128946},
+        "invariant_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "object_recall": 1.0, "value_recall": 1.0, "pair_recall": 1.0, "mean_sweeps": 2.0, "mean_active": 1.1111111111111112, "mean_candidates": 41.80555555555556, "prototype_count": 18.666666666666668, "model_bytes": 1561.3333333333333, "training_seconds": 0.257, "inference_ms": 1.95}
+      },
+      "unseen": {
+        "base": {"accuracy": 1.0, "wrong_commit": 0.0, "null_rate": 0.0, "object_recall": 1.0, "value_recall": 1.0, "pair_recall": 1.0},
+        "invariant": {"accuracy": 1.0, "wrong_commit": 0.0, "null_rate": 0.0, "object_recall": 1.0, "value_recall": 1.0, "pair_recall": 1.0},
+        "invariant_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "object_recall": 1.0, "value_recall": 1.0, "pair_recall": 1.0}
+      },
+      "ambiguous": {
+        "base": {"accuracy": 0.0, "wrong_commit": 1.0, "null_rate": 0.0, "pair_recall": 0.0},
+        "invariant": {"accuracy": 0.0, "wrong_commit": 1.0, "null_rate": 0.0, "pair_recall": 0.0},
+        "invariant_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.0}
+      },
+      "nested": {
+        "base": {"accuracy": 0.0, "wrong_commit": 1.0, "null_rate": 0.0, "object_recall": 0.5277777777777778, "value_recall": 0.2777777777777778, "pair_recall": 0.027777777777777776},
+        "invariant": {"accuracy": 0.0, "wrong_commit": 1.0, "null_rate": 0.0, "object_recall": 0.5277777777777778, "value_recall": 0.2777777777777778, "pair_recall": 0.027777777777777776},
+        "invariant_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.027777777777777776}
+      },
+      "omitted": {
+        "base": {"accuracy": 0.027777777777777776, "wrong_commit": 0.9722222222222222, "null_rate": 0.0, "object_recall": 0.027777777777777776, "value_recall": 1.0, "pair_recall": 0.027777777777777776},
+        "invariant": {"accuracy": 0.027777777777777776, "wrong_commit": 0.9722222222222222, "null_rate": 0.0, "object_recall": 0.027777777777777776, "value_recall": 1.0, "pair_recall": 0.027777777777777776},
+        "invariant_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.027777777777777776}
+      },
+      "paragraph": {
+        "base": {"accuracy": 0.05555555555555555, "wrong_commit": 0.9444444444444444, "null_rate": 0.0, "object_recall": 0.3611111111111111, "value_recall": 0.4166666666666667, "pair_recall": 0.05555555555555555},
+        "invariant": {"accuracy": 0.05555555555555555, "wrong_commit": 0.9444444444444444, "null_rate": 0.0, "object_recall": 0.3611111111111111, "value_recall": 0.4166666666666667, "pair_recall": 0.05555555555555555, "mean_sweeps": 2.0, "mean_active": 3.888888888888889, "mean_candidates": 44.138888888888886, "prototype_count": 18.666666666666668, "inference_ms": 2.3693294999955268},
+        "invariant_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.05555555555555555}
+      },
+      "plan": {
+        "base": {"accuracy": 0.0, "wrong_commit": 1.0, "null_rate": 0.0, "object_recall": 1.0, "value_recall": 0.0, "pair_recall": 0.0},
+        "invariant": {"accuracy": 0.0, "wrong_commit": 1.0, "null_rate": 0.0, "object_recall": 1.0, "value_recall": 0.0, "pair_recall": 0.0},
+        "invariant_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.0}
+      },
+      "counterfactual": {
+        "base": {"accuracy": 0.0, "wrong_commit": 1.0, "null_rate": 0.0, "object_recall": 0.3888888888888889, "value_recall": 0.0, "pair_recall": 0.0},
+        "invariant": {"accuracy": 0.0, "wrong_commit": 1.0, "null_rate": 0.0, "object_recall": 0.3888888888888889, "value_recall": 0.0, "pair_recall": 0.0},
+        "invariant_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.0}
+      }
+    }
+  },
+  "peak_rss_kib_runtime_included": 111668,
+  "estimated_complexity": "candidate O(L^2), response O(HF), environment prototype O(NEH), relaxation O(SH), E=4,H<=48,S<=5",
+  "hidden_labels_used_by_learner": false,
+  "environment_bundle_labels_used": true,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
