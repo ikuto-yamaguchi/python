@@ -1,0 +1,75 @@
+{
+  "cycle": 38,
+  "hypothesis": "Object-Centered Support Birth from Paired-World Co-Segmentation",
+  "seeds": [1, 7, 19],
+  "summary": {
+    "seen": {
+      "factorized": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 32, "paired_support_sum": 0, "model_bytes": 2289.3333333333335, "training_seconds": 0.008028714666655409, "inference_ms": 7.624439759259379},
+      "coseg": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 8, "paired_support_sum": 33, "model_bytes": 705.6666666666666, "training_seconds": 0.01992593033333871, "inference_ms": 2.1029355370366694},
+      "strict": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 6.666666666666667, "paired_support_sum": 31.666666666666668, "model_bytes": 618.6666666666666, "training_seconds": 0.01964159399999706, "inference_ms": 1.870146129629941},
+      "shuffle": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 6.333333333333333, "paired_support_sum": 24, "model_bytes": 613.6666666666666, "training_seconds": 0.020188276666677513, "inference_ms": 1.696470259259568}
+    },
+    "order": {
+      "factorized": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 32, "paired_support_sum": 0, "model_bytes": 2289.3333333333335, "training_seconds": 0.00765288766666572, "inference_ms": 7.4663704629632255},
+      "coseg": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 8, "paired_support_sum": 33, "model_bytes": 705.6666666666666, "training_seconds": 0.019236533666675843, "inference_ms": 1.8338317222220146},
+      "strict": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 6.666666666666667, "paired_support_sum": 31.666666666666668, "model_bytes": 618.6666666666666, "training_seconds": 0.019055754333332214, "inference_ms": 1.5722516111109313},
+      "shuffle": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 6.333333333333333, "paired_support_sum": 24, "model_bytes": 613.6666666666666, "training_seconds": 0.01922027666666774, "inference_ms": 1.4218093703703971}
+    },
+    "lexeme": {
+      "factorized": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 32, "paired_support_sum": 0, "model_bytes": 2289.3333333333335, "training_seconds": 0.008014958666677785, "inference_ms": 7.848907907408097},
+      "coseg": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 8, "paired_support_sum": 33, "model_bytes": 705.6666666666666, "training_seconds": 0.019256917666666595, "inference_ms": 1.8827032037030997},
+      "strict": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 6.666666666666667, "paired_support_sum": 31.666666666666668, "model_bytes": 618.6666666666666, "training_seconds": 0.01942936099999315, "inference_ms": 1.7111086296295155},
+      "shuffle": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 6.333333333333333, "paired_support_sum": 24, "model_bytes": 613.6666666666666, "training_seconds": 0.019826483666671873, "inference_ms": 1.534339425926187}
+    },
+    "rename": {
+      "factorized": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 32, "paired_support_sum": 0, "model_bytes": 2289.3333333333335, "training_seconds": 0.007584348000004108, "inference_ms": 4.911314425925711},
+      "coseg": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 8, "paired_support_sum": 33, "model_bytes": 705.6666666666666, "training_seconds": 0.019606062333328584, "inference_ms": 1.2696935925917943},
+      "strict": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 6.666666666666667, "paired_support_sum": 31.666666666666668, "model_bytes": 618.6666666666666, "training_seconds": 0.019783869666667897, "inference_ms": 1.092164351851571},
+      "shuffle": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 6.333333333333333, "paired_support_sum": 24, "model_bytes": 613.6666666666666, "training_seconds": 0.01948570033332923, "inference_ms": 1.0399002592588726}
+    },
+    "alternate": {
+      "factorized": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 32, "paired_support_sum": 0, "model_bytes": 2289.3333333333335, "training_seconds": 0.008890856333342375, "inference_ms": 5.355113814815127},
+      "coseg": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 8, "paired_support_sum": 33, "model_bytes": 705.6666666666666, "training_seconds": 0.020822800999998965, "inference_ms": 1.319459981481238},
+      "strict": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 6.666666666666667, "paired_support_sum": 31.666666666666668, "model_bytes": 618.6666666666666, "training_seconds": 0.02033879966667011, "inference_ms": 1.1688639629633606},
+      "shuffle": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 6.333333333333333, "paired_support_sum": 24, "model_bytes": 613.6666666666666, "training_seconds": 0.01924668400000466, "inference_ms": 1.0171696666669017}
+    },
+    "nested": {
+      "factorized": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 32, "paired_support_sum": 0, "model_bytes": 2289.3333333333335, "training_seconds": 0.007784574999997555, "inference_ms": 10.816805037037026},
+      "coseg": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 8, "paired_support_sum": 33, "model_bytes": 705.6666666666666, "training_seconds": 0.01954081100000356, "inference_ms": 2.935942925925924},
+      "strict": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 6.666666666666667, "paired_support_sum": 31.666666666666668, "model_bytes": 618.6666666666666, "training_seconds": 0.01926631200000391, "inference_ms": 2.6440641481481517},
+      "shuffle": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 6.333333333333333, "paired_support_sum": 24, "model_bytes": 613.6666666666666, "training_seconds": 0.020183933999997333, "inference_ms": 2.331802259259643}
+    },
+    "omitted": {
+      "factorized": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 32, "paired_support_sum": 0, "model_bytes": 2289.3333333333335, "training_seconds": 0.007482816000001928, "inference_ms": 3.5521617962964918},
+      "coseg": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 8, "paired_support_sum": 33, "model_bytes": 705.6666666666666, "training_seconds": 0.019483411333330498, "inference_ms": 0.8632671666667328},
+      "strict": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 6.666666666666667, "paired_support_sum": 31.666666666666668, "model_bytes": 618.6666666666666, "training_seconds": 0.02040668933333715, "inference_ms": 0.7465750370361893},
+      "shuffle": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 6.333333333333333, "paired_support_sum": 24, "model_bytes": 613.6666666666666, "training_seconds": 0.019036815333341412, "inference_ms": 0.6597423148151536}
+    },
+    "paragraph": {
+      "factorized": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 32, "paired_support_sum": 0, "model_bytes": 2289.3333333333335, "training_seconds": 0.007680112666671827, "inference_ms": 10.78987016666712},
+      "coseg": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 8, "paired_support_sum": 33, "model_bytes": 705.6666666666666, "training_seconds": 0.019376590000007354, "inference_ms": 3.0616863703706354},
+      "strict": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 6.666666666666667, "paired_support_sum": 31.666666666666668, "model_bytes": 618.6666666666666, "training_seconds": 0.019174997666662346, "inference_ms": 2.5675413703707077},
+      "shuffle": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 6.333333333333333, "paired_support_sum": 24, "model_bytes": 613.6666666666666, "training_seconds": 0.01947625566666981, "inference_ms": 2.466708351852381}
+    },
+    "plan": {
+      "factorized": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 32, "paired_support_sum": 0, "model_bytes": 2289.3333333333335, "training_seconds": 0.008329969666666178, "inference_ms": 14.141512518518367},
+      "coseg": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 8, "paired_support_sum": 33, "model_bytes": 705.6666666666666, "training_seconds": 0.01963714133333383, "inference_ms": 3.6628510370375293},
+      "strict": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 6.666666666666667, "paired_support_sum": 31.666666666666668, "model_bytes": 618.6666666666666, "training_seconds": 0.019332432000008264, "inference_ms": 3.0897336481477513},
+      "shuffle": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 6.333333333333333, "paired_support_sum": 24, "model_bytes": 613.6666666666666, "training_seconds": 0.020382240999992973, "inference_ms": 2.8523587222219215}
+    },
+    "counterfactual": {
+      "factorized": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 32, "paired_support_sum": 0, "model_bytes": 2289.3333333333335, "training_seconds": 0.007559756333336054, "inference_ms": 18.28563805555495},
+      "coseg": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 8, "paired_support_sum": 33, "model_bytes": 705.6666666666666, "training_seconds": 0.01960972733332748, "inference_ms": 4.994724962962756},
+      "strict": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 6.666666666666667, "paired_support_sum": 31.666666666666668, "model_bytes": 618.6666666666666, "training_seconds": 0.019567002666661892, "inference_ms": 4.130367018518655},
+      "shuffle": {"accuracy": 0, "wrong_commit": 0, "null": 1, "exact_boundary": 0, "object_value_pair": 0, "mean_candidates": 0, "proposal_count": 6.333333333333333, "paired_support_sum": 24, "model_bytes": 613.6666666666666, "training_seconds": 0.02071377866665595, "inference_ms": 3.9867673518519573}
+    }
+  },
+  "peak_rss_kib_runtime_included": 111072,
+  "estimated_complexity": "induction O(NL^2), paired co-segmentation O(QO^2L), inference O(POVL)",
+  "final_test_outcome_used_for_selection": false,
+  "fixed_ontology_or_handwritten_slots_used_by_model": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
