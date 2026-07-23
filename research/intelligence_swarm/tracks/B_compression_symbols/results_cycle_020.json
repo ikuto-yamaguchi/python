@@ -1,0 +1,26 @@
+{
+  "hypothesis": "Substitution-Closed Program Nonterminals by Exact Derivation Compression",
+  "seeds": [1, 7, 19],
+  "sizes": [48, 144, 432],
+  "summary_432": {
+    "seen": {
+      "executable": {"accuracy": 0.6833333333333333, "wrong_commit": 0.06111111111111111, "candidate_execution_recall": 0.6833333333333333, "programs": 32, "nonterminals": 0, "description_bits": 9120, "model_bytes": 40143.666666666664, "training_seconds": 0.0164, "inference_ms": 0.0320},
+      "surface_group": {"accuracy": 0.6944444444444444, "wrong_commit": 0.013888888888888888, "candidate_execution_recall": 0.6944444444444444, "programs": 32, "nonterminals": 0, "description_bits": 9042.666666666666, "model_bytes": 40208.333333333336, "training_seconds": 0.0176, "inference_ms": 0.0298},
+      "substitution_grammar": {"accuracy": 0.7888888888888889, "wrong_commit": 0.002777777777777778, "candidate_execution_recall": 0.8305555555555556, "programs": 8, "nonterminals": 32, "merges": 8, "description_bits": 14876, "model_bytes": 15511.666666666666, "training_seconds": 0.02548517833332653, "inference_ms": 0.03474928611105889}
+    },
+    "held_order": {"executable_accuracy": 0.0, "surface_group_accuracy": 0.0, "substitution_grammar_accuracy": 0.0},
+    "held_lexeme": {"executable_accuracy": 0.0, "surface_group_accuracy": 0.0, "substitution_grammar_accuracy": 0.0},
+    "rename": {"executable_accuracy": 0.0, "surface_group_accuracy": 0.0, "substitution_grammar_accuracy": 0.0},
+    "nested": {"executable_accuracy": 0.6833333333333333, "surface_group_accuracy": 0.6944444444444444, "substitution_grammar_accuracy": 0.7833333333333333},
+    "omitted": {"executable_accuracy": 0.0, "surface_group_accuracy": 0.0, "substitution_grammar_accuracy": 0.0},
+    "alternate": {"executable_accuracy": 0.0, "surface_group_accuracy": 0.0, "substitution_grammar_accuracy": 0.0},
+    "freeform": {"executable_accuracy": 0.6833333333333333, "surface_group_accuracy": 0.6944444444444444, "substitution_grammar_accuracy": 0.7444444444444445}
+  },
+  "peak_rss_kib_runtime_included": 112124,
+  "estimated_complexity": "proposal O(NC^2), closure O(P*S*F), quotient O(P), inference O((P+G)*L)",
+  "hidden_labels_used_by_learner": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
