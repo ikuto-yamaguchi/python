@@ -1,0 +1,49 @@
+{
+  "hypothesis": "Reversible Multi-View Factor Codes by Held-Out Reconstruction",
+  "seeds": [1, 7, 19],
+  "sizes": [48, 144, 432],
+  "summary_432": {
+    "seen": {
+      "executable": {"accuracy": 0.6888888888888889, "model_bytes": 7343, "training_seconds": 0.012035741999985325, "inference_ms": 0.019352725000013987, "programs": 32, "raw_candidates": 432, "rejected": 0, "merges": 0, "factor_groups": 0, "mean_read_candidates": 0.8111111111111111},
+      "surface_mdl": {"accuracy": 0.175, "model_bytes": 2504, "training_seconds": 0.03897722499999645, "inference_ms": 0.006077291666568069, "programs": 8, "raw_candidates": 432, "rejected": 0, "merges": 39.333333333333336, "factor_groups": 0, "mean_read_candidates": 0.21944444444444444},
+      "multiview_factor": {"accuracy": 0.6944444444444444, "model_bytes": 9579, "training_seconds": 0.038441385999997614, "inference_ms": 0.019688080555526868, "programs": 32, "raw_candidates": 432, "rejected": 0, "merges": 1.3333333333333333, "factor_groups": 46.666666666666664, "mean_read_candidates": 0.8083333333333333}
+    },
+    "held_order": {
+      "executable": {"accuracy": 0.0, "model_bytes": 7343, "training_seconds": 0.011662970999992694, "inference_ms": 0.006844397222178284, "programs": 32, "raw_candidates": 432, "rejected": 0, "merges": 0, "factor_groups": 0, "mean_read_candidates": 0.0},
+      "surface_mdl": {"accuracy": 0.0, "model_bytes": 2504, "training_seconds": 0.03839505733334173, "inference_ms": 0.0022288194444620834, "programs": 8, "raw_candidates": 432, "rejected": 0, "merges": 39.333333333333336, "factor_groups": 0, "mean_read_candidates": 0.0},
+      "multiview_factor": {"accuracy": 0.0, "model_bytes": 9579, "training_seconds": 0.038023043999989646, "inference_ms": 0.007052094444443608, "programs": 32, "raw_candidates": 432, "rejected": 0, "merges": 1.3333333333333333, "factor_groups": 46.666666666666664, "mean_read_candidates": 0.0}
+    },
+    "held_lexeme": {
+      "executable": {"accuracy": 0.0, "model_bytes": 7343, "training_seconds": 0.011618177333332369, "inference_ms": 0.006642763888938437, "programs": 32, "raw_candidates": 432, "rejected": 0, "merges": 0, "factor_groups": 0, "mean_read_candidates": 0.0},
+      "surface_mdl": {"accuracy": 0.0, "model_bytes": 2504, "training_seconds": 0.03786624566667266, "inference_ms": 0.0020255499999658846, "programs": 8, "raw_candidates": 432, "rejected": 0, "merges": 39.333333333333336, "factor_groups": 0, "mean_read_candidates": 0.0},
+      "multiview_factor": {"accuracy": 0.0, "model_bytes": 9579, "training_seconds": 0.03835594266667878, "inference_ms": 0.007459194444534331, "programs": 32, "raw_candidates": 432, "rejected": 0, "merges": 1.3333333333333333, "factor_groups": 46.666666666666664, "mean_read_candidates": 0.0}
+    },
+    "nested": {
+      "executable": {"accuracy": 0.6888888888888889, "model_bytes": 7343, "training_seconds": 0.011687683666660101, "inference_ms": 0.025475052777797675, "programs": 32, "raw_candidates": 432, "rejected": 0, "merges": 0, "factor_groups": 0, "mean_read_candidates": 0.8111111111111111},
+      "surface_mdl": {"accuracy": 0.175, "model_bytes": 2504, "training_seconds": 0.038884591333328444, "inference_ms": 0.00690476944432324, "programs": 8, "raw_candidates": 432, "rejected": 0, "merges": 39.333333333333336, "factor_groups": 0, "mean_read_candidates": 0.21944444444444444},
+      "multiview_factor": {"accuracy": 0.6944444444444444, "model_bytes": 9579, "training_seconds": 0.03826058833332505, "inference_ms": 0.024589549999929104, "programs": 32, "raw_candidates": 432, "rejected": 0, "merges": 1.3333333333333333, "factor_groups": 46.666666666666664, "mean_read_candidates": 0.8083333333333333}
+    },
+    "omitted": {
+      "executable": {"accuracy": 0.0, "model_bytes": 7343, "training_seconds": 0.011742390999984309, "inference_ms": 0.006871994444502939, "programs": 32, "raw_candidates": 432, "rejected": 0, "merges": 0, "factor_groups": 0, "mean_read_candidates": 0.0},
+      "surface_mdl": {"accuracy": 0.0, "model_bytes": 2504, "training_seconds": 0.03796268800000272, "inference_ms": 0.001977397222121782, "programs": 8, "raw_candidates": 432, "rejected": 0, "merges": 39.333333333333336, "factor_groups": 0, "mean_read_candidates": 0.0},
+      "multiview_factor": {"accuracy": 0.0, "model_bytes": 9579, "training_seconds": 0.0384514739999986, "inference_ms": 0.006928133333319566, "programs": 32, "raw_candidates": 432, "rejected": 0, "merges": 1.3333333333333333, "factor_groups": 46.666666666666664, "mean_read_candidates": 0.0}
+    },
+    "alternate": {
+      "executable": {"accuracy": 0.0, "model_bytes": 7343, "training_seconds": 0.011595967333335011, "inference_ms": 0.00698265833334075, "programs": 32, "raw_candidates": 432, "rejected": 0, "merges": 0, "factor_groups": 0, "mean_read_candidates": 0.0},
+      "surface_mdl": {"accuracy": 0.0, "model_bytes": 2504, "training_seconds": 0.038106140333326266, "inference_ms": 0.002247849999924433, "programs": 8, "raw_candidates": 432, "rejected": 0, "merges": 39.333333333333336, "factor_groups": 0, "mean_read_candidates": 0.0},
+      "multiview_factor": {"accuracy": 0.0, "model_bytes": 9579, "training_seconds": 0.03809642900000654, "inference_ms": 0.007468766666739334, "programs": 32, "raw_candidates": 432, "rejected": 0, "merges": 1.3333333333333333, "factor_groups": 46.666666666666664, "mean_read_candidates": 0.0}
+    },
+    "freeform": {
+      "executable": {"accuracy": 0.6888888888888889, "model_bytes": 7343, "training_seconds": 0.01156714200000882, "inference_ms": 0.028228094444513217, "programs": 32, "raw_candidates": 432, "rejected": 0, "merges": 0, "factor_groups": 0, "mean_read_candidates": 0.8111111111111111},
+      "surface_mdl": {"accuracy": 0.175, "model_bytes": 2504, "training_seconds": 0.03822477233333643, "inference_ms": 0.00795269999992835, "programs": 8, "raw_candidates": 432, "rejected": 0, "merges": 39.333333333333336, "factor_groups": 0, "mean_read_candidates": 0.21944444444444444},
+      "multiview_factor": {"accuracy": 0.6944444444444444, "model_bytes": 9579, "training_seconds": 0.03817099966665675, "inference_ms": 0.02845741111114661, "programs": 32, "raw_candidates": 432, "rejected": 0, "merges": 1.3333333333333333, "factor_groups": 46.666666666666664, "mean_read_candidates": 0.8083333333333333}
+    }
+  },
+  "peak_rss_kib_runtime_included": 111564,
+  "estimated_complexity": "proposal O(NC^2), view coding O(PW), held-out reconstruction O(PV), inference O(PL)",
+  "hidden_labels_used_by_learner": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
