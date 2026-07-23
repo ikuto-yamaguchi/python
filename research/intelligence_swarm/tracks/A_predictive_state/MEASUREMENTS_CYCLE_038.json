@@ -1,0 +1,52 @@
+{
+  "cycle": 38,
+  "hypothesis": "Sensor-Causal State Cells from Selective Channel Lesions and Object-Target Birth",
+  "seeds": [1, 7, 19],
+  "conditions": ["seen", "order", "lexeme", "nested", "omitted", "paragraph", "plan", "counterfactual"],
+  "methods": ["separated", "object_birth", "lesion_causal", "shuffle"],
+  "summary": {
+    "seen": {
+      "separated": {"accuracy": 0.5925925926, "wrong": 0.4074074074, "null": 0.0, "rules": 3.6666666667},
+      "object_birth": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "rules": 0.0},
+      "lesion_causal": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "rules": 0.0},
+      "shuffle": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "rules": 0.0}
+    },
+    "held_conditions": {
+      "order": {"separated_accuracy": 0.0, "separated_wrong": 1.0, "lesion_causal_accuracy": 0.0, "lesion_causal_wrong": 0.0},
+      "lexeme": {"separated_accuracy": 0.0, "separated_wrong": 1.0, "lesion_causal_accuracy": 0.0, "lesion_causal_wrong": 0.0},
+      "nested": {"separated_accuracy": 0.0, "separated_wrong": 1.0, "lesion_causal_accuracy": 0.0, "lesion_causal_wrong": 0.0},
+      "omitted": {"separated_accuracy": 0.0, "separated_wrong": 1.0, "lesion_causal_accuracy": 0.0, "lesion_causal_wrong": 0.0},
+      "paragraph": {"separated_accuracy": 0.0, "separated_wrong": 1.0, "lesion_causal_accuracy": 0.0, "lesion_causal_wrong": 0.0},
+      "plan": {"separated_accuracy": 0.0, "separated_wrong": 1.0, "lesion_causal_accuracy": 0.0, "lesion_causal_wrong": 0.0},
+      "counterfactual": {"separated_accuracy": 0.0, "separated_wrong": 1.0, "lesion_causal_accuracy": 0.0, "lesion_causal_wrong": 0.0}
+    }
+  },
+  "diagnostics": {
+    "correct_object_birth": 1.0,
+    "object_edge_candidates": 3.3333333333,
+    "lesion_profile_cells": 2.0,
+    "shuffle_lesion_profile_cells": 5.0,
+    "probe_audits": 160.0,
+    "object_birth_trials": 136.0,
+    "object_sensor_accepted_rules": 0.0,
+    "model_bytes": 627.0,
+    "training_seconds": 0.014748157,
+    "seen_inference_ms": 0.005583889,
+    "paragraph_inference_ms": 0.005931981,
+    "peak_rss_kib_runtime_included": 111136
+  },
+  "estimated_complexity": "candidate O(L^2) bounded 64; object residual transport O(QC); lesion audit O(QCK), K=5; inference O(R)",
+  "validation": {
+    "python_compile": true,
+    "external_dependencies": false,
+    "final_test_outcome_used_for_ranking": false,
+    "fixed_ontology_used": false,
+    "handwritten_slots_used": false,
+    "rag_used": false,
+    "external_llm_used": false
+  },
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
