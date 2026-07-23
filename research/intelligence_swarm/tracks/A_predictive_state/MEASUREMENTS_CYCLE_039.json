@@ -1,0 +1,28 @@
+{
+  "cycle": 39,
+  "hypothesis": "Prediction-Error Hysteresis Cells from Delayed Paraphrase Re-entry",
+  "seeds": [1, 7, 19],
+  "conditions": ["seen", "paraphrase", "order", "paragraph", "plan", "counterfactual"],
+  "methods": ["stateless", "carry", "hysteresis", "shuffled"],
+  "summary": {
+    "seen": {
+      "stateless": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "rules": 48, "model_bytes": 9809.67, "training_seconds": 0.017294, "inference_ms": 0.739284},
+      "carry": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "rules": 48, "retained_rate": 0.0, "switches": 0, "model_bytes": 9805.67, "training_seconds": 0.016919, "inference_ms": 0.715875},
+      "hysteresis": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "explicit_accuracy": 0.0, "omitted_accuracy": 0.0, "switch_accuracy": 0.0, "wrong_carry": 0.0, "retained_rate": 0.0, "rules": 48, "switches": 0, "retains": 0, "model_bytes": 9799.67, "training_seconds": 0.016633, "inference_ms": 0.719193},
+      "shuffled": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "rules": 48, "retained_rate": 0.0, "switches": 0, "model_bytes": 9799.67, "training_seconds": 0.017253, "inference_ms": 0.734390}
+    },
+    "paraphrase": {"stateless": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0}, "carry": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0}, "hysteresis": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "inference_ms": 0.770260}, "shuffled": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0}},
+    "order": {"stateless": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0}, "carry": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0}, "hysteresis": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "inference_ms": 0.701999}, "shuffled": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0}},
+    "paragraph": {"stateless": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0}, "carry": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0}, "hysteresis": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "inference_ms": 0.803724}, "shuffled": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0}},
+    "plan": {"stateless": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0}, "carry": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0}, "hysteresis": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "inference_ms": 0.826665}, "shuffled": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0}},
+    "counterfactual": {"stateless": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0}, "carry": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0}, "hysteresis": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "inference_ms": 0.902123}, "shuffled": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0}}
+  },
+  "peak_rss_kib_runtime_included": 160000,
+  "estimated_complexity": "induction O(NL); proposal O(RVL); recurrent update O(1) per event",
+  "final_test_after_future_used_for_ranking": false,
+  "fixed_ontology_or_handwritten_slots_used_by_model": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
