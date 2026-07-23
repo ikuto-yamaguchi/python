@@ -1,0 +1,60 @@
+{
+  "cycle": 31,
+  "hypothesis": "Counterexample-Driven Boundary Expansion from Near-Miss Probe Residuals",
+  "seeds": [1, 7, 19],
+  "summary": {
+    "model": {
+      "no_residual": {"repair_contexts": 6.333333333333333, "repair_rules": 8.333333333333334, "audit": 3456, "near_miss": 36, "updates": 36, "train_s": 1.0327123496666293, "bytes": 42424.333333333336},
+      "residual": {"repair_contexts": 6.333333333333333, "repair_rules": 8.333333333333334, "audit": 3456, "near_miss": 36, "updates": 36, "train_s": 0.98234158466668, "bytes": 42421.333333333336},
+      "shuffle": {"repair_contexts": 0, "repair_rules": 0, "audit": 3456, "near_miss": 0.3333333333333333, "updates": 0.3333333333333333, "train_s": 0.9220873823333022, "bytes": 41717.333333333336}
+    },
+    "seen": {
+      "no_residual": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.0, "mean_min_boundary_distance": 12.694444444444445, "mean_candidates": 96, "mean_active": 24, "mean_sweeps": 2, "max_sweeps": 2, "convergence_rate": 1.0, "mean_gap": 0.00004225364609782783, "inference_ms": 10.667068319444676},
+      "residual": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.0, "mean_min_boundary_distance": 10.541666666666666, "mean_candidates": 97.52777777777777, "mean_active": 18.25, "mean_sweeps": 2, "max_sweeps": 2, "convergence_rate": 1.0, "mean_gap": 0.0017089203127645762, "inference_ms": 10.439535736114497},
+      "shuffle": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.0, "mean_min_boundary_distance": 12.694444444444445, "mean_candidates": 96, "mean_active": 24, "mean_sweeps": 2, "max_sweeps": 2, "convergence_rate": 1.0, "mean_gap": 0.00004225364609782783, "inference_ms": 11.063914416663717}
+    },
+    "unknown": {
+      "no_residual": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.0, "mean_min_boundary_distance": 12.972222222222223, "mean_candidates": 96, "mean_active": 24, "mean_sweeps": 2, "max_sweeps": 2, "convergence_rate": 1.0, "mean_gap": 0.000012595970198327046, "inference_ms": 10.084569041667793},
+      "residual": {"accuracy": 0.125, "wrong_commit": 0.041666666666666664, "null_rate": 0.8333333333333334, "pair_recall": 0.0, "mean_min_boundary_distance": 0.4305555555555556, "mean_candidates": 101.77777777777779, "mean_active": 3.486111111111111, "mean_sweeps": 2, "max_sweeps": 2, "convergence_rate": 1.0, "mean_gap": 16.502916666666668, "inference_ms": 11.054574111107563},
+      "shuffle": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.0, "mean_min_boundary_distance": 12.972222222222223, "mean_candidates": 96, "mean_active": 24, "mean_sweeps": 2, "max_sweeps": 2, "convergence_rate": 1.0, "mean_gap": 0.000012595970198327046, "inference_ms": 10.826925569445065}
+    },
+    "ambiguous": {
+      "no_residual": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.0, "mean_min_boundary_distance": 13.63888888888889, "mean_candidates": 96, "mean_active": 24, "mean_sweeps": 2, "max_sweeps": 2, "convergence_rate": 1.0, "mean_gap": 0.00010813291919192163, "inference_ms": 12.01592240277844},
+      "residual": {"accuracy": 0.0, "wrong_commit": 0.2777777777777778, "null_rate": 0.7222222222222222, "pair_recall": 0.0, "mean_min_boundary_distance": 12.305555555555555, "mean_candidates": 96.27777777777777, "mean_active": 17.61111111111111, "mean_sweeps": 2, "max_sweeps": 2, "convergence_rate": 1.0, "mean_gap": 27.500076642155243, "inference_ms": 12.466256708329915},
+      "shuffle": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.0, "mean_min_boundary_distance": 13.63888888888889, "mean_candidates": 96, "mean_active": 24, "mean_sweeps": 2, "max_sweeps": 2, "convergence_rate": 1.0, "mean_gap": 0.00010813291919192163, "inference_ms": 12.61667336111019}
+    },
+    "nested": {
+      "no_residual": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.0, "mean_min_boundary_distance": 12.694444444444445, "mean_candidates": 96, "mean_active": 24, "mean_sweeps": 2, "max_sweeps": 2, "convergence_rate": 1.0, "mean_gap": 0.00015332681903074748, "inference_ms": 12.015154680556053},
+      "residual": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.0, "mean_min_boundary_distance": 12.694444444444445, "mean_candidates": 96, "mean_active": 24, "mean_sweeps": 2, "max_sweeps": 2, "convergence_rate": 1.0, "mean_gap": 0.00015332681903074748, "inference_ms": 11.895165041667926},
+      "shuffle": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.0, "mean_min_boundary_distance": 12.694444444444445, "mean_candidates": 96, "mean_active": 24, "mean_sweeps": 2, "max_sweeps": 2, "convergence_rate": 1.0, "mean_gap": 0.00015332681903074748, "inference_ms": 12.89088395833144}
+    },
+    "omitted": {
+      "no_residual": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.0, "mean_min_boundary_distance": 11.694444444444445, "mean_candidates": 96, "mean_active": 24, "mean_sweeps": 2, "max_sweeps": 2, "convergence_rate": 1.0, "mean_gap": 0.00007061930924153377, "inference_ms": 12.019824555557712},
+      "residual": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.0, "mean_min_boundary_distance": 11.694444444444445, "mean_candidates": 96, "mean_active": 24, "mean_sweeps": 2, "max_sweeps": 2, "convergence_rate": 1.0, "mean_gap": 0.00007061930924153377, "inference_ms": 11.219683875001213},
+      "shuffle": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.0, "mean_min_boundary_distance": 11.694444444444445, "mean_candidates": 96, "mean_active": 24, "mean_sweeps": 2, "max_sweeps": 2, "convergence_rate": 1.0, "mean_gap": 0.00007061930924153377, "inference_ms": 11.76345243055405}
+    },
+    "paragraph": {
+      "no_residual": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.0, "mean_min_boundary_distance": 13.555555555555555, "mean_candidates": 96, "mean_active": 24, "mean_sweeps": 2, "max_sweeps": 2, "convergence_rate": 1.0, "mean_gap": 0.0, "inference_ms": 12.502219138888726},
+      "residual": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.0, "mean_min_boundary_distance": 13.555555555555555, "mean_candidates": 96, "mean_active": 24, "mean_sweeps": 2, "max_sweeps": 2, "convergence_rate": 1.0, "mean_gap": 0.0, "inference_ms": 12.202865722220697},
+      "shuffle": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.0, "mean_min_boundary_distance": 13.555555555555555, "mean_candidates": 96, "mean_active": 24, "mean_sweeps": 2, "max_sweeps": 2, "convergence_rate": 1.0, "mean_gap": 0.0, "inference_ms": 12.275694374996723}
+    },
+    "plan": {
+      "no_residual": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.0, "mean_min_boundary_distance": 16.02777777777778, "mean_candidates": 96, "mean_active": 24, "mean_sweeps": 2, "max_sweeps": 2, "convergence_rate": 1.0, "mean_gap": 0.0, "inference_ms": 12.79858076388665},
+      "residual": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.0, "mean_min_boundary_distance": 16.02777777777778, "mean_candidates": 96, "mean_active": 24, "mean_sweeps": 2, "max_sweeps": 2, "convergence_rate": 1.0, "mean_gap": 0.0, "inference_ms": 12.924019013884921},
+      "shuffle": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.0, "mean_min_boundary_distance": 16.02777777777778, "mean_candidates": 96, "mean_active": 24, "mean_sweeps": 2, "max_sweeps": 2, "convergence_rate": 1.0, "mean_gap": 0.0, "inference_ms": 12.815796763890022}
+    },
+    "counterfactual": {
+      "no_residual": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.0, "mean_min_boundary_distance": 15.694444444444445, "mean_candidates": 96, "mean_active": 24, "mean_sweeps": 2, "max_sweeps": 2, "convergence_rate": 1.0, "mean_gap": 0.0, "inference_ms": 12.49437255555424},
+      "residual": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.0, "mean_min_boundary_distance": 15.694444444444445, "mean_candidates": 96, "mean_active": 24, "mean_sweeps": 2, "max_sweeps": 2, "convergence_rate": 1.0, "mean_gap": 0.0, "inference_ms": 12.699718694442986},
+      "shuffle": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "pair_recall": 0.0, "mean_min_boundary_distance": 15.694444444444445, "mean_candidates": 96, "mean_active": 24, "mean_sweeps": 2, "max_sweeps": 2, "convergence_rate": 1.0, "mean_gap": 0.0, "inference_ms": 12.715821972221875}
+    }
+  },
+  "peak_rss_kib_runtime_included": 113048,
+  "estimated_complexity": "candidate O(L^4) bounded, near-miss edit distance O(QHL^2), repair expansion O(HR), relaxation O(SH)",
+  "final_test_outcomes_used_for_ranking": false,
+  "probe_partition_independent": true,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
