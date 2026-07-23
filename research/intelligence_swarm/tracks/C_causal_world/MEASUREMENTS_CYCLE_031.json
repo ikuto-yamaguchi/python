@@ -1,0 +1,44 @@
+{
+  "cycle": 31,
+  "hypothesis": "Target-Boundary Competition from Source-Mechanism Predictive Cuts",
+  "seeds": [1, 7, 19],
+  "train": {"induction": 190, "independent_probe": 98, "final_test_per_split": 36},
+  "summary": {
+    "seen": {"surface_accuracy": 0.0, "probe_accuracy": 0.0, "fiber_accuracy": 0.0, "null_rate": 1.0, "mean_candidates": 78.6852},
+    "order": {"probe_accuracy": 0.0, "null_rate": 1.0, "mean_candidates": 78.6852},
+    "lexeme": {"probe_accuracy": 0.0, "null_rate": 1.0, "mean_candidates": 78.6852},
+    "rename": {"probe_accuracy": 0.0, "null_rate": 1.0, "mean_candidates": 94.0},
+    "alternate": {"probe_accuracy": 0.0, "null_rate": 1.0, "mean_candidates": 0.0},
+    "nested": {"probe_accuracy": 0.0, "null_rate": 1.0, "mean_candidates": 78.6852},
+    "omitted": {"probe_accuracy": 0.0, "null_rate": 1.0, "mean_candidates": 77.0370},
+    "paragraph": {"probe_accuracy": 0.0, "null_rate": 1.0, "mean_candidates": 79.7963},
+    "plan": {"probe_accuracy": 0.0, "null_rate": 1.0, "mean_candidates": 81.0556},
+    "counterfactual": {"probe_accuracy": 0.0, "null_rate": 1.0, "mean_candidates": 78.6852}
+  },
+  "diagnostics": {
+    "mechanisms_mean": 16.6667,
+    "probe_pair_audits_mean": 307543.0,
+    "probe_discriminations_mean": 0.0,
+    "boundary_credits_mean": 0.0,
+    "exact_target_value_recall_all_splits": 0.0,
+    "wrong_commit_all_splits": 0.0,
+    "model_bytes_mean": 1702.0,
+    "training_seconds_mean": 0.759445,
+    "seen_inference_ms_mean": 7.898756,
+    "paragraph_inference_ms_mean": 9.580458,
+    "peak_rss_kib_runtime_included": 160200
+  },
+  "ablations": {
+    "surface": "zero execution, full abstention",
+    "independent_probe": "zero discrimination and no gain",
+    "fiber_consensus": "no gain over probe",
+    "shuffled_probe": "identical because no valid probe discrimination existed"
+  },
+  "estimated_complexity": "mechanism O(NL), target boundary O(L^2), mechanism voting O(BVPL), probe audit O(QH^2), inference O(BVPL)",
+  "target_after_future_used_for_candidate_or_ranking": false,
+  "fixed_ontology_or_handwritten_slots_used_by_model": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
