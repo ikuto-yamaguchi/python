@@ -1,0 +1,38 @@
+{
+  "cycle": 33,
+  "hypothesis": "Curvature-Gated Multi-Value Attractors from Counterfactual Work Loops",
+  "seeds": [1, 7, 19],
+  "model": {
+    "none": {"states": 40.3333333333, "audit": 384, "train_s": 0.1850895907, "bytes": 8591},
+    "single": {"states": 40.3333333333, "audit": 384, "train_s": 0.1910447040, "bytes": 8593},
+    "curvature": {"states": 40.3333333333, "audit": 384, "train_s": 0.1840806187, "bytes": 8586},
+    "shuffle": {"states": 42.6666666667, "audit": 384, "train_s": 0.1852981443, "bytes": 8747}
+  },
+  "conditions": {
+    "seen": {
+      "none": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 32, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 20.0, "convergence_rate": 1.0, "inference_ms": 1.0794106},
+      "single": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 32, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 17.7333333333, "convergence_rate": 1.0, "inference_ms": 22.0533177667},
+      "curvature": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 32, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 17.7333333333, "convergence_rate": 1.0, "inference_ms": 22.0915396667},
+      "shuffle": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 32, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 17.7333333333, "convergence_rate": 1.0, "inference_ms": 22.2374194333}
+    },
+    "unknown": {
+      "none": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 32, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 20.0, "convergence_rate": 1.0, "inference_ms": 1.1093695},
+      "single": {"accuracy": 0.0, "wrong_commit": 0.0333333333, "null_rate": 0.9666666667, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 32, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 15.7666666667, "convergence_rate": 1.0, "inference_ms": 22.5278784667},
+      "curvature": {"accuracy": 0.0, "wrong_commit": 0.0333333333, "null_rate": 0.9666666667, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 32, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 15.7666666667, "convergence_rate": 1.0, "inference_ms": 22.6571491667},
+      "shuffle": {"accuracy": 0.0, "wrong_commit": 0.0333333333, "null_rate": 0.9666666667, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 32, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 15.6666666667, "convergence_rate": 1.0, "inference_ms": 22.4642881333}
+    },
+    "ambiguous": {"none_accuracy": 0.0, "single_accuracy": 0.0, "curvature_accuracy": 0.0, "shuffle_accuracy": 0.0, "curvature_wrong": 0.0, "curvature_null": 1.0, "curvature_active": 11.5333333333, "curvature_inference_ms": 27.7610671667},
+    "nested": {"none_accuracy": 0.0, "single_accuracy": 0.0, "curvature_accuracy": 0.0, "shuffle_accuracy": 0.0, "curvature_wrong": 0.0, "curvature_null": 1.0, "curvature_active": 19.6, "curvature_inference_ms": 27.4515858667},
+    "omitted": {"none_accuracy": 0.0, "single_accuracy": 0.0, "curvature_accuracy": 0.0, "shuffle_accuracy": 0.0, "curvature_wrong": 0.0, "curvature_null": 1.0, "curvature_active": 20.0, "curvature_inference_ms": 20.4188196667},
+    "paragraph": {"none_accuracy": 0.0, "single_accuracy": 0.0, "curvature_accuracy": 0.0, "shuffle_accuracy": 0.0, "curvature_wrong": 0.0, "curvature_null": 1.0, "curvature_active": 15.5, "curvature_inference_ms": 38.1319234667},
+    "plan": {"none_accuracy": 0.0, "single_accuracy": 0.0, "curvature_accuracy": 0.0, "shuffle_accuracy": 0.0, "curvature_wrong": 0.0, "curvature_null": 1.0, "curvature_active": 17.9, "curvature_inference_ms": 39.9585796},
+    "counterfactual": {"none_accuracy": 0.0, "single_accuracy": 0.0, "curvature_accuracy": 0.0, "shuffle_accuracy": 0.0, "curvature_wrong": 0.0, "curvature_null": 1.0, "curvature_active": 19.5, "curvature_inference_ms": 60.2837506}
+  },
+  "peak_rss_kib_runtime_included": 111676,
+  "estimated_complexity": "candidate O(L^4) capped, multi-value work O(QHV L^2), relaxation O(SH)",
+  "final_test_outcomes_used_for_ranking": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
