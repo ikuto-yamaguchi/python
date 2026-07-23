@@ -1,0 +1,34 @@
+{
+  "hypothesis": "Environment-Paired Mechanism Residual Partitions for Event Identity",
+  "seeds": [1, 7, 19],
+  "sizes": [48, 144, 288],
+  "maximum_288_summary": {
+    "seen": {"surface": 0.1666666667, "identity": 0.1666666667, "graph": 0.1666666667},
+    "held": {"surface": 0.1666666667, "identity": 0.1666666667, "graph": 0.1666666667},
+    "rename": {"surface": 0.1805555556, "identity": 0.1805555556, "graph": 0.1805555556},
+    "alternate": {"surface": 0.2013888889, "identity": 0.2013888889, "graph": 0.2013888889},
+    "omitted": {"surface": 0.0, "identity": 0.0, "graph": 0.0},
+    "paragraph": {"surface": 0.2152777778, "identity": 0.2152777778, "graph": 0.2152777778},
+    "plan": {"surface": 0.1736111111, "identity": 0.1736111111, "graph": 0.1736111111},
+    "counterfactual": {"surface": 0.1666666667, "identity": 0.1666666667, "graph": 0.1666666667}
+  },
+  "diagnostics": {
+    "events": 64,
+    "identity_classes": 1,
+    "identity_members": 64,
+    "edges": 0,
+    "mean_stability": 0.984527572,
+    "sequential_coverage": 0.1276595745,
+    "sequential_accuracy_conditional": 0.3285714286,
+    "model_bytes": 22328.3333333333,
+    "training_seconds": 0.0108369877,
+    "inference_ms": 0.0427189514,
+    "peak_rss_kib_runtime_included": 160196
+  },
+  "estimated_complexity": "event extraction O(NL), environment replay O(PNE), partition O(P), graph O(C^2), inference O(PL)",
+  "hidden_labels_used_by_learner": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
