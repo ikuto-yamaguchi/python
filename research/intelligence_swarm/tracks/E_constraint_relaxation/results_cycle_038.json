@@ -1,0 +1,28 @@
+{
+  "cycle": 38,
+  "hypothesis": "Intervention-Orthogonal Sensor Birth from Actively Synthesized Constraint Queries",
+  "seeds": [1, 7, 19],
+  "summary": {
+    "model": {
+      "none": {"sensors": 0, "hyperedges": 0, "query_audit": 204, "train_s": 0.0235759730, "bytes": 3915},
+      "random": {"sensors": 0, "hyperedges": 0, "query_audit": 204, "train_s": 0.0229568877, "bytes": 3917},
+      "active": {"sensors": 0, "hyperedges": 0, "query_audit": 204, "train_s": 0.0230025713, "bytes": 3917},
+      "shuffle": {"sensors": 0, "hyperedges": 0, "query_audit": 204, "train_s": 0.0228914733, "bytes": 3918}
+    },
+    "seen": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 12, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 12, "convergence_rate": 1.0, "active_inference_ms": 0.6635806667},
+    "unknown": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 12, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 12, "convergence_rate": 1.0, "active_inference_ms": 0.7037151667},
+    "ambiguous": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 12, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 12, "convergence_rate": 1.0, "active_inference_ms": 0.7178010833},
+    "nested": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 12, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 12, "convergence_rate": 1.0, "active_inference_ms": 0.7358399583},
+    "omitted": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 12, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 12, "convergence_rate": 1.0, "active_inference_ms": 0.6076726250},
+    "paragraph": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 12, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 12, "convergence_rate": 1.0, "active_inference_ms": 0.8768977917},
+    "plan": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 12, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 12, "convergence_rate": 1.0, "active_inference_ms": 0.8366000000},
+    "counterfactual": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 12, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 12, "convergence_rate": 1.0, "active_inference_ms": 0.9820272083}
+  },
+  "peak_rss_kib_runtime_included": 111808,
+  "estimated_complexity": "candidate O(L^4) capped; query synthesis O(Q); disagreement O(QH^2); orthogonal selection O(S^2H); relaxation O(RHS)",
+  "final_test_outcomes_used_for_ranking": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
