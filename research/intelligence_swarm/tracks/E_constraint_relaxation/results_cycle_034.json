@@ -1,0 +1,68 @@
+{
+  "cycle": 34,
+  "hypothesis": "Command-State Coupled Energy Fibers from Cross-Value Contrastive Work",
+  "seeds": [1, 7, 19],
+  "summary": {
+    "model": {
+      "none": {"edges": 26.333333333333332, "audit": 288, "train_s": 0.284669302000007, "bytes": 6003.666666666667},
+      "state": {"edges": 26.333333333333332, "audit": 288, "train_s": 0.28984699099999034, "bytes": 6004.666666666667},
+      "coupled": {"edges": 26.333333333333332, "audit": 288, "train_s": 0.2839945520000053, "bytes": 6006.666666666667},
+      "shuffle": {"edges": 27.666666666666668, "audit": 288, "train_s": 0.2797391376666667, "bytes": 6101.333333333333}
+    },
+    "seen": {
+      "none": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 20, "convergence_rate": 1.0, "inference_ms": 4.490764041667224},
+      "state": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 16.666666666666668, "convergence_rate": 1.0, "inference_ms": 29.156159083332984},
+      "coupled": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 16.666666666666668, "convergence_rate": 1.0, "inference_ms": 29.371543750000246},
+      "shuffle": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 16.666666666666668, "convergence_rate": 1.0, "inference_ms": 28.286734375000105}
+    },
+    "unknown": {
+      "none": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 20, "convergence_rate": 1.0, "inference_ms": 5.150534208331929},
+      "state": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 14.75, "convergence_rate": 1.0, "inference_ms": 28.93518649999886},
+      "coupled": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 14.75, "convergence_rate": 1.0, "inference_ms": 29.042905708333677},
+      "shuffle": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 14.75, "convergence_rate": 1.0, "inference_ms": 30.224409208332286}
+    },
+    "ambiguous": {
+      "none": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 20, "convergence_rate": 1.0, "inference_ms": 4.544239583333128},
+      "state": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 11.708333333333334, "convergence_rate": 1.0, "inference_ms": 38.85857745833358},
+      "coupled": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 12.125, "convergence_rate": 1.0, "inference_ms": 42.000853625000424},
+      "shuffle": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 12.125, "convergence_rate": 1.0, "inference_ms": 38.55311004166614}
+    },
+    "nested": {
+      "none": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 20, "convergence_rate": 1.0, "inference_ms": 4.716707791666626},
+      "state": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 19.916666666666668, "convergence_rate": 1.0, "inference_ms": 38.94832170833359},
+      "coupled": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 19.916666666666668, "convergence_rate": 1.0, "inference_ms": 40.07869570833241},
+      "shuffle": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 19.916666666666668, "convergence_rate": 1.0, "inference_ms": 36.47346604166657}
+    },
+    "omitted": {
+      "none": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 20, "convergence_rate": 1.0, "inference_ms": 4.891379583333115},
+      "state": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 20, "convergence_rate": 1.0, "inference_ms": 35.97943033333332},
+      "coupled": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 20, "convergence_rate": 1.0, "inference_ms": 36.87896329166781},
+      "shuffle": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 20, "convergence_rate": 1.0, "inference_ms": 41.45530412500046}
+    },
+    "paragraph": {
+      "none": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 20, "convergence_rate": 1.0, "inference_ms": 6.568877500001236},
+      "state": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 16.916666666666668, "convergence_rate": 1.0, "inference_ms": 68.29084766666682},
+      "coupled": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 16.916666666666668, "convergence_rate": 1.0, "inference_ms": 55.6831877916674},
+      "shuffle": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 16.916666666666668, "convergence_rate": 1.0, "inference_ms": 56.36813087500059}
+    },
+    "plan": {
+      "none": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 20, "convergence_rate": 1.0, "inference_ms": 4.8689154166664155},
+      "state": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 16.291666666666668, "convergence_rate": 1.0, "inference_ms": 48.667078916667585},
+      "coupled": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 16.291666666666668, "convergence_rate": 1.0, "inference_ms": 48.30909495833424},
+      "shuffle": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 16.291666666666668, "convergence_rate": 1.0, "inference_ms": 48.75715495833314}
+    },
+    "counterfactual": {
+      "none": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 20, "convergence_rate": 1.0, "inference_ms": 5.385768208333512},
+      "state": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 18.916666666666668, "convergence_rate": 1.0, "inference_ms": 87.49200720833272},
+      "coupled": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 18.916666666666668, "convergence_rate": 1.0, "inference_ms": 84.7924468750006},
+      "shuffle": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "exact_boundary_recall": 0.0, "pair_recall": 0.0, "mean_candidates": 24, "mean_sweeps": 2, "max_sweeps": 2, "mean_active": 18.916666666666668, "convergence_rate": 1.0, "inference_ms": 80.44182641666708}
+    }
+  },
+  "peak_rss_kib_runtime_included": 111824,
+  "estimated_complexity": "candidate O(L^4) capped, coupled work O(QHVL^2), relaxation O(SH)",
+  "final_test_outcomes_used_for_ranking": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
