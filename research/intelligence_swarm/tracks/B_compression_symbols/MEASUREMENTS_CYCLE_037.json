@@ -1,0 +1,24 @@
+{
+  "cycle": 37,
+  "hypothesis": "Residual-Generating Quotient Productions from Counterexample Trace Splits",
+  "seeds": [1, 7, 19],
+  "metric_order": ["accuracy", "wrong_commit", "null_rate", "pair_recall", "mean_candidates"],
+  "summary": {
+    "seen": {"factorized": [0.0,0.655556,0.344444,0.1,1.644444],"quotient": [0.0,0.655556,0.344444,0.1,1.644444],"birth": [0.0,0.655556,0.344444,0.1,1.644444],"mdl": [0.0,0.655556,0.344444,0.1,1.644444],"shuffle": [0.0,0.533333,0.466667,0.1,1.644444]},
+    "order": {"factorized": [0.0,0.655556,0.344444,0.0,1.644444],"quotient": [0.0,0.655556,0.344444,0.0,1.644444],"birth": [0.0,0.655556,0.344444,0.0,1.644444],"mdl": [0.0,0.655556,0.344444,0.0,1.644444],"shuffle": [0.0,0.533333,0.466667,0.0,1.644444]},
+    "lexeme": {"factorized": [0.0,0.655556,0.344444,0.0,1.644444],"quotient": [0.0,0.655556,0.344444,0.0,1.644444],"birth": [0.0,0.655556,0.344444,0.0,1.644444],"mdl": [0.0,0.655556,0.344444,0.0,1.644444],"shuffle": [0.0,0.533333,0.466667,0.0,1.644444]},
+    "rename": {"factorized": [0.0,0.788889,0.211111,0.066667,2.077778],"quotient": [0.0,0.788889,0.211111,0.066667,2.077778],"birth": [0.0,0.788889,0.211111,0.066667,2.077778],"mdl": [0.0,0.788889,0.211111,0.066667,2.077778],"shuffle": [0.0,0.711111,0.288889,0.066667,2.077778]},
+    "alternate": {"factorized": [0.0,0.333333,0.666667,0.055556,0.333333],"quotient": [0.0,0.333333,0.666667,0.055556,0.333333],"birth": [0.0,0.333333,0.666667,0.055556,0.333333],"mdl": [0.0,0.333333,0.666667,0.055556,0.333333],"shuffle": [0.0,0.333333,0.666667,0.055556,0.333333]},
+    "nested": {"factorized": [0.0,0.655556,0.344444,0.0,1.644444],"quotient": [0.0,0.655556,0.344444,0.0,1.644444],"birth": [0.0,0.655556,0.344444,0.0,1.644444],"mdl": [0.0,0.655556,0.344444,0.0,1.644444],"shuffle": [0.0,0.533333,0.466667,0.0,1.644444]},
+    "omitted": {"factorized": [0.066667,0.6,0.333333,0.0,1.1],"quotient": [0.066667,0.6,0.333333,0.0,1.1],"birth": [0.066667,0.6,0.333333,0.0,1.1],"mdl": [0.066667,0.6,0.333333,0.0,1.1],"shuffle": [0.066667,0.522222,0.411111,0.0,1.1]},
+    "paragraph": {"factorized": [0.0,0.655556,0.344444,0.0,1.644444],"quotient": [0.0,0.655556,0.344444,0.0,1.644444],"birth": [0.0,0.655556,0.344444,0.0,1.644444],"mdl": [0.0,0.655556,0.344444,0.0,1.644444],"shuffle": [0.0,0.533333,0.466667,0.0,1.644444]}
+  },
+  "diagnostics": {"symbols":11.333333333333334,"quotient_classes":3.3333333333333335,"born_productions":0,"birth_trials":0,"trace_audits":226.66666666666666,"description_bits":2112,"model_bytes":1574.6666666666667,"training_seconds":0.0011638249999729549,"seen_inference_ms":0.022924655554056192,"peak_rss_kib_runtime_included":160024},
+  "estimated_complexity":"induction O(NL), trace audit O(QP), residual birth O(QPR), quotient partition O(P log P), inference O(PL)",
+  "final_test_after_future_used_for_selection":false,
+  "fixed_ontology_or_handwritten_slots_used_by_model":false,
+  "highschool_level_passed":false,
+  "native_japanese_communication_passed":false,
+  "weak_smartphone_verified":false,
+  "completion":false
+}
