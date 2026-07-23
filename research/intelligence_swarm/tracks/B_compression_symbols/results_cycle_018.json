@@ -1,0 +1,55 @@
+{
+  "hypothesis": "Counterexample-Coded Program Symbols by Minimum Exception Cover",
+  "seeds": [1, 7, 19],
+  "train_sizes": [48, 144, 432],
+  "final_size": 432,
+  "test_examples_per_split_per_seed": 120,
+  "methods": ["executable", "success_mdl", "exception_mdl"],
+  "summary_432": {
+    "seen": {
+      "executable": {"accuracy": 0.6888888888888889, "wrong_commit": 0.02777777777777778, "candidate_execution_recall": 0.6888888888888889, "programs": 32, "model_bytes": 38917.333333333336, "description_bits": 12244, "exception_bits": 0, "training_seconds": 0.015564, "inference_ms": 0.028991},
+      "success_mdl": {"accuracy": 0.6888888888888889, "wrong_commit": 0.02777777777777778, "candidate_execution_recall": 0.6888888888888889, "programs": 32, "model_bytes": 38918.333333333336, "description_bits": 12244, "exception_bits": 0, "training_seconds": 0.015553, "inference_ms": 0.028720},
+      "exception_mdl": {"accuracy": 0.6861111111111111, "wrong_commit": 0.02777777777777778, "candidate_execution_recall": 0.6861111111111111, "programs": 32, "model_bytes": 38936, "description_bits": 81578.33333333333, "exception_bits": 369, "covered_train": 337.3333333333333, "training_seconds": 0.016798, "inference_ms": 0.028944}
+    },
+    "held_order": {
+      "executable": {"accuracy": 0, "wrong_commit": 0, "candidate_execution_recall": 0},
+      "success_mdl": {"accuracy": 0, "wrong_commit": 0, "candidate_execution_recall": 0},
+      "exception_mdl": {"accuracy": 0, "wrong_commit": 0, "candidate_execution_recall": 0}
+    },
+    "held_lexeme": {
+      "executable": {"accuracy": 0, "wrong_commit": 0, "candidate_execution_recall": 0},
+      "success_mdl": {"accuracy": 0, "wrong_commit": 0, "candidate_execution_recall": 0},
+      "exception_mdl": {"accuracy": 0, "wrong_commit": 0, "candidate_execution_recall": 0}
+    },
+    "nested": {
+      "executable": {"accuracy": 0.6888888888888889, "wrong_commit": 0.02777777777777778, "candidate_execution_recall": 0.6888888888888889},
+      "success_mdl": {"accuracy": 0.6888888888888889, "wrong_commit": 0.02777777777777778, "candidate_execution_recall": 0.6888888888888889},
+      "exception_mdl": {"accuracy": 0.6861111111111111, "wrong_commit": 0.02777777777777778, "candidate_execution_recall": 0.6861111111111111}
+    },
+    "omitted": {
+      "executable": {"accuracy": 0, "wrong_commit": 0, "candidate_execution_recall": 0},
+      "success_mdl": {"accuracy": 0, "wrong_commit": 0, "candidate_execution_recall": 0},
+      "exception_mdl": {"accuracy": 0, "wrong_commit": 0, "candidate_execution_recall": 0}
+    },
+    "alternate": {
+      "executable": {"accuracy": 0, "wrong_commit": 0, "candidate_execution_recall": 0},
+      "success_mdl": {"accuracy": 0, "wrong_commit": 0, "candidate_execution_recall": 0},
+      "exception_mdl": {"accuracy": 0, "wrong_commit": 0, "candidate_execution_recall": 0}
+    },
+    "freeform": {
+      "executable": {"accuracy": 0.6888888888888889, "wrong_commit": 0.02777777777777778, "candidate_execution_recall": 0.6888888888888889, "inference_ms": 0.038681},
+      "success_mdl": {"accuracy": 0.6888888888888889, "wrong_commit": 0.02777777777777778, "candidate_execution_recall": 0.6888888888888889, "inference_ms": 0.038459},
+      "exception_mdl": {"accuracy": 0.6861111111111111, "wrong_commit": 0.02777777777777778, "candidate_execution_recall": 0.6861111111111111, "inference_ms": 0.037938}
+    }
+  },
+  "raw_candidates": 432,
+  "program_cap": 32,
+  "peak_rss_kib_runtime_included": 159992,
+  "estimated_complexity": "proposal O(NC^2), behavior O(PN), greedy cover O(KPN), inference O(PL); P<=64,K<=32",
+  "hidden_labels_used_by_learner": false,
+  "reproduction": "Run counterexample_exception_cover_cycle18.py to regenerate full raw and all-size summaries.",
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
