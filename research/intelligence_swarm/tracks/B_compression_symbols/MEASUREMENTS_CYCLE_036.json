@@ -1,0 +1,37 @@
+{
+  "cycle": 36,
+  "hypothesis": "Trace-Bisimulation Quotient Grammar from Minimal Multi-Intervention Diagrams",
+  "seeds": [1, 7, 19],
+  "summary": {
+    "seen": {
+      "factorized": {"accuracy": 0.0, "wrong_commit": 0.7444444444, "null_rate": 0.2555555556, "pair_recall": 0.1555555556, "mean_candidates": 2.6333333333},
+      "single": {"accuracy": 0.0, "wrong_commit": 0.4555555556, "null_rate": 0.5444444444, "pair_recall": 0.1555555556, "mean_candidates": 2.6333333333},
+      "quotient": {"accuracy": 0.0, "wrong_commit": 0.4555555556, "null_rate": 0.5444444444, "pair_recall": 0.1555555556, "mean_candidates": 2.6333333333},
+      "shuffle": {"accuracy": 0.0, "wrong_commit": 0.6222222222, "null_rate": 0.3777777778, "pair_recall": 0.1555555556, "mean_candidates": 2.6333333333}
+    },
+    "order": {"quotient": {"accuracy": 0.0, "wrong_commit": 0.4555555556, "pair_recall": 0.0}},
+    "lexeme": {"quotient": {"accuracy": 0.0, "wrong_commit": 0.4555555556, "pair_recall": 0.0}},
+    "rename": {"quotient": {"accuracy": 0.0, "wrong_commit": 0.4444444444, "pair_recall": 0.0666666667}},
+    "alternate": {"quotient": {"accuracy": 0.0, "wrong_commit": 0.3333333333, "pair_recall": 0.0555555556}},
+    "nested": {"quotient": {"accuracy": 0.0, "wrong_commit": 0.4555555556, "pair_recall": 0.0}},
+    "omitted": {"factorized": {"accuracy": 0.0666666667, "wrong_commit": 0.4666666667}, "quotient": {"accuracy": 0.0, "wrong_commit": 0.3333333333, "pair_recall": 0.0}},
+    "paragraph": {"quotient": {"accuracy": 0.0, "wrong_commit": 0.4555555556, "pair_recall": 0.0}}
+  },
+  "diagnostics": {
+    "production_symbols": 15.0,
+    "quotient_classes": 5.6666666667,
+    "trace_audits": 540.0,
+    "description_bits": 2098.6666666667,
+    "model_bytes": 2071.6666666667,
+    "training_seconds": 0.0041754823,
+    "seen_inference_ms": 0.0252316778,
+    "paragraph_inference_ms": 0.0249853222,
+    "peak_rss_kib_runtime_included": 111480
+  },
+  "estimated_complexity": "induction O(NL), intervention traces O(QPI), quotient partition O(P log P), inference O(PL)",
+  "final_test_outcomes_used_for_selection": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
