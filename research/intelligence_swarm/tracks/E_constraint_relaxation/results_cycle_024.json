@@ -1,0 +1,57 @@
+{
+  "hypothesis": "Commutator-Separated Factor Roles from Independent Intervention Pairs",
+  "seeds": [1, 7, 19],
+  "sizes": [24],
+  "summary": {
+    "24": {
+      "base": {
+        "base": {"accuracy": 0.5833333333333334, "wrong_commit": 0.4166666666666667, "null_rate": 0.0, "object_recall": 0.5833333333333334, "value_recall": 1.0, "pair_recall": 0.5833333333333334, "mean_sweeps": 2.0, "mean_active": 1.0833333333333333, "mean_candidates": 10.055555555555555, "prototype_count": 0, "model_bytes": 112, "training_seconds": 8.04666569820256e-07, "inference_ms": 2.0355698333358103},
+        "commutator": {"accuracy": 0.5833333333333334, "wrong_commit": 0.4166666666666667, "null_rate": 0.0, "object_recall": 0.5833333333333334, "value_recall": 1.0, "pair_recall": 0.5833333333333334, "mean_sweeps": 2.0, "mean_active": 1.0833333333333333, "mean_candidates": 10.055555555555555, "prototype_count": 0, "model_bytes": 118, "training_seconds": 0.16099141866667802, "inference_ms": 2.0195162777870084},
+        "commutator_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "object_recall": 0.5833333333333334, "value_recall": 1.0, "pair_recall": 0.5833333333333334, "mean_sweeps": 2.0, "mean_active": 1.0833333333333333, "mean_candidates": 10.055555555555555, "prototype_count": 0, "model_bytes": 123, "training_seconds": 0.15990601666665802, "inference_ms": 2.0392347222216105}
+      },
+      "unseen": {
+        "base": {"accuracy": 0.2222222222222222, "wrong_commit": 0.7777777777777778, "null_rate": 0.0, "object_recall": 0.2222222222222222, "value_recall": 1.0, "pair_recall": 0.2222222222222222, "mean_sweeps": 2.0, "mean_active": 1.3611111111111112, "mean_candidates": 13.166666666666666, "prototype_count": 0, "model_bytes": 112, "training_seconds": 8.676666614822656e-07, "inference_ms": 2.5180408888950803},
+        "commutator": {"accuracy": 0.2222222222222222, "wrong_commit": 0.7777777777777778, "null_rate": 0.0, "object_recall": 0.2222222222222222, "value_recall": 1.0, "pair_recall": 0.2222222222222222, "mean_sweeps": 2.0, "mean_active": 1.3611111111111112, "mean_candidates": 13.166666666666666, "prototype_count": 0, "model_bytes": 118, "training_seconds": 0.16158581799997287, "inference_ms": 2.517484527774943},
+        "commutator_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "object_recall": 0.2222222222222222, "value_recall": 1.0, "pair_recall": 0.2222222222222222, "mean_sweeps": 2.0, "mean_active": 1.3611111111111112, "mean_candidates": 13.166666666666666, "prototype_count": 0, "model_bytes": 123, "training_seconds": 0.161017624333302, "inference_ms": 2.562163694442966}
+      },
+      "ambiguous": {
+        "base": {"accuracy": 0.0, "wrong_commit": 0.6666666666666666, "null_rate": 0.3333333333333333, "object_recall": 0.5833333333333334, "value_recall": 0.0, "pair_recall": 0.0, "mean_sweeps": 1.3333333333333333, "mean_active": 1.0833333333333333, "mean_candidates": 4.277777777777778, "prototype_count": 0, "model_bytes": 112, "training_seconds": 8.279999595591411e-07, "inference_ms": 1.2921222499989602},
+        "commutator": {"accuracy": 0.0, "wrong_commit": 0.6666666666666666, "null_rate": 0.3333333333333333, "object_recall": 0.5833333333333334, "value_recall": 0.0, "pair_recall": 0.0, "mean_sweeps": 1.3333333333333333, "mean_active": 1.0833333333333333, "mean_candidates": 4.277777777777778, "prototype_count": 0, "model_bytes": 118, "training_seconds": 0.1664107996667402, "inference_ms": 1.2838955555594112},
+        "commutator_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "object_recall": 0.5833333333333334, "value_recall": 0.0, "pair_recall": 0.0, "mean_sweeps": 1.3333333333333333, "mean_active": 1.0833333333333333, "mean_candidates": 4.277777777777778, "prototype_count": 0, "model_bytes": 123, "training_seconds": 0.15990669433328245, "inference_ms": 1.2757226388847205}
+      },
+      "nested": {
+        "base": {"accuracy": 0.0, "wrong_commit": 0.6111111111111112, "null_rate": 0.3888888888888889, "object_recall": 0.25, "value_recall": 0.3611111111111111, "pair_recall": 0.0, "mean_sweeps": 1.2222222222222223, "mean_active": 1.7777777777777777, "mean_candidates": 6.333333333333334, "prototype_count": 0, "model_bytes": 112, "training_seconds": 7.279999560220555e-07, "inference_ms": 1.5285634444492442},
+        "commutator": {"accuracy": 0.0, "wrong_commit": 0.6111111111111112, "null_rate": 0.3888888888888889, "object_recall": 0.25, "value_recall": 0.3611111111111111, "pair_recall": 0.0, "mean_sweeps": 1.2222222222222223, "mean_active": 1.7777777777777777, "mean_candidates": 6.333333333333334, "prototype_count": 0, "model_bytes": 118, "training_seconds": 0.16083340399995905, "inference_ms": 1.5378800833332207},
+        "commutator_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "object_recall": 0.25, "value_recall": 0.3611111111111111, "pair_recall": 0.0, "mean_sweeps": 1.2222222222222223, "mean_active": 1.7777777777777777, "mean_candidates": 6.333333333333334, "prototype_count": 0, "model_bytes": 123, "training_seconds": 0.16003359233332048, "inference_ms": 1.5441260000051849}
+      },
+      "omitted": {
+        "base": {"accuracy": 0.027777777777777776, "wrong_commit": 0.9722222222222222, "null_rate": 0.0, "object_recall": 0.027777777777777776, "value_recall": 1.0, "pair_recall": 0.027777777777777776, "mean_sweeps": 2.0, "mean_active": 1.3888888888888888, "mean_candidates": 10.777777777777779, "prototype_count": 0, "model_bytes": 112, "training_seconds": 9.88000010693213e-07, "inference_ms": 2.1302766388973597},
+        "commutator": {"accuracy": 0.027777777777777776, "wrong_commit": 0.9722222222222222, "null_rate": 0.0, "object_recall": 0.027777777777777776, "value_recall": 1.0, "pair_recall": 0.027777777777777776, "mean_sweeps": 2.0, "mean_active": 1.3888888888888888, "mean_candidates": 10.777777777777779, "prototype_count": 0, "model_bytes": 118, "training_seconds": 0.16130009033334622, "inference_ms": 2.121623250003621},
+        "commutator_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "object_recall": 0.027777777777777776, "value_recall": 1.0, "pair_recall": 0.027777777777777776, "mean_sweeps": 2.0, "mean_active": 1.3888888888888888, "mean_candidates": 10.777777777777779, "prototype_count": 0, "model_bytes": 123, "training_seconds": 0.1601394233333243, "inference_ms": 2.1164416111029523}
+      },
+      "paragraph": {
+        "base": {"accuracy": 0.0, "wrong_commit": 0.5277777777777778, "null_rate": 0.4722222222222222, "object_recall": 0.3888888888888889, "value_recall": 0.33333333333333337, "pair_recall": 0.0, "mean_sweeps": 1.0555555555555556, "mean_active": 1.2777777777777777, "mean_candidates": 4.972222222222222, "prototype_count": 0, "model_bytes": 112, "training_seconds": 7.376665962510742e-07, "inference_ms": 1.5334270833275494},
+        "commutator": {"accuracy": 0.0, "wrong_commit": 0.5277777777777778, "null_rate": 0.4722222222222222, "object_recall": 0.3888888888888889, "value_recall": 0.33333333333333337, "pair_recall": 0.0, "mean_sweeps": 1.0555555555555556, "mean_active": 1.2777777777777777, "mean_candidates": 4.972222222222222, "prototype_count": 0, "model_bytes": 118, "training_seconds": 0.15997419766661855, "inference_ms": 1.5082457777819198},
+        "commutator_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "object_recall": 0.3888888888888889, "value_recall": 0.33333333333333337, "pair_recall": 0.0, "mean_sweeps": 1.0555555555555556, "mean_active": 1.2777777777777777, "mean_candidates": 4.972222222222222, "prototype_count": 0, "model_bytes": 123, "training_seconds": 0.16070165466665762, "inference_ms": 1.502627138885752}
+      },
+      "plan": {
+        "base": {"accuracy": 0.0, "wrong_commit": 0.5, "null_rate": 0.5, "object_recall": 0.5555555555555556, "value_recall": 0.0, "pair_recall": 0.0, "mean_sweeps": 1.0, "mean_active": 0.8333333333333333, "mean_candidates": 3.3055555555555554, "prototype_count": 0, "model_bytes": 112, "training_seconds": 5.473332294059219e-07, "inference_ms": 1.143627000001541},
+        "commutator": {"accuracy": 0.0, "wrong_commit": 0.5, "null_rate": 0.5, "object_recall": 0.5555555555555556, "value_recall": 0.0, "pair_recall": 0.0, "mean_sweeps": 1.0, "mean_active": 0.8333333333333333, "mean_candidates": 3.3055555555555554, "prototype_count": 0, "model_bytes": 118, "training_seconds": 0.16091939500006447, "inference_ms": 1.140044166662493},
+        "commutator_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "object_recall": 0.5555555555555556, "value_recall": 0.0, "pair_recall": 0.0, "mean_sweeps": 1.0, "mean_active": 0.8333333333333333, "mean_candidates": 3.3055555555555554, "prototype_count": 0, "model_bytes": 123, "training_seconds": 0.1596554103333195, "inference_ms": 1.147326055546374}
+      },
+      "counterfactual": {
+        "base": {"accuracy": 0.0, "wrong_commit": 1.0, "null_rate": 0.0, "object_recall": 0.25, "value_recall": 0.0, "pair_recall": 0.0, "mean_sweeps": 2.0, "mean_active": 3.7777777777777777, "mean_candidates": 11.25, "prototype_count": 0, "model_bytes": 112, "training_seconds": 6.310000723412182e-07, "inference_ms": 2.454047750000478},
+        "commutator": {"accuracy": 0.0, "wrong_commit": 1.0, "null_rate": 0.0, "object_recall": 0.25, "value_recall": 0.0, "pair_recall": 0.0, "mean_sweeps": 2.0, "mean_active": 3.7777777777777777, "mean_candidates": 11.25, "prototype_count": 0, "model_bytes": 118, "training_seconds": 0.1600002193332936, "inference_ms": 2.4743851944385318},
+        "commutator_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0, "object_recall": 0.25, "value_recall": 0.0, "pair_recall": 0.0, "mean_sweeps": 2.0, "mean_active": 3.7777777777777777, "mean_candidates": 11.25, "prototype_count": 0, "model_bytes": 123, "training_seconds": 0.15917229666668695, "inference_ms": 2.4532941666658794}
+      }
+    }
+  },
+  "peak_rss_kib_runtime_included": 168284,
+  "estimated_complexity": "candidate O(L^2), four intervention pairs O(PHF), prototype O(NEH), relaxation O(SH), P=4,E=4,H<=16,S<=5",
+  "hidden_labels_used_by_learner": false,
+  "environment_bundle_labels_used": true,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
