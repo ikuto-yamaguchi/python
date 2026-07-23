@@ -1,0 +1,26 @@
+{
+  "hypothesis": "MDL-Gated Reversible Edit-Skeleton Grammars by Raw Derivation Anti-Unification",
+  "seeds": [1, 7, 19],
+  "sizes": [48, 144, 288],
+  "summary_288": {
+    "seen": {
+      "exact": {"accuracy": 0.11805555555555555, "wrong_commit": 0.0, "candidate_recall": 0.11805555555555555, "scripts": 64, "grammars": 0, "baseline_bits": 19656, "total_bits": 19656, "model_bytes": 48525.666666666664, "training_seconds": 0.005437713333170298, "inference_ms": 0.02682007638554751},
+      "anti": {"accuracy": 0.11805555555555555, "wrong_commit": 0.0, "candidate_recall": 0.11805555555555555, "scripts": 64, "grammars": 0, "baseline_bits": 19656, "total_bits": 19656, "model_bytes": 48524.666666666664, "training_seconds": 0.0059039983334514545, "inference_ms": 0.031354645835158915},
+      "mdl": {"accuracy": 0.11805555555555555, "wrong_commit": 0.0, "candidate_recall": 0.11805555555555555, "scripts": 64, "grammars": 0, "baseline_bits": 19656, "total_bits": 19656, "model_bytes": 48523.666666666664, "training_seconds": 0.0058332016666705995, "inference_ms": 0.0253702152753653}
+    },
+    "held_order": {"exact": {"accuracy": 0.0, "candidate_recall": 0.0}, "anti": {"accuracy": 0.0, "candidate_recall": 0.0}, "mdl": {"accuracy": 0.0, "candidate_recall": 0.0}},
+    "held_lex": {"exact": {"accuracy": 0.0, "candidate_recall": 0.0}, "anti": {"accuracy": 0.0, "candidate_recall": 0.0}, "mdl": {"accuracy": 0.0, "candidate_recall": 0.0}},
+    "rename": {"exact": {"accuracy": 0.2638888888888889, "candidate_recall": 0.2638888888888889}, "anti": {"accuracy": 0.2638888888888889, "candidate_recall": 0.2638888888888889}, "mdl": {"accuracy": 0.2638888888888889, "candidate_recall": 0.2638888888888889}},
+    "nested": {"exact": {"accuracy": 0.11805555555555555, "candidate_recall": 0.11805555555555555}, "anti": {"accuracy": 0.11805555555555555, "candidate_recall": 0.11805555555555555}, "mdl": {"accuracy": 0.11805555555555555, "candidate_recall": 0.11805555555555555}},
+    "omitted": {"exact": {"accuracy": 0.0, "candidate_recall": 0.0}, "anti": {"accuracy": 0.0, "candidate_recall": 0.0}, "mdl": {"accuracy": 0.0, "candidate_recall": 0.0}},
+    "alternate": {"exact": {"accuracy": 0.0625, "wrong_commit": 0.006944444444444444, "candidate_recall": 0.0625}, "anti": {"accuracy": 0.0625, "wrong_commit": 0.006944444444444444, "candidate_recall": 0.0625}, "mdl": {"accuracy": 0.0625, "wrong_commit": 0.006944444444444444, "candidate_recall": 0.0625}},
+    "paragraph": {"exact": {"accuracy": 0.11805555555555555, "candidate_recall": 0.11805555555555555}, "anti": {"accuracy": 0.11805555555555555, "candidate_recall": 0.11805555555555555}, "mdl": {"accuracy": 0.11805555555555555, "candidate_recall": 0.11805555555555555}}
+  },
+  "peak_rss_kib_runtime_included": 111608,
+  "estimated_complexity": "proposal O(NL^2), anti-unification O(P^2 L), audit O(GN), inference O((P+G)L), P<=64 G<=32",
+  "hidden_labels_used_by_learner": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
