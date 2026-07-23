@@ -1,0 +1,45 @@
+{
+  "hypothesis": "Provenance-Gated Alias Links with Reconsolidating Sparse Address Traces",
+  "seeds": [1, 7, 19],
+  "sizes": [36, 108, 216],
+  "summary_216": {
+    "seen": {
+      "no_alias": {"write_accuracy": 0.05555555555555555, "read_accuracy": 0.2638888888888889, "wrong_object_rate": 0.3888888888888889, "null_rate": 0.20833333333333331, "object_traces": 8, "relation_traces": 39.333333333333336, "links": 0, "slow_links": 0, "addresses": 7.333333333333333, "fast_updates": 12, "forgotten": 0, "model_bytes": 12637.333333333334, "training_seconds": 0.2317928900000273, "inference_ms": 0.09772398611100168},
+      "temporary_alias": {"write_accuracy": 0.05555555555555555, "read_accuracy": 0.2638888888888889, "wrong_object_rate": 0.3888888888888889, "null_rate": 0.20833333333333331, "object_traces": 8, "relation_traces": 39.333333333333336, "links": 4, "slow_links": 0, "addresses": 7.333333333333333, "fast_updates": 12, "forgotten": 0, "model_bytes": 12920, "training_seconds": 0.2331256153333925, "inference_ms": 0.09502246527719964},
+      "reconsolidated": {"write_accuracy": 0.05555555555555555, "read_accuracy": 0.2638888888888889, "wrong_object_rate": 0.3888888888888889, "null_rate": 0.20833333333333331, "object_traces": 8, "relation_traces": 39.333333333333336, "links": 4, "slow_links": 0, "addresses": 7.333333333333333, "fast_updates": 12, "forgotten": 0, "model_bytes": 12920, "training_seconds": 0.22854848966661243, "inference_ms": 0.10295539583340643}
+    },
+    "held": {
+      "no_alias": {"write_accuracy": 0.0, "read_accuracy": 0.0, "wrong_object_rate": 0.0, "null_rate": 1.0, "object_traces": 0, "relation_traces": 35.333333333333336, "links": 0, "slow_links": 0, "addresses": 0, "fast_updates": 0, "forgotten": 0, "model_bytes": 5490.333333333333, "training_seconds": 0.19403127933325473, "inference_ms": 0.0035847222221718766},
+      "temporary_alias": {"write_accuracy": 0.0, "read_accuracy": 0.0, "wrong_object_rate": 0.0, "null_rate": 1.0, "object_traces": 0, "relation_traces": 35.333333333333336, "links": 0, "slow_links": 0, "addresses": 0, "fast_updates": 0, "forgotten": 0, "model_bytes": 5490.333333333333, "training_seconds": 0.18761207466665533, "inference_ms": 0.0035369374984384194},
+      "reconsolidated": {"write_accuracy": 0.0, "read_accuracy": 0.0, "wrong_object_rate": 0.0, "null_rate": 1.0, "object_traces": 0, "relation_traces": 35.333333333333336, "links": 0, "slow_links": 0, "addresses": 0, "fast_updates": 0, "forgotten": 0, "model_bytes": 5490.333333333333, "training_seconds": 0.18891265066675564, "inference_ms": 0.003655159722547473}
+    },
+    "rename": {
+      "no_alias": {"write_accuracy": 0.10339506172839506, "read_accuracy": 0.3958333333333333, "wrong_object_rate": 0.2222222222222222, "null_rate": 0.10416666666666667, "object_traces": 16, "relation_traces": 46, "links": 0, "slow_links": 0, "addresses": 19.333333333333332, "fast_updates": 25.333333333333332, "forgotten": 0, "model_bytes": 21627.666666666668, "training_seconds": 0.289711202333289, "inference_ms": 0.18667033333170163},
+      "temporary_alias": {"write_accuracy": 0.10339506172839506, "read_accuracy": 0.3958333333333333, "wrong_object_rate": 0.2222222222222222, "null_rate": 0.10416666666666667, "object_traces": 16, "relation_traces": 46, "links": 12.333333333333334, "slow_links": 0, "addresses": 19.333333333333332, "fast_updates": 25.333333333333332, "forgotten": 0, "model_bytes": 22376.666666666668, "training_seconds": 0.3033686733333525, "inference_ms": 0.2137375763911425},
+      "reconsolidated": {"write_accuracy": 0.10339506172839506, "read_accuracy": 0.3958333333333333, "wrong_object_rate": 0.2222222222222222, "null_rate": 0.10416666666666667, "object_traces": 16, "relation_traces": 46, "links": 12.333333333333334, "slow_links": 0, "addresses": 19.333333333333332, "fast_updates": 25.333333333333332, "forgotten": 0, "model_bytes": 22376.666666666668, "training_seconds": 0.30555502400003814, "inference_ms": 0.21513186805716739}
+    },
+    "alternate": {
+      "no_alias": {"write_accuracy": 0.1558641975308642, "read_accuracy": 0.22222222222222224, "wrong_object_rate": 0.08333333333333333, "null_rate": 0.5277777777777778, "object_traces": 10.333333333333334, "relation_traces": 54.666666666666664, "links": 0, "slow_links": 0, "addresses": 26.333333333333332, "fast_updates": 33.666666666666664, "forgotten": 0, "model_bytes": 20323.333333333332, "training_seconds": 0.30143795333325824, "inference_ms": 0.21516575000172602},
+      "temporary_alias": {"write_accuracy": 0.1558641975308642, "read_accuracy": 0.22222222222222224, "wrong_object_rate": 0.08333333333333333, "null_rate": 0.5277777777777778, "object_traces": 10.333333333333334, "relation_traces": 54.666666666666664, "links": 8.666666666666666, "slow_links": 0, "addresses": 26.333333333333332, "fast_updates": 33.666666666666664, "forgotten": 0, "model_bytes": 20904, "training_seconds": 0.30915497566653966, "inference_ms": 0.2407129930538253},
+      "reconsolidated": {"write_accuracy": 0.1558641975308642, "read_accuracy": 0.22222222222222224, "wrong_object_rate": 0.08333333333333333, "null_rate": 0.5277777777777778, "object_traces": 10.333333333333334, "relation_traces": 54.666666666666664, "links": 8.666666666666666, "slow_links": 0, "addresses": 26.333333333333332, "fast_updates": 33.666666666666664, "forgotten": 0, "model_bytes": 20904, "training_seconds": 0.3034498373332705, "inference_ms": 0.2407004097240891}
+    },
+    "long": {
+      "no_alias": {"write_accuracy": 0.05092592592592592, "read_accuracy": 0.2638888888888889, "wrong_object_rate": 0.4722222222222222, "null_rate": 0.13194444444444445, "object_traces": 8, "relation_traces": 41.333333333333336, "links": 0, "slow_links": 0, "addresses": 6.333333333333333, "fast_updates": 11, "forgotten": 0, "model_bytes": 12876, "training_seconds": 0.22800488866664637, "inference_ms": 0.08743994444494597},
+      "temporary_alias": {"write_accuracy": 0.05092592592592592, "read_accuracy": 0.2638888888888889, "wrong_object_rate": 0.4722222222222222, "null_rate": 0.13194444444444445, "object_traces": 8, "relation_traces": 41.333333333333336, "links": 3.6666666666666665, "slow_links": 0, "addresses": 6.333333333333333, "fast_updates": 11, "forgotten": 0, "model_bytes": 13143.666666666666, "training_seconds": 0.23193091933338414, "inference_ms": 0.0901489722227527},
+      "reconsolidated": {"write_accuracy": 0.05092592592592592, "read_accuracy": 0.2638888888888889, "wrong_object_rate": 0.4722222222222222, "null_rate": 0.13194444444444445, "object_traces": 8, "relation_traces": 41.333333333333336, "links": 3.6666666666666665, "slow_links": 0, "addresses": 6.333333333333333, "fast_updates": 11, "forgotten": 0, "model_bytes": 13143.666666666666, "training_seconds": 0.2337414506666846, "inference_ms": 0.09318174305406046}
+    },
+    "combined": {
+      "no_alias": {"write_accuracy": 0.16512345679012347, "read_accuracy": 0.2916666666666667, "wrong_object_rate": 0.1388888888888889, "null_rate": 0.2708333333333333, "object_traces": 16, "relation_traces": 51.666666666666664, "links": 0, "slow_links": 0, "addresses": 26.333333333333332, "fast_updates": 35.666666666666664, "forgotten": 0, "model_bytes": 22273.333333333332, "training_seconds": 0.2944557313333007, "inference_ms": 0.22623388889068488},
+      "temporary_alias": {"write_accuracy": 0.16512345679012347, "read_accuracy": 0.2916666666666667, "wrong_object_rate": 0.1388888888888889, "null_rate": 0.2708333333333333, "object_traces": 16, "relation_traces": 51.666666666666664, "links": 11.666666666666666, "slow_links": 0, "addresses": 26.333333333333332, "fast_updates": 35.666666666666664, "forgotten": 0, "model_bytes": 22977, "training_seconds": 0.30352349399997064, "inference_ms": 0.27382986805453885},
+      "reconsolidated": {"write_accuracy": 0.16512345679012347, "read_accuracy": 0.2916666666666667, "wrong_object_rate": 0.1388888888888889, "null_rate": 0.2708333333333333, "object_traces": 16, "relation_traces": 51.666666666666664, "links": 11.666666666666666, "slow_links": 0, "addresses": 26.333333333333332, "fast_updates": 35.666666666666664, "forgotten": 0, "model_bytes": 22977, "training_seconds": 0.30300499533329156, "inference_ms": 0.2612363194458567}
+    },
+    "one_shot": {"no_alias": 0.6666666666666666, "temporary_alias": 0.6666666666666666, "reconsolidated": 0.6666666666666666},
+    "interference": {"no_alias": 0.0, "temporary_alias": 0.0, "reconsolidated": 0.0}
+  },
+  "peak_rss_kib_runtime_included": 160324,
+  "estimated_complexity": "proposal O(L^2), link credit O(AH), read/write O((A+K)G), A<=64",
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
