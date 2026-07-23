@@ -1,0 +1,23 @@
+{
+  "cycle": 40,
+  "hypothesis": "Delayed-Error Event Boundary Birth from Competing Microstate Lifetimes",
+  "seeds": [1, 7, 19],
+  "metrics": {
+    "explicit": {"one_step": {"accuracy": 0.267893, "wrong": 0.1, "null": 0.632107, "boundary_f1": 0}, "no_lifetime": {"accuracy": 0.267893, "wrong": 0.1, "null": 0.632107, "boundary_f1": 0}, "lifetime": {"accuracy": 0, "wrong": 0, "null": 1, "boundary_f1": 0.027778}, "temporal_shuffle": {"accuracy": 0.014493, "wrong": 0.229376, "null": 0.756132, "boundary_f1": 0}},
+    "omitted": {"one_step": {"accuracy": 0.233389, "wrong": 0.1, "null": 0.666611, "boundary_f1": 0}, "no_lifetime": {"accuracy": 0.233389, "wrong": 0.1, "null": 0.666611, "boundary_f1": 0}, "lifetime": {"accuracy": 0, "wrong": 0, "null": 1, "boundary_f1": 0.027778}, "temporal_shuffle": {"accuracy": 0.028986, "wrong": 0.211929, "null": 0.759086, "boundary_f1": 0}},
+    "paraphrase": {"one_step": {"accuracy": 0.016667, "wrong": 0.05, "null": 0.933333, "boundary_f1": 0}, "no_lifetime": {"accuracy": 0.016667, "wrong": 0.05, "null": 0.933333, "boundary_f1": 0}, "lifetime": {"accuracy": 0, "wrong": 0, "null": 1, "boundary_f1": 0.031746}, "temporal_shuffle": {"accuracy": 0, "wrong": 0.25, "null": 0.75, "boundary_f1": 0}},
+    "order": {"one_step": {"accuracy": 0.043478, "wrong": 0.15, "null": 0.806522, "boundary_f1": 0}, "no_lifetime": {"accuracy": 0.043478, "wrong": 0.15, "null": 0.806522, "boundary_f1": 0}, "lifetime": {"accuracy": 0, "wrong": 0, "null": 1, "boundary_f1": 0}, "temporal_shuffle": {"accuracy": 0, "wrong": 0.222575, "null": 0.777425, "boundary_f1": 0}},
+    "paragraph": {"one_step": {"accuracy": 0.216049, "wrong": 0.012346, "null": 0.771605, "boundary_f1": 0}, "no_lifetime": {"accuracy": 0.216049, "wrong": 0.012346, "null": 0.771605, "boundary_f1": 0}, "lifetime": {"accuracy": 0, "wrong": 0, "null": 1, "boundary_f1": 0.129841}, "temporal_shuffle": {"accuracy": 0.024691, "wrong": 0.125, "null": 0.850309, "boundary_f1": 0}},
+    "switch": {"one_step": {"accuracy": 0.32836, "wrong": 0.057471, "null": 0.614169, "boundary_f1": 0}, "no_lifetime": {"accuracy": 0.32836, "wrong": 0.057471, "null": 0.614169, "boundary_f1": 0}, "lifetime": {"accuracy": 0.011494, "wrong": 0, "null": 0.988506, "boundary_f1": 0.312596}, "temporal_shuffle": {"accuracy": 0.011494, "wrong": 0.164567, "null": 0.823939, "boundary_f1": 0}},
+    "plan": {"one_step": {"accuracy": 0.256173, "wrong": 0.012346, "null": 0.731481, "boundary_f1": 0}, "no_lifetime": {"accuracy": 0.256173, "wrong": 0.012346, "null": 0.731481, "boundary_f1": 0}, "lifetime": {"accuracy": 0, "wrong": 0, "null": 1, "boundary_f1": 0.123926}, "temporal_shuffle": {"accuracy": 0.037037, "wrong": 0.100309, "null": 0.862654, "boundary_f1": 0}},
+    "counterfactual": {"one_step": {"accuracy": 0.043478, "wrong": 0.05, "null": 0.906522, "boundary_f1": 0}, "no_lifetime": {"accuracy": 0.043478, "wrong": 0.05, "null": 0.906522, "boundary_f1": 0}, "lifetime": {"accuracy": 0, "wrong": 0, "null": 1, "boundary_f1": 0}, "temporal_shuffle": {"accuracy": 0, "wrong": 0.163601, "null": 0.836399, "boundary_f1": 0}}
+  },
+  "resources": {"rules": 64, "model_bytes": 3345, "training_seconds": 0.001916041, "seen_inference_ms": 0.069184533, "paragraph_inference_ms": 0.091288434, "peak_rss_kib_runtime_included": 160120, "estimated_complexity": "induction O(NL); online O(TR) with R<=64, active<=12"},
+  "diagnostics": {"switch_boundary_f1": 0.312596, "plan_boundary_f1": 0.123926, "switch_lifetime_accuracy": 0.011494, "temporal_shuffle_switch_boundary_f1": 0},
+  "final_test_outcome_used_for_candidate_ranking": false,
+  "fixed_ontology_or_handwritten_slots_used_by_model": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
