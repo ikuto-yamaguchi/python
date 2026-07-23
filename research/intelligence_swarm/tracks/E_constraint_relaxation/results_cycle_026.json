@@ -1,0 +1,24 @@
+{
+  "hypothesis": "Residual-Mediator Constraint Hyperedges from Triadic Energy Synergy",
+  "seeds": [1, 7, 19],
+  "summary": {
+    "seen": {"base_accuracy": 0.0, "hyper_accuracy": 0.0, "hyper_null_rate": 1.0, "pair_recall": 0.0, "mean_sweeps": 2.0, "mean_active": 16.0, "inference_ms": 0.569},
+    "unknown": {"base_accuracy": 0.0, "hyper_accuracy": 0.0, "hyper_null_rate": 1.0, "pair_recall": 0.0, "mean_sweeps": 2.0, "mean_active": 16.0, "inference_ms": 0.560},
+    "ambiguous": {"base_accuracy": 0.0, "hyper_accuracy": 0.0, "hyper_null_rate": 1.0, "pair_recall": 0.0, "mean_sweeps": 2.0, "mean_active": 16.0, "inference_ms": 0.552},
+    "nested": {"base_accuracy": 0.0, "hyper_accuracy": 0.0, "hyper_null_rate": 1.0, "pair_recall": 0.0, "mean_sweeps": 2.0, "mean_active": 16.0, "inference_ms": 0.629},
+    "omitted": {"base_accuracy": 0.0, "hyper_accuracy": 0.0, "hyper_null_rate": 1.0, "pair_recall": 0.0, "mean_sweeps": 0.0, "mean_active": 0.0, "inference_ms": 0.259},
+    "paragraph": {"base_accuracy": 0.0, "hyper_accuracy": 0.0, "hyper_null_rate": 1.0, "pair_recall": 0.0, "mean_sweeps": 2.0, "mean_active": 16.0, "inference_ms": 0.744},
+    "plan": {"base_accuracy": 0.0, "hyper_accuracy": 0.0, "hyper_null_rate": 1.0, "pair_recall": 0.0, "mean_sweeps": 2.0, "mean_active": 16.0, "inference_ms": 0.721},
+    "counterfactual": {"base_accuracy": 0.0, "hyper_accuracy": 0.0, "hyper_null_rate": 1.0, "pair_recall": 0.0, "mean_sweeps": 2.0, "mean_active": 16.0, "inference_ms": 0.768},
+    "hyperedges": 110.0,
+    "model_bytes": 2611.67,
+    "training_seconds": 0.165767,
+    "peak_rss_kib_runtime_included": 111000
+  },
+  "estimated_complexity": "candidate O(L^2), triadic audit O(NORV), relaxation O(SH), O,V<=4,R<=8,H<=64,S<=6",
+  "falsification": "110 triadic hyperedges formed, but all capability metrics matched the base energy model. Residuals and factor candidates shared the same after/future surface source, producing leakage-based synergy and exact episodic triple keys that did not transfer.",
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
