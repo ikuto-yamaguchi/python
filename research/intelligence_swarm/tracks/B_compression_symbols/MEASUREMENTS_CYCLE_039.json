@@ -1,0 +1,20 @@
+{
+  "cycle": 39,
+  "hypothesis": "Co-Segmentation Grammar Birth from Paired Disagreement Worlds",
+  "seeds": [1, 7, 19],
+  "methods": {
+    "factorized": {"grammar": 5.6667, "model_bytes": 117, "training_seconds": 0.3372, "seen_accuracy": 0, "seen_null": 1, "seen_candidates": 11061.78, "seen_inference_ms": 3.4980, "paragraph_candidates": 23248.51, "paragraph_inference_ms": 6.2781},
+    "coseg": {"grammar": 5.6667, "model_bytes": 117, "training_seconds": 0.3395, "seen_accuracy": 0, "seen_null": 1, "seen_candidates": 11061.78, "seen_inference_ms": 3.0345, "paragraph_candidates": 23248.51, "paragraph_inference_ms": 6.1536},
+    "strict": {"grammar": 5.3333, "model_bytes": 111, "training_seconds": 0.3326, "seen_accuracy": 0, "seen_null": 1, "seen_candidates": 10412.73, "seen_inference_ms": 2.8088, "paragraph_candidates": 21880.53, "paragraph_inference_ms": 5.8469},
+    "shuffle": {"grammar": 0, "model_bytes": 5, "training_seconds": 0.3359, "seen_accuracy": 0, "seen_null": 1, "seen_candidates": 0, "seen_inference_ms": 0.0172, "paragraph_candidates": 0, "paragraph_inference_ms": 0.0287}
+  },
+  "all_test_modes_accuracy": 0,
+  "all_nonshuffle_test_modes_null_rate": 1,
+  "peak_rss_kib_runtime_included": 111132,
+  "estimated_complexity": "paired segmentation O(NL^2), quotient O(P log P), inference O(GL^2V)",
+  "final_test_after_future_used_for_selection": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
