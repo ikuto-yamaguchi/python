@@ -1,0 +1,26 @@
+{
+  "cycle": 32,
+  "hypothesis": "Probe-Driven Symbol Refinement by Counterexample Boundary Repair",
+  "seeds": [1, 7, 19],
+  "splits": {"induction": 190, "independent_probe": 98, "final_test_per_mode": 24},
+  "ablations": ["graph", "symbol", "repair", "shuffle_repair"],
+  "summary": {
+    "seen": {"graph": {"accuracy": 0.0138888889, "pair_recall": 0.0416666667, "mean_candidates": 11.2222222222, "mean_boundary_distance": 12.4027777778}, "repair": {"accuracy": 0.0, "wrong_commit": 0.0, "pair_recall": 0.25, "mean_candidates": 84.8055555556, "mean_boundary_distance": 9.8194444444, "inference_ms": 11.4465529167}},
+    "order": {"graph": {"accuracy": 0.0277777778, "pair_recall": 0.0416666667, "mean_candidates": 11.5555555556, "mean_boundary_distance": 12.4027777778}, "repair": {"accuracy": 0.0, "wrong_commit": 0.0, "pair_recall": 0.3611111111, "mean_candidates": 92.7222222222, "mean_boundary_distance": 9.8194444444, "inference_ms": 13.4572235417}},
+    "lexeme": {"graph": {"accuracy": 0.0277777778, "pair_recall": 0.0555555556, "mean_candidates": 10.6666666667, "mean_boundary_distance": 12.4027777778}, "repair": {"accuracy": 0.0, "wrong_commit": 0.0, "pair_recall": 0.3888888889, "mean_candidates": 76.875, "mean_boundary_distance": 9.8194444444, "inference_ms": 9.2006289583}},
+    "rename": {"graph": {"accuracy": 0.0, "pair_recall": 0.0, "mean_candidates": 11.1527777778, "mean_boundary_distance": 12.2222222222}, "repair": {"accuracy": 0.0, "wrong_commit": 0.0, "pair_recall": 0.0277777778, "mean_candidates": 85.1944444444, "mean_boundary_distance": 9.6388888889, "inference_ms": 11.7684225556}},
+    "alternate": {"graph": {"accuracy": 0.0, "pair_recall": 0.0, "mean_candidates": 0.0, "mean_boundary_distance": 999.0}, "repair": {"accuracy": 0.0, "wrong_commit": 0.0, "pair_recall": 0.3611111111, "mean_candidates": 46.7222222222, "mean_boundary_distance": 27.7083333333, "inference_ms": 8.7851332222}},
+    "nested": {"graph": {"accuracy": 0.0138888889, "pair_recall": 0.0416666667, "mean_candidates": 11.5555555556, "mean_boundary_distance": 12.4027777778}, "repair": {"accuracy": 0.0, "wrong_commit": 0.0, "pair_recall": 0.25, "mean_candidates": 106.0833333333, "mean_boundary_distance": 9.8194444444, "inference_ms": 14.8296225278}},
+    "omitted": {"graph": {"accuracy": 0.0, "pair_recall": 0.0, "mean_candidates": 3.0, "mean_boundary_distance": 765.1111111111}, "repair": {"accuracy": 0.0, "wrong_commit": 0.0, "pair_recall": 0.0, "mean_candidates": 18.0694444444, "mean_boundary_distance": 765.1111111111, "inference_ms": 5.03893575}},
+    "paragraph": {"graph": {"accuracy": 0.0138888889, "pair_recall": 0.0138888889, "mean_candidates": 11.8888888889, "mean_boundary_distance": 12.3888888889}, "repair": {"accuracy": 0.0, "wrong_commit": 0.0, "pair_recall": 0.0833333333, "mean_candidates": 122.3194444444, "mean_boundary_distance": 9.8055555556, "inference_ms": 24.9313091389}}
+  },
+  "diagnostics": {"programs": 64, "active_probes": 12.6666666667, "symbol_classes": 5.0, "symbol_members": 49.0, "global_repairs": 8.6666666667, "symbol_specific_repair_rules": 0.0, "description_bits": 20574.0, "model_bytes": 6462.3333333333, "training_seconds": 0.6534501417, "peak_rss_kib_runtime_included": 114304},
+  "estimated_complexity": "program induction O(NKoKv), probe response O(VT), near-miss repair O(VHL^2), repair expansion O(TR), inference O(TL^2+TR)",
+  "final_test_outcome_used": false,
+  "probe_pool_independent": true,
+  "fixed_ontology_or_handwritten_slots_used_by_model": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
