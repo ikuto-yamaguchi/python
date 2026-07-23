@@ -1,0 +1,51 @@
+{
+  "hypothesis": "Bipartite Query–Object–Relation Addresses with Endpoint-Specific Reconsolidation",
+  "seeds": [1, 7, 19],
+  "sizes": [12, 24, 48],
+  "summary_48": {
+    "seen": {
+      "joint": {"write_accuracy": 0.0, "read_accuracy": 0.0, "wrong_read": 0.0, "objects": 0, "relations": 0, "edges": 0, "slow_edges": 0, "model_bytes": 1394, "training_seconds": 0.004932793333334, "inference_ms": 0.0039495902777433554, "fast_updates": 0},
+      "bipartite": {"write_accuracy": 0.0, "read_accuracy": 0.0, "wrong_read": 0.0, "objects": 0, "relations": 0, "edges": 0, "slow_edges": 0, "model_bytes": 1398, "training_seconds": 0.004867679999999079, "inference_ms": 0.0038145347226582597, "fast_updates": 0},
+      "slow": {"write_accuracy": 0.0, "read_accuracy": 0.0, "wrong_read": 0.0, "objects": 0, "relations": 0, "edges": 0, "slow_edges": 0, "model_bytes": 1393, "training_seconds": 0.004820379666663636, "inference_ms": 0.00363702777820644, "fast_updates": 0}
+    },
+    "held": {
+      "joint": {"write_accuracy": 0.0, "read_accuracy": 0.0, "wrong_read": 0.0},
+      "bipartite": {"write_accuracy": 0.0, "read_accuracy": 0.0, "wrong_read": 0.0},
+      "slow": {"write_accuracy": 0.0, "read_accuracy": 0.0, "wrong_read": 0.0}
+    },
+    "rename": {
+      "joint": {"write_accuracy": 0.0, "read_accuracy": 0.0, "wrong_read": 0.0},
+      "bipartite": {"write_accuracy": 0.0, "read_accuracy": 0.0, "wrong_read": 0.0},
+      "slow": {"write_accuracy": 0.0, "read_accuracy": 0.0, "wrong_read": 0.0}
+    },
+    "alternate": {
+      "joint": {"write_accuracy": 0.020833333333333332, "read_accuracy": 0.027777777777777776, "wrong_read": 0.05555555555555555},
+      "bipartite": {"write_accuracy": 0.020833333333333332, "read_accuracy": 0.027777777777777776, "wrong_read": 0.05555555555555555},
+      "slow": {"write_accuracy": 0.0, "read_accuracy": 0.2222222222222222, "wrong_read": 0.1388888888888889}
+    },
+    "omitted": {
+      "joint": {"write_accuracy": 0.1875, "read_accuracy": 0.19444444444444445, "wrong_read": 0.05555555555555555},
+      "bipartite": {"write_accuracy": 0.1875, "read_accuracy": 0.19444444444444445, "wrong_read": 0.05555555555555555},
+      "slow": {"write_accuracy": 0.041666666666666664, "read_accuracy": 0.1388888888888889, "wrong_read": 0.4444444444444445}
+    },
+    "long": {
+      "joint": {"write_accuracy": 0.0, "read_accuracy": 0.0, "wrong_read": 0.0},
+      "bipartite": {"write_accuracy": 0.0, "read_accuracy": 0.0, "wrong_read": 0.0},
+      "slow": {"write_accuracy": 0.0, "read_accuracy": 0.0, "wrong_read": 0.0}
+    },
+    "combined": {
+      "joint": {"write_accuracy": 0.07506172839506173, "read_accuracy": 0.05555555555555555, "wrong_read": 0.05555555555555555, "objects": 6.333333333333333, "relations": 11.333333333333334, "edges": 59, "slow_edges": 9, "model_bytes": 33624, "training_seconds": 0.022119300666664305, "inference_ms": 1.5456268384472795, "fast_updates": 69.33333333333333},
+      "bipartite": {"write_accuracy": 0.07506172839506173, "read_accuracy": 0.05555555555555555, "wrong_read": 0.05555555555555555, "objects": 6.333333333333333, "relations": 11.333333333333334, "edges": 59, "slow_edges": 9, "model_bytes": 33628, "training_seconds": 0.022270892333324355, "inference_ms": 1.549850186698981, "fast_updates": 69.33333333333333},
+      "slow": {"write_accuracy": 0.07506172839506173, "read_accuracy": 0.09722222222222222, "wrong_read": 0.2361111111111111, "objects": 6.333333333333333, "relations": 11.333333333333334, "edges": 59, "slow_edges": 9, "model_bytes": 33611, "training_seconds": 0.022242192999982535, "inference_ms": 0.2622926939731215, "fast_updates": 69.33333333333333}
+    },
+    "one_shot": {"joint": 0.0, "bipartite": 0.0, "slow": 0.0},
+    "interference": {"joint": 0.1527777777777778, "bipartite": 0.1527777777777778, "slow": 0.5}
+  },
+  "peak_rss_kib_runtime_included": 112116,
+  "estimated_complexity": "proposal O(L^2), learning O(N(A+R)G), read/write O(k(A+R)G), k<=64",
+  "hidden_labels_used_by_learner": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
