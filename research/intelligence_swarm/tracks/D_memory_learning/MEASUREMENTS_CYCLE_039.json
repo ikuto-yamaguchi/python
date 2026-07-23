@@ -1,0 +1,35 @@
+{
+  "cycle": 39,
+  "hypothesis": "Delayed Reconsolidation Trace Birth from Paired-Replay Fingerprint Stability",
+  "seeds": [1, 7, 19],
+  "summary": {
+    "traces": 96,
+    "pair_worlds": 48,
+    "audit": 13824,
+    "one_shot": 0.0,
+    "interference_before": 0.0,
+    "interference_after": 0.0,
+    "latest": 0.0,
+    "model_bytes": 5351,
+    "base": {"active": 96, "all_modes_closed": 0, "all_modes_wrong": 0, "all_modes_null": 1.0},
+    "fast": {"active": 0, "all_modes_closed": 0, "all_modes_wrong": 0, "all_modes_null": 1.0},
+    "slow": {"active": 0, "all_modes_closed": 0, "all_modes_wrong": 0, "all_modes_null": 1.0},
+    "shuffled": {"active": 0, "all_modes_closed": 0, "all_modes_wrong": 0, "all_modes_null": 1.0},
+    "training_seconds": 0.13541597299990826,
+    "inference_ms": 0.0000651850007216126
+  },
+  "raw_seed_core": {
+    "1": {"traces": 96, "pair_worlds": 48, "audit": 13824, "fast": 0, "slow": 0, "shuffled": 0, "one_shot": 0.0, "latest": 0.0, "model_bytes": 5351},
+    "7": {"traces": 96, "pair_worlds": 48, "audit": 13824, "fast": 0, "slow": 0, "shuffled": 0, "one_shot": 0.0, "latest": 0.0, "model_bytes": 5351},
+    "19": {"traces": 96, "pair_worlds": 48, "audit": 13824, "fast": 0, "slow": 0, "shuffled": 0, "one_shot": 0.0, "latest": 0.0, "model_bytes": 5351}
+  },
+  "peak_rss_kib_runtime_included": 111508,
+  "estimated_complexity": "induction O(NL^2), paired replay O(QP), reconsolidation O(QP), inference O(APL)",
+  "fixed_ontology_or_handwritten_slots_used_by_model": false,
+  "rag_or_external_llm_used": false,
+  "final_outcome_used_for_candidate_ranking": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
