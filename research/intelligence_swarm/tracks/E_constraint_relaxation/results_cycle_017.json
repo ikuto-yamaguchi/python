@@ -1,0 +1,49 @@
+{
+  "hypothesis": "Frustration-Driven Candidate Birth with Null-Preserving Relaxation",
+  "seeds": [1, 7, 19],
+  "sizes": [12, 24, 36],
+  "peak_rss_kib_runtime_included": 110644,
+  "estimated_complexity": "initial O(L^2), birth O(Hb Hc F), relaxation O(SHF), H<=8, S<=3",
+  "hidden_labels_used_by_learner": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false,
+  "summary_max_size_36": {
+    "seen": {
+      "fixed": {"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"candidate_recall":0.0,"mean_sweeps":1.0,"mean_active":0.0,"mean_born":0.0,"convergence_rate":1.0,"model_bytes":159,"training_seconds":0.003293629,"inference_ms":0.011460125},
+      "birth": {"accuracy":0.0,"wrong_commit":1.0,"null_rate":0.0,"candidate_recall":0.0,"mean_sweeps":2.0,"mean_active":8.0,"mean_born":8.0,"convergence_rate":1.0,"model_bytes":159,"training_seconds":0.003042343,"inference_ms":2.031987542},
+      "birth_null": {"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"candidate_recall":0.0,"mean_sweeps":2.0,"mean_active":8.0,"mean_born":8.0,"convergence_rate":1.0,"model_bytes":164,"training_seconds":0.003128148,"inference_ms":2.092793083}
+    },
+    "unseen": {
+      "fixed": {"accuracy":0.0,"wrong_commit":1.0,"null_rate":0.0,"candidate_recall":0.0,"mean_sweeps":2.0,"mean_active":4.291667,"mean_born":0.0,"convergence_rate":1.0,"model_bytes":159,"training_seconds":0.003105474,"inference_ms":0.342970625},
+      "birth": {"accuracy":0.0,"wrong_commit":1.0,"null_rate":0.0,"candidate_recall":0.0,"mean_sweeps":2.916667,"mean_active":8.0,"mean_born":7.291667,"convergence_rate":1.0,"model_bytes":159,"training_seconds":0.003063057,"inference_ms":5.0990535},
+      "birth_null": {"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"candidate_recall":0.0,"mean_sweeps":2.916667,"mean_active":8.0,"mean_born":7.291667,"convergence_rate":1.0,"model_bytes":164,"training_seconds":0.003074251,"inference_ms":5.368440833}
+    },
+    "nested": {
+      "fixed": {"accuracy":0.0,"wrong_commit":1.0,"null_rate":0.0,"candidate_recall":0.0,"mean_sweeps":2.0,"mean_active":4.5,"mean_born":0.0,"convergence_rate":1.0,"model_bytes":159,"training_seconds":0.003065263,"inference_ms":0.358502917},
+      "birth": {"accuracy":0.0,"wrong_commit":1.0,"null_rate":0.0,"candidate_recall":0.0,"mean_sweeps":2.708333,"mean_active":8.0,"mean_born":6.333333,"convergence_rate":1.0,"model_bytes":159,"training_seconds":0.003101435,"inference_ms":5.334902792},
+      "birth_null": {"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"candidate_recall":0.0,"mean_sweeps":2.708333,"mean_active":8.0,"mean_born":6.333333,"convergence_rate":1.0,"model_bytes":164,"training_seconds":0.003121677,"inference_ms":5.407063042}
+    },
+    "omitted": {
+      "fixed": {"accuracy":0.0,"wrong_commit":1.0,"null_rate":0.0,"candidate_recall":0.0,"mean_sweeps":2.0,"mean_active":4.25,"mean_born":0.0,"convergence_rate":1.0,"model_bytes":159,"training_seconds":0.003099056,"inference_ms":0.344022542},
+      "birth": {"accuracy":0.0,"wrong_commit":1.0,"null_rate":0.0,"candidate_recall":0.0,"mean_sweeps":2.875,"mean_active":8.0,"mean_born":6.875,"convergence_rate":1.0,"model_bytes":159,"training_seconds":0.003061915,"inference_ms":5.7253125},
+      "birth_null": {"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"candidate_recall":0.0,"mean_sweeps":2.875,"mean_active":8.0,"mean_born":6.875,"convergence_rate":1.0,"model_bytes":164,"training_seconds":0.003259887,"inference_ms":6.091095167}
+    },
+    "paragraph": {
+      "fixed": {"accuracy":0.0,"wrong_commit":1.0,"null_rate":0.0,"candidate_recall":0.0,"mean_sweeps":2.0,"mean_active":4.5,"mean_born":0.0,"convergence_rate":1.0,"model_bytes":159,"training_seconds":0.003122547,"inference_ms":0.361445042},
+      "birth": {"accuracy":0.0,"wrong_commit":1.0,"null_rate":0.0,"candidate_recall":0.0,"mean_sweeps":2.708333,"mean_active":8.0,"mean_born":6.333333,"convergence_rate":1.0,"model_bytes":159,"training_seconds":0.00320184,"inference_ms":5.430985792},
+      "birth_null": {"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"candidate_recall":0.0,"mean_sweeps":2.708333,"mean_active":8.0,"mean_born":6.333333,"convergence_rate":1.0,"model_bytes":164,"training_seconds":0.003037957,"inference_ms":5.396395875}
+    },
+    "plan": {
+      "fixed": {"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"candidate_recall":0.0,"mean_sweeps":1.0,"mean_active":0.0,"mean_born":0.0,"convergence_rate":1.0,"model_bytes":159,"training_seconds":0.003094921,"inference_ms":0.010173167},
+      "birth": {"accuracy":0.0,"wrong_commit":1.0,"null_rate":0.0,"candidate_recall":0.0,"mean_sweeps":2.0,"mean_active":8.0,"mean_born":8.0,"convergence_rate":1.0,"model_bytes":159,"training_seconds":0.003028513,"inference_ms":2.379060792},
+      "birth_null": {"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"candidate_recall":0.0,"mean_sweeps":2.0,"mean_active":8.0,"mean_born":8.0,"convergence_rate":1.0,"model_bytes":164,"training_seconds":0.003097917,"inference_ms":2.205420167}
+    },
+    "counterfactual": {
+      "fixed": {"accuracy":0.0,"wrong_commit":1.0,"null_rate":0.0,"candidate_recall":0.0,"mean_sweeps":2.0,"mean_active":4.5,"mean_born":0.0,"convergence_rate":1.0,"model_bytes":159,"training_seconds":0.003117348,"inference_ms":0.351511917},
+      "birth": {"accuracy":0.0,"wrong_commit":1.0,"null_rate":0.0,"candidate_recall":0.0,"mean_sweeps":2.791667,"mean_active":7.25,"mean_born":7.625,"convergence_rate":1.0,"model_bytes":159,"training_seconds":0.003128185,"inference_ms":5.307014042},
+      "birth_null": {"accuracy":0.0,"wrong_commit":0.0,"null_rate":1.0,"candidate_recall":0.0,"mean_sweeps":2.791667,"mean_active":7.25,"mean_born":7.625,"convergence_rate":1.0,"model_bytes":164,"training_seconds":0.003048641,"inference_ms":5.356378042}
+    }
+  }
+}
