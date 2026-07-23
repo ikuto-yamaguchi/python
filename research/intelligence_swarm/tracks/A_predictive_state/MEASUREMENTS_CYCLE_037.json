@@ -1,0 +1,70 @@
+{
+  "cycle": 37,
+  "hypothesis": "Counterfactual Sensor Separation for Multi-Channel Predictive State Birth",
+  "seeds": [1, 7, 19],
+  "metrics": {
+    "seen": {
+      "shared": {"accuracy": 0.0, "wrong": 1.0, "null": 0.0, "rules": 1.666667, "model_bytes": 397.333333, "training_seconds": 0.022146, "inference_ms": 0.010952},
+      "single": {"accuracy": 0.0, "wrong": 0.092593, "null": 0.907407, "rules": 5.666667, "model_bytes": 634, "training_seconds": 0.018293, "inference_ms": 0.011235},
+      "separated": {"accuracy": 0.592593, "wrong": 0.407407, "null": 0.0, "rules": 3.666667, "model_bytes": 510.666667, "training_seconds": 0.018757, "inference_ms": 0.010405},
+      "shuffle": {"accuracy": 0.592593, "wrong": 0.407407, "null": 0.0, "rules": 3.0, "model_bytes": 527, "training_seconds": 0.02155, "inference_ms": 0.011196}
+    },
+    "order": {
+      "shared": {"accuracy": 0.0, "wrong": 0.666667, "null": 0.333333, "rules": 1.666667, "model_bytes": 397.333333, "training_seconds": 0.015945, "inference_ms": 0.00863},
+      "single": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "rules": 5.666667, "model_bytes": 634, "training_seconds": 0.017537, "inference_ms": 0.012978},
+      "separated": {"accuracy": 0.0, "wrong": 1.0, "null": 0.0, "rules": 3.666667, "model_bytes": 510.666667, "training_seconds": 0.016294, "inference_ms": 0.010402},
+      "shuffle": {"accuracy": 0.0, "wrong": 1.0, "null": 0.0, "rules": 3.0, "model_bytes": 527, "training_seconds": 0.019247, "inference_ms": 0.011155}
+    },
+    "lexeme": {
+      "shared": {"accuracy": 0.0, "wrong": 0.666667, "null": 0.333333, "rules": 1.666667, "model_bytes": 397.333333, "training_seconds": 0.017306, "inference_ms": 0.008737},
+      "single": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "rules": 5.666667, "model_bytes": 634, "training_seconds": 0.017161, "inference_ms": 0.010819},
+      "separated": {"accuracy": 0.0, "wrong": 1.0, "null": 0.0, "rules": 3.666667, "model_bytes": 510.666667, "training_seconds": 0.017599, "inference_ms": 0.010717},
+      "shuffle": {"accuracy": 0.0, "wrong": 1.0, "null": 0.0, "rules": 3.0, "model_bytes": 527, "training_seconds": 0.017421, "inference_ms": 0.009665}
+    },
+    "nested": {
+      "shared": {"accuracy": 0.0, "wrong": 0.666667, "null": 0.333333, "rules": 1.666667, "model_bytes": 397.333333, "training_seconds": 0.018448, "inference_ms": 0.008675},
+      "single": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "rules": 5.666667, "model_bytes": 634, "training_seconds": 0.016868, "inference_ms": 0.0128},
+      "separated": {"accuracy": 0.0, "wrong": 1.0, "null": 0.0, "rules": 3.666667, "model_bytes": 510.666667, "training_seconds": 0.019839, "inference_ms": 0.012349},
+      "shuffle": {"accuracy": 0.0, "wrong": 1.0, "null": 0.0, "rules": 3.0, "model_bytes": 527, "training_seconds": 0.02455, "inference_ms": 0.012929}
+    },
+    "omitted": {
+      "shared": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "rules": 1.666667, "model_bytes": 397.333333, "training_seconds": 0.019824, "inference_ms": 0.008327},
+      "single": {"accuracy": 0.0, "wrong": 1.0, "null": 0.0, "rules": 5.666667, "model_bytes": 634, "training_seconds": 0.019666, "inference_ms": 0.012491},
+      "separated": {"accuracy": 0.0, "wrong": 1.0, "null": 0.0, "rules": 3.666667, "model_bytes": 510.666667, "training_seconds": 0.022288, "inference_ms": 0.012096},
+      "shuffle": {"accuracy": 0.0, "wrong": 1.0, "null": 0.0, "rules": 3.0, "model_bytes": 527, "training_seconds": 0.02059, "inference_ms": 0.010935}
+    },
+    "paragraph": {
+      "shared": {"accuracy": 0.240741, "wrong": 0.425926, "null": 0.333333, "rules": 1.666667, "model_bytes": 397.333333, "training_seconds": 0.016852, "inference_ms": 0.008978},
+      "single": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "rules": 5.666667, "model_bytes": 634, "training_seconds": 0.017087, "inference_ms": 0.010939},
+      "separated": {"accuracy": 0.0, "wrong": 1.0, "null": 0.0, "rules": 3.666667, "model_bytes": 510.666667, "training_seconds": 0.018929, "inference_ms": 0.010591},
+      "shuffle": {"accuracy": 0.0, "wrong": 1.0, "null": 0.0, "rules": 3.0, "model_bytes": 527, "training_seconds": 0.018914, "inference_ms": 0.009748}
+    },
+    "plan": {
+      "shared": {"accuracy": 0.0, "wrong": 0.666667, "null": 0.333333, "rules": 1.666667, "model_bytes": 397.333333, "training_seconds": 0.018611, "inference_ms": 0.010303},
+      "single": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "rules": 5.666667, "model_bytes": 634, "training_seconds": 0.017896, "inference_ms": 0.012745},
+      "separated": {"accuracy": 0.0, "wrong": 1.0, "null": 0.0, "rules": 3.666667, "model_bytes": 510.666667, "training_seconds": 0.017497, "inference_ms": 0.011131},
+      "shuffle": {"accuracy": 0.0, "wrong": 1.0, "null": 0.0, "rules": 3.0, "model_bytes": 527, "training_seconds": 0.020829, "inference_ms": 0.010377}
+    },
+    "counterfactual": {
+      "shared": {"accuracy": 0.0, "wrong": 0.666667, "null": 0.333333, "rules": 1.666667, "model_bytes": 397.333333, "training_seconds": 0.01768, "inference_ms": 0.008401},
+      "single": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "rules": 5.666667, "model_bytes": 634, "training_seconds": 0.016584, "inference_ms": 0.014265},
+      "separated": {"accuracy": 0.0, "wrong": 1.0, "null": 0.0, "rules": 3.666667, "model_bytes": 510.666667, "training_seconds": 0.019037, "inference_ms": 0.012362},
+      "shuffle": {"accuracy": 0.0, "wrong": 1.0, "null": 0.0, "rules": 3.0, "model_bytes": 527, "training_seconds": 0.021202, "inference_ms": 0.012377}
+    }
+  },
+  "seen_sensor_accept": {
+    "value_sensor_accept": 23.666667,
+    "object_sensor_accept": 0,
+    "future_sensor_accept": 5.666667,
+    "non_target_sensor_accept": 23.666667,
+    "inverse_sensor_accept": 23.666667,
+    "probe_audits": 136
+  },
+  "peak_rss_kib_runtime_included": 167428,
+  "estimated_complexity": "candidate O(L^2) bounded 64; probe O(QC); inference O(R)",
+  "final_test_outcome_used_for_ranking": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
