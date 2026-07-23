@@ -1,0 +1,34 @@
+{
+  "cycle": 35,
+  "hypothesis": "Joint-Born Command-State Transition Cells from Cross-Turn Contrastive Swaps",
+  "seeds": [1, 7, 19],
+  "metric_order": ["accuracy", "wrong", "null", "pair_recall"],
+  "methods": ["factorized", "state_only", "joint", "shuffle"],
+  "metrics": {
+    "seen": {"factorized": [0.013889,0.416667,0.569444,0.041667],"state_only": [0.0,0.0,1.0,0.0],"joint": [0.0,0.0,1.0,0.0],"shuffle": [0.0,0.0,1.0,0.0]},
+    "order": {"factorized": [0.0,0.5,0.5,0.0],"state_only": [0.0,0.0,1.0,0.0],"joint": [0.0,0.0,1.0,0.0],"shuffle": [0.0,0.0,1.0,0.0]},
+    "lexeme": {"factorized": [0.0,0.5,0.5,0.0],"state_only": [0.0,0.0,1.0,0.0],"joint": [0.0,0.0,1.0,0.0],"shuffle": [0.0,0.0,1.0,0.0]},
+    "rename": {"factorized": [0.013889,0.416667,0.569444,0.055556],"state_only": [0.0,0.0,1.0,0.0],"joint": [0.0,0.0,1.0,0.0],"shuffle": [0.0,0.0,1.0,0.0]},
+    "nested": {"factorized": [0.0,0.361111,0.638889,0.0],"state_only": [0.0,0.0,1.0,0.0],"joint": [0.0,0.0,1.0,0.0],"shuffle": [0.0,0.0,1.0,0.0]},
+    "omitted": {"factorized": [0.0,0.652778,0.347222,0.0],"state_only": [0.0,0.0,1.0,0.0],"joint": [0.0,0.0,1.0,0.0],"shuffle": [0.0,0.0,1.0,0.0]},
+    "switchmix": {"factorized": [0.0,0.347222,0.652778,0.013889],"state_only": [0.0,0.0,1.0,0.0],"joint": [0.0,0.0,1.0,0.0],"shuffle": [0.0,0.0,1.0,0.0]},
+    "paragraph": {"factorized": [0.0,0.527778,0.472222,0.0],"state_only": [0.0,0.0,1.0,0.0],"joint": [0.0,0.0,1.0,0.0],"shuffle": [0.0,0.0,1.0,0.0]},
+    "plan": {"factorized": [0.0,0.208333,0.791667,0.0],"state_only": [0.0,0.0,1.0,0.0],"joint": [0.0,0.0,1.0,0.0],"shuffle": [0.0,0.0,1.0,0.0]},
+    "counterfactual": {"factorized": [0.0,0.333333,0.666667,0.0],"state_only": [0.0,0.0,1.0,0.0],"joint": [0.0,0.0,1.0,0.0],"shuffle": [0.0,0.0,1.0,0.0]}
+  },
+  "seen_diagnostics": {
+    "factorized": {"cells": 5.666666666666667,"reactivation_edges": 0,"swap_supported_cells": 0,"probe_audits": 0,"model_bytes": 559,"training_seconds": 0.0004611503333329381,"inference_ms": 0.01661712499995755},
+    "state_only": {"cells": 0,"reactivation_edges": 0,"swap_supported_cells": 0,"probe_audits": 185.33333333333334,"model_bytes": 603.3333333333334,"training_seconds": 0.0012107873333325376,"inference_ms": 0.004741805555516818},
+    "joint": {"cells": 0,"reactivation_edges": 0,"swap_supported_cells": 0,"probe_audits": 185.33333333333334,"model_bytes": 598.3333333333334,"training_seconds": 0.0011975509999994454,"inference_ms": 0.003960763888915469},
+    "shuffle": {"cells": 0,"reactivation_edges": 0,"swap_supported_cells": 0,"probe_audits": 185.33333333333334,"model_bytes": 600.3333333333334,"training_seconds": 0.0012072653333324486,"inference_ms": 0.003929874999987327}
+  },
+  "paragraph_joint_inference_ms": 0.0038852361111057438,
+  "peak_rss_kib_runtime_included": 159844,
+  "estimated_complexity": "induction O(NL), contrastive probe O(QC), inference O(C)",
+  "final_test_outcome_used_for_ranking": false,
+  "fixed_ontology_or_handwritten_slots_used_by_model": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
