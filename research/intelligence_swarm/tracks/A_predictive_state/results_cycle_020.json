@@ -1,0 +1,49 @@
+{
+  "hypothesis": "Cross-Stream Surprise Phase Locking for Minimal Predictive Roles",
+  "seeds": [1, 7, 19],
+  "train_sizes": [24, 72, 144],
+  "reported_size": 144,
+  "metrics": {
+    "seen": {
+      "sync": {"accuracy": 0.0625, "object_recall": 0.583333, "value_recall": 0.291667, "pair_recall": 0.25, "wrong_commit": 0.9375, "null_rate": 0.0, "model_bytes": 8611.666667, "training_seconds": 0.007285, "inference_ms": 5.471487, "predictive_states": 0},
+      "sync_null": {"accuracy": 0.0625, "object_recall": 0.583333, "value_recall": 0.291667, "pair_recall": 0.25, "wrong_commit": 0.1875, "null_rate": 0.75, "model_bytes": 8616.666667, "training_seconds": 0.007445, "inference_ms": 5.327597, "predictive_states": 0},
+      "sync_learned": {"accuracy": 0.041667, "object_recall": 0.583333, "value_recall": 0.291667, "pair_recall": 0.229167, "wrong_commit": 0.958333, "null_rate": 0.0, "model_bytes": 11693.666667, "training_seconds": 0.037427, "inference_ms": 6.489802, "predictive_states": 64}
+    },
+    "held": {
+      "sync": {"accuracy": 0.083333, "object_recall": 0.645833, "value_recall": 0.583333, "pair_recall": 0.3125, "wrong_commit": 0.916667, "null_rate": 0.0, "inference_ms": 5.359216},
+      "sync_null": {"accuracy": 0.083333, "wrong_commit": 0.229167, "null_rate": 0.6875},
+      "sync_learned": {"accuracy": 0.104167, "predictive_states": 64}
+    },
+    "rename": {
+      "sync": {"accuracy": 0.020833, "object_recall": 0.5625, "value_recall": 0.583333, "pair_recall": 0.291667, "wrong_commit": 0.979167, "inference_ms": 5.49148},
+      "sync_null": {"accuracy": 0.020833, "wrong_commit": 0.270833, "null_rate": 0.708333}
+    },
+    "alternate": {
+      "sync": {"accuracy": 0.104167, "object_recall": 0.583333, "value_recall": 0.270833, "pair_recall": 0.229167, "wrong_commit": 0.895833, "inference_ms": 4.085053},
+      "sync_null": {"accuracy": 0.104167, "wrong_commit": 0.125, "null_rate": 0.770833}
+    },
+    "nested": {
+      "sync": {"accuracy": 0.0, "object_recall": 0.083333, "value_recall": 0.020833, "pair_recall": 0.0, "wrong_commit": 1.0, "inference_ms": 1.927746},
+      "sync_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0}
+    },
+    "omitted": {
+      "sync": {"accuracy": 0.0, "object_recall": 0.0, "value_recall": 0.645833, "pair_recall": 0.0, "wrong_commit": 1.0, "inference_ms": 3.899258},
+      "sync_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0}
+    },
+    "paragraph": {
+      "sync": {"accuracy": 0.0, "object_recall": 0.0, "value_recall": 0.0, "pair_recall": 0.0, "wrong_commit": 1.0, "inference_ms": 1.582912},
+      "sync_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0}
+    },
+    "plan": {
+      "sync": {"accuracy": 0.0, "object_recall": 0.0625, "value_recall": 0.0, "pair_recall": 0.0, "wrong_commit": 0.916667, "inference_ms": 7.038619},
+      "sync_null": {"accuracy": 0.0, "wrong_commit": 0.0, "null_rate": 1.0}
+    }
+  },
+  "peak_rss_kib_runtime_included": 111624,
+  "estimated_complexity": "character prediction O(NL), phase cells O(L), cross-stream alignment O(Hc(Hb+Ha+Hf)), sparse pairing O(KpKc)",
+  "hidden_labels_used_by_learner": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
