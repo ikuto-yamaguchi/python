@@ -1,0 +1,31 @@
+{
+  "hypothesis": "Transition-Mediated Predictive Responsibility from Local Residual Routing",
+  "seeds": [1, 7, 19],
+  "train_size": 48,
+  "test_size_per_split": 18,
+  "summary": {
+    "seen": {"no_carry_pair_recall": 0.1851851852, "no_carry_accuracy": 0.1481481481, "unconditional_pair_recall": 0.1851851852, "unconditional_accuracy": 0.0925925926, "routed_pair_recall": 0.1851851852, "routed_accuracy": 0.1481481481, "routed_carry": 0.8703703704, "local_residual_reduction": 0.1266570216},
+    "held": {"no_carry_pair_recall": 0.1666666667, "no_carry_accuracy": 0.1481481481, "unconditional_pair_recall": 0.1851851852, "unconditional_accuracy": 0.0925925926, "routed_pair_recall": 0.1666666667, "routed_accuracy": 0.1481481481, "routed_carry": 0.8148148148, "local_residual_reduction": 0.1417642747},
+    "rename": {"no_carry_pair_recall": 0.0740740741, "no_carry_accuracy": 0.0555555556, "unconditional_pair_recall": 0.0555555556, "unconditional_accuracy": 0.0185185185, "routed_pair_recall": 0.0740740741, "routed_accuracy": 0.0555555556, "routed_carry": 0.7592592593, "local_residual_reduction": 0.1472168210},
+    "alternate": {"no_carry_pair_recall": 0.4814814815, "no_carry_accuracy": 0.0, "unconditional_pair_recall": 0.3148148148, "unconditional_accuracy": 0.0, "routed_pair_recall": 0.4814814815, "routed_accuracy": 0.0, "routed_carry": 0.8333333333, "local_residual_reduction": 0.1207619599},
+    "nested": {"no_carry_pair_recall": 0.0370370370, "no_carry_accuracy": 0.0370370370, "unconditional_pair_recall": 0.0555555556, "unconditional_accuracy": 0.0555555556, "routed_pair_recall": 0.0370370370, "routed_accuracy": 0.0370370370, "routed_carry": 0.7777777778, "local_residual_reduction": 0.1184953704},
+    "omitted": {"no_carry_pair_recall": 0.0925925926, "no_carry_accuracy": 0.0185185185, "unconditional_pair_recall": 0.1851851852, "unconditional_accuracy": 0.0, "routed_pair_recall": 0.0925925926, "routed_accuracy": 0.0185185185, "routed_carry": 0.9259259259, "continuation_recall": 0.5, "wrong_carry": 0.4259259259, "local_residual_reduction": 0.1172800926},
+    "switch": {"no_carry_pair_recall": 0.1111111111, "no_carry_accuracy": 0.0370370370, "unconditional_pair_recall": 0.2962962963, "unconditional_accuracy": 0.0185185185, "routed_pair_recall": 0.1111111111, "routed_accuracy": 0.0370370370, "routed_carry": 0.9074074074, "continuation_recall": 0.6666666667, "wrong_carry": 0.2407407407, "local_residual_reduction": 0.0999074074},
+    "paragraph": {"no_carry_pair_recall": 0.0370370370, "no_carry_accuracy": 0.0370370370, "unconditional_pair_recall": 0.0370370370, "unconditional_accuracy": 0.0185185185, "routed_pair_recall": 0.0370370370, "routed_accuracy": 0.0370370370, "routed_carry": 0.4814814815, "local_residual_reduction": 0.0687464635},
+    "plan": {"no_carry_pair_recall": 0.0740740741, "no_carry_accuracy": 0.0740740741, "unconditional_pair_recall": 0.0185185185, "unconditional_accuracy": 0.0185185185, "routed_pair_recall": 0.0740740741, "routed_accuracy": 0.0740740741, "routed_carry": 0.9259259259, "wrong_carry": 0.9259259259, "local_residual_reduction": 0.1681712963}
+  },
+  "model_bytes": 10050.3333333333,
+  "training_seconds": 0.0939509580,
+  "inference_ms_seen": 4.5227147222,
+  "inference_ms_omitted": 4.4664277037,
+  "commit_prototypes": 39.6666666667,
+  "route_prototypes": 32,
+  "peak_rss_kib_runtime_included": 111532,
+  "estimated_complexity": "character prediction O(NL), interval proposal O(L), route matching O(KRW), sparse pairing O(KoKv)",
+  "hidden_labels_used_by_learner": false,
+  "current_turn_after_future_used_for_selection": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
