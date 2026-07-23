@@ -1,0 +1,42 @@
+{
+  "cycle": 38,
+  "hypothesis": "Disagreement-Seeking Production Birth from Active Counterexample Partitioning",
+  "seeds": [1, 7, 19],
+  "conditions": {
+    "seen": {"accuracy": 0.0, "wrong_commit": 0.9444444444, "null_rate": 0.0555555556, "pair_recall": 0.2888888889, "mean_candidates": 3.5333333333},
+    "order": {"accuracy": 0.0, "wrong_commit": 0.9444444444, "null_rate": 0.0555555556, "pair_recall": 0.0, "mean_candidates": 3.5333333333},
+    "lexeme": {"accuracy": 0.0, "wrong_commit": 0.9444444444, "null_rate": 0.0555555556, "pair_recall": 0.0, "mean_candidates": 3.5333333333},
+    "rename": {"accuracy": 0.0, "wrong_commit": 0.7888888889, "null_rate": 0.2111111111, "pair_recall": 0.1111111111, "mean_candidates": 3.6},
+    "alternate": {"accuracy": 0.0, "wrong_commit": 0.3333333333, "null_rate": 0.6666666667, "pair_recall": 0.0888888889, "mean_candidates": 1.1222222222},
+    "nested": {"accuracy": 0.0, "wrong_commit": 0.9444444444, "null_rate": 0.0555555556, "pair_recall": 0.0, "mean_candidates": 3.5333333333},
+    "omitted": {"accuracy": 0.0, "wrong_commit": 1.0, "null_rate": 0.0, "pair_recall": 0.0, "mean_candidates": 2.5777777778},
+    "paragraph": {"accuracy": 0.0, "wrong_commit": 0.9444444444, "null_rate": 0.0555555556, "pair_recall": 0.0, "mean_candidates": 3.5333333333}
+  },
+  "ablation": {
+    "factorized_seen_accuracy": 0.0,
+    "active_seen_accuracy": 0.0,
+    "birth_seen_accuracy": 0.0,
+    "mdl_seen_accuracy": 0.0,
+    "shuffle_seen_accuracy": 0.0,
+    "correct_disagreements": 1.6666666667,
+    "shuffled_disagreements": 0.3333333333,
+    "active_queries": 53.0,
+    "born_productions": 0.0
+  },
+  "resources": {
+    "symbols": 18.3333333333,
+    "description_bits": 4770.6666666667,
+    "literal_bits": 177077.3333333333,
+    "model_bytes": 1715.0,
+    "training_seconds": 0.248273613,
+    "inference_ms_seen": 0.0337059667,
+    "peak_rss_kib_runtime_included": 112008
+  },
+  "estimated_complexity": "induction O(NL), pair query synthesis O(QP^2UL), mutation birth O(DR), inference O(PL)",
+  "final_test_outcome_used_for_selection": false,
+  "fixed_ontology_or_handwritten_slots_used_by_model": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
