@@ -1,0 +1,36 @@
+{
+  "cycle": 34,
+  "hypothesis": "Multi-Value Temporal Transition Fibers with Cross-Turn Reactivation",
+  "seeds": [1, 7, 19],
+  "methods": ["raw", "single", "multi", "shuffle"],
+  "splits": ["seen", "order", "lexeme", "rename", "nested", "omitted", "switchmix", "paragraph", "plan", "counterfactual"],
+  "summary": {
+    "all_splits": {
+      "raw_accuracy": 0.0,
+      "single_accuracy": 0.0,
+      "multi_accuracy": 0.0,
+      "shuffle_accuracy": 0.0,
+      "multi_null_rate": 1.0,
+      "pair_recall": 0.0
+    },
+    "seen": {
+      "raw_kernels": 6.0,
+      "single_value_fibers": 0.0,
+      "multi_value_temporal_fibers": 0.0,
+      "reactivation_edges": 0.0,
+      "multi_model_bytes": 134.0,
+      "multi_training_seconds": 0.000057,
+      "multi_inference_ms": 0.0008
+    },
+    "paragraph": {"multi_inference_ms": 0.0008}
+  },
+  "peak_rss_kib_runtime_included": 111112,
+  "complexity": "induction O(NL), multi-value probe O(QFVL), inference O(FOV)",
+  "final_test_outcome_used_for_ranking": false,
+  "fixed_ontology_or_handwritten_slots_used": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false,
+  "note": "Full per-seed measurements are reproducible by the accompanying script; this checked-in summary records the aggregate values used by the report."
+}
