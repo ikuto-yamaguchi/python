@@ -1,0 +1,25 @@
+{
+  "hypothesis": "Responsibility-Weighted Prospective Commitments by Counterfactual Prediction Removal",
+  "seeds": [1, 7, 19],
+  "train_size": 72,
+  "splits": {
+    "seen": {"no_carry":{"pair_recall":0.21296296296296297,"accuracy":0.19444444444444445},"unconditional":{"pair_recall":0.037037037037037035,"accuracy":0.018518518518518517},"responsibility":{"pair_recall":0.21296296296296297,"accuracy":0.19444444444444445,"wrong":0.8055555555555556,"carry":0.018518518518518517,"continuation_recall":0.0,"mean_removal_responsibility":-0.08171516990672718,"inference_ms":1.4135095000003477},"responsibility_null":{"accuracy":0.0,"wrong":0.0,"null":1.0}},
+    "held": {"no_carry":{"pair_recall":0.3148148148148148,"accuracy":0.2685185185185185},"unconditional":{"pair_recall":0.12037037037037036,"accuracy":0.06481481481481481},"responsibility":{"pair_recall":0.3148148148148148,"accuracy":0.2685185185185185,"wrong":0.7314814814814815,"carry":0.018518518518518517,"continuation_recall":0.0,"mean_removal_responsibility":-0.08144933440398924,"inference_ms":1.4266151296253695},"responsibility_null":{"accuracy":0.0,"wrong":0.0,"null":1.0}},
+    "rename": {"no_carry":{"pair_recall":0.1574074074074074,"accuracy":0.12962962962962962},"unconditional":{"pair_recall":0.05555555555555555,"accuracy":0.037037037037037035},"responsibility":{"pair_recall":0.1574074074074074,"accuracy":0.12962962962962962,"wrong":0.8703703703703703,"carry":0.21296296296296297,"continuation_recall":0.0,"mean_removal_responsibility":-0.04760995575399615,"inference_ms":1.5829417037046503},"responsibility_null":{"accuracy":0.0,"wrong":0.0,"null":1.0}},
+    "alternate": {"no_carry":{"pair_recall":0.37037037037037035,"accuracy":0.0},"unconditional":{"pair_recall":0.1388888888888889,"accuracy":0.0},"responsibility":{"pair_recall":0.37037037037037035,"accuracy":0.0,"wrong":1.0,"carry":0.009259259259259259,"continuation_recall":0.0,"mean_removal_responsibility":-0.09433277673719925,"inference_ms":1.3109364351833022},"responsibility_null":{"accuracy":0.0,"wrong":0.0,"null":1.0}},
+    "nested": {"no_carry":{"pair_recall":0.037037037037037035,"accuracy":0.037037037037037035},"unconditional":{"pair_recall":0.018518518518518517,"accuracy":0.009259259259259259},"responsibility":{"pair_recall":0.037037037037037035,"accuracy":0.037037037037037035,"wrong":0.9629629629629629,"carry":0.037037037037037035,"continuation_recall":0.0,"mean_removal_responsibility":-0.06585526054510525,"inference_ms":1.440422740739888},"responsibility_null":{"accuracy":0.0,"wrong":0.0,"null":1.0}},
+    "omitted": {"no_carry":{"pair_recall":0.28703703703703703,"accuracy":0.09259259259259259},"unconditional":{"pair_recall":0.2962962962962963,"accuracy":0.0},"responsibility":{"pair_recall":0.28703703703703703,"accuracy":0.09259259259259259,"wrong":0.9074074074074073,"carry":0.0,"continuation_recall":0.0,"mean_removal_responsibility":-0.08679743740826315,"inference_ms":1.3868352962963062},"responsibility_null":{"accuracy":0.0,"wrong":0.0,"null":1.0}},
+    "switch": {"no_carry":{"pair_recall":0.3055555555555556,"accuracy":0.05555555555555555},"unconditional":{"pair_recall":0.4074074074074074,"accuracy":0.009259259259259259},"responsibility":{"pair_recall":0.3055555555555556,"accuracy":0.05555555555555555,"wrong":0.9444444444444444,"carry":0.0,"continuation_recall":0.0,"mean_removal_responsibility":-0.08727853235375552,"inference_ms":1.3716393425848192},"responsibility_null":{"accuracy":0.0,"wrong":0.0,"null":1.0}},
+    "paragraph": {"no_carry":{"pair_recall":0.009259259259259259,"accuracy":0.009259259259259259},"unconditional":{"pair_recall":0.0,"accuracy":0.0},"responsibility":{"pair_recall":0.009259259259259259,"accuracy":0.009259259259259259,"wrong":0.9907407407407407,"carry":0.18518518518518517,"continuation_recall":0.0,"mean_removal_responsibility":-0.04997802724679138,"inference_ms":1.631333398146732},"responsibility_null":{"accuracy":0.0,"wrong":0.0,"null":1.0}},
+    "plan": {"no_carry":{"pair_recall":0.018518518518518517,"accuracy":0.018518518518518517},"unconditional":{"pair_recall":0.0,"accuracy":0.0},"responsibility":{"pair_recall":0.018518518518518517,"accuracy":0.018518518518518517,"wrong":0.9814814814814815,"carry":0.05555555555555555,"continuation_recall":0.0,"mean_removal_responsibility":-0.055683977184066064,"inference_ms":1.6254377962965278},"responsibility_null":{"accuracy":0.0,"wrong":0.0,"null":1.0}}
+  },
+  "model_bytes": 9629,
+  "commit_prototypes": 48.333333333333336,
+  "training_seconds": 0.03562063433325117,
+  "peak_rss_kib_runtime_included": 160164,
+  "estimated_complexity": "character prediction O(NL), interval proposal O(L), responsibility removal O(KL), sparse pairing O(KoKv)",
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
