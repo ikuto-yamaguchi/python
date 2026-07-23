@@ -1,0 +1,26 @@
+{
+  "cycle": 39,
+  "hypothesis": "Event-Centered Causal Units from Multi-World Intervention-Closure Co-Segmentation",
+  "seeds": [1, 7, 19],
+  "event_family_count": 0,
+  "model_bytes": 5,
+  "training_seconds": 0.3803882420000093,
+  "peak_rss_kib_runtime_included": 125300,
+  "summary": {
+    "seen": {"accuracy": 0, "wrong": 0, "null": 1, "candidates": 0, "exact_event_recall": 0, "inference_ms": 9.882645888888517},
+    "word_order": {"accuracy": 0, "wrong": 0, "null": 1, "candidates": 0, "exact_event_recall": 0, "inference_ms": 11.691098180555631},
+    "lexeme": {"accuracy": 0, "wrong": 0, "null": 1, "candidates": 0, "exact_event_recall": 0, "inference_ms": 7.532165736111078},
+    "rename": {"accuracy": 0, "wrong": 0, "null": 1, "candidates": 0, "exact_event_recall": 0, "inference_ms": 11.210565305554828},
+    "alternate": {"accuracy": 0, "wrong": 0, "null": 1, "candidates": 0, "exact_event_recall": 0, "inference_ms": 4.487639708333152},
+    "nested": {"accuracy": 0, "wrong": 0, "null": 1, "candidates": 0, "exact_event_recall": 0, "inference_ms": 20.631139027777973},
+    "omitted": {"accuracy": 0, "wrong": 0, "null": 1, "candidates": 0, "exact_event_recall": 0, "inference_ms": 7.352750250000718},
+    "paragraph": {"accuracy": 0, "wrong": 0, "null": 1, "candidates": 0, "exact_event_recall": 0, "inference_ms": 21.547895305555503},
+    "plan": {"accuracy": 0, "wrong": 0, "null": 1, "candidates": 0, "exact_event_recall": 0, "inference_ms": 18.82125475000033},
+    "counterfactual": {"accuracy": 0, "wrong": 0, "null": 1, "candidates": 0, "exact_event_recall": 0, "inference_ms": 21.095146833333207}
+  },
+  "estimated_complexity": "O(N L^4) candidate audit, capped at 96/episode; inference O(F L^4)",
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
