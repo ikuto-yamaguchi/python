@@ -1,0 +1,27 @@
+{
+  "hypothesis": "Open-Transport Context Relations from Partial Derivation Homomorphisms",
+  "seeds": [1, 7, 19],
+  "train_sizes": [48, 144, 288],
+  "test_examples_per_split_per_seed": 48,
+  "summary_288": {
+    "seen": {
+      "executable": {"accuracy": 0.6111111111111112, "wrong_commit": 0.10416666666666666, "candidate_execution_recall": 0.6666666666666666, "model_bytes": 24901.666666666668, "training_seconds": 0.010614930333332495, "inference_ms": 0.025086340277782584, "programs": 32, "relations": 0, "description_bits": 9128},
+      "strict": {"accuracy": 0.6111111111111112, "wrong_commit": 0.10416666666666666, "candidate_execution_recall": 0.6666666666666666, "model_bytes": 24897.666666666668, "training_seconds": 0.01098855733333437, "inference_ms": 0.020859166666683155, "programs": 32, "relations": 0, "description_bits": 9128},
+      "partial": {"accuracy": 0.6111111111111112, "wrong_commit": 0.10416666666666666, "candidate_execution_recall": 0.6666666666666666, "model_bytes": 24898.666666666668, "training_seconds": 0.24376912466666786, "inference_ms": 0.021877618055536157, "programs": 32, "relations": 0, "description_bits": 9128}
+    },
+    "held_order": {"executable_accuracy": 0.0, "strict_accuracy": 0.0, "partial_accuracy": 0.0, "partial_relations": 0},
+    "held_lexeme": {"executable_accuracy": 0.0, "strict_accuracy": 0.0, "partial_accuracy": 0.0, "partial_relations": 0},
+    "rename": {"executable_accuracy": 0.0, "strict_accuracy": 0.0, "partial_accuracy": 0.0, "partial_relations": 0},
+    "nested": {"executable_accuracy": 0.6111111111111112, "strict_accuracy": 0.6111111111111112, "partial_accuracy": 0.6111111111111112, "partial_relations": 0},
+    "omitted": {"executable_accuracy": 0.0, "strict_accuracy": 0.0, "partial_accuracy": 0.0, "partial_relations": 0},
+    "alternate": {"executable_accuracy": 0.0, "strict_accuracy": 0.0, "partial_accuracy": 0.0, "partial_relations": 0},
+    "freeform": {"executable_accuracy": 0.6111111111111112, "strict_accuracy": 0.6111111111111112, "partial_accuracy": 0.6111111111111112, "partial_relations": 0}
+  },
+  "peak_rss_kib_runtime_included": 160148,
+  "estimated_complexity": "proposal O(NC^2), behavior O(PN), relation O(P^2N), inference O((P+R)L)",
+  "hidden_labels_used_by_learner": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
