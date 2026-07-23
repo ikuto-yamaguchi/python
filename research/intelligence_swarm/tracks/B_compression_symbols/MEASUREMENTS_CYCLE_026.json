@@ -1,0 +1,70 @@
+{
+  "hypothesis": "Executable Binding Graphs from Role-Exchange Consequence Factorization",
+  "seeds": [1, 7, 19],
+  "train_sizes": [48, 144, 288],
+  "reported_train_size": 288,
+  "test_per_split_per_seed": 24,
+  "summary_288": {
+    "seen": {
+      "exact": {"accuracy": 0.0, "pair_recall": 0.0, "commit_rate": 0.0, "inference_ms": 0.0246},
+      "graph": {"accuracy": 0.0, "pair_recall": 0.0138888889, "commit_rate": 0.0, "mean_candidates": 5.9861, "inference_ms": 4.6202},
+      "mdl": {"accuracy": 0.0, "pair_recall": 0.0138888889, "commit_rate": 0.0, "mean_candidates": 5.9861, "inference_ms": 4.5878}
+    },
+    "order": {
+      "exact": {"accuracy": 0.0, "pair_recall": 0.0},
+      "graph": {"accuracy": 0.0, "pair_recall": 0.0, "mean_candidates": 5.9861, "inference_ms": 6.1009},
+      "mdl": {"accuracy": 0.0, "pair_recall": 0.0, "mean_candidates": 5.9861, "inference_ms": 6.4513}
+    },
+    "lexeme": {
+      "exact": {"accuracy": 0.0, "pair_recall": 0.0},
+      "graph": {"accuracy": 0.0, "pair_recall": 0.0138888889, "mean_candidates": 5.9861, "inference_ms": 4.7280},
+      "mdl": {"accuracy": 0.0, "pair_recall": 0.0138888889, "mean_candidates": 5.9861, "inference_ms": 3.9770}
+    },
+    "rename": {
+      "exact": {"accuracy": 0.0, "pair_recall": 0.0},
+      "graph": {"accuracy": 0.0, "pair_recall": 0.0, "mean_candidates": 5.7222, "inference_ms": 5.1509},
+      "mdl": {"accuracy": 0.0, "pair_recall": 0.0, "mean_candidates": 5.7222, "inference_ms": 5.0846}
+    },
+    "alternate": {
+      "exact": {"accuracy": 0.0, "pair_recall": 0.0},
+      "graph": {"accuracy": 0.0, "pair_recall": 0.0, "mean_candidates": 0.0, "inference_ms": 4.4693},
+      "mdl": {"accuracy": 0.0, "pair_recall": 0.0, "mean_candidates": 0.0, "inference_ms": 4.6364}
+    },
+    "nested": {
+      "exact": {"accuracy": 0.0, "pair_recall": 0.0},
+      "graph": {"accuracy": 0.0, "pair_recall": 0.0, "mean_candidates": 5.9861, "inference_ms": 8.1392},
+      "mdl": {"accuracy": 0.0, "pair_recall": 0.0, "mean_candidates": 5.9861, "inference_ms": 8.2992}
+    },
+    "omitted": {
+      "exact": {"accuracy": 0.0, "pair_recall": 0.0},
+      "graph": {"accuracy": 0.0, "pair_recall": 0.0, "mean_candidates": 1.1667, "inference_ms": 3.3625},
+      "mdl": {"accuracy": 0.0, "pair_recall": 0.0, "mean_candidates": 1.1667, "inference_ms": 3.3346}
+    },
+    "paragraph": {
+      "exact": {"accuracy": 0.0, "pair_recall": 0.0},
+      "graph": {"accuracy": 0.0, "pair_recall": 0.0, "mean_candidates": 5.9861, "inference_ms": 17.4639},
+      "mdl": {"accuracy": 0.0, "pair_recall": 0.0, "mean_candidates": 5.9861, "inference_ms": 17.1808}
+    }
+  },
+  "graph_structure": {
+    "object_nodes": 6,
+    "value_nodes": 5,
+    "state_endpoints": 32,
+    "binding_triangles": 64,
+    "raw_candidates_mean": 3124.3333333333,
+    "forward_inverse_audits_mean": 1855
+  },
+  "resource": {
+    "graph_model_bytes": 14701,
+    "training_seconds": 0.0813521473,
+    "peak_rss_kib_runtime_included": 112140,
+    "literal_description_bits": 283045.3333333333,
+    "mdl_description_bits": 26112
+  },
+  "estimated_complexity": "proposal O(NL^2), observed-triple audit O(NK_oK_v), inference O(TL^2), K_o,K_v<=4,T<=64",
+  "hidden_labels_used_by_learner": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
