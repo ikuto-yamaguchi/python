@@ -1,0 +1,30 @@
+{
+  "cycle": 40,
+  "hypothesis": "Relation-Bearing Event Birth from Cross-Object State-Difference Tensor Factorization",
+  "seeds": [1, 7, 19],
+  "summary": {
+    "seen": {
+      "literal": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "components": 6.3333333333, "model_bytes": 355.6666666667, "training_seconds": 0.0005681857, "inference_ms": 1.6384696667},
+      "rank1": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "components": 40.3333333333, "model_bytes": 1902.6666666667, "training_seconds": 0.0005561610, "inference_ms": 1.6227265833},
+      "tensor": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "components": 6.0, "model_bytes": 352.0, "training_seconds": 0.0005527523, "inference_ms": 1.6266156944},
+      "tensor_shuffle": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "components": 0.0, "model_bytes": 83.0, "training_seconds": 0.0005353737, "inference_ms": 1.6164834722}
+    },
+    "all_conditions": {
+      "conditions": ["seen", "order", "lexeme", "rename", "nested", "omitted", "paragraph", "plan", "counterfactual"],
+      "literal_accuracy": 0.0,
+      "rank1_accuracy": 0.0,
+      "tensor_accuracy": 0.0,
+      "tensor_shuffle_accuracy": 0.0,
+      "tensor_null_rate": 1.0,
+      "exact_event_boundary_recall": 0.0
+    }
+  },
+  "peak_rss_kib_runtime_included": 111312,
+  "estimated_complexity": "induction O(NL), marginal tensor factorization O(F), inference O(L^3) with 128-candidate cap",
+  "final_after_future_used_for_ranking": false,
+  "fixed_ontology_or_slots": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
