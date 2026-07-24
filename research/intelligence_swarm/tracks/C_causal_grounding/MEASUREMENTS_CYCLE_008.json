@@ -1,0 +1,26 @@
+{
+  "cycle": 8,
+  "hypothesis": "Structure-Expanding Residual Birth from Cross-Episode Counterfactual Repair",
+  "seeds": [1, 7, 19],
+  "summary": {
+    "base": {"births": 0.0, "d3_held": {"joint": 0.0260416667, "inverse": 0.2291666667, "repair": 0.21875}, "d3_word_order": {"joint": 0.0520833333, "inverse": 0.25, "repair": 0.3125}, "d3_paragraph": {"joint": 0.0104166667, "inverse": 0.28125, "repair": 0.21875}, "d3_free": {"joint": 0.0364583333, "inverse": 0.25, "repair": 0.21875}, "d3_rename": {"joint": 0.0729166667, "inverse": 0.25, "repair": 0.28125}},
+    "weight": {"births": 29.0, "d3_held": {"joint": 0.0260416667, "inverse": 0.2291666667, "repair": 0.1354166667}, "d3_word_order": {"joint": 0.0260416667, "inverse": 0.3125, "repair": 0.2083333333}, "d3_paragraph": {"joint": 0.0364583333, "inverse": 0.296875, "repair": 0.2604166667}, "d3_free": {"joint": 0.0364583333, "inverse": 0.2604166667, "repair": 0.2447916667}, "d3_rename": {"joint": 0.0572916667, "inverse": 0.2447916667, "repair": 0.2291666667}},
+    "expand": {"births": 15.3333333333, "d3_held": {"joint": 0.0364583333, "inverse": 0.2447916667, "repair": 0.2291666667}, "d3_word_order": {"joint": 0.0520833333, "inverse": 0.2552083333, "repair": 0.25}, "d3_paragraph": {"joint": 0.0416666667, "inverse": 0.3125, "repair": 0.2864583333}, "d3_free": {"joint": 0.0416666667, "inverse": 0.2083333333, "repair": 0.28125}, "d3_rename": {"joint": 0.015625, "inverse": 0.2239583333, "repair": 0.1458333333}},
+    "shuffle": {"births": 18.6666666667, "d3_held": {"joint": 0.0364583333, "inverse": 0.2708333333, "repair": 0.2916666667}, "d3_word_order": {"joint": 0.03125, "inverse": 0.2864583333, "repair": 0.203125}, "d3_paragraph": {"joint": 0.0572916667, "inverse": 0.28125, "repair": 0.2447916667}, "d3_free": {"joint": 0.0520833333, "inverse": 0.2291666667, "repair": 0.2864583333}, "d3_rename": {"joint": 0.0260416667, "inverse": 0.25, "repair": 0.25}}
+  },
+  "strict_gate_by_seed": [false, false, false],
+  "model_bytes_mean": 91114.5,
+  "runtime_seconds": 11.634300162,
+  "peak_rss_kib": 112336,
+  "candidate_count": 32,
+  "interaction_dim": 128,
+  "estimated_ops_update_per_episode": 14336,
+  "estimated_ops_inference_per_query": 14336,
+  "answer_leakage": false,
+  "post_treatment_test_input": false,
+  "fixed_ontology": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
