@@ -30,11 +30,21 @@ python -m pip install --extra-index-url https://download.pytorch.org/whl/cpu \
   'torch==1.13.1+cpu' 'torchvision==0.14.1+cpu'
 python -m pip install \
   'gym==0.21.0' 'py-getch==1.0.1' 'pyyaml==6.0.1' \
-  'submitit==1.4.5' 'expman==0.0.5' \
+  'submitit==1.4.5' 'expman==0.0.7' \
   'vocab>=0.0.4' 'embeddings>=0.0.7' 'revtok>=0.0.3' \
   'transformers==4.30.2'
 python -m pip install --no-deps -e "$ROOT/RTFM"
 python -m pip install --no-deps -e "$ROOT/silg"
+
+# Fail during installation, rather than after all public assets have been
+# prepared, when the experiment-manager API does not match pinned SILG.
+python - <<'PY'
+import importlib.metadata
+from expman import Experiment, JSONLogger
+from expman.job import SlurmJob
+print('expman', importlib.metadata.version('expman'))
+print('expman_api', Experiment.__name__, JSONLogger.__name__, SlurmJob.__name__)
+PY
 
 # SILG's base environment imports a local BERT tokenizer unconditionally, but
 # transformers and these assets are omitted from requirements.txt.
