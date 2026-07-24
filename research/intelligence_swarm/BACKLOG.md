@@ -1,36 +1,37 @@
 # Intelligence Swarm Backlog
 
-## P0 — Episode-Local Nuisance Orbit / Raw Structural Core Reconvergence
+## P0 — State-Crossing Causal Program / Scope–Arity Birth
 
-- A: 対象文字集合・操作文字集合を与えず、raw全文の境界、余剰語、主語省略、複数段落、語順変動をepisode-local候補として保持する。
-- A: 表層形が異なっても、重複しない第二witness集合で同じ対象・変数・関係の構造核へ再収束することを要求する。
-- B: operation familyとarity候補multisetをoracleで与えず、zero/unary/binary以上の引数構造、goal、argument linkを外部結果から保守的にbirthする。
-- B: 全episode共通の単一parseへ強制せず、counterfactual coverageを失わない局所syntax orbitを維持する。
-- C: segmentation、factorization、arity、argument link、causal mappingの構造核と、episode-local surface nuisanceを分離した共同version spaceを監査する。
+- A: class cardinalityを与えず、raw全文から対象、状態変数、操作、関係、nuisanceのrole inventoryをepisode-local syntax下で生成する。
+- A: before-state交換、対象交換、値交換後にも同じ対象・変数identityが維持される最小反例を作る。
+- B: 単一token outcome entropyによるoperation inventory birthを本線から外し、非連続表現集合と複数初期状態上の応答関数からoperation familyを生成する。
+- B: goal条件、scope、zero/unary/binary以上のarity、argument linkを固定せず、set/toggle、noop/set-zero、relation作用を分離する。
+- C: state crossing、non-target保存、target交換、argument-order交換、介入順序交換を同一候補空間で監査する。
 - C: prospective、inverse、object permanence、causal direction、goal change、counterfactual composition/repairを接地未使用queryで測る。
-- D: 二つの独立witness集合が同じraw-learned構造核へ収束し、矛盾取得を既存identityへ上書きせず隔離できる場合だけ資格候補にする。
-- E: global-template leakage、character-class oracle、operation-family oracle、arity-multiset oracle、calibration-after、domain bridge、best-seed選択を監査する。
+- D: 重複しない二つのwitness集合が同じraw-learned scope・arity・programへ独立再収束し、矛盾取得を既存identityへ上書きせず隔離できる場合だけ資格候補にする。
+- E: class cardinality、program family、binary state interface、scope、arity、calibration-after、domain bridge、best-seed漏洩を監査する。
 
-## P0 — Common G1/G2 benchmark v8
+## P0 — Common G1/G2 benchmark v9
 
 - `budget=0`は置換対称性・理論chance上限の監査として別報告し、能力進歩gateに使わない。
-- calibration witness budgetを段階的に測り、Active / Random / Global-template control / Outcome shuffle / Oracle structural supportを比較する。
 - initial candidate generation、witness selection、calibration outcome、independent second witness set、conflict audit、final held-out evaluationを分離する。
-- 固定ontology、対応辞書、shared token、shared ID、oracle token境界、oracle character class、oracle factorization、oracle operation family、oracle arity multisetを正式条件では禁止する。
-- surface語順・余剰語・省略・段落構造は、外部結果が共通構造を要求するまでepisode-local nuisance orbitとして保持する。
-- 接地に使っていないtoken、Rename、未知語順、主語省略、複数段落、自由日本語、未観測因子組合せを評価する。
-- Correct、Random witness、global-template control、boundary shuffle、factor shuffle、arity shuffle、argument-link shuffle、outcome shuffle、witness-set shuffleを同一seedで比較する。
-- 3 seedすべてでCorrectが全対照を0.10以上上回り、独立witness集合で同じ構造核へ再収束することを暫定昇格条件とする。
-- ActiveとRandomの最終能力が同率の場合、witness効率差だけを能力進歩へ数えない。
+- 同じoperation表現を異なるbefore-stateで介入するstate-crossing witnessを必須化する。
+- `set-one vs toggle`、`noop vs set-zero`、単一target作用 vs 二対象関係作用、non-target破壊、argument-order交換を必須反例とする。
+- Active / Random / State-static / Global-template / Boundary shuffle / Factor shuffle / Family shuffle / Arity shuffle / Argument-link shuffle / Outcome shuffleを同一seedで比較する。
+- 固定ontology、対応辞書、shared token/ID、oracle token境界、oracle character class、固定role cardinality、oracle operation family、oracle state interface、oracle scope、oracle arity multisetを正式条件では禁止する。
+- surface語順、余剰語、省略、段落構造はepisode-local nuisance orbitとして保持する。
+- 接地未使用token、Rename、未知語順、主語省略、複数段落、自由日本語、未観測state×target×operation/relation組合せを評価する。
+- 3 seedすべて・2以上のopaque domainでCorrectが全対照を0.10以上上回り、独立witness集合で同じ構造核へ再収束することを暫定昇格条件とする。
+- ActiveとRandomの最終能力が同率の場合、witness効率や候補削減だけを能力進歩へ数えない。
 
 ## P1 — Evidence and benchmark repair
 
-- PR387の部分同定を `raw_boundary_orbit_upper_bound` として登録し、Active-Random差が0.10未満であることを維持する。
-- PR388の失敗をselector failureだけでなく `global_surface_template_support_failure` として再分類する。
-- PR389〜390の高精度へ `oracle_character_classes/operation_family/arity_multiset_upper_bound` を明記し、G1/G2進歩へ数えない。
-- HF-013を主台帳へ登録し、prefix/suffix/interleave/reverse等の名前変更によるglobal-template再試行を拒否する。
+- PR392を `raw_character_role_upper_bound_with_fixed_cardinality_and_family` として登録する。
+- PR393を `single_token_outcome_entropy_inventory_failure` として登録し、formal operation proposal 0を維持する。
+- PR394〜395を `state_crossing_unary_program_identifiability_upper_bound` として登録し、binary interface/unary scope/program family oracleを明記する。
+- state-static witness件数を独立情報量とみなさず、状態空間coverageを別指標として記録する。
+- AF-012を台帳へ追加し、AF-011との包含関係を明記する。
 - track-local evidenceを主台帳へ安全に追記し、既存証拠を削除しない。
-- Legacy trackは反証archiveとして保持する。
 
 ## Frozen mainline work
 
@@ -47,13 +48,13 @@ G1成立まで次を本線として再開しない。
 - generic disagreement、固定結果codebook、consensus/transpose/lesionによる後段意味化
 - 外部識別前の低rank軸、surprise、失敗形状類似度によるidentity確定
 - 正しいcandidate supportなしのselector、version-space collapse、oracle action改善
-- bridge 0の完全未知語彙zero-shot失敗に対し、候補型・head・selectorを追加して意味能力を主張する方式
-- 全episodeへ単一の固定segmentation/order/templateを強制し、その候補消去をsemantic structure discoveryとみなす方式
+- bridge 0の完全未知語彙zero-shot失敗に対し候補型・head・selectorを追加する方式
+- 全episodeへ単一の固定segmentation/order/templateを強制する方式
 
 ## Cycle completion rules
 
 - 実装は必須ではない。メタ分析、評価再設計、仮説族凍結、stage変更も完結サイクルとする。
 - 採用、継続、凍結、段階遷移のいずれかを必ず明示する。
-- 進歩は最小witness後のheld-out外部能力、domain/seed/unit consensus、独立再同定で判定する。
+- 進歩は最小非oracle witness後のheld-out外部能力、domain/seed/unit consensus、独立再同定で判定する。
 - version-space縮約、oracle条件の高精度、witness数削減、候補数削減、surface orbit数はsemantic progressと混同しない。
 - 複数seed、反証条件、資源量、answer leakage、calibration-after leakage、domain bridge leakage、oracle-structure leakage、global-template leakageを監査する。

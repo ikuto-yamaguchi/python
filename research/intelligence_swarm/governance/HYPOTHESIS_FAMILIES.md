@@ -138,7 +138,7 @@ Root premise: 意味単位はbridge 0で推測するのではなく、raw Japane
 Current interpretation: global surface formはHF-013として凍結し、surface nuisanceを局所orbitとして保持した構造核同定へ具体化する。
 
 ## AF-011 — Episode-Local Nuisance Orbit with Independently Reconvergent Structural Core
-Status: **ACTIVE PRIORITY**
+Status: **ACTIVE, OVERARCHING STRUCTURAL PRINCIPLE**
 Root premise: 語順、余剰語、省略、段落構造、局所segmentation候補はepisodeごとに変動し得るnuisance orbitとして保持し、意味identityはそれらを越えて独立witness集合が再同定する最小のsegmentation/factorization/arity/argument-link/causal-mapping構造核として誕生する。
 Required evidence:
 1. 固定ontology、辞書、shared token/ID、oracle token境界、oracle character class、oracle operation family、oracle arity multisetを正式条件で使わない。
@@ -149,3 +149,19 @@ Required evidence:
 6. ActiveがRandomおよび全shuffleを各0.10以上上回り、2以上のopaque domain × 3 seedすべてで成立する。
 7. calibration outcomeはwitness更新にのみ使用し、final outcomeを候補生成・選択・rankingへ使わない。
 G1/G2 promotion condition: 同じraw-learned構造核が上記を満たし、独立再収束、conflict quarantine、oracle/global-template/domain bridge/best-seed leakage監査を通過すること。
+
+## AF-012 — State-Crossing Scope–Arity Program Birth under Nonparametric Role Inventory
+Status: **ACTIVE PRIORITY**
+Root premise: operation identityは単一episodeの局所差分やtoken単位outcome統計ではなく、複数の初期状態、対象交換、non-target保存、引数順序、介入順序を横断して再現される応答関数として誕生する。role inventory、program family、scope、arityは固定せず、raw Japaneseのepisode-local表層orbitとworld介入を共同制約して生成する。
+Evidence so far:
+1. PR392: character role集合は固定cardinality/family上限でraw alphabetから再収束したが、ActiveとRandomの最終能力は同率。
+2. PR393: 単一token outcome entropyによるnonparametric operation inventory birthはCorrectがRandomを下回り、second-domain能力0、formal operation proposal 0。
+3. PR394: oracle binary-state/unary program空間ではstate-crossing ActiveがRandomを+0.1667上回り、prospective/inverse/repair 1.0。
+4. PR395: 独立state-crossing witness集合が同じprogramへ3/3 seedで再収束し、conflict detection 1.0。ただしformal memory eligibility 0。
+Required evidence:
+1. fixed role cardinality、operation family、state interface、scope、arity multisetを正式条件で使わない。
+2. set-one vs toggle、noop vs set-zero、単一target作用 vs 二対象関係作用、non-target破壊、argument-order交換、intervention-order交換を含む。
+3. State-crossing ActiveをRandom、State-static、Family/Arity/Argument/Outcome shuffleと比較する。
+4. 2以上のopaque domain × 3 seedで、held-out自由日本語と未観測state×factor組合せのprospective/inverse/object permanence/repairが全対照を0.10以上上回る。
+5. 重複しない二つのwitness集合が同じraw-learned role inventory、scope、arity、programへ独立再収束し、矛盾取得を隔離する。
+G1/G2 promotion condition: AF-011の構造核条件と本familyのstate-crossing causal-function条件を同じunitが同時に満たすこと。
