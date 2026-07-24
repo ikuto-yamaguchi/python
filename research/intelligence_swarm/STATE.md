@@ -2,56 +2,88 @@
 
 ## Mission
 
-1GB未満・弱いスマートフォンCPUで高速に動作し、生の自由な日本語から手書きslotなしで対象・変数・操作・目的・制約・因果構造を獲得する汎用知能原理を発見・反証する。
+1GB未満・弱いスマートフォンCPUで実行可能な知能モデルを目標とし、生の日本語と環境相互作用から対象・状態・操作・因果構造を獲得する原理を研究する。
 
 ## Current stage
 
-- Stage: **S1 Semantic Identity Birth — transformation-indexed causal equivariance substage**
+- Stage: **R0 Research Reconstruction — prior art, baseline reproduction, benchmark contract**
 - Semantic Identity Gate G1: **未達**
 - Operation/Goal Gate G2: **未達**
 - Formal memory eligibility: **未達**
-- Mainline: **AF-014 Transformation-Indexed Cross-Expression Causal Equivariance**
-- AF-011 episode-local nuisance orbit: **上位構造原理として維持**
-- AF-013 paired intervention basis: **反例・取得設計へ縮小**
-- Memory/consolidation: **G1待ち。保存最適化は凍結継続**
+- 学術的新規性: **未確立**
+- 再現済み外部baseline: **0**
+- 査読可能な中心命題: **未確立**
+- Active mechanism family: **なし**
+- AF-014 transformation-indexed equivariance: **PAUSED**
+- A〜Dの新規toy仮説生成: **停止**
+- Memory/consolidation最適化: **停止継続**
 
-## Integrated external evidence
+## Why the program was reset
 
-1. PR402 / A: 同じ表面commandのpaired difference quotientはprospective 0.1746、Random 0.2202、free 0.3929、Random 0.4881。Rename・未知語順・省略は全方式0。surface-shared pairはidentityを生まない。
-2. PR403 / B: factor別paired lesionからrole候補は平均0.333形成されたが、prospective/inverse/goal/repairは全方式0。paired response差だけではtarget/source/goal/operationを一意化できない。
-3. PR404 / C: 表面非共有pairのsame-delta mutual repairはprospective 0.2500、Random 0.1953だが、Pair shuffle 0.2240。inverse差+0.0078、object permanence差+0.0208、strict 0/3。単一delta一致は因果identityではない。
-4. PR405 / D: 状態条件付き完全応答関数でPaired prospective 0.7721、Random 0.3003まで上がったが、Pair shuffleが全指標でPairedと完全同率。平均10 unitがtensor-equivalenceへ衝突し、same-unique reconvergenceは0、formal memory eligible unit 0。
+過去サイクルは、合成opaque token環境上で候補機構を変更し、Correctとshuffle/randomの差が出ないことを反復確認した。評価漏れや不可能条件の発見はあったが、以下が欠けていた。
 
-## Governance decision
+1. 先行研究に対する新規性監査
+2. 公開benchmark上の既存baseline再現
+3. 同一benchmark・同一splitでの累積改善
+4. 数学的に反証可能な単一中心命題
+5. 一つのcanonical実装への統合
 
-- **HF-015を凍結**: `Paired Difference or Response-Function Equality Defines Semantic/Episode Identity`。
-- 根本前提は、paired intervention差、same-delta、または状態条件付き応答関数の値が一致すれば、異なる表現・対象・操作を同一semantic/causal/episode unitへ束ねられる、というもの。
-- A〜Dの4系列でCorrectとpair-shuffle/randomの能力差または取得時same-unique再同定を生まなかったため、本線から排除する。
-- paired interventionは反例生成・介入軸設計に限って継続し、response equality自体をidentity証拠へ使わない。
+したがって、これまでの成果を新しい知能原理または基礎研究上の発見とは扱わない。
 
-## Maximum upstream bottleneck
+## R0 reproduction gate
 
-**固定role/program/state/scope/arityを列挙せず、raw自由日本語の異なる表現が、target-state交換、target-identity交換、non-target交換、argument-order交換、intervention-order交換、causal-direction反転、goal変更に対して同じ選択的共変・不変則を示す変換-indexed unitへ、各独立取得集合単独で一意再収束し、pair/state-axis/target-link/argument-link/direction/goal shuffleで外部能力が選択的に崩れること。**
+新しい仮説族を開始する前に、次を順番に完了する。
 
-## Active assignments
+1. **SILG reproduction**  
+   MessengerまたはRTFMの公式環境を固定し、pretrained LMなしの共有recurrent baselineを再現する。
+2. **Environment-first baseline**  
+   言語なしstate transitionから環境表現を先に学ぶbaselineと、language/actionを同時学習するbaselineを同じsplitで比較する。
+3. **Intervention-target ablation**  
+   介入対象が既知、部分既知、未知の3条件を同じ軌跡上で比較し、表現同定とinstruction following能力を分離する。
+4. **Japanese realism audit**  
+   J-CRe3を実世界日本語参照接地の外部監査として使用する。J-CRe3は行為因果benchmarkではないため、主性能値と混同しない。
+5. **Resource gate**  
+   推論モデル1GB未満、CPU推論時間、RSS、学習時間を実測する。
 
-- A: surface共通性やresponse equalityを使わず、表現変換とtarget/state交換に対して同じ共変則を持つ対象・変数候補を生成する。
-- B: target/source/goal/argumentの各交換で対応成分だけが変化し、他成分が保存されるoperation transformation signatureをbirthする。
-- C: state/target/non-target/argument/order/direction/goal各軸の選択的共変・不変性を監査し、単なるtensor equalityと区別する。
-- D: 各独立取得集合単独で同じtransformation-indexed unitへsame-unique再収束した場合だけ資格候補化し、pair shuffle不変なunitを拒否する。
-- E: response equality、tensor collision、paired-difference言い換え、oracle intervention axis、best-seed、domain bridge、calibration-after漏洩を監査する。
+R0では再現値が原論文または公開実装の許容範囲へ入るまで、新規原理の成功・失敗を主張しない。
+
+## Candidate research question — not a novelty claim
+
+**RQ-001: Can latent intervention targets and raw-language equivalence classes be jointly identified from interactive trajectories when neither a semantic parser nor intervention-axis labels are supplied?**
+
+既存研究には以下が別々に存在する。
+
+- interventional causal representation learning
+- unknown multi-node intervention identifiability
+- environment-first instruction grounding
+- incremental action-observation grounding
+- multi-domain interactive language grounding
+- Japanese real-world reference grounding
+
+現時点では、これらの交差領域が未解決である可能性があるだけであり、新規性は主張しない。体系的文献監査とbaseline reproduction後に、既存研究が同じ問題を既に解いていない場合のみ正式仮説へ昇格する。
 
 ## Progress rule
 
-2以上のopaque domain × 3 seedすべてで、非oracle最小介入後に、接地未使用token、Rename、未知語順、主語省略、複数段落、自由日本語、未観測state×target×operation/relation組合せのprospective、inverse、object permanence、causal direction、goal change、counterfactual repairがCorrect条件でRandom、State-static、Global-template、Boundary/Factor/Family/Arity/Pair/State-axis/Target-link/Argument-link/Direction/Goal/Outcome shuffleを各+0.10以上上回ること。各独立取得集合が単独で同じtransformation-indexed raw unitへ一意再収束し、response/tensor equalityやintersection rescueだけでは通過させない。
+R0の進歩は以下のみ。
+
+- 公開baselineの再現成功
+- 同一benchmark・同一split・同一seedでの外部能力改善
+- 既存理論との差分が明確な定理、反例、または識別可能性条件
+- 再現可能なデータ・コード・測定ログ
+
+候補数、graph、tensor、圧縮、低rank、version-space縮約、toy環境内の一意化は進歩へ数えない。
+
+## Canonical branch policy
+
+今後の研究は一本のcanonical reconstruction branchから進める。過去のstacked draft PRは反証archiveとして保持し、新しい実験のbaseには使用しない。
 
 ## Current status
 
-- 高校生級: 未達
+- 高校生級知能: 未達
 - ネイティブ日本語コミュニケーション: 未達
 - 弱いスマートフォン実機検証: 未達
 - 完成: false
 
 ## Last integration
 
-2026-07-24: GOV-013。PR402〜405を統合し、HF-015を凍結。S1内をtransformation-indexed causal equivarianceへ遷移し、AF-014を優先。
+2026-07-24: **RESET-001**。旧A〜E toy hypothesis loopを停止し、研究段階をR0 prior-art / reproduction / benchmark constructionへ戻した。
