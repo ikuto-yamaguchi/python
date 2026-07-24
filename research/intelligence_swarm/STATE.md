@@ -12,6 +12,7 @@
 - Formal memory eligibility: **未達**
 - 学術的新規性: **未確立**
 - 再現済み外部baseline: **0**
+- 公開環境control実測: **1件（SILG/RTFM S1 random-valid-action）**
 - 査読可能な中心命題: **未確立**
 - Active mechanism family: **なし**
 - AF-001〜AF-014: **PAUSED**
@@ -53,27 +54,37 @@ The broad `language features -> intervention distribution` formulation is not no
 
 - SILG: `silg==0.0.1`、Python `>=3.7.10`、MIT。
 - Target SILG commit: `2af07578e1264029a240fcfb78d4ac0aea16f5de`。
-- Official requirements are partly unpinned: `gym>=0.15.4`, `torch`, `torchvision`, `pyyaml`, `expman`, `submitit`; exact pin is `py-getch==1.0.1`。
-- Reference container: `pytorch/pytorch:1.9.0-cuda10.2-cudnn7-runtime`。
-- SILGは個別環境の導入、依存install、environment data取得が必要。初回対象はRTFM S1に限定する。
+- RTFM commit: `58f17955595b5a127c96d045d896fcbcc7d4b570`。
+- Reproduced runner: Ubuntu 22.04、Python 3.8.18、4 vCPU AMD EPYC 7763、15 GiB RAM。
+- Resolved core pins: `torch==1.13.1+cpu`, `torchvision==0.14.1+cpu`, `gym==0.21.0`, `numpy==1.24.4`, `transformers==4.30.2`。
 - Official experiment entrypoint: `run_exp.py`; local launch: `OMP_NUM_THREADS=1 python launch.py --local --envs rtfm`。
 - RTFM registers `rtfm_train_s1..s4-v0` and `rtfm_test_s1..s4-v0`。
-- Default S1 observation contains `name/name_len`, `text/text_len`, `wiki/wiki_len`, `task/task_len`, `inv/inv_len`, `valid`, `rel_pos`, `pos`。
-- Default action space is five actions: stay/up/down/left/right; grid 6×6; max steps 80。
+- Observed S1 keys: `name/name_len`, `wiki/wiki_len`, `task/task_len`, `inv/inv_len`, `valid`, `rel_pos`, `pos`。
+- Observed shapes: grid-name `[6,6,1,8]`, wiki `[80]`, task `[40]`, inventory `[8]`, valid action mask `[5]`, relative positions `[6,6,2]`, player position `[2]`。
+- Action space: 5 actions; maximum episode length: 80。
 - J-CRe3は日本語realism auditであり、R0.1の因果・行為baselineの代替ではない。
 
-## R0.1 cycle 007 result
+## R0.1 public-environment control result
 
-公式README、requirements、setup、Dockerfile、RTFM wrapperを監査し、固定manifest、deterministic bootstrap、実行失敗ログをcanonical branchへ追加した。
+GitHub Actions run `30101406916` successfully installed the pinned SILG and RTFM repositories and executed a public RTFM S1 random-valid-action probe.
 
-- `SILG_RTFM_MANIFEST_R01_007.json`
-- `bootstrap_silg_rtfm_r01.sh`
-- `SILG_INSTALL_ATTEMPT_R01_007.log`
-- `REPORT_R01_CYCLE_007.md`
+- Artifact: `r0-silg-rtfm-probe-30101406916`
+- Artifact digest: `sha256:ed463e76d5c528b2cf25d740847c77978dbe66d0ed5455a57289519ba0455afd`
+- Environment: `silg:rtfm_train_s1-v0`
+- Seeds: `0,1,2`
+- Episodes: 20 per seed, 60 total
+- Wins: 8 / 60
+- Mean seed win rate: `0.1333` (seed range `0.05–0.25`)
+- Aggregate win rate: `0.1333`
+- Mean return: `-1.0237`
+- Mean episode length: `15.5167`
+- Total environment wall time: `2.7652 s`
+- Random action-selection latency: `7.324 µs/action`
+- Raw logs, pip freeze and SHA-256 manifest: captured in the workflow artifact
 
-実行sandboxで `git clone https://github.com/vzhong/silg.git /tmp/silg` を再試行したが、`Could not resolve host: github.com` でsource acquisition前に停止した。失敗分類は `initial_public_environment_installation_failure`。モデル構築・学習・公開task評価には到達していないため、性能値は存在しない。
+This is a **public environment/control reproduction**, not the official shared recurrent baseline. It resolves the previous DNS/source-acquisition blocker but does not complete R0.1.
 
-次の最小修正は、outbound DNSを持つUbuntu x86_64環境でbootstrap scriptを実行し、resolved `pip freeze` とcommit SHAを保存した後、同一S1 episode・seed 1/7/19でofficial recurrent、random-valid-action、language-blind、state-only、language-shuffleを比較すること。
+The workflow used seeds `0,1,2`, while the canonical research seeds are `1,7,19`; therefore the run is accepted as an installation/schema/control proof only. The next controlled run must use `1,7,19` and identical episode instances across all methods.
 
 ## R0.2 cycle 001 result
 
@@ -88,11 +99,11 @@ Gaddy & Klein 2019のconditional-autoencoder方式に忠実な再現harnessをca
 
 Synthetic fixtureでseed 1/7/19のpipeline smoke testを完了したが、これは公開SILG再現でも能力証拠でもない。environment-first action accuracy 0.5028、end-to-end 0.4097だった一方、task successは0.0042対0.2069でenvironment-firstが劣った。fixture結果は研究判断に使用しない。
 
-## Current blocker
+## Current bottleneck
 
-**公開baselineの実行値がまだ1件もない。**
+**SILG/RTFM公式shared recurrent baselineと、同一episode上のlanguage-blind/state-only/shuffle対照が未実行。**
 
-実行sandboxは外部DNSを解決できず、GitHub cloneとenvironment data downloadが失敗する。SILG/RTFM環境、environment data、互換Python runtimeが存在しない。connector経由では公式ソースの監査はできるが、実行可能なrepository tree・依存package・データをruntimeへ展開できない。
+Source acquisition and environment installation now succeed in GitHub Actions. The next bottleneck is no longer DNS; it is faithful training/evaluation orchestration, deterministic instance replay, and complete artifact accounting.
 
 ## Progress rule
 
@@ -111,4 +122,4 @@ R0の進歩は、公開baselineの再現成功、同一benchmark・同一split�
 
 ## Last integration
 
-2026-07-24: **R01-007**。SILG/RTFMの公式依存・split・observation/action schemaを固定し、deterministic bootstrapと再現可能なDNS失敗ログを追加。公開baseline再現は0件のためR0継続、新規性・能力進歩の主張なし。
+2026-07-24: **RESET-E009**。SILG/RTFM固定環境のGitHub Actions導入と3-seed public random controlが成功。公開環境実行値を初取得したが、official recurrent baselineとmatched controlsは未実行のためR0継続。新規性・知能原理・能力進歩の認定なし。
