@@ -6,40 +6,39 @@
 
 ## Current stage
 
-- Stage: **S1 Semantic Identity Birth — intervention-born identifiability substage**
+- Stage: **S1 Semantic Identity Birth — intervention-residual candidate birth substage**
 - Semantic Identity Gate G1: **未達**
-- Identifiability prerequisite G1a: **synthetic観測側で限定支持、raw Japaneseとのprospective統合は未達**
+- Identifiability prerequisite G1a: **外部介入による候補破壊は監査用途で支持、正しい候補の創発は未達**
 - Operation/Goal Gate G2: **未達**
-- Causal grounding mainline: **AF-008 Intervention-Born Diagram Identityを優先**
-- AF-007 Jointly Emergent Language–World Intervention Diagrams: **共同生成という上位方針は維持し、類似度・誤差形状による事前対応付けは凍結**
+- Causal grounding mainline: **AF-009 Intervention-Residual Joint Candidate Birthを優先**
+- AF-008 Intervention-Born Diagram Identity: **候補資格監査・識別行為評価へ縮小。既存候補の選別だけでsemantic unitを生む下位仮説は凍結**
 - Memory/consolidation mainline: G1待ち。保存最適化は凍結継続
 - Integrated intelligence: 未達
 
 ## Maximum upstream bottleneck
 
-固定codebookを外しても、global低rank軸、single-domain surprise cluster、cross-domain failure correspondenceはいずれも、**外部行為で候補identityが確定する前に、類似度・誤差形状・共同変動で候補を同一視する**ため失敗した。現在の最大ボトルネックは、候補を事前対応付けせず、候補対が異なる予測を返す最小の識別行為集合を生成し、実際の外部結果で一方だけが生存したときに初めてlanguage/world diagram identityを形成し、その識別構造を完全語彙非共有domainで再生成することである。
+A PR376、B PR378、D PR375では、world-only、joint language/world、active、random、oracleを含む識別行為選択を改善しても、hidden opaque domainでprospective・inverse・repairを満たす正しい候補が候補集合に存在しなかった。現在の最大ボトルネックは、**既存候補を選ぶことではなく、全候補が外部結果を説明できない介入episodeのlanguage residualとworld residualから、局所的なlanguage/world変換候補を共同生成し、その候補が別episode・別opaque domainの新しい結果を予測できるかを検証すること**である。
 
 ## Cross-track conclusion
 
-1. HF-001〜HF-009の凍結を維持する。
-2. PR372: raw language/world差分のglobal低rank共同生成は、jointとinverseがほぼ0で、異なる変化因子の平均軸へ縮退した。
-3. PR373: local surpriseからの競合diagramは既知domainの一部を改善したが、hidden domainではprospective/inverseが0、world shuffleがCorrectを上回った。
-4. PR374: cross-domain failure correspondenceによるdiagramもjoint/inverseが全条件0で、hidden domain自由日本語ではshuffleがCorrectを上回った。
-5. PR370: formal memory eligibilityは0/3 seedであり、下流保存研究を再開できる単位は存在しない。
-6. よって、**外部識別行為前の類似度・低rank軸・surprise cluster・失敗形状対応からdiagram identityを作れる**という根本前提をHF-010として凍結する。
-7. AF-007の共同生成方針は維持するが、候補対応付けを先に置かない。AF-008 Intervention-Born Diagram Identity from Minimal Discriminating Action Setsを優先本線へ昇格する。
+1. HF-001〜HF-010の凍結を維持する。
+2. PR376: hidden d3自由日本語ではActiveがRandom/Shuffleを上回ったが、未知語順・複数段落・Rename・d1・全seedへ再現せずstrict gate 0/3。
+3. PR378: joint language/world selectorはworld-onlyと全条件で完全同一。言語entropyは観測価値を変えず、oracle selectorでもhidden-domain能力は改善しない。
+4. PR375: external interventionはoutcome-shuffle候補を排除したがCorrect候補も3 seed中2 seedで全滅し、formal memory eligibilityは0。
+5. よって、**正しいsemantic candidateが候補集合に存在しない状態でも、識別行為選択・version-space collapse・oracle selectionを改善すればsemantic unitが成立する**という根本前提をHF-011として凍結する。
+6. AF-008は候補資格監査、oracle gap、action leakage診断として維持する。優先本線をAF-009 Intervention-Residual Joint Candidate Birthへ遷移する。
 
 ## Active assignments
 
-- A: raw Japanese/world変換候補を独立に維持し、候補対を最小に識別する発話・観測・行為を生成する。外部結果前にfamily化しない
-- B: 固定factorや類似度clusterを使わず、候補diagramごとの異なるtarget・transition・goal予測から最小識別行為集合を構成する
-- C: 識別行為の結果で一方だけが生存する因果必要性、action-set shuffle、random介入、反実仮想再現を監査する
-- D: 外部介入で一意に生存し、複数opaque domain × 全seedで再生成されたdiagramだけをmemory eligibility候補にする。未成立中は保存最適化を拒否する
-- E: intervention leakage、oracle action selection、test outcome leakage、domain bridge、best-seed選択を監査し、仮説族凍結とstage遷移を管理する
+- A: 全候補不適合episodeからraw Japanese側の説明不能残差を抽出し、world residualと共同で新しい局所変換候補を生成する
+- B: operation/goal候補が存在しないことをoracleで監査し、target・transition・goalのどの予測成分を新生すべきかを分離する
+- C: residual-born候補が別介入・別opaque domainをprospectiveに説明するか、outcome shuffle・residual shuffle・pair shuffleで因果監査する
+- D: residual-born候補が複数domain・全seedで再生成され、AF-008のintervention survivalを通過した場合だけmemory eligibility候補にする
+- E: residual生成時のafter leakage、oracle candidate leakage、domain bridge、best-seed選択を監査し、HF-011の言い換え再試行を拒否する
 
 ## Progress rule
 
-進歩は、介入前情報だけから候補diagramを生成し、学習用test正解を使わずに選んだ最小識別行為の実結果によって候補が一意に生存し、その生存diagramが2以上の完全語彙非共有domainと3 seedすべてで、未知表現・自由日本語上のprospective target×transition、inverse query、counterfactual repairをCorrect > random intervention / action-set shuffle / outcome shuffleで実質差0.10以上示した場合だけ認定する。介入数削減、候補消去率、類似度、残差低下、単一domainのtarget単体高値は診断である。
+進歩は、final評価結果を使わずにcalibration介入の予測―観測残差から新生した同一の局所language/world変換候補が、2以上の完全語彙非共有domainと3 seedすべてで、未知表現・自由日本語上のprospective target×transition、inverse query、counterfactual repairをCorrect > random birth / residual shuffle / pair shuffle / existing-candidate selectorで実質差0.10以上示し、その後AF-008の実介入生存監査を通過した場合だけ認定する。候補数、残差低下、再構成精度、oracleのみの成功は診断である。
 
 ## Current status
 
@@ -54,4 +53,4 @@
 
 ## Last integration
 
-2026-07-24: GOV-007。PR372〜374および最新D PR370を統合し、S1をintervention-born identifiability substageへ遷移。外部識別行為前に低rank軸・surprise cluster・失敗類似度でdiagram identityを作る仮説をHF-010として凍結。AF-008 Intervention-Born Diagram Identityを優先本線へ設定。G1/G2およびmemory eligibilityは未達。
+2026-07-24: GOV-008。PR376、PR378、PR375およびAF-008の系列横断結果を統合し、S1をintervention-residual candidate birth substageへ遷移。既存候補の選別・version-space collapse・oracle action改善だけでsemantic unitを成立させる仮説をHF-011として凍結。AF-009 Intervention-Residual Joint Candidate Birthを優先本線へ設定。G1/G2およびmemory eligibilityは未達。
