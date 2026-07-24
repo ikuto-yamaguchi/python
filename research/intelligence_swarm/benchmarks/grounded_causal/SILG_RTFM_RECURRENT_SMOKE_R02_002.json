@@ -1,0 +1,58 @@
+{
+  "status": "success",
+  "classification": "official_recurrent_training_smoke_not_full_baseline_reproduction",
+  "workflow_run_id": 30103957538,
+  "artifact_id": 8600841729,
+  "artifact_digest": "sha256:87076f69f2916b1e92fdfa4c11d1620225660ef7c6d1ab04662d964b967b9c58",
+  "source_pins": {
+    "silg": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
+    "rtfm": "58f17955595b5a127c96d045d896fcbcc7d4b570",
+    "expman": "0.0.7",
+    "expman_sdist_sha256": "5b778d23d9efdb541d72783d1ecf1482451cc1a476eb7e16fb52d6b2ce1445c6"
+  },
+  "environment": "silg:rtfm_train_s1-v0",
+  "validation_environment": "silg:rtfm_test_s1-v0",
+  "model": "official SILG multi recurrent",
+  "pretrained_language_model": false,
+  "seeds": [1, 7, 19],
+  "frames_per_seed": 2048,
+  "runs": [
+    {
+      "seed": 1,
+      "completed": true,
+      "wall_seconds": 26.609461282,
+      "peak_rss_kib": 470236,
+      "user_seconds": 67.74,
+      "system_seconds": 2.87,
+      "log_sha256": "63276c64b7d75e0265bd2bc40d7d3585e0ec9e77a18ec808f77ca257322bfc87"
+    },
+    {
+      "seed": 7,
+      "completed": true,
+      "wall_seconds": 26.565972964,
+      "peak_rss_kib": 457640,
+      "user_seconds": 68.27,
+      "system_seconds": 2.82,
+      "log_sha256": "7787b8d136822ef8627bb664c55c8144bc36854739d7cb2f418f69e96add83bc"
+    },
+    {
+      "seed": 19,
+      "completed": true,
+      "wall_seconds": 26.548130048,
+      "peak_rss_kib": 474548,
+      "user_seconds": 67.38,
+      "system_seconds": 3.03,
+      "log_sha256": "57061ef10b74644361407462d15f03b45e94505e8a3e628a22693d74c82b534b"
+    }
+  ],
+  "mean_wall_seconds": 26.57452143133333,
+  "mean_peak_rss_kib": 467474.6666666667,
+  "max_peak_rss_kib": 474548,
+  "total_wall_seconds": 80.728814702,
+  "determinism_patch": "actor_seed = experiment_seed * 1000003 + actor_index",
+  "official_full_baseline_completed": false,
+  "matched_controls_completed": false,
+  "environment_first_public_comparison_completed": false,
+  "capability_progress_claimed": false,
+  "novelty_claimed": false
+}
