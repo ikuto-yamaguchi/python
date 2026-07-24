@@ -2,7 +2,7 @@
 
 ## Mission
 
-1GB未満・弱いスマートフォンCPUで実行可能な知能モデルを目標とし、生の日本語と環境相互作用から対象・状態・操作・因果構造を獲得する原理を研究する。
+1GB未満・弱いスマートフォンCPUで実行可能な知能モデルを長期目標とし、生の日本語と環境相互作用から対象・状態・操作・因果構造を獲得する原理を研究する。ただし現在は原理発明を停止し、公開研究の再現・評価資格・新規性境界を確立する。
 
 ## Current stage
 
@@ -11,53 +11,25 @@
 - Operation/Goal Gate G2: **未達**
 - Formal memory eligibility: **未達**
 - 学術的新規性: **未確立**
+- 査読可能な中心命題: **未確立**
+- Active mechanism family: **なし**
+- AF-001〜AF-014: **PAUSED**
+- A〜Dの新規toy仮説・別branch生成: **停止**
+- 過去stacked draft PR: **negative-results archive**
+
+## R0 status ledger
+
 - 公開環境control再現: **1件**
 - 公開学習経路再現: **1件**
 - 固定初期instance matched評価経路: **1件（engineering smoke）**
 - 学習済み公開能力baseline再現: **0件**
-- R0.2公開trajectory offline診断: **1件（negative diagnostic、正式再現ではない）**
-- 査読可能な中心命題: **未確立**
-- Active mechanism family: **なし**
-- AF-001〜AF-014: **PAUSED**
-- A〜Dの新規toy仮説生成: **停止**
-- Memory/consolidation最適化: **停止継続**
+- R0.2公開trajectory offline診断: **1件（比較不適格）**
+- R0.3 intervention-target ablation: **未開始**
+- J-CRe3日本語外部監査: **未再現**
 
-## Why the program was reset
+公開能力baselineとmatched controlsがevaluation contractを通るまで、新規機構族・知能原理・能力進歩を認定しない。
 
-過去サイクルは、合成opaque-token環境上で候補機構を変更し、Correctとshuffle/randomの差が出ないことを反復確認した。評価漏れや不可能条件の切り分けはあったが、公開benchmark上の既存baseline再現、同一benchmark・split・instanceでの累積比較、一次研究との新規性監査、反証可能な単一中心命題、一つのcanonical実装が欠けていた。したがって過去成果を新しい知能原理または基礎研究上の発見とは扱わない。
-
-## R0 gates
-
-1. **R0.1 SILG capability reproduction** — paper-scaleまたは収束確認済みrecurrent policyと全controlを固定公開test instanceで比較し、reference scoreとの許容差を宣言する。
-2. **R0.2 Environment-first reproduction** — 既存environment-first / language-dynamics baselineとend-to-endを同一データ・parameter budgetで比較し、online task successと実holdout transferを測る。
-3. **R0.3 Intervention-target ablation** — Gate L陽性かつ公開benchmarkが非自明な介入partitionを定義する場合だけ実行する。
-4. **R0.4 Japanese realism audit** — J-CRe3を日本語参照接地の外部監査として使用し、SILG性能と混合しない。
-5. **Resource / reproducibility gate** — model bytes、peak RSS、学習時間、CPU推論時間、raw logs、source/model/data checksumを全methodで記録する。
-
-公開能力baselineとmatched controlsがevaluation contractを通るまで、新規原理・能力進歩を認定しない。
-
-## Candidate research question status
-
-旧RQ-001-N3を単一SILG benchmark上のGate L＋Gate I命題として扱うことは**棄却**した。
-
-理由: RTFM/SILGはraw language、grid state、action、rewardを提供するが、ground-truth latent intervention family、intervention target、causal abstraction、utterance-to-intervention対応を定義しない。独自partitionを後付けすると手書きontologyになる。
-
-現在は二つに分離する。
-
-- **Gate L — 継続:** raw languageがstate/action/history/environment identityを超える外部予測・行為情報を持つか、matched public episodesで測定する。
-- **Gate I — 保留:** explicit mechanism pre/post、ground-truth intervention familyまたは理論的に正当化されたcausal abstraction、held-out target/mechanism、permutation-aware評価を持つ公開benchmarkが見つかるまで開始しない。
-
-C005の一次文献監査により、raw trajectoryからのsystem-parameter同定、temporal dataからのpartition＋causal graph同定、partially shared multimodal latentの同定はいずれも既存範囲であることを追加確認した。
-
-残る候補は **RQ-001-N4 — narrowed, not adopted**:
-
-> 独立にmechanism-changing variationを定義する公開benchmark上で、episode-aligned raw languageがtrajectory-only CRLに残る同値類を実際に除去し、より細かいintervention-supported causal abstractionとheld-out mechanism予測改善を生むか。
-
-generic multimodal improvement、context proxy、environment ID推定、reward/history proxyでは不十分。trajectory-only equivalence classを明示し、correct languageがlanguage shuffle・context/reward/history controlを越えてそのclassを厳密に細分化する必要がある。
-
-Gate-I適格benchmarkが見つからなければ、共同同定の実証命題を棄却し、識別不能条件・必要条件の理論研究だけを残す。
-
-## Pinned public reproduction
+## Pinned SILG / RTFM reproduction
 
 - SILG commit: `2af07578e1264029a240fcfb78d4ac0aea16f5de`
 - RTFM commit: `58f17955595b5a127c96d045d896fcbcc7d4b570`
@@ -69,101 +41,107 @@ Gate-I適格benchmarkが見つからなければ、共同同定の実証命題�
 - Observation: 6×6 grid, wiki 80 token, task 40 token, inventory 8 token, valid-action mask 5, relative position 6×6×2
 - Action space: 5; maximum episode length: 80
 
-## R0.1 matched recurrent smoke
+## R0.1 public recurrent status
 
-GitHub Actions run `30107848065` trained and reloaded the official SILG `multi` recurrent model for seeds `1,7,19`, then evaluated Correct, Random, Language-blind and State-only from identical independently seeded initial RTFM test instances.
+2,048-frame級の公式SILG `multi` recurrentについて、seed `1,7,19`の学習、checkpoint保存・再読込、固定初期instance上のCorrect / Random / Language-blind / State-only評価経路を再現した。
 
-- Requested frames: `2,048`; final checkpoints: `2,080`
 - Parameters: `4,916,915`
-- Trained state dict: approximately `19.694 MB`
-- Training wall time: `26.560 / 26.592 / 26.565 s`
+- Trained state dict: 約`19.694 MB`
+- Training wall time: 約`26.6 s/seed`
 - Maximum RSS: `493,576 KiB`
-- CPU inference: approximately `8.1 ms/step`
-- Artifact digest: `sha256:408e95f8c0b682dab398dd52a5694e3bb57533453a33d775d9bd952f55b4ad50`
-
-Aggregate smoke result:
-
-| Method | Win rate | Mean return |
-|---|---:|---:|
-| Correct recurrent | 0.0167 | -1.8820 |
-| Random | 0.0667 | -1.1513 |
-| Language-blind | 0.0167 | -1.9087 |
-| State-only | 0.0000 | -2.1243 |
+- CPU inference: 約`8.1 ms/step`
+- Correct win rate: `0.0167`
+- Random win rate: `0.0667`
+- Language-blind win rate: `0.0167`
+- State-only win rate: `0.0000`
 
 Classification: **`matched_fixed_episode_smoke_completed / public_capability_baseline_not_reproduced / insufficient_training_budget`**。
 
-低予算policyはRandom未満であり、言語除去にもほぼ不変。これはundertrainingと評価経路の診断であって、言語不要・能力進歩の証拠ではない。
+32,768 frames/seedへの段階的拡張、Language-shuffle、episode-level paired exportは実装・投入済みだが、完了artifactは本統合時点で未確定。結果がない状態で進歩判定しない。
 
-## R0.2 public trajectory offline diagnostic
+## R0.2 environment-first status
 
-GitHub Actions run `30108096366` exported pinned public recurrent trajectories and trained environment-first、parameter-matched end-to-end、state-only baselines for seeds `1,7,19`.
+公開trajectory上の旧offline比較:
 
-- Environment-first / end-to-end inference model: both `7,661,516 bytes`
-- State-only model: `696,140 bytes`
-- Mean offline action accuracy: environment-first `0.6840`; end-to-end `0.6907`; state-only `0.7240`
-- Environment-first − end-to-end: `-0.0067`
-- Environment-first − state-only: `-0.0401`
-- Environment-first Correct / language-blind / language-shuffle: all `0.6840`
-- Maximum RSS: `538,256 KiB`
-- Environment-first CPU inference: approximately `0.493 ms/item`
-- Online task success and real held-out entity/dynamics/language-form transfer: 未測定
+- Environment-first action accuracy: `0.6840`
+- End-to-end: `0.6907`
+- State-only: `0.7240`
+- Environment-first language-blind: `0.6840`
+- Environment-first language-shuffle: `0.6840`
 
-Classification: **`public_trajectory_offline_negative_diagnostic_not_r02_reproduction`**。
+しかし生成元policyは比較資格を満たさなかった。
 
-現在のundertrained-policy trajectoryでは言語寄与が0でstate-onlyが最良。typed observation loss、成功demonstration、online success、real holdoutがないため正式なenvironment-first再現ではない。
+- seed 1 train success: `0/40`
+- seed 7 train success: `0/40`; majority action share `97.42%`
+- seed 19 train success: `1/40`
+- 全seed test success: `0/20`
 
-## Evaluation-contract status
+Classification: **`ineligible_failed-policy-trajectory_negative_diagnostic / not_R0.2_reproduction`**。
+
+Representation modelを調整する前に、32,768-frame以上のsource policy trajectoryが次のanti-collapse条件を通る必要がある。
+
+- majority-action share `<= 0.90`
+- 各seedでsuccessful train episode `>= 5`
+- 5%以上のsupportを持つaction `>= 2`
+
+## Evaluation contract status
 
 `evaluation_contract.py`は以下を監査する。
 
-- train/test発話重複、entity/dynamics split重複
-- gold action、after state、reward、done、completed trajectory、post-treatment入力漏洩
-- domain/seed/split/method欠落
-- immutable instance fingerprintとprediction coverage
+- train/test utterance overlap、entity/dynamics split overlap
+- gold action、after state、reward、done、post-treatment state、completed trajectory leakage
+- immutable `instance_fingerprint`のprediction側必須化
 - method × seed × domain × splitの完全coverage
-- domain × seed × condition cell、平均差、最小cell差、95% CI、paired randomization test
-- model/data/log checksum、code commit、model bytes、RSS、train time、CPU latency
+- duplicate / missing predictionとcoverage
+- domain × seed × condition cell統計
+- episode-level paired gap、Correct-only / control-only、exact McNemar検定
+- hierarchical cluster-bootstrap 95% CI
+- source/model/data/log SHA-256、code commit、model bytes、RSS、train time、CPU latency
 
-回帰テストは6件成功。ただし最新R0.2 summaryはinstance-level prediction、全control、完全manifest、online/holdout指標を欠くためpreflight不合格。
+回帰テストは**7件成功**。ただし全methodの固定test prediction JSONLと完全artifact manifestが未提出のため、現在の正式分類は **`initial_reproduction_failure`**。
 
-Formal classification: **`initial_reproduction_failure`**。
+## Candidate research question status
 
-## Prior-art boundary
+SILG/RTFMはground-truth latent intervention family、target、mechanism pre/post operator、causal abstractionを定義しないため、Gate Iの直接benchmarkとしては棄却した。
 
-単独では新規性にならない既存範囲:
+- **Gate L — 継続・未達:** raw languageがstate/action/history/environment identityを超える外部能力を持つか、competent public policyとmatched controlsで測る。
+- **Gate I — 保留:** 明示的mechanism variation、ground-truth intervention familyまたは理論的causal abstraction、held-out mechanism、permutation-aware評価を持つ公開benchmarkが見つかるまで開始しない。
 
-- unknown intervention target / unknown multi-node intervention recovery
-- nonparametric causal representation learning under general environments
-- causal abstraction under limited intervention families
-- raw-trajectory system-parameter identifiability
-- temporal partition and causal-graph joint learning
-- partially shared multimodal causal representation identifiability
-- language-conditioned dynamics pretraining
-- environment-first instruction-following pretraining
-- intervention-conditioned or causal response representation
+現在の候補は **RQ-001-N4 — narrowed, not adopted**:
 
-2025〜2026の一次研究は未知介入、一般mixing、少数環境・有限標本、local dynamical structure、temporal partitioning、multimodal partial sharingまで範囲を拡大している。残る候補差分は、公開interactive trajectory上の言語固有情報と、別のGate-I適格benchmark上でlanguageがtrajectory-only equivalence classを厳密に細分化することを分離して示す場合に限られる。
+> 独立にmechanism-changing variationを定義する公開benchmark上で、episode-aligned raw languageがtrajectory-only CRLに残る同値類を除去し、より細かいintervention-supported causal abstractionとheld-out mechanism予測改善を生むか。
+
+未知介入target回復、unknown multi-node intervention、general-environment nonparametric CRL、subset-intervention causal abstraction、temporal partition＋causal graph、multimodal partial-sharing identifiability、language-dynamics pretraining、environment-first instruction followingは単独では既存範囲であり、新規性にならない。
 
 ## Current maximum bottleneck
 
-**paper-scaleまたは収束確認済みSILG recurrent policyを固定公開test setで全controlと比較し、evaluation contractを通すこと。その後、成功または十分なtask competenceを持つtrajectory上でR0.2をonline task success・typed next-state objective・実holdout付きで再現すること。Gate Iは適格公開benchmarkが見つかり、trajectory-only equivalence classを定義できるまで禁止する。**
+**32,768-frame段階実験のartifactを確定し、competenceとtrajectory eligibilityを監査すること。適格なら一つのimmutable `rtfm_test_s1-v0` JSONLを固定し、Correct / Random / Language-blind / State-only / Environment-ID-only / Language-shuffle / Outcome-or-transition-shuffleを同一snapshotで実行し、全prediction・checksum・資源量をevaluation contractへ通す。不適格なら表現モデルを触らず、source policyの学習予算または公式再現条件だけを修正する。**
 
-## Progress rule
+## Stage-transition rule
 
-進歩として認めるのは、公開baseline再現、同一benchmark・split・instance・seed上の外部能力差、既存理論との差分が明確な定理・反例・識別可能性条件、再現可能なデータ・コード・測定ログのみ。候補数、graph、tensor、圧縮、low-rank、version-space縮約、toy環境内の一意化は数えない。
+次stageを提案できるのは全て満たした場合だけ。
+
+1. 学習済み外部公開能力baselineを少なくとも1件再現
+2. 固定公開instance上のrandom / language-blind / state-only / shuffle対照
+3. canonical 3 seedと完全artifact/leakage contract
+4. R0.2のonline task success・typed next-state・実holdout付き比較
+5. R0.3を適格benchmarkで完了、またはundefined/unavailableとして正式棄却
+6. 2026年までのnovelty matrix
+7. 中心命題・主要指標・停止条件の事前登録
 
 ## Canonical branch policy
 
-今後の研究は`research/intelligence-swarm-reconstruction-001`だけへ累積する。過去のstacked draft PRはnegative-results archiveとして保持し、新しい実験のbaseには使用しない。
+今後の研究は`research/intelligence-swarm-reconstruction-001`だけへ累積する。過去のstacked draft PRを新実験のbaseにしない。
 
 ## Current status
 
-- 高校生級知能: 未達
-- ネイティブ日本語コミュニケーション: 未達
-- 弱いスマートフォン実機検証: 未達
-- 新規知能原理: 未発見
-- 完成: false
+- 高校生級知能: **未達**
+- ネイティブ日本語コミュニケーション: **未達**
+- 弱いスマートフォン実機検証: **未達**
+- 新規知能原理: **未発見**
+- 能力進歩: **未認定**
+- 完成: **false**
 
 ## Last integration
 
-2026-07-25: **C005**。2026年のraw-trajectory identifiability、temporal partition learning、multimodal partial-sharing CRL、partially observed SCMを統合し、RQをN4へ狭義化。Gate Iは適格公開benchmark待ち、新規architecture禁止を維持。
+2026-07-25: **RESET-E012**。R0.1の32,768-frame段階実験を結果待ちとして分離し、旧R0.2 trajectoryをeligibility不合格として正式統合。C005のRQ-001-N4、D009のsnapshot proof・instance paired statisticsを反映し、R0継続・段階遷移なしを決定。
