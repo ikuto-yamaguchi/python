@@ -8,34 +8,37 @@
 
 - Stage: **S1 Semantic Identity Birth**
 - Semantic Identity Gate G1: **未達**
-- Identifiability prerequisite G1a: **synthetic pilotで限定支持**
-- Operation/Goal Gate G2: 未達
-- Causal grounding mainline: G1/G2待ち。現在はidentity識別可能性を支援
+- Identifiability prerequisite G1a: **synthetic観測側で限定支持、prospective条件は未達**
+- Operation/Goal Gate G2: **未達**
+- Causal grounding mainline: G1/G2待ち。現在はpre-treatment identity識別可能性を支援
 - Memory/consolidation mainline: G1待ち。保存最適化は凍結継続
 - Integrated intelligence: 未達
 
 ## Maximum upstream bottleneck
 
-trajectory continuity・不可逆痕跡のようなsymmetry-breaking witnessは個体再同定を可能にするが、生の自由日本語の発話・指示・説明から同じwitness-bearing unitを形成し、held-out paraphrase・rename・別領域でprospective predictionとinverse queryへ再利用する機構が未成立。
+介入後に完成するtrajectoryやscarへ日本語を事後対応させるのではなく、**介入前に利用可能な対象間関係・履歴prefix・commandだけから、どの対象がどう変化するかを予測し、その同じ潜在単位を未知言い換え・別領域・inverse queryで再生成する機構**が未成立。
 
 ## Cross-track conclusion
 
-1. 文字位置・区間幅・局所shape・局所差分から候補を先に作り、後段のreplay、MDL、graph、tensor、lesion、energyで意味へ昇格させるHF-001〜HF-004は凍結を維持する。
-2. PR349は、因果挙動だけでは個体identityがworld automorphismまでしか定まらず、完全対称な介入を増やしても一意化しないことを示した。
-3. PR350は、行動同値のみの取得0.0000に対し、trajectory 0.9663、不可逆痕跡1.0000、joint witness 1.0000、identity shuffle 0.0236を示した。これはsynthetic観測側の識別可能性に限定した外部能力差であり、日本語semantic identityの成立ではない。
-4. AF-001の「behavioral equivalenceだけでindividual identityを得る」解釈は棄却し、因果的役割同値類の形成に限定する。新しい本線はAF-003 Symmetry-Breaking Witness Groundingとする。
+1. HF-001〜HF-005の凍結を維持する。
+2. PR352はheld paraphrase等でCorrect-shuffle差を示したが、別domainとinverseではchance近傍だった。
+3. PR354はPR352の大きな差が完成したpost-treatment trajectoryに依存し、future censorで縮小することを示した。
+4. PR355は介入前prefixからacquisition・別domain・inverse・cross-form consistencyを同時に満たすmemory eligible unitが0件であることを示した。
+5. PR353はoperation/goal prospective、inverse、goal change、failure repairがすべてchance近傍で、G2を支持しなかった。
+6. post-treatment witnessをprospective semantic identityの証拠へ流用する根本前提をHF-006として凍結する。
+7. AF-003はretrospective re-identificationの限定証拠として継続し、本線をAF-004 Pre-Treatment Relational Change Groundingへ移す。
 
 ## Active assignments
 
-- A: raw Japaneseとtrajectory／不可逆痕跡の同期からwitness-bearing semantic unitを形成し、held-out paraphrase・renameで再生成する
-- B: witness-bearing identityを前提としたときだけoperation/goal候補を検証し、未成立中は必要な言語–行為対照反例をAへ返す
-- C: trajectory continuityと不可逆痕跡のどちらが必要十分か、対称world・cross-domain・counterfactualで識別限界を測る
-- D: memory eligibility gateを維持し、raw Japaneseとの結合が成立するまでreplay／fast-slow／sleep最適化を再開しない
-- E: AF-003の外部能力差を共通benchmark化し、G1昇格条件を監査する
+- A: raw Japaneseと介入前の関係変化予測を結び、future trajectoryを見ずにtarget/afterを生成する
+- B: same identity/different operation、different identity/same operation、same operation/different goal、before-after reversalの四方向反例を生成する
+- C: pre-treatment relation、trajectory prefix、不可逆な既往履歴の必要十分性を対称worldとcounterfactualで監査する
+- D: acquisition資格を満たすunitが出るまで保存・干渉・睡眠統合を再開せず、時間索引付きeligibility gateを維持する
+- E: G1 benchmarkをretrospective / prospective / inverse / domain transferへ分離し、AF-004の昇格条件を監査する
 
 ## Progress rule
 
-進歩は、未知表現・別領域・自由日本語上の外部能力がCorrect条件でshuffle/randomを複数seedにわたり実質的に上回る場合だけ認定する。候補数削減、圧縮、graph形成、低rank性、収束、棄権増加だけは診断とする。Synthetic witness pilotは「識別可能性前提の限定支持」であり、G1通過とは数えない。
+進歩は、介入前情報だけを使い、未知表現・別領域・自由日本語上のprospective predictionとinverse queryでCorrectがshuffle/randomを複数seedにわたり実質的に上回る場合だけ認定する。完成trajectoryや行為後scarを候補featureへ含む成功はretrospective matchingとして別記録し、G1通過へ数えない。
 
 ## Current status
 
@@ -50,4 +53,4 @@ trajectory continuity・不可逆痕跡のようなsymmetry-breaking witnessは�
 
 ## Last integration
 
-2026-07-24: GOV-002。PR349/350を統合し、S1を継続。behavioral equivalence単独によるindividual identityを棄却し、AF-003 Symmetry-Breaking Witness Groundingを優先本線へ設定した。G1は未達のまま。
+2026-07-24: GOV-003。PR352〜355を統合し、S1継続。post-treatment witnessによるprospective identity解釈をHF-006として凍結。AF-003をretrospective re-identificationへ限定し、AF-004 Pre-Treatment Relational Change Groundingを優先本線へ設定した。G1/G2は未達。
