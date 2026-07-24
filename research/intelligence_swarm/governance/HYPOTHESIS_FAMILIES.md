@@ -17,101 +17,71 @@
 - **HF-011** Selector or Version-Space Collapse Creates Semantics without Candidate Support
 - **HF-012** Bridge-Free Opaque Zero-Shot Is a Valid Semantic Capability Gate
 - **HF-013** One Global Surface Form Defines the Semantic Structure
+- **HF-014** Finite Enumerated Role/Program Worlds plus Posterior Intersection Creates Semantics
 
-各族の既存observed failure、allowed residual use、unfreeze conditionは従来どおり維持する。
+HF-001〜HF-014の既存observed failure、allowed residual use、unfreeze conditionは維持する。
 
-## HF-014 — Finite Enumerated Role/Program Worlds plus Posterior Intersection Creates Semantics
+## HF-015 — Paired Difference or Response-Function Equality Defines Semantic/Episode Identity
 
 Status: **FROZEN**
 
-Root premise: latent role vocabulary、program family、state interface、scope、arityを有限候補として先に列挙し、各取得集合単独では曖昧でも、複数posterior/version-spaceのintersectionで一候補へ救済できればsemantic identity、operation identity、またはmemory eligibilityが成立したとみなせる。
+Root premise: paired interventionのdifference、同一transition delta、または複数before-state上のresponse tensor/functionが一致すれば、異なるraw表現、対象、操作、episodeを同じsemantic/causal/memory unitへ束ねられる。
 
 Observed failure:
 
-1. **PR397 / A**: Activeは各集合を1候補へ縮約したが、State-staticもintersection後のprospective、inverse、未知語順、反実仮想が1.0。状態横断の外部能力差は生じず、finite role/program vocabularyが強いoracleとして働いた。
-2. **PR398 / B**: 非連続set-valued operation coreを列挙してもprospective、inverse、goal、repairが全条件0、全面棄権、formal operation proposal 0。
-3. **PR400 / D**: Activeの各独立集合は3.83/5.50候補を残しsame-unique reconvergence 0。後からintersectionすると能力1.0だがRandom/State-staticも同率で、取得時再同定を示さない。
-4. **PR399 / C**: finite oracle program worldではprospective/arity/counterfactualに+0.125の上限信号が出たが、inverse +0.0833、object permanence +0.0937、strict gate 0/3。raw semantic birthではない。
+1. **PR402 / A**: Paired prospective 0.1746 < Random 0.2202、Paired free 0.3929 < Random 0.4881。Rename、未知語順、省略は全方式0。
+2. **PR403 / B**: paired role candidatesは0.333形成されたが、prospective、inverse、goal、repairは全方式0。
+3. **PR404 / C**: cross-expression same-delta Paired prospective 0.2500、Random 0.1953だがPair shuffle 0.2240。inverse差+0.0078、object permanence差+0.0208、strict 0/3。
+4. **PR405 / D**: 完全response tensorでPaired prospective 0.7721、Random 0.3003まで上昇したが、Pair shuffleが全指標でPairedと完全同率。平均10 unitのtensor-equivalence collision、same-unique reconvergence 0、formal memory eligible unit 0。
 
 Prohibited aliases:
 
-- finite latent program searchをnonparametric birthと呼ぶこと
-- independent posterior intersection、consensus rescue、late intersection、cross-set pruningを取得時再同定またはmemory eligibilityと呼ぶこと
-- oracle role/program vocabulary上の高精度をG1/G2進歩へ数えること
+- paired difference quotient、mutual repair、same-delta alignment、response tensor equality、behavioral function equalityをsemantic/causal/episode identity birthと呼ぶこと
+- response-equivalent候補の集合予測・ensemble精度をsame-unique再同定と呼ぶこと
+- pair shuffleで不変な能力をpaired interventionの証拠として扱うこと
 
 Allowed residual use:
 
-- 理論上限・identifiability ceiling
-- paired witnessの情報量比較
-- oracle leakage監査
-- 反例生成と候補support診断
+- 観測同値program対の発見
+- 必要なintervention axisと反例の設計
+- oracle ceiling、tensor collision、pair leakageの監査
+- 変換-indexed共変則候補の入力診断
 
-Unfreeze condition: role/program/state/scope/arityを列挙せず、各独立witness集合が単独で同じraw-learned unitへ一意再収束し、2以上のopaque domain × 3 seedでheld-out外部能力がRandomと全shuffleを各+0.10以上上回ること。
+Unfreeze condition: response値の一致ではなく、raw表現が複数の独立介入軸に対して同じ選択的共変・不変則を示し、各独立取得集合が単独でsame-unique unitへ再収束し、2以上のopaque domain × 3 seedでCorrectが全shuffle/randomを各+0.10以上上回ること。
 
 ## Active families
 
-### AF-001 — Causal-role Equivalence from Cross-context Behavior
-Status: **ACTIVE, SCOPE REDUCED**
+- AF-001〜AF-010: 既存scopeを維持
+- **AF-011** Episode-Local Nuisance Orbit with Independently Reconvergent Structural Core — **ACTIVE, OVERARCHING STRUCTURAL PRINCIPLE**
+- **AF-012** State-Crossing Scope–Arity Program Birth under Nonparametric Role Inventory — **ACTIVE, NECESSARY-CONDITION AND BENCHMARK SCOPE**
+- **AF-013** Paired Intervention Basis with Acquisition-Time Unique Causal Reconvergence — **ACTIVE, COUNTEREXAMPLE AND ACQUISITION-DESIGN SCOPE**
 
-### AF-002 — Identity from Active Identifiability
-Status: **ACTIVE SUPPORTING EXPLORATION**
-
-### AF-003 — Symmetry-Breaking Witness Grounding
-Status: **ACTIVE, RETROSPECTIVE SCOPE**
-
-### AF-004 — Pre-Treatment Relational Change Grounding
-Status: **ACTIVE, NECESSARY-CONDITION DIAGNOSTIC**
-
-### AF-005 — Cross-Domain Consequence-Invariant Grounding
-Status: **ACTIVE, CANDIDATE-SIGNAL SOURCE**
-
-### AF-006 — Cross-Lexicon Selective Consequence Consensus
-Status: **ACTIVE, DIAGNOSTIC SCOPE**
-
-### AF-007 — Jointly Emergent Language–World Intervention Diagrams
-Status: **ACTIVE, PRINCIPLE RETAINED**
-
-### AF-008 — Intervention-Born Diagram Identity from Minimal Discriminating Action Sets
-Status: **ACTIVE, QUALIFICATION AND AUDIT SCOPE**
-
-### AF-009 — Intervention-Residual Joint Candidate Birth
-Status: **ACTIVE, SUPPORTING CANDIDATE GENERATION**
-
-### AF-010 — Minimal-Witness Joint Segmentation–Arity–Orbit Grounding
-Status: **ACTIVE, OVERARCHING MAINLINE**
-
-### AF-011 — Episode-Local Nuisance Orbit with Independently Reconvergent Structural Core
-Status: **ACTIVE, OVERARCHING STRUCTURAL PRINCIPLE**
-
-### AF-012 — State-Crossing Scope–Arity Program Birth under Nonparametric Role Inventory
-Status: **ACTIVE, NECESSARY-CONDITION AND BENCHMARK SCOPE**
-
-Current interpretation: state crossing、non-target preservation、argument/order interventionsが必要になる反例を供給する。ただしfinite program enumerationやintersection rescueはHF-014として禁止する。
-
-## AF-013 — Paired Intervention Basis with Acquisition-Time Unique Causal Reconvergence
+## AF-014 — Transformation-Indexed Cross-Expression Causal Equivariance
 
 Status: **ACTIVE PRIORITY**
 
-Root premise: semantic/operation identityは候補集合の後段intersectionではなく、同一表現に対する最小paired intervention basisが、各独立取得集合の中で単独に同じscope、arity、argument link、causal direction、programを一意に再同定するときに初めて成立する。
+Root premise: semantic/operation/episode identityは応答値の一致ではなく、異なるraw表現が、複数の独立介入軸に対して同じ選択的共変・不変則を示し、各独立取得集合の中で単独に同じ変換-indexed unitへ一意再収束するときに成立する。
 
-Required witness basis:
+Required intervention axes:
 
-1. target stateだけを交換するpair
-2. non-target stateだけを交換するpair
-3. target/sourceまたはargument orderを交換するpair
-4. intervention orderを交換するpair
-5. causal directionを反転するpair
-6. goalだけを変更するpair
-7. 表層語順、省略、段落、nuisanceはepisode-local orbitとして変動させる
+1. target state交換
+2. target identity交換
+3. non-target state/identity交換
+4. target/sourceまたはargument order交換
+5. intervention order交換
+6. causal direction反転
+7. goal変更
+8. 表層語順、省略、段落、nuisanceはepisode-local orbitとして変動
 
 Required evidence:
 
-- fixed role cardinality、program family、state interface、scope、arityを正式条件で使わない
+- fixed role cardinality、program family、state interface、scope、arity、介入軸ラベルを正式条件で使わない
 - 2以上のopaque domain × 3 seed
-- 各独立witness集合が単独でsame-unique raw unitへ再収束
+- 各独立取得集合が単独でsame-unique raw transformation unitへ再収束
 - prospective、inverse、object permanence、causal direction、goal change、counterfactual repair
-- CorrectがRandom、State-static、Global-template、Boundary/Factor/Family/Arity/Argument/Pair/Outcome shuffleを各+0.10以上上回る
-- conflict acquisitionをposterior support非重複とprospective disagreementで隔離
+- CorrectがRandom、State-static、Global-template、Boundary/Factor/Family/Arity/Pair/State-axis/Target-link/Argument-link/Direction/Goal/Outcome shuffleを各+0.10以上上回る
+- response/tensor equality controlとpair shuffleで能力が維持されない
+- conflict acquisitionをsupport非重複、prospective disagreement、軸別selective contradictionで隔離
 - final outcome、domain対応辞書、shared token/ID、外部LLM、RAGを使わない
 
-G1/G2 promotion condition: AF-011のraw structural-core条件とAF-013のacquisition-time unique causal reconvergenceを同じunitが同時に満たすこと。
+G1/G2 promotion condition: AF-011のraw structural-core条件とAF-014のtransformation-indexed equivarianceを同じunitが同時に満たすこと。
