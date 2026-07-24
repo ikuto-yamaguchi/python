@@ -22,11 +22,11 @@
 - 公開環境control再現: **1件**
 - 公開学習経路再現: **1件（32,768-frame staged budget、3 seed）**
 - 固定初期instance matched評価経路: **1件**
-- 131,072-frame staged run: **実行中・未統合**
+- 131,072-frame corrected staged run: **実行中・未統合**
 - 学習済み公開能力baseline再現: **0件**
 - R0.2正式再現: **0件**
 - R0.3 empirical intervention-target ablation: **正式棄却**
-- RQ-001-T1 theory-only candidate: **再狭義化・未採用**
+- RQ-001-T1 theory-only candidate: **最終理論テストへ狭義化・未採用**
 - J-CRe3日本語外部監査: **未再現**
 
 公開能力baselineとmatched controlsがevaluation contractを通るまで、新規機構族、知能原理、能力進歩を認定しない。
@@ -80,7 +80,9 @@ Classification: **`matched_fixed_episode_32768_frame_staged_training_not_public_
 
 ### Current staged run
 
-忠実な条件を維持したまま学習budgetだけを`131,072 frames/seed`へ増やしたworkflow run `30127967677`は、RESET-E016統合時点で **`in_progress`** である。未完了runの能力値、資源値、trajectory資格、R0.2結果はSTATEへ取り込まない。
+最初の`131,072 frames/seed`実行は、公式learnerの例外ではなく、再現ハーネスの固定`1,200秒` subprocess timeoutで停止した。公式モデル、loss、optimizer、seed、split、schemaは変更せず、frame数に応じたtimeoutとtimeout時raw-log保存だけを追加した。
+
+補正後workflow run `30129717438`はRESET-E017統合時点で **公式recurrent学習stepを実行中** である。未完了runの能力値、資源値、trajectory資格、R0.2結果はSTATEへ取り込まない。
 
 ## R0.2 Environment-first status
 
@@ -118,11 +120,11 @@ R0.2を再開する前に、各seedで次を満たす。
 - train/test utterance overlap、entity/dynamics split overlap
 - gold action、after state、reward、done、post-treatment state、completed trajectory leakage
 - prediction側のimmutable `instance_fingerprint`
-- method × seed × domain × split完全coverage
+- method × seed × domain × split × condition完全coverage
 - duplicate / missing predictionとduplicate method-seed run
-- domain × seed × condition cell統計
+- domain × seed × split × condition cell統計
 - episode-level paired gap、Correct-only / control-only、exact McNemar検定
-- hierarchical cluster-bootstrap 95% CI
+- `seed × domain × split × condition` clusterによるhierarchical bootstrap 95% CI
 - run-level集計値とepisode recordsの再計算一致
 - top-level集計値とrun valuesの再計算一致
 - independently readable raw-log、model、immutable-data files
@@ -133,17 +135,17 @@ R0.2を再開する前に、各seedで次を満たす。
 - canonical seeds `1,7,19`
 - `answer_leakage: false`、`pretrained_language_model: false`の明示
 
-D013から`target_label_shuffle`と`outcome_shuffle`の各prediction rowに、donor `control_source_instance_id`と`control_source_fingerprint`を必須化した。donor存在、self-donor禁止、同一seed/domain/split/condition、fingerprint一致、cell内全単射、固定点なしderangement、donor不正再利用を自動検査し、`shuffle_assignment_audit`を保存する。
+`target_label_shuffle`と`outcome_shuffle`の各prediction rowには、donor `control_source_instance_id`と`control_source_fingerprint`を必須化した。donor存在、self-donor禁止、同一seed/domain/split/condition、fingerprint一致、cell内全単射、固定点なしderangement、donor不正再利用を自動検査し、`shuffle_assignment_audit`を保存する。
 
-**13件の回帰テストは成功した。** 実target-label/outcome shuffle predictionとdonor provenance、target labelが非oracleで定義不能な場合の正式inapplicability記録、immutable serialized test dataset checksum、全cellのraw-log/model/data artifact joinが不足するため、現在の正式分類は **`initial_reproduction_failure`**。
+D014でscoreとartifact双方のセルを`method × seed × domain × split × condition`へ統一し、artifact runの`condition`も必須化した。**15件の回帰テストは成功した。** 実target-label/outcome shuffle predictionとdonor provenance、target labelが非oracleで定義不能な場合の正式inapplicability記録、immutable serialized test dataset checksum、全cellのraw-log/model/data artifact joinが不足するため、現在の正式分類は **`initial_reproduction_failure`**。
 
 ## Prior-art and novelty boundary
 
 未知介入下のnonparametric CRL、unknown multi-node intervention、score-based CRL、subset-intervention causal abstraction、finite-sample few-environment recovery、environment-first instruction following、language-dynamics pretraining、multimodal shared-latent recovery、perturbation-to-intervention modeling、causal sufficiency/necessity、causal-world-modelと言語interfaceは単独では既存範囲である。
 
-さらに、raw languageをauxiliary variableとして用いる識別、正しいtrajectory-language pairとshuffle pairの対比、完全historyを使うtemporal nonlinear ICA、multimodal partial-sharing identifiability、generic symmetry/invariance breaking、multi-view nonlinear ICA、hidden-regime nonlinear ICA、mechanistic-independence、heterogeneous measurement-model identifiabilityも既存境界として除外する。
+さらに、raw languageをauxiliary variableとして用いる識別、正しいtrajectory-language pairとshuffle pairの対比、完全historyを使うtemporal nonlinear ICA、multimodal partial-sharing identifiability、generic symmetry/invariance breaking、multi-view nonlinear ICA、hidden-regime nonlinear ICA、mechanistic-independence、heterogeneous measurement-model identifiability、grouping-based CRL、weakly supervised causal representation、mechanism sparsityも既存境界として除外する。
 
-広い「言語とtrajectoryから未知因果変数を発見する」「言語が補助変数として識別性を与える」「言語とtrajectoryを複数viewとして共有latentを回復する」は中心命題として採用しない。
+広い「言語とtrajectoryから未知因果変数を発見する」「言語が補助変数として識別性を与える」「言語とtrajectoryを複数viewとして共有latentを回復する」「発話pair/group labelで介入partitionを識別する」は中心命題として採用しない。
 
 ## Research-question decision
 
@@ -152,27 +154,29 @@ SILG/RTFMはground-truth latent intervention family、target、mechanism pre/pos
 - **Gate L — 継続・未達:** competent public policyとmatched controlsで、raw languageがstate/action/history/environment identityを超える外部能力を持つか測る。
 - **Gate I empirical track — 正式棄却:** 現在の公開benchmark制約下で共同同定実験を開始しない。研究者がtarget/mechanism ontologyを後付けすることも禁止する。
 - **RQ-001-N5 — 棄却:** empirical joint-identification claimとして閉じる。
-- **RQ-001-T1 — 再狭義化、未採用:** 完全な非言語trajectoryを条件とし、言語を単なるauxiliary/environment/intervention indexとして使う全説明を同値類として除外した後でも、raw utterance間の構成的関係がtrajectory-only causal equivalence classを厳密に細分化できるかを問う。
+- **RQ-001-T1 — 最終理論テストへ狭義化、未採用:** oracle paraphrase、target、environment、group、graph labelを使わず、raw utteranceの観測可能な形式的・関係的構造だけが、完全な非言語trajectoryと任意の有限auxiliary indexを条件とした後にも残るcausal-model symmetryを除去できるかを問う。
 
 C009ではnegative constructionが成立した。可逆変換で結ばれた二つの潜在表現が同一の完全pre/post trajectoryを生成しながら、異なる介入partitionとtarget cardinalityを持てる。言語が環境・介入indexの関数なら追加情報を与えず、この同値性を破れない。
+
+C010では最初のpositive constructionを試したが、発話pair、group、relationがparaphrase、target、factor、class、graph、semantic-equivalence label由来ならweak supervisionであり、auxiliary index、contrastive pair、second viewとして使う場合も既存ICA/CRLへ還元されるため不成立とした。
 
 T1採用に残る必須条件:
 
 1. formal observation modelとtrajectory-only equivalence relation
 2. auxiliary/environment/intervention-index情報によるquotient
-3. domain labelへ還元不能なcompositional language relation
+3. oracle labelへ還元不能なraw utterance relation
 4. correct languageのみでのstrict refinement
 5. 独立介入効果による意味裏付け
-6. 既存ICA/CRL/measurement-identifiabilityと異なる保証
+6. grouping/weak supervision/auxiliary-variable/multi-view/mechanism-sparsityを超える保証
 7. **nontrivial positive construction**
 8. sufficient-condition theorem
 9. exactly one中心命題の事前登録と停止条件
 
-negative constructionは存在するが、positive constructionと定理は存在しない。
+negative constructionは存在するが、nontrivial positive constructionと定理は存在しない。
 
 ## Current maximum bottleneck
 
-**workflow run `30127967677`の131,072-frame公式SILG recurrentを完了・完全検証し、同じimmutable matched protocolでpolicy competenceが成立するか確認する。成立するまでR0.2調整、新規architecture、T1実装を禁止する。**
+**workflow run `30129717438`の131,072-frame公式SILG recurrentを完了・完全検証し、同じimmutable matched protocolでpolicy competenceが成立するか確認する。成立するまでR0.2調整、新規architecture、T1実装を禁止する。**
 
 ## Stage-transition rule
 
@@ -201,4 +205,4 @@ negative constructionは存在するが、positive constructionと定理は存�
 
 ## Last integration
 
-2026-07-25: **RESET-E016**。C009の非識別反例、D013のshuffle donor provenance contract、131,072-frame staged workflowの実行中状態を統合した。未完了runの値は採用せず、最新の完了済み能力証拠は32,768-frame結果のままである。公開能力baselineは0件、R0継続、段階遷移禁止を維持した。
+2026-07-25: **RESET-E017**。C010のpositive construction不成立、D014のsplit×condition評価contract、131,072-frame初回runのharness timeoutと補正後run `30129717438`の実行中状態を統合した。未完了runの値は採用せず、最新の完了済み能力証拠は32,768-frame結果のままである。公開能力baselineは0件、R0継続、段階遷移禁止を維持した。
