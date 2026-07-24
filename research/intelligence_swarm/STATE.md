@@ -47,6 +47,14 @@
 - **Gate L — 継続:** raw languageがstate/action/history/environment identityを超える外部予測・行為情報を持つか、matched public episodesで測定する。
 - **Gate I — 保留:** explicit mechanism pre/post、ground-truth intervention familyまたは理論的に正当化されたcausal abstraction、held-out target/mechanism、permutation-aware評価を持つ公開benchmarkが見つかるまで開始しない。
 
+C005の一次文献監査により、raw trajectoryからのsystem-parameter同定、temporal dataからのpartition＋causal graph同定、partially shared multimodal latentの同定はいずれも既存範囲であることを追加確認した。
+
+残る候補は **RQ-001-N4 — narrowed, not adopted**:
+
+> 独立にmechanism-changing variationを定義する公開benchmark上で、episode-aligned raw languageがtrajectory-only CRLに残る同値類を実際に除去し、より細かいintervention-supported causal abstractionとheld-out mechanism予測改善を生むか。
+
+generic multimodal improvement、context proxy、environment ID推定、reward/history proxyでは不十分。trajectory-only equivalence classを明示し、correct languageがlanguage shuffle・context/reward/history controlを越えてそのclassを厳密に細分化する必要がある。
+
 Gate-I適格benchmarkが見つからなければ、共同同定の実証命題を棄却し、識別不能条件・必要条件の理論研究だけを残す。
 
 ## Pinned public reproduction
@@ -127,15 +135,18 @@ Formal classification: **`initial_reproduction_failure`**。
 - unknown intervention target / unknown multi-node intervention recovery
 - nonparametric causal representation learning under general environments
 - causal abstraction under limited intervention families
+- raw-trajectory system-parameter identifiability
+- temporal partition and causal-graph joint learning
+- partially shared multimodal causal representation identifiability
 - language-conditioned dynamics pretraining
 - environment-first instruction-following pretraining
 - intervention-conditioned or causal response representation
 
-2025〜2026の一次研究は未知介入、一般mixing、少数環境・有限標本、causally disentangled representationまで範囲を拡大している。残る候補差分は、公開interactive trajectory上の言語固有情報と、別のGate-I適格benchmark上のjoint-permutation-aware partition recoveryを厳密に分離した場合に限られる。
+2025〜2026の一次研究は未知介入、一般mixing、少数環境・有限標本、local dynamical structure、temporal partitioning、multimodal partial sharingまで範囲を拡大している。残る候補差分は、公開interactive trajectory上の言語固有情報と、別のGate-I適格benchmark上でlanguageがtrajectory-only equivalence classを厳密に細分化することを分離して示す場合に限られる。
 
 ## Current maximum bottleneck
 
-**paper-scaleまたは収束確認済みSILG recurrent policyを固定公開test setで全controlと比較し、evaluation contractを通すこと。その後、成功または十分なtask competenceを持つtrajectory上でR0.2をonline task success・typed next-state objective・実holdout付きで再現すること。Gate Iは適格公開benchmarkが見つかるまで禁止する。**
+**paper-scaleまたは収束確認済みSILG recurrent policyを固定公開test setで全controlと比較し、evaluation contractを通すこと。その後、成功または十分なtask competenceを持つtrajectory上でR0.2をonline task success・typed next-state objective・実holdout付きで再現すること。Gate Iは適格公開benchmarkが見つかり、trajectory-only equivalence classを定義できるまで禁止する。**
 
 ## Progress rule
 
@@ -155,4 +166,4 @@ Formal classification: **`initial_reproduction_failure`**。
 
 ## Last integration
 
-2026-07-25: **RESET-E011**。R0.1固定初期instance matched smoke、R0.2公開trajectory negative diagnostic、R0-D strict preflight、C004のSILG Gate-I benchmark棄却を統合。R0継続、次stage遷移なし。
+2026-07-25: **C005**。2026年のraw-trajectory identifiability、temporal partition learning、multimodal partial-sharing CRL、partially observed SCMを統合し、RQをN4へ狭義化。Gate Iは適格公開benchmark待ち、新規architecture禁止を維持。
