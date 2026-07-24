@@ -21,6 +21,11 @@ fi
 git -C "$ROOT/silg" fetch --depth 1 origin "$SILG_SHA"
 git -C "$ROOT/silg" checkout --detach "$SILG_SHA"
 
+# SILG imports every optional environment from silg.envs.__init__, so importing
+# RTFM alone otherwise requires NLE, ALFWorld, Messenger and Touchdown. Restrict
+# registration to the selected public benchmark without changing RTFM itself.
+printf '%s\n' 'from silg.envs import rtfm' > "$ROOT/silg/silg/envs/__init__.py"
+
 python -m pip install --extra-index-url https://download.pytorch.org/whl/cpu \
   'torch==1.13.1+cpu' 'torchvision==0.14.1+cpu'
 python -m pip install \
