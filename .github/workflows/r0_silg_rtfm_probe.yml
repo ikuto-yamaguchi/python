@@ -9,6 +9,8 @@ on:
       - 'research/intelligence_swarm/benchmarks/grounded_causal/silg_rtfm_probe.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/run_silg_matched_eval.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/export_silg_policy_trajectories.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/environment_first_baseline.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/SILG_RTFM_REPRO_001.md'
   pull_request:
@@ -17,6 +19,8 @@ on:
       - 'research/intelligence_swarm/benchmarks/grounded_causal/silg_rtfm_probe.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/run_silg_matched_eval.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/export_silg_policy_trajectories.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/environment_first_baseline.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/SILG_RTFM_REPRO_001.md'
   workflow_dispatch:
@@ -24,7 +28,7 @@ on:
 jobs:
   rtfm-public-probe:
     runs-on: ubuntu-22.04
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
 
@@ -80,6 +84,30 @@ jobs:
             --seeds 1 7 19 \
             --episodes 20 \
             2>&1 | tee research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_MATCHED_EVAL.log
+
+      - name: Export public recurrent-policy trajectories and run R0.2 baselines
+        run: |
+          set -euo pipefail
+          : > research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_R02.log
+          for seed in 1 7 19; do
+            data="research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_POLICY_TRAJECTORIES_SEED_${seed}.jsonl"
+            out="research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_ENVIRONMENT_FIRST_SEED_${seed}.json"
+            /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/export_silg_policy_trajectories.py \
+              --silg-root "$RUNNER_TEMP/r0_silg/silg" \
+              --checkpoint "research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_TRAINED_STATE_SEED_${seed}.pt" \
+              --seed "$seed" \
+              --train-episodes 40 \
+              --test-episodes 20 \
+              --out "$data" \
+              2>&1 | tee -a research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_R02.log
+            /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/environment_first_baseline.py \
+              --data "$data" \
+              --out "$out" \
+              --seed "$seed" \
+              --env-epochs 8 \
+              --lang-epochs 8 \
+              2>&1 | tee -a research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_R02.log
+          done
 
       - name: Freeze installed versions
         if: always()
