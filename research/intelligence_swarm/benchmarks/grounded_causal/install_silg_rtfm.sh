@@ -4,6 +4,9 @@ set -euxo pipefail
 ROOT="${1:-$PWD/.r0_silg}"
 SILG_SHA=2af07578e1264029a240fcfb78d4ac0aea16f5de
 RTFM_SHA=58f17955595b5a127c96d045d896fcbcc7d4b570
+EXPMAN_VERSION=0.0.7
+EXPMAN_SHA256=5b778d23d9efdb541d72783d1ecf1482451cc1a476eb7e16fb52d6b2ce1445c6
+EXPMAN_URL=https://files.pythonhosted.org/packages/ac/f7/1963bb15460bf03dc8df94c6d1e9f296eab9e1fe316387b5d3c4c532dee1/expman-0.0.7.tar.gz
 
 mkdir -p "$ROOT"
 python -m pip install --upgrade \
@@ -30,9 +33,23 @@ python -m pip install --extra-index-url https://download.pytorch.org/whl/cpu \
   'torch==1.13.1+cpu' 'torchvision==0.14.1+cpu'
 python -m pip install \
   'gym==0.21.0' 'py-getch==1.0.1' 'pyyaml==6.0.1' \
-  'submitit==1.4.5' 'expman==0.0.7' \
+  'submitit==1.4.5' \
   'vocab>=0.0.4' 'embeddings>=0.0.7' 'revtok>=0.0.3' \
   'transformers==4.30.2'
+
+# PyPI's expman 0.0.7 source distribution contains the SILG-compatible
+# expman.job.SlurmJob API, but its package manifest accidentally omits the
+# requirements.txt read by setup.py. Install the exact verified sdist after
+# restoring that missing empty file; all runtime dependencies are pinned above.
+EXPMAN_ARCHIVE="$ROOT/expman-${EXPMAN_VERSION}.tar.gz"
+EXPMAN_SOURCE="$ROOT/expman-${EXPMAN_VERSION}"
+wget -q "$EXPMAN_URL" -O "$EXPMAN_ARCHIVE"
+printf '%s  %s\n' "$EXPMAN_SHA256" "$EXPMAN_ARCHIVE" | sha256sum -c -
+rm -rf "$EXPMAN_SOURCE"
+tar -xzf "$EXPMAN_ARCHIVE" -C "$ROOT"
+: > "$EXPMAN_SOURCE/requirements.txt"
+python -m pip install --no-deps "$EXPMAN_SOURCE"
+
 python -m pip install --no-deps -e "$ROOT/RTFM"
 python -m pip install --no-deps -e "$ROOT/silg"
 
