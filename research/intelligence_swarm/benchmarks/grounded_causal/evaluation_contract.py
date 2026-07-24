@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 CANONICAL_REQUIRED={"instance_id","domain","seed","split","condition","utterance","state_before","gold_action","gold_state_after"}
-PRED_REQUIRED={"instance_id","method","pred_action","pred_state_after"}
+PRED_REQUIRED={"instance_id","method","instance_fingerprint","pred_action","pred_state_after"}
 REQUIRED_CONTROL_METHODS={"random","language_blind","state_only","target_label_shuffle","outcome_shuffle"}
 HELD_OUT_CONDITIONS={"entity_holdout","dynamics_holdout","language_holdout"}
 FORBIDDEN_MODEL_INPUT_FIELDS={"gold_action","gold_state_after","gold_inverse","answer","label","completed_trajectory","post_treatment_state","state_after","action","reward","done","terminal_observation"}
@@ -141,9 +141,31 @@ def _paired_p(diffs:list[float],trials:int=20000,seed:int=20260724)->float:
         v=abs(statistics.mean(x if rng.random()<.5 else -x for x in xs)); ext+=v>=obs-1e-15
     return (ext+1)/(trials+1)
 
+def _mcnemar_exact(correct_only:int,control_only:int)->float:
+    """Exact two-sided McNemar/binomial p-value for paired binary outcomes."""
+    n=correct_only+control_only
+    if n==0:return 1.0
+    k=min(correct_only,control_only)
+    tail=sum(math.comb(n,i) for i in range(k+1))/(2**n)
+    return min(1.0,2.0*tail)
+
+def _cluster_bootstrap_ci(instance_diffs:dict[tuple[int,str,str],list[float]],trials:int=5000,seed:int=20260724)->tuple[float,float]:
+    """Resample seed/domain/condition cells, then instances within cells."""
+    keys=sorted(instance_diffs)
+    if not keys:return math.nan,math.nan
+    rng=random.Random(seed); vals=[]
+    for _ in range(trials):
+        chosen=[keys[rng.randrange(len(keys))] for _ in keys]; sampled=[]
+        for key in chosen:
+            xs=instance_diffs[key]
+            sampled.extend(xs[rng.randrange(len(xs))] for _ in xs)
+        vals.append(statistics.mean(sampled))
+    vals.sort(); lo=vals[max(0,int(.025*len(vals))-1)]; hi=vals[min(len(vals)-1,int(.975*len(vals)))]
+    return lo,hi
+
 def score(data:list[dict[str,Any]],preds:list[dict[str,Any]])->dict[str,Any]:
     data=adapt_dataset(data); by_id={str(r["instance_id"]):r for r in data}; eval_ids={i for i,r in by_id.items() if str(r["split"]).lower()!="train"}
-    errors=[]; seen=set(); method_ids=defaultdict(set); grouped=defaultdict(list); snapshots=defaultdict(set)
+    errors=[]; seen=set(); method_ids=defaultdict(set); grouped=defaultdict(list); snapshots=defaultdict(set); outcomes=defaultdict(dict)
     for i,p in enumerate(preds,1):
         miss=PRED_REQUIRED-p.keys()
         if miss: errors.append(f"prediction row {i}: missing {sorted(miss)}"); continue
@@ -152,12 +174,13 @@ def score(data:list[dict[str,Any]],preds:list[dict[str,Any]])->dict[str,Any]:
         seen.add(key); gold=by_id.get(iid)
         if gold is None: errors.append(f"prediction row {i}: unknown instance_id={iid}"); continue
         if str(gold["split"]).lower()=="train": errors.append(f"prediction row {i}: prediction supplied for train instance={iid}"); continue
-        expected_fp=instance_fingerprint(gold); supplied=p.get("instance_fingerprint")
-        if supplied is not None and str(supplied)!=expected_fp: errors.append(f"prediction row {i}: instance snapshot mismatch for {iid}/{method}")
-        snapshots[iid].add(str(supplied or expected_fp)); method_ids[method].add(iid)
+        expected_fp=instance_fingerprint(gold); supplied=str(p["instance_fingerprint"])
+        if supplied!=expected_fp: errors.append(f"prediction row {i}: instance snapshot mismatch for {iid}/{method}")
+        snapshots[iid].add(supplied); method_ids[method].add(iid)
         item={"prospective":float(p["pred_state_after"]==gold["gold_state_after"]),"action":float(p["pred_action"]==gold["gold_action"])}
         if "gold_inverse" in gold and "pred_inverse" in p:item["inverse"]=float(p["pred_inverse"]==gold["gold_inverse"])
         grouped[(method,int(gold["seed"]),str(gold["domain"]),str(gold["condition"]))].append(item)
+        outcomes[method][iid]=item
     for iid,fps in snapshots.items():
         if len(fps)!=1: errors.append(f"instance {iid}: methods used different input snapshots")
     coverage={}
@@ -182,11 +205,23 @@ def score(data:list[dict[str,Any]],preds:list[dict[str,Any]])->dict[str,Any]:
     correct={(c["seed"],c["domain"],c["condition"]):c for c in cells if c["method"]=="correct"}; gaps={}
     for ctrl in sorted(methods-{"correct"}):
         cc={(c["seed"],c["domain"],c["condition"]):c for c in cells if c["method"]==ctrl}; gaps[ctrl]={}
+        shared_ids=sorted(eval_ids & method_ids.get("correct",set()) & method_ids.get(ctrl,set()))
         for metric in metrics:
             diffs=[float(correct[k][metric])-float(cc[k][metric]) for k in sorted(correct.keys()&cc.keys()) if metric in correct[k] and metric in cc[k]]
-            if diffs:
-                m,lo,hi=_mean_ci(diffs); gaps[ctrl][metric]={"paired_cells":len(diffs),"mean_gap":m,"min_cell_gap":min(diffs),"max_cell_gap":max(diffs),"positive_cell_fraction":sum(x>0 for x in diffs)/len(diffs),"ci95_low":lo,"ci95_high":hi,"paired_randomization_p_two_sided":_paired_p(diffs),"passes_mean_gap_0_10":m>=.10,"passes_every_cell_positive":min(diffs)>0,"passes_ci_excludes_zero":lo>0}
-    return {"valid":not errors,"errors":errors,"prediction_rows":len(preds),"expected_eval_instances":len(eval_ids),"coverage":coverage,"same_instance_snapshot":not any("snapshot" in e for e in errors),"cells":cells,"summary":dict(summary),"paired_gaps_vs_correct":gaps,"progress_contract":{"required_mean_gap":.10,"requires_all_three_seeds":True,"requires_same_instance_snapshot":True,"requires_complete_prediction_coverage":True,"requires_ci_excludes_zero":True,"internal_metrics_do_not_count":True}}
+            if not diffs:continue
+            inst_by_cell=defaultdict(list); correct_only=control_only=ties=0
+            for iid in shared_ids:
+                a=outcomes["correct"][iid].get(metric); b=outcomes[ctrl][iid].get(metric)
+                if a is None or b is None:continue
+                gold=by_id[iid]; cell_key=(int(gold["seed"]),str(gold["domain"]),str(gold["condition"])); inst_by_cell[cell_key].append(float(a-b))
+                if a>b:correct_only+=1
+                elif b>a:control_only+=1
+                else:ties+=1
+            instance_values=[x for xs in inst_by_cell.values() for x in xs]
+            blo,bhi=_cluster_bootstrap_ci(inst_by_cell) if instance_values else (math.nan,math.nan)
+            m,lo,hi=_mean_ci(diffs)
+            gaps[ctrl][metric]={"paired_cells":len(diffs),"mean_gap":m,"min_cell_gap":min(diffs),"max_cell_gap":max(diffs),"positive_cell_fraction":sum(x>0 for x in diffs)/len(diffs),"ci95_low":lo,"ci95_high":hi,"paired_randomization_p_two_sided":_paired_p(diffs),"paired_instances":len(instance_values),"instance_mean_gap":statistics.mean(instance_values) if instance_values else math.nan,"instance_cluster_bootstrap_ci95_low":blo,"instance_cluster_bootstrap_ci95_high":bhi,"correct_only_instances":correct_only,"control_only_instances":control_only,"tied_instances":ties,"mcnemar_exact_p_two_sided":_mcnemar_exact(correct_only,control_only),"passes_mean_gap_0_10":m>=.10,"passes_every_cell_positive":min(diffs)>0,"passes_ci_excludes_zero":lo>0,"passes_instance_cluster_ci_excludes_zero":blo>0 if not math.isnan(blo) else False}
+    return {"valid":not errors,"errors":errors,"prediction_rows":len(preds),"expected_eval_instances":len(eval_ids),"coverage":coverage,"same_instance_snapshot":not any("snapshot" in e for e in errors),"fingerprints_required":True,"cells":cells,"summary":dict(summary),"paired_gaps_vs_correct":gaps,"progress_contract":{"required_mean_gap":.10,"requires_all_three_seeds":True,"requires_same_instance_snapshot":True,"requires_explicit_instance_fingerprint":True,"requires_complete_prediction_coverage":True,"requires_ci_excludes_zero":True,"requires_instance_cluster_ci_excludes_zero":True,"internal_metrics_do_not_count":True}}
 
 def audit_artifacts(manifest:dict[str,Any],base_dir:Path)->dict[str,Any]:
     errors=[]; warnings=[]; checks=[]; runs=manifest.get("runs")
