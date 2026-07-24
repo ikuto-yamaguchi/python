@@ -59,6 +59,18 @@ Prohibited aliases: domain-local rebirth、mean cross-domain accuracy、best-dom
 Allowed residual use: 候補接地信号の探索、domain difficulty診断、反例生成、次のconsensus testの初期化。
 Unfreeze condition: 2以上の完全語彙非共有domain × 3 seedすべてでprospective・inverse・自由日本語がCorrect > shuffle/randomを実質差0.10以上で示し、factor-selective lesion signatureがdomain間で同符号となること。
 
+## HF-009 — Predefined Consequence Codebook plus Post-selection Creates Semantics
+Status: **FROZEN**
+Root premise: 結果fingerprint、identity/operation/goal channel、response orbitなどの固定codebookを先に作り、cross-domain consensus、transpose近似、cycle closure、selective lesionで後段選別すればsemantic unitへ昇格できる。
+Observed failure:
+- PR367: 2 domain平均では正方向だがD2自由日本語差は+0.0347で、全domain・全seed条件を通らない。
+- PR368: consensus channel 4.67/16を形成してもD/E freeとF goal-changeでCorrect < shuffle、strict gate 0/3。
+- PR369: bidirectional lesion consensus channel 3/16を形成してもforward・inverse・cycle closureの外部能力符号がdomain間で反転、strict gate 0/3。
+- PR370: 3 domain平均のprospective/inverse差はあるがidentity/goal lesion符号がdomain × seedで一致せず、formal eligibility 0/3。
+Prohibited aliases: fixed response codebook、consequence subspace、lesion-transpose code、consensus orbitを先に置き、選別条件だけを増やしてsemantic birthと呼ぶ再試行。
+Allowed residual use: failure diagnosis、counterexample construction、bridge leakage audit、共同創発方式のbaseline。
+Unfreeze condition: 固定codebookなしでlanguage transformationとworld interventionを共同生成し、隠しdomainで同一unitのprospective・inverse・counterfactual能力が成立した後、その圧縮・監査用途としてのみ再評価する。
+
 ## AF-001 — Causal-role Equivalence from Cross-context Behavior
 Status: **ACTIVE, SCOPE REDUCED**
 Question: individual identityではなく因果的役割同値類を形成できるか。
@@ -80,17 +92,21 @@ Current interpretation: relation necessity、座標/index依存除去、factor�
 ## AF-005 — Cross-Domain Consequence-Invariant Grounding
 Status: **ACTIVE, CANDIDATE-SIGNAL SOURCE**
 Root premise: semantic unitは名称・座標・object indexそのものではなく、異なるdomainで保存される選択的結果、失敗修正、inverse応答、non-target保存の共同不変量として形成される。
-Current interpretation: PR363/365で有望な結果指紋信号が得られたが、domain/seed consensus不足。単独ではG1通過に使わず、AF-006の候補生成源に限定する。
+Current interpretation: 有望な結果指紋信号は得られたが、domain/seed consensus不足。単独ではG1通過に使わず、反例生成と共同創発候補の監査に限定する。
 
 ## AF-006 — Cross-Lexicon Selective Consequence Consensus
+Status: **ACTIVE, DIAGNOSTIC SCOPE**
+Root premise: 完全語彙非共有domain間でidentity / operation / goal / wording介入への選択的responseまたはlesion signatureを比較する。
+Current interpretation: PR367〜370により固定codebook上のconsensusはsemantic birthの十分条件ではない。domain/seed failure pattern、factor混線、bridge leakageの診断に限定する。
+
+## AF-007 — Jointly Emergent Language–World Intervention Diagrams
 Status: **ACTIVE PRIORITY**
-Root premise: 再利用可能semantic unitは、単なる結果指紋の平均相関ではなく、完全語彙非共有domain間でidentity / operation / goal / wording介入に対して同じ選択的responseまたはlesion signatureを示す局所因果単位として形成される。
+Root premise: semantic unitを既成の文字span、結果channel、factor slotから選ばず、raw Japanese上の局所変換とworld上の局所介入を同時に生成し、言語変換→world介入とworld介入→言語変換の可換図式を複数domainで閉じる最小変換対として形成する。
 Required evidence:
-1. 2以上の独立opaque domainで語彙、座標、object index、template、乱数系列を分離。
-2. domain対応辞書、共有identity、共有token、手書きslot、文字列検索を禁止。
-3. before+commandからtargetとtransitionをprospectiveに予測。
-4. inverse query、free Japanese、failure repair、twin discriminationを同じunitで満たす。
-5. identity / operation / goal / wording channelの個別介入・lesionで対応能力だけが変化。
-6. domain間で選択的signatureが同符号となる。
-7. 2 domain × 3 seedすべてでCorrect > shuffle/random、暫定実質差0.10以上。
-G1 promotion condition: 上記を同一unitで満たし、post-treatment leakage、domain bridge leakage、seed selection bias監査を通過すること。
+1. 固定identity/operation/goal label、固定結果codebook、対応辞書、共有token、共有IDを用いない。
+2. 介入前worldとraw Japaneseのみからlanguage transformationとworld intervention候補を共同生成する。
+3. Correct diagram、language-transform shuffle、world-transform shuffle、pair shuffle、domain shuffle、randomを比較する。
+4. prospective target×transition、inverse query、counterfactual repair、twin discriminationを同一unitで満たす。
+5. 片domainで選択したunitが完全に隠したopaque domainでも再生成される。
+6. 2以上のopaque domain × 3 seedすべてでCorrect > shuffle/random、暫定実質差0.10以上。
+G1 promotion condition: 同一diagram unitが上記を満たし、post-treatment leakage、domain bridge leakage、predefined-codebook leakage、seed selection bias監査を通過すること。
