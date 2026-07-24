@@ -7,20 +7,22 @@ on:
     paths:
       - '.github/workflows/r0_silg_rtfm_probe.yml'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/silg_rtfm_probe.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/SILG_RTFM_REPRO_001.md'
   pull_request:
     paths:
       - '.github/workflows/r0_silg_rtfm_probe.yml'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/silg_rtfm_probe.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/SILG_RTFM_REPRO_001.md'
   workflow_dispatch:
 
 jobs:
-  rtfm-random-probe:
+  rtfm-public-probe:
     runs-on: ubuntu-22.04
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
@@ -46,16 +48,26 @@ jobs:
           /usr/bin/time -v bash research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh "$RUNNER_TEMP/r0_silg" \
             2>&1 | tee research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_INSTALL.log
 
-      - name: Run three-seed random control and schema probe
+      - name: Run canonical-seed random control and schema probe
         run: |
           set -o pipefail
           /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/silg_rtfm_probe.py \
             --env silg:rtfm_train_s1-v0 \
-            --seeds 0 1 2 \
+            --seeds 1 7 19 \
             --episodes 20 \
             --max-steps 80 \
-            --output research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_RANDOM_3SEED.json \
-            2>&1 | tee research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_PROBE.log
+            --output research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_RANDOM_CANONICAL_3SEED.json \
+            2>&1 | tee research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_RANDOM_CANONICAL.log
+
+      - name: Run official multi recurrent training smoke
+        run: |
+          set -o pipefail
+          /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" \
+            --seeds 1 7 19 \
+            --frames 2048 \
+            --output research/intelligence_swarm/benchmarks/grounded_causal/results \
+            2>&1 | tee research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_RECURRENT_SMOKE.log
 
       - name: Freeze installed versions
         if: always()
