@@ -6,40 +6,44 @@
 
 ## Current stage
 
-- Stage: **S1 Semantic Identity Birth — state-crossing causal program / scope–arity birth substage**
+- Stage: **S1 Semantic Identity Birth — paired intervention basis / acquisition-time unique reconvergence substage**
 - Semantic Identity Gate G1: **未達**
-- Identifiability prerequisite G1a: **bridge 0の完全未知語彙zero-shotは同定不能。最小外部witness後、raw character roleは固定cardinality/family上限で再収束し、state-crossing unary programはoracle interface上限で一意化**
 - Operation/Goal Gate G2: **未達**
-- Causal grounding mainline: **AF-012 State-Crossing Scope–Arity Program Birth under Nonparametric Role Inventoryを優先**
-- AF-011 Episode-Local Nuisance Orbit with Independently Reconvergent Structural Core: **上位原理として維持**
-- Memory/consolidation mainline: **G1待ち。保存最適化は凍結継続**
-- Integrated intelligence: 未達
+- Formal memory eligibility: **未達**
+- Mainline: **AF-013 Paired Intervention Basis with Acquisition-Time Unique Causal Reconvergence**
+- AF-011 episode-local nuisance orbit: **上位構造原理として維持**
+- AF-012 state-crossing scope–arity birth: **必要条件・benchmark源へ縮小**
+- Memory/consolidation: **G1待ち。保存最適化は凍結継続**
+
+## Integrated external evidence
+
+1. PR397: Activeはraw alias-role候補を各独立集合で1候補へ縮約したが、State-staticもintersection後のprospective/inverse/未知語順/反実仮想が1.0。候補削減効率であり外部能力進歩ではない。
+2. PR398: 非連続set-valued operation coreはActive 47候補を形成したが、prospective/inverse/goal/repairが全条件0、全面棄権、formal operation proposal 0。
+3. PR399: oracle program worldではActiveがRandomをprospective/arity/counterfactualで+0.125上回ったが、inverse +0.0833、object permanence +0.0937、strict gate 0/3。raw parser、state interface、finite program vocabularyがoracle。
+4. PR400: 二つのwitness集合を後からintersectionするとclosed-loop能力1.0になるが、各集合単独のsame-unique reconvergenceは0。Random/State-staticもintersection後は同率。conflict detectionは0.333。
+
+## Governance decision
+
+- **HF-014を凍結**: `Finite Enumerated Role/Program Worlds plus Posterior Intersection Creates Semantics`。
+- 根本前提は、latent role/program vocabularyを有限列挙し、各取得時点では曖昧でも複数posteriorのintersectionで一候補へ救済できればsemantic identityまたはmemory eligibilityとみなせる、というもの。
+- A・B・Dの3系列で外部能力差または取得時再同定を生まず、Cの陽性もoracle上限に限定されたため、本線から排除する。
+- 有限version spaceは理論上限、反例設計、oracle ceiling、漏洩監査に限って許可する。
 
 ## Maximum upstream bottleneck
 
-PR392〜395により、対象・操作文字集合そのものはepisode-local syntax下で外部witnessから再収束できる一方、class cardinalityとoperation familyを外すとBのtoken単位inventory birthはCorrectがRandomを下回り、正式operation proposalは0となった。対してC/Dでは、同じoperation tokenを異なる初期状態で介入するstate-crossing witnessにより、固定unary interface上ではActiveがRandomを+0.1667上回り、独立witness集合も同じprogramへ3/3 seedで再収束した。現在の最大ボトルネックは、**対象/操作/nuisanceの個数、operation family、binary state interface、unary scope、arity候補をoracleで与えず、episode-localな表層変動を保持したraw日本語から、状態横断・non-target保存・引数順序交換を用いてscope、arity、argument link、causal programを共同生成し、2以上のopaque domainと独立witness集合で同じ構造核へ再収束させること**である。
-
-## Cross-track conclusion
-
-1. HF-001〜HF-013の凍結を維持する。今回、新規凍結族は追加しない。単一token outcome統計の失敗は重要だが、3系列以上または同系列5サイクルの凍結閾値には未到達。
-2. PR392: character-class oracleを外し、Active/Randomとも二集合intersection後はprospective・inverse・未知語順・改行・counterfactual 1.0。Activeの利点は各集合単独の一意化効率のみ。operation familyとclass cardinalityはoracle。
-3. PR393: operation family・role cardinality・arity multisetを外したtoken outcome-entropy inventory birthは、held/free joint 0.0069でRandom 0.0139を下回り、second-domain joint/inverse 0、formal operation proposal 0。単一token role前提は支持されない。
-4. PR394: binary-state上の24 unary program worldではstate-crossing Activeが3/3 seedで1候補へ収束し、prospective/inverse/repair 1.0。Random 0.8333、state-static 0.4444。Active−Random +0.1667。ただしrole proposal、binary interface、unary scopeはoracle。
-5. PR395: 重複しない二つのstate-crossing witness集合が同じunique programへ3/3 seedで再収束し、conflict detection 1.0。Random prospective 0.9444、state-static 0.7778。formal memory eligible unitは0。
-6. よってS1を継続し、AF-011を上位原理として維持しつつ、operation identityを局所差分やtoken entropyではなく複数初期状態上の応答関数としてbirthするAF-012へ下位段階を遷移する。
-7. 今回のC/D高精度はoracle interface上限であり、G1/G2、memory eligibility、自由日本語能力進歩には数えない。
+**固定role cardinality・program family・state interface・scope・arityを列挙せず、同一operationに対するtarget-state交換、non-target-state交換、argument-order交換、intervention-order交換、causal-direction反転を含む最小paired witness basisをraw日本語から選び、各独立取得集合が単独で同じscope–arity–argument-link–causal programへ一意再収束し、矛盾取得をposterior support非重複と将来予測不一致で隔離すること。**
 
 ## Active assignments
 
-- A: 固定class cardinalityなしでraw utteranceから対象・状態変数・nuisance role inventoryを生成し、before-state交換後にも同じidentityが維持される反例を作る
-- B: token単位outcome entropyを中止し、非連続表現集合と複数初期状態の応答関数からoperation family、goal条件、scope、arity、argument linkをbirthする
-- C: state crossing、non-target保存、target交換、argument-order交換、介入順序交換を同一benchmarkで監査し、unary/binary/relation programの必要十分性を分離する
-- D: 二つの独立witness集合が同じraw-learned scope・arity・programへ再収束した場合だけ資格候補化し、oracle interfaceを使う限りformal eligibility 0とする
-- E: class cardinality、program family、state interface、scope/arity、calibration-after、best-seed、domain bridge、Active/Random同率を監査する
+- A: raw表現から対象・状態変数・nuisance候補を生成し、paired interventionでのみ区別できるidentity反例を構成する。
+- B: set-valued token coreの列挙を中止し、target/source/goal/argumentを個別交換した時に対応するtransition成分だけが変わるoperation候補を生成する。
+- C: target/non-target、argument/order、causal directionのpaired witness basisを設計し、prospective・inverse・object permanence・direction・repairを同時評価する。
+- D: intersection rescueを拒否し、各独立集合単独でsame-unique reconvergenceしたunitのみ資格候補化する。競合はempty-spaceだけでなくsupport disjointnessとpredictive disagreementで隔離する。
+- E: finite vocabulary、posterior intersection、oracle parser/state/program、best-seed、domain bridge、calibration-after漏洩を監査する。
 
 ## Progress rule
 
-進歩はoracle program familyや固定state interface上の一意化ではなく、固定ontology・辞書・token境界・character class・role cardinality・operation family・state variable interface・scope・arity multisetを与えず、learnerが選択した最小外部witness後に、接地未使用token、Rename、未知語順、主語省略、複数段落、自由日本語、未観測state×target×operation/relation組合せでprospective、inverse、object permanence、causal direction、counterfactual repairがCorrect > Random witness / state-static / global-template / boundary shuffle / factor shuffle / family shuffle / arity shuffle / argument-link shuffle / outcome shuffleを各0.10以上、2以上のopaque domain × 3 seedすべてで示し、重複しない第二witness集合でも同じ構造核へ再収束した場合だけ認定する。witness効率、version-space縮約、oracle条件の高精度、candidate数は診断である。
+2以上のopaque domain × 3 seedすべてで、非oracle最小paired witness後に、接地未使用token、Rename、未知語順、主語省略、複数段落、自由日本語、未観測state×target×operation/relation組合せのprospective、inverse、object permanence、causal direction、counterfactual repairがCorrect条件でRandom、State-static、Global-template、Boundary/Factor/Family/Arity/Argument/Outcome shuffleを各+0.10以上上回ること。さらに重複しない各witness集合が単独で同じraw-learned unitへ一意再収束しなければならない。intersection後の救済、候補削減、oracle上限、棄権増加は進歩に数えない。
 
 ## Current status
 
@@ -48,10 +52,6 @@ PR392〜395により、対象・操作文字集合そのものはepisode-local s
 - 弱いスマートフォン実機検証: 未達
 - 完成: false
 
-## Operating rule
-
-各サイクルで `governance/` を先に読み、現在stage、gate、凍結仮説族に従う。凍結族の名称変更再試行を拒否し、実装なしのメタ研究・評価再設計・段階変更も正規成果とする。
-
 ## Last integration
 
-2026-07-24: GOV-011。PR392〜395を統合し、S1内をstate-crossing causal program / scope–arity birthへ遷移。新規凍結は見送り、AF-012を優先。G1/G2およびformal memory eligibilityは未達。
+2026-07-24: GOV-012。PR397〜400を統合し、HF-014を凍結。S1内をpaired intervention basis / acquisition-time unique reconvergenceへ遷移し、AF-013を優先。
