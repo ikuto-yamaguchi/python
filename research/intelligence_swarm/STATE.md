@@ -34,9 +34,20 @@
 
 R0では再現値が原論文または公開実装の許容範囲へ入るまで、新規原理の成功・失敗を主張しない。
 
-## Candidate research question — narrowed, not adopted
+## Candidate research question — narrowed again, not adopted
 
-**RQ-001-N:** On a fixed public interactive benchmark, can raw-language equivalence provide statistically necessary information for recovering a latent intervention partition or abstraction beyond state/action-only models, when environment identity is available for split construction but intervention-target labels, semantic parsers, object slots and pretrained language models are absent?
+**RQ-001-N2:** On a fixed public interactive benchmark, does raw language contain statistically necessary information about an intervention partition or causal abstraction beyond state, action, history and environment identity, and can that information be recovered up to joint permutation without intervention-target labels, semantic parsers, object slots, pretrained language models or supplied perturbation-feature semantics?
+
+The broad `language features -> intervention distribution` formulation is not novel after Generative Intervention Models. Exact latent-variable names and exact utterance-target names are not identifiable under a joint latent/language permutation without an observable anchor. Evaluation must therefore be permutation- or abstraction-aware.
+
+## Causal identifiability audit C002
+
+- Added closest-overlap audit for Generative Intervention Models, Isolated Causal Effects of Natural Language and real-system CRL sanity checking.
+- Added an exact finite counterexample with three latent variables and six joint permutations.
+- All six joint relabelings induce one identical observable table.
+- Exact latent and utterance-target names are therefore not identifiable; recovery is only valid up to joint permutation or a coarser causal abstraction.
+- Required language evidence is now `full - state/action/history-only` on held-out mechanisms, with utterance, transition and target-label shuffles plus rename/paraphrase controls.
+- This is an identifiability restriction, not a new intelligence mechanism or capability result.
 
 ## Pinned reproduction facts
 
@@ -66,7 +77,7 @@ Synthetic fixtureでseed 1/7/19のpipeline smoke testを完了したが、これ
 
 実行sandboxは外部DNSを解決できず、GitHub cloneとACL software archive downloadが失敗した。SILG/RTFM環境、environment data、互換Python 3.7/3.8 runtimeが存在しない。分類は `initial_public_environment_installation_failure`。
 
-次の有効作業は、公式DockerまたはUbuntu x86_64でSILG commitとRTFM環境を固定し、公式shared recurrent baselineを実行した後、同一trajectory・seed 1/7/19でenvironment-first、end-to-end、random、language-blind、state-only、language-shuffle、transition-shuffleを測定すること。
+次の有効作業は、公式DockerまたはUbuntu x86_64でSILG commitとRTFM環境を固定し、公式shared recurrent baselineを実行した後、同一trajectory・seed 1/7/19でenvironment-first、end-to-end、random、language-blind、state-only、history-only、language-shuffle、transition-shuffleを測定すること。
 
 ## Progress rule
 
@@ -85,4 +96,4 @@ R0の進歩は、公開baselineの再現成功、同一benchmark・同一split�
 
 ## Last integration
 
-2026-07-24: **R0.2-CYCLE-001**。Environment-first reproduction harness、SILG trajectory exporter、3-seed resource/control smoke testを追加。公開SILG baseline再現は未完了のためR0継続、新規性・能力進歩の主張なし。
+2026-07-24: **C-AUDIT-002**。GIM等の重複監査、joint latent/language permutation no-go、permutation-aware評価条件を追加。RQ-001をRQ-001-N2へさらに狭義化。公開baseline再現は0件のためR0継続、新規性・能力進歩の主張なし。
