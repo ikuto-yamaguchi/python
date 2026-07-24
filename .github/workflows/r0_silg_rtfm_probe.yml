@@ -11,6 +11,7 @@ on:
       - 'research/intelligence_swarm/benchmarks/grounded_causal/run_silg_matched_eval.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/export_silg_policy_trajectories.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/environment_first_baseline.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_r02_trajectory_eligibility.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/SILG_RTFM_REPRO_001.md'
   pull_request:
@@ -21,6 +22,7 @@ on:
       - 'research/intelligence_swarm/benchmarks/grounded_causal/run_silg_matched_eval.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/export_silg_policy_trajectories.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/environment_first_baseline.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_r02_trajectory_eligibility.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/SILG_RTFM_REPRO_001.md'
   workflow_dispatch:
@@ -108,6 +110,17 @@ jobs:
               --lang-epochs 8 \
               2>&1 | tee -a research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_R02.log
           done
+
+      - name: Audit R0.2 trajectory eligibility
+        if: always()
+        run: |
+          set -o pipefail
+          python research/intelligence_swarm/benchmarks/grounded_causal/audit_r02_trajectory_eligibility.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_POLICY_TRAJECTORIES_SEED_1.jsonl \
+            research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_POLICY_TRAJECTORIES_SEED_7.jsonl \
+            research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_POLICY_TRAJECTORIES_SEED_19.jsonl \
+            --output research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_R02_TRAJECTORY_ELIGIBILITY.json \
+            2>&1 | tee research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_R02_TRAJECTORY_ELIGIBILITY.log || true
 
       - name: Freeze installed versions
         if: always()
