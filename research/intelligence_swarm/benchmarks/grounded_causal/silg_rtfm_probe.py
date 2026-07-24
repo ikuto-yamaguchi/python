@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import platform
 import random
 import resource
@@ -18,18 +17,6 @@ import sys
 import time
 from pathlib import Path
 from typing import Any
-
-
-def encode(value: Any) -> Any:
-    if hasattr(value, "tolist"):
-        return value.tolist()
-    if isinstance(value, dict):
-        return {str(k): encode(v) for k, v in value.items()}
-    if isinstance(value, (list, tuple)):
-        return [encode(v) for v in value]
-    if isinstance(value, (str, int, float, bool)) or value is None:
-        return value
-    return repr(value)
 
 
 def shape_of(value: Any) -> Any:
@@ -74,7 +61,7 @@ def sample_valid_action(obs: Any, action_n: int, rng: random.Random) -> int:
 
 def run_seed(env_id: str, seed: int, episodes: int, max_steps: int) -> dict[str, Any]:
     import gym
-    import silg  # noqa: F401; registration side effect
+    import silg.envs  # noqa: F401; explicit registration side effect
 
     rng = random.Random(seed)
     env = gym.make(env_id)
@@ -139,6 +126,7 @@ def main() -> None:
         import gym
         import torch
         import silg
+        import silg.envs  # noqa: F401
         import rtfm
 
         results = [run_seed(args.env, seed, args.episodes, args.max_steps) for seed in args.seeds]
@@ -152,7 +140,7 @@ def main() -> None:
             "silg": getattr(silg, "__version__", "0.0.1-source"),
             "rtfm": getattr(rtfm, "__version__", "source"),
         }
-    except Exception as exc:  # preserve exact reproducible failure
+    except Exception as exc:
         status = "failed"
         error = {"type": type(exc).__name__, "message": str(exc)}
         results = []
