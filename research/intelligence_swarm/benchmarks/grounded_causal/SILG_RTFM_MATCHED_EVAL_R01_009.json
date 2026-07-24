@@ -1,0 +1,57 @@
+{
+  "workflow_run_id": 30107848065,
+  "artifact_id": 8602443375,
+  "artifact_digest": "sha256:408e95f8c0b682dab398dd52a5694e3bb57533453a33d775d9bd952f55b4ad50",
+  "head_commit": "38b4e9453d5e7823d61ad4fd39c6eb0324af11d3",
+  "classification": "matched_fixed_episode_smoke_not_full_paper_reproduction",
+  "environment": "silg:rtfm_test_s1-v0",
+  "source_pins": {
+    "silg": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
+    "rtfm": "58f17955595b5a127c96d045d896fcbcc7d4b570"
+  },
+  "seeds": [1, 7, 19],
+  "episodes_per_method_seed": 20,
+  "frames_per_training_seed": 2048,
+  "all_initial_streams_match": true,
+  "aggregate": {
+    "correct": {
+      "win_rate": 0.016666666666666666,
+      "return_mean": -1.8819994022448858,
+      "episode_length_mean": 46.76666666666667,
+      "cpu_inference_ms_per_step": 8.12371741924591
+    },
+    "random": {
+      "win_rate": 0.06666666666666667,
+      "return_mean": -1.151333263516426,
+      "episode_length_mean": 15.233333333333334,
+      "cpu_inference_ms_per_step": 0.010905544683179216
+    },
+    "language_blind": {
+      "win_rate": 0.016666666666666666,
+      "return_mean": -1.9086660514275235,
+      "episode_length_mean": 48.1,
+      "cpu_inference_ms_per_step": 8.027521829201255
+    },
+    "state_only": {
+      "win_rate": 0.0,
+      "return_mean": -2.1243325968583426,
+      "episode_length_mean": 57.21666666666667,
+      "cpu_inference_ms_per_step": 7.990361704560594
+    }
+  },
+  "training": {
+    "parameters": 4916915,
+    "untrained_state_dict_bytes": 19694385,
+    "untrained_cpu_forward_ms_per_step": 7.6113905,
+    "seed_1": {"wall_seconds": 26.559937967999986, "peak_rss_kib": 477160, "frames_in_checkpoint": 2080, "model_state_bytes": 19693911, "model_state_sha256": "1d5dfce4dc7a32c94c5544dc7da01319e0f32c6dd0352f78862596cf9052f1c2"},
+    "seed_7": {"wall_seconds": 26.591817771000024, "peak_rss_kib": 493576, "frames_in_checkpoint": 2080, "model_state_bytes": 19693911, "model_state_sha256": "67a9326dd3a2896fca274d8696bd6a1d2459ff21fae6bb1d4f692cda987eac23"},
+    "seed_19": {"wall_seconds": 26.56508782800006, "peak_rss_kib": 454260, "frames_in_checkpoint": 2080, "model_state_bytes": 19693990, "model_state_sha256": "8672cbbdacbf71cb3ab70c3cf4e0477751001c02e71cf3250a9d008c9216f2e1"}
+  },
+  "matched_eval_peak_rss_kib": 298808,
+  "matched_eval_wall_seconds": 124.07131080999989,
+  "pretrained_language_model": false,
+  "answer_leakage": false,
+  "official_full_baseline_completed": false,
+  "capability_progress_claimed": false,
+  "decision": "The matched evaluation path is reproduced, but the 2048-frame recurrent policy is below random and nearly invariant to language removal. Treat this as an undertrained engineering smoke, not a reproduced public capability baseline."
+}
