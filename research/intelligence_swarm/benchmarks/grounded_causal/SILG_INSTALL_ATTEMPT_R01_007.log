@@ -1,0 +1,28 @@
+R0.1 SILG/RTFM installation attempt
+UTC date: 2026-07-24
+Command:
+  git clone https://github.com/vzhong/silg.git /tmp/silg
+
+Observed output:
+  Cloning into '/tmp/silg'...
+  fatal: unable to access 'https://github.com/vzhong/silg.git/': Could not resolve host: github.com
+
+Exit status: 1
+Failure class: initial_public_environment_installation_failure
+Failure stage: source acquisition, before dependency resolution or benchmark execution
+Transient/permanent assessment: environment-specific network/DNS restriction; official repository remains accessible through the GitHub connector, but executable source bytes and environment data cannot be materialized in the runtime.
+
+Verified independently from official repository files:
+- repository branch: main
+- target commit retained by the reconstruction plan: 2af07578e1264029a240fcfb78d4ac0aea16f5de
+- package version: silg 0.0.1
+- python_requires: >=3.7.10
+- reference image: pytorch/pytorch:1.9.0-cuda10.2-cudnn7-runtime
+- RTFM launch: OMP_NUM_THREADS=1 python launch.py --local --envs rtfm
+
+Minimal next correction:
+1. Execute bootstrap_silg_rtfm_r01.sh on an Ubuntu x86_64 host/container with outbound DNS and GitHub access.
+2. Preserve the resolved pip freeze and exact SILG commit.
+3. Run only rtfm_train_s1-v0 / rtfm_test_s1-v0 first.
+4. Export identical episode IDs for official recurrent, random-valid-action, language-blind, state-only and language-shuffle controls.
+5. Do not report public benchmark capability until seed 1/7/19 all finish.
