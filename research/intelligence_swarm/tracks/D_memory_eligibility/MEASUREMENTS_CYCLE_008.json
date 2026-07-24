@@ -1,0 +1,27 @@
+{
+  "cycle": 8,
+  "track": "D_memory_eligibility",
+  "hypothesis": "Independent minimal witness-set consensus is required before memory eligibility; contradictory acquisition must be rejected rather than consolidated",
+  "seeds": [1, 7, 19],
+  "initial_worlds": 576,
+  "raw": [
+    {"single_remaining": 1, "second_remaining": 1, "merged_remaining": 1, "single_unique": 1.0, "dual_consensus": 1.0, "upper_bound_eligible": 1.0, "corrupt_first_remaining": 0, "merged_corrupt_remaining": 0, "conflict_detected": 1.0, "retained_joint": 1.0, "retained_inverse": 1.0, "retained_closed": 1.0, "witnesses_total": 6},
+    {"single_remaining": 1, "second_remaining": 1, "merged_remaining": 1, "single_unique": 1.0, "dual_consensus": 1.0, "upper_bound_eligible": 1.0, "corrupt_first_remaining": 1, "merged_corrupt_remaining": 0, "conflict_detected": 1.0, "retained_joint": 1.0, "retained_inverse": 1.0, "retained_closed": 1.0, "witnesses_total": 6},
+    {"single_remaining": 1, "second_remaining": 1, "merged_remaining": 1, "single_unique": 1.0, "dual_consensus": 1.0, "upper_bound_eligible": 1.0, "corrupt_first_remaining": 1, "merged_corrupt_remaining": 0, "conflict_detected": 1.0, "retained_joint": 1.0, "retained_inverse": 1.0, "retained_closed": 1.0, "witnesses_total": 6}
+  ],
+  "mean": {"single_remaining": 1.0, "second_remaining": 1.0, "merged_remaining": 1.0, "single_unique": 1.0, "dual_consensus": 1.0, "upper_bound_eligible": 1.0, "corrupt_first_remaining": 0.6666666667, "merged_corrupt_remaining": 0.0, "conflict_detected": 1.0, "retained_joint": 1.0, "retained_inverse": 1.0, "retained_closed": 1.0, "witnesses_total": 6.0},
+  "runtime_seconds": 0.022367242,
+  "peak_rss_kib": 109988,
+  "model_bytes_upper_bound": 9216,
+  "estimated_probe_simulations_max": 55296,
+  "answer_leakage": false,
+  "final_test_outcome_used_for_selection": false,
+  "oracle_limitations": ["oracle token segmentation", "known target-operation factorization", "known unary arity", "finite permutation world"],
+  "g1_passed": false,
+  "g2_passed": false,
+  "formal_memory_eligibility_passed": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
