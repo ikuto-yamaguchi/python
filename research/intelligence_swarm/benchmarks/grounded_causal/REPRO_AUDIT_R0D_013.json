@@ -1,0 +1,30 @@
+{
+  "audit_id": "R0D-013",
+  "scope": "shuffle control provenance and same-cell assignment integrity",
+  "contract_commit": "ec7adfb9a68b3068e925535c44b6dedd9be34bfc",
+  "classification": "initial_reproduction_failure",
+  "completed": [
+    "target_label_shuffle and outcome_shuffle now require donor instance provenance",
+    "donor fingerprint must match the immutable evaluation instance",
+    "shuffle donor must remain within the same seed/domain/split/condition cell",
+    "each shuffle cell must be a bijective derangement",
+    "self-shuffle and repeated donor assignments are rejected",
+    "shuffle assignment audit is emitted with per-cell counts"
+  ],
+  "tests": {
+    "command": "python test_evaluation_contract.py",
+    "result": "13 tests passed",
+    "environment": "local standard-library-only fixture"
+  },
+  "remaining_failures": [
+    "current public baseline payload does not contain target_label_shuffle predictions",
+    "current public baseline payload does not contain outcome_shuffle predictions",
+    "current payloads do not provide control_source_instance_id and control_source_fingerprint",
+    "paper-scale public capability baseline remains unreproduced",
+    "complete raw-log/model/immutable-data artifact join remains incomplete"
+  ],
+  "progress_claim": false,
+  "novelty_claim": false,
+  "intelligence_principle_claim": false,
+  "high_school_level_intelligence": "not achieved"
+}
