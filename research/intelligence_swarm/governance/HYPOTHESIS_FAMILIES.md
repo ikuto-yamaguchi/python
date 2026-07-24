@@ -33,13 +33,20 @@ Allowed residual use: 因果的役割同値類候補としてのみ利用。
 ## HF-006 — Post-Treatment Witness Implies Prospective Semantic Identity
 Status: **FROZEN**
 Root premise: 完成trajectoryや行為後scarと日本語の対応で得た再同定能力を、before+commandからのprospective identity能力として扱える。
-Observed failure:
-- PR352: held条件では差が出たが別domainとinverseはchance近傍。
-- PR354: 完成trajectoryでheld 0.2396対shuffle 0.1337だが、prefix1 0.1580、prefix2 0.1892へ縮小し、別domainはchance近傍。
-- PR355: pre-treatment prefixからacquisition・domain・inverse・cross-form consistencyを同時通過するeligible unitは0。
-Prohibited aliases: future trace completion、scar-conditioned selection、completed-trajectory synchronyをprospective groundingと呼ぶ再試行。
+Observed failure: PR352〜355でfuture censor、別domain、inverse、eligibility gateを通過しない。
 Allowed residual use: retrospective re-identification、episode監査、取得後の照合。
-Unfreeze condition: 介入後featureを完全にcensorし、未知表現・別domainのprospective predictionとinverse queryでCorrect > shuffle/randomを示すこと。
+
+## HF-007 — Structural Equivariance or Factorization Alone Creates Cross-Domain Semantics
+Status: **FROZEN**
+Root premise: 介入前relation、座標変換可換性、identity/operation/goal因子分離を満たせば、追加のcross-domain接地信号なしでも同じsemantic unitを別語彙・別sensor domainへ再生成できる。
+Observed failure:
+- PR357: domain joint Correct 0.0625 = shuffle 0.0625。
+- PR358: heldの一部以外はchance近傍で、自由日本語Factorized 0.0000 < shuffle 0.0556、domain差も小さい。
+- PR359: domain Equivariant 0.0389 = shuffle 0.0389。
+- PR360: domain joint Correct 0.0500 < shuffle 0.0667、strict seed pass 0/3、eligible unit 0。
+Prohibited aliases: paired-coordinate equivariance、anonymous factor separation、relation-only prospective bindingを、cross-domain semantic groundingと呼ぶ再試行。
+Allowed residual use: coordinate/index依存除去、混線診断、必要条件のablation。
+Unfreeze condition: domain対応辞書・共有IDなしで、未知domainのprospective target×transitionとinverse queryがCorrect > shuffle/randomを3 seedすべてで実質的に示すこと。
 
 ## AF-001 — Causal-role Equivalence from Cross-context Behavior
 Status: **ACTIVE, SCOPE REDUCED**
@@ -52,17 +59,21 @@ Question: 潜在同一性を識別可能にする最小観測・行為系列を�
 ## AF-003 — Symmetry-Breaking Witness Grounding
 Status: **ACTIVE, RETROSPECTIVE SCOPE**
 Root premise: trajectory continuity、不可逆痕跡、個体履歴は置換対称性を壊す。
-Evidence: PR349/350、およびPR352のheld retrospective signal。
 Current interpretation: synthetic観測側および完成trajectoryによるretrospective re-identificationには限定支持。G1通過には数えない。
 
 ## AF-004 — Pre-Treatment Relational Change Grounding
+Status: **ACTIVE, NECESSARY-CONDITION DIAGNOSTIC**
+Root premise: 介入前に観測可能な対象間関係とcommandが選択的な将来変化を予測する。
+Current interpretation: relation necessity、座標/index依存除去、factor混線診断には有効だが、cross-domain semantic identityの十分条件ではない。
+
+## AF-005 — Cross-Domain Consequence-Invariant Grounding
 Status: **ACTIVE PRIORITY**
-Root premise: semantic identityは、介入後の完成witnessではなく、介入前に観測可能な対象間関係・履歴prefixとcommandが予測する選択的な将来変化として形成される。
+Root premise: semantic unitは名称・座標・object indexそのものではなく、異なるdomainで保存される選択的結果、失敗修正、inverse応答、non-target保存の共同不変量として形成される。
 Required evidence:
-1. candidate featureは介入前時点のみ。
-2. before+commandからtargetとafterをprospectiveに予測。
-3. held paraphrase、rename、未知語順、主語省略、複数段落、自由日本語、別domainで再生成。
-4. inverse query、対象交換時support移動、non-target保存を同じunitで満たす。
-5. Correctがidentity/relation/temporal shuffleとrandomを3 seed以上で実質的に上回る。
-6. same identity/different operation等の四方向対照でidentity・operation・goalを分離。
-G1 promotion condition: 上記のprospective・inverse・domain条件を同時に満たし、post-treatment leakage監査を通過すること。
+1. 学習domainと評価domainで語彙、座標、object index、surface templateを分離。
+2. domain対応辞書、共有identity、手書きslot、文字列検索を禁止。
+3. before+commandからtargetとtransitionをprospectiveに予測。
+4. inverse query、goal変更、failure repair、twin discrimination、non-target保存を同じunitで満たす。
+5. Correctをidentity/operation/goal/domain shuffleとrandomへ比較。
+6. 3 seedすべてで未知domain Correct > shuffle/random、暫定実質差0.10以上。
+G1 promotion condition: prospective・inverse・domain条件を同時に満たし、post-treatment leakageとdomain bridge leakage監査を通過すること。
