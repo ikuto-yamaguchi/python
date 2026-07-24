@@ -1,0 +1,18 @@
+{
+  "cycle": "C_CAUSAL_GROUNDING_002",
+  "hypothesis": "Pre-Treatment Witness Necessity for Prospective Causal Identity",
+  "seeds": [1, 7, 19],
+  "chance": 0.125,
+  "per_seed": [
+    {"seed":1,"held":{"full":0.22395833333333334,"prefix1":0.09895833333333333,"prefix2":0.17708333333333334,"future_only":0.13020833333333334,"scar_only":0.125},"domain":{"full":0.16666666666666666,"prefix1":0.16145833333333334,"prefix2":0.15625,"future_only":0.21354166666666666,"scar_only":0.13020833333333334},"shuffle_full":{"held":0.140625,"domain":0.11979166666666667}},
+    {"seed":7,"held":{"full":0.296875,"prefix1":0.16666666666666666,"prefix2":0.1875,"future_only":0.19791666666666666,"scar_only":0.16145833333333334},"domain":{"full":0.13541666666666666,"prefix1":0.13020833333333334,"prefix2":0.13541666666666666,"future_only":0.0625,"scar_only":0.13020833333333334},"shuffle_full":{"held":0.13020833333333334,"domain":0.125}},
+    {"seed":19,"held":{"full":0.19791666666666666,"prefix1":0.20833333333333334,"prefix2":0.203125,"future_only":0.14583333333333334,"scar_only":0.11458333333333333},"domain":{"full":0.140625,"prefix1":0.140625,"prefix2":0.11979166666666667,"future_only":0.109375,"scar_only":0.13541666666666666},"shuffle_full":{"held":0.13020833333333334,"domain":0.125}}
+  ],
+  "mean": {
+    "held": {"full":0.23958333333333334,"prefix1":0.1579861111111111,"prefix2":0.1892361111111111,"future_only":0.1579861111111111,"scar_only":0.13368055555555555},
+    "domain": {"full":0.14756944444444445,"prefix1":0.14409722222222224,"prefix2":0.1371527777777778,"future_only":0.1284722222222222,"scar_only":0.13194444444444445},
+    "shuffle_full": {"held":0.13368055555555555,"domain":0.1232638888888889}
+  },
+  "resources": {"matrix_bytes_float32_estimate":98304,"runtime_seconds_total":10.507347652999997,"peak_rss_kib_python_runtime_included":177268,"candidate_scoring_ops_estimate":24576,"candidate_count":8,"complexity":"O(K*T*W)"},
+  "leakage_audit": {"identity_label_used_in_training":false,"span_boundaries_generated":false,"final_test_outcome_used_for_training":false,"post_treatment_witness_explicitly_censored":true}
+}
