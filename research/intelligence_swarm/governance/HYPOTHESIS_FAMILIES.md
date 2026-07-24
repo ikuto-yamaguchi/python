@@ -80,6 +80,18 @@ Prohibited aliases: zero-shot opaque transfer、bridge-free semantic rebirth、�
 Allowed residual use: 理論chance監査、漏洩検出、witness必要量の下限測定。
 Unfreeze condition: 外部世界またはデータ生成過程に置換対称性を破る観測可能な非対称性が存在することを形式的・実測的に示すこと。
 
+## HF-013 — One Global Surface Form Defines the Semantic Structure
+Status: **FROZEN**
+Root premise: 同じ意味単位を表す全episodeは、一つの固定segmentation、token order、prefix/suffix/interleave/reverse形式、または単一global parserへ適合しなければならず、そのglobal formに合わない候補を消去すればsemantic structureが得られる。
+Observed failure:
+- PR387: 固定二因子連結上限でも3 witness後に2仮説が残り、Active-Random差は最大+0.0769。
+- PR388: mixed-order datasetへglobal formを強制するとActiveが2/3 seedで真候補を破壊し、prospective 0.2222でRandom 0.3819を下回る。
+- PR389: 同じデータでsurface formをepisode-local nuisance orbitとして周辺化すると真候補生存1.0、prospective 0.9583、inverse 1.0、counterfactual 0.9740へ回復。
+- PR390: local syntax下では二つの独立witness集合がActiveで3/3 seed同じunique構造へ再収束する一方、表層形そのものはidentity資格に不要。
+Prohibited aliases: universal word-order template、single canonical segmentation、one parser per semantic unit、global syntax class、共通surface skeletonを先に固定して候補を消去する方式。
+Allowed residual use: global-template control、漏洩監査、表層変動の難度診断。
+Unfreeze condition: 自然な自由日本語の複数domain・3 seedで、global formがepisode-local orbitよりheld-out外部能力を0.10以上一貫して上回り、真候補supportを失わないこと。
+
 ## AF-001 — Causal-role Equivalence from Cross-context Behavior
 Status: **ACTIVE, SCOPE REDUCED**
 Question: individual identityではなく因果的役割同値類を形成できるか。
@@ -121,14 +133,19 @@ Root premise: 全候補不適合episodeのlanguage/world residualから新しい
 Current interpretation: bridge 0同定不能条件での主探索から外し、AF-010で同定可能なwitness条件が確立した後の候補生成補助として比較する。
 
 ## AF-010 — Minimal-Witness Joint Segmentation–Arity–Orbit Grounding
-Status: **ACTIVE PRIORITY**
+Status: **ACTIVE, OVERARCHING MAINLINE**
 Root premise: 意味単位はbridge 0で推測するのではなく、raw Japaneseのsegmentation、対象／操作／関係factorization、可変arity、causal mappingの共同version spaceを、learnerが選んだ最小外部witnessで分割することにより誕生する。
+Current interpretation: global surface formはHF-013として凍結し、surface nuisanceを局所orbitとして保持した構造核同定へ具体化する。
+
+## AF-011 — Episode-Local Nuisance Orbit with Independently Reconvergent Structural Core
+Status: **ACTIVE PRIORITY**
+Root premise: 語順、余剰語、省略、段落構造、局所segmentation候補はepisodeごとに変動し得るnuisance orbitとして保持し、意味identityはそれらを越えて独立witness集合が再同定する最小のsegmentation/factorization/arity/argument-link/causal-mapping構造核として誕生する。
 Required evidence:
-1. 固定ontology、対応辞書、shared token/ID、oracle token境界、oracle factorization、oracle arityを正式条件で使わない。
-2. raw Japaneseの複数segmentation、unary/binary以上のarity、target/operation/relation mappingを同時に保持する。
-3. Active / Random witness、boundary shuffle、factor shuffle、arity shuffle、outcome shuffle、oracle-structure upper boundを比較する。
-4. calibration witnessとfinal評価を分離し、final outcomeをwitness選択・構造生成・rankingへ使わない。
-5. 最小witness後、接地未使用token、Rename、未知語順、主語省略、複数段落、自由日本語、未観測factor組合せでprospective・inverse・counterfactual composition/repairを評価する。
-6. 重複しない第二witness集合でも同じsegmentation・arity・mappingへ再収束し、矛盾witnessを上書きせずconflictとして隔離する。
-7. 2以上のopaque domain × 3 seedすべてでCorrectが全対照を0.10以上上回る。
-G1/G2 promotion condition: 同一のraw-learned unitが上記を満たし、oracle-structure leakage、calibration-after leakage、domain bridge、seed selection bias監査を通過すること。
+1. 固定ontology、辞書、shared token/ID、oracle token境界、oracle character class、oracle operation family、oracle arity multisetを正式条件で使わない。
+2. global-template controlとepisode-local orbitを同じdataset・seed・witness budgetで比較する。
+3. 二つの重複しないwitness集合が、表層orbitは異なっても同じ構造核へ独立再収束する。
+4. 接地未使用token、Rename、未知語順、主語省略、複数段落、自由日本語、未観測factor組合せでprospective・inverse・counterfactual composition/repairを評価する。
+5. argument-link、factor、arity、boundary、outcomeの各shuffleが対応能力を選択的に低下させる。
+6. ActiveがRandomおよび全shuffleを各0.10以上上回り、2以上のopaque domain × 3 seedすべてで成立する。
+7. calibration outcomeはwitness更新にのみ使用し、final outcomeを候補生成・選択・rankingへ使わない。
+G1/G2 promotion condition: 同じraw-learned構造核が上記を満たし、独立再収束、conflict quarantine、oracle/global-template/domain bridge/best-seed leakage監査を通過すること。
