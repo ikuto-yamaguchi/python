@@ -1,0 +1,90 @@
+{
+  "status": "completed_negative_staged_reproduction",
+  "classification": "matched_fixed_episode_32768_frame_staged_training_not_public_capability_reproduction",
+  "workflow_run_id": 30120620610,
+  "workflow_head_sha": "cc2763a78e51c50fe6bb258e046fe33aa772ff4c",
+  "artifact": {
+    "id": 8607725350,
+    "name": "r0-silg-rtfm-probe-30120620610",
+    "size_bytes": 73259322,
+    "sha256": "662139632c73082f096154d819bef20f86f672d4e8f5b36f8667d754b6b751d2"
+  },
+  "source_pins": {
+    "silg": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
+    "rtfm": "58f17955595b5a127c96d045d896fcbcc7d4b570"
+  },
+  "environment": {
+    "train": "silg:rtfm_train_s1-v0",
+    "test": "silg:rtfm_test_s1-v0"
+  },
+  "seeds": [1, 7, 19],
+  "frames_per_seed": 32768,
+  "model": {
+    "parameters": 4916915,
+    "trainable_parameters": 4916915,
+    "state_dict_bytes": 19694385,
+    "cpu_forward_latency_ms_per_step": 6.91142888,
+    "completed": true,
+    "state_dict_sha256": "084c70b2d4d5835879d2f1a6ff179d40f9b32bb8618e72cdc0259b77b56c6dd3"
+  },
+  "training": {
+    "per_seed": [
+      {
+        "seed": 1,
+        "frames_checkpoint": 32800,
+        "wall_seconds": 341.905868576,
+        "peak_rss_kib": 480076,
+        "model_state_bytes": 19693911,
+        "model_state_sha256": "207c036c0fed9415a29ddc5cb60b1578e4696aa249a35aa7285b028b586c5bc3",
+        "log_sha256": "03d74c11339f278411c486e37b5874c4916cf9048c1f02a155a241204075be68"
+      },
+      {
+        "seed": 7,
+        "frames_checkpoint": 32800,
+        "wall_seconds": 346.898394104,
+        "peak_rss_kib": 505600,
+        "model_state_bytes": 19693911,
+        "model_state_sha256": "10580b2369b15a5e73b687107b85a4e51d7aa44a65789e8800fd60eb544b3a93",
+        "log_sha256": "ae8473d14d8ac2d3a08c18c727e0aa4896a7d95677e3ff16a1ea8de90ba40785"
+      },
+      {
+        "seed": 19,
+        "frames_checkpoint": 32800,
+        "wall_seconds": 341.8818108580001,
+        "peak_rss_kib": 483056,
+        "model_state_bytes": 19693990,
+        "model_state_sha256": "5c38b4927ac3d1f26d1aae0f8f0bad6b320713cc7cb5fcfdbae9ee13b626082d",
+        "log_sha256": "7ae749df052f39544b6e4a221e024d7306063d000e6791e96163a46e503b40b2"
+      }
+    ],
+    "total_wall_seconds": 1033.885407421,
+    "max_peak_rss_kib": 505600
+  },
+  "matched_eval": {
+    "episodes_per_method_seed": 20,
+    "all_initial_streams_match": true,
+    "methods": {
+      "correct": {"win_rate": 0.016666666666666666, "return_mean": -1.8826660692691803, "episode_length_mean": 46.800000000000004, "cpu_inference_ms_per_step": 7.228603584740757},
+      "random": {"win_rate": 0.06666666666666667, "return_mean": -1.151333263516426, "episode_length_mean": 15.233333333333334, "cpu_inference_ms_per_step": 0.008054666892718878},
+      "language_blind": {"win_rate": 0.016666666666666666, "return_mean": -2.0416659633318583, "episode_length_mean": 54.75, "cpu_inference_ms_per_step": 4.42428123706945},
+      "state_only": {"win_rate": 0.016666666666666666, "return_mean": -2.19633252620697, "episode_length_mean": 62.48333333333333, "cpu_inference_ms_per_step": 4.102767188081117},
+      "language_shuffle": {"win_rate": 0.016666666666666666, "return_mean": -1.9346660335858663, "episode_length_mean": 49.4, "cpu_inference_ms_per_step": 7.252066691483073}
+    },
+    "correct_minus_controls": {
+      "random": {"win_rate": -0.05, "return_mean": -0.7313328057527544, "episode_length_mean": 31.56666666666667},
+      "language_blind": {"win_rate": 0.0, "return_mean": 0.158999894062678, "episode_length_mean": -7.949999999999996},
+      "state_only": {"win_rate": 0.0, "return_mean": 0.3136664569377896, "episode_length_mean": -15.683333333333323},
+      "language_shuffle": {"win_rate": 0.0, "return_mean": 0.051999964316685965, "episode_length_mean": -2.5999999999999943}
+    },
+    "peak_rss_kib": 302116,
+    "total_wall_seconds": 136.6017267589998,
+    "answer_leakage": false,
+    "pretrained_language_model": false
+  },
+  "decision": {
+    "public_capability_baseline_reproduced": false,
+    "capability_progress_claimed": false,
+    "reason": "Correct win rate remained below random and equal to language-blind/state-only/language-shuffle at 1/60 wins; 32,768 frames is staged engineering budget, not paper-scale reproduction.",
+    "next_minimum_change": "Increase only official recurrent training budget or faithful reproduction condition; keep identical fixed episodes and controls. Do not tune R0.2 or add mechanisms."
+  }
+}
