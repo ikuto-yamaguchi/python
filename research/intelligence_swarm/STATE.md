@@ -14,7 +14,7 @@
 - 再現済み外部baseline: **0**
 - 査読可能な中心命題: **未確立**
 - Active mechanism family: **なし**
-- AF-014 transformation-indexed equivariance: **PAUSED**
+- AF-001〜AF-014: **PAUSED**
 - A〜Dの新規toy仮説生成: **停止**
 - Memory/consolidation最適化: **停止継続**
 
@@ -47,20 +47,36 @@
 
 R0では再現値が原論文または公開実装の許容範囲へ入るまで、新規原理の成功・失敗を主張しない。
 
-## Candidate research question — not a novelty claim
+## Candidate research question — narrowed, not adopted
 
-**RQ-001: Can latent intervention targets and raw-language equivalence classes be jointly identified from interactive trajectories when neither a semantic parser nor intervention-axis labels are supplied?**
+**RQ-001-N:** On a fixed public interactive benchmark, can raw-language equivalence provide statistically necessary information for recovering a latent intervention partition or abstraction beyond state/action-only models, when environment identity is available for split construction but intervention-target labels, semantic parsers, object slots and pretrained language models are absent?
 
-既存研究には以下が別々に存在する。
+## Latest prior-art consequence
 
-- interventional causal representation learning
-- unknown multi-node intervention identifiability
-- environment-first instruction grounding
-- incremental action-observation grounding
+2025〜2026の一次文献監査により、次は既に独立に研究されていることを確認した。
+
+- unknown intervention target下の非パラメトリック識別可能性
+- arbitrary-subset interventionからのcausal abstraction識別
+- 少数環境・有限標本でのunknown multi-node target回復
 - multi-domain interactive language grounding
-- Japanese real-world reference grounding
+- language-conditioned dynamics pretraining
+- 実世界日本語のcrossmodal reference grounding
 
-現時点では、これらの交差領域が未解決である可能性があるだけであり、新規性は主張しない。体系的文献監査とbaseline reproduction後に、既存研究が同じ問題を既に解いていない場合のみ正式仮説へ昇格する。
+したがって、`unknown intervention target`、`language-conditioned dynamics`、`multi-environment grounding`のいずれか単独では新規性にならない。正確な低レベル変数identityではなく、共有置換またはcausal abstractionまでしか識別できない可能性も正式に許容する。
+
+## Pinned reproduction facts
+
+- SILG: PyPI `silg==0.0.1`、2021-10-20公開、Python `>=3.7.10`、MIT。
+- SILGは個別環境の導入、依存install、environment data取得が必要。初回対象はRTFMまたはMessengerに限定する。
+- SILG official experiment entrypoint: `run_exp.py` / `launch.py`。
+- J-CRe3: official public repository `riken-grp/J-CRe3`、公開メタデータ上のavailable dateは2026-04-06。
+- J-CRe3は日本語realism auditであり、R0.1の因果・行為baselineの代替ではない。
+
+## Current blocker
+
+**公開baselineの実行値がまだ1件もない。**
+
+次の統合作業は、新しい理論名やモデルを作ることではなく、SILG RTFMまたはMessengerの環境pinning、公式shared recurrent baselineの実行、random/language-blind/state-only対照の同一seed測定である。
 
 ## Progress rule
 
@@ -75,7 +91,7 @@ R0の進歩は以下のみ。
 
 ## Canonical branch policy
 
-今後の研究は一本のcanonical reconstruction branchから進める。過去のstacked draft PRは反証archiveとして保持し、新しい実験のbaseには使用しない。
+今後の研究は一本のcanonical reconstruction branchから進める。過去のstacked draft PRはnegative-results archiveとして保持し、新しい実験のbaseには使用しない。
 
 ## Current status
 
@@ -86,4 +102,4 @@ R0の進歩は以下のみ。
 
 ## Last integration
 
-2026-07-24: **RESET-001**。旧A〜E toy hypothesis loopを停止し、研究段階をR0 prior-art / reproduction / benchmark constructionへ戻した。
+2026-07-24: **RESET-E008**。2025〜2026のCRL一次文献と公式benchmark公開情報を追加監査し、RQ-001をRQ-001-Nへ狭義化した。新規性は未確立、baseline再現0件のためR0継続。
