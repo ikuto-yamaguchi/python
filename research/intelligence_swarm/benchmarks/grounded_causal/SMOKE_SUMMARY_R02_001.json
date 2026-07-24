@@ -1,0 +1,21 @@
+{
+  "status": "synthetic_fixture_smoke_only_not_public_silg_reproduction",
+  "seeds": [1, 7, 19],
+  "environment": {"python": "3.13.5", "torch": "2.10.0+cpu", "threads": 1},
+  "environment_first": {
+    "correct": {"task_success": 0.0041666667, "action_accuracy": 0.5027777778, "next_state_mse": 0.2122622477, "cpu_inference_ms_per_item": 0.0441167539},
+    "language_blind": {"task_success": 0.0, "action_accuracy": 0.2527777778, "next_state_mse": 0.2116976314},
+    "language_shuffle": {"task_success": 0.0013888889, "action_accuracy": 0.2666666667, "next_state_mse": 0.2169729378},
+    "model_bytes": 116384,
+    "train_seconds": 1.0915056433
+  },
+  "end_to_end": {
+    "correct": {"task_success": 0.2069444444, "action_accuracy": 0.4097222222, "next_state_mse": 0.1095385657, "cpu_inference_ms_per_item": 0.0436762782},
+    "language_blind": {"task_success": 0.0805555556, "action_accuracy": 0.2333333333, "next_state_mse": 0.1068310049},
+    "language_shuffle": {"task_success": 0.0972222222, "action_accuracy": 0.2333333333, "next_state_mse": 0.1106789304},
+    "model_bytes": 107840,
+    "train_seconds": 0.9039917677
+  },
+  "peak_rss_kib_mean": 388858.6667,
+  "interpretation": "Pipeline smoke test only. Values must not be used as research progress or SILG reproduction evidence."
+}
