@@ -1,0 +1,36 @@
+{
+  "audit_id": "R0D-014",
+  "classification": "initial_reproduction_failure",
+  "completed_change": "split_condition_cell_integrity",
+  "contract_changes": {
+    "score_cells_include_split": true,
+    "paired_statistics_cluster_by_seed_domain_split_condition": true,
+    "artifact_manifest_condition_required": true,
+    "artifact_cartesian_axes": [
+      "method",
+      "seed",
+      "domain",
+      "split",
+      "condition"
+    ],
+    "condition_cell_collapse_rejected": true
+  },
+  "regression_tests": {
+    "count": 15,
+    "status": "passed",
+    "runtime_seconds": 2.776,
+    "environment": "standard_library_only"
+  },
+  "remaining_failures": [
+    "target-label shuffle real predictions and donor provenance are not yet joined to immutable evaluation artifacts",
+    "outcome shuffle real predictions and donor provenance are not yet joined to immutable evaluation artifacts",
+    "paper-scale public capability baseline has not been reproduced",
+    "complete raw-log/model/data manifest for every method x seed x domain x split x condition cell is unavailable"
+  ],
+  "claims": {
+    "capability_progress": false,
+    "novelty": false,
+    "new_intelligence_principle": false,
+    "high_school_level": false
+  }
+}
