@@ -61,11 +61,11 @@ def sample_valid_action(obs: Any, action_n: int, rng: random.Random) -> int:
 
 def run_seed(env_id: str, seed: int, episodes: int, max_steps: int) -> dict[str, Any]:
     import gym
-    import silg.envs  # noqa: F401; explicit registration side effect
+    import silg.envs.rtfm  # noqa: F401; register only RTFM, not optional envs
 
     rng = random.Random(seed)
     env = gym.make(env_id)
-    action_n = int(getattr(env.action_space, "n", len(env.action_space)))
+    action_n = int(env.action_space.n) if hasattr(env.action_space, "n") else len(env.action_space)
     returns: list[float] = []
     wins = 0
     lengths: list[int] = []
@@ -126,7 +126,7 @@ def main() -> None:
         import gym
         import torch
         import silg
-        import silg.envs  # noqa: F401
+        import silg.envs.rtfm  # noqa: F401
         import rtfm
 
         results = [run_seed(args.env, seed, args.episodes, args.max_steps) for seed in args.seeds]
