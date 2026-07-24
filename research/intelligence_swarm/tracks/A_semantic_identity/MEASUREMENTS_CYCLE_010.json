@@ -1,0 +1,72 @@
+{
+  "cycle": 10,
+  "hypothesis": "Independent-Witness Raw Character-Class Birth under Episode-Local Syntax",
+  "seeds": [1, 7, 19],
+  "summary": {
+    "active": {
+      "survivors_1": 1.0,
+      "survivors_2": 1.0,
+      "intersection": 1.0,
+      "true_support_1": 1.0,
+      "true_support_2": 1.0,
+      "same_unique": 1.0,
+      "prospective": 1.0,
+      "inverse": 1.0,
+      "unknown_order": 1.0,
+      "paragraph": 1.0,
+      "counterfactual": 1.0,
+      "model_bytes": 18.0
+    },
+    "random": {
+      "survivors_1": 2.0,
+      "survivors_2": 2.0,
+      "intersection": 1.0,
+      "true_support_1": 1.0,
+      "true_support_2": 1.0,
+      "same_unique": 0.0,
+      "prospective": 1.0,
+      "inverse": 1.0,
+      "unknown_order": 1.0,
+      "paragraph": 1.0,
+      "counterfactual": 1.0,
+      "model_bytes": 18.0
+    },
+    "outcome_shuffle": {
+      "survivors_1": 0.0,
+      "survivors_2": 0.0,
+      "intersection": 0.0,
+      "prospective": 0.0,
+      "inverse": 0.0,
+      "unknown_order": 0.0,
+      "paragraph": 0.0,
+      "counterfactual": 0.0
+    },
+    "factor_shuffle": {
+      "survivors_1": 1.0,
+      "survivors_2": 1.0,
+      "intersection": 1.0,
+      "prospective": 0.3571428571,
+      "inverse": 0.3571428571,
+      "unknown_order": 0.389957265,
+      "paragraph": 0.3259259259,
+      "counterfactual": 0.3571428571
+    }
+  },
+  "strict_progress_seeds": 0,
+  "semantic_identity_gate": false,
+  "failure_classification": "oracle_operation_family_and_cardinality_upper_bound",
+  "candidate_count": 20160,
+  "model_bytes_mean": 18.0,
+  "peak_rss_kib": 113656,
+  "runtime_seconds": 7.113379246,
+  "estimated_ops": "O(2*B*H*Q), H=20160, B=5, plus held-out voting",
+  "answer_leakage": false,
+  "character_class_oracle": false,
+  "operation_family_oracle": true,
+  "fixed_ontology": false,
+  "rag": false,
+  "external_llm": false,
+  "weak_smartphone_verified": false,
+  "highschool_level_passed": false,
+  "completion": false
+}
