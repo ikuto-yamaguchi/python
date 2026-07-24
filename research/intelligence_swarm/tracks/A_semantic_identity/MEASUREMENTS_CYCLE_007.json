@@ -1,0 +1,39 @@
+{
+  "cycle": 7,
+  "hypothesis": "Intervention-Born Semantic Identity from Minimal Discriminating Action Sets",
+  "seeds": [1, 7, 19],
+  "chance": {"joint": 0.03125, "target": 0.25, "inverse": 0.25},
+  "summary": {
+    "d1_held": {"active": [0.0277777778, 0.3541666667, 0.1666666667], "random": [0.0277777778, 0.4027777777, 0.2083333333], "shuffle": [0.0347222222, 0.2708333333, 0.2291666667]},
+    "d1_free": {"active": [0.0277777778, 0.2777777777, 0.2291666667], "random": [0.0486111111, 0.2986111111, 0.3055555556], "shuffle": [0.0, 0.1944444444, 0.2569444445]},
+    "d2_held": {"active": [0.0625, 0.4166666667, 0.3055555556], "random": [0.0625, 0.3055555556, 0.3263888889], "shuffle": [0.0416666667, 0.2916666667, 0.2777777777]},
+    "d2_free": {"active": [0.0763888889, 0.3958333333, 0.25], "random": [0.0347222222, 0.3333333333, 0.2430555556], "shuffle": [0.0347222222, 0.3333333333, 0.2361111111]},
+    "d3_held": {"active": [0.0694444444, 0.3055555556, 0.3125], "random": [0.0416666667, 0.2986111111, 0.25], "shuffle": [0.0208333333, 0.2847222223, 0.2222222222]},
+    "d3_word_order": {"active": [0.0694444444, 0.3958333333, 0.3125], "random": [0.0763888889, 0.4861111112, 0.2638888889], "shuffle": [0.0416666667, 0.3055555556, 0.2916666667]},
+    "d3_paragraph": {"active": [0.0625, 0.3194444445, 0.2361111111], "random": [0.0763888889, 0.3680555556, 0.2638888888], "shuffle": [0.0347222222, 0.25, 0.2291666667]},
+    "d3_free": {"active": [0.1180555556, 0.3055555555, 0.3333333333], "random": [0.0486111111, 0.3125, 0.2777777777], "shuffle": [0.0138888889, 0.25, 0.2430555556]},
+    "d3_rename": {"active": [0.0277777778, 0.3263888889, 0.2638888889], "random": [0.0486111111, 0.3125, 0.2638888889], "shuffle": [0.0069444444, 0.1944444445, 0.2222222222]}
+  },
+  "raw_hidden_gate_conditions": {
+    "1": {"active_word_order": [0.1041666667, 0.3333333333], "random_word_order": [0.1666666667, 0.3541666667], "shuffle_word_order": [0.0416666667, 0.3541666667], "active_free": [0.1875, 0.3541666667], "random_free": [0.0416666667, 0.2708333333], "shuffle_free": [0.0, 0.2291666667]},
+    "7": {"active_word_order": [0.0416666667, 0.3125], "random_word_order": [0.0416666667, 0.25], "shuffle_word_order": [0.0416666667, 0.2291666667], "active_free": [0.0208333333, 0.2708333333], "random_free": [0.0208333333, 0.2916666667], "shuffle_free": [0.0208333333, 0.25]},
+    "19": {"active_word_order": [0.0625, 0.2916666667], "random_word_order": [0.0208333333, 0.1875], "shuffle_word_order": [0.0416666667, 0.2916666667], "active_free": [0.1458333333, 0.375], "random_free": [0.0833333333, 0.2708333333], "shuffle_free": [0.0208333333, 0.25]}
+  },
+  "metric_order": ["joint", "target", "inverse"],
+  "gate_metric_order": ["joint", "inverse"],
+  "strict_gate_by_seed": [false, false, false],
+  "model_bytes_mean": 98781.0,
+  "runtime_seconds": 2.088616458,
+  "peak_rss_kib": 112536,
+  "observation_budget_per_domain": 24,
+  "candidate_count": 32,
+  "estimated_ops_update_per_episode": 12288,
+  "estimated_ops_inference_per_query": 12288,
+  "answer_leakage": false,
+  "post_treatment_test_input": false,
+  "fixed_ontology": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
