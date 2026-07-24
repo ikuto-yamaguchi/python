@@ -1,10 +1,10 @@
 # Intelligence Swarm Backlog
 
-## P0 — Reproduce a competent public SILG capability baseline
+## P0 — Complete the faithful staged SILG recurrent reproduction
 
-Current status: **corrected 32,768-frame workflow completed; training and matched-evaluation paths reproduced; public capability baseline not reproduced**.
+Current completed evidence: **corrected 32,768-frame workflow completed; training and matched-evaluation paths reproduced; public capability baseline not reproduced**.
 
-Confirmed staged result:
+Confirmed completed result:
 
 - official SILG `multi` recurrent, no pretrained language model;
 - seeds `1,7,19`;
@@ -22,20 +22,30 @@ Classification:
 
 `matched_fixed_episode_32768_frame_staged_training_not_public_capability_reproduction`
 
+Current staged run:
+
+- workflow run `30127967677`;
+- `131,072 frames/seed`;
+- same official recurrent family, source pins, schema, splits and canonical seeds;
+- status at RESET-E016: **in progress**;
+- results, resource values and competence claims: **not incorporated**.
+
 Only authorized actions:
 
-1. compare the official paper/code training schedule, optimizer, actor count, unroll, batching, evaluation mode and checkpoint handling against the current staged configuration;
-2. increase only the faithful official recurrent training budget or correct an official reproduction-condition mismatch;
-3. retain staged checkpoints and evaluate the same immutable matched protocol at preregistered budgets;
-4. record frames, model bytes, RSS, training wall time, CPU latency, full source/model/data/log hashes and all failure logs;
-5. stop and classify resource insufficiency if competence does not emerge within the fixed ceiling.
+1. complete and verify run `30127967677`;
+2. retain staged checkpoints and evaluate the same immutable matched protocol;
+3. record source/model/data/raw-log hashes, model bytes, peak RSS, training wall time, CPU latency, seeds and splits;
+4. evaluate Correct, Random, Language-blind, State-only and Language-shuffle on identical instances;
+5. test policy competence and trajectory anti-collapse eligibility;
+6. if competence still does not emerge, correct only a verified official reproduction-condition mismatch or classify budget/resource insufficiency at the preregistered ceiling.
 
 Forbidden:
 
 - tuning Environment-first against failed-policy trajectories;
 - adding a new architecture or mechanism family;
 - inferring that language is irrelevant from an incompetent policy;
-- selecting a favorable seed or changing the test instances.
+- selecting a favorable seed or changing test instances;
+- incorporating unfinished-run values.
 
 ## P0 — Immutable R0.1 public capability evaluation
 
@@ -87,9 +97,31 @@ Every measured run must pass:
 - finite model bytes, peak RSS, training wall time and CPU inference latency;
 - explicit `answer_leakage: false` and `pretrained_language_model: false`.
 
-Ten regression tests pass.
+For `target_label_shuffle` and `outcome_shuffle`, every prediction row must additionally provide:
 
-Current classification: **`initial_reproduction_failure`**. Missing: Outcome/transition shuffle, target-label shuffle or formal non-oracle inapplicability, immutable serialized test-set checksum, and a complete per-cell manifest joining readable logs/models/data with hashes.
+- `control_source_instance_id`;
+- `control_source_fingerprint`;
+- donor existence in the immutable evaluation set;
+- no self-donor;
+- same seed/domain/split/condition cell;
+- donor fingerprint agreement;
+- cell-wise bijection;
+- fixed-point-free derangement;
+- no illicit donor reuse.
+
+The output must save `shuffle_assignment_audit` for every cell.
+
+**Thirteen regression tests pass.**
+
+Current classification: **`initial_reproduction_failure`**.
+
+Missing:
+
+- real target-label-shuffle predictions with donor provenance, or formal non-oracle inapplicability;
+- real outcome/transition-shuffle predictions with donor provenance;
+- immutable serialized test-set checksum;
+- complete per-cell manifest joining readable logs, models and data with hashes;
+- paper-scale or otherwise competent public capability reproduction.
 
 ## P1 — R0.2 Environment-first reproduction
 
@@ -144,15 +176,23 @@ Status: **narrowed again, not adopted; no implementation authorized**.
 
 Surviving candidate:
 
-> Characterize whether compositional relations among raw utterances can remove a causal-model equivalence that remains after conditioning on complete trajectories and after quotienting out every use of language as a mere auxiliary/environment index; prove impossibility when language reduces to such an index or available interventions do not separate competing partitions.
+> Characterize whether compositional relations among raw utterances can remove a causal-model equivalence that remains after conditioning on complete trajectories and after quotienting out every use of language as a mere auxiliary/environment/intervention index; prove impossibility when language reduces to such an index or available interventions do not separate competing partitions.
 
-Before adoption, all are required:
+C009 status:
+
+- nontrivial negative construction: **present**;
+- language-as-index impossibility: **present**;
+- positive construction: **absent**;
+- sufficient-condition theorem: **absent**;
+- adoption: **not authorized**.
+
+Before adoption, all remaining requirements are:
 
 1. formal observation model and trajectory-only equivalence relation;
-2. exact quotient by auxiliary/environment-index information;
-3. a distinction from auxiliary-variable nonlinear ICA, temporal nonlinear ICA, multimodal partial-sharing CRL and environment-indexed invariance;
+2. exact quotient by auxiliary/environment/intervention-index information;
+3. a distinction from auxiliary-variable, temporal, multi-view and hidden-regime nonlinear ICA, multimodal CRL, mechanistic-independence and heterogeneous measurement-model identifiability;
 4. at least one nontrivial positive construction;
-5. at least one nontrivial negative construction;
+5. a sufficient-condition theorem;
 6. exactly one preregistered theorem, counterexamples and stopping rule;
 7. completed R0.1 public capability reproduction before any new architecture.
 
@@ -168,15 +208,16 @@ Maintain primary-source comparison through 2026 for:
 - subset-intervention causal abstraction;
 - raw-trajectory system-parameter identifiability;
 - temporal partition and causal-graph joint learning;
-- auxiliary-variable and temporal nonlinear ICA;
+- auxiliary-variable, temporal, multi-view and hidden-regime nonlinear ICA;
 - multimodal partial-sharing identifiability;
+- mechanistic-independence and heterogeneous measurement-model identifiability;
 - perturbation-target and causal-response representations;
 - interactive language grounding;
 - language-dynamics and environment-first pretraining;
 - causal world models connected to language agents;
 - physical causal-reasoning benchmarks with expert graphs.
 
-Broad claims that language is an auxiliary identifiability signal, shuffled language supplies contrastive negatives, interventions create causal representations, unknown targets can be recovered, or capable agents contain world models are not novel.
+Broad claims that language is an auxiliary identifiability signal, shuffled language supplies contrastive negatives, interventions create causal representations, unknown targets can be recovered, language and trajectory are two views of a shared latent, or capable agents contain world models are not novel.
 
 ## P2 — Japanese realism audit
 
