@@ -1,0 +1,35 @@
+{
+  "cycle": "D_MEMORY_ELIGIBILITY_001",
+  "hypothesis": "Symmetry-Breaking Witness Eligibility",
+  "seeds": [1, 7, 19],
+  "per_seed": {
+    "1": {"acquisition": {"behavior": 0.0, "trajectory": 0.9729166667, "scar": 1.0, "joint": 1.0, "shuffled_joint": 0.025}, "retention": {"behavior": 0.0, "trajectory": 0.8958333333, "scar": 1.0, "joint": 1.0}},
+    "7": {"acquisition": {"behavior": 0.0, "trajectory": 0.965625, "scar": 1.0, "joint": 1.0, "shuffled_joint": 0.0270833333}, "retention": {"behavior": 0.0, "trajectory": 0.7291666667, "scar": 1.0, "joint": 1.0}},
+    "19": {"acquisition": {"behavior": 0.0, "trajectory": 0.9604166667, "scar": 1.0, "joint": 1.0, "shuffled_joint": 0.01875}, "retention": {"behavior": 0.0, "trajectory": 0.875, "scar": 1.0, "joint": 1.0}}
+  },
+  "mean": {
+    "acquisition_accuracy": {"behavior": 0.0, "trajectory": 0.9663194444, "scar": 1.0, "joint": 1.0, "shuffled_joint": 0.0236111111},
+    "acquisition_abstention": {"behavior": 1.0, "trajectory": 0.0305555556, "scar": 0.0, "joint": 0.0, "shuffled_joint": 0.0},
+    "retention_accuracy": {"behavior": 0.0, "trajectory": 0.8333333333, "scar": 1.0, "joint": 1.0},
+    "retention_abstention": {"behavior": 1.0, "trajectory": 0.1458333333, "scar": 0.0, "joint": 0.0}
+  },
+  "resources": {
+    "learned_model_bytes": 0,
+    "serialized_record_bytes_estimate": 1920,
+    "records_before_interference": 48,
+    "records_after_interference": 144,
+    "update_bytes_per_episode_estimate": 40,
+    "training_seconds_total": 0.900993132,
+    "mean_inference_microseconds_estimate": 60.16246875,
+    "peak_rss_kib_python_runtime_included": 161120,
+    "complexity": {"update": "O(W)", "retrieval": "O(MW)", "interference_audit": "O(IMW)"}
+  },
+  "classification": {
+    "behavior_only": "acquisition_failure",
+    "trajectory": "semantic_transfer_candidate_with_retention_degradation",
+    "scar": "eligible_in_synthetic_pilot",
+    "joint": "eligible_in_synthetic_pilot",
+    "catastrophic_forgetting_observed": false,
+    "semantic_identity_gate_passed": false
+  }
+}
