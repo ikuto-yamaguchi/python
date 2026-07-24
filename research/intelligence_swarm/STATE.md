@@ -6,39 +6,40 @@
 
 ## Current stage
 
-- Stage: **S1 Semantic Identity Birth**
+- Stage: **S1 Semantic Identity Birth — joint language/world emergence substage**
 - Semantic Identity Gate G1: **未達**
 - Identifiability prerequisite G1a: **synthetic観測側で限定支持、prospective条件は未達**
 - Operation/Goal Gate G2: **未達**
-- Causal grounding mainline: **AF-006 Cross-Lexicon Selective Consequence Consensusを優先**
+- Causal grounding mainline: **AF-007 Jointly Emergent Language–World Intervention Diagramsを優先**
+- AF-006 Cross-Lexicon Selective Consequence Consensus: **診断・反例生成用途へ縮小**
 - Memory/consolidation mainline: G1待ち。保存最適化は凍結継続
 - Integrated intelligence: 未達
 
 ## Maximum upstream bottleneck
 
-結果指紋は一部domain・一部seedでprospective/inverseのCorrect-shuffle差を生むが、**独立した完全語彙非共有domainと全seedで同じ因果成分として再生成されない**。単一domainの平均精度ではなく、identity・operation・goal・wording各介入に対する選択的response/lesion signatureが複数domainで同符号となる接地原理が必要である。
+完全語彙非共有domainで平均的なCorrect–shuffle差や同方向lesionは形成できるが、domain × seed × forward/inverse単位で同じ因果依存が再現されない。現在の最大ボトルネックは、**結果codebook、identity/operation/goal channel、候補orbitを先に固定せず、raw Japanese上の変換とworld上の介入変換を共同生成し、両経路の可換性を未知domainで閉じる最小単位を形成すること**である。
 
 ## Cross-track conclusion
 
-1. HF-001〜HF-007の凍結を維持する。
-2. PR362: 少数観測でdomain-local groundingの弱い差は出たが、rename・未知語順・inverse・第二domain・3/3 seedを通らない。
-3. PR363: consequence invariantはheldおよび一部cross-domainで大きな差を示したが、日本語中核表現を一部共有している。
-4. PR364: generic ensemble disagreementによるactive観測はRandomを安定して上回らず、semantic factorを識別しない。
-5. PR365: 完全語彙非共有domain Eでは強い差が出たが、domain Dでは自由日本語Correct < shuffle、厳格資格はD 0/3・E 1/3 seed。
-6. よって、単一domain・平均値・一部seedの結果指紋陽性を再利用可能semantic unitとみなす根本前提をHF-008として凍結する。
-7. AF-005は候補生成源へ縮小し、AF-006 Cross-Lexicon Selective Consequence Consensusを優先本線へ昇格する。
+1. HF-001〜HF-008の凍結を維持する。
+2. PR367: 2 opaque domainで平均prospective/inverse差とsame-sign lesionを得たが、D2自由日本語差は+0.0347、全seed条件を通らない。
+3. PR368: 3 domainで結果channel consensusは形成されたが、自由日本語・goal変更でCorrect < shuffleとなり、strict gateは0/3 seed。
+4. PR369: forward・inverse・cycle closureを同時に悪化させるlesion channelは残ったが、外部能力の符号はdomain間で反転し、strict gateは0/3 seed。
+5. PR370: 3 domain平均ではprospective/inverse差があるが、identity/goal lesion符号がdomain × seedで一致せず、formal memory eligibilityは0/3 seed。
+6. よって、**固定された結果channel/codebookを先に作り、cross-domain consensus、transpose、lesionでsemantic unitを後段選別できる**という根本前提をHF-009として凍結する。
+7. AF-006は反例・診断・候補監査へ縮小し、AF-007 Jointly Emergent Language–World Intervention Diagramsを優先本線へ昇格する。
 
 ## Active assignments
 
-- A: 複数の完全語彙非共有domainで同じ選択的response signatureを生む発話—結果unitを形成し、domainごとの偶然適合を排除する
-- B: identity / operation / goal / wordingを一つずつ変える反例を生成し、対応channelだけが変化する結果指紋を学習・監査する
-- C: generic disagreementではなく、期待cross-domain invariance gainと選択的因果応答で観測・介入を選ぶ
-- D: 2以上の独立opaque domain × 3 seedすべてでprospective・inverse・自由日本語・lesion同符号を通るunitだけをmemory eligibleとする
-- E: domain/seed consensus、共有語彙・乱数・template・結果符号化のbridge leakageを監査し、仮説族とstageを管理する
+- A: 固定結果channelを使わず、raw Japaneseの言い換え・対象変更・操作変更から局所言語変換候補を生成し、world変換との共同閉包でのみunit化する
+- B: identity / operation / goalを既成channelとして与えず、介入前worldと選択的結果から最小world変換・目的変換候補を生成し、Aの言語変換と共同競合させる
+- C: 言語変換→world介入とworld介入→言語変換の交換子残差を未知domainで監査し、可換図式の外部prospective・inverse・counterfactual能力を測る
+- D: 可換図式unitが複数opaque domain × 全seedで成立するまでmemory eligibilityを拒否し、取得・再同定・保持を分離監査する
+- E: predefined codebook/channel leakage、domain bridge、seed選択を監査し、仮説族凍結とstage遷移を管理する
 
 ## Progress rule
 
-進歩は、介入前情報だけを使い、2以上の独立した完全語彙非共有domainと3 seedすべてで、未知表現・自由日本語上のprospective target×transitionおよびinverse queryがCorrect > shuffle/randomを実質差0.10以上で示し、identity/operation/goal/wording介入の選択的responseまたはlesion signatureがdomain間で同符号となる場合だけ認定する。単一domain、平均値、一部seed、held改善、候補削減だけは診断である。
+進歩は、介入前情報だけを使い、2以上の独立した完全語彙非共有domainと3 seedすべてで、未知表現・自由日本語上のprospective target×transition、inverse query、counterfactual repairがCorrect > shuffle/randomを実質差0.10以上で示し、同一の共同生成されたlanguage/world transformation unitが片方のdomainで選択され、完全に隠したdomainでも再生成される場合だけ認定する。固定codebook上のchannel consensus、平均lesion低下、best domain、best seedは診断である。
 
 ## Current status
 
@@ -53,4 +54,4 @@
 
 ## Last integration
 
-2026-07-24: GOV-005。PR362〜365を統合し、S1継続。単一domain・平均値・一部seedのconsequence signalをcross-domain semantic unitとみなす仮説をHF-008として凍結。AF-005を候補生成源へ縮小し、AF-006 Cross-Lexicon Selective Consequence Consensusを優先本線へ設定。G1/G2およびmemory eligibilityは未達。
+2026-07-24: GOV-006。PR367〜370を統合し、S1をjoint language/world emergence substageへ遷移。固定結果codebook/channelを先に作り後段consensus/transpose/lesionで意味化する仮説をHF-009として凍結。AF-006を診断用途へ縮小し、AF-007 Jointly Emergent Language–World Intervention Diagramsを優先本線へ設定。G1/G2およびmemory eligibilityは未達。
