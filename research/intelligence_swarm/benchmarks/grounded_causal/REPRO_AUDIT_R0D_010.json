@@ -1,0 +1,43 @@
+{
+  "date": "2026-07-25",
+  "cycle": "R0D-010",
+  "classification": "initial_reproduction_failure",
+  "completed": [
+    "native_silg_matched_episode_schema_adapter",
+    "canonical_seed_1_7_19_check",
+    "per_method_episode_coverage_check",
+    "immutable_initial_fingerprint_check",
+    "paired_win_return_length_statistics",
+    "seed_cluster_bootstrap_ci",
+    "exact_mcnemar_for_win",
+    "checkpoint_and_source_pin_presence_check"
+  ],
+  "required_core_methods": [
+    "correct",
+    "random",
+    "language_blind",
+    "state_only",
+    "language_shuffle"
+  ],
+  "required_strict_methods": [
+    "correct",
+    "random",
+    "language_blind",
+    "state_only",
+    "target_label_shuffle",
+    "outcome_shuffle"
+  ],
+  "current_known_gap": [
+    "target_label_shuffle_not_emitted_by_current_matched_evaluator",
+    "outcome_shuffle_not_emitted_by_current_matched_evaluator",
+    "artifact_manifest_not_joined_to_episode_payload",
+    "public_capability_baseline_not_yet_reproduced"
+  ],
+  "tests": {
+    "command": "python test_evaluation_contract_silg_episode.py -v",
+    "passed": 4,
+    "failed": 0
+  },
+  "progress_claimed": false,
+  "highschool_level_passed": false
+}
