@@ -11,6 +11,9 @@ This is a living primary-source map, not a novelty claim. Every row records what
 | Ng et al., *CRL from General Environments under Nonparametric Mixing*, AISTATS 2025 | Recovers latent DAG and variables from broader environment changes under nonparametric mixing | Sufficient mechanism-change conditions, including higher-order derivative conditions; latent noise-model assumptions | No language grounding; environment shifts remain a supplied grouping |
 | Li et al., *On the Identifiability of Causal Abstractions*, AISTATS 2025 | Characterizes the granularity recoverable from arbitrary-subset unknown interventions; exact low-level identity may collapse to an identifiable abstraction | Contrastive pre/post pairs and a family of possible interventions | Direct warning that RQ-001 may only admit abstraction-level recovery; no language alignment |
 | Lee et al., *Beyond Identifiability: Learning Causal Representations with Few Environments and Finite Samples*, arXiv 2026 | Finite-sample recovery of latent graph, mixing representation and unknown multi-node targets with logarithmically many environments in the studied model | Linear/statistical model assumptions and multiple environment distributions | Shrinks the novelty of “unknown targets with few environments”; no raw language or interactive policy semantics |
+| Schneider et al., *Generative Intervention Models for Causal Perturbation Modeling*, ICML 2025 | Jointly estimates a causal model and maps observed perturbation features to distributions over atomic interventions, including unseen perturbation features | Perturbation features, distributional intervention data and causal-model assumptions | Closest overlap: `language features -> intervention distribution` alone is not novel; raw interactive utterance equivalence without supplied feature semantics remains outside scope |
+| Lin et al., *Isolated Causal Effects of Natural Language*, ICML 2025 | Formal estimation of the causal effect of focal language changes on external outcomes; analyzes omitted-variable bias from non-focal language | Defined focal language intervention, outcome and approximation of non-focal text | Language-as-treatment is prior art; no latent intervention-partition recovery or interactive instruction following |
+| Gamella et al., *Sanity Checking CRL on a Simple Real-World System*, ICML 2025 | Representative CRL methods fail on a controlled real optical system and often already fail in simplified synthetic ablations | Controlled system satisfying headline CRL assumptions and known ground truth | Makes public reproduction and real-data sanity checks mandatory before theory or toy success is treated as evidence |
 | Markham et al., *Intervening to Learn and Compose Causally Disentangled Representations*, CLeaR 2026 | Learns composable causal concepts under intervention/context supervision | Concept/context and architecture assumptions | Must not be treated as raw semantic birth; no raw Japanese |
 | Liu et al., *CausalTriplet*, CLeaR 2023 | Actionable counterfactual benchmark; exposes dependence on object-centric priors | Visual scenes and intervention structure | No natural-language acquisition |
 | Brady et al., *Provably Learning Object-Centric Representations*, ICML 2023 | Conditions for unsupervised object-centric identifiability | Compositionality and irreducibility of scene generator | No actions or raw language |
@@ -24,21 +27,24 @@ This is a living primary-source map, not a novelty claim. Every row records what
 
 ## Updated conclusion — 2026-07-24
 
-The broad form of RQ-001 is not novel. Unknown intervention-target recovery, nonparametric identifiability, abstraction-level recovery, finite-sample recovery from few environments, interactive grounding, and language-conditioned dynamics learning already exist as separate mature lines.
+The broad form of RQ-001 is not novel. Unknown intervention-target recovery, nonparametric identifiability, abstraction-level recovery, finite-sample recovery from few environments, perturbation-feature-to-intervention modeling, interactive grounding, language-conditioned dynamics learning and causal estimation of language effects already exist as separate mature lines.
 
 The only defensible candidate gap is narrower:
 
-> On a fixed public interactive benchmark, can raw-language equivalence provide statistically necessary information for recovering a latent intervention **partition or abstraction** beyond state/action-only models, when environment identity is available for splitting but intervention-target labels, semantic parsers, object slots and pretrained language models are absent?
+> On a fixed public interactive benchmark, does raw language contain statistically necessary information about an intervention partition or causal abstraction beyond state, action, history and environment identity, and can that information be recovered up to joint permutation without intervention-target labels, semantic parsers, object slots, pretrained language models or supplied perturbation-feature semantics?
 
-Even this is not adopted. It must be rejected if any primary source already demonstrates the same joint recovery, or if SILG reproduction shows that language adds no stable held-out-mechanism signal beyond state/action controls.
+Even this is not adopted. It must be rejected if any primary source already demonstrates the same joint recovery, if GIM already subsumes the operational setting once utterances are represented as perturbation features, or if SILG reproduction shows that language adds no stable held-out-mechanism signal beyond state/action/history controls.
 
 ## Consequences for the program
 
 1. “Unknown intervention target” alone is not a contribution after the 2023–2026 CRL results.
-2. Exact variable identity may be impossible; abstraction-level recovery must be an allowed theoretical outcome.
-3. SILG/LDD must be reproduced before designing a new model because multi-environment grounding and language-conditioned dynamics are established baselines.
-4. J-CRe3 is now publicly discoverable through the official `riken-grp/J-CRe3` repository, but it remains an external Japanese reference audit rather than the causal benchmark.
-5. Novelty requires a joint theorem or external result showing a language-specific gain that cannot be explained by state, action, environment ID, transition statistics or label leakage.
+2. `language embedding -> intervention distribution` alone is also not a contribution after GIM.
+3. Exact variable or utterance-target names are not identifiable under joint latent/language permutation without an observable anchor; evaluation must be permutation- or abstraction-aware.
+4. Exact variable identity may be impossible; abstraction-level recovery must be an allowed theoretical outcome.
+5. SILG/LDD must be reproduced before designing a new model because multi-environment grounding and language-conditioned dynamics are established baselines.
+6. Public reproduction is a scientific requirement, not housekeeping, given the real-system CRL failures reported by Gamella et al.
+7. J-CRe3 remains an external Japanese realism audit rather than the causal benchmark.
+8. Novelty requires a joint theorem or external result showing a language-specific gain that cannot be explained by state, action, history, environment ID, transition statistics, perturbation features or label leakage.
 
 ## Reproduction facts pinned in this audit
 
@@ -56,6 +62,9 @@ Even this is not adopted. It must be rejected if any primary source already demo
 - https://proceedings.mlr.press/v258/ng25a.html
 - https://proceedings.mlr.press/v258/li25g.html
 - https://arxiv.org/abs/2603.25796
+- https://proceedings.mlr.press/v267/schneider25a.html
+- https://proceedings.mlr.press/v267/lin25k.html
+- https://proceedings.mlr.press/v267/gamella25a.html
 - https://proceedings.mlr.press/v323/markham26a.html
 - https://proceedings.mlr.press/v213/liu23a.html
 - https://proceedings.mlr.press/v202/brady23a.html
