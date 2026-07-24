@@ -1,29 +1,28 @@
 # Intelligence Swarm Backlog
 
-## P0 — Pre-Treatment Relational Change Grounding
+## P0 — Cross-Domain Consequence-Invariant Grounding
 
-- A: 完成trajectory・future scarを使わず、発話と介入前の対象間関係・履歴prefix・commandを同期し、targetとafterをprospectiveに生成する。
-- A: held paraphrase、rename、未知語順、主語省略、複数段落、自由日本語、別領域で同じunitをprospective predictionとinverse queryへ再利用する。
-- B: same identity / different operation、different identity / same operation、same operation / different goal、same words / reversed before-after の四方向対照からoperationとidentityを分離する。
-- C: pre-treatment relation、trajectory prefix、既往scarの必要十分性を、完全同型の双子対象、world automorphism、counterfactual interventionで切り分ける。
-- D: acquisition・retrospective re-identification・prospective use・retentionを分離し、prospective資格を通過したunitだけをmemory eligibility対象とする。
-- E: AF-004共通benchmarkを管理し、post-treatment leakageを自動監査する。
+- A: 語彙、座標系、object indexが完全に異なるdomain間で、同じ選択的結果・失敗修正・inverse応答を生む発話—観測単位を形成する。
+- A: domain対応辞書、共有identity、手書きslot、文字列検索なしでheld / rename / free / domainを同一latent unitへ結ぶ。
+- B: identity / operation / goal / wording / domain表現の五方向対照を生成し、対応factorだけが変化するか監査する。
+- C: domain間で保存される最小因果証拠を、target選択、transition、non-target保存、反実仮想、inverseで切り分ける。
+- D: cross-domain prospective、inverse、cross-form consistencyを同時通過するunitだけをmemory eligibleとする。
+- E: domain bridge leakage、共有token、暗黙対応表、同一乱数系列による漏洩を監査する。
 
-## P0 — Common G1 benchmark
+## P0 — Common G1 benchmark v2
 
-- Candidate featureの観測時刻を記録し、介入後情報をprospective scoreへ混入させない。
-- Correct、identity shuffle、trajectory shuffle、relation shuffle、random、behavior-only、surface-onlyを同一入力・同一seedで比較する。
-- Rename、未知語順、別状態表現、主語省略、複数段落、自由日本語、別領域転移を共通gateにする。
-- prospective target selection、after prediction、inverse query、対象交換時support移動、twin discrimination、non-target保存を中心証拠にする。
-- retrospective matching、prospective acquisition、inverse use、retentionを別フィールドで記録する。
-- 内部構造生成数と外部能力を別フィールドで記録する。
+- 学習domainと評価domainで語彙、座標、object index、surface templateを分離する。
+- Correct、identity shuffle、operation shuffle、goal shuffle、domain shuffle、randomを同一seedで比較する。
+- prospective target selection、transition prediction、inverse query、twin discrimination、non-target保存を同じunitで測る。
+- held条件とdomain条件を別々に報告し、held改善をG1通過へ数えない。
+- post-treatment feature、domain対応辞書、共有ID、answer leakageを自動検査する。
+- 3 seedすべてでdomain Correct > shuffle/random、かつ実質差0.10以上を暫定昇格条件とする。
 
 ## P1 — Evidence repair
 
-- PR352をretrospective trajectory-predicate groundingの限定証拠へ再分類する。
-- PR353をG2未達および四方向contrast必要性の証拠として登録する。
-- PR354/355をHF-006凍結とAF-004昇格の監査証拠として登録する。
-- 各PRへ `root_premise`、`external_capability_delta`、`post_treatment_features`、`stage_decision` を追加する。
+- PR357〜360へ `root_premise=pre_treatment_structure_without_cross_domain_anchor` を付与する。
+- Equivariance、factorization、relation necessityは必要条件診断へ再分類する。
+- HF-007とAF-005の証拠を各系列の次サイクルから参照する。
 - Legacy trackは削除せず反証archiveとして維持する。
 
 ## Frozen mainline work
@@ -36,11 +35,12 @@ G1成立まで次を本線として再開しない。
 - 名称だけをcell、node、role、event、trace、familyへ変えた再試行
 - behavioral equivalenceだけをindividual identityとみなす方式
 - 完成trajectory・行為後scarをprospective identity featureとして利用する方式
+- pre-treatment relation、座標可換性、identity/operation factorizationだけでcross-domain semanticsが生まれるとみなす方式
 
 ## Cycle completion rules
 
 - 実装は必須ではない。メタ分析、評価再設計、仮説族凍結、stage変更も完結サイクルとする。
 - 採用、継続、凍結、段階遷移のいずれかを必ず明示する。
 - 進歩は未知条件の外部能力とbaseline差で判定する。
-- Retrospective matchingとprospective groundingを混同しない。
-- 再現コマンド、複数seed、反証条件、資源量、answer leakage・post-treatment leakage監査を維持する。
+- Retrospective matching、held-family fit、cross-domain groundingを混同しない。
+- 再現コマンド、複数seed、反証条件、資源量、answer leakage・post-treatment leakage・domain bridge leakage監査を維持する。
