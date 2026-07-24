@@ -1,0 +1,57 @@
+{
+  "audit_id": "R0D-007",
+  "date": "2026-07-25",
+  "source": "SILG_RTFM_RECURRENT_SMOKE_R02_002.json",
+  "classification": "initial_reproduction_failure",
+  "public_environment": "silg:rtfm_test_s1-v0",
+  "canonical_seeds": [1, 7, 19],
+  "available_methods": ["correct_training_path", "random_environment_control"],
+  "required_methods": [
+    "correct",
+    "random",
+    "language_blind",
+    "state_only",
+    "target_label_shuffle",
+    "outcome_shuffle"
+  ],
+  "missing_methods": [
+    "language_blind",
+    "state_only",
+    "target_label_shuffle",
+    "outcome_shuffle"
+  ],
+  "same_instance_comparison_completed": false,
+  "public_test_predictions_available": false,
+  "public_capability_statistics_available": false,
+  "training_resource_observations": {
+    "method": "official SILG multi recurrent",
+    "frames_per_seed": 2048,
+    "model_parameters": 4916915,
+    "model_bytes": 19694385,
+    "model_sha256": "29b6865d2366e30a59ee82b8e098f806b7b26b2b2d67231e18fca2a167540b62",
+    "cpu_inference_ms_per_step": 7.49024244,
+    "runs": [
+      {"seed": 1, "training_wall_seconds": 26.547, "peak_rss_bytes": 473858048, "raw_log_sha256_status": "invalid_truncated_digest_in_source"},
+      {"seed": 7, "training_wall_seconds": 26.531, "peak_rss_bytes": 529195008, "raw_log_sha256_status": "invalid_truncated_digest_in_source"},
+      {"seed": 19, "training_wall_seconds": 31.536, "peak_rss_bytes": 492986368, "raw_log_sha256_status": "invalid_truncated_digest_in_source"}
+    ]
+  },
+  "artifact_integrity": {
+    "workflow_artifact_digest": "sha256:51d8bfb3fe31f4a00d9b5f86f1bc2761da5f91c70067d222e8f376f334418070",
+    "raw_log_checksums_independently_verifiable": false,
+    "data_checksum_recorded": false,
+    "code_commit_recorded_per_run": false,
+    "result": "fail"
+  },
+  "contract_changes": [
+    "instance_fingerprint added for immutable same-instance comparison",
+    "prediction snapshot mismatch is fatal",
+    "complete method coverage remains mandatory",
+    "artifact manifest now requires the full method x seed x domain x split Cartesian product",
+    "confidence interval exclusion of zero is recorded separately from the 0.10 effect-size gate"
+  ],
+  "next_minimum_action": "Export one deterministic rtfm_test_s1-v0 episode set for seeds 1, 7, and 19, replay the identical instance fingerprints through all six methods, and save full raw-log/model/data SHA-256 values plus code commit for every run cell.",
+  "capability_progress_claimed": false,
+  "novelty_claimed": false,
+  "highschool_level_passed": false
+}
