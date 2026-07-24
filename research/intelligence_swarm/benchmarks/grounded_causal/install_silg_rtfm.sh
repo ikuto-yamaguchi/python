@@ -6,7 +6,10 @@ SILG_SHA=2af07578e1264029a240fcfb78d4ac0aea16f5de
 RTFM_SHA=58f17955595b5a127c96d045d896fcbcc7d4b570
 
 mkdir -p "$ROOT"
-python -m pip install --upgrade 'pip<24' 'setuptools<69' 'wheel<0.42'
+# Gym 0.21 has metadata rejected by newer setuptools. Pin the 2021-era build
+# toolchain before generating metadata; this is a compatibility repair only.
+python -m pip install --upgrade \
+  'pip==22.3.1' 'setuptools==59.5.0' 'wheel==0.37.1'
 
 if [ ! -d "$ROOT/RTFM/.git" ]; then
   git clone https://github.com/facebookresearch/RTFM.git "$ROOT/RTFM"
