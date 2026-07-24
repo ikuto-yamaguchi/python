@@ -1,0 +1,63 @@
+{
+  "cycle": 6,
+  "hypothesis": "Counterexample-Born Commutator Squares from Cross-Domain Failure Correspondence",
+  "seeds": [1, 7, 19],
+  "summary": {
+    "correct": {
+      "d1_held": {"joint": 0.0, "target": 0.2916666666666667, "inverse": 0.0, "repair": 0.3541666666666667},
+      "d1_word_order": {"joint": 0.0, "target": 0.25, "inverse": 0.0, "repair": 0.3645833333333333},
+      "d1_paragraph": {"joint": 0.0, "target": 0.4166666666666667, "inverse": 0.0, "repair": 0.20833333333333334},
+      "d1_free": {"joint": 0.0, "target": 0.3333333333333333, "inverse": 0.0, "repair": 0.2708333333333333},
+      "d2_held": {"joint": 0.0, "target": 0.3958333333333333, "inverse": 0.0, "repair": 0.25},
+      "d2_word_order": {"joint": 0.0, "target": 0.3333333333333333, "inverse": 0.0, "repair": 0.2604166666666667},
+      "d2_paragraph": {"joint": 0.0, "target": 0.28125, "inverse": 0.0, "repair": 0.2708333333333333},
+      "d2_free": {"joint": 0.0, "target": 0.4166666666666667, "inverse": 0.0, "repair": 0.20833333333333334},
+      "d3_held": {"joint": 0.0, "target": 0.5729166666666666, "inverse": 0.0, "repair": 0.3020833333333333},
+      "d3_word_order": {"joint": 0.0, "target": 0.4895833333333333, "inverse": 0.0, "repair": 0.2708333333333333},
+      "d3_paragraph": {"joint": 0.0, "target": 0.3229166666666667, "inverse": 0.0, "repair": 0.4375},
+      "d3_free": {"joint": 0.0, "target": 0.3541666666666667, "inverse": 0.0, "repair": 0.375}
+    },
+    "language_shuffle": {
+      "d1_held": {"joint": 0.010416666666666666, "target": 0.3333333333333333, "inverse": 0.0, "repair": 0.21875},
+      "d1_word_order": {"joint": 0.0, "target": 0.3854166666666667, "inverse": 0.0, "repair": 0.19791666666666666},
+      "d1_paragraph": {"joint": 0.041666666666666664, "target": 0.3229166666666667, "inverse": 0.0, "repair": 0.3541666666666667},
+      "d1_free": {"joint": 0.020833333333333332, "target": 0.34375, "inverse": 0.0, "repair": 0.21875},
+      "d2_held": {"joint": 0.010416666666666666, "target": 0.3645833333333333, "inverse": 0.0, "repair": 0.3333333333333333},
+      "d2_word_order": {"joint": 0.010416666666666666, "target": 0.3645833333333333, "inverse": 0.0, "repair": 0.3333333333333333},
+      "d2_paragraph": {"joint": 0.020833333333333332, "target": 0.28125, "inverse": 0.0, "repair": 0.4270833333333333},
+      "d2_free": {"joint": 0.020833333333333332, "target": 0.3645833333333333, "inverse": 0.0, "repair": 0.2604166666666667},
+      "d3_held": {"joint": 0.0, "target": 0.46875, "inverse": 0.0, "repair": 0.1875},
+      "d3_word_order": {"joint": 0.0, "target": 0.5104166666666666, "inverse": 0.0, "repair": 0.19791666666666666},
+      "d3_paragraph": {"joint": 0.0, "target": 0.4583333333333333, "inverse": 0.0, "repair": 0.28125},
+      "d3_free": {"joint": 0.0, "target": 0.4895833333333333, "inverse": 0.0, "repair": 0.22916666666666666}
+    },
+    "world_shuffle": {
+      "d1_held": {"joint": 0.0, "target": 0.3854166666666667, "inverse": 0.0, "repair": 0.3541666666666667},
+      "d1_word_order": {"joint": 0.0, "target": 0.4166666666666667, "inverse": 0.0, "repair": 0.3645833333333333},
+      "d1_paragraph": {"joint": 0.0, "target": 0.4791666666666667, "inverse": 0.0, "repair": 0.2604166666666667},
+      "d1_free": {"joint": 0.0, "target": 0.4270833333333333, "inverse": 0.0, "repair": 0.3125},
+      "d2_held": {"joint": 0.0, "target": 0.3541666666666667, "inverse": 0.0, "repair": 0.2916666666666667},
+      "d2_word_order": {"joint": 0.0, "target": 0.4166666666666667, "inverse": 0.0, "repair": 0.3229166666666667},
+      "d2_paragraph": {"joint": 0.0, "target": 0.3229166666666667, "inverse": 0.0, "repair": 0.2708333333333333},
+      "d2_free": {"joint": 0.0, "target": 0.375, "inverse": 0.0, "repair": 0.3125},
+      "d3_held": {"joint": 0.0, "target": 0.4895833333333333, "inverse": 0.0, "repair": 0.3125},
+      "d3_word_order": {"joint": 0.0, "target": 0.5833333333333334, "inverse": 0.0, "repair": 0.28125},
+      "d3_paragraph": {"joint": 0.0, "target": 0.4375, "inverse": 0.0, "repair": 0.3125},
+      "d3_free": {"joint": 0.0, "target": 0.46875, "inverse": 0.0, "repair": 0.3854166666666667}
+    }
+  },
+  "model_bytes_mean": 70033.0,
+  "runtime_seconds": 27.033062541000163,
+  "peak_rss_kib": 165164,
+  "candidate_count": 32,
+  "diagram_cap": 16,
+  "estimated_ops_train_per_pair": 2304,
+  "estimated_ops_inference_per_query": 131072,
+  "answer_leakage": false,
+  "post_treatment_test_input": false,
+  "fixed_codebook": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
