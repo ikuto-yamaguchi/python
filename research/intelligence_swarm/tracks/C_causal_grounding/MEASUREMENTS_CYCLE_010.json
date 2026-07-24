@@ -1,0 +1,23 @@
+{
+  "cycle": 10,
+  "hypothesis": "Episode-Local Syntax Orbit Restores Causal Candidate Support",
+  "seeds": [1, 7, 19],
+  "witness_budget": 5,
+  "initial_hypotheses": {"global_form": 27648, "episode_local_form": 6912},
+  "summary": {
+    "global_form": {"survivors": 0.3333333333, "true_support_rate": 0.3333333333, "prospective": 0.21875, "inverse": 0.2291666667, "repair": 0.21875, "mixed_order": 0.2424242424, "counterfactual": 0.21875, "model_bytes": 33.0},
+    "local_active": {"survivors": 1.0, "true_support_rate": 1.0, "prospective": 0.9583333333, "inverse": 1.0, "repair": 0.953125, "mixed_order": 0.9426699427, "counterfactual": 0.9739583333, "model_bytes": 78.0},
+    "local_random": {"survivors": 1.0, "true_support_rate": 1.0, "prospective": 0.9583333333, "inverse": 1.0, "repair": 0.953125, "mixed_order": 0.9426699427, "counterfactual": 0.9739583333, "model_bytes": 78.0},
+    "argument_shuffle": {"survivors": 5.0, "true_support_rate": 0.3333333333, "prospective": 0.5052083333, "inverse": 1.0, "repair": 0.5208333333, "mixed_order": 0.4831090831, "counterfactual": 0.515625, "model_bytes": 149.6666666667},
+    "outcome_shuffle": {"survivors": 0.0, "true_support_rate": 0.0, "prospective": 0.0, "inverse": 0.0, "repair": 0.0, "mixed_order": 0.0, "counterfactual": 0.0, "model_bytes": 5.0}
+  },
+  "strict_gate_seeds": 0,
+  "peak_rss_kib_python_runtime_included": 164324,
+  "runtime_seconds_3_seed_local_execution": 9.20,
+  "estimated_ops": "selector O(B*H*Q), H=6912 local / 27648 global; inference O(H*Q)",
+  "answer_leakage": false,
+  "model_under_1gb": true,
+  "weak_smartphone_verified": false,
+  "highschool_level_passed": false,
+  "completion": false
+}
