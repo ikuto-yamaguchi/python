@@ -49,6 +49,31 @@ def sha256(path: Path) -> str:
     return h.hexdigest()
 
 
+def mask_text_fields(out: dict[str, torch.Tensor], fields: tuple[str, ...]) -> None:
+    """Remove text content without creating invalid zero-length RNN samples.
+
+    SILG's official text encoder uses ``pack_padded_sequence`` and therefore
+    requires every declared sequence length to be at least one. A text-blind
+    control should remove token information, not violate the model's input
+    contract. Token tensors are zeroed and their matching ``*_len`` tensors are
+    set to one. This leaves one padding/unknown position and no lexical content.
+    """
+    for key in fields:
+        if key not in out:
+            continue
+        if key.endswith("_len"):
+            out[key].fill_(1)
+        else:
+            out[key].zero_()
+
+
+def sanitize_language_lengths(out: dict[str, torch.Tensor]) -> None:
+    """Clamp copied donor lengths to the minimum accepted by the official RNN."""
+    for key in ("wiki_len", "task_len"):
+        if key in out:
+            out[key].clamp_(min=1)
+
+
 def transform_observation(
     obs: dict[str, torch.Tensor],
     method: str,
@@ -56,13 +81,9 @@ def transform_observation(
 ) -> dict[str, torch.Tensor]:
     out = {key: value.clone() for key, value in obs.items()}
     if method == "language_blind":
-        for key in LANGUAGE_FIELDS:
-            if key in out:
-                out[key].zero_()
+        mask_text_fields(out, LANGUAGE_FIELDS)
     elif method == "state_only":
-        for key in STATE_TEXT_FIELDS:
-            if key in out:
-                out[key].zero_()
+        mask_text_fields(out, STATE_TEXT_FIELDS)
     elif method == "language_shuffle":
         if donor_language is None:
             raise ValueError("language_shuffle requires a donor observation")
@@ -71,6 +92,7 @@ def transform_observation(
                 if out[key].shape != donor_language[key].shape:
                     raise ValueError(f"language donor shape mismatch for {key}")
                 out[key].copy_(donor_language[key])
+        sanitize_language_lengths(out)
     return out
 
 
@@ -91,6 +113,7 @@ def capture_language_donors(Model: Any, flags: Any, seed: int, episodes: int) ->
             for key in LANGUAGE_FIELDS
             if key in raw
         }
+        sanitize_language_lengths(donor)
         donors.append(donor)
         donor_seeds.append(donor_seed)
         gym_env.close()
@@ -285,6 +308,12 @@ def main() -> None:
             "fields": list(LANGUAGE_FIELDS),
             "donor_episode": "(episode_index + 1) mod episodes",
             "state_and_valid_actions_unchanged": True,
+            "zero_length_sequences_prevented": True,
+        },
+        "text_ablation_protocol": {
+            "token_values": "zeroed",
+            "declared_lengths": "set to one to preserve official pack_padded_sequence input contract",
+            "future_information_used": False,
         },
         "checkpoints": {
             str(seed): {
