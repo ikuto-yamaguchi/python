@@ -8,6 +8,13 @@ on:
       - '.github/workflows/r0_silg_rtfm_probe.yml'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/silg_rtfm_probe.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/SILG_RTFM_REPRO_001.md'
+  pull_request:
+    paths:
+      - '.github/workflows/r0_silg_rtfm_probe.yml'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/silg_rtfm_probe.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/SILG_RTFM_REPRO_001.md'
   workflow_dispatch:
 
 jobs:
