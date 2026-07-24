@@ -242,7 +242,7 @@ def _mcnemar_exact(correct_only: int, control_only: int) -> float:
     return min(1.0, 2.0 * tail)
 
 
-def _cluster_bootstrap_ci(instance_diffs: dict[tuple[int, str, str], list[float]], trials: int = 5000, seed: int = 20260724) -> tuple[float, float]:
+def _cluster_bootstrap_ci(instance_diffs: dict[tuple[int, str, str, str], list[float]], trials: int = 5000, seed: int = 20260724) -> tuple[float, float]:
     keys = sorted(instance_diffs)
     if not keys:
         return math.nan, math.nan
@@ -328,7 +328,7 @@ def score(data: list[dict[str, Any]], preds: list[dict[str, Any]]) -> dict[str, 
         item = {"prospective": float(pred["pred_state_after"] == gold["gold_state_after"]), "action": float(pred["pred_action"] == gold["gold_action"])}
         if "gold_inverse" in gold and "pred_inverse" in pred:
             item["inverse"] = float(pred["pred_inverse"] == gold["gold_inverse"])
-        grouped[(method, int(gold["seed"]), str(gold["domain"]), str(gold["condition"]))].append(item)
+        grouped[(method, int(gold["seed"]), str(gold["domain"]), str(gold["split"]).lower(), str(gold["condition"]))].append(item)
         outcomes[method][iid] = item
     for iid, fingerprints in snapshots.items():
         if len(fingerprints) != 1:
@@ -348,8 +348,8 @@ def score(data: list[dict[str, Any]], preds: list[dict[str, Any]]) -> dict[str, 
     shuffle_errors, shuffle_audit = _validate_shuffle_assignments(preds, by_id, eval_ids)
     errors.extend(shuffle_errors)
     cells = []
-    for (method, seed, domain, condition), items in sorted(grouped.items()):
-        cell = {"method": method, "seed": seed, "domain": domain, "condition": condition, "n": len(items)}
+    for (method, seed, domain, split, condition), items in sorted(grouped.items()):
+        cell = {"method": method, "seed": seed, "domain": domain, "split": split, "condition": condition, "n": len(items)}
         for metric in sorted({k for item in items for k in item}):
             cell[metric] = statistics.mean(item[metric] for item in items if metric in item)
         cells.append(cell)
@@ -362,10 +362,10 @@ def score(data: list[dict[str, Any]], preds: list[dict[str, Any]]) -> dict[str, 
             if values:
                 mean, low, high = _mean_ci(values)
                 summary[method].update({metric: mean, f"{metric}_cell_ci95_low": low, f"{metric}_cell_ci95_high": high})
-    correct_cells = {(cell["seed"], cell["domain"], cell["condition"]): cell for cell in cells if cell["method"] == "correct"}
+    correct_cells = {(cell["seed"], cell["domain"], cell["split"], cell["condition"]): cell for cell in cells if cell["method"] == "correct"}
     gaps = {}
     for control in sorted(methods - {"correct"}):
-        control_cells = {(cell["seed"], cell["domain"], cell["condition"]): cell for cell in cells if cell["method"] == control}
+        control_cells = {(cell["seed"], cell["domain"], cell["split"], cell["condition"]): cell for cell in cells if cell["method"] == control}
         gaps[control] = {}
         shared_ids = sorted(eval_ids & method_ids.get("correct", set()) & method_ids.get(control, set()))
         for metric in metrics:
@@ -378,7 +378,7 @@ def score(data: list[dict[str, Any]], preds: list[dict[str, Any]]) -> dict[str, 
                 if a is None or b is None:
                     continue
                 gold = by_id[iid]
-                cell_key = (int(gold["seed"]), str(gold["domain"]), str(gold["condition"]))
+                cell_key = (int(gold["seed"]), str(gold["domain"]), str(gold["split"]).lower(), str(gold["condition"]))
                 inst_by_cell[cell_key].append(float(a - b))
                 if a > b:
                     correct_only += 1
@@ -390,7 +390,7 @@ def score(data: list[dict[str, Any]], preds: list[dict[str, Any]]) -> dict[str, 
             bootstrap_low, bootstrap_high = _cluster_bootstrap_ci(inst_by_cell) if instance_values else (math.nan, math.nan)
             mean, low, high = _mean_ci(diffs)
             gaps[control][metric] = {"paired_cells": len(diffs), "mean_gap": mean, "min_cell_gap": min(diffs), "max_cell_gap": max(diffs), "positive_cell_fraction": sum(x > 0 for x in diffs) / len(diffs), "ci95_low": low, "ci95_high": high, "paired_randomization_p_two_sided": _paired_p(diffs), "paired_instances": len(instance_values), "instance_mean_gap": statistics.mean(instance_values) if instance_values else math.nan, "instance_cluster_bootstrap_ci95_low": bootstrap_low, "instance_cluster_bootstrap_ci95_high": bootstrap_high, "correct_only_instances": correct_only, "control_only_instances": control_only, "tied_instances": ties, "mcnemar_exact_p_two_sided": _mcnemar_exact(correct_only, control_only), "passes_mean_gap_0_10": mean >= .10, "passes_every_cell_positive": min(diffs) > 0, "passes_ci_excludes_zero": low > 0, "passes_instance_cluster_ci_excludes_zero": bootstrap_low > 0 if not math.isnan(bootstrap_low) else False}
-    return {"valid": not errors, "errors": errors, "prediction_rows": len(preds), "expected_eval_instances": len(eval_ids), "coverage": coverage, "same_instance_snapshot": not any("snapshot" in error for error in errors), "fingerprints_required": True, "shuffle_assignment_audit": shuffle_audit, "cells": cells, "summary": dict(summary), "paired_gaps_vs_correct": gaps, "progress_contract": {"required_mean_gap": .10, "requires_all_three_seeds": True, "requires_same_instance_snapshot": True, "requires_explicit_instance_fingerprint": True, "requires_complete_prediction_coverage": True, "requires_shuffle_provenance": True, "requires_within_cell_derangement": True, "requires_ci_excludes_zero": True, "requires_instance_cluster_ci_excludes_zero": True, "internal_metrics_do_not_count": True}}
+    return {"valid": not errors, "errors": errors, "prediction_rows": len(preds), "expected_eval_instances": len(eval_ids), "coverage": coverage, "same_instance_snapshot": not any("snapshot" in error for error in errors), "fingerprints_required": True, "shuffle_assignment_audit": shuffle_audit, "cells": cells, "summary": dict(summary), "paired_gaps_vs_correct": gaps, "progress_contract": {"required_mean_gap": .10, "requires_all_three_seeds": True, "requires_same_instance_snapshot": True, "requires_explicit_instance_fingerprint": True, "requires_complete_prediction_coverage": True, "requires_shuffle_provenance": True, "requires_within_cell_derangement": True, "requires_split_condition_cells": True, "requires_ci_excludes_zero": True, "requires_instance_cluster_ci_excludes_zero": True, "internal_metrics_do_not_count": True}}
 
 
 def audit_artifacts(manifest: dict[str, Any], base_dir: Path) -> dict[str, Any]:
@@ -398,7 +398,7 @@ def audit_artifacts(manifest: dict[str, Any], base_dir: Path) -> dict[str, Any]:
     runs = manifest.get("runs")
     if not isinstance(runs, list) or not runs:
         return {"valid": False, "errors": ["manifest.runs must be a non-empty list"], "checks": [], "classification": "initial_reproduction_failure"}
-    methods, cells, seeds, domains, splits = set(), set(), set(), set(), set()
+    methods, cells, seeds, domains, splits, conditions = set(), set(), set(), set(), set(), set()
     for i, run in enumerate(runs, 1):
         if not isinstance(run, dict):
             errors.append(f"run {i}: must be an object")
@@ -407,7 +407,7 @@ def audit_artifacts(manifest: dict[str, Any], base_dir: Path) -> dict[str, Any]:
         if missing:
             errors.append(f"run {i}: missing resource/provenance fields {sorted(missing)}")
         try:
-            method, seed, domain, split = str(run["method"]), int(run["seed"]), str(run["domain"]), str(run["split"])
+            method, seed, domain, split, condition = str(run["method"]), int(run["seed"]), str(run["domain"]), str(run["split"]), str(run["condition"])
         except (KeyError, TypeError, ValueError) as exc:
             errors.append(f"run {i}: invalid indexing field {exc}")
             continue
@@ -415,7 +415,9 @@ def audit_artifacts(manifest: dict[str, Any], base_dir: Path) -> dict[str, Any]:
             errors.append(f"run {i}: domain must be non-empty")
         if not split:
             errors.append(f"run {i}: split must be non-empty")
-        cell = (method, seed, domain, split)
+        if not condition:
+            errors.append(f"run {i}: condition must be non-empty")
+        cell = (method, seed, domain, split, condition)
         if cell in cells:
             errors.append(f"run {i}: duplicate run cell {cell}")
         cells.add(cell)
@@ -423,6 +425,7 @@ def audit_artifacts(manifest: dict[str, Any], base_dir: Path) -> dict[str, Any]:
         seeds.add(seed)
         domains.add(domain)
         splits.add(split)
+        conditions.add(condition)
         for key in ("model_bytes", "peak_rss_bytes", "training_wall_seconds", "cpu_inference_ms_per_item"):
             if not _finite_nonnegative(run.get(key)):
                 errors.append(f"run {i}: {key} must be a finite non-negative number")
@@ -453,11 +456,11 @@ def audit_artifacts(manifest: dict[str, Any], base_dir: Path) -> dict[str, Any]:
         errors.append(f"manifest missing required methods {sorted(missing_methods)}")
     if seeds != CANONICAL_SEEDS:
         errors.append(f"manifest seeds must be exactly {sorted(CANONICAL_SEEDS)}, found {sorted(seeds)}")
-    expected_cells = {(method, seed, domain, split) for method in required for seed in CANONICAL_SEEDS for domain in domains for split in splits}
+    expected_cells = {(method, seed, domain, split, condition) for method in required for seed in CANONICAL_SEEDS for domain in domains for split in splits for condition in conditions}
     missing_cells = expected_cells - cells
     if missing_cells:
         errors.append(f"manifest incomplete Cartesian coverage: {len(missing_cells)} missing cells")
-    return {"valid": not errors, "errors": errors, "warnings": [], "checks": checks, "methods": sorted(methods), "seeds": sorted(seeds), "domains": sorted(domains), "splits": sorted(splits), "runs": len(runs), "missing_run_cells": len(missing_cells), "missing_run_cell_examples": [list(x) for x in sorted(missing_cells)[:10]], "independent_artifacts_required": True, "canonical_seeds": sorted(CANONICAL_SEEDS), "classification": "reproduced" if not errors else "initial_reproduction_failure"}
+    return {"valid": not errors, "errors": errors, "warnings": [], "checks": checks, "methods": sorted(methods), "seeds": sorted(seeds), "domains": sorted(domains), "splits": sorted(splits), "conditions": sorted(conditions), "runs": len(runs), "missing_run_cells": len(missing_cells), "missing_run_cell_examples": [list(x) for x in sorted(missing_cells)[:10]], "independent_artifacts_required": True, "condition_index_required": True, "canonical_seeds": sorted(CANONICAL_SEEDS), "classification": "reproduced" if not errors else "initial_reproduction_failure"}
 
 
 def main(argv: list[str] | None = None) -> int:
