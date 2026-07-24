@@ -6,40 +6,40 @@
 
 ## Current stage
 
-- Stage: **S1 Semantic Identity Birth — intervention-born identifiability substage**
+- Stage: **S1 Semantic Identity Birth — minimal-witness joint structure identification substage**
 - Semantic Identity Gate G1: **未達**
-- Identifiability prerequisite G1a: **synthetic観測側で限定支持、raw Japaneseとのprospective統合は未達**
+- Identifiability prerequisite G1a: **bridge 0の完全未知語彙zero-shotは置換対称性により同定不能。最小外部witness後の上限条件では支持**
 - Operation/Goal Gate G2: **未達**
-- Causal grounding mainline: **AF-008 Intervention-Born Diagram Identityを優先**
-- AF-007 Jointly Emergent Language–World Intervention Diagrams: **共同生成という上位方針は維持し、類似度・誤差形状による事前対応付けは凍結**
-- Memory/consolidation mainline: G1待ち。保存最適化は凍結継続
+- Causal grounding mainline: **AF-010 Minimal-Witness Joint Segmentation–Arity–Orbit Groundingを優先**
+- AF-009 Intervention-Residual Joint Candidate Birth: **同定可能な観測条件での候補生成補助へ縮小**
+- Memory/consolidation mainline: **G1待ち。保存最適化は凍結継続**
 - Integrated intelligence: 未達
 
 ## Maximum upstream bottleneck
 
-固定codebookを外しても、global低rank軸、single-domain surprise cluster、cross-domain failure correspondenceはいずれも、**外部行為で候補identityが確定する前に、類似度・誤差形状・共同変動で候補を同一視する**ため失敗した。現在の最大ボトルネックは、候補を事前対応付けせず、候補対が異なる予測を返す最小の識別行為集合を生成し、実際の外部結果で一方だけが生存したときに初めてlanguage/world diagram identityを形成し、その識別構造を完全語彙非共有domainで再生成することである。
+PR382〜385により、完全語彙非共有domainへ外部接地witnessを一切与えない場合、語彙と意味の対応は任意置換に対して観測同値であり、chance超えを要求するbenchmark自体が同定不能と確定した。一方、oracle token境界・target/operation factorization・unary arityを与えると、3個のfactor-crossing witnessで576 causal worldsを一意化し、未観測target×operation合成、inverse、conflict検出まで成立した。現在の最大ボトルネックは、**oracle分節・固定因子分解・固定項数を外し、raw Japaneseの分節、対象／操作／関係の因子分解、可変arity、因果mappingを最小の独立外部witness集合から共同同定し、未観測表現・未観測因子組合せへ一般化すること**である。
 
 ## Cross-track conclusion
 
-1. HF-001〜HF-009の凍結を維持する。
-2. PR372: raw language/world差分のglobal低rank共同生成は、jointとinverseがほぼ0で、異なる変化因子の平均軸へ縮退した。
-3. PR373: local surpriseからの競合diagramは既知domainの一部を改善したが、hidden domainではprospective/inverseが0、world shuffleがCorrectを上回った。
-4. PR374: cross-domain failure correspondenceによるdiagramもjoint/inverseが全条件0で、hidden domain自由日本語ではshuffleがCorrectを上回った。
-5. PR370: formal memory eligibilityは0/3 seedであり、下流保存研究を再開できる単位は存在しない。
-6. よって、**外部識別行為前の類似度・低rank軸・surprise cluster・失敗形状対応からdiagram identityを作れる**という根本前提をHF-010として凍結する。
-7. AF-007の共同生成方針は維持するが、候補対応付けを先に置かない。AF-008 Intervention-Born Diagram Identity from Minimal Discriminating Action Setsを優先本線へ昇格する。
+1. HF-001〜HF-011の凍結を維持する。
+2. PR382: 8-way opaque lexiconでbridge 0の場合、理論上限はchance 0.125、実測0.1160、観測同値置換pairは720/720。bridge 0 zero-shotは能力試験として同定不能。
+3. PR383: oracle lexical segmentation下では4-way operation orbitを3 witnessで一意化し、prospective・inverse・goal変更・repairが1.0。ただしraw Japanese operation birthではない。
+4. PR384: oracle target/operation factorization下では576 causal worldsを3 factor-crossing witnessで1へ縮約し、未観測組合せのprospective・inverse・compositionが1.0。Randomは2.33 worlds、能力0.5833。
+5. PR385: 重複しない二つの3-witness集合が同じworldへ独立収束し、矛盾取得はversion space空として100%検出。ただしoracle-to-raw gapが残る。
+6. よって、**外部witnessなしの完全未知語彙zero-shotをG1/G2の必須能力とし、その失敗に対して候補型やselectorを増やす**という評価前提をHF-012として凍結する。
+7. S1をminimal-witness joint structure identificationへ遷移し、AF-010を優先本線へ設定する。上限監査の成功は能力進歩へ数えない。
 
 ## Active assignments
 
-- A: raw Japanese/world変換候補を独立に維持し、候補対を最小に識別する発話・観測・行為を生成する。外部結果前にfamily化しない
-- B: 固定factorや類似度clusterを使わず、候補diagramごとの異なるtarget・transition・goal予測から最小識別行為集合を構成する
-- C: 識別行為の結果で一方だけが生存する因果必要性、action-set shuffle、random介入、反実仮想再現を監査する
-- D: 外部介入で一意に生存し、複数opaque domain × 全seedで再生成されたdiagramだけをmemory eligibility候補にする。未成立中は保存最適化を拒否する
-- E: intervention leakage、oracle action selection、test outcome leakage、domain bridge、best-seed選択を監査し、仮説族凍結とstage遷移を管理する
+- A: raw Japanese全文の複数segmentation候補を保持し、最小witnessで同じ対象・変数単位へ収束するか検証する
+- B: oracle token境界と固定unary operationを外し、可変arityのoperation/goal候補とlanguage segmentation orbitを共同分割する
+- C: segmentation・factorization・arity・causal mappingを同一version spaceで共同同定し、未観測factor組合せへの反実仮想合成を監査する
+- D: 重複しないwitness集合が同じraw-learned構造へ再収束し、矛盾取得を上書きせず隔離できたunitだけをmemory eligibility候補へ通す
+- E: zero-witness identifiability、oracle segmentation/factorization/arity、calibration-after、domain bridge、best-seed leakageを監査し、benchmarkとstageを管理する
 
 ## Progress rule
 
-進歩は、介入前情報だけから候補diagramを生成し、学習用test正解を使わずに選んだ最小識別行為の実結果によって候補が一意に生存し、その生存diagramが2以上の完全語彙非共有domainと3 seedすべてで、未知表現・自由日本語上のprospective target×transition、inverse query、counterfactual repairをCorrect > random intervention / action-set shuffle / outcome shuffleで実質差0.10以上示した場合だけ認定する。介入数削減、候補消去率、類似度、残差低下、単一domainのtarget単体高値は診断である。
+進歩は、bridge 0のzero-shotではなく、事前に固定ontology・対応辞書・token境界・factorization・arityを与えず、learnerが選択した最小外部witness後に、接地へ使っていないtoken・未知語順・複数段落・自由日本語・未観測target×operation／relation組合せで、prospective、inverse、counterfactual repairがCorrect > Random witness / boundary shuffle / arity shuffle / outcome shuffleを各0.10以上、3 seedすべてで示し、重複しない第二witness集合でも同じ構造へ再収束した場合だけ認定する。version-space縮約、oracle条件の1.0、witness数削減、候補数削減は診断である。
 
 ## Current status
 
@@ -54,4 +54,4 @@
 
 ## Last integration
 
-2026-07-24: GOV-007。PR372〜374および最新D PR370を統合し、S1をintervention-born identifiability substageへ遷移。外部識別行為前に低rank軸・surprise cluster・失敗類似度でdiagram identityを作る仮説をHF-010として凍結。AF-008 Intervention-Born Diagram Identityを優先本線へ設定。G1/G2およびmemory eligibilityは未達。
+2026-07-24: GOV-009。PR382〜385を統合し、S1をminimal-witness joint structure identification substageへ遷移。bridge 0の完全未知語彙zero-shotを必須能力とする同定不能評価前提をHF-012として凍結し、AF-010 Minimal-Witness Joint Segmentation–Arity–Orbit Groundingを優先本線へ設定。G1/G2およびformal memory eligibilityは未達。
