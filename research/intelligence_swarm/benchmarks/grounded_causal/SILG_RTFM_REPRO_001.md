@@ -3,15 +3,16 @@
 ## Status
 
 - Public benchmark selected: **SILG RTFM stage 1**
-- Official recurrent baseline completed: **no**
-- Random control completed: **pending GitHub Actions execution**
-- Language-blind completed: **no**
-- State-only completed: **no**
+- Environment installation and reset/step probe: **completed**
+- Three-seed random control: **completed**
+- Official recurrent baseline: **not completed**
+- Language-blind: **not completed**
+- State-only: **not completed**
 - Capability or novelty claim: **none**
 
-This cycle fixes public source versions, the install path, environment split,
-observation/action schema and a three-seed random-control probe. It does not
-introduce a new architecture.
+This work fixes public source versions, the install path, environment split,
+observation/action schema and an executable three-seed control. It introduces
+no new architecture.
 
 ## Official sources and pins
 
@@ -19,12 +20,8 @@ introduce a new architecture.
 |---|---|---|
 | SILG | `vzhong/silg` | `2af07578e1264029a240fcfb78d4ac0aea16f5de` |
 | RTFM | `facebookresearch/RTFM` | `58f17955595b5a127c96d045d896fcbcc7d4b570` |
-| SILG package | PyPI | `0.0.1`, released 2021-10-20 |
+| SILG package | PyPI | `0.0.1` |
 | Paper | NeurIPS 2021 | SILG shared recurrent architecture |
-
-The official repository has only six commits and no tagged GitHub release;
-therefore the latest public commit and the matching PyPI version are both
-recorded. RTFM is archived and read-only.
 
 ## Official entry points and split
 
@@ -33,16 +30,16 @@ The official launcher defines:
 - train: `silg:rtfm_train_s1-v0`
 - validation/test: `silg:rtfm_test_s1-v0`
 - model: `multi`
-- two entropy-cost settings: `0.05`, `0.005`
-- default launch seeds: `range(4)`
+- entropy costs: `0.05`, `0.005`
+- launcher seeds: `range(4)`
 
-The published local command is:
+Published local entry point:
 
 ```bash
 python launch.py --local --envs rtfm
 ```
 
-The default training program is not a small smoke test. Its parser uses:
+Default training is large rather than a smoke test:
 
 - `total_frames = 100,000,000`
 - `num_actors = 30`
@@ -50,128 +47,99 @@ The default training program is not a small smoke test. Its parser uses:
 - `unroll_length = 80`
 - `num_threads = 4`
 
-A full faithful learning-curve reproduction therefore requires substantially
-more compute than the environment/import probe.
+## Dependency reconstruction
 
-## Observation schema
+The public repositories do not provide a complete lock file. Four concrete
+compatibility failures were reproduced and minimally repaired:
 
-The SILG RTFM wrapper declares these fields:
+1. Gym 0.21 metadata is rejected by modern setuptools. The build toolchain is
+   pinned to pip 22.3.1, setuptools 59.5.0 and wheel 0.37.1.
+2. `expman` is unpinned. Version 0.0.7 has a broken source distribution that
+   omits `requirements.txt`; installable wheel 0.0.5 is used.
+3. `transformers` and the local BERT tokenizer files are required by
+   `silg.envs.base` but absent from requirements. Transformers 4.30.2 and the
+   three assets referenced by the official download script are installed.
+4. `silg.envs.__init__` imports every optional environment, causing an RTFM-only
+   run to require NLE, ALFWorld, Messenger and Touchdown. The installer limits
+   registration to RTFM without modifying RTFM itself.
 
-| Field | Shape / meaning |
+Successful runtime versions:
+
+- Python 3.8.18
+- Gym 0.21.0
+- PyTorch 1.13.1+cpu
+- torchvision 0.14.1+cpu
+- SILG 0.0.1 source
+- RTFM pinned source
+
+## Measured observation/action schema
+
+The successful probe observed:
+
+| Field | Shape |
 |---|---|
-| `name` | `(height, width, max_placement, max_name)`, word IDs describing grid occupants |
-| `name_len` | descriptor lengths per cell |
-| `text` / `text_len` | combined text input |
-| `wiki` / `wiki_len` | environment-dynamics document |
-| `task` / `task_len` | task/goal language |
-| `inv` / `inv_len` | inventory language |
-| `valid` | valid-action mask |
-| `rel_pos` | relative positions |
-| `pos` | agent position |
+| `name` | `[6, 6, 1, 8]` |
+| `name_len` | `[6, 6, 1]` |
+| `wiki` | `[80]` |
+| `wiki_len` | `[1]` |
+| `task` | `[40]` |
+| `task_len` | `[1]` |
+| `inv` | `[8]` |
+| `inv_len` | `[1]` |
+| `valid` | `[5]` |
+| `rel_pos` | `[6, 6, 2]` |
+| `pos` | `[2]` |
 
-Text fields exposed by the wrapper are `wiki`, `task`, and `inv`.
+Actions are discrete: stay, up, down, left, right.
 
-## Action schema
+## Three-seed random control
 
-RTFM stage 1 exposes five discrete actions in this order:
+Condition: uniformly sample one action from the public `valid` mask.
 
-0. stay
-1. up
-2. down
-3. left
-4. right
+- seeds: `0, 1, 2`
+- episodes: 20 per seed, 60 total
+- wins: 6 / 60
+- mean win rate: **0.1000**
+- mean return: **-1.0823**
+- mean episode length: **15.1167**
+- mean wall time: **0.8522 s per 20-episode seed batch**
+- mean action-selection latency: **8.087 microseconds/action**
+- total probe wall time: **3.8286 s**
+- peak RSS: **232,992 KiB**
+- trainable model size: **0 bytes**
 
-The wrapper reports a win when environment reward is greater than `0.5`;
-SILG's TorchBeast training code generally treats reward greater than `0.8` as
-a win. This mismatch is explicitly logged rather than silently normalized.
+Per seed:
 
-## Dependency contract
+| Seed | Wins | Win rate | Return | Mean length |
+|---:|---:|---:|---:|---:|
+| 0 | 3 | 0.15 | -0.938 | 12.90 |
+| 1 | 1 | 0.05 | -1.158 | 13.90 |
+| 2 | 2 | 0.10 | -1.151 | 18.55 |
 
-SILG itself specifies only broad/unpinned dependencies:
+Canonical result:
 
-```text
-gym>=0.15.4
-py-getch==1.0.1
-pyyaml
-torch
-torchvision
-expman
-submitit
-```
-
-RTFM adds:
-
-```text
-vocab>=0.0.4
-embeddings>=0.0.7
-revtok>=0.0.3
-gym>=0.15.4
-py-getch==1.0.1
-```
-
-For the compatibility probe, the workflow pins Python 3.8, PyTorch 1.13.1 CPU,
-Gym 0.21.0, pip below 24 and setuptools below 69. These are reproduction
-compatibility pins, not claimed official experiment versions; the public code
-does not supply a complete lock file.
-
-## Probe
-
-Files:
-
-- `install_silg_rtfm.sh`
-- `silg_rtfm_probe.py`
-- `.github/workflows/r0_silg_rtfm_probe.yml`
-
-The probe performs:
-
-1. exact-source checkout;
-2. dependency installation;
-3. import and environment registration;
-4. schema capture;
-5. 20 episodes × seeds `0,1,2` using uniformly sampled valid actions;
-6. win rate, return, episode length, wall time, action-selection latency and
-   peak RSS measurement;
-7. pip freeze, raw logs and SHA-256 checksum artifact upload.
-
-The random policy contains zero trainable model bytes. It is an evaluation
-control, not an official recurrent baseline.
+- `results/SILG_RTFM_RANDOM_3SEED.json`
+- workflow run `30100194601`
+- artifact digest `sha256:c4f4102dce4d5929b1ea2a54c98572c5ea6e8c251d87625965752f42c1f11fe6`
 
 ## Leakage audit
 
-The random probe selects only from the observation's `valid` mask. It does not
-consume:
+The control reads only current observation fields and the public valid-action
+mask. It does not consume future state, gold action, episode outcome, completed
+trajectory, test label or language-to-entity mapping. Model bytes are zero.
 
-- future state;
-- gold action;
-- episode outcome;
-- completed trajectory;
-- test labels;
-- language-to-entity mapping.
+## Next minimal work
 
-Using `valid` is part of the public observation interface. A later matched
-state-only and language-blind comparison must use the same mask.
-
-## Current blocker
-
-The tool execution container could not resolve `github.com`, so installation
-could not be run locally. The canonical branch now contains a GitHub Actions
-probe that runs in an internet-enabled Ubuntu environment and always uploads
-installation/probe logs, including on failure.
-
-A successful random probe is necessary but not sufficient. The next minimal
-steps are:
-
-1. inspect the workflow artifact and repair only the first concrete dependency
-   failure, if any;
-2. instantiate the official `multi` recurrent model and record parameter bytes;
-3. run a reduced-frame sanity training for seeds 0,1,2;
-4. implement language-blind and state-only input ablations without changing
-   the optimizer, actor count, instances or valid-action interface;
-5. only then schedule the full official-frame reproduction.
+1. instantiate official `multi` recurrent model and measure parameter bytes;
+2. run reduced-frame training/evaluation for seeds 0,1,2;
+3. add language-blind and state-only input masks without changing episodes,
+   valid-action handling, optimizer or model capacity;
+4. compare all controls on identical validation instances;
+5. only after the sanity run, schedule a faithful 100M-frame reproduction.
 
 ## Research decision
 
-R0.1 remains **in progress**. Public baseline reproduction count remains zero
-until the recurrent model trains and evaluates successfully. No intelligence
-principle, semantic-identity progress or high-school-level capability is
-claimed.
+R0.1 remains **in progress**. One public environment/control is now reproducible,
+but the published recurrent baseline count remains zero. No intelligence
+principle, semantic-identity progress, novelty or high-school-level capability
+is claimed.
