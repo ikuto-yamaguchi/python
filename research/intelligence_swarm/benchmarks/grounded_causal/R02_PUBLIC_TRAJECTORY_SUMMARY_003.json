@@ -1,0 +1,63 @@
+{
+  "date": "2026-07-25",
+  "workflow_run_id": 30108096366,
+  "workflow_head_sha": "0acae4cdc00542e2411335fcdc7c8c70cab5060c",
+  "artifact": {
+    "id": 8602643003,
+    "name": "r0-silg-rtfm-probe-30108096366",
+    "sha256": "6423e1a06b45bf2e9bc65a401a62e217fa3e916f670f7632f7ddd9e89b833be8",
+    "bytes": 73246005
+  },
+  "source_pins": {
+    "silg": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
+    "rtfm": "58f17955595b5a127c96d045d896fcbcc7d4b570"
+  },
+  "seeds": [1, 7, 19],
+  "train_episodes_per_seed": 40,
+  "test_episodes_per_seed": 20,
+  "state_dim": 414,
+  "actions": 5,
+  "inference_parameter_budget_matched": true,
+  "inference_model_bytes": {
+    "environment_first": 7661516,
+    "end_to_end": 7661516,
+    "state_only": 696140
+  },
+  "mean_action_accuracy": {
+    "environment_first_correct": 0.6839639874188636,
+    "environment_first_language_blind": 0.6839639874188636,
+    "environment_first_language_shuffle": 0.6839639874188636,
+    "end_to_end_correct": 0.6906841730563071,
+    "end_to_end_language_blind": 0.6906841730563071,
+    "end_to_end_language_shuffle": 0.6906841730563071,
+    "state_only": 0.7240439532888274
+  },
+  "mean_gaps": {
+    "environment_first_minus_end_to_end": -0.0067201856374435875,
+    "environment_first_minus_state_only": -0.040079965869963874,
+    "environment_first_minus_language_blind": 0.0,
+    "environment_first_minus_language_shuffle": 0.0
+  },
+  "training_seconds_by_seed": {
+    "1": {"environment_pretrain": 1.5948942380000517, "language_stage": 27.307962724999925, "end_to_end": 27.346664695999948, "state_only": 1.4733310499999561},
+    "7": {"environment_pretrain": 1.765951254000015, "language_stage": 30.675539832000027, "end_to_end": 30.777610641000024, "state_only": 1.6260342110000465},
+    "19": {"environment_pretrain": 1.8752769079999325, "language_stage": 32.689877635000016, "end_to_end": 32.99328718600009, "state_only": 1.6657453999999916}
+  },
+  "peak_rss_kib_by_seed": {"1": 506948, "7": 522948, "19": 538256},
+  "cpu_inference_ms_per_item_approx": {
+    "environment_first": 0.493,
+    "end_to_end": 0.491,
+    "state_only": 0.016
+  },
+  "task_success_measured": false,
+  "heldout_entity_measured": false,
+  "heldout_dynamics_measured": false,
+  "heldout_language_form_measured": false,
+  "next_state_metric_valid": false,
+  "next_state_metric_issue": "raw flattened state mixes continuous values and categorical token IDs; unnormalised scalar MSE is not interpretable",
+  "trajectory_policy": "official recurrent checkpoint after 2048-frame engineering smoke",
+  "classification": "public_trajectory_offline_negative_diagnostic_not_r02_reproduction",
+  "capability_progress_claimed": false,
+  "novelty_claimed": false,
+  "highschool_level_passed": false
+}
