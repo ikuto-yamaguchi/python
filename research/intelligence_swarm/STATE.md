@@ -14,6 +14,7 @@
 - 公開環境control再現: **1件**
 - 公開学習経路再現: **1件（SILG/RTFM official multi recurrent, 2,048-frame smoke）**
 - 公開能力baseline再現: **0件**
+- R0.2公開trajectory offline診断: **1件（正式再現ではない）**
 - 査読可能な中心命題: **未確立**
 - Active mechanism family: **なし**
 - AF-001〜AF-014: **PAUSED**
@@ -76,6 +77,27 @@ GitHub Actions run `30104299406` completed the official SILG `multi` recurrent t
 
 これは**学習経路・依存関係・資源測定の再現成功**であり、公開能力baseline再現ではない。
 
+## R0.2 public trajectory offline result
+
+GitHub Actions run `30108096366` exported policy trajectories from the pinned public recurrent checkpoints and trained the corrected environment-first, matched end-to-end and state-only baselines for seeds `1,7,19`.
+
+- Artifact digest: `sha256:6423e1a06b45bf2e9bc65a401a62e217fa3e916f670f7632f7ddd9e89b833be8`
+- Environment-first / end-to-end inference model: both `7,661,516 bytes`
+- State-only model: `696,140 bytes`
+- Mean offline action accuracy: environment-first `0.6840`; end-to-end `0.6907`; state-only `0.7240`
+- Environment-first minus end-to-end: `-0.0067`
+- Environment-first minus state-only: `-0.0401`
+- Environment-first correct / language-blind / language-shuffle: all `0.6840`
+- Peak RSS: seed 1 `506,948 KiB`; seed 7 `522,948 KiB`; seed 19 `538,256 KiB`
+- Environment-first CPU inference: approximately `0.493 ms/item`
+- 1GB未満: 達成
+- Online task success: 未測定
+- Held-out entity/dynamics/language-form transfer: 未測定
+
+Classification: **`public_trajectory_offline_negative_diagnostic_not_r02_reproduction`**。
+
+現在のtrajectory/export条件ではlanguage-specific benefitは観測されず、state-onlyが最良だった。また、414次元raw stateはcontinuous/binary値とcategorical token IDを混在させており、未正規化next-state MSEは無効。これはR0.2の正式再現・能力進歩ではない。
+
 ## Evaluation-contract status
 
 `evaluation_contract.py`は以下を自動監査する。
@@ -96,18 +118,19 @@ GitHub Actions run `30104299406` completed the official SILG `multi` recurrent t
 
 現時点の公開結果は、次の理由で能力baselineとして不合格。
 
-1. recurrent checkpointを固定`rtfm_test_s1-v0` instance setで評価していない。
-2. random controlは同一instance replayではない。
-3. language-blind、state-only、target-label shuffle、outcome/transition shuffleが未実施。
-4. per-run raw-log digestが短縮値で、data checksumとper-run code commitが不足。
+1. recurrent checkpointの評価は同じ初期episode seedだが、policy分岐後の同一snapshot replayではない。
+2. environment-ID-only、target-label shuffle、outcome/transition shuffleが未実施。
+3. R0.2はundertrained recurrent policyのoffline imitationであり、online task successがない。
+4. typed state loss、実際のentity/dynamics/language-form holdoutが未実装。
+5. per-run complete artifact manifestをevaluation contractへ入力していない。
 
 Formal classification: **`initial_reproduction_failure`**。
 
 ## Current maximum bottleneck
 
-**seed 1/7/19の固定`rtfm_test_s1-v0` instance setを一度だけcaptureし、同じinstance fingerprintを保持したまま、official recurrent、random、language-blind、state-only、environment-ID-only、target-label shuffle、language shuffle、outcome/transition shuffleを評価し、完全artifact監査を通すこと。**
+**公開checkpointと全controlを、固定snapshotまたは明示的に同一初期instanceと定義した公平な評価へ接続し、R0.2ではtyped observation field別のnext-state objective、実holdout split、online task successを揃えること。特に、言語をblind/shuffleしても性能が不変な現在のoffline設定をGate Lの陽性証拠として扱わない。**
 
-R0.2のpublic environment-first比較は、このinstance replayと公式checkpoint評価が成立した後に実行する。R0.3 Gate IはGate Lの陽性とbenchmark上の非自明な介入多様性が確認されるまで開始しない。
+R0.3 Gate IはGate Lの陽性とbenchmark上の非自明な介入多様性が確認されるまで開始しない。
 
 ## Progress rule
 
@@ -127,4 +150,4 @@ R0の進歩は、公開baselineの再現成功、同一benchmark・同一split�
 
 ## Last integration
 
-2026-07-25: **RESET-E010**。公式SILG recurrentの3-seed学習経路・資源測定をR0のengineering reproductionとして統合。公開能力baselineはevaluation contract不合格のため0件を維持。次の唯一のP0を固定test-instance capture/replayと全matched control比較へ限定し、次stage遷移を見送った。
+2026-07-25: **R0.2-CYCLE-003**。公開SILG trajectory上でstate-conditioned environment-first、parameter-matched end-to-end、state-onlyを3 seed実行。言語blind/shuffle差0、state-only優位、typed next-state metric未成立のためnegative diagnosticとして統合し、R0.2正式再現と能力進歩は未認定。
