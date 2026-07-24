@@ -1,53 +1,51 @@
 # Intelligence Swarm Backlog
 
-## P0 — R0.1 learned public capability baseline
+## P0 — Resolve the 32,768-frame SILG run
 
-Current status: **matched fixed-initial-instance smoke completed; learned public capability baseline not reproduced**.
+Current status: **submitted / result not yet integrated**.
 
-### Completed
+Only authorized actions:
 
-- SILG `2af07578e1264029a240fcfb78d4ac0aea16f5de`
-- RTFM `58f17955595b5a127c96d045d896fcbcc7d4b570`
-- Ubuntu 22.04 / Python 3.8.18 and resolved dependency lock
-- RTFM S1 schema probe and random-valid-action public control
-- official SILG `multi` recurrent 3-seed training/checkpoint path
-- checkpoint save/reload
-- Correct / Random / Language-blind / State-only from identical independently seeded initial test instances
-- parameters、model bytes、RSS、training time、CPU latency、artifact digest
-- evaluation contract adapters and leakage/artifact regression tests
+1. obtain the completed GitHub Actions artifact for seeds `1,7,19`;
+2. verify checkpoint, model, data and raw-log SHA-256;
+3. record frames, model bytes, training wall time, peak RSS and CPU inference latency;
+4. verify Correct / Random / Language-blind / State-only / Language-shuffle share all initial-instance fingerprints;
+5. evaluate episode-level paired gaps;
+6. run the trajectory-eligibility audit.
 
-### Engineering values
+Decision:
 
-- parameters: `4,916,915`
-- trained state dict: approximately `19.694 MB`
-- training wall time: `26.560 / 26.592 / 26.565 s`
-- maximum peak RSS: `493,576 KiB`
-- matched smoke Correct win rate: `0.0167`
-- matched smoke Random win rate: `0.0667`
-- matched smoke Language-blind win rate: `0.0167`
-- artifact digest: `sha256:408e95f8c0b682dab398dd52a5694e3bb57533453a33d775d9bd952f55b4ad50`
+- if policy competence and trajectory eligibility improve, proceed to immutable matched evaluation;
+- if not, increase or repair only the official recurrent training budget/reproduction condition;
+- do not tune Environment-first, invent a new architecture or claim language irrelevance from a collapsed policy.
 
-These values establish the public training/evaluation path only. They do not reproduce the published capability baseline.
+## P0 — Immutable R0.1 public capability evaluation
 
-### Only authorized R0.1 work
+R0.1 completes only when one serialized `rtfm_test_s1-v0` evaluation set is frozen for seeds `1,7,19` and every method consumes that exact snapshot.
 
-1. Increase official recurrent training budget with checkpointed learning curves until convergence evidence or a declared resource ceiling.
-2. Freeze one canonical `rtfm_test_s1-v0` evaluation set for seeds `1,7,19`; store complete dataset SHA-256 and instance fingerprints.
-3. Evaluate the same learned checkpoints and all controls:
-   - official recurrent
-   - random
-   - language-blind
-   - state-only
-   - environment-ID-only
-   - within-environment language shuffle
-   - outcome/transition shuffle
-   - target-label shuffle only if an operational target proxy exists without gold ontology
-4. Export per-instance predictions with complete method × seed × split coverage.
-5. Record raw-log/model/data SHA-256, exact source commit, model bytes, RSS, train time and CPU latency.
-6. Pass `evaluation_contract.py` before interpreting scores.
-7. Compare against the paper/code reference score using a preregistered tolerance.
+Required methods:
 
-R0.1 completes only when a learned recurrent policy and controls are validly compared on fixed public test data and the artifact/leakage contract passes.
+- official recurrent Correct
+- random valid action
+- language-blind
+- state-only
+- environment-ID-only
+- within-environment language shuffle
+- outcome or transition shuffle
+- target-label shuffle only if a non-oracle operational proxy exists
+
+Required outputs:
+
+- per-instance prediction JSONL
+- mandatory `instance_fingerprint`
+- complete method × seed × domain × split coverage
+- online win / return / episode length
+- model/data/log checksums and exact source commit
+- model bytes, peak RSS, training wall time and CPU latency
+- cell-level and instance-paired statistics
+- comparison with a preregistered public reference tolerance
+
+Interpret no score until `evaluation_contract.py` passes.
 
 ## P0 — Evaluation and artifact contract
 
@@ -55,117 +53,116 @@ Every measured experiment must pass:
 
 - train/test normalized utterance overlap check
 - entity and dynamics split overlap check
-- gold action、next state、reward、done、post-treatment state、completed trajectory leakage check
+- gold action, next state, reward, done, post-treatment and completed-trajectory leakage checks
 - canonical seeds `1,7,19`
-- immutable instance fingerprint agreement
-- complete method × seed × domain × split coverage
-- prediction coverage and duplicate prediction audit
+- prediction-supplied immutable instance fingerprints
+- complete prediction and artifact coverage
 - domain × seed × condition cells
-- paired mean gap、minimum cell gap、95% CI、paired randomization test
-- source/model/data/log checksums and exact code commit
-- model bytes、peak RSS、training wall time、CPU inference latency
+- paired mean/minimum-cell gaps and positive-cell fraction
+- exact McNemar test and hierarchical cluster-bootstrap 95% CI
+- source/model/data/log SHA-256 and code commit
+- model bytes, peak RSS, training wall time and CPU inference latency
 
-Current R0.1/R0.2 formal classification: **`initial_reproduction_failure`** because full controls, complete manifests, valid public ability reference comparison and online/holdout metrics remain absent.
+Current classification: **`initial_reproduction_failure`**. Contract tests: **7 passed**. Aggregate summaries alone are invalid.
 
 ## P1 — R0.2 Environment-first reproduction
 
-Current status: **public trajectory negative diagnostic completed; formal reproduction not completed**.
+Current status: **old public trajectories rejected as comparison-ineligible**.
 
-Observed on undertrained SILG policy trajectories:
+Observed negative diagnostic:
 
-- environment-first action accuracy: `0.6840`
-- matched end-to-end: `0.6907`
-- state-only: `0.7240`
-- environment-first language-blind: `0.6840`
-- environment-first language-shuffle: `0.6840`
+- Environment-first action accuracy: `0.6840`
+- matched End-to-end: `0.6907`
+- State-only: `0.7240`
+- Language-blind gap: `0.0000`
+- Language-shuffle gap: `0.0000`
 
-This is not evidence for or against the literature claim because trajectories came from a low-competence policy and online task success / true holdout transfer were not measured.
+Eligibility failure:
 
-### Authorized next work
+- seed 1 successful train episodes: `0/40`
+- seed 7: `0/40`; majority action `97.42%`
+- seed 19: `1/40`
+- all test sets: `0/20`
 
-After R0.1 competence is established:
+Before any representation comparison, source trajectories must satisfy per seed:
 
-1. export successful or sufficiently competent public trajectories;
-2. define typed observation-field losses instead of scalar MSE over mixed continuous/binary/token-ID fields;
-3. reproduce Gaddy & Klein 2019 environment-first training or a faithful task-matched equivalent;
+- majority action share `<= 0.90`
+- successful train episodes `>= 5`
+- at least two actions with `>=5%` support
+
+After R0.1 competence and eligibility:
+
+1. export competent public trajectories;
+2. use typed observation-field next-state losses;
+3. reproduce Gaddy & Klein 2019 or a faithful task-matched Environment-first baseline;
 4. reproduce Language Dynamics Distillation or a faithful next-state objective;
-5. match parameter and data budgets to end-to-end;
-6. measure online task success、typed next-state prediction、action accuracy、held-out entity、held-out dynamics/mechanism、held-out language form;
-7. run language-blind、language-shuffle、state-only、transition-shuffle controls on identical instances;
-8. pass the artifact/evaluation contract.
+5. match parameter and data budgets to End-to-end;
+6. measure online task success, action accuracy, typed next-state prediction and real held-out entity/dynamics/language-form transfer;
+7. run language-blind, language-shuffle, state-only and transition/outcome-shuffle on identical instances;
+8. pass the evaluation/artifact contract.
 
-Internal representation appearance、compression、latent clusteringは進歩へ数えない。
+Internal representation appearance, compression and latent clustering do not count as progress.
 
 ## P1 — Gate-I benchmark qualification
 
-SILG/RTFM is **rejected as a direct Gate-I benchmark** because it does not define ground-truth latent intervention families, targets, mechanism pre/post operators or a causal abstraction. Adding them by hand would reintroduce a fixed ontology.
+SILG/RTFM is rejected as a direct intervention-partition benchmark because it does not define latent intervention families, targets, mechanism pre/post operators or a causal abstraction.
 
-Search primary literature and official datasets for a benchmark with all of:
+A qualified public benchmark must contain:
 
-- raw language plus sequential or interactive trajectories
-- explicit mechanism-change pre/post data
+- raw language and sequential/interactive trajectories
+- independently defined mechanism-changing variation
+- explicit mechanism pre/post data
 - ground-truth intervention family or theoretically justified causal abstraction
 - held-out intervention target or mechanism
 - permutation-aware evaluation
-- intervention diversity sufficient to distinguish competing partitions
+- intervention diversity that distinguishes competing partitions
 
-If no public benchmark qualifies, formally reject the empirical joint-identification program and retain only an impossibility/sufficient-condition theory program.
+Candidate RQ-001-N4 remains **narrowed, not adopted**:
 
-No R0.3 model experiment is authorized before Gate L is positive and a Gate-I benchmark qualifies.
+> Does episode-aligned raw language strictly refine a trajectory-only equivalence class into a finer intervention-supported causal abstraction and improve held-out mechanism prediction?
+
+Reject the empirical joint-identification direction if no public benchmark qualifies, if an equal/weaker-assumption primary source solves it, or if hand-written target slots/ontology are required.
+
+No R0.3 model experiment is authorized before Gate L is positive and Gate-I qualification succeeds.
 
 ## P1 — Prior-art and novelty matrix
 
-Established areas that are not standalone contributions:
+Maintain primary-source comparison through 2026 for:
 
-- unknown intervention target and unknown multi-node intervention recovery
-- unknown soft-intervention inference
-- finite-sample recovery from few environments
-- nonparametric causal representation learning under general environments
-- causal abstraction under subset interventions
-- intervention-conditioned causal response representation
-- perturbation-target prediction
-- multi-environment interactive language grounding
-- language-conditioned dynamics pretraining
-- environment-first instruction-following pretraining
+- unknown / multi-node / soft intervention recovery
+- finite-sample few-environment identifiability
+- nonparametric general-environment CRL
+- subset-intervention causal abstraction
+- raw-trajectory system parameter identifiability
+- temporal partition and causal-graph joint learning
+- multimodal partial-sharing identifiability
+- perturbation-target and causal-response representations
+- interactive language grounding
+- language-dynamics and environment-first pretraining
 
-Latest boundary: 2025–2026 work extends identifiability/achievability to general mixing, unknown interventions, few environments, finite samples and intervention-inspired disentanglement. A broad claim that interventions create causal representations is not novel.
-
-### Current research-question status
-
-- Gate L on SILG: **continued as public language-necessity evaluation**
-- Gate I on SILG: **rejected as undefined**
-- joint empirical RQ: **not adopted**
-- next-stage central claim: **not preregistered**
-
-Reject the whole empirical direction if:
-
-1. Full fails to exceed state/action/history and language shuffle after competent-policy reproduction;
-2. gains disappear under environment-ID control、Rename or transition shuffle;
-3. no Gate-I-qualified public benchmark exists;
-4. an equal-or-weaker-assumption primary source solves the exact joint problem;
-5. target labels、completed trajectories、post-treatment features or hand-written causal ontology are required.
+Broad claims that interventions create causal representations, or that language and dynamics can be jointly learned, are not novel.
 
 ## P2 — Japanese realism audit
 
-Pinned source: official `riken-grp/J-CRe3` repository.
+Pinned candidate: official `riken-grp/J-CRe3`.
 
 Tasks:
 
-- pin commit、license、download command、checksum、split、annotation schema
-- reproduce text-only、vision-only、combined reference baselines where supported
-- separate direct reference、predicate-argument、bridging reference
-- audit subject omission and demonstratives where annotations permit
+- pin commit, license, download command, checksum, split and annotation schema;
+- reproduce supported text-only, vision-only and combined baselines;
+- separate direct reference, predicate-argument and bridging reference;
+- audit subject omission and demonstratives where annotations permit.
 
-J-CRe3 is an external Japanese grounding audit. It does not substitute for SILG R0.1 and must not be averaged into its primary score.
+J-CRe3 is an external Japanese grounding audit and must not be averaged into SILG scores.
 
-## P2 — Theory before invention
+## P2 — Preregister at most one next-stage claim
 
-After valid R0 reproduction, preregister at most one claim:
+Only after R0 completion, preregister one of:
 
-- impossibility theorem for joint language–causal alignment under a specified symmetry; or
-- sufficient-condition theorem for shared-permutation / supported-abstraction recovery under explicit trajectory and intervention diversity.
+- an impossibility theorem under an explicit joint language–causal symmetry; or
+- a sufficient-condition theorem for shared-permutation / supported-abstraction recovery.
 
-No new architecture is authorized before baseline reproduction、novelty comparison、primary metric and stopping rule are preregistered.
+The preregistration must specify prior-art difference, assumptions, primary metric, controls, resource ceiling and stopping rule before any new architecture.
 
 ## Frozen work
 
@@ -173,23 +170,23 @@ No new architecture is authorized before baseline reproduction、novelty compari
 - renamed span/slot/graph/tensor/assembly/attractor mechanisms
 - AF-014 derivatives before reproduction
 - memory/replay/fast weights/sleep/forgetting optimization
-- best-seed、domain-average-only、single-condition positives
-- prospective evaluation using after-state or completed trajectory
+- best-seed, average-only or single-condition positives
+- after-state/completed-trajectory prospective leakage
 - new stacked PR chains
-- treating random-control、training-path or offline imitation diagnostics as intelligence progress
-- implementing Gate I by manually adding an ontology to SILG
+- treating installation, random control, training-path smoke or offline imitation as intelligence progress
+- manually adding a Gate-I ontology to SILG
+- tuning R0.2 representation models on failed-policy demonstrations
 
 ## R0 completion rule
 
-R0 completes only when all are true:
+All must hold:
 
-- at least one learned external public capability baseline is reproduced
-- random/language-blind/state-only/shuffle controls are measured on fixed public instances
-- at least three canonical seed logs exist
-- complete artifact/leakage contract passes
-- CPU/RSS/model-size measurements are recorded
-- R0.2 matched public online comparison is completed
-- R0.3 is completed on a qualified benchmark or formally rejected as undefined/unavailable
-- novelty matrix covers relevant 2026 primary literature
-- the empirical RQ is adopted, further narrowed or rejected
-- exactly one next-stage central claim is preregistered
+1. at least one learned external public capability baseline reproduced;
+2. random/language-blind/state-only/shuffle controls on immutable public instances;
+3. three canonical seed logs and complete artifact/leakage contract;
+4. CPU/RSS/model-size measurements;
+5. R0.2 matched public online comparison with typed metrics and real holdouts;
+6. R0.3 completed on a qualified benchmark or formally rejected;
+7. novelty matrix through relevant 2026 primary literature;
+8. empirical RQ adopted, further narrowed or rejected;
+9. exactly one next-stage central claim preregistered.
