@@ -71,6 +71,17 @@ Prohibited aliases: fixed response codebook、consequence subspace、lesion-tran
 Allowed residual use: failure diagnosis、counterexample construction、bridge leakage audit、共同創発方式のbaseline。
 Unfreeze condition: 固定codebookなしでlanguage transformationとworld interventionを共同生成し、隠しdomainで同一unitのprospective・inverse・counterfactual能力が成立した後、その圧縮・監査用途としてのみ再評価する。
 
+## HF-010 — Pre-Action Similarity or Error Correspondence Defines Diagram Identity
+Status: **FROZEN**
+Root premise: 外部識別行為で候補の正誤を確定する前でも、global低rank共同軸、single-domain surprise cluster、cross-domain failure similarity、交換子残差形状などからlanguage/world diagram identityを対応付けられる。
+Observed failure:
+- PR372: global raw language/world low-rank operatorはjointとinverseがほぼ0で、異なる変化因子の平均軸へ縮退。
+- PR373: local surprise diagramはhidden domainのprospective/inverseが0で、world shuffleがCorrectを大幅に上回る条件が複数。
+- PR374: cross-domain failure correspondenceでもjoint/inverseは全条件0。hidden domain自由日本語・未知語順・複数段落でshuffleがCorrectを上回る。
+Prohibited aliases: global joint axis、local surprise square、failure-correspondence family、residual-shape matching、nearest counterexample pairingを、外部識別証拠なしにsemantic identityまたはcausal diagram identityと呼ぶ再試行。
+Allowed residual use: 候補生成、失敗多様性診断、識別行為候補の初期化。identity確定には使わない。
+Unfreeze condition: 類似度・誤差形状で事前対応付けせず、test正解から独立に選んだ識別行為の実結果で候補が一意に生存し、そのdiagramが複数opaque domain・全seedで外部能力を満たすこと。
+
 ## AF-001 — Causal-role Equivalence from Cross-context Behavior
 Status: **ACTIVE, SCOPE REDUCED**
 Question: individual identityではなく因果的役割同値類を形成できるか。
@@ -100,13 +111,18 @@ Root premise: 完全語彙非共有domain間でidentity / operation / goal / wor
 Current interpretation: PR367〜370により固定codebook上のconsensusはsemantic birthの十分条件ではない。domain/seed failure pattern、factor混線、bridge leakageの診断に限定する。
 
 ## AF-007 — Jointly Emergent Language–World Intervention Diagrams
+Status: **ACTIVE, PRINCIPLE RETAINED / MATCHING SUBFAMILY FROZEN**
+Root premise: semantic unitを既成の文字span、結果channel、factor slotから選ばず、raw Japanese上の局所変換とworld上の局所介入を同時に生成し、言語変換→world介入とworld介入→言語変換の可換図式として形成する。
+Current interpretation: 共同生成という上位方針は維持する。ただし外部識別行為前のglobal軸・surprise cluster・failure correspondenceによる事前対応付けはHF-010として凍結。
+
+## AF-008 — Intervention-Born Diagram Identity from Minimal Discriminating Action Sets
 Status: **ACTIVE PRIORITY**
-Root premise: semantic unitを既成の文字span、結果channel、factor slotから選ばず、raw Japanese上の局所変換とworld上の局所介入を同時に生成し、言語変換→world介入とworld介入→言語変換の可換図式を複数domainで閉じる最小変換対として形成する。
+Root premise: 候補diagramのidentityは類似度で事前に与えず、候補対が異なる結果を予測する最小行為集合をtest正解から独立に選び、実際の外部結果で一方だけが生存したときに初めて形成する。
 Required evidence:
-1. 固定identity/operation/goal label、固定結果codebook、対応辞書、共有token、共有IDを用いない。
-2. 介入前worldとraw Japaneseのみからlanguage transformationとworld intervention候補を共同生成する。
-3. Correct diagram、language-transform shuffle、world-transform shuffle、pair shuffle、domain shuffle、randomを比較する。
-4. prospective target×transition、inverse query、counterfactual repair、twin discriminationを同一unitで満たす。
-5. 片domainで選択したunitが完全に隠したopaque domainでも再生成される。
-6. 2以上のopaque domain × 3 seedすべてでCorrect > shuffle/random、暫定実質差0.10以上。
-G1 promotion condition: 同一diagram unitが上記を満たし、post-treatment leakage、domain bridge leakage、predefined-codebook leakage、seed selection bias監査を通過すること。
+1. 固定identity/operation/goal label、固定結果codebook、domain対応辞書、共有token、共有IDを用いない。
+2. 候補生成、識別行為選択、外部結果観測、final評価をデータ分離する。
+3. Correct minimal intervention、random intervention、action-set shuffle、outcome shuffle、oracle action selectorを比較する。
+4. 介入後に一意に生存した同じdiagramでprospective target×transition、inverse query、counterfactual repair、twin discriminationを満たす。
+5. 片domainで得た識別行為構造が完全に隠したopaque domainでも再生成される。
+6. 2以上のopaque domain × 3 seedすべてでCorrect > random/action-set shuffle/outcome shuffle、暫定実質差0.10以上。
+G1 promotion condition: 同一のintervention-born diagramが上記を満たし、test outcome leakage、oracle action leakage、domain bridge leakage、seed selection bias監査を通過すること。
