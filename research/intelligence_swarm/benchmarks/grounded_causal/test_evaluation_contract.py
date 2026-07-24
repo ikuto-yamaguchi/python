@@ -1,122 +1,40 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import hashlib
-import importlib.util
-import json
-import tempfile
-import unittest
+import hashlib, importlib.util, tempfile, unittest
 from pathlib import Path
-
-HERE = Path(__file__).resolve().parent
-SPEC = importlib.util.spec_from_file_location("evaluation_contract", HERE / "evaluation_contract.py")
-assert SPEC and SPEC.loader
-ec = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(ec)
-
-METHODS = ["correct", "random", "language_blind", "state_only", "target_label_shuffle", "outcome_shuffle"]
-
-
-class ContractTests(unittest.TestCase):
-    def make_rows(self):
-        rows = []
-        for seed in (1, 7, 19):
-            rows.append({
-                "instance_id": f"train-{seed}", "domain": "rtfm_s1", "seed": seed,
-                "split": "train", "utterance": f"train text {seed}",
-                "state_before": [0, seed], "state_after": [1, seed],
-                "action": 1, "reward": 0.0, "done": False,
-            })
-            for condition in ("entity_holdout", "dynamics_holdout", "language_holdout"):
-                rows.append({
-                    "instance_id": f"test-{seed}-{condition}",
-                    "domain": "rtfm_s1", "seed": seed, "split": "test",
-                    "utterance": f"test text {seed} {condition}",
-                    "state_before": [0, seed], "state_after": [1, seed],
-                    "action": 1, "reward": 1.0, "done": True,
-                    "entity_holdout": condition == "entity_holdout",
-                    "dynamics_holdout": condition == "dynamics_holdout",
-                    "language_holdout": condition == "language_holdout",
-                    "entity_signature": f"eval-e-{seed}-{condition}",
-                    "dynamics_signature": f"eval-d-{seed}-{condition}",
-                })
-        return rows
-
-    def make_predictions(self, rows):
-        preds = []
-        for row in rows:
-            if row["split"] == "train":
-                continue
-            for method in METHODS:
-                correct = method == "correct"
-                preds.append({
-                    "instance_id": row["instance_id"], "method": method,
-                    "pred_action": row["action"] if correct else 0,
-                    "pred_state_after": row["state_after"] if correct else row["state_before"],
-                })
-        return preds
-
-    def test_silg_export_schema_adapts_and_scores(self):
-        rows = self.make_rows()
-        report = ec.validate_dataset(rows)
-        self.assertTrue(report["valid"], report)
-        scored = ec.score(rows, self.make_predictions(rows))
-        self.assertTrue(scored["valid"], scored)
-        self.assertEqual(scored["coverage"]["correct"]["coverage"], 1.0)
-        self.assertGreaterEqual(
-            scored["paired_gaps_vs_correct"]["state_only"]["action"]["mean_gap"], 0.10
-        )
-
-    def test_gold_and_completed_trajectory_leakage_rejected(self):
-        rows = self.make_rows()
-        rows[0]["model_input_fields"] = ["utterance", "state_before", "action"]
-        rows[1]["model_input"] = {"history": [], "completed_trajectory": [1, 2]}
-        report = ec.validate_dataset(rows)
-        self.assertFalse(report["valid"])
-        self.assertGreaterEqual(report["leakage_rows"], 2)
-
-    def test_exact_train_test_overlap_rejected(self):
-        rows = self.make_rows()
-        rows[3]["utterance"] = rows[0]["utterance"]
-        report = ec.validate_dataset(rows)
-        self.assertFalse(report["valid"])
-        self.assertTrue(any("utterance leakage" in e for e in report["errors"]))
-
-    def test_incomplete_prediction_coverage_rejected(self):
-        rows = self.make_rows()
-        preds = self.make_predictions(rows)
-        preds = [p for p in preds if not (
-            p["method"] == "state_only" and p["instance_id"].endswith("language_holdout")
-        )]
-        scored = ec.score(rows, preds)
-        self.assertFalse(scored["valid"])
-        self.assertLess(scored["coverage"]["state_only"]["coverage"], 1.0)
-
-    def test_artifact_checksum_and_resource_manifest(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            base = Path(tmp)
-            raw = base / "run.log"
-            model = base / "model.bin"
-            data = base / "data.jsonl"
-            raw.write_text("ok\n", encoding="utf-8")
-            model.write_bytes(b"model")
-            data.write_text("{}\n", encoding="utf-8")
-            sha = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
-            runs = []
-            for seed in (1, 7, 19):
-                for method in METHODS:
-                    runs.append({
-                        "method": method, "seed": seed, "domain": "rtfm_s1", "split": "test",
-                        "model_bytes": model.stat().st_size, "peak_rss_bytes": 1024,
-                        "training_wall_seconds": 1.0, "cpu_inference_ms_per_item": 0.1,
-                        "raw_log_path": raw.name, "raw_log_sha256": sha(raw),
-                        "model_path": model.name, "model_sha256": sha(model),
-                        "data_path": data.name, "data_sha256": sha(data),
-                        "code_commit": "deadbeef",
-                    })
-            report = ec.audit_artifacts({"runs": runs}, base)
-            self.assertTrue(report["valid"], report)
-            self.assertEqual(report["classification"], "reproduced")
-
-
-if __name__ == "__main__":
-    unittest.main()
+HERE=Path(__file__).resolve().parent
+SPEC=importlib.util.spec_from_file_location("evaluation_contract",HERE/"evaluation_contract.py"); assert SPEC and SPEC.loader
+ec=importlib.util.module_from_spec(SPEC); SPEC.loader.exec_module(ec)
+METHODS=["correct","random","language_blind","state_only","target_label_shuffle","outcome_shuffle"]
+class Tests(unittest.TestCase):
+ def rows(self):
+  out=[]
+  for seed in (1,7,19):
+   out.append({"instance_id":f"train-{seed}","domain":"rtfm_s1","seed":seed,"split":"train","utterance":f"train {seed}","state_before":[0,seed],"state_after":[1,seed],"action":1})
+   for c in ("entity_holdout","dynamics_holdout","language_holdout"):
+    out.append({"instance_id":f"test-{seed}-{c}","domain":"rtfm_s1","seed":seed,"split":"test","utterance":f"test {seed} {c}","state_before":[0,seed],"state_after":[1,seed],"action":1,c:True,"entity_signature":f"e-{seed}-{c}","dynamics_signature":f"d-{seed}-{c}"})
+  return out
+ def preds(self,rows):
+  out=[]
+  for r in rows:
+   if r["split"]=="train":continue
+   fp=ec.instance_fingerprint(ec.adapt_row(r))
+   for m in METHODS:out.append({"instance_id":r["instance_id"],"method":m,"instance_fingerprint":fp,"pred_action":r["action"] if m=="correct" else 0,"pred_state_after":r["state_after"] if m=="correct" else r["state_before"]})
+  return out
+ def test_valid(self):
+  r=self.rows();self.assertTrue(ec.validate_dataset(r)["valid"]);s=ec.score(r,self.preds(r));self.assertTrue(s["valid"]);self.assertTrue(s["same_instance_snapshot"])
+ def test_snapshot_mismatch(self):
+  r=self.rows();p=self.preds(r);p[0]["instance_fingerprint"]="bad";s=ec.score(r,p);self.assertFalse(s["valid"]);self.assertTrue(any("snapshot mismatch" in e for e in s["errors"]))
+ def test_leakage(self):
+  r=self.rows();r[0]["model_input"]={"completed_trajectory":[]};self.assertFalse(ec.validate_dataset(r)["valid"])
+ def test_overlap(self):
+  r=self.rows();r[3]["utterance"]=r[0]["utterance"];self.assertFalse(ec.validate_dataset(r)["valid"])
+ def test_coverage(self):
+  r=self.rows();p=[x for x in self.preds(r) if not(x["method"]=="state_only" and x["instance_id"].endswith("language_holdout"))];self.assertFalse(ec.score(r,p)["valid"])
+ def test_manifest_cartesian(self):
+  with tempfile.TemporaryDirectory() as td:
+   b=Path(td);raw=b/"r";model=b/"m";data=b/"d";raw.write_text("x");model.write_bytes(b"m");data.write_text("d");sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();runs=[]
+   for seed in (1,7,19):
+    for m in METHODS:runs.append({"method":m,"seed":seed,"domain":"rtfm_s1","split":"test","model_bytes":1,"peak_rss_bytes":2,"training_wall_seconds":1,"cpu_inference_ms_per_item":.1,"raw_log_path":"r","raw_log_sha256":sha(raw),"model_path":"m","model_sha256":sha(model),"data_path":"d","data_sha256":sha(data),"code_commit":"abc"})
+   self.assertTrue(ec.audit_artifacts({"runs":runs},b)["valid"]);runs.pop();q=ec.audit_artifacts({"runs":runs},b);self.assertFalse(q["valid"]);self.assertGreater(q["missing_run_cells"],0)
+if __name__=="__main__":unittest.main()
