@@ -1,0 +1,57 @@
+{
+  "cycle": 6,
+  "hypothesis": "Joint Version-Space Collapse for Executable Operation Birth",
+  "seeds": [1, 7, 19],
+  "hidden_d3_three_seed_mean": {
+    "held": {
+      "joint_selector": {"joint": 0.0625, "inverse": 0.2153, "goal_change": 0.1181, "repair": 0.1875},
+      "world_only": {"joint": 0.0625, "inverse": 0.2153, "goal_change": 0.1181, "repair": 0.1875},
+      "random": {"joint": 0.0347, "inverse": 0.2569, "goal_change": 0.1458, "repair": 0.3958},
+      "outcome_shuffle": {"joint": 0.0139, "inverse": 0.2708, "goal_change": 0.1319, "repair": 0.25},
+      "oracle": {"joint": 0.0139, "inverse": 0.2986, "goal_change": 0.1319, "repair": 0.1736}
+    },
+    "word_order": {
+      "joint_selector": {"joint": 0.0208, "inverse": 0.2917, "goal_change": 0.1111, "repair": 0.2917},
+      "world_only": {"joint": 0.0208, "inverse": 0.2917, "goal_change": 0.1111, "repair": 0.2917},
+      "random": {"joint": 0.0347, "inverse": 0.2986, "goal_change": 0.1319, "repair": 0.25},
+      "outcome_shuffle": {"joint": 0.0208, "inverse": 0.2847, "goal_change": 0.1111, "repair": 0.2917},
+      "oracle": {"joint": 0.0208, "inverse": 0.2986, "goal_change": 0.1181, "repair": 0.2639}
+    },
+    "paragraph": {
+      "joint_selector": {"joint": 0.0625, "inverse": 0.3542, "goal_change": 0.1389, "repair": 0.2986},
+      "world_only": {"joint": 0.0625, "inverse": 0.3542, "goal_change": 0.1389, "repair": 0.2986},
+      "random": {"joint": 0.0208, "inverse": 0.2708, "goal_change": 0.0556, "repair": 0.2431},
+      "outcome_shuffle": {"joint": 0.0347, "inverse": 0.2222, "goal_change": 0.0972, "repair": 0.2361},
+      "oracle": {"joint": 0.0208, "inverse": 0.2778, "goal_change": 0.1458, "repair": 0.3264}
+    },
+    "free": {
+      "joint_selector": {"joint": 0.0417, "inverse": 0.2153, "goal_change": 0.1319, "repair": 0.2639},
+      "world_only": {"joint": 0.0417, "inverse": 0.2153, "goal_change": 0.1319, "repair": 0.2639},
+      "random": {"joint": 0.0347, "inverse": 0.2292, "goal_change": 0.1042, "repair": 0.2847},
+      "outcome_shuffle": {"joint": 0.0208, "inverse": 0.1875, "goal_change": 0.1319, "repair": 0.2986},
+      "oracle": {"joint": 0.0417, "inverse": 0.2917, "goal_change": 0.125, "repair": 0.2847}
+    },
+    "rename": {
+      "joint_selector": {"joint": 0.0278, "inverse": 0.2361, "goal_change": 0.1458, "repair": 0.2292},
+      "world_only": {"joint": 0.0278, "inverse": 0.2361, "goal_change": 0.1458, "repair": 0.2292},
+      "random": {"joint": 0.0417, "inverse": 0.2569, "goal_change": 0.1389, "repair": 0.2778},
+      "outcome_shuffle": {"joint": 0.0278, "inverse": 0.25, "goal_change": 0.1597, "repair": 0.2014},
+      "oracle": {"joint": 0.0278, "inverse": 0.2153, "goal_change": 0.1181, "repair": 0.2708}
+    }
+  },
+  "strict_gate_by_seed": [false, false, false],
+  "model_bytes_mean": 98474.0,
+  "runtime_seconds": 8.2341,
+  "peak_rss_kib": 112092,
+  "observation_budget_per_domain": 24,
+  "candidate_count": 32,
+  "estimated_ops_update_per_episode": 12288,
+  "estimated_ops_inference_per_query": 12288,
+  "answer_leakage": false,
+  "post_treatment_test_input": false,
+  "fixed_ontology": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
