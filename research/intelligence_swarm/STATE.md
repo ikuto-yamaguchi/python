@@ -22,11 +22,12 @@
 - 公開環境control再現: **1件**
 - 公開学習経路再現: **1件（32,768-frame staged budget、3 seed）**
 - 固定初期instance matched評価経路: **1件**
-- 131,072-frame corrected staged run: **実行中・未統合**
+- 131,072-frame staged run: **実行中・未統合**
 - 学習済み公開能力baseline再現: **0件**
 - R0.2正式再現: **0件**
 - R0.3 empirical intervention-target ablation: **正式棄却**
-- RQ-001-T1 theory-only candidate: **最終理論テストへ狭義化・未採用**
+- RQ-001-T1 current formulation: **棄却**
+- population-level restricted-auxiliary reformulation: **事前登録候補のみ・未採用**
 - J-CRe3日本語外部監査: **未再現**
 
 公開能力baselineとmatched controlsがevaluation contractを通るまで、新規機構族、知能原理、能力進歩を認定しない。
@@ -45,7 +46,7 @@
 
 ## R0.1 public recurrent status
 
-補正済みworkflow run `30120620610`は全工程を完走した。公式SILG `multi` recurrentをseed `1,7,19`で各32,768 frames要求し、checkpointは各32,800 framesで保存された。pretrained language modelは使用していない。
+Completed workflow run `30120620610` reproduced the official SILG `multi` recurrent training path for seeds `1,7,19` at 32,768 requested frames and saved 32,800-frame checkpoints. No pretrained language model was used.
 
 ### Training and resources
 
@@ -64,7 +65,7 @@
 
 ### Matched fixed-instance evaluation
 
-各method・seedで20 episode、methodあたり60 episodeを評価し、全methodの初期instance fingerprint streamは一致した。
+Each method used 20 episodes per seed, 60 episodes total, with identical initial-instance fingerprint streams.
 
 | Method | Win rate | Mean return | Mean episode length | CPU inference |
 |---|---:|---:|---:|---:|
@@ -74,19 +75,19 @@
 | State-only | `0.0167` | `-2.1963` | `62.48` | `4.103 ms/step` |
 | Language-shuffle | `0.0167` | `-1.9347` | `49.40` | `7.252 ms/step` |
 
-Correctは1/60勝、Randomは4/60勝だった。これは言語不要の証拠ではなく、policy competence不足である。
+Correct was 1/60 and Random was 4/60. This demonstrates insufficient policy competence, not that language is unnecessary.
 
-Classification: **`matched_fixed_episode_32768_frame_staged_training_not_public_capability_reproduction`**。
+Classification: **`matched_fixed_episode_32768_frame_staged_training_not_public_capability_reproduction`**.
 
 ### Current staged run
 
-最初の`131,072 frames/seed`実行は、公式learnerの例外ではなく、再現ハーネスの固定`1,200秒` subprocess timeoutで停止した。公式モデル、loss、optimizer、seed、split、schemaは変更せず、frame数に応じたtimeoutとtimeout時raw-log保存だけを追加した。
+The first 131,072-frame attempt stopped because of a fixed 1,200-second reconstruction-harness subprocess timeout, not an official learner exception. The timeout now scales with requested frames and timeout failures preserve raw logs and hashes. The official model, loss, optimizer, seed, split and schema were unchanged.
 
-補正後workflow run `30129717438`はRESET-E017統合時点で **公式recurrent学習stepを実行中** である。未完了runの能力値、資源値、trajectory資格、R0.2結果はSTATEへ取り込まない。
+At RESET-E018, head workflow run `30133481693` is still in the official recurrent training step. No unfinished capability, resource, trajectory or R0.2 value is incorporated. Repeated governance-only updates are not treated as new evidence; the latest completed capability evidence remains the 32,768-frame result.
 
 ## R0.2 Environment-first status
 
-旧公開trajectory上のoffline比較:
+The old public-trajectory offline comparison is a negative diagnostic only:
 
 - Environment-first action accuracy: `0.6840`
 - End-to-end: `0.6907`
@@ -94,105 +95,72 @@ Classification: **`matched_fixed_episode_32768_frame_staged_training_not_public_
 - Environment-first language-blind: `0.6840`
 - Environment-first language-shuffle: `0.6840`
 
-しかし生成元policyは比較資格を満たさなかった。
+The source policy was ineligible: seed 1 train success `0/40`; seed 7 `0/40` with `97.42%` majority action; seed 19 `1/40`; all test sets `0/20`.
 
-- seed 1 train success: `0/40`
-- seed 7 train success: `0/40`; majority action share `97.42%`
-- seed 19 train success: `1/40`
-- 全seed test success: `0/20`
+Classification: **`ineligible_failed-policy-trajectory_negative_diagnostic / not_R0.2_reproduction`**.
 
-Classification: **`ineligible_failed-policy-trajectory_negative_diagnostic / not_R0.2_reproduction`**。
+The current implementation is a continuous environment-first adaptation, not the official Gaddy & Klein default structured discrete-message and direct message-alignment baseline. Flat MSE over mixed typed state is not a valid formal next-state metric.
 
-現行実装はGaddy & Klein 2019の二段階順序を持つが、公式defaultのstructured discrete messageと直接message-alignment objectiveを持たないため、**`continuous_environment_first_adaptation_not_gaddy_klein_default_reproduction`** とする。flatten済みmixed-type stateへの一律MSEは正式next-state指標として無効である。
-
-R0.2を再開する前に、各seedで次を満たす。
-
-- majority-action share `<= 0.90`
-- successful train episode `>= 5`
-- 5%以上のsupportを持つaction `>= 2`
-
-正式比較ではtyped observation-field transition loss、online task success、実entity/dynamics/language-form holdout、matched parameter/data budget、同一instance controlsを必須とする。source policyがこの資格を満たすまでEnvironment-firstを調整しない。
+R0.2 remains blocked until every source-policy seed has majority-action share `<=0.90`, successful train episodes `>=5`, and at least two actions with `>=5%` support. Formal comparison requires typed transition loss, online task success, real entity/dynamics/language-form holdouts, matched parameter/data budget and identical-instance controls.
 
 ## Evaluation contract status
 
-`evaluation_contract.py`とSILG episode adapterは以下を監査する。
+`evaluation_contract.py` and the SILG adapter audit:
 
-- train/test utterance overlap、entity/dynamics split overlap
-- gold action、after state、reward、done、post-treatment state、completed trajectory leakage
-- prediction側のimmutable `instance_fingerprint`
-- method × seed × domain × split × condition完全coverage
-- duplicate / missing predictionとduplicate method-seed run
-- domain × seed × split × condition cell統計
-- episode-level paired gap、Correct-only / control-only、exact McNemar検定
-- `seed × domain × split × condition` clusterによるhierarchical bootstrap 95% CI
-- run-level集計値とepisode recordsの再計算一致
-- top-level集計値とrun valuesの再計算一致
-- independently readable raw-log、model、immutable-data files
-- full 40-hex source/code pins
-- full 64-hex checkpoint/model/data/log SHA-256
-- reported `model_bytes`と実model file sizeの一致
-- model bytes、RSS、training wall time、CPU latencyの有限・非負監査
-- canonical seeds `1,7,19`
-- `answer_leakage: false`、`pretrained_language_model: false`の明示
+- train/test utterance and entity/dynamics overlap;
+- gold action, after-state, reward, done, post-treatment and completed-trajectory leakage;
+- immutable prediction-side `instance_fingerprint`;
+- complete `method × seed × domain × split × condition` prediction and artifact coverage;
+- duplicate/missing predictions and duplicate method-seed runs;
+- domain × seed × split × condition cells, paired gaps, exact McNemar and hierarchical bootstrap 95% CI;
+- run and top-level aggregate recomputation;
+- readable raw-log, model and immutable-data artifacts;
+- full source/code pins and SHA-256 values;
+- reported model bytes versus actual artifact size;
+- finite model bytes, RSS, training wall time and CPU latency;
+- canonical seeds `1,7,19`, `answer_leakage:false`, `pretrained_language_model:false`.
 
-`target_label_shuffle`と`outcome_shuffle`の各prediction rowには、donor `control_source_instance_id`と`control_source_fingerprint`を必須化した。donor存在、self-donor禁止、同一seed/domain/split/condition、fingerprint一致、cell内全単射、固定点なしderangement、donor不正再利用を自動検査し、`shuffle_assignment_audit`を保存する。
+`target_label_shuffle` and `outcome_shuffle` require donor IDs/fingerprints, same-cell assignment, bijection, fixed-point-free derangement and no donor reuse. D014 has 15 passing regression tests.
 
-D014でscoreとartifact双方のセルを`method × seed × domain × split × condition`へ統一し、artifact runの`condition`も必須化した。**15件の回帰テストは成功した。** 実target-label/outcome shuffle predictionとdonor provenance、target labelが非oracleで定義不能な場合の正式inapplicability記録、immutable serialized test dataset checksum、全cellのraw-log/model/data artifact joinが不足するため、現在の正式分類は **`initial_reproduction_failure`**。
+Missing real target-label/outcome shuffle predictions or formal target-label inapplicability, immutable serialized test checksum and complete artifact joins. Formal classification remains **`initial_reproduction_failure`**.
 
 ## Prior-art and novelty boundary
 
-未知介入下のnonparametric CRL、unknown multi-node intervention、score-based CRL、subset-intervention causal abstraction、finite-sample few-environment recovery、environment-first instruction following、language-dynamics pretraining、multimodal shared-latent recovery、perturbation-to-intervention modeling、causal sufficiency/necessity、causal-world-modelと言語interfaceは単独では既存範囲である。
+Unknown-target and multi-node intervention recovery, score/general-environment CRL, subset-intervention causal abstraction, finite-sample recovery, environment-first instruction following, language-dynamics pretraining, auxiliary-variable/temporal/multi-view/hidden-regime nonlinear ICA, grouping-based and weakly supervised CRL, mechanism sparsity, mechanistic independence and multimodal shared-latent recovery are existing boundaries.
 
-さらに、raw languageをauxiliary variableとして用いる識別、正しいtrajectory-language pairとshuffle pairの対比、完全historyを使うtemporal nonlinear ICA、multimodal partial-sharing identifiability、generic symmetry/invariance breaking、multi-view nonlinear ICA、hidden-regime nonlinear ICA、mechanistic-independence、heterogeneous measurement-model identifiability、grouping-based CRL、weakly supervised causal representation、mechanism sparsityも既存境界として除外する。
-
-広い「言語とtrajectoryから未知因果変数を発見する」「言語が補助変数として識別性を与える」「言語とtrajectoryを複数viewとして共有latentを回復する」「発話pair/group labelで介入partitionを識別する」は中心命題として採用しない。
+Broad claims that language is an auxiliary identifiability signal, shuffled language supplies contrastive negatives, unknown targets can be recovered, language and trajectory are two views of a shared latent, or utterance pair/group labels identify intervention semantics are not adopted as novelty.
 
 ## Research-question decision
 
-SILG/RTFMはground-truth latent intervention family、target、mechanism pre/post operator、causal abstractionを定義しない。J-CRe3、CausalTriplet、ACCESS、MIB、CausalPhysを含む監査済み候補も、episode-aligned raw language、interactive trajectory、独立mechanism change、held-out mechanism ground truth、permutation-aware評価を同時に満たさない。
+SILG/RTFM does not define ground-truth latent intervention families, targets, mechanism operators or causal abstractions. Audited alternatives including J-CRe3, CausalTriplet, ACCESS, MIB and CausalPhys do not jointly provide episode-aligned raw language, interactive trajectories, independent mechanism changes, held-out mechanism ground truth and permutation-aware evaluation.
 
-- **Gate L — 継続・未達:** competent public policyとmatched controlsで、raw languageがstate/action/history/environment identityを超える外部能力を持つか測る。
-- **Gate I empirical track — 正式棄却:** 現在の公開benchmark制約下で共同同定実験を開始しない。研究者がtarget/mechanism ontologyを後付けすることも禁止する。
-- **RQ-001-N5 — 棄却:** empirical joint-identification claimとして閉じる。
-- **RQ-001-T1 — 最終理論テストへ狭義化、未採用:** oracle paraphrase、target、environment、group、graph labelを使わず、raw utteranceの観測可能な形式的・関係的構造だけが、完全な非言語trajectoryと任意の有限auxiliary indexを条件とした後にも残るcausal-model symmetryを除去できるかを問う。
+- **Gate L — continued, not passed:** test whether raw language adds external capability beyond state/action/history/environment identity after a competent public policy exists.
+- **Gate I empirical track — rejected:** no joint-identification experiment and no researcher-authored target ontology on SILG.
+- **RQ-001-N5 — rejected.**
+- **RQ-001-T1 current form — rejected by C011.** On finite benchmark support, every observed utterance and every deterministic relation derived from it can be losslessly represented by a finite auxiliary index such as `U=index(L)`. Therefore “raw language exceeds every finite auxiliary representation” is not empirically demonstrable.
+- **Only admissible reformulation — not adopted:** under an explicit population grammar and a restricted auxiliary class that cannot copy utterance identity, test whether compositional relations over unseen utterance forms refine a known intervention-induced causal abstraction beyond complete non-language trajectories.
 
-C009ではnegative constructionが成立した。可逆変換で結ばれた二つの潜在表現が同一の完全pre/post trajectoryを生成しながら、異なる介入partitionとtarget cardinalityを持てる。言語が環境・介入indexの関数なら追加情報を与えず、この同値性を破れない。
-
-C010では最初のpositive constructionを試したが、発話pair、group、relationがparaphrase、target、factor、class、graph、semantic-equivalence label由来ならweak supervisionであり、auxiliary index、contrastive pair、second viewとして使う場合も既存ICA/CRLへ還元されるため不成立とした。
-
-T1採用に残る必須条件:
-
-1. formal observation modelとtrajectory-only equivalence relation
-2. auxiliary/environment/intervention-index情報によるquotient
-3. oracle labelへ還元不能なraw utterance relation
-4. correct languageのみでのstrict refinement
-5. 独立介入効果による意味裏付け
-6. grouping/weak supervision/auxiliary-variable/multi-view/mechanism-sparsityを超える保証
-7. **nontrivial positive construction**
-8. sufficient-condition theorem
-9. exactly one中心命題の事前登録と停止条件
-
-negative constructionは存在するが、nontrivial positive constructionと定理は存在しない。
+Before that reformulation can be preregistered it requires a formal population language generator, explicit admissible auxiliary class, exact causal-model equivalence relation, a known residual abstraction, unseen-form positive and negative constructions, a proof sketch, falsification rule and lookup-preventing split. No architecture or synthetic benchmark is authorized before preregistration and public baseline reproduction.
 
 ## Current maximum bottleneck
 
-**workflow run `30129717438`の131,072-frame公式SILG recurrentを完了・完全検証し、同じimmutable matched protocolでpolicy competenceが成立するか確認する。成立するまでR0.2調整、新規architecture、T1実装を禁止する。**
+**Complete and fully verify the active 131,072-frame official SILG recurrent run under the immutable matched protocol. Until policy competence exists, R0.2 tuning, new architecture and any RQ-001 implementation remain forbidden.**
 
 ## Stage-transition rule
 
-次stageを提案できるのは全て満たした場合だけ。
+A next stage may be proposed only after all are complete:
 
-1. 学習済み外部公開能力baselineを少なくとも1件再現
-2. immutable公開instance上のrandom / language-blind / state-only / shuffle対照
-3. canonical 3 seedと完全artifact/leakage contract
-4. R0.2のonline task success、typed next-state、実holdout付き比較
-5. R0.3 empirical trackの正式棄却をgovernanceへ統合
-6. 2026年までのnovelty matrix
-7. exactly one中心命題、主要指標または定理、反例、停止条件の事前登録
+1. at least one learned external public capability baseline;
+2. immutable-instance random/language-blind/state-only/shuffle controls;
+3. canonical three-seed artifact and leakage contract;
+4. R0.2 online task success, typed next-state and real holdouts;
+5. formal R0.3 empirical rejection in governance;
+6. novelty matrix through relevant 2026 primary work;
+7. exactly one preregistered claim/theorem, counterexamples and stopping conditions.
 
 ## Canonical branch policy
 
-今後の研究は`research/intelligence-swarm-reconstruction-001`だけへ累積する。過去のstacked draft PRを新実験のbaseにしない。
+All work accumulates only on `research/intelligence-swarm-reconstruction-001`. Existing stacked drafts remain negative-results archives and are not experiment bases.
 
 ## Current status
 
@@ -205,4 +173,4 @@ negative constructionは存在するが、nontrivial positive constructionと定
 
 ## Last integration
 
-2026-07-25: **RESET-E017**。C010のpositive construction不成立、D014のsplit×condition評価contract、131,072-frame初回runのharness timeoutと補正後run `30129717438`の実行中状態を統合した。未完了runの値は採用せず、最新の完了済み能力証拠は32,768-frame結果のままである。公開能力baselineは0件、R0継続、段階遷移禁止を維持した。
+2026-07-25: **RESET-E018**。C011のfinite-index collapseによりRQ-001-T1現行形式を棄却し、population grammarとrestricted auxiliary classを明示する再定式化だけを未採用の事前登録候補として残した。D014の厳格評価contractを維持し、head workflow run `30133481693`は131,072-frame公式recurrent学習中のため未完了値を採用しない。公開能力baseline 0件、R0継続、段階遷移禁止、高校生級未達を維持する。
