@@ -1,0 +1,42 @@
+{
+  "cycle": "D_MEMORY_ELIGIBILITY_003",
+  "hypothesis": "Factorized Identity-Operation Consistency as Memory Eligibility",
+  "seeds": [1, 7, 19],
+  "chance": {"target": 0.125, "move": 0.25, "joint": 0.03125, "inverse": 0.25},
+  "mean": {
+    "correct": {
+      "held": {"target": 0.3, "move": 0.3541666667, "joint": 0.1166666667, "inverse": 0.3208333333, "eligible_rate": 0.1083333333},
+      "rename": {"target": 0.275, "move": 0.2875, "joint": 0.0916666667, "inverse": 0.2541666667, "eligible_rate": 0.0875},
+      "order": {"target": 0.2958333333, "move": 0.3708333333, "joint": 0.1375, "inverse": 0.2583333333, "eligible_rate": 0.125},
+      "omission": {"target": 0.2833333333, "move": 0.3458333333, "joint": 0.0875, "inverse": 0.225, "eligible_rate": 0.0833333333},
+      "paragraph": {"target": 0.2916666667, "move": 0.3, "joint": 0.1, "inverse": 0.3, "eligible_rate": 0.1},
+      "free": {"target": 0.2541666667, "move": 0.3458333333, "joint": 0.0833333333, "inverse": 0.3125, "eligible_rate": 0.0833333333},
+      "domain": {"target": 0.2708333333, "move": 0.1833333333, "joint": 0.05, "inverse": 0.2625, "eligible_rate": 0.05}
+    },
+    "shuffle": {
+      "held": {"target": 0.25, "move": 0.2833333333, "joint": 0.075, "inverse": 0.3041666667, "eligible_rate": 0.075},
+      "rename": {"target": 0.225, "move": 0.2458333333, "joint": 0.0583333333, "inverse": 0.2416666667, "eligible_rate": 0.0583333333},
+      "order": {"target": 0.2541666667, "move": 0.2416666667, "joint": 0.075, "inverse": 0.2416666667, "eligible_rate": 0.075},
+      "omission": {"target": 0.1875, "move": 0.225, "joint": 0.025, "inverse": 0.225, "eligible_rate": 0.025},
+      "paragraph": {"target": 0.2541666667, "move": 0.3166666667, "joint": 0.0958333333, "inverse": 0.275, "eligible_rate": 0.0958333333},
+      "free": {"target": 0.2125, "move": 0.2125, "joint": 0.0416666667, "inverse": 0.2958333333, "eligible_rate": 0.0416666667},
+      "domain": {"target": 0.2875, "move": 0.2291666667, "joint": 0.0666666667, "inverse": 0.2583333333, "eligible_rate": 0.0625}
+    }
+  },
+  "strict_seed_passes": 0,
+  "semantic_memory_eligible_units": 0,
+  "resources": {
+    "model_bytes_float32_estimate": 12288,
+    "training_seconds_total": 7.132076322,
+    "peak_rss_kib_python_runtime_included": 113504,
+    "update_ops_estimate_per_episode": 3072,
+    "inference_ops_estimate_per_query": 20480
+  },
+  "leakage_audit": {
+    "post_treatment_used": false,
+    "final_outcome_used_for_training": false,
+    "identity_or_operation_label_used_for_scoring": false,
+    "span_proposals_used": false,
+    "string_retrieval_used": false
+  }
+}
