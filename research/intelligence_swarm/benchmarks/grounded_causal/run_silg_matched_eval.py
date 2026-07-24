@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Evaluate a trained official SILG recurrent checkpoint and matched controls
-on identically seeded RTFM test episode streams.
+on independently seeded, identical RTFM test episodes.
 
 This is an evaluation harness, not a new architecture. `correct` uses the
 unaltered official model. Ablations only mask declared observation fields at
 inference time and never expose future state, reward, or completed trajectory.
+Each episode is created in a fresh environment from a fixed episode seed, so
+all methods receive exactly the same initial benchmark instance even when their
+trajectories and episode lengths diverge.
 """
 from __future__ import annotations
 
@@ -74,34 +77,41 @@ def run_method(root: Path, checkpoint: Path, seed: int, method: str, episodes: i
     flags.disable_cuda = True
     flags.seed = seed
 
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    gym_env = Model.create_env(flags)
-    gym_env.seed(seed)
-    env = environment.Environment(gym_env)
-    model = Model.make(flags, gym_env).eval()
+    template_env = Model.create_env(flags)
+    model = Model.make(flags, template_env).eval()
+    template_env.close()
     model.load_state_dict(torch.load(str(checkpoint), map_location="cpu"))
 
-    observation = env.initial()
-    agent_state = model.initial_state(batch_size=1)
     returns: list[float] = []
     wins: list[float] = []
     lengths: list[int] = []
     fingerprints: list[str] = []
+    episode_seeds: list[int] = []
     inference_ns: list[int] = []
     started = time.perf_counter()
-    episode = 0
 
-    while episode < episodes:
+    for episode in range(episodes):
+        episode_seed = seed * 1_000_003 + episode
+        episode_seeds.append(episode_seed)
+        random.seed(episode_seed)
+        np.random.seed(episode_seed)
+        torch.manual_seed(episode_seed)
+
+        gym_env = Model.create_env(flags)
+        gym_env.seed(episode_seed)
+        env = environment.Environment(gym_env)
+        observation = env.initial()
         fingerprints.append(stable_tensor_hash(observation))
+        agent_state = model.initial_state(batch_size=1)
         done = False
         steps = 0
+        rng = random.Random(episode_seed)
+
         while not done:
             if method == "random":
                 valid = [i for i, flag in enumerate(observation["valid"].flatten().tolist()) if flag]
                 t0 = time.perf_counter_ns()
-                action = torch.tensor([[random.choice(valid)]], dtype=torch.int64)
+                action = torch.tensor([[rng.choice(valid)]], dtype=torch.int64)
                 inference_ns.append(time.perf_counter_ns() - t0)
             else:
                 model_obs = mask_observation(observation, method)
@@ -113,23 +123,21 @@ def run_method(root: Path, checkpoint: Path, seed: int, method: str, episodes: i
             observation = env.step(action)
             steps += 1
             done = bool(observation["done"].item())
-            if done:
-                returns.append(float(observation["episode_return"].item()))
-                wins.append(float(observation["reward"][0][0].item() > 0.5))
-                lengths.append(steps)
-                agent_state = model.initial_state(batch_size=1)
-                episode += 1
 
-    wall = time.perf_counter() - started
-    env.close()
+        returns.append(float(observation["episode_return"].item()))
+        wins.append(float(observation["reward"][0][0].item() > 0.5))
+        lengths.append(steps)
+        env.close()
+
     return {
         "method": method,
         "seed": seed,
         "episodes": episodes,
+        "episode_seeds": episode_seeds,
         "win_rate": statistics.fmean(wins),
         "return_mean": statistics.fmean(returns),
         "episode_length_mean": statistics.fmean(lengths),
-        "wall_seconds": wall,
+        "wall_seconds": time.perf_counter() - started,
         "cpu_inference_ms_per_step": statistics.fmean(inference_ns) / 1e6,
         "initial_instance_fingerprints": fingerprints,
     }
@@ -156,14 +164,29 @@ def main() -> None:
     consistency: dict[str, dict[str, bool]] = {}
     for seed in args.seeds:
         seed_runs = [run for run in runs if run["seed"] == seed]
-        base = seed_runs[0]["initial_instance_fingerprints"]
+        base_fingerprints = seed_runs[0]["initial_instance_fingerprints"]
+        base_episode_seeds = seed_runs[0]["episode_seeds"]
         consistency[str(seed)] = {
-            run["method"]: run["initial_instance_fingerprints"] == base for run in seed_runs
+            run["method"]: (
+                run["initial_instance_fingerprints"] == base_fingerprints
+                and run["episode_seeds"] == base_episode_seeds
+            )
+            for run in seed_runs
+        }
+
+    aggregate: dict[str, dict[str, float]] = {}
+    for method in METHODS:
+        selected = [run for run in runs if run["method"] == method]
+        aggregate[method] = {
+            "win_rate": statistics.fmean(run["win_rate"] for run in selected),
+            "return_mean": statistics.fmean(run["return_mean"] for run in selected),
+            "episode_length_mean": statistics.fmean(run["episode_length_mean"] for run in selected),
+            "cpu_inference_ms_per_step": statistics.fmean(run["cpu_inference_ms_per_step"] for run in selected),
         }
 
     payload = {
         "status": "success",
-        "classification": "matched_same_seed_episode_stream_smoke_not_full_paper_reproduction",
+        "classification": "matched_fixed_episode_smoke_not_full_paper_reproduction",
         "environment": "silg:rtfm_test_s1-v0",
         "source_pins": {
             "silg": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
@@ -173,6 +196,7 @@ def main() -> None:
         "episodes_per_method_seed": args.episodes,
         "methods": list(METHODS),
         "runs": runs,
+        "aggregate": aggregate,
         "same_initial_instance_stream": consistency,
         "all_initial_streams_match": all(all(values.values()) for values in consistency.values()),
         "checkpoints": {
@@ -192,6 +216,8 @@ def main() -> None:
     output = args.results / "SILG_RTFM_MATCHED_EVAL_3SEED.json"
     output.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(payload, ensure_ascii=False, indent=2))
+    if not payload["all_initial_streams_match"]:
+        raise SystemExit("matched-instance contract failed")
 
 
 if __name__ == "__main__":
