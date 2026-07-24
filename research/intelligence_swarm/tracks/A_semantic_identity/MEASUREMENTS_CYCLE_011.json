@@ -1,0 +1,32 @@
+{
+  "cycle": 11,
+  "hypothesis": "Nonparametric Alias-Role Inventory Birth from Independent State-Crossing Witnesses",
+  "seeds": [1, 7, 19],
+  "summary": {
+    "active": {"survivors_1": 1.0, "survivors_2": 1.0, "intersection": 1.0, "same_unique": 1.0, "prospective": 1.0, "inverse": 1.0, "unknown_order": 1.0, "paragraph": 1.0, "omitted": 1.0, "counterfactual": 1.0, "model_bytes": 18.0},
+    "random": {"survivors_1": 5.6666666667, "survivors_2": 3.0, "intersection": 1.6666666667, "same_unique": 0.3333333333, "prospective": 0.925, "inverse": 0.9083333333, "unknown_order": 0.9696969697, "paragraph": 0.9259259259, "omitted": 0.9047619048, "counterfactual": 0.925},
+    "state_static": {"survivors_1": 4.0, "survivors_2": 3.3333333333, "intersection": 1.0, "same_unique": 0.0, "prospective": 1.0, "inverse": 1.0, "unknown_order": 1.0, "paragraph": 1.0, "omitted": 1.0, "counterfactual": 1.0},
+    "outcome_shuffle": {"survivors_1": 0.0, "survivors_2": 0.0, "intersection": 0.0, "prospective": 0.0, "inverse": 0.0, "unknown_order": 0.0, "paragraph": 0.0, "omitted": 0.0, "counterfactual": 0.0},
+    "alias_lesion": {"intersection": 1.0, "prospective": 1.0, "inverse": 1.0, "unknown_order": 1.0, "paragraph": 1.0, "omitted": 1.0, "counterfactual": 1.0}
+  },
+  "seed_results": {
+    "1": {"active": {"intersection": 1, "prospective": 1.0, "inverse": 1.0}, "random": {"intersection": 1, "prospective": 1.0, "inverse": 1.0}, "state_static": {"intersection": 1, "prospective": 1.0, "inverse": 1.0}},
+    "7": {"active": {"intersection": 1, "prospective": 1.0, "inverse": 1.0}, "random": {"intersection": 2, "prospective": 1.0, "inverse": 1.0}, "state_static": {"intersection": 1, "prospective": 1.0, "inverse": 1.0}},
+    "19": {"active": {"intersection": 1, "prospective": 1.0, "inverse": 1.0}, "random": {"intersection": 2, "prospective": 0.775, "inverse": 0.725}, "state_static": {"intersection": 1, "prospective": 1.0, "inverse": 1.0}}
+  },
+  "strict_progress_seeds": 0,
+  "semantic_identity_gate": false,
+  "failure_classification": "finite_role_vocabulary_and_binary_state_upper_bound",
+  "candidate_count": 6000,
+  "model_bytes_mean": 18.0,
+  "peak_rss_kib": 168892,
+  "runtime_seconds": 7.442561021,
+  "estimated_ops": "O(2*B*H*Q), H=6000, B=8",
+  "answer_leakage": false,
+  "fixed_class_cardinality": false,
+  "operation_family_oracle": true,
+  "binary_state_interface_oracle": true,
+  "weak_smartphone_verified": false,
+  "highschool_level_passed": false,
+  "completion": false
+}
