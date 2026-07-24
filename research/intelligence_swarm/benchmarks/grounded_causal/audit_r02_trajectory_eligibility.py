@@ -2,8 +2,10 @@
 """Audit whether exported SILG trajectories are eligible for R0.2 comparison.
 
 This is an evaluation guard, not a model. Environment-first and end-to-end
-models must not be compared as evidence when the behavior policy has collapsed
-or supplies essentially no successful task trajectories.
+models must not be compared as evidence when the behavior policy has collapsed,
+supplies essentially no successful task trajectories, or trajectory export did
+not complete. Missing inputs are emitted as a reproducible eligibility failure
+rather than an unstructured traceback.
 """
 from __future__ import annotations
 
@@ -28,7 +30,7 @@ def entropy(counter: collections.Counter[int]) -> float:
 
 
 def summarize(path: Path) -> dict[str, Any]:
-    rows = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+    rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
     if not rows:
         raise ValueError(f"empty trajectory file: {path}")
     result: dict[str, Any] = {
@@ -70,8 +72,29 @@ def main() -> None:
     parser.add_argument("--min-active-actions", type=int, default=2)
     args = parser.parse_args()
 
-    datasets = [summarize(path) for path in args.inputs]
     failures: list[dict[str, Any]] = []
+    datasets: list[dict[str, Any]] = []
+    for path in args.inputs:
+        if not path.exists():
+            failures.append({
+                "seed": None,
+                "check": "missing_trajectory_artifact",
+                "path": str(path),
+                "classification": "initial_reproduction_failure",
+            })
+            continue
+        try:
+            datasets.append(summarize(path))
+        except (OSError, ValueError, KeyError, json.JSONDecodeError) as exc:
+            failures.append({
+                "seed": None,
+                "check": "invalid_trajectory_artifact",
+                "path": str(path),
+                "error_type": type(exc).__name__,
+                "error": str(exc),
+                "classification": "initial_reproduction_failure",
+            })
+
     for dataset in datasets:
         seed = dataset["seed"]
         train = dataset["splits"]["train"]
@@ -97,21 +120,23 @@ def main() -> None:
                 "required": args.min_active_actions,
             })
 
-    eligible = not failures
+    eligible = not failures and len(datasets) == len(args.inputs)
     output = {
         "status": "eligible" if eligible else "ineligible_public_trajectory_for_r02_capability_comparison",
-        "purpose": "guard environment-first comparison against failed or collapsed behavior-policy data",
+        "purpose": "guard environment-first comparison against missing, failed, or collapsed behavior-policy data",
         "thresholds": {
             "max_majority_action_share": args.max_majority_share,
             "min_successful_train_episodes_per_seed": args.min_successful_train_episodes,
             "min_actions_with_at_least_5pct_share": args.min_active_actions,
         },
+        "expected_inputs": [str(path) for path in args.inputs],
+        "loaded_input_count": len(datasets),
         "datasets": datasets,
         "failures": failures,
         "r02_capability_claim_allowed": False,
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n")
+    args.output.write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(output, ensure_ascii=False, indent=2))
     raise SystemExit(0 if eligible else 2)
 
