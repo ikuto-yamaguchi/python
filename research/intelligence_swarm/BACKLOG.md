@@ -24,15 +24,17 @@ Classification:
 
 Current staged run:
 
-- workflow run `30127967677`;
-- `131,072 frames/seed`;
+- the first `131,072 frames/seed` attempt stopped because the reconstruction harness enforced a fixed 1,200-second subprocess timeout;
+- this was a harness resource-bound failure, not an official learner exception;
+- the timeout now scales with requested frames and timeout failures preserve stdout/stderr, return code and log SHA-256;
+- corrected workflow run `30129717438`;
 - same official recurrent family, source pins, schema, splits and canonical seeds;
-- status at RESET-E016: **in progress**;
+- status at RESET-E017: **in progress in official recurrent training**;
 - results, resource values and competence claims: **not incorporated**.
 
 Only authorized actions:
 
-1. complete and verify run `30127967677`;
+1. complete and verify run `30129717438`;
 2. retain staged checkpoints and evaluate the same immutable matched protocol;
 3. record source/model/data/raw-log hashes, model bytes, peak RSS, training wall time, CPU latency, seeds and splits;
 4. evaluate Correct, Random, Language-blind, State-only and Language-shuffle on identical instances;
@@ -65,11 +67,11 @@ Required controls:
 Required outputs:
 
 - per-instance/episode predictions and immutable `instance_fingerprint`;
-- complete method × seed × domain × split coverage;
+- complete method × seed × domain × split × condition coverage;
 - online win, return and episode length;
 - source/model/data/raw-log SHA-256 and exact code commit;
 - model bytes, peak RSS, training wall time and CPU latency;
-- domain × seed × condition cells and episode-paired statistics;
+- domain × seed × split × condition cells and episode-paired statistics;
 - preregistered public-reference tolerance.
 
 Interpret no capability score until the complete evaluation contract passes.
@@ -85,10 +87,10 @@ Every measured run must pass:
 - prediction-supplied instance fingerprints;
 - complete prediction and artifact coverage;
 - no duplicate method × seed run;
-- domain × seed × condition cells;
+- score and artifact cells indexed by `method × seed × domain × split × condition`;
 - paired mean/minimum-cell gaps and positive-cell fraction;
 - Correct-only/control-only counts and exact McNemar test;
-- hierarchical cluster-bootstrap 95% CI;
+- hierarchical cluster-bootstrap 95% CI over `seed × domain × split × condition` clusters;
 - run and top-level aggregate recomputation;
 - independently readable raw-log, model and immutable-data files;
 - full 40-hex source/code pins;
@@ -111,7 +113,7 @@ For `target_label_shuffle` and `outcome_shuffle`, every prediction row must addi
 
 The output must save `shuffle_assignment_audit` for every cell.
 
-**Thirteen regression tests pass.**
+**Fifteen regression tests pass.**
 
 Current classification: **`initial_reproduction_failure`**.
 
@@ -172,17 +174,19 @@ Rejected empirical claim: **RQ-001-N5**.
 
 ## P2 — Theory-only candidate RQ-001-T1
 
-Status: **narrowed again, not adopted; no implementation authorized**.
+Status: **narrowed to a final theory test, not adopted; no implementation authorized**.
 
 Surviving candidate:
 
-> Characterize whether compositional relations among raw utterances can remove a causal-model equivalence that remains after conditioning on complete trajectories and after quotienting out every use of language as a mere auxiliary/environment/intervention index; prove impossibility when language reduces to such an index or available interventions do not separate competing partitions.
+> Determine whether observable formal/relational structure among raw utterances, without oracle paraphrase, target, environment, group or graph labels, can remove a causal-model symmetry that remains after conditioning on complete non-language trajectories and quotienting out every finite auxiliary index.
 
-C009 status:
+C009/C010 status:
 
 - nontrivial negative construction: **present**;
 - language-as-index impossibility: **present**;
-- positive construction: **absent**;
+- first positive construction using utterance pairing/grouping/relation labels: **rejected**;
+- rejection reason: weak supervision, grouping-based CRL, auxiliary-variable contrast, multi-view recovery or mechanism-sparsity reduction;
+- nontrivial positive construction: **absent**;
 - sufficient-condition theorem: **absent**;
 - adoption: **not authorized**.
 
@@ -190,8 +194,8 @@ Before adoption, all remaining requirements are:
 
 1. formal observation model and trajectory-only equivalence relation;
 2. exact quotient by auxiliary/environment/intervention-index information;
-3. a distinction from auxiliary-variable, temporal, multi-view and hidden-regime nonlinear ICA, multimodal CRL, mechanistic-independence and heterogeneous measurement-model identifiability;
-4. at least one nontrivial positive construction;
+3. a distinction from auxiliary-variable, temporal, multi-view and hidden-regime nonlinear ICA, multimodal/grouping-based CRL, weak supervision, mechanistic-independence, mechanism sparsity and heterogeneous measurement-model identifiability;
+4. at least one nontrivial positive construction using no oracle semantic relation;
 5. a sufficient-condition theorem;
 6. exactly one preregistered theorem, counterexamples and stopping rule;
 7. completed R0.1 public capability reproduction before any new architecture.
@@ -210,14 +214,16 @@ Maintain primary-source comparison through 2026 for:
 - temporal partition and causal-graph joint learning;
 - auxiliary-variable, temporal, multi-view and hidden-regime nonlinear ICA;
 - multimodal partial-sharing identifiability;
+- grouping-based and weakly supervised CRL;
 - mechanistic-independence and heterogeneous measurement-model identifiability;
+- mechanism sparsity and intervention-support recovery;
 - perturbation-target and causal-response representations;
 - interactive language grounding;
 - language-dynamics and environment-first pretraining;
 - causal world models connected to language agents;
 - physical causal-reasoning benchmarks with expert graphs.
 
-Broad claims that language is an auxiliary identifiability signal, shuffled language supplies contrastive negatives, interventions create causal representations, unknown targets can be recovered, language and trajectory are two views of a shared latent, or capable agents contain world models are not novel.
+Broad claims that language is an auxiliary identifiability signal, shuffled language supplies contrastive negatives, interventions create causal representations, unknown targets can be recovered, language and trajectory are two views of a shared latent, pair/group labels identify semantics, or capable agents contain world models are not novel.
 
 ## P2 — Japanese realism audit
 
