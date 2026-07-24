@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 import re
 import shutil
@@ -120,7 +121,31 @@ def extract_final_model(savedir: Path, output_dir: Path, seed: int) -> dict[str,
     return result
 
 
-def run_seed(root: Path, output_dir: Path, seed: int, frames: int) -> dict[str, Any]:
+def default_seed_timeout_seconds(frames: int) -> int:
+    """Scale the process timeout with the declared training budget.
+
+    The previous fixed 1,200-second limit was sufficient for 32,768 frames but
+    killed the unchanged official learner at 131,072 frames before completion.
+    This is a harness-only resource bound; it does not alter training behavior.
+    """
+    return max(1200, int(math.ceil(frames / 32768.0) * 600))
+
+
+def _as_text(value: str | bytes | None) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, bytes):
+        return value.decode("utf-8", errors="replace")
+    return value
+
+
+def run_seed(
+    root: Path,
+    output_dir: Path,
+    seed: int,
+    frames: int,
+    timeout_seconds: int,
+) -> dict[str, Any]:
     savedir = (output_dir / f"official_exp_seed_{seed}").resolve()
     xpid = f"rtfm-multi-r01-smoke-seed-{seed}"
     log_path = output_dir / f"SILG_RTFM_RECURRENT_SEED_{seed}.log"
@@ -144,22 +169,46 @@ def run_seed(root: Path, output_dir: Path, seed: int, frames: int) -> dict[str, 
     env = os.environ.copy()
     env["OMP_NUM_THREADS"] = "1"
     started = time.perf_counter()
-    proc = subprocess.run(cmd, cwd=root, env=env, text=True, capture_output=True, timeout=1200)
+    timed_out = False
+    timeout_error = None
+    try:
+        proc = subprocess.run(
+            cmd,
+            cwd=root,
+            env=env,
+            text=True,
+            capture_output=True,
+            timeout=timeout_seconds,
+        )
+        stdout = proc.stdout
+        stderr = proc.stderr
+        returncode = proc.returncode
+    except subprocess.TimeoutExpired as exc:
+        timed_out = True
+        stdout = _as_text(exc.stdout)
+        stderr = _as_text(exc.stderr)
+        returncode = 124
+        timeout_error = f"training process exceeded {timeout_seconds} seconds"
     wall = time.perf_counter() - started
-    combined = proc.stdout + "\n--- STDERR ---\n" + proc.stderr
+    combined = stdout + "\n--- STDERR ---\n" + stderr
+    if timeout_error:
+        combined += "\n--- HARNESS ERROR ---\n" + timeout_error + "\n"
     log_path.write_text(combined, encoding="utf-8")
-    checkpoint = extract_final_model(savedir, output_dir, seed) if proc.returncode == 0 else {"completed": False}
+    checkpoint = extract_final_model(savedir, output_dir, seed) if returncode == 0 else {"completed": False}
     return {
         "seed": seed,
         "frames_requested": frames,
-        "returncode": proc.returncode,
+        "returncode": returncode,
         "wall_seconds": wall,
-        "resource": parse_time_v(proc.stderr),
+        "timeout_seconds": timeout_seconds,
+        "timed_out": timed_out,
+        "error": timeout_error,
+        "resource": parse_time_v(stderr),
         "command": cmd,
         "log": str(log_path),
         "log_sha256": sha256(log_path),
         "checkpoint": checkpoint,
-        "completed": proc.returncode == 0 and checkpoint.get("completed", False),
+        "completed": returncode == 0 and checkpoint.get("completed", False),
     }
 
 
@@ -203,13 +252,23 @@ def main() -> None:
     p.add_argument("--output", type=Path, required=True)
     p.add_argument("--seeds", type=int, nargs="+", default=[1, 7, 19])
     p.add_argument("--frames", type=int, default=2048)
+    p.add_argument(
+        "--seed-timeout-seconds",
+        type=int,
+        default=None,
+        help="per-seed learner timeout; default scales with --frames",
+    )
     args = p.parse_args()
     args.output = args.output.resolve()
     args.output.mkdir(parents=True, exist_ok=True)
+    timeout_seconds = args.seed_timeout_seconds or default_seed_timeout_seconds(args.frames)
     started = time.perf_counter()
     patch = deterministic_patch(args.silg_root)
     model = inspect_model(args.silg_root, args.output)
-    runs = [run_seed(args.silg_root, args.output, seed, args.frames) for seed in args.seeds]
+    runs = [
+        run_seed(args.silg_root, args.output, seed, args.frames, timeout_seconds)
+        for seed in args.seeds
+    ]
     payload = {
         "status": "success" if all(r["completed"] for r in runs) else "failed",
         "classification": "official_recurrent_training_checkpoint_smoke_not_full_baseline_reproduction",
@@ -223,6 +282,7 @@ def main() -> None:
         "pretrained_language_model": False,
         "seeds": args.seeds,
         "frames_per_seed": args.frames,
+        "seed_timeout_seconds": timeout_seconds,
         "determinism_patch": patch,
         "model_audit": model,
         "runs": runs,
