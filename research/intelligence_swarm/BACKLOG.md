@@ -1,63 +1,102 @@
 # Intelligence Swarm Backlog
 
-## P0 — Transformation-Indexed Cross-Expression Causal Equivariance
+## P0 — Reproduce before inventing
 
-- A: raw表現のn-gram共有やresponse equalityを使わず、target identity/state交換に対する共変則から対象・変数候補を生成する。
-- A: Rename、未知語順、主語省略、複数段落、自由日本語で同じ変換則が再生成される反例を作る。
-- B: target/source/goal/argumentを個別交換し、対応するtransition成分だけが変化し他成分が保存されるoperation signatureを生成する。
-- B: same-delta、paired token差、set-valued surface coreをidentity birthへ使わない。
-- C: target-state、target-identity、non-target、argument-order、intervention-order、causal-direction、goalの軸別equivarianceを同時監査する。
-- C: response equality controlと、State-axis / Target-link / Argument-link / Direction / Goal shuffleを必須化する。
-- D: 二つの独立取得集合が各集合単独で同じtransformation-indexed unitへsame-unique再収束した場合だけ資格候補化する。
-- D: Pair shuffleで能力が維持されるunit、tensor-equivalent collision、集合予測だけで高精度なunitを拒否する。
-- E: HF-015の言い換え再試行とoracle intervention-axis漏洩を監査する。
+### R0.1 SILG environment pinning
 
-## P0 — Common G1/G2 benchmark v11
+- 公式SILGのMessengerまたはRTFMを固定versionで導入する。
+- dataset/environment checksum、Python依存、seed、train/dev/test splitを記録する。
+- pretrained language modelを使わない公式または最小共有baselineを再現する。
+- random policy、language-blind policy、state-only policyを必須対照にする。
 
-- candidate birth、介入軸発見、calibration outcome、independent second acquisition set、conflict audit、final held-out evaluationを分離する。
-- `identity vs set-zero`、`set-one vs toggle`、target同値/non-target破壊、argument-order、intervention-order、causal-direction、goal反転を必須反例とする。
-- response value equalityではなく、各介入軸に対するselective covariance/invariance matrixを評価する。
-- 各独立集合が単独でsame-unique再収束しなければ不合格。intersection、ensemble、tensor-cluster rescueは禁止。
-- Active / Random / State-static / Global-template / Boundary / Factor / Family / Arity / Pair / State-axis / Target-link / Argument-link / Direction / Goal / Outcome shuffleを同一seedで比較する。
-- fixed ontology、辞書、shared token/ID、oracle token境界、role cardinality、operation family、state interface、scope、arity、介入軸ラベルを正式条件では禁止する。
-- surface語順、余剰語、省略、段落構造はepisode-local nuisance orbitとして保持する。
-- 接地未使用token、Rename、未知語順、主語省略、複数段落、自由日本語、未観測state×target×operation/relation組合せを評価する。
-- 3 seedすべて・2以上のopaque domainでCorrectが全対照を0.10以上上回ることを暫定昇格条件とする。
-- conflictはsupport非重複、将来予測不一致、変換軸別の選択的矛盾で隔離する。
+### R0.2 Environment-first representation baseline
 
-## P1 — Evidence and benchmark repair
+- 言語なしstate transitionからaction-conditioned latent representationを事前学習する。
+- 同じparameter budgetでend-to-end baselineと比較する。
+- held-out entity、held-out dynamics、held-out language formでsuccess rateとnext-state predictionを測定する。
+- 内部表現の可視化だけではなく、外部instruction-following能力で比較する。
 
-- PR402を `surface_shared_paired_difference_failure` として登録する。
-- PR403を `paired_role_lesion_birth_failure` として登録する。
-- PR404を `same_delta_cross_expression_failure` として登録する。
-- PR405を `response_tensor_equality_collision_memory_failure` として登録する。
-- HF-015とAF-014を仮説族台帳へ追加する。
-- track-local evidenceを主台帳へ安全に追記し、既存証拠を削除しない。
+### R0.3 Intervention-target identifiability ablation
 
-## Frozen mainline work
+同じtrajectoryへ以下の条件を用意する。
 
-G1成立まで次を本線として再開しない。
+1. intervention target既知
+2. intervention targetの候補集合だけ既知
+3. intervention target完全未知
+4. target label shuffle
+5. action/outcome shuffle
 
-- semantic address未成立のreplay、fast/slow memory、sleep consolidation
-- execution 0のMDL、grammar、圧縮最適化
-- surface候補上のgraph、tensor、assembly、energy、attractor最適化
-- 名称だけをcell、node、role、event、trace、familyへ変えた再試行
-- behavioral equivalenceだけをindividual identityとみなす方式
-- 完成trajectory・行為後scarをprospective identity featureとして利用する方式
-- relation、座標可換性、factorizationだけでcross-domain semanticsが生まれるとみなす方式
-- 単一domain、domain平均、一部seedだけの陽性を再利用可能semantic unitとみなす方式
-- generic disagreement、固定結果codebook、consensus/transpose/lesionによる後段意味化
-- 外部識別前の低rank軸、surprise、失敗形状類似度によるidentity確定
-- 正しいcandidate supportなしのselector、version-space collapse、oracle action改善
-- bridge 0の完全未知語彙zero-shot失敗に対し候補型・head・selectorを追加する方式
-- 全episodeへ単一の固定segmentation/order/templateを強制する方式
-- 有限role/program vocabularyを先に列挙し、posterior intersectionでidentityへ昇格する方式
-- **paired difference、same-delta、response tensor/function equalityだけでsemantic・causal・episode identityを確定する方式**
+測定:
 
-## Cycle completion rules
+- prospective next-state prediction
+- action selection
+- inverse action/query
+- entity/reference re-identification
+- unseen dynamics transfer
+- closed-loop task success
 
-- 実装は必須ではない。メタ分析、評価再設計、仮説族凍結、stage変更も完結サイクルとする。
-- 採用、継続、凍結、段階遷移のいずれかを必ず明示する。
-- 進歩は非oracle介入後のheld-out外部能力、domain/seed/unit consensus、各集合単独の独立再同定で判定する。
-- response equality、tensor cluster、intersection rescue、候補縮約、oracle高精度、witness数削減、棄権増加はsemantic progressと混同しない。
-- 複数seed、反証条件、資源量、answer leakage、calibration-after leakage、domain bridge leakage、oracle-structure leakage、global-template leakageを監査する。
+### R0.4 Japanese realism audit
+
+- J-CRe3の利用条件とデータ取得手順を固定する。
+- テキストだけ、視覚だけ、両方のblind baselineを再現する。
+- 主語省略、指示表現、橋渡し照応、述語項構造を条件別に分離する。
+- SILG結果とJ-CRe3結果を同一能力として平均しない。
+
+## P0 — Benchmark contract
+
+- `benchmarks/grounded_causal/evaluation_contract.py`を全実験で使用する。
+- train/test正規化文の完全重複を禁止する。
+- model inputへgold action、after state、completed trajectoryを含めない。
+- 2 domain以上、3 seed以上を必須とする。
+- Correct、random、language-blind、state-only、target-label shuffle、outcome shuffleを同じinstanceで比較する。
+- metricsはdomain × seed × condition cellごとに保存する。
+- 内部候補数をprogress metricへ使用しない。
+
+## P1 — Prior-art and novelty audit
+
+- causal representation learningのidentifiability assumptionを表形式で整理する。
+- grounded instruction followingが前提として与えるstate/action/entity structureを整理する。
+- raw languageとunknown intervention targetの共同同定を扱う論文を追加探索する。
+- 同一問題が既に解かれている場合、RQ-001を棄却して別問題を選ぶ。
+- 新規性は「見つからなかった」だけでなく、検索query、対象venue、期間、除外理由を保存する。
+
+## P1 — Theory before new mechanism
+
+R0再現後、次のどちらか一つだけを選ぶ。
+
+- 識別不能性定理: どの観測対称性がraw language–causal alignmentを不可能にするか
+- 十分条件定理: どのtrajectory diversityとintervention structureで共同同定できるか
+
+定理または明確な反例がないまま新しいarchitectureを増やさない。
+
+## P2 — New model gate
+
+新規モデル実装を開始できる条件:
+
+1. R0.1〜R0.3再現完了
+2. baselineとの差分が1文で説明可能
+3. 新規性監査で直接重複がない
+4. 事前登録されたprimary metricと停止条件がある
+5. 一つのcanonical branchと一つのbenchmarkを使用
+
+## Frozen work
+
+- opaque tokenだけの新規toy benchmark
+- 新しい名称を付けたspan、slot、graph、tensor、assembly、attractor
+- baseline未再現のままのAF-014派生
+- memory、replay、sleep、forgetting最適化
+- best seed、domain平均、一条件だけの陽性
+- after-stateまたはcompleted trajectoryを使うprospective評価
+- PRを積み上げるだけでcanonical baselineへ統合しない運用
+
+## R0 completion rule
+
+R0は次をすべて満たしたときだけ完了。
+
+- 外部公開benchmark 1件以上のbaseline再現
+- 言語blind/state-only/random対照の実測
+- 3 seed以上の再現ログ
+- CPU/RSS/model size測定
+- novelty matrix完成
+- RQ-001の採用または棄却
+- 次段階の中心命題を一つだけ決定
