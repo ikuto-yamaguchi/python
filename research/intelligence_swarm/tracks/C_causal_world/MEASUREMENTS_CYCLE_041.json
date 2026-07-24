@@ -1,0 +1,24 @@
+{
+  "cycle": 41,
+  "hypothesis": "Predictive Relation Axes from Leave-One-World-Out Difference Completion",
+  "seeds": [1, 7, 19],
+  "summary": {
+    "seen": {"literal_axes": 24.0, "rank1_axes": 24.0, "completion_axes": 24.0, "shuffle_axes": 8.0, "completion_hits": 75.6666666667, "shuffle_hits": 17.3333333333, "completion_accuracy": 0.0, "completion_wrong": 0.0, "completion_null": 1.0, "completion_candidates": 0.0, "model_bytes": 905.3333333333, "training_seconds": 0.025415544, "inference_ms": 9.5560956111},
+    "order": {"completion_accuracy": 0.0, "completion_null": 1.0, "completion_candidates": 0.0, "inference_ms": 11.9486116389},
+    "lexeme": {"completion_accuracy": 0.0, "completion_null": 1.0, "completion_candidates": 0.0, "inference_ms": 14.1173031667},
+    "rename": {"completion_accuracy": 0.0, "completion_null": 1.0, "completion_candidates": 0.0, "inference_ms": 29.68739475},
+    "nested": {"completion_accuracy": 0.0, "completion_null": 1.0, "completion_candidates": 0.0, "inference_ms": 11.5675461944},
+    "omitted": {"completion_accuracy": 0.0, "completion_null": 1.0, "completion_candidates": 0.0, "inference_ms": 0.2108622222},
+    "paragraph": {"completion_accuracy": 0.0, "completion_null": 1.0, "completion_candidates": 0.0, "inference_ms": 26.41543125},
+    "plan": {"completion_accuracy": 0.0, "completion_null": 1.0, "completion_candidates": 0.0, "inference_ms": 9.5986327778},
+    "counterfactual": {"completion_accuracy": 0.0, "completion_null": 1.0, "completion_candidates": 0.0, "inference_ms": 33.7887031111}
+  },
+  "peak_rss_kib_runtime_included": 119028,
+  "estimated_complexity": "training O(G W A^3), inference O(L^3) with axes<=24 and candidate cap 256",
+  "final_after_future_used_for_ranking": false,
+  "fixed_ontology_or_slots": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
