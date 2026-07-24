@@ -1,0 +1,45 @@
+{
+  "cycle": 8,
+  "hypothesis": "Joint Segmentation–Variable-Arity Operation Orbit Birth from Minimal Witnesses",
+  "seeds": [1, 7, 19],
+  "initial_hypotheses": 27648,
+  "witness_budget": 5,
+  "summary": {
+    "active": {"survivors": 0.3333333333333333, "used_witnesses": 5, "prospective": 0.2222222222222222, "inverse": 0.2222222222222222, "repair": 0.2222222222222222, "free": 0.22666666666666668, "seconds": 1.3788811370000005, "model_bytes": 33},
+    "random": {"survivors": 3.3333333333333335, "used_witnesses": 4.333333333333333, "prospective": 0.3819444444444445, "inverse": 0.4444444444444444, "repair": 0.3888888888888889, "free": 0.3839080459770115, "seconds": 0.04724421700000173, "model_bytes": 105},
+    "boundary_shuffle": {"survivors": 1.6666666666666667, "used_witnesses": 4, "prospective": 0.3888888888888889, "inverse": 0.4444444444444444, "repair": 0.3819444444444444, "free": 0.39954022988505744, "seconds": 0.027562647000001068, "model_bytes": 82.66666666666667},
+    "arity_shuffle": {"survivors": 1, "used_witnesses": 4, "prospective": 0.034722222222222224, "inverse": 0.041666666666666664, "repair": 0.034722222222222224, "free": 0.05747126436781609, "seconds": 0.032349051999998345, "model_bytes": 73},
+    "outcome_shuffle": {"survivors": 0, "used_witnesses": 1, "prospective": 0.0, "inverse": 0.0, "repair": 0.0, "free": 0.0, "seconds": 0.029877251999998578, "model_bytes": 5}
+  },
+  "strict_gate_seeds": 0,
+  "peak_rss_kib_runtime_included": 159740,
+  "estimated_ops": "selector O(B*H*Q), inference O(H*Q), H=27648",
+  "answer_leakage": false,
+  "fixed_ontology_or_handwritten_slots": false,
+  "weak_smartphone_verified": false,
+  "highschool_level_passed": false,
+  "completion": false,
+  "raw": {
+    "1": {
+      "active": {"survivors": 0, "used_witnesses": 5, "prospective": 0.0, "inverse": 0.0, "repair": 0.0, "free": 0.0, "seconds": 1.3422787909999983, "model_bytes": 5},
+      "random": {"survivors": 2, "used_witnesses": 5, "prospective": 0.5208333333333334, "inverse": 0.6666666666666666, "repair": 0.5833333333333334, "free": 0.5517241379310345, "seconds": 0.07689866200000495, "model_bytes": 109},
+      "boundary_shuffle": {"survivors": 0, "used_witnesses": 2, "prospective": 0.0, "inverse": 0.0, "repair": 0.0, "free": 0.0, "seconds": 0.02915840800000069, "model_bytes": 5},
+      "arity_shuffle": {"survivors": 1, "used_witnesses": 5, "prospective": 0.0625, "inverse": 0.0625, "repair": 0.0625, "free": 0.10344827586206896, "seconds": 0.03430429000000146, "model_bytes": 92},
+      "outcome_shuffle": {"survivors": 0, "used_witnesses": 1, "prospective": 0.0, "inverse": 0.0, "repair": 0.0, "free": 0.0, "seconds": 0.03359589400000118, "model_bytes": 5}
+    },
+    "7": {
+      "active": {"survivors": 1, "used_witnesses": 5, "prospective": 0.6666666666666666, "inverse": 0.6666666666666666, "repair": 0.6666666666666666, "free": 0.68, "seconds": 1.4071897020000037, "model_bytes": 89},
+      "random": {"survivors": 8, "used_witnesses": 5, "prospective": 0.625, "inverse": 0.6666666666666666, "repair": 0.5833333333333334, "free": 0.6, "seconds": 0.0303399120000023, "model_bytes": 201},
+      "boundary_shuffle": {"survivors": 4, "used_witnesses": 5, "prospective": 0.5625, "inverse": 0.7291666666666666, "repair": 0.5416666666666666, "free": 0.44, "seconds": 0.028095181000004743, "model_bytes": 151},
+      "arity_shuffle": {"survivors": 0, "used_witnesses": 2, "prospective": 0.0, "inverse": 0.0, "repair": 0.0, "free": 0.0, "seconds": 0.03176452599999635, "model_bytes": 5},
+      "outcome_shuffle": {"survivors": 0, "used_witnesses": 1, "prospective": 0.0, "inverse": 0.0, "repair": 0.0, "free": 0.0, "seconds": 0.03242547600000023, "model_bytes": 5}
+    },
+    "19": {
+      "active": {"survivors": 0, "used_witnesses": 5, "prospective": 0.0, "inverse": 0.0, "repair": 0.0, "free": 0.0, "seconds": 1.3871749179999995, "model_bytes": 5},
+      "random": {"survivors": 0, "used_witnesses": 3, "prospective": 0.0, "inverse": 0.0, "repair": 0.0, "free": 0.0, "seconds": 0.03449407699999796, "model_bytes": 5},
+      "boundary_shuffle": {"survivors": 1, "used_witnesses": 5, "prospective": 0.6041666666666666, "inverse": 0.6041666666666666, "repair": 0.6041666666666666, "free": 0.7586206896551724, "seconds": 0.025434351999997773, "model_bytes": 92},
+      "arity_shuffle": {"survivors": 2, "used_witnesses": 5, "prospective": 0.041666666666666664, "inverse": 0.0625, "repair": 0.041666666666666664, "free": 0.06896551724137931, "seconds": 0.030978339999997218, "model_bytes": 122},
+      "outcome_shuffle": {"survivors": 0, "used_witnesses": 1, "prospective": 0.0, "inverse": 0.0, "repair": 0.0, "free": 0.0, "seconds": 0.02361038599999432, "model_bytes": 5}
+    }
+  }
+}
