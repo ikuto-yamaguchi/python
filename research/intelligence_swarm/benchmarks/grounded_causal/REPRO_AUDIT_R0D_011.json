@@ -1,0 +1,32 @@
+{
+  "date": "2026-07-25",
+  "cycle": "R0D-011",
+  "classification": "initial_reproduction_failure",
+  "completed_work": "matched SILG episode payload provenance and aggregate-consistency contract",
+  "tests": {
+    "command": "python3 research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_silg_episode.py",
+    "ran": 7,
+    "passed": 7,
+    "failed": 0
+  },
+  "new_checks": [
+    "per-method/seed run uniqueness",
+    "finite non-negative wall time and CPU inference latency",
+    "episode records recompute run-level win/return/length aggregates",
+    "run-level aggregates recompute top-level method aggregates",
+    "positive checkpoint bytes and full 64-hex checkpoint SHA-256 for seeds 1, 7 and 19",
+    "full 40-hex SILG and RTFM source commits",
+    "finite non-negative peak RSS and total wall time",
+    "answer leakage explicitly false",
+    "pretrained language model explicitly false"
+  ],
+  "remaining_blockers": [
+    "target_label_shuffle is absent from matched episode payloads",
+    "outcome_shuffle is absent from matched episode payloads",
+    "raw workflow log files are not independently joined and rehashed by the episode adapter",
+    "data artifact checksum is not present for an immutable exported test set",
+    "paper-scale public capability baseline is not reproduced"
+  ],
+  "progress_claimed": false,
+  "highschool_level_passed": false
+}
