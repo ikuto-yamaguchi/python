@@ -1,49 +1,69 @@
 # Prior-Art Audit 001
 
-This is a first-pass map, not a novelty claim. The search must continue until the assumptions and contribution of each adjacent line are checked in the full paper and code.
+This is a living primary-source map, not a novelty claim. Every row records what is actually established and what remains outside scope.
 
 | Work | What it establishes | Structure/supervision supplied | Gap relative to RQ-001 |
 |---|---|---|---|
-| Ahuja et al., *Interventional Causal Representation Learning*, ICML 2023 | Identifiability of latent causal factors under perfect/interpretable interventions, up to permutation/scaling; weaker block identification under imperfect interventions | Interventional environments; mathematical assumptions on observation/support | No raw language alignment or instruction following |
-| Varici et al., *General Identifiability and Achievability for CRL*, AISTATS 2024 | General nonparametric identifiability with uncoupled hard interventions | Multiple intervention environments; latent causal model assumptions | Does not jointly discover lexical/utterance equivalence |
-| Varici et al., *Unknown Multi-node Interventions*, 2024 | Identifiability with unknown multi-node interventions under linear observation mixing | Linear mixing; sufficiently diverse interventions | Closest unknown-target theory, but no raw language |
-| Ng et al., *CRL from General Environments under Nonparametric Mixing*, AISTATS 2025 | Broader identifiability conditions across general environments | Distribution-shift assumptions | No language grounding task |
-| Markham et al., *Intervening to learn and compose causally disentangled representations*, CLeaR 2026 | Context module learns composable causally disentangled concepts in expressive generative models | Concept/context information and model architecture assumptions | Must inspect whether concept information corresponds to known intervention labels; no raw Japanese |
-| Liu et al., *CausalTriplet*, CLeaR 2023 | Actionable counterfactual benchmark; current methods struggle without object-centric priors | Visual scenes, intervention structure, object-centric downstream task | No natural-language acquisition |
+| Ahuja et al., *Interventional Causal Representation Learning*, ICML 2023 | Identifiability of latent causal factors under perfect/interpretable interventions, up to permutation/scaling; weaker block identification under imperfect interventions | Interventional environments; mathematical assumptions on observation/support | No raw-language alignment or instruction following |
+| von Kügelgen et al., *Nonparametric Identifiability of Causal Representations from Unknown Interventions*, 2023 | Nonparametric latent-variable and graph identifiability from unknown perfect interventions, subject to genericity and intervention diversity | Distribution-level environments; perfect interventions; for general dimension, at least two distinct perfect interventional domains per node | No language view; the environment partition itself is observed |
+| Varici et al., *General Identifiability and Achievability for CRL*, AISTATS 2024 | General nonparametric identifiability with uncoupled hard interventions | Multiple intervention environments; hard-intervention and latent-model assumptions | Does not jointly discover lexical/utterance equivalence |
+| Varici et al., *Linear CRL from Unknown Multi-node Interventions*, 2024 | Identifiability under unknown multi-node interventions | Linear observation mixing; sufficiently diverse interventions | No raw language; linear mixing |
+| Ng et al., *CRL from General Environments under Nonparametric Mixing*, AISTATS 2025 | Recovers latent DAG and variables from broader environment changes under nonparametric mixing | Sufficient mechanism-change conditions, including higher-order derivative conditions; latent noise-model assumptions | No language grounding; environment shifts remain a supplied grouping |
+| Li et al., *On the Identifiability of Causal Abstractions*, AISTATS 2025 | Characterizes the granularity recoverable from arbitrary-subset unknown interventions; exact low-level identity may collapse to an identifiable abstraction | Contrastive pre/post pairs and a family of possible interventions | Direct warning that RQ-001 may only admit abstraction-level recovery; no language alignment |
+| Lee et al., *Beyond Identifiability: Learning Causal Representations with Few Environments and Finite Samples*, arXiv 2026 | Finite-sample recovery of latent graph, mixing representation and unknown multi-node targets with logarithmically many environments in the studied model | Linear/statistical model assumptions and multiple environment distributions | Shrinks the novelty of “unknown targets with few environments”; no raw language or interactive policy semantics |
+| Markham et al., *Intervening to Learn and Compose Causally Disentangled Representations*, CLeaR 2026 | Learns composable causal concepts under intervention/context supervision | Concept/context and architecture assumptions | Must not be treated as raw semantic birth; no raw Japanese |
+| Liu et al., *CausalTriplet*, CLeaR 2023 | Actionable counterfactual benchmark; exposes dependence on object-centric priors | Visual scenes and intervention structure | No natural-language acquisition |
 | Brady et al., *Provably Learning Object-Centric Representations*, ICML 2023 | Conditions for unsupervised object-centric identifiability | Compositionality and irreducibility of scene generator | No actions or raw language |
-| Gaddy & Klein, *Pre-Learning Environment Representations for Data-Efficient Neural Instruction Following*, ACL 2019 | Language-free transition pretraining improves instruction following | Environment transitions and task action structure | Does not target causal identifiability or unknown intervention targets |
-| Han & Schlangen, *Grounding Language by Continuous Observation of Instruction Following*, EACL 2017 | Incremental action traces improve sub-utterance grounding | Observed human action sequence and GUI domain | No latent causal variable identifiability |
-| Zhong et al., *SILG*, NeurIPS 2021 | Unified multi-environment interactive language grounding benchmark; shared recurrent/entity-centric baselines | Symbolic observations/actions and environment APIs | Suitable reproduction benchmark; semantics are not jointly identified with latent causal state |
-| Ueda et al., *J-CRe3*, LREC-COLING 2024 / JNLP 2024 | Real-world Japanese reference grounding with egocentric video/dialogue | Bounding-box and crossmodal reference annotations | Realistic Japanese audit; not an intervention/action benchmark |
-| Shelton et al., *PQB-EQA*, ACL 2025 | Balanced environments expose language-only guessing in embodied QA | Paired question/environment construction | Useful control principle, not a learning principle |
+| Gaddy & Klein, *Pre-Learning Environment Representations for Data-Efficient Neural Instruction Following*, ACL 2019 | Language-free transition pretraining improves instruction following | Environment transitions and task action structure | Environment-first learning is prior art, not our novelty |
+| Han & Schlangen, *Grounding Language by Continuous Observation of Instruction Following*, EACL 2017 | Incremental action traces improve sub-utterance grounding | Observed human action sequence and GUI domain | No latent causal-variable identifiability |
+| Zhong et al., *SILG*, NeurIPS 2021 | Unified five-environment interactive language-grounding benchmark and shared recurrent/entity-centric baselines | Symbolic observation/action APIs and environment-specific wrappers | Reproduction benchmark; state/object/action interface is substantially exposed |
+| Zhong et al., *Language Dynamics Distillation*, NeurIPS 2022 | Language-conditioned next-dynamics pretraining improves sample efficiency and generalization on SILG | Language-described expert demonstrations, actions and observed transitions | Joint language–dynamics learning is prior art; hidden intervention partition is not recovered |
+| Wong et al., *Learning Grounded Action Abstractions from Language*, ICLR 2024 | Learns reusable action abstractions for planning from language/task evidence | Planner/action interface and program-library induction assumptions | Not raw semantic birth without supplied planning structure |
+| Ueda et al., *J-CRe3*, LREC-COLING / JNLP 2024 | Real-world Japanese crossmodal reference grounding, including predicate-argument and bridging references | Egocentric video, dialogue transcripts and bounding-box reference annotations | Realism audit only; not an intervention/action benchmark |
+| Shelton et al., *PQB-EQA*, ACL 2025 | Balanced paired environments expose language-only guessing | Paired question/environment construction | Useful control principle, not a learning principle |
 
-## Initial conclusion
+## Updated conclusion — 2026-07-24
 
-The previous program rediscovered pieces of known identifiability and grounding ideas without establishing novelty. The defensible candidate gap is narrower:
+The broad form of RQ-001 is not novel. Unknown intervention-target recovery, nonparametric identifiability, abstraction-level recovery, finite-sample recovery from few environments, interactive grounding, and language-conditioned dynamics learning already exist as separate mature lines.
 
-> joint identification of a latent intervention partition and cross-expression language equivalence from the same trajectories, when intervention targets are hidden and no pretrained parser/object slots are supplied.
+The only defensible candidate gap is narrower:
 
-This remains only a candidate gap. The next search must include:
+> On a fixed public interactive benchmark, can raw-language equivalence provide statistically necessary information for recovering a latent intervention **partition or abstraction** beyond state/action-only models, when environment identity is available for splitting but intervention-target labels, semantic parsers, object slots and pretrained language models are absent?
 
-- language-conditioned causal representation learning
-- latent action discovery from text and trajectories
-- unsupervised semantic parsing from interaction
-- unknown intervention target CRL
-- multimodal nonlinear ICA with language views
-- object-centric instruction following without slots
-- 2025–2026 CLeaR, ICML, ICLR, NeurIPS, ACL and CoRL papers
+Even this is not adopted. It must be rejected if any primary source already demonstrates the same joint recovery, or if SILG reproduction shows that language adds no stable held-out-mechanism signal beyond state/action controls.
+
+## Consequences for the program
+
+1. “Unknown intervention target” alone is not a contribution after the 2023–2026 CRL results.
+2. Exact variable identity may be impossible; abstraction-level recovery must be an allowed theoretical outcome.
+3. SILG/LDD must be reproduced before designing a new model because multi-environment grounding and language-conditioned dynamics are established baselines.
+4. J-CRe3 is now publicly discoverable through the official `riken-grp/J-CRe3` repository, but it remains an external Japanese reference audit rather than the causal benchmark.
+5. Novelty requires a joint theorem or external result showing a language-specific gain that cannot be explained by state, action, environment ID, transition statistics or label leakage.
+
+## Reproduction facts pinned in this audit
+
+- SILG PyPI package: `silg==0.0.1`, released 2021-10-20, Python `>=3.7.10`, MIT.
+- SILG official instructions require installing individual environments, then `pip install -r requirements.txt`, `pip install -e .`; experiments enter through `run_exp.py` / `launch.py`.
+- Initial reproduction target remains RTFM or Messenger, not all five environments.
+- J-CRe3 public dataset repository: `https://github.com/riken-grp/J-CRe3`; public metadata availability date 2026-04-06.
 
 ## Primary sources
 
 - https://proceedings.mlr.press/v202/ahuja23a.html
+- https://arxiv.org/abs/2306.00542
 - https://proceedings.mlr.press/v238/varici24a.html
 - https://arxiv.org/abs/2406.05937
 - https://proceedings.mlr.press/v258/ng25a.html
+- https://proceedings.mlr.press/v258/li25g.html
+- https://arxiv.org/abs/2603.25796
 - https://proceedings.mlr.press/v323/markham26a.html
 - https://proceedings.mlr.press/v213/liu23a.html
 - https://proceedings.mlr.press/v202/brady23a.html
 - https://aclanthology.org/P19-1188/
 - https://aclanthology.org/E17-2079/
 - https://proceedings.neurips.cc/paper_files/paper/2021/hash/b3e3e393c77e35a4a3f3cbd1e429b5dc-Abstract.html
+- https://proceedings.neurips.cc/paper_files/paper/2022/hash/51053d7b8473df7d5a2165b2a8ee9629-Abstract-Conference.html
+- https://openreview.net/forum?id=qJ0Cfj4Ex9
 - https://aclanthology.org/2024.lrec-main.829/
+- https://github.com/riken-grp/J-CRe3
 - https://aclanthology.org/2025.acl-short.11/
