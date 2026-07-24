@@ -37,18 +37,19 @@ R0では再現値が原論文または公開実装の許容範囲へ入るまで
 
 ## Candidate research question — narrowed again, not adopted
 
-**RQ-001-N2:** On a fixed public interactive benchmark, does raw language contain statistically necessary information about an intervention partition or causal abstraction beyond state, action, history and environment identity, and can that information be recovered up to joint permutation without intervention-target labels, semantic parsers, object slots, pretrained language models or supplied perturbation-feature semantics?
+**RQ-001-N3:** On a fixed public interactive benchmark, does raw language provide predictive information about held-out mechanism changes beyond state, action, history, reward and environment identity; and, conditional on that gain, can an utterance-conditioned intervention partition be recovered up to joint permutation or the finest intervention-supported causal abstraction, without target labels, semantic parsers, object slots, pretrained language models or supplied perturbation semantics?
 
 The broad `language features -> intervention distribution` formulation is not novel after Generative Intervention Models. Exact latent-variable names and exact utterance-target names are not identifiable under a joint latent/language permutation without an observable anchor. Evaluation must therefore be permutation- or abstraction-aware.
 
-## Causal identifiability audit C002
+## Causal identifiability audit C003
 
-- Added closest-overlap audit for Generative Intervention Models, Isolated Causal Effects of Natural Language and real-system CRL sanity checking.
-- Added an exact finite counterexample with three latent variables and six joint permutations.
-- All six joint relabelings induce one identical observable table.
-- Exact latent and utterance-target names are therefore not identifiable; recovery is only valid up to joint permutation or a coarser causal abstraction.
-- Required language evidence is now `full - state/action/history-only` on held-out mechanisms, with utterance, transition and target-label shuffles plus rename/paraphrase controls.
-- This is an identifiability restriction, not a new intelligence mechanism or capability result.
+- Split the candidate claim into two gates.
+- **Gate L:** language-specific predictive information beyond state, action, history, reward and environment identity on matched held-out episodes.
+- **Gate I:** conditional on Gate L, joint utterance/intervention partition recovery up to shared permutation or the finest intervention-supported abstraction.
+- Gate L does not imply Gate I; language may be only an environment, policy, reward-density or episode-phase proxy.
+- Environment-indexed CRL guarantees do not directly establish recovery when the environment/intervention partition must itself be inferred from raw trajectories and language.
+- Unknown-target recovery, unknown soft-intervention inference and supervised perturbation-target prediction are prior art; they are not standalone contributions.
+- No new architecture is authorized until Gate L is operationalized on a reproduced public baseline and Gate I is shown to be well-defined for the selected benchmark.
 
 ## Pinned reproduction facts
 
@@ -103,7 +104,7 @@ Synthetic fixtureでseed 1/7/19のpipeline smoke testを完了したが、これ
 
 **SILG/RTFM公式shared recurrent baselineと、同一episode上のlanguage-blind/state-only/shuffle対照が未実行。**
 
-Source acquisition and environment installation now succeed in GitHub Actions. The next bottleneck is no longer DNS; it is faithful training/evaluation orchestration, deterministic instance replay, and complete artifact accounting.
+Source acquisition and environment installation now succeed in GitHub Actions. The next bottleneck is no longer DNS; it is faithful training/evaluation orchestration, deterministic instance replay, complete artifact accounting, and operationalizing Gate L. Gate I must not be implemented until the benchmark's intervention diversity is shown to define a nontrivial evaluation-only partition.
 
 ## Progress rule
 
@@ -122,4 +123,4 @@ R0の進歩は、公開baselineの再現成功、同一benchmark・同一split�
 
 ## Last integration
 
-2026-07-24: **RESET-E009**。SILG/RTFM固定環境のGitHub Actions導入と3-seed public random controlが成功。公開環境実行値を初取得したが、official recurrent baselineとmatched controlsは未実行のためR0継続。新規性・知能原理・能力進歩の認定なし。
+2026-07-25: **C-AUDIT-003**。一次文献監査からRQをGate L（言語固有の予測情報）とGate I（介入partitionの共同同定）へ分離し、RQ-001-N3へ狭義化。予測改善だけをsemantic identifiabilityとみなす経路を禁止。公開recurrent baselineとmatched controlsが未完了のため、新規性・知能原理・能力進歩の認定なし。
