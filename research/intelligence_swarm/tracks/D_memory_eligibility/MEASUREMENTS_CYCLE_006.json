@@ -1,0 +1,80 @@
+{
+  "cycle": 6,
+  "hypothesis": "Intervention-Certified Memory Eligibility from Minimal Discriminating Action-Set Survival",
+  "seeds": [1, 7, 19],
+  "summary": {
+    "active": {
+      "survivors": 0.3333333333333333,
+      "probes": 1.6666666666666667,
+      "eval": {
+        "d1_held": {"joint": 0.010416666666666666, "target": 0.09375, "inverse": 0.20833333333333334, "closed": 0.010416666666666666},
+        "d1_word_order": {"joint": 0.0, "target": 0.052083333333333336, "inverse": 0.16666666666666666, "closed": 0.0},
+        "d1_paragraph": {"joint": 0.020833333333333332, "target": 0.09375, "inverse": 0.3229166666666667, "closed": 0.020833333333333332},
+        "d1_free": {"joint": 0.03125, "target": 0.125, "inverse": 0.21875, "closed": 0.03125},
+        "d2_held": {"joint": 0.0, "target": 0.03125, "inverse": 0.23958333333333334, "closed": 0.0},
+        "d2_word_order": {"joint": 0.03125, "target": 0.10416666666666667, "inverse": 0.19791666666666666, "closed": 0.03125},
+        "d2_paragraph": {"joint": 0.020833333333333332, "target": 0.052083333333333336, "inverse": 0.25, "closed": 0.020833333333333332},
+        "d2_free": {"joint": 0.03125, "target": 0.11458333333333333, "inverse": 0.20833333333333334, "closed": 0.03125},
+        "d3_held": {"joint": 0.010416666666666666, "target": 0.11458333333333333, "inverse": 0.22916666666666666, "closed": 0.010416666666666666},
+        "d3_word_order": {"joint": 0.020833333333333332, "target": 0.0625, "inverse": 0.25, "closed": 0.020833333333333332},
+        "d3_paragraph": {"joint": 0.010416666666666666, "target": 0.10416666666666667, "inverse": 0.20833333333333334, "closed": 0.010416666666666666},
+        "d3_free": {"joint": 0.010416666666666666, "target": 0.08333333333333333, "inverse": 0.3020833333333333, "closed": 0.010416666666666666}
+      }
+    },
+    "random": {
+      "survivors": 0.3333333333333333,
+      "probes": 1.3333333333333333,
+      "eval": {
+        "d1_held": {"joint": 0.010416666666666666, "target": 0.041666666666666664, "inverse": 0.2708333333333333, "closed": 0.010416666666666666},
+        "d1_word_order": {"joint": 0.0, "target": 0.10416666666666667, "inverse": 0.14583333333333334, "closed": 0.0},
+        "d1_paragraph": {"joint": 0.03125, "target": 0.08333333333333333, "inverse": 0.3229166666666667, "closed": 0.03125},
+        "d1_free": {"joint": 0.020833333333333332, "target": 0.09375, "inverse": 0.22916666666666666, "closed": 0.020833333333333332},
+        "d2_held": {"joint": 0.041666666666666664, "target": 0.125, "inverse": 0.3020833333333333, "closed": 0.041666666666666664},
+        "d2_word_order": {"joint": 0.010416666666666666, "target": 0.052083333333333336, "inverse": 0.22916666666666666, "closed": 0.010416666666666666},
+        "d2_paragraph": {"joint": 0.020833333333333332, "target": 0.11458333333333333, "inverse": 0.23958333333333334, "closed": 0.020833333333333332},
+        "d2_free": {"joint": 0.03125, "target": 0.0625, "inverse": 0.23958333333333334, "closed": 0.03125},
+        "d3_held": {"joint": 0.03125, "target": 0.13541666666666666, "inverse": 0.23958333333333334, "closed": 0.03125},
+        "d3_word_order": {"joint": 0.0, "target": 0.08333333333333333, "inverse": 0.25, "closed": 0.0},
+        "d3_paragraph": {"joint": 0.010416666666666666, "target": 0.09375, "inverse": 0.21875, "closed": 0.010416666666666666},
+        "d3_free": {"joint": 0.0, "target": 0.052083333333333336, "inverse": 0.28125, "closed": 0.0}
+      }
+    },
+    "shuffle": {
+      "survivors": 0.0,
+      "probes": 2.0,
+      "eval": {
+        "d1_held": {"joint": 0.0, "target": 0.0, "inverse": 0.23958333333333334, "closed": 0.0},
+        "d1_word_order": {"joint": 0.0, "target": 0.0, "inverse": 0.1875, "closed": 0.0},
+        "d1_paragraph": {"joint": 0.0, "target": 0.0, "inverse": 0.25, "closed": 0.0},
+        "d1_free": {"joint": 0.0, "target": 0.0, "inverse": 0.2604166666666667, "closed": 0.0},
+        "d2_held": {"joint": 0.0, "target": 0.0, "inverse": 0.28125, "closed": 0.0},
+        "d2_word_order": {"joint": 0.0, "target": 0.0, "inverse": 0.20833333333333334, "closed": 0.0},
+        "d2_paragraph": {"joint": 0.0, "target": 0.0, "inverse": 0.3020833333333333, "closed": 0.0},
+        "d2_free": {"joint": 0.0, "target": 0.0, "inverse": 0.21875, "closed": 0.0},
+        "d3_held": {"joint": 0.0, "target": 0.0, "inverse": 0.2708333333333333, "closed": 0.0},
+        "d3_word_order": {"joint": 0.0, "target": 0.0, "inverse": 0.28125, "closed": 0.0},
+        "d3_paragraph": {"joint": 0.0, "target": 0.0, "inverse": 0.20833333333333334, "closed": 0.0},
+        "d3_free": {"joint": 0.0, "target": 0.0, "inverse": 0.2916666666666667, "closed": 0.0}
+      }
+    }
+  },
+  "model_bytes_mean": 1031.3333333333333,
+  "runtime_seconds": 31.673779776000174,
+  "peak_rss_kib": 115072,
+  "candidate_cap": 24,
+  "probe_budget": 12,
+  "estimated_ops_train_per_pair": 2304,
+  "estimated_ops_inference_per_query": 98304,
+  "answer_leakage": false,
+  "post_treatment_test_input": false,
+  "formal_memory_eligible": false,
+  "seed_diagnostics": {
+    "1": {"active": {"survivors": 0, "probes": 2, "d3_free": {"joint": 0.0, "target": 0.0, "inverse": 0.3125, "closed": 0.0}}, "random": {"survivors": 0, "probes": 1, "d3_free": {"joint": 0.0, "target": 0.0, "inverse": 0.3125, "closed": 0.0}}, "shuffle": {"survivors": 0, "probes": 2, "d3_free": {"joint": 0.0, "target": 0.0, "inverse": 0.3125, "closed": 0.0}}},
+    "7": {"active": {"survivors": 0, "probes": 2, "d3_free": {"joint": 0.0, "target": 0.0, "inverse": 0.3125, "closed": 0.0}}, "random": {"survivors": 0, "probes": 2, "d3_free": {"joint": 0.0, "target": 0.0, "inverse": 0.3125, "closed": 0.0}}, "shuffle": {"survivors": 0, "probes": 2, "d3_free": {"joint": 0.0, "target": 0.0, "inverse": 0.3125, "closed": 0.0}}},
+    "19": {"active": {"survivors": 1, "probes": 1, "d3_free": {"joint": 0.03125, "target": 0.25, "inverse": 0.28125, "closed": 0.03125}}, "random": {"survivors": 1, "probes": 1, "d3_free": {"joint": 0.0, "target": 0.15625, "inverse": 0.21875, "closed": 0.0}}, "shuffle": {"survivors": 0, "probes": 2, "d3_free": {"joint": 0.0, "target": 0.0, "inverse": 0.25, "closed": 0.0}}}
+  },
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
