@@ -1,0 +1,59 @@
+{
+  "cycle": 7,
+  "hypothesis": "Intervention-Residual Candidate Birth before Memory Eligibility",
+  "seeds": [1, 7, 19],
+  "modes": {
+    "base": {"births_mean": 22.0},
+    "residual": {"births_mean": 22.0},
+    "random": {"births_mean": 22.666666666666668},
+    "shuffle": {"births_mean": 24.0}
+  },
+  "hidden_d3": {
+    "held": {
+      "residual": {"joint": 0.020833333333333332, "target": 0.3263888888888889, "inverse": 0.25000000000000006, "closed": 0.020833333333333332, "repair": 0.22916666666666666},
+      "base": {"joint": 0.027777777777777776, "target": 0.34027777777777773, "inverse": 0.22916666666666666, "closed": 0.027777777777777776, "repair": 0.22916666666666666},
+      "random": {"joint": 0.027777777777777776, "target": 0.22222222222222224, "inverse": 0.22916666666666666, "closed": 0.027777777777777776, "repair": 0.2222222222222222},
+      "shuffle": {"joint": 0.013888888888888888, "target": 0.20833333333333334, "inverse": 0.24305555555555555, "closed": 0.013888888888888888, "repair": 0.2708333333333333}
+    },
+    "word_order": {
+      "residual": {"joint": 0.041666666666666664, "target": 0.27777777777777785, "inverse": 0.24305555555555558, "closed": 0.041666666666666664, "repair": 0.23611111111111113},
+      "base": {"joint": 0.013888888888888888, "target": 0.3055555555555555, "inverse": 0.25, "closed": 0.013888888888888888, "repair": 0.3333333333333333},
+      "random": {"joint": 0.041666666666666664, "target": 0.28472222222222215, "inverse": 0.2708333333333333, "closed": 0.041666666666666664, "repair": 0.3333333333333333},
+      "shuffle": {"joint": 0.020833333333333332, "target": 0.3194444444444444, "inverse": 0.20833333333333334, "closed": 0.020833333333333332, "repair": 0.22916666666666666}
+    },
+    "paragraph": {
+      "residual": {"joint": 0.020833333333333332, "target": 0.26388888888888884, "inverse": 0.34027777777777773, "closed": 0.020833333333333332, "repair": 0.3055555555555555},
+      "base": {"joint": 0.027777777777777776, "target": 0.2708333333333333, "inverse": 0.3819444444444445, "closed": 0.027777777777777776, "repair": 0.23611111111111113},
+      "random": {"joint": 0.048611111111111105, "target": 0.3055555555555556, "inverse": 0.22916666666666666, "closed": 0.048611111111111105, "repair": 0.28472222222222227},
+      "shuffle": {"joint": 0.06944444444444443, "target": 0.2708333333333333, "inverse": 0.2986111111111111, "closed": 0.06944444444444443, "repair": 0.32638888888888884}
+    },
+    "free": {
+      "residual": {"joint": 0.020833333333333332, "target": 0.22916666666666666, "inverse": 0.23611111111111108, "closed": 0.020833333333333332, "repair": 0.23611111111111113},
+      "base": {"joint": 0.020833333333333332, "target": 0.25, "inverse": 0.22916666666666663, "closed": 0.020833333333333332, "repair": 0.22222222222222224},
+      "random": {"joint": 0.06944444444444443, "target": 0.3333333333333333, "inverse": 0.2708333333333333, "closed": 0.06944444444444443, "repair": 0.375},
+      "shuffle": {"joint": 0.013888888888888888, "target": 0.22222222222222224, "inverse": 0.23611111111111113, "closed": 0.013888888888888888, "repair": 0.27777777777777773}
+    },
+    "rename": {
+      "residual": {"joint": 0.041666666666666664, "target": 0.28472222222222215, "inverse": 0.19444444444444445, "closed": 0.041666666666666664, "repair": 0.2708333333333333},
+      "base": {"joint": 0.05555555555555555, "target": 0.3194444444444445, "inverse": 0.23611111111111108, "closed": 0.05555555555555555, "repair": 0.2222222222222222},
+      "random": {"joint": 0.027777777777777776, "target": 0.22916666666666666, "inverse": 0.24305555555555555, "closed": 0.027777777777777776, "repair": 0.20833333333333334},
+      "shuffle": {"joint": 0.020833333333333332, "target": 0.25, "inverse": 0.20833333333333334, "closed": 0.020833333333333332, "repair": 0.22916666666666666}
+    }
+  },
+  "strict_gate_by_seed": [false, false, false],
+  "formal_memory_eligible_units": 0,
+  "model_bytes_mean": 245998.0,
+  "runtime_seconds": 4.064837545000003,
+  "peak_rss_kib": 112800,
+  "candidate_count": 32,
+  "observation_budget": 24,
+  "estimated_ops_update_per_episode": 15360,
+  "estimated_ops_inference_per_query": 15360,
+  "answer_leakage": false,
+  "post_treatment_test_input": false,
+  "fixed_ontology": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
