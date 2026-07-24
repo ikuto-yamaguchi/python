@@ -1,0 +1,24 @@
+{
+  "cycle": 11,
+  "hypothesis": "Role-Specific Paired Lesion Birth without Enumerated Programs",
+  "seeds": [1, 7, 19],
+  "summary": {
+    "paired": {"candidates": 0.3333333333333333, "model_bytes": 43, "trials": 16, "seen": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}, "paraphrase": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}, "order": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}, "nested": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}, "paragraph": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}, "free": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}},
+    "random": {"candidates": 0.16666666666666666, "model_bytes": 23.833333333333332, "trials": 16, "seen": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}, "paraphrase": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}, "order": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}, "nested": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}, "paragraph": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}, "free": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}},
+    "state_static": {"candidates": 0, "model_bytes": 5, "trials": 16, "seen": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}, "paraphrase": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}, "order": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}, "nested": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}, "paragraph": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}, "free": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}},
+    "pair_shuffle": {"candidates": 0.16666666666666666, "model_bytes": 24.166666666666668, "trials": 16, "seen": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}, "paraphrase": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}, "order": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}, "nested": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}, "paragraph": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}, "free": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}},
+    "outcome_shuffle": {"candidates": 0.3333333333333333, "model_bytes": 42, "trials": 16, "seen": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}, "paraphrase": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}, "order": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}, "nested": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}, "paragraph": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}, "free": {"prospective": 0.0, "inverse": 0.0, "goal": 0.0, "repair": 0.0, "abstain": 1.0, "candidate_rollouts": 0}}
+  },
+  "strict_progress_seeds": 0,
+  "peak_rss_kib": 168884,
+  "runtime_seconds": 0.03114977700178989,
+  "estimated_complexity": "pair generation O(N^2 L), inference O(C*36)",
+  "answer_leakage": false,
+  "under_1gb": true,
+  "weak_smartphone_verified": false,
+  "semantic_identity_gate": false,
+  "operation_goal_gate": false,
+  "formal_operation_proposals": 0,
+  "highschool_level_passed": false,
+  "completion": false
+}
