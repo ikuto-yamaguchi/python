@@ -8,6 +8,7 @@ on:
       - '.github/workflows/r0_silg_rtfm_probe.yml'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/silg_rtfm_probe.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/run_silg_matched_eval.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/SILG_RTFM_REPRO_001.md'
   pull_request:
@@ -15,6 +16,7 @@ on:
       - '.github/workflows/r0_silg_rtfm_probe.yml'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/silg_rtfm_probe.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/run_silg_matched_eval.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/SILG_RTFM_REPRO_001.md'
   workflow_dispatch:
@@ -59,7 +61,7 @@ jobs:
             --output research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_RANDOM_CANONICAL_3SEED.json \
             2>&1 | tee research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_RANDOM_CANONICAL.log
 
-      - name: Run official multi recurrent training smoke
+      - name: Run official multi recurrent training smoke and persist checkpoints
         run: |
           set -o pipefail
           /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py \
@@ -68,6 +70,16 @@ jobs:
             --frames 2048 \
             --output research/intelligence_swarm/benchmarks/grounded_causal/results \
             2>&1 | tee research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_RECURRENT_SMOKE.log
+
+      - name: Evaluate recurrent and matched random/language-blind/state-only controls
+        run: |
+          set -o pipefail
+          /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/run_silg_matched_eval.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" \
+            --results research/intelligence_swarm/benchmarks/grounded_causal/results \
+            --seeds 1 7 19 \
+            --episodes 20 \
+            2>&1 | tee research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_MATCHED_EVAL.log
 
       - name: Freeze installed versions
         if: always()
