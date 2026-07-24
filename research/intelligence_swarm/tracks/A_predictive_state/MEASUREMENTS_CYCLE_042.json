@@ -1,0 +1,50 @@
+{
+  "cycle": 42,
+  "hypothesis": "Prediction-Residual State Rebirth from Post-Event Counterexample Synthesis",
+  "seeds": [1, 7, 19],
+  "summary": {
+    "switch": {
+      "one_step": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "boundary_f1": 1.0, "post_boundary_accuracy": 0.0, "rules": 21.666666666666668, "births": 0, "boundaries": 7, "model_bytes": 773.6666666666666, "training_seconds": 0.012105472333333958, "inference_ms": 0.07559177777781577},
+      "boundary_only": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "boundary_f1": 1.0, "post_boundary_accuracy": 0.0, "rules": 21.666666666666668, "births": 0, "boundaries": 7, "model_bytes": 778.6666666666666, "training_seconds": 0.012570370666667921, "inference_ms": 0.07063890277771002},
+      "rebirth": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "boundary_f1": 1.0, "post_boundary_accuracy": 0.0, "rules": 21.666666666666668, "births": 0, "boundaries": 7, "model_bytes": 772.6666666666666, "training_seconds": 0.012542547666664442, "inference_ms": 0.18010916666671367},
+      "shuffle": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "boundary_f1": 1.0, "post_boundary_accuracy": 0.0, "rules": 21.666666666666668, "births": 0, "boundaries": 7, "model_bytes": 772.6666666666666, "training_seconds": 0.012434186666666847, "inference_ms": 0.17537199999997613}
+    },
+    "omitted": {
+      "one_step": {"accuracy": 0.0, "wrong": 0.6666666666666666, "null": 0.3333333333333333, "boundary_f1": 1.0, "post_boundary_accuracy": 0.0, "rules": 21.666666666666668, "births": 0, "boundaries": 16.333333333333332, "model_bytes": 773.6666666666666, "training_seconds": 0.011782717333334839, "inference_ms": 0.06597198611106118},
+      "boundary_only": {"accuracy": 0.0, "wrong": 0.013888888888888888, "null": 0.9861111111111112, "boundary_f1": 1.0, "post_boundary_accuracy": 0.0, "rules": 21.666666666666668, "births": 0, "boundaries": 16.333333333333332, "model_bytes": 778.6666666666666, "training_seconds": 0.011769051666668418, "inference_ms": 0.05397240277796003},
+      "rebirth": {"accuracy": 0.0, "wrong": 0.013888888888888888, "null": 0.9861111111111112, "boundary_f1": 1.0, "post_boundary_accuracy": 0.0, "rules": 21.666666666666668, "births": 0, "boundaries": 16.333333333333332, "model_bytes": 772.6666666666666, "training_seconds": 0.011740273000000911, "inference_ms": 0.2550461805555947},
+      "shuffle": {"accuracy": 0.0, "wrong": 0.4722222222222222, "null": 0.5277777777777778, "boundary_f1": 0.9607673372379255, "post_boundary_accuracy": 0.0, "rules": 21.666666666666668, "births": 18, "boundaries": 17.666666666666668, "model_bytes": 772.6666666666666, "training_seconds": 0.011480505666665882, "inference_ms": 0.310399402777723}
+    },
+    "order": {
+      "one_step": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "boundary_f1": 1.0, "post_boundary_accuracy": 0.0, "rules": 21.666666666666668, "births": 0, "boundaries": 16.333333333333332, "model_bytes": 773.6666666666666, "training_seconds": 0.011827464666666287, "inference_ms": 0.07796841666656779},
+      "boundary_only": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "boundary_f1": 1.0, "post_boundary_accuracy": 0.0, "rules": 21.666666666666668, "births": 0, "boundaries": 16.333333333333332, "model_bytes": 778.6666666666666, "training_seconds": 0.011663065333335018, "inference_ms": 0.06528544444458124},
+      "rebirth": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "boundary_f1": 1.0, "post_boundary_accuracy": 0.0, "rules": 21.666666666666668, "births": 0, "boundaries": 16.333333333333332, "model_bytes": 772.6666666666666, "training_seconds": 0.011483473333332958, "inference_ms": 0.31201480555558764},
+      "shuffle": {"accuracy": 0.0, "wrong": 0.1388888888888889, "null": 0.8611111111111112, "boundary_f1": 0.9607673372379255, "post_boundary_accuracy": 0.0, "rules": 21.666666666666668, "births": 20, "boundaries": 17.666666666666668, "model_bytes": 772.6666666666666, "training_seconds": 0.011421301666665329, "inference_ms": 0.3453471388889579}
+    },
+    "paragraph": {
+      "one_step": {"accuracy": 0.0, "wrong": 0.4583333333333333, "null": 0.5416666666666666, "boundary_f1": 1.0, "post_boundary_accuracy": 0.0, "rules": 21.666666666666668, "births": 0, "boundaries": 18.333333333333332, "model_bytes": 773.6666666666666, "training_seconds": 0.011137360666663673, "inference_ms": 0.07227175000008085},
+      "boundary_only": {"accuracy": 0.0, "wrong": 0.1388888888888889, "null": 0.861111111111111, "boundary_f1": 1.0, "post_boundary_accuracy": 0.0, "rules": 21.666666666666668, "births": 0, "boundaries": 18.333333333333332, "model_bytes": 778.6666666666666, "training_seconds": 0.011373902666666899, "inference_ms": 0.06025397222221408},
+      "rebirth": {"accuracy": 0.0, "wrong": 0.1388888888888889, "null": 0.861111111111111, "boundary_f1": 1.0, "post_boundary_accuracy": 0.0, "rules": 21.666666666666668, "births": 0, "boundaries": 18.333333333333332, "model_bytes": 772.6666666666666, "training_seconds": 0.01129964866666692, "inference_ms": 0.3182602916666808},
+      "shuffle": {"accuracy": 0.0, "wrong": 0.3611111111111111, "null": 0.6388888888888888, "boundary_f1": 0.9821470519144938, "post_boundary_accuracy": 0.0, "rules": 21.666666666666668, "births": 10.333333333333334, "boundaries": 19, "model_bytes": 772.6666666666666, "training_seconds": 0.011396253999999809, "inference_ms": 0.35730168055556377}
+    },
+    "plan": {
+      "one_step": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "boundary_f1": 1.0, "post_boundary_accuracy": 0.0, "rules": 21.666666666666668, "births": 0, "boundaries": 18.333333333333332, "model_bytes": 773.6666666666666, "training_seconds": 0.011483926333333727, "inference_ms": 0.07368538888879388},
+      "boundary_only": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "boundary_f1": 1.0, "post_boundary_accuracy": 0.0, "rules": 21.666666666666668, "births": 0, "boundaries": 18.333333333333332, "model_bytes": 778.6666666666666, "training_seconds": 0.011862336000000084, "inference_ms": 0.06412797222211787},
+      "rebirth": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "boundary_f1": 1.0, "post_boundary_accuracy": 0.0, "rules": 21.666666666666668, "births": 0, "boundaries": 18.333333333333332, "model_bytes": 772.6666666666666, "training_seconds": 0.011797392333332843, "inference_ms": 0.3292462361110064},
+      "shuffle": {"accuracy": 0.0, "wrong": 0.33333333333333337, "null": 0.6666666666666667, "boundary_f1": 0.9821470519144938, "post_boundary_accuracy": 0.0, "rules": 21.666666666666668, "births": 10.333333333333334, "boundaries": 19, "model_bytes": 772.6666666666666, "training_seconds": 0.011609671666661825, "inference_ms": 0.37331172222228776}
+    },
+    "counterfactual": {
+      "one_step": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "boundary_f1": 1.0, "post_boundary_accuracy": 0.0, "rules": 21.666666666666668, "births": 0, "boundaries": 16.333333333333332, "model_bytes": 773.6666666666666, "training_seconds": 0.011728707666667523, "inference_ms": 0.07782133333340052},
+      "boundary_only": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "boundary_f1": 1.0, "post_boundary_accuracy": 0.0, "rules": 21.666666666666668, "births": 0, "boundaries": 16.333333333333332, "model_bytes": 778.6666666666666, "training_seconds": 0.011951925333332744, "inference_ms": 0.06793674999983068},
+      "rebirth": {"accuracy": 0.0, "wrong": 0.0, "null": 1.0, "boundary_f1": 1.0, "post_boundary_accuracy": 0.0, "rules": 21.666666666666668, "births": 0, "boundaries": 16.333333333333332, "model_bytes": 772.6666666666666, "training_seconds": 0.012390749000002662, "inference_ms": 0.32618180555547366},
+      "shuffle": {"accuracy": 0.0, "wrong": 0.1388888888888889, "null": 0.8611111111111112, "boundary_f1": 0.9607673372379255, "post_boundary_accuracy": 0.0, "rules": 21.666666666666668, "births": 20, "boundaries": 17.666666666666668, "model_bytes": 772.6666666666666, "training_seconds": 0.012024944666665741, "inference_ms": 0.35391036111113533}
+    }
+  },
+  "peak_rss_kib_runtime_included": 167244,
+  "estimated_complexity": "induction O(NL^2) capped; online O(TR); residual birth O(kRM)",
+  "final_test_after_future_used_for_standard_ranking": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
