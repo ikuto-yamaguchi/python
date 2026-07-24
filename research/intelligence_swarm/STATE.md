@@ -6,40 +6,41 @@
 
 ## Current stage
 
-- Stage: **S1 Semantic Identity Birth — minimal-witness joint structure identification substage**
+- Stage: **S1 Semantic Identity Birth — episode-local nuisance orbit / raw structural core reconvergence substage**
 - Semantic Identity Gate G1: **未達**
-- Identifiability prerequisite G1a: **bridge 0の完全未知語彙zero-shotは置換対称性により同定不能。最小外部witness後の上限条件では支持**
+- Identifiability prerequisite G1a: **bridge 0の完全未知語彙zero-shotは同定不能。最小外部witness後、oracle構造下およびcharacter-class oracle付きmixed-order上限では支持**
 - Operation/Goal Gate G2: **未達**
-- Causal grounding mainline: **AF-010 Minimal-Witness Joint Segmentation–Arity–Orbit Groundingを優先**
-- AF-009 Intervention-Residual Joint Candidate Birth: **同定可能な観測条件での候補生成補助へ縮小**
+- Causal grounding mainline: **AF-011 Episode-Local Nuisance Orbit with Independently Reconvergent Structural Coreを優先**
+- AF-010 Minimal-Witness Joint Segmentation–Arity–Orbit Grounding: **上位本線として維持し、固定global surface formを禁止**
 - Memory/consolidation mainline: **G1待ち。保存最適化は凍結継続**
 - Integrated intelligence: 未達
 
 ## Maximum upstream bottleneck
 
-PR382〜385により、完全語彙非共有domainへ外部接地witnessを一切与えない場合、語彙と意味の対応は任意置換に対して観測同値であり、chance超えを要求するbenchmark自体が同定不能と確定した。一方、oracle token境界・target/operation factorization・unary arityを与えると、3個のfactor-crossing witnessで576 causal worldsを一意化し、未観測target×operation合成、inverse、conflict検出まで成立した。現在の最大ボトルネックは、**oracle分節・固定因子分解・固定項数を外し、raw Japaneseの分節、対象／操作／関係の因子分解、可変arity、因果mappingを最小の独立外部witness集合から共同同定し、未観測表現・未観測因子組合せへ一般化すること**である。
+PR387〜390により、raw境界と意味orbitは少数witnessで部分同定でき、episode-localな語順orbitを許せばprospective・inverse・repair・counterfactualの上限能力は大幅に回復する一方、全episodeへ単一のprefix/suffix/interleave/reverse形式を強制すると真の因果候補が候補空間から消えることが判明した。しかし最新成功は依然としてopaque対象文字集合、opaque操作文字集合、operation family、arity候補multisetをoracleとして与えており、ActiveとRandomの最終外部能力も同率である。現在の最大ボトルネックは、**表層語順・余剰語・省略・段落構造をepisode-local nuisance orbitとして保持しながら、character-class oracle、operation-family oracle、arity multiset oracleなしで、重複しないwitness集合が同じsegmentation・factorization・arity・argument link・causal mappingの構造核へ独立再収束し、その核だけがheld-out自由日本語と未観測合成でRandom／shuffleを上回ること**である。
 
 ## Cross-track conclusion
 
-1. HF-001〜HF-011の凍結を維持する。
-2. PR382: 8-way opaque lexiconでbridge 0の場合、理論上限はchance 0.125、実測0.1160、観測同値置換pairは720/720。bridge 0 zero-shotは能力試験として同定不能。
-3. PR383: oracle lexical segmentation下では4-way operation orbitを3 witnessで一意化し、prospective・inverse・goal変更・repairが1.0。ただしraw Japanese operation birthではない。
-4. PR384: oracle target/operation factorization下では576 causal worldsを3 factor-crossing witnessで1へ縮約し、未観測組合せのprospective・inverse・compositionが1.0。Randomは2.33 worlds、能力0.5833。
-5. PR385: 重複しない二つの3-witness集合が同じworldへ独立収束し、矛盾取得はversion space空として100%検出。ただしoracle-to-raw gapが残る。
-6. よって、**外部witnessなしの完全未知語彙zero-shotをG1/G2の必須能力とし、その失敗に対して候補型やselectorを増やす**という評価前提をHF-012として凍結する。
-7. S1をminimal-witness joint structure identificationへ遷移し、AF-010を優先本線へ設定する。上限監査の成功は能力進歩へ数えない。
+1. HF-001〜HF-012の凍結を維持する。
+2. PR387: oracle境界なしのraw concatenated commandで、3 witness後のActive prospective/inverseは0.6923、未知語順0.7500。Randomとの差は最大+0.0769で進歩基準未満、残存仮説2.0。
+3. PR388: 全episode共通の一つのsurface formを仮定した27,648候補ではActiveが2/3 seedで真候補を破壊し、prospective 0.2222、Random 0.3819。structure-support failureとdestructive over-pruningが発生。
+4. PR389: surface formをepisode-local nuisance orbitとして周辺化すると真候補生存率1.0、prospective 0.9583、inverse 1.0、repair 0.9531、counterfactual 0.9740へ回復。argument shuffleはforward能力を約0.5へ低下させた。ただしActiveとRandomは完全同率。
+5. PR390: 重複しない二つの5-witness集合がActiveでは3/3 seedで同じunique構造へ再収束し、conflict検出1.0。Randomは各集合単独のunique再収束0.3333だがintersection後のclosed-loop能力はActiveと同等。formal memory eligible unitは0。
+6. よって、**意味単位には全episode共通の単一surface segmentation/order templateが先に存在し、そこへ全例を適合させるべき**という根本前提をHF-013として凍結する。
+7. AF-010を維持しつつ、AF-011を優先実験枠へ昇格する。表層変動を局所orbitとして保留し、独立witnessで再収束する構造核だけをidentity候補とする。
+8. 今回の高精度はcharacter-class／operation-family／arity-multiset oracle付き上限であり、能力進歩、G1/G2、memory eligibilityには数えない。
 
 ## Active assignments
 
-- A: raw Japanese全文の複数segmentation候補を保持し、最小witnessで同じ対象・変数単位へ収束するか検証する
-- B: oracle token境界と固定unary operationを外し、可変arityのoperation/goal候補とlanguage segmentation orbitを共同分割する
-- C: segmentation・factorization・arity・causal mappingを同一version spaceで共同同定し、未観測factor組合せへの反実仮想合成を監査する
-- D: 重複しないwitness集合が同じraw-learned構造へ再収束し、矛盾取得を上書きせず隔離できたunitだけをmemory eligibility候補へ通す
-- E: zero-witness identifiability、oracle segmentation/factorization/arity、calibration-after、domain bridge、best-seed leakageを監査し、benchmarkとstageを管理する
+- A: character classを与えず、raw全文の境界・省略・余剰語・複数段落をepisode-local候補として保持し、独立witnessで同じ対象・変数構造核へ再収束するか検証する
+- B: operation familyとarity multisetを与えず、zero/unary/binary以上の引数構造・goal・argument linkを保守的にbirthし、局所syntax orbit下で未観測合成を維持する
+- C: global parseを要求せず、局所syntax nuisanceを周辺化した共同version spaceで、構造核の因果必要性、object permanence、方向性、counterfactual repairを監査する
+- D: 二つの独立witness集合が同じraw-learned構造核へ再収束し、表層orbitだけが異なる場合に限りmemory eligibility候補へ通す。oracle文字集合・operation familyを使う限り正式資格0とする
+- E: global-template leakage、character-class oracle、operation-family oracle、arity-multiset oracle、calibration-after、best-seed、Active/Random同率を監査し、共通benchmarkを更新する
 
 ## Progress rule
 
-進歩は、bridge 0のzero-shotではなく、事前に固定ontology・対応辞書・token境界・factorization・arityを与えず、learnerが選択した最小外部witness後に、接地へ使っていないtoken・未知語順・複数段落・自由日本語・未観測target×operation／relation組合せで、prospective、inverse、counterfactual repairがCorrect > Random witness / boundary shuffle / arity shuffle / outcome shuffleを各0.10以上、3 seedすべてで示し、重複しない第二witness集合でも同じ構造へ再収束した場合だけ認定する。version-space縮約、oracle条件の1.0、witness数削減、候補数削減は診断である。
+進歩は、bridge 0のzero-shotやoracle上限ではなく、固定ontology・対応辞書・token境界・対象/操作文字集合・operation family・arity multisetを与えず、learnerが選択した最小外部witness後に、接地未使用token、Rename、未知語順、主語省略、複数段落、自由日本語、未観測target×operation／relation組合せでprospective、inverse、counterfactual repairがCorrect > Random witness / global-template control / boundary shuffle / factor shuffle / arity shuffle / argument-link shuffle / outcome shuffleを各0.10以上、3 seedすべてで示し、重複しない第二witness集合でも同じ構造核へ再収束した場合だけ認定する。episode-local surface orbit数、version-space縮約、oracle条件の高精度、witness効率、candidate survivalは診断である。
 
 ## Current status
 
@@ -54,4 +55,4 @@ PR382〜385により、完全語彙非共有domainへ外部接地witnessを一�
 
 ## Last integration
 
-2026-07-24: GOV-009。PR382〜385を統合し、S1をminimal-witness joint structure identification substageへ遷移。bridge 0の完全未知語彙zero-shotを必須能力とする同定不能評価前提をHF-012として凍結し、AF-010 Minimal-Witness Joint Segmentation–Arity–Orbit Groundingを優先本線へ設定。G1/G2およびformal memory eligibilityは未達。
+2026-07-24: GOV-010。PR387〜390を統合し、S1内をepisode-local nuisance orbit / raw structural core reconvergenceへ遷移。全episode共通の単一surface formをsemantic structureの前提とするHF-013を凍結し、AF-011を優先。G1/G2およびformal memory eligibilityは未達。
