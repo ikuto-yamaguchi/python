@@ -11,6 +11,10 @@ This is a living primary-source map, not a novelty claim. Every row records what
 | Ng et al., *CRL from General Environments under Nonparametric Mixing*, AISTATS 2025 | Recovers latent DAG and variables from broader environment changes under nonparametric mixing | Sufficient mechanism-change conditions, including higher-order derivative conditions; latent noise-model assumptions; environment-indexed distributions | No language grounding; the environment partition is supplied rather than induced from raw language and trajectories |
 | Li et al., *On the Identifiability of Causal Abstractions*, AISTATS 2025 | Characterizes the granularity recoverable from arbitrary-subset unknown interventions; exact low-level identity may collapse to an identifiable abstraction | Contrastive pre/post pairs and a family of possible interventions | Direct warning that RQ-001 may only admit abstraction-level recovery; no language alignment |
 | Lee et al., *Beyond Identifiability: Learning Causal Representations with Few Environments and Finite Samples*, arXiv 2026 | Finite-sample recovery of latent graph, mixing representation and unknown multi-node targets with logarithmically many environments in the studied model | Linear/statistical model assumptions and multiple environment distributions | Shrinks the novelty of “unknown targets with few environments”; no raw language or interactive policy semantics |
+| Baumgartner et al., *Disentangling Dynamical Systems: CRL Meets Local Sparse Attention*, CLeaR 2026 | Graphical identifiability criterion for system parameters from raw trajectories up to permutation and diffeomorphism; local state-dependent causal structure can be necessary | Trajectory data, constrained structural variation and local sparse causal structure | Raw-trajectory disentanglement alone is prior art; no raw-language equivalence or instruction semantics |
+| Brouillard et al., *Learning a Spatial Partitioning and its Causal Relations from Temporal Data*, CLeaR 2026 | Jointly identifies a partition of observed temporal variables into latent factors and a causal graph under single-parent decoding | Temporal observations and single-parent decoding structure | Joint partition-plus-graph learning is prior art; no language modality or hidden utterance-target mapping |
+| Benhamza et al., *Identifiable Multimodal CRL under Partial Latent Sharing*, 2026 | Component-wise identifiability for nonlinear multimodal observations with partially shared causal latents | Aligned modalities and partial latent-sharing assumptions | Treating language as a second modality is not enough for novelty; no interactive intervention semantics |
+| Orujlu et al., *Partially Observed Structural Causal Models*, 2026 | Formalizes latent contexts that co-determine interaction structure and mechanisms; gives positive and negative identifiability results across intervention families | Partially observed SCM and context/node/edge intervention hierarchy | Shows context-proxy language can remain non-identifying without context-separating interventions |
 | Schneider et al., *Generative Intervention Models for Causal Perturbation Modeling*, ICML 2025 | Jointly estimates a causal model and maps observed perturbation features to distributions over atomic interventions, including unseen perturbation features | Perturbation features, distributional intervention data and causal-model assumptions | Closest overlap: `language features -> intervention distribution` alone is not novel; raw interactive utterance equivalence without supplied feature semantics remains outside scope |
 | Lin et al., *Isolated Causal Effects of Natural Language*, ICML 2025 | Formal estimation of the causal effect of focal language changes on external outcomes; analyzes omitted-variable bias from non-focal language | Defined focal language intervention, outcome and approximation of non-focal text | Language-as-treatment is prior art; no latent intervention-partition recovery or interactive instruction following |
 | Wu et al., *Identifying Biological Perturbation Targets through Causal Differential Networks*, ICML 2025 | Predicts soft/hard intervention targets from observational/interventional distribution changes | Supervised target labels, observed variables, domain-specific statistical features | Unknown-target prediction itself is not novel; supervision and observed-variable setting differ from raw-language latent partition recovery |
@@ -27,37 +31,40 @@ This is a living primary-source map, not a novelty claim. Every row records what
 | Ueda et al., *J-CRe3*, LREC-COLING / JNLP 2024 | Real-world Japanese crossmodal reference grounding, including predicate-argument and bridging references | Egocentric video, dialogue transcripts and bounding-box reference annotations | Realism audit only; not an intervention/action benchmark |
 | Shelton et al., *PQB-EQA*, ACL 2025 | Balanced paired environments expose language-only guessing | Paired question/environment construction | Useful control principle, not a learning principle |
 
-## Updated conclusion — 2026-07-25
+## Updated conclusion — 2026-07-25 C005
 
-The broad form of RQ-001 is not novel. Unknown intervention-target recovery, nonparametric identifiability, abstraction-level recovery, finite-sample recovery from few environments, perturbation-feature-to-intervention modeling, supervised target prediction, unknown soft-target inference, interactive grounding, language-conditioned dynamics learning and causal estimation of language effects already exist as separate mature lines.
+The broad form of RQ-001 is not novel. Unknown intervention-target recovery, nonparametric identifiability, abstraction-level recovery, finite-sample recovery from few environments, temporal partition-plus-graph learning, raw-trajectory parameter disentanglement, partially shared multimodal CRL, perturbation-feature-to-intervention modeling, supervised target prediction, unknown soft-target inference, interactive grounding, language-conditioned dynamics learning and causal estimation of language effects already exist as mature or rapidly developing lines.
 
-The remaining candidate gap must be split into two claims:
+The surviving candidate must now be stated as a strict *incremental identifiability* claim rather than a generic joint-learning claim:
+
+> On a public benchmark that independently defines mechanism-changing variation, does episode-aligned raw language eliminate equivalence classes that remain under trajectory-only causal representation learning, yielding a strictly finer intervention-supported causal abstraction and improved held-out mechanism prediction under permutation-aware evaluation?
+
+Status: **RQ-001-N4 — narrowed, not adopted.**
+
+This claim is rejected unless the benchmark provides genuine mechanism variation without researcher-authored target slots, the trajectory-only equivalence class is characterized, correct language refines that class beyond context/reward/history controls, and the refinement improves held-out mechanism capability across at least two environment families and seeds 1, 7 and 19.
+
+Gate L and Gate I remain separate:
 
 1. **Gate L — language-specific predictive information:** raw language improves held-out mechanism prediction beyond state, action, history, reward and environment identity under matched shuffles and paraphrase/rename controls.
-2. **Gate I — joint partition identifiability:** conditional on Gate L, utterance equivalence and an intervention partition are recoverable up to joint permutation or the finest intervention-supported causal abstraction.
+2. **Gate I — incremental joint identifiability:** conditional on Gate L, correct episode-aligned language strictly refines the trajectory-only causal equivalence class up to joint permutation or the finest intervention-supported abstraction.
 
-A Gate L result does not imply Gate I. Language may act only as an environment, policy, reward-density or episode-phase proxy. Conversely, CRL identifiability theorems with supplied environment partitions do not establish recovery when those partitions must themselves be inferred from raw trajectories and language.
-
-The only defensible candidate question is now:
-
-> On a fixed public interactive benchmark, does raw language provide predictive information about held-out mechanism changes beyond state, action, history, reward and environment identity; and, conditional on that gain, can an utterance-conditioned intervention partition be recovered up to joint permutation or the finest intervention-supported causal abstraction without target labels, semantic parsers, object slots, pretrained language models or supplied perturbation semantics?
-
-Status: **RQ-001-N3 — narrowed again, not adopted.**
-
-Reject it if any primary source already demonstrates the same two-gate result, if GIM subsumes the operational setting after utterances are treated as perturbation features, if language gain vanishes under environment/reward/history controls, or if SILG/another public benchmark lacks sufficient intervention diversity to define Gate I.
+A Gate L result does not imply Gate I. Language may act only as an environment, policy, reward-density or episode-phase proxy. Generic multimodal component recovery also does not establish interactive utterance-conditioned intervention identity.
 
 ## Consequences for the program
 
 1. “Unknown intervention target” alone is not a contribution after the 2023–2026 CRL results.
 2. `language embedding -> intervention distribution` alone is also not a contribution after GIM.
-3. Predictive language gain is not semantic identifiability; Gate L and Gate I must be reported separately.
-4. Exact variable or utterance-target names are not identifiable under joint latent/language permutation without an observable anchor; evaluation must be permutation- or abstraction-aware.
-5. Exact variable identity may be impossible; abstraction-level recovery must be an allowed theoretical outcome.
-6. Environment-indexed CRL results do not directly solve partition induction from ungrouped interactive trajectories.
-7. SILG/LDD must be reproduced before designing a new model because multi-environment grounding and language-conditioned dynamics are established baselines.
-8. Public reproduction is a scientific requirement, not housekeeping, given the real-system CRL failures reported by Gamella et al.
-9. J-CRe3 remains an external Japanese realism audit rather than the causal benchmark.
-10. No new architecture is authorized until Gate L is operationalized on a reproduced public baseline and Gate I is shown to be well-defined for the chosen benchmark.
+3. `temporal observations -> partition + causal graph` alone is not a contribution after Brouillard et al.
+4. `raw trajectories -> identifiable system parameters` alone is not a contribution after Baumgartner et al.
+5. `language as auxiliary modality -> shared latent recovery` alone is not a contribution after multimodal CRL results.
+6. Predictive language gain is not semantic identifiability; Gate L and Gate I must be reported separately.
+7. Exact variable or utterance-target names are not identifiable under joint latent/language permutation without an observable anchor; evaluation must be permutation- or abstraction-aware.
+8. Exact variable identity may be impossible; abstraction-level recovery must be an allowed theoretical outcome.
+9. Environment-indexed CRL results do not directly solve partition induction from ungrouped interactive trajectories.
+10. SILG/LDD must be reproduced before designing a new model because multi-environment grounding and language-conditioned dynamics are established baselines.
+11. Public reproduction is a scientific requirement, not housekeeping, given the real-system CRL failures reported by Gamella et al.
+12. J-CRe3 remains an external Japanese realism audit rather than the causal benchmark.
+13. No new architecture is authorized until Gate L is operationalized on a reproduced public baseline and a Gate-I-qualified public benchmark is identified.
 
 ## Reproduction facts pinned in this audit
 
@@ -75,6 +82,10 @@ Reject it if any primary source already demonstrates the same two-gate result, i
 - https://proceedings.mlr.press/v258/ng25a.html
 - https://proceedings.mlr.press/v258/li25g.html
 - https://arxiv.org/abs/2603.25796
+- https://proceedings.mlr.press/v323/baumgartner26a.html
+- https://proceedings.mlr.press/v323/brouillard26a.html
+- https://arxiv.org/abs/2605.19135
+- https://arxiv.org/abs/2605.03268
 - https://proceedings.mlr.press/v267/schneider25a.html
 - https://proceedings.mlr.press/v267/lin25k.html
 - https://proceedings.mlr.press/v267/wu25v.html
