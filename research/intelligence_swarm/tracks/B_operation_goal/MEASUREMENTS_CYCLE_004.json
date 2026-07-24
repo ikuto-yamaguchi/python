@@ -1,0 +1,44 @@
+{
+  "track": "B_operation_goal",
+  "cycle": 4,
+  "hypothesis": "Cross-Lexicon Selective Consequence Subspace from Counterfactual Response Consensus",
+  "seeds": [1, 7, 19],
+  "chance": {"joint": 0.03125, "inverse": 0.125, "goal": 0.5},
+  "consensus_channels_mean": 4.666666666666667,
+  "strict_seed_passes": 0,
+  "candidate_count": 32,
+  "model_bytes_per_domain": 7026,
+  "peak_rss_kib_runtime_included": 112888,
+  "estimated_update_ops_per_episode": 1536,
+  "estimated_inference_ops_per_query": 11264,
+  "summary": {
+    "D": {
+      "held": {"correct_joint": 0.041666666666666664, "shuffle_joint": 0.0, "inverse": 0.25, "goal": 0.4166666666666667},
+      "word_order": {"correct_joint": 0.08333333333333333, "shuffle_joint": 0.0, "inverse": 0.125, "goal": 0.8333333333333334},
+      "free": {"correct_joint": 0.08333333333333333, "shuffle_joint": 0.125, "inverse": 0.2916666666666667, "goal": 0.375},
+      "goal_change": {"correct_joint": 0.0, "shuffle_joint": 0.041666666666666664, "inverse": 0.16666666666666666, "goal": 0.625},
+      "repair": {"correct_joint": 0.08333333333333333, "shuffle_joint": 0.0, "inverse": 0.041666666666666664, "goal": 0.7083333333333334}
+    },
+    "E": {
+      "held": {"correct_joint": 0.0, "shuffle_joint": 0.041666666666666664, "inverse": 0.25, "goal": 0.7083333333333334},
+      "word_order": {"correct_joint": 0.08333333333333333, "shuffle_joint": 0.0, "inverse": 0.041666666666666664, "goal": 0.7916666666666666},
+      "free": {"correct_joint": 0.0, "shuffle_joint": 0.125, "inverse": 0.20833333333333334, "goal": 0.6666666666666666},
+      "goal_change": {"correct_joint": 0.08333333333333333, "shuffle_joint": 0.08333333333333333, "inverse": 0.08333333333333333, "goal": 0.5833333333333334},
+      "repair": {"correct_joint": 0.041666666666666664, "shuffle_joint": 0.041666666666666664, "inverse": 0.16666666666666666, "goal": 0.5416666666666666}
+    },
+    "F": {
+      "held": {"correct_joint": 0.125, "shuffle_joint": 0.08333333333333333, "inverse": 0.20833333333333334, "goal": 0.8333333333333334},
+      "word_order": {"correct_joint": 0.041666666666666664, "shuffle_joint": 0.0, "inverse": 0.125, "goal": 0.4583333333333333},
+      "free": {"correct_joint": 0.0, "shuffle_joint": 0.041666666666666664, "inverse": 0.20833333333333334, "goal": 0.625},
+      "goal_change": {"correct_joint": 0.041666666666666664, "shuffle_joint": 0.125, "inverse": 0.16666666666666666, "goal": 0.5833333333333334},
+      "repair": {"correct_joint": 0.041666666666666664, "shuffle_joint": 0.08333333333333333, "inverse": 0.16666666666666666, "goal": 0.5833333333333334}
+    }
+  },
+  "post_treatment_information_used_at_test": false,
+  "shared_lexicon_across_domains": false,
+  "fixed_ontology_or_handwritten_slot_used": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
