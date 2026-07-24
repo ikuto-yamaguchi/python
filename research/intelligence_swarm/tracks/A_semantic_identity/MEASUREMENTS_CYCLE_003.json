@@ -1,0 +1,66 @@
+{
+  "cycle": "A_SEMANTIC_IDENTITY_003",
+  "hypothesis": "Cross-Domain Consequence-Anchored Unit Rebirth from Few Observed Transitions",
+  "seeds": [1, 7, 19],
+  "mean": {
+    "zero_shot": {
+      "held": {"joint": 0.034722222222222224, "target": 0.13194444444444445, "move": 0.2708333333333333},
+      "rename": {"joint": 0.013888888888888888, "target": 0.08333333333333333, "move": 0.21527777777777776},
+      "word_order": {"joint": 0.020833333333333332, "target": 0.08333333333333333, "move": 0.22916666666666666},
+      "omission": {"joint": 0.020833333333333332, "target": 0.0763888888888889, "move": 0.3125},
+      "paragraph": {"joint": 0.034722222222222224, "target": 0.11805555555555555, "move": 0.3402777777777778},
+      "free": {"joint": 0.027777777777777776, "target": 0.07638888888888888, "move": 0.24305555555555555}
+    },
+    "adapted": {
+      "held": {"joint": 0.06944444444444445, "target": 0.19444444444444445, "move": 0.3472222222222222},
+      "rename": {"joint": 0.013888888888888888, "target": 0.0625, "move": 0.20833333333333331},
+      "word_order": {"joint": 0.020833333333333332, "target": 0.09722222222222222, "move": 0.22222222222222224},
+      "omission": {"joint": 0.04166666666666667, "target": 0.1388888888888889, "move": 0.3611111111111111},
+      "paragraph": {"joint": 0.08333333333333333, "target": 0.2222222222222222, "move": 0.375},
+      "free": {"joint": 0.04861111111111111, "target": 0.1111111111111111, "move": 0.3055555555555556}
+    },
+    "shuffled": {
+      "held": {"joint": 0.034722222222222224, "target": 0.10416666666666666, "move": 0.2777777777777778},
+      "rename": {"joint": 0.013888888888888888, "target": 0.10416666666666666, "move": 0.20833333333333331},
+      "word_order": {"joint": 0.034722222222222224, "target": 0.08333333333333333, "move": 0.2847222222222222},
+      "omission": {"joint": 0.006944444444444444, "target": 0.08333333333333333, "move": 0.20833333333333334},
+      "paragraph": {"joint": 0.041666666666666664, "target": 0.13194444444444445, "move": 0.3194444444444444},
+      "free": {"joint": 0.020833333333333332, "target": 0.06944444444444445, "move": 0.22222222222222224}
+    },
+    "inverse": {"adapted": 0.25, "shuffled": 0.24305555555555555},
+    "second_domain": {"correct": 0.013888888888888888, "shuffled": 0.006944444444444444},
+    "dose": {
+      "0": {"joint": 0.034722222222222224, "target": 0.13194444444444445, "move": 0.2708333333333333},
+      "1": {"joint": 0.06944444444444445, "target": 0.19444444444444445, "move": 0.3472222222222222},
+      "2": {"joint": 0.08333333333333333, "target": 0.16666666666666669, "move": 0.3263888888888889},
+      "4": {"joint": 0.06944444444444445, "target": 0.1597222222222222, "move": 0.375}
+    }
+  },
+  "chance": {"joint": 0.03125, "target": 0.125, "move": 0.25, "inverse": 0.25},
+  "paired_held_joint_gap": {"mean": 0.034722222222222224, "min": 0.0, "positive_seeds": 2},
+  "resources": {
+    "matrix_bytes_float32_estimate": 65536,
+    "adaptation_records_per_domain": 16,
+    "training_seconds_total": 9.196681130999877,
+    "peak_rss_kib_python_runtime_included": 113036,
+    "update_ops_estimate_per_episode": 16384,
+    "inference_ops_estimate_per_option": 16384,
+    "options_per_query": 32,
+    "complexity": {"update": "O(TC)", "query": "O(KTC)"}
+  },
+  "leakage_audit": {
+    "post_treatment_observation_used_at_test": false,
+    "observed_transition_used_only_in_adaptation": true,
+    "final_test_outcome_used_for_training": false,
+    "shared_domain_dictionary_used": false,
+    "shared_identity_used": false,
+    "span_boundaries_generated": false,
+    "string_retrieval_used": false,
+    "external_llm_used": false
+  },
+  "per_seed_summary": [
+    {"seed": 1, "held_correct_joint": 0.041666666666666664, "held_shuffle_joint": 0.020833333333333332, "free_correct_joint": 0.020833333333333332, "free_shuffle_joint": 0.020833333333333332, "inverse_correct": 0.1875, "inverse_shuffle": 0.20833333333333334, "second_domain_correct_joint": 0.0, "second_domain_shuffle_joint": 0.0},
+    {"seed": 7, "held_correct_joint": 0.0, "held_shuffle_joint": 0.0, "free_correct_joint": 0.0, "free_shuffle_joint": 0.0, "inverse_correct": 0.3958333333333333, "inverse_shuffle": 0.3541666666666667, "second_domain_correct_joint": 0.0, "second_domain_shuffle_joint": 0.0},
+    {"seed": 19, "held_correct_joint": 0.16666666666666666, "held_shuffle_joint": 0.08333333333333333, "free_correct_joint": 0.125, "free_shuffle_joint": 0.041666666666666664, "inverse_correct": 0.16666666666666666, "inverse_shuffle": 0.16666666666666666, "second_domain_correct_joint": 0.041666666666666664, "second_domain_shuffle_joint": 0.020833333333333332}
+  ]
+}
