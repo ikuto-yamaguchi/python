@@ -24,7 +24,7 @@
 - 固定初期instance matched評価経路: **1件（engineering smoke）**
 - 学習済み公開能力baseline再現: **0件**
 - R0.2公開trajectory offline診断: **1件（比較不適格）**
-- R0.3 intervention-target ablation: **未開始**
+- R0.3 intervention-target ablation: **未開始・SILGでは実施禁止**
 - J-CRe3日本語外部監査: **未再現**
 
 公開能力baselineとmatched controlsがevaluation contractを通るまで、新規機構族・知能原理・能力進歩を認定しない。
@@ -105,17 +105,21 @@ Representation modelを調整する前に、32,768-frame以上のsource policy t
 SILG/RTFMはground-truth latent intervention family、target、mechanism pre/post operator、causal abstractionを定義しないため、Gate Iの直接benchmarkとしては棄却した。
 
 - **Gate L — 継続・未達:** raw languageがstate/action/history/environment identityを超える外部能力を持つか、competent public policyとmatched controlsで測る。
-- **Gate I — 保留:** 明示的mechanism variation、ground-truth intervention familyまたは理論的causal abstraction、held-out mechanism、permutation-aware評価を持つ公開benchmarkが見つかるまで開始しない。
+- **Gate I — audited public benchmarkでは利用不能:** SILG/RTFM、J-CRe3、CausalTriplet、ACCESS、MIBのいずれも、episode-aligned raw language、interactive trajectory、独立に定義されたmechanism variation、正当化されたtarget/abstraction、held-out mechanism splitを同時に持たない。
 
-現在の候補は **RQ-001-N4 — narrowed, not adopted**:
+現在の候補は **RQ-001-N5 — narrowed, not adopted; empirical track blocked**:
 
-> 独立にmechanism-changing variationを定義する公開benchmark上で、episode-aligned raw languageがtrajectory-only CRLに残る同値類を除去し、より細かいintervention-supported causal abstractionとheld-out mechanism予測改善を生むか。
+> 独立にmechanism-changing variationを定義する公開benchmark上で、episode-aligned raw languageが完全な非言語trajectoryを条件とした後にもmechanism情報を持ち、trajectory-only CRLに残る同値類を厳密に細分化し、held-out mechanism能力を改善するか。
 
-未知介入target回復、unknown multi-node intervention、general-environment nonparametric CRL、subset-intervention causal abstraction、temporal partition＋causal graph、multimodal partial-sharing identifiability、language-dynamics pretraining、environment-first instruction followingは単独では既存範囲であり、新規性にならない。
+必要条件は `I(M; L | X) > 0`。ここで`X`はstate、action、history、reward、time、policy phase、environment identityを含む。`M ⟂ L | X`なら`p(M|X,L)=p(M|X)`であり、architectureに関係なく言語はtrajectory-only同値類を細分化できない。
+
+未知介入target回復、unknown multi-node intervention、general-environment nonparametric CRL、subset-intervention causal abstraction、temporal partition＋causal graph、multimodal partial-sharing identifiability、perturbation-feature-to-intervention modeling、causal sufficiency/necessity、language-dynamics pretraining、environment-first instruction followingは単独では既存範囲であり、新規性にならない。
+
+適格benchmarkがnovelty audit完了までに見つからなければ、empirical Gate Iを正式に閉じ、明示的な観測・介入仮定を持つtheory-onlyの不可能性または十分条件へ限定する。
 
 ## Current maximum bottleneck
 
-**32,768-frame段階実験のartifactを確定し、competenceとtrajectory eligibilityを監査すること。適格なら一つのimmutable `rtfm_test_s1-v0` JSONLを固定し、Correct / Random / Language-blind / State-only / Environment-ID-only / Language-shuffle / Outcome-or-transition-shuffleを同一snapshotで実行し、全prediction・checksum・資源量をevaluation contractへ通す。不適格なら表現モデルを触らず、source policyの学習予算または公式再現条件だけを修正する。**
+**R0.1では32,768-frame段階実験のartifactを確定し、competenceとtrajectory eligibilityを監査する。因果研究Cでは、researcher-authored target slotなしにGate Iを評価できる公開mechanism-change benchmarkが存在するかを最終監査する。見つからなければempirical Gate Iを閉じ、中心命題をtheory-onlyへ事前登録する。**
 
 ## Stage-transition rule
 
@@ -144,4 +148,4 @@ SILG/RTFMはground-truth latent intervention family、target、mechanism pre/pos
 
 ## Last integration
 
-2026-07-25: **RESET-E012**。R0.1の32,768-frame段階実験を結果待ちとして分離し、旧R0.2 trajectoryをeligibility不合格として正式統合。C005のRQ-001-N4、D009のsnapshot proof・instance paired statisticsを反映し、R0継続・段階遷移なしを決定。
+2026-07-25: **C006**。Gate-Iの必要条件を`I(M;L|X)>0`として明文化し、SILG/RTFM、J-CRe3、CausalTriplet、ACCESS、MIBを公開benchmark資格監査した。適格benchmarkは0件。RQ-001-N5へ狭義化し、empirical Gate Iをbenchmark unavailableとして保留、研究者手書きtargetの追加を禁止した。
