@@ -27,9 +27,11 @@ git -C "$ROOT/silg" checkout --detach "$SILG_SHA"
 # preserves the pre-Torch-2 execution assumptions of the 2021 code.
 python -m pip install --extra-index-url https://download.pytorch.org/whl/cpu \
   'torch==1.13.1+cpu' 'torchvision==0.14.1+cpu'
+# expman 0.0.7's source distribution omits requirements.txt and cannot build.
+# 0.0.5 is the nearest public release with an installable wheel.
 python -m pip install \
   'gym==0.21.0' 'py-getch==1.0.1' 'pyyaml==6.0.1' \
-  'submitit==1.4.5' 'expman==0.0.7' \
+  'submitit==1.4.5' 'expman==0.0.5' \
   'vocab>=0.0.4' 'embeddings>=0.0.7' 'revtok>=0.0.3'
 python -m pip install --no-deps -e "$ROOT/RTFM"
 python -m pip install --no-deps -e "$ROOT/silg"
