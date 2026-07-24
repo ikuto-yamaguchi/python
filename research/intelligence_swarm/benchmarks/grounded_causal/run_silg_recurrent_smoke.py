@@ -119,9 +119,10 @@ def run_seed(root: Path, output_dir: Path, seed: int, frames: int) -> dict[str, 
 
 def inspect_model(root: Path, output_dir: Path) -> dict[str, Any]:
     code = r'''
-import json, sys, torch
+import json, os, sys, time, torch
 sys.path.insert(0, sys.argv[1])
 import exp_utils
+from silg import envs as _registered_envs
 from model.multi import Model
 flags = exp_utils.get_parser().parse_args([])
 flags.env = "silg:rtfm_train_s1-v0"
@@ -129,12 +130,33 @@ flags.val_env = "silg:rtfm_test_s1-v0"
 flags.model = "multi"
 flags.disable_cuda = True
 env = Model.create_env(flags)
-model = Model.make(flags, env)
+model = Model.make(flags, env).eval()
 params = sum(p.numel() for p in model.parameters())
 trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
 path = sys.argv[2]
 torch.save(model.state_dict(), path)
-print(json.dumps({"parameters": params, "trainable_parameters": trainable, "state_dict_bytes": __import__('os').path.getsize(path)}))
+# Audit CPU forward latency on the real public observation schema.
+obs = env.reset()
+batch = {k: torch.as_tensor(v).unsqueeze(0).unsqueeze(0) for k, v in obs.items()}
+batch.update({
+    "reward": torch.zeros(1, 1),
+    "done": torch.zeros(1, 1, dtype=torch.bool),
+    "episode_return": torch.zeros(1, 1),
+    "episode_step": torch.zeros(1, 1, dtype=torch.int32),
+    "last_action": torch.zeros(1, 1, dtype=torch.int64),
+})
+state = model.initial_state(batch_size=1)
+with torch.no_grad():
+    for _ in range(10): model(batch, state)
+    t0 = time.perf_counter_ns()
+    for _ in range(100): model(batch, state)
+    latency_ms = (time.perf_counter_ns() - t0) / 100 / 1e6
+print(json.dumps({
+    "parameters": params,
+    "trainable_parameters": trainable,
+    "state_dict_bytes": os.path.getsize(path),
+    "cpu_forward_latency_ms_per_step": latency_ms,
+}))
 env.close()
 '''
     model_path = output_dir / "SILG_RTFM_MULTI_UNTRAINED_STATE_DICT.pt"
