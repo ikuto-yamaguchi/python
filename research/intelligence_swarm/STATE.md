@@ -51,12 +51,29 @@ The broad `language features -> intervention distribution` formulation is not no
 
 ## Pinned reproduction facts
 
-- SILG: PyPI `silg==0.0.1`、2021-10-20公開、Python `>=3.7.10`、MIT。
-- Public SILG code URLs expose commit `2af07578e1264029a240fcfb78d4ac0aea16f5de`。
-- Official requirements are only partly pinned: `gym>=0.15.4`, `torch`, `torchvision`, `pyyaml`, `expman`, `submitit`; exact pin is `py-getch==1.0.1`。
-- SILGは個別環境の導入、依存install、environment data取得が必要。初回対象はRTFMに限定する。
-- Official experiment entrypoint: `run_exp.py` / `launch.py`; learner sets `OMP_NUM_THREADS=1` and uses V-trace actor-learner training。
+- SILG: `silg==0.0.1`、Python `>=3.7.10`、MIT。
+- Target SILG commit: `2af07578e1264029a240fcfb78d4ac0aea16f5de`。
+- Official requirements are partly unpinned: `gym>=0.15.4`, `torch`, `torchvision`, `pyyaml`, `expman`, `submitit`; exact pin is `py-getch==1.0.1`。
+- Reference container: `pytorch/pytorch:1.9.0-cuda10.2-cudnn7-runtime`。
+- SILGは個別環境の導入、依存install、environment data取得が必要。初回対象はRTFM S1に限定する。
+- Official experiment entrypoint: `run_exp.py`; local launch: `OMP_NUM_THREADS=1 python launch.py --local --envs rtfm`。
+- RTFM registers `rtfm_train_s1..s4-v0` and `rtfm_test_s1..s4-v0`。
+- Default S1 observation contains `name/name_len`, `text/text_len`, `wiki/wiki_len`, `task/task_len`, `inv/inv_len`, `valid`, `rel_pos`, `pos`。
+- Default action space is five actions: stay/up/down/left/right; grid 6×6; max steps 80。
 - J-CRe3は日本語realism auditであり、R0.1の因果・行為baselineの代替ではない。
+
+## R0.1 cycle 007 result
+
+公式README、requirements、setup、Dockerfile、RTFM wrapperを監査し、固定manifest、deterministic bootstrap、実行失敗ログをcanonical branchへ追加した。
+
+- `SILG_RTFM_MANIFEST_R01_007.json`
+- `bootstrap_silg_rtfm_r01.sh`
+- `SILG_INSTALL_ATTEMPT_R01_007.log`
+- `REPORT_R01_CYCLE_007.md`
+
+実行sandboxで `git clone https://github.com/vzhong/silg.git /tmp/silg` を再試行したが、`Could not resolve host: github.com` でsource acquisition前に停止した。失敗分類は `initial_public_environment_installation_failure`。モデル構築・学習・公開task評価には到達していないため、性能値は存在しない。
+
+次の最小修正は、outbound DNSを持つUbuntu x86_64環境でbootstrap scriptを実行し、resolved `pip freeze` とcommit SHAを保存した後、同一S1 episode・seed 1/7/19でofficial recurrent、random-valid-action、language-blind、state-only、language-shuffleを比較すること。
 
 ## R0.2 cycle 001 result
 
@@ -75,9 +92,7 @@ Synthetic fixtureでseed 1/7/19のpipeline smoke testを完了したが、これ
 
 **公開baselineの実行値がまだ1件もない。**
 
-実行sandboxは外部DNSを解決できず、GitHub cloneとACL software archive downloadが失敗した。SILG/RTFM環境、environment data、互換Python 3.7/3.8 runtimeが存在しない。分類は `initial_public_environment_installation_failure`。
-
-次の有効作業は、公式DockerまたはUbuntu x86_64でSILG commitとRTFM環境を固定し、公式shared recurrent baselineを実行した後、同一trajectory・seed 1/7/19でenvironment-first、end-to-end、random、language-blind、state-only、history-only、language-shuffle、transition-shuffleを測定すること。
+実行sandboxは外部DNSを解決できず、GitHub cloneとenvironment data downloadが失敗する。SILG/RTFM環境、environment data、互換Python runtimeが存在しない。connector経由では公式ソースの監査はできるが、実行可能なrepository tree・依存package・データをruntimeへ展開できない。
 
 ## Progress rule
 
@@ -96,4 +111,4 @@ R0の進歩は、公開baselineの再現成功、同一benchmark・同一split�
 
 ## Last integration
 
-2026-07-24: **C-AUDIT-002**。GIM等の重複監査、joint latent/language permutation no-go、permutation-aware評価条件を追加。RQ-001をRQ-001-N2へさらに狭義化。公開baseline再現は0件のためR0継続、新規性・能力進歩の主張なし。
+2026-07-24: **R01-007**。SILG/RTFMの公式依存・split・observation/action schemaを固定し、deterministic bootstrapと再現可能なDNS失敗ログを追加。公開baseline再現は0件のためR0継続、新規性・能力進歩の主張なし。
