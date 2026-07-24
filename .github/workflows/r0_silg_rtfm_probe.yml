@@ -28,7 +28,7 @@ on:
 jobs:
   rtfm-public-probe:
     runs-on: ubuntu-22.04
-    timeout-minutes: 90
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
 
@@ -65,17 +65,17 @@ jobs:
             --output research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_RANDOM_CANONICAL_3SEED.json \
             2>&1 | tee research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_RANDOM_CANONICAL.log
 
-      - name: Run official multi recurrent training smoke and persist checkpoints
+      - name: Run official multi recurrent staged training and persist checkpoints
         run: |
           set -o pipefail
           /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py \
             --silg-root "$RUNNER_TEMP/r0_silg/silg" \
             --seeds 1 7 19 \
-            --frames 2048 \
+            --frames 32768 \
             --output research/intelligence_swarm/benchmarks/grounded_causal/results \
             2>&1 | tee research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_RECURRENT_SMOKE.log
 
-      - name: Evaluate recurrent and matched random/language-blind/state-only controls
+      - name: Evaluate recurrent and matched random/language-blind/state-only/language-shuffle controls
         run: |
           set -o pipefail
           /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/run_silg_matched_eval.py \
