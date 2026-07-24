@@ -1,0 +1,73 @@
+{
+  "cycle": "D_MEMORY_ELIGIBILITY_005",
+  "hypothesis": "Cross-Lexicon Consensus Eligibility from Shared Selective Lesion Signatures",
+  "seeds": [1, 7, 19],
+  "chance": {"joint": 0.015625, "target": 0.125, "move": 0.25, "goal": 0.5, "inverse": 0.125},
+  "mean": {
+    "d1": {
+      "held": {"correct_joint": 0.1597222222, "shuffle_joint": 0.0347222222},
+      "rename": {"correct_joint": 0.15625, "shuffle_joint": 0.0347222222},
+      "word_order": {"correct_joint": 0.1076388889, "shuffle_joint": 0.0520833333},
+      "omission": {"correct_joint": 0.1111111111, "shuffle_joint": 0.0173611111},
+      "free": {"correct_joint": 0.1875, "shuffle_joint": 0.03125},
+      "inverse": {"correct": 0.2777777778, "shuffle": 0.1284722222},
+      "lesion_drop": {"identity": 0.0347222222, "operation": 0.1041666667, "goal": 0.0555555556}
+    },
+    "d2": {
+      "held": {"correct_joint": 0.1597222222, "shuffle_joint": 0.0347222222},
+      "rename": {"correct_joint": 0.1458333333, "shuffle_joint": 0.0208333333},
+      "word_order": {"correct_joint": 0.03125, "shuffle_joint": 0.0104166667},
+      "omission": {"correct_joint": 0.1284722222, "shuffle_joint": 0.0347222222},
+      "free": {"correct_joint": 0.0763888889, "shuffle_joint": 0.0208333333},
+      "inverse": {"correct": 0.2673611111, "shuffle": 0.1319444444},
+      "lesion_drop": {"identity": 0.0659722222, "operation": 0.1006944444, "goal": 0.1006944444}
+    },
+    "d3": {
+      "held": {"correct_joint": 0.1354166667, "shuffle_joint": 0.0347222222},
+      "rename": {"correct_joint": 0.1354166667, "shuffle_joint": 0.0208333333},
+      "word_order": {"correct_joint": 0.1284722222, "shuffle_joint": 0.0208333333},
+      "omission": {"correct_joint": 0.2326388889, "shuffle_joint": 0.0416666667},
+      "free": {"correct_joint": 0.2430555556, "shuffle_joint": 0.0347222222},
+      "inverse": {"correct": 0.3159722222, "shuffle": 0.1180555556},
+      "lesion_drop": {"identity": 0.0416666667, "operation": 0.0659722222, "goal": 0.0}
+    }
+  },
+  "per_seed_eligibility": [
+    {"seed": 1, "domain_pass": {"d1": false, "d2": false, "d3": false}, "lesion_signs": {"identity": [1,1,0], "operation": [1,1,1], "goal": [1,1,-1]}},
+    {"seed": 7, "domain_pass": {"d1": false, "d2": false, "d3": false}, "lesion_signs": {"identity": [1,1,-1], "operation": [1,1,-1], "goal": [1,1,1]}},
+    {"seed": 19, "domain_pass": {"d1": false, "d2": false, "d3": false}, "lesion_signs": {"identity": [-1,1,1], "operation": [1,1,1], "goal": [1,1,-1]}}
+  ],
+  "strict_gate_pass_seeds": 0,
+  "resources": {
+    "matrix_bytes_per_domain": 98304,
+    "three_domain_matrix_bytes": 294912,
+    "runtime_seconds_total": 14.172304883,
+    "peak_rss_kib_python_runtime_included": 161940,
+    "update_ops_estimate_per_episode": 24576,
+    "inference_ops_estimate_per_option": 24576,
+    "options_per_query": 64
+  },
+  "leakage_audit": {
+    "post_treatment_used_at_test": false,
+    "test_outcome_used_for_training": false,
+    "shared_content_lexicon_across_domains": false,
+    "shared_domain_dictionary": false,
+    "shared_object_id": false,
+    "span_proposals": false,
+    "string_retrieval": false,
+    "rag": false,
+    "external_llm": false
+  },
+  "status": {
+    "g1_passed": false,
+    "g2_passed": false,
+    "memory_eligibility_passed": false,
+    "retention_mainline_enabled": false,
+    "progress_recognized": false,
+    "failure_class": "initial_semantics_failure",
+    "highschool_level_passed": false,
+    "native_japanese_communication_passed": false,
+    "weak_smartphone_verified": false,
+    "completion": false
+  }
+}
