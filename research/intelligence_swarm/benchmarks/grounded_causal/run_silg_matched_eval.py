@@ -3,11 +3,11 @@
 on independently seeded, identical RTFM test episodes.
 
 This is an evaluation harness, not a new architecture. `correct` uses the
-unaltered official model. Ablations only mask declared observation fields at
-inference time and never expose future state, reward, or completed trajectory.
-Each episode is created in a fresh environment from a fixed episode seed, so
-all methods receive exactly the same initial benchmark instance even when their
-trajectories and episode lengths diverge.
+unaltered official model. Ablations only mask or permute declared observation
+fields at inference time and never expose future state, reward, or completed
+trajectory. Each episode is created in a fresh environment from a fixed episode
+seed, so all methods receive exactly the same initial benchmark instance even
+when their trajectories and episode lengths diverge.
 """
 from __future__ import annotations
 
@@ -25,9 +25,9 @@ from typing import Any
 import numpy as np
 import torch
 
-METHODS = ("correct", "random", "language_blind", "state_only")
-LANGUAGE_FIELDS = ("wiki", "task")
-STATE_TEXT_FIELDS = ("wiki", "task", "inv", "name")
+METHODS = ("correct", "random", "language_blind", "state_only", "language_shuffle")
+LANGUAGE_FIELDS = ("wiki", "wiki_len", "task", "task_len")
+STATE_TEXT_FIELDS = LANGUAGE_FIELDS + ("inv", "inv_len", "name", "name_len")
 
 
 def stable_tensor_hash(obs: dict[str, torch.Tensor]) -> str:
@@ -49,18 +49,52 @@ def sha256(path: Path) -> str:
     return h.hexdigest()
 
 
-def mask_observation(obs: dict[str, torch.Tensor], method: str) -> dict[str, torch.Tensor]:
+def transform_observation(
+    obs: dict[str, torch.Tensor],
+    method: str,
+    donor_language: dict[str, torch.Tensor] | None = None,
+) -> dict[str, torch.Tensor]:
     out = {key: value.clone() for key, value in obs.items()}
     if method == "language_blind":
-        fields = LANGUAGE_FIELDS
+        for key in LANGUAGE_FIELDS:
+            if key in out:
+                out[key].zero_()
     elif method == "state_only":
-        fields = STATE_TEXT_FIELDS
-    else:
-        fields = ()
-    for key in fields:
-        if key in out:
-            out[key].zero_()
+        for key in STATE_TEXT_FIELDS:
+            if key in out:
+                out[key].zero_()
+    elif method == "language_shuffle":
+        if donor_language is None:
+            raise ValueError("language_shuffle requires a donor observation")
+        for key in LANGUAGE_FIELDS:
+            if key in out and key in donor_language:
+                if out[key].shape != donor_language[key].shape:
+                    raise ValueError(f"language donor shape mismatch for {key}")
+                out[key].copy_(donor_language[key])
     return out
+
+
+def capture_language_donors(Model: Any, flags: Any, seed: int, episodes: int) -> tuple[list[dict[str, torch.Tensor]], list[int]]:
+    donors: list[dict[str, torch.Tensor]] = []
+    donor_seeds: list[int] = []
+    for episode in range(episodes):
+        donor_episode = (episode + 1) % episodes
+        donor_seed = seed * 1_000_003 + donor_episode
+        random.seed(donor_seed)
+        np.random.seed(donor_seed)
+        torch.manual_seed(donor_seed)
+        gym_env = Model.create_env(flags)
+        gym_env.seed(donor_seed)
+        raw = gym_env.reset()
+        donor = {
+            key: torch.as_tensor(raw[key]).unsqueeze(0).unsqueeze(0).clone()
+            for key in LANGUAGE_FIELDS
+            if key in raw
+        }
+        donors.append(donor)
+        donor_seeds.append(donor_seed)
+        gym_env.close()
+    return donors, donor_seeds
 
 
 def run_method(root: Path, checkpoint: Path, seed: int, method: str, episodes: int) -> dict[str, Any]:
@@ -82,12 +116,18 @@ def run_method(root: Path, checkpoint: Path, seed: int, method: str, episodes: i
     template_env.close()
     model.load_state_dict(torch.load(str(checkpoint), map_location="cpu"))
 
+    donor_languages: list[dict[str, torch.Tensor]] = []
+    donor_seeds: list[int] = []
+    if method == "language_shuffle":
+        donor_languages, donor_seeds = capture_language_donors(Model, flags, seed, episodes)
+
     returns: list[float] = []
     wins: list[float] = []
     lengths: list[int] = []
     fingerprints: list[str] = []
     episode_seeds: list[int] = []
     inference_ns: list[int] = []
+    episode_records: list[dict[str, Any]] = []
     started = time.perf_counter()
 
     for episode in range(episodes):
@@ -101,11 +141,13 @@ def run_method(root: Path, checkpoint: Path, seed: int, method: str, episodes: i
         gym_env.seed(episode_seed)
         env = environment.Environment(gym_env)
         observation = env.initial()
-        fingerprints.append(stable_tensor_hash(observation))
+        fingerprint = stable_tensor_hash(observation)
+        fingerprints.append(fingerprint)
         agent_state = model.initial_state(batch_size=1)
         done = False
         steps = 0
         rng = random.Random(episode_seed)
+        donor = donor_languages[episode] if donor_languages else None
 
         while not done:
             if method == "random":
@@ -114,7 +156,7 @@ def run_method(root: Path, checkpoint: Path, seed: int, method: str, episodes: i
                 action = torch.tensor([[rng.choice(valid)]], dtype=torch.int64)
                 inference_ns.append(time.perf_counter_ns() - t0)
             else:
-                model_obs = mask_observation(observation, method)
+                model_obs = transform_observation(observation, method, donor)
                 t0 = time.perf_counter_ns()
                 with torch.no_grad():
                     output, agent_state = model(model_obs, agent_state)
@@ -124,9 +166,20 @@ def run_method(root: Path, checkpoint: Path, seed: int, method: str, episodes: i
             steps += 1
             done = bool(observation["done"].item())
 
-        returns.append(float(observation["episode_return"].item()))
-        wins.append(float(observation["reward"][0][0].item() > 0.5))
+        episode_return = float(observation["episode_return"].item())
+        win = float(observation["reward"][0][0].item() > 0.5)
+        returns.append(episode_return)
+        wins.append(win)
         lengths.append(steps)
+        episode_records.append({
+            "episode_index": episode,
+            "episode_seed": episode_seed,
+            "initial_instance_fingerprint": fingerprint,
+            "language_donor_seed": donor_seeds[episode] if donor_seeds else None,
+            "win": win,
+            "return": episode_return,
+            "length": steps,
+        })
         env.close()
 
     return {
@@ -140,7 +193,34 @@ def run_method(root: Path, checkpoint: Path, seed: int, method: str, episodes: i
         "wall_seconds": time.perf_counter() - started,
         "cpu_inference_ms_per_step": statistics.fmean(inference_ns) / 1e6,
         "initial_instance_fingerprints": fingerprints,
+        "episode_records": episode_records,
     }
+
+
+def paired_episode_gaps(runs: list[dict[str, Any]]) -> dict[str, dict[str, float]]:
+    indexed: dict[str, dict[tuple[int, int], dict[str, Any]]] = {}
+    for run in runs:
+        indexed[run["method"]] = {
+            (int(run["seed"]), int(record["episode_seed"])): record
+            for record in run["episode_records"]
+        }
+    correct = indexed["correct"]
+    out: dict[str, dict[str, float]] = {}
+    for control in METHODS:
+        if control == "correct":
+            continue
+        keys = sorted(correct.keys() & indexed[control].keys())
+        return_diffs = [float(correct[key]["return"]) - float(indexed[control][key]["return"]) for key in keys]
+        win_diffs = [float(correct[key]["win"]) - float(indexed[control][key]["win"]) for key in keys]
+        out[control] = {
+            "paired_episodes": len(keys),
+            "return_mean_gap": statistics.fmean(return_diffs),
+            "return_min_gap": min(return_diffs),
+            "return_positive_fraction": sum(x > 0 for x in return_diffs) / len(return_diffs),
+            "win_rate_mean_gap": statistics.fmean(win_diffs),
+            "win_positive_fraction": sum(x > 0 for x in win_diffs) / len(win_diffs),
+        }
+    return out
 
 
 def main() -> None:
@@ -186,7 +266,7 @@ def main() -> None:
 
     payload = {
         "status": "success",
-        "classification": "matched_fixed_episode_smoke_not_full_paper_reproduction",
+        "classification": "matched_fixed_episode_staged_training_not_full_paper_reproduction",
         "environment": "silg:rtfm_test_s1-v0",
         "source_pins": {
             "silg": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
@@ -197,8 +277,15 @@ def main() -> None:
         "methods": list(METHODS),
         "runs": runs,
         "aggregate": aggregate,
+        "paired_episode_gaps_vs_correct": paired_episode_gaps(runs),
         "same_initial_instance_stream": consistency,
         "all_initial_streams_match": all(all(values.values()) for values in consistency.values()),
+        "language_shuffle_protocol": {
+            "type": "within-seed cyclic episode permutation",
+            "fields": list(LANGUAGE_FIELDS),
+            "donor_episode": "(episode_index + 1) mod episodes",
+            "state_and_valid_actions_unchanged": True,
+        },
         "checkpoints": {
             str(seed): {
                 "bytes": (args.results / f"SILG_RTFM_TRAINED_STATE_SEED_{seed}.pt").stat().st_size,
