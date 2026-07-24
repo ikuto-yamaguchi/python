@@ -1,29 +1,29 @@
 # Intelligence Swarm Backlog
 
-## P0 — Resolve the 32,768-frame SILG run
+## P0 — Resolve corrected 32,768-frame SILG evaluation
 
-Current status: **submitted / result not yet integrated**.
+Current status: **corrected workflow in progress; no capability result integrated**.
 
 Only authorized actions:
 
-1. obtain the completed GitHub Actions artifact for seeds `1,7,19`;
-2. verify checkpoint, model, data and raw-log SHA-256;
-3. record frames, model bytes, training wall time, peak RSS and CPU inference latency;
-4. verify Correct / Random / Language-blind / State-only / Language-shuffle share all initial-instance fingerprints;
-5. evaluate episode-level paired gaps;
-6. run the trajectory-eligibility audit.
+1. obtain the completed artifact for seeds `1,7,19`;
+2. verify checkpoint, model, source, data and raw-log SHA-256;
+3. record actual frames, model bytes, training wall time, peak RSS and CPU inference latency;
+4. verify Correct / Random / Language-blind / State-only / Language-shuffle share every initial-instance fingerprint;
+5. compute episode-level win, return and length paired gaps;
+6. run source-trajectory competence and anti-collapse eligibility audits.
 
 Decision:
 
-- if policy competence and trajectory eligibility improve, proceed to immutable matched evaluation;
-- if not, increase or repair only the official recurrent training budget/reproduction condition;
-- do not tune Environment-first, invent a new architecture or claim language irrelevance from a collapsed policy.
+- if policy competence and trajectory eligibility pass, freeze one immutable public test set and proceed to strict matched evaluation;
+- if they fail, change only the official recurrent training budget or reproduction condition;
+- do not tune Environment-first, add a new architecture or infer that language is irrelevant from a failed policy.
 
 ## P0 — Immutable R0.1 public capability evaluation
 
-R0.1 completes only when one serialized `rtfm_test_s1-v0` evaluation set is frozen for seeds `1,7,19` and every method consumes that exact snapshot.
+R0.1 completes only when one serialized `rtfm_test_s1-v0` set is frozen for seeds `1,7,19` and every method consumes that exact snapshot.
 
-Required methods:
+Required controls:
 
 - official recurrent Correct
 - random valid action
@@ -31,39 +31,40 @@ Required methods:
 - state-only
 - environment-ID-only
 - within-environment language shuffle
-- outcome or transition shuffle
+- transition or outcome shuffle
 - target-label shuffle only if a non-oracle operational proxy exists
 
 Required outputs:
 
-- per-instance prediction JSONL
-- mandatory `instance_fingerprint`
+- per-instance/episode predictions
+- mandatory immutable `instance_fingerprint`
 - complete method × seed × domain × split coverage
-- online win / return / episode length
-- model/data/log checksums and exact source commit
+- online win, return and episode length
+- source/model/data/log SHA-256 and exact code commit
 - model bytes, peak RSS, training wall time and CPU latency
-- cell-level and instance-paired statistics
-- comparison with a preregistered public reference tolerance
+- cell-level and episode-paired statistics
+- preregistered reference tolerance
 
-Interpret no score until `evaluation_contract.py` passes.
+Interpret no capability score until the evaluation contract passes.
 
-## P0 — Evaluation and artifact contract
+## P0 — Evaluation, statistics, leakage and provenance
 
-Every measured experiment must pass:
+Every measured run must pass:
 
-- train/test normalized utterance overlap check
-- entity and dynamics split overlap check
+- normalized train/test utterance overlap check
+- entity and dynamics split-overlap check
 - gold action, next state, reward, done, post-treatment and completed-trajectory leakage checks
 - canonical seeds `1,7,19`
-- prediction-supplied immutable instance fingerprints
+- prediction-supplied instance fingerprints
 - complete prediction and artifact coverage
 - domain × seed × condition cells
 - paired mean/minimum-cell gaps and positive-cell fraction
-- exact McNemar test and hierarchical cluster-bootstrap 95% CI
+- Correct-only/control-only counts and exact McNemar test
+- hierarchical cluster-bootstrap 95% CI
 - source/model/data/log SHA-256 and code commit
 - model bytes, peak RSS, training wall time and CPU inference latency
 
-Current classification: **`initial_reproduction_failure`**. Contract tests: **7 passed**. Aggregate summaries alone are invalid.
+Current classification: **`initial_reproduction_failure`**. Aggregate-only summaries are invalid.
 
 ## P1 — R0.2 Environment-first reproduction
 
@@ -84,22 +85,22 @@ Eligibility failure:
 - seed 19: `1/40`
 - all test sets: `0/20`
 
-Before any representation comparison, source trajectories must satisfy per seed:
+Before representation comparison, every source-policy seed must satisfy:
 
 - majority action share `<= 0.90`
 - successful train episodes `>= 5`
 - at least two actions with `>=5%` support
 
-After R0.1 competence and eligibility:
+After R0.1 competence and trajectory qualification:
 
 1. export competent public trajectories;
-2. use typed observation-field next-state losses;
-3. reproduce Gaddy & Klein 2019 or a faithful task-matched Environment-first baseline;
+2. use typed observation-field transition losses;
+3. reproduce Gaddy & Klein 2019 or an explicitly documented faithful task-matched variant;
 4. reproduce Language Dynamics Distillation or a faithful next-state objective;
 5. match parameter and data budgets to End-to-end;
-6. measure online task success, action accuracy, typed next-state prediction and real held-out entity/dynamics/language-form transfer;
+6. measure online task success, action accuracy, typed next-state prediction and real entity/dynamics/language-form transfer;
 7. run language-blind, language-shuffle, state-only and transition/outcome-shuffle on identical instances;
-8. pass the evaluation/artifact contract.
+8. pass the full evaluation/artifact contract.
 
 Internal representation appearance, compression and latent clustering do not count as progress.
 
@@ -109,58 +110,59 @@ SILG/RTFM is rejected as a direct intervention-partition benchmark because it do
 
 A qualified public benchmark must contain:
 
-- raw language and sequential/interactive trajectories
+- raw episode-aligned language and sequential/interactive trajectories
 - independently defined mechanism-changing variation
 - explicit mechanism pre/post data
-- ground-truth intervention family or theoretically justified causal abstraction
-- held-out intervention target or mechanism
+- ground-truth intervention family or theoretically justified abstraction
+- held-out target or mechanism split
 - permutation-aware evaluation
 - intervention diversity that distinguishes competing partitions
 
-Candidate RQ-001-N4 remains **narrowed, not adopted**:
+Audited candidates SILG/RTFM, J-CRe3, CausalTriplet, ACCESS and MIB do not meet the joint requirements.
 
-> Does episode-aligned raw language strictly refine a trajectory-only equivalence class into a finer intervention-supported causal abstraction and improve held-out mechanism prediction?
+Candidate **RQ-001-N5** remains narrowed and not adopted:
 
-Reject the empirical joint-identification direction if no public benchmark qualifies, if an equal/weaker-assumption primary source solves it, or if hand-written target slots/ontology are required.
+> On a qualified public mechanism-change benchmark, does episode-aligned language retain mechanism information after conditioning on the complete non-language trajectory, strictly refine a trajectory-only equivalence class, and improve held-out mechanism capability?
 
-No R0.3 model experiment is authorized before Gate L is positive and Gate-I qualification succeeds.
+Necessary condition: `I(M;L|X)>0`, with `X` including state, action, history, reward, time, policy phase and environment identity.
+
+Close the empirical Gate-I direction if no benchmark qualifies, if an equal/weaker-assumption primary source already solves it, or if researcher-authored target slots are required. No R0.3 model experiment is authorized before Gate L is positive and benchmark qualification succeeds.
 
 ## P1 — Prior-art and novelty matrix
 
 Maintain primary-source comparison through 2026 for:
 
-- unknown / multi-node / soft intervention recovery
+- unknown, multi-node and soft intervention recovery
 - finite-sample few-environment identifiability
 - nonparametric general-environment CRL
+- score-based CRL under general transformations
 - subset-intervention causal abstraction
-- raw-trajectory system parameter identifiability
+- raw-trajectory system-parameter identifiability
 - temporal partition and causal-graph joint learning
 - multimodal partial-sharing identifiability
 - perturbation-target and causal-response representations
 - interactive language grounding
 - language-dynamics and environment-first pretraining
 
-Broad claims that interventions create causal representations, or that language and dynamics can be jointly learned, are not novel.
+Broad claims that interventions create causal representations, unknown targets can be recovered, or language and dynamics can be jointly learned are not novel.
 
 ## P2 — Japanese realism audit
 
 Pinned candidate: official `riken-grp/J-CRe3`.
 
-Tasks:
-
-- pin commit, license, download command, checksum, split and annotation schema;
+- pin commit, license, download command, checksums, split and annotation schema;
 - reproduce supported text-only, vision-only and combined baselines;
 - separate direct reference, predicate-argument and bridging reference;
-- audit subject omission and demonstratives where annotations permit.
+- audit subject omission and demonstratives where annotation permits.
 
-J-CRe3 is an external Japanese grounding audit and must not be averaged into SILG scores.
+J-CRe3 is an external Japanese grounding audit and must not be averaged into SILG scores or treated as Gate I.
 
-## P2 — Preregister at most one next-stage claim
+## P2 — Preregister exactly one successor claim
 
 Only after R0 completion, preregister one of:
 
-- an impossibility theorem under an explicit joint language–causal symmetry; or
-- a sufficient-condition theorem for shared-permutation / supported-abstraction recovery.
+- an impossibility theorem under explicit joint language–causal symmetry; or
+- a sufficient-condition theorem for shared-permutation or supported-abstraction recovery.
 
 The preregistration must specify prior-art difference, assumptions, primary metric, controls, resource ceiling and stopping rule before any new architecture.
 
@@ -175,7 +177,7 @@ The preregistration must specify prior-art difference, assumptions, primary metr
 - new stacked PR chains
 - treating installation, random control, training-path smoke or offline imitation as intelligence progress
 - manually adding a Gate-I ontology to SILG
-- tuning R0.2 representation models on failed-policy demonstrations
+- tuning R0.2 on failed-policy demonstrations
 
 ## R0 completion rule
 
