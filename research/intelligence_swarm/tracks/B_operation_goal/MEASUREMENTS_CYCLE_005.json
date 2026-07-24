@@ -1,0 +1,49 @@
+{
+  "cycle": 5,
+  "hypothesis": "Locally Competing Commutator Squares from Single-Factor Surprise Splits",
+  "seeds": [1, 7, 19],
+  "summary": {
+    "local": {
+      "d1_held": {"joint": 0.1111, "inverse": 0.0, "goal": 0.8889, "repair": 0.25},
+      "d1_free": {"joint": 0.0833, "inverse": 0.0, "goal": 0.9167, "repair": 0.3472},
+      "d2_held": {"joint": 0.0278, "inverse": 0.0, "goal": 0.9722, "repair": 0.25},
+      "d2_paragraph": {"joint": 0.2361, "inverse": 0.0, "goal": 0.7639, "repair": 0.375},
+      "d2_free": {"joint": 0.2222, "inverse": 0.0, "goal": 0.7778, "repair": 0.2639},
+      "d3_held": {"joint": 0.0, "inverse": 0.0, "goal": 1.0, "repair": 0.2639},
+      "d3_free": {"joint": 0.0, "inverse": 0.0, "goal": 1.0, "repair": 0.2778}
+    },
+    "language_shuffle": {
+      "d1_held": {"joint": 0.0556}, "d1_free": {"joint": 0.0833},
+      "d2_held": {"joint": 0.0139}, "d2_paragraph": {"joint": 0.0417},
+      "d2_free": {"joint": 0.1111}, "d3_held": {"joint": 0.0}, "d3_free": {"joint": 0.0}
+    },
+    "world_shuffle": {
+      "d1_held": {"joint": 0.4028}, "d1_free": {"joint": 0.3056},
+      "d2_held": {"joint": 0.2083}, "d2_paragraph": {"joint": 0.3750},
+      "d2_free": {"joint": 0.4028}, "d3_held": {"joint": 0.0}, "d3_free": {"joint": 0.0}
+    },
+    "global_lowrank": {
+      "d1_held": {"joint": 0.1528, "inverse": 0.2778},
+      "d1_free": {"joint": 0.1667, "inverse": 0.2639},
+      "d2_held": {"joint": 0.0417, "inverse": 0.2083},
+      "d2_paragraph": {"joint": 0.0972, "inverse": 0.2917},
+      "d2_free": {"joint": 0.0694, "inverse": 0.2639},
+      "d3_held": {"joint": 0.0417, "inverse": 0.1944},
+      "d3_free": {"joint": 0.0278, "inverse": 0.2222}
+    }
+  },
+  "model_bytes_mean": 38984.0,
+  "train_seconds_mean": 0.0323,
+  "runtime_seconds": 20.617,
+  "peak_rss_kib": 115624,
+  "candidate_count": 32,
+  "estimated_ops_train_per_pair": 3200,
+  "estimated_ops_inference_per_query": 122880,
+  "answer_leakage": false,
+  "post_treatment_test_input": false,
+  "fixed_codebook": false,
+  "strict_progress_gate": false,
+  "highschool_level_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
