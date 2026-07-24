@@ -20,12 +20,12 @@
 ## R0 status ledger
 
 - 公開環境control再現: **1件**
-- 公開学習経路再現: **1件**
-- 固定初期instance matched評価経路: **1件（engineering smoke）**
+- 公開学習経路再現: **1件（32,768-frame staged budget、3 seed）**
+- 固定初期instance matched評価経路: **1件**
 - 学習済み公開能力baseline再現: **0件**
 - R0.2正式再現: **0件**
 - R0.3 empirical intervention-target ablation: **正式棄却**
-- RQ-001-T1 theory-only candidate: **未採用**
+- RQ-001-T1 theory-only candidate: **再狭義化・未採用**
 - J-CRe3日本語外部監査: **未再現**
 
 公開能力baselineとmatched controlsがevaluation contractを通るまで、新規機構族、知能原理、能力進歩を認定しない。
@@ -44,26 +44,40 @@
 
 ## R0.1 public recurrent status
 
-2,048-frame級の公式SILG `multi` recurrentについて、seed `1,7,19`の学習、checkpoint保存・再読込、固定初期instance上のCorrect / Random / Language-blind / State-only評価経路を再現した。
+補正済みworkflow run `30120620610`は全工程を完走した。公式SILG `multi` recurrentをseed `1,7,19`で各32,768 frames要求し、checkpointは各32,800 framesで保存された。pretrained language modelは使用していない。
+
+### Training and resources
+
+| Seed | Training wall time | Peak RSS | Trained model bytes |
+|---:|---:|---:|---:|
+| 1 | 341.906 s | 480,076 KiB | 19,693,911 |
+| 7 | 346.898 s | 505,600 KiB | 19,693,911 |
+| 19 | 341.882 s | 483,056 KiB | 19,693,990 |
 
 - Parameters: `4,916,915`
-- Trained state dict: 約`19.694 MB`
-- Training wall time: 約`26.6 s/seed`
-- Maximum RSS: `493,576 KiB`
-- CPU inference: 約`8.1 ms/step`
-- Correct win rate: `0.0167`
-- Random win rate: `0.0667`
-- Language-blind win rate: `0.0167`
-- State-only win rate: `0.0000`
+- State-dict audit size: `19,694,385 bytes`
+- CPU forward audit: `6.911 ms/step`
+- Total three-seed training wall time: `1,033.885 s`
+- Maximum RSS: `505,600 KiB`
+- Artifact digest: `662139632c73082f096154d819bef20f86f672d4e8f5b36f8667d754b6b751d2`
 
-Classification: **`matched_fixed_episode_smoke_completed / public_capability_baseline_not_reproduced / insufficient_training_budget`**。
+### Matched fixed-instance evaluation
 
-32,768-frame公式recurrent学習はseed `1,7,19`すべてでcheckpoint作成まで完走した。最初のmatched evaluationは、言語ablationが公式packed RNNへ長さ0のsequenceを渡したため停止し、token内容をmaskしつつ1-token padding lengthを維持するよう修正済み。
+各method・seedで20 episode、methodあたり60 episodeを評価し、全methodの初期instance fingerprint streamは一致した。
 
-- Current corrected workflow run: `30120620610`
-- Status at RESET-E014 integration: **in progress**
+| Method | Win rate | Mean return | Mean episode length | CPU inference |
+|---|---:|---:|---:|---:|
+| Correct recurrent | `0.0167` | `-1.8827` | `46.80` | `7.229 ms/step` |
+| Random valid action | `0.0667` | `-1.1513` | `15.23` | `0.0081 ms/step` |
+| Language-blind | `0.0167` | `-2.0417` | `54.75` | `4.424 ms/step` |
+| State-only | `0.0167` | `-2.1963` | `62.48` | `4.103 ms/step` |
+| Language-shuffle | `0.0167` | `-1.9347` | `49.40` | `7.252 ms/step` |
 
-補正workflowのartifact、完全checksum、matched fingerprint、policy competence、trajectory eligibilityが確定するまで、32,768-frame能力値を統合しない。
+Correctは1/60勝、Randomは4/60勝だった。CorrectはRandomを下回り、Language-blind、State-only、Language-shuffleとaggregate win rateで分離しなかった。これは言語不要の証拠ではなく、policy competence不足である。
+
+Classification: **`matched_fixed_episode_32768_frame_staged_training_not_public_capability_reproduction`**。
+
+公開学習経路とmatched評価経路は再現したが、学習済み公開能力baselineは再現していない。次に変更できるのは公式recurrentの忠実な学習budgetまたは公式再現条件だけである。
 
 ## R0.2 Environment-first status
 
@@ -84,13 +98,15 @@ Classification: **`matched_fixed_episode_smoke_completed / public_capability_bas
 
 Classification: **`ineligible_failed-policy-trajectory_negative_diagnostic / not_R0.2_reproduction`**。
 
+現行実装はGaddy & Klein 2019の二段階順序を持つが、公式defaultのstructured discrete messageと直接message-alignment objectiveを持たないため、**`continuous_environment_first_adaptation_not_gaddy_klein_default_reproduction`** とする。flatten済みmixed-type stateへの一律MSEは正式next-state指標として無効である。
+
 R0.2を再開する前に、各seedで次を満たす。
 
 - majority-action share `<= 0.90`
 - successful train episode `>= 5`
 - 5%以上のsupportを持つaction `>= 2`
 
-正式比較ではtyped observation-field transition loss、online task success、実entity/dynamics/language-form holdout、matched parameter/data budget、同一instance controlsを必須とする。
+正式比較ではtyped observation-field transition loss、online task success、実entity/dynamics/language-form holdout、matched parameter/data budget、同一instance controlsを必須とする。source policyがこの資格を満たすまでEnvironment-firstを調整しない。
 
 ## Evaluation contract status
 
@@ -105,18 +121,24 @@ R0.2を再開する前に、各seedで次を満たす。
 - episode-level paired gap、Correct-only / control-only、exact McNemar検定
 - hierarchical cluster-bootstrap 95% CI
 - run-level集計値とepisode recordsの再計算一致
-- full 40-hex SILG/RTFM source pins
+- top-level集計値とrun valuesの再計算一致
+- independently readable raw-log、model、immutable-data files
+- full 40-hex source/code pins
 - full 64-hex checkpoint/model/data/log SHA-256
-- model bytes、RSS、training wall time、CPU latencyの有限・正値監査
+- reported `model_bytes`と実model file sizeの一致
+- model bytes、RSS、training wall time、CPU latencyの有限・非負監査
+- canonical seeds `1,7,19`
 - `answer_leakage: false`、`pretrained_language_model: false`の明示
 
-7件の回帰テストは成功した。Target-label shuffle、Outcome shuffle、immutable test dataset checksum、raw workflow log実体との独立joinが不足するため、現在の正式分類は **`initial_reproduction_failure`**。
+10件の回帰テストは成功した。Outcome/transition shuffle、target-label shuffleまたは非oracleでの正式inapplicability記録、immutable serialized test dataset checksum、全cellのraw-log/model/data artifact joinが不足するため、現在の正式分類は **`initial_reproduction_failure`**。
 
 ## Prior-art and novelty boundary
 
 未知介入下のnonparametric CRL、unknown multi-node intervention、score-based CRL、subset-intervention causal abstraction、finite-sample few-environment recovery、environment-first instruction following、language-dynamics pretraining、multimodal shared-latent recovery、perturbation-to-intervention modeling、causal sufficiency/necessity、causal-world-modelと言語interfaceは単独では既存範囲である。
 
-広い「言語とtrajectoryから未知因果変数を発見する」は中心命題として採用しない。
+さらに、raw languageをauxiliary variableとして用いる識別、正しいtrajectory-language pairとshuffle pairの対比、完全historyを使うtemporal nonlinear ICA、multimodal partial-sharing identifiability、generic symmetry/invariance breakingも既存範囲である。
+
+広い「言語とtrajectoryから未知因果変数を発見する」や「言語が補助変数として識別性を与える」は中心命題として採用しない。
 
 ## Research-question decision
 
@@ -125,13 +147,13 @@ SILG/RTFMはground-truth latent intervention family、target、mechanism pre/pos
 - **Gate L — 継続・未達:** competent public policyとmatched controlsで、raw languageがstate/action/history/environment identityを超える外部能力を持つか測る。
 - **Gate I empirical track — 正式棄却:** 現在の公開benchmark制約下で共同同定実験を開始しない。研究者がtarget/mechanism ontologyを後付けすることも禁止する。
 - **RQ-001-N5 — 棄却:** empirical joint-identification claimとして閉じる。
-- **RQ-001-T1 — theory-only candidate, not adopted:** 明示した観測・介入仮定の下で、言語がtrajectory-only causal equivalence classを厳密に細分化できる条件と不可能条件を特徴づける。
+- **RQ-001-T1 — 再狭義化、未採用:** 完全な非言語trajectoryを条件とし、言語を単なるauxiliary/environment indexとして使う全説明を同値類として除外した後でも、raw utterance間の構成的関係がtrajectory-only causal equivalence classを厳密に細分化できるかを問う。
 
-必要条件 `I(M; L | X) > 0` は十分条件ではない。T1採用前にformal observation model、equivalence relation、既存multimodal ICA/CRLとの差、非自明なpositive/negative construction、事前登録が必要であり、R0.1完了前の新規architectureは禁止する。
+T1採用には、trajectory-onlyで観測同値な非同型モデル、auxiliary-index quotient後も残る同値性、domain labelへ還元不能なcompositional language relation、correct languageのみでのstrict refinement、独立介入効果による意味裏付け、既存nonlinear ICA/temporal ICA/multimodal CRLより異なる保証、positive/negative construction、事前登録が必要である。現在その定理も構成も存在しない。
 
 ## Current maximum bottleneck
 
-**補正済み32,768-frame matched-evaluation artifactを確定し、checkpoint、model、data、raw-log provenance、policy competence、trajectory eligibilityを監査すること。合格するまでR0.2調整と新規architectureを禁止する。Empirical Gate Iは閉じ、理論候補T1も事前登録条件を満たすまで開始しない。**
+**公式SILG recurrentの忠実な学習budgetまたは公式再現条件だけを段階的に修正し、同じimmutable matched protocolでpolicy competenceが成立するか確認すること。成立するまでR0.2調整、新規architecture、T1実装を禁止する。**
 
 ## Stage-transition rule
 
@@ -143,7 +165,7 @@ SILG/RTFMはground-truth latent intervention family、target、mechanism pre/pos
 4. R0.2のonline task success、typed next-state、実holdout付き比較
 5. R0.3 empirical trackの正式棄却をgovernanceへ統合
 6. 2026年までのnovelty matrix
-7. exactly one中心命題、主要指標、反例、停止条件の事前登録
+7. exactly one中心命題、主要指標または定理、反例、停止条件の事前登録
 
 ## Canonical branch policy
 
@@ -160,4 +182,4 @@ SILG/RTFMはground-truth latent intervention family、target、mechanism pre/pos
 
 ## Last integration
 
-2026-07-25: **RESET-E014**。C007のempirical Gate-I棄却とtheory-only候補T1、D011のprovenance・集計再計算監査を統合した。補正済み32,768-frame workflow run `30120620610`は実行中のため未確定値を採用せず、学習済み公開能力baseline 0件、R0継続、段階遷移禁止を維持した。
+2026-07-25: **RESET-E015**。補正済み32,768-frame SILG/RTFM学習とmatched評価の完走、R0.2忠実性監査、C008のauxiliary-variable/temporal/multimodal identifiability重複境界、D012の独立artifact provenance contractを統合した。公開学習・評価経路は再現したがCorrectはRandomを下回り、学習済み公開能力baselineは0件、R0継続、段階遷移禁止を維持した。
