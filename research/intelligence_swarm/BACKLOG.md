@@ -1,70 +1,106 @@
 # Intelligence Swarm Backlog
 
-## P0 — Reproduce before inventing
+## P0 — R0.1 matched public capability baseline
 
-### R0.1 SILG environment and baseline reproduction
+Current status: **official SILG/RTFM recurrent training path reproduced; public capability baseline not reproduced**.
 
-Current status: **public environment and random control reproduced; official shared recurrent baseline not reproduced**.
-
-Completed:
+### Completed
 
 - SILG commit `2af07578e1264029a240fcfb78d4ac0aea16f5de`
 - RTFM commit `58f17955595b5a127c96d045d896fcbcc7d4b570`
 - Ubuntu 22.04 / Python 3.8.18 installation
-- resolved `pip freeze`
-- `rtfm_train_s1-v0` schema probe
-- random-valid-action control: 60 public episodes across seeds 0/1/2
-- raw install/probe logs, host manifest and SHA-256 bundle
-- workflow artifact digest recorded
+- resolved dependency set including `expman==0.0.7` and `ujson==5.10.0`
+- RTFM S1 schema probe and random-valid-action public control
+- official SILG `multi` recurrent training smoke for seeds `1,7,19`
+- 2,048 frames per seed
+- parameters, model bytes, RSS, training time and CPU forward latency recorded
+- raw workflow artifact and top-level artifact digest recorded
+- evaluation contract adapted to SILG exporter schema
+- six regression tests for leakage, snapshot identity and artifact coverage
 
-Random-control result:
+### Reproduced engineering values
 
-- 8 wins / 60 episodes
-- aggregate win rate 0.1333
-- mean return -1.0237
-- mean episode length 15.5167
-- random action selection 7.324 µs/action
+- parameters: `4,916,915`
+- state dict: `19,694,385 bytes`
+- CPU forward latency: `7.49024244 ms/environment step`
+- training wall time: `26.547 / 26.531 / 31.536 s`
+- maximum peak RSS: `516,792 KiB`
+- artifact digest: `sha256:51d8bfb3fe31f4a00d9b5f86f1bc2761da5f91c70067d222e8f376f334418070`
 
-Required next commits on the canonical branch:
+These values prove the public training path and resource audit only. They are not a reproduced task score.
 
-1. Change canonical seeds to `1,7,19`.
-2. Add deterministic episode-instance capture/replay so every method sees identical worlds.
-3. Run the official shared recurrent baseline without a pretrained language model.
-4. Run random, language-blind, state-only and language-shuffle controls on identical instances.
-5. Save model bytes, peak RSS, training wall time and CPU inference latency for every learned method.
-6. Compare reproduced official metric to the paper/code reference with a declared tolerance.
-7. Run the test split `rtfm_test_s1-v0`; train-environment random control alone is not a task reproduction.
+### Next authorized commits — strict order
 
-R0.1 completion requires a learned official or faithful recurrent baseline and matched controls. Installation/schema/random-only success does not complete it.
+1. Capture one deterministic `rtfm_test_s1-v0` evaluation set for seeds `1,7,19`.
+2. Store dataset SHA-256 and every immutable `instance_fingerprint`.
+3. Save and reload the official recurrent checkpoint for test inference.
+4. Replay the identical snapshot through:
+   - official recurrent
+   - random
+   - language-blind
+   - state-only
+   - environment-ID-only
+   - language shuffle
+   - target-label shuffle where a target proxy is operationally defined without gold leakage
+   - outcome/transition shuffle
+5. Save every method × seed × split prediction with complete coverage.
+6. Record full raw-log/model/data SHA-256, exact code commit, model bytes, peak RSS, train time and CPU inference latency.
+7. Run `evaluation_contract.py`; do not interpret scores before it passes.
+8. Compare the official recurrent score with paper/code reference under a declared tolerance.
 
-### R0.2 Environment-first and language-dynamics baselines
+R0.1 completes only when a learned recurrent policy and all required controls are measured on identical public test instances and pass artifact/leakage audit.
 
-Do not implement a new representation learner. Reproduce existing prior art first:
+## P0 — Benchmark contract
 
-- Gaddy & Klein 2019 environment-first transition pretraining or a faithful task-matched equivalent.
-- Zhong et al. 2022 Language Dynamics Distillation or a faithful next-state objective using the same SILG data.
-- End-to-end tabula-rasa shared recurrent baseline with matched parameter budget.
+Use `benchmarks/grounded_causal/evaluation_contract.py` for every measured experiment.
 
-The synthetic-fixture harness is a pipeline smoke test only and must not enter the research score table.
+Required checks:
 
-After R0.1 instance replay exists, compare on identical RTFM instances:
+- train/test normalized-utterance overlap
+- entity and dynamics split overlap
+- gold action, next state, reward, done, post-treatment state and completed trajectory leakage
+- canonical seeds `1,7,19`
+- at least two eligible domains for any research claim
+- immutable instance fingerprint agreement across methods
+- complete method × seed × domain × split coverage
+- prediction coverage and abstention
+- domain × seed × condition cells
+- paired mean gap, minimum cell gap, approximate 95% CI and paired randomization test
+- raw logs, package lock, source SHAs, dataset checksum, model checksum and artifact digest
+- model bytes, peak RSS, training wall time and CPU inference latency
+
+Current public result classification: **`initial_reproduction_failure`** because matched test predictions and complete controls/artifacts are absent.
+
+## P1 — R0.2 Environment-first and language-dynamics baselines
+
+Start public comparison only after R0.1 deterministic instance replay and recurrent checkpoint evaluation work.
+
+Reproduce, do not invent:
+
+- Gaddy & Klein 2019 environment-first transition pretraining or a faithful task-matched equivalent
+- Zhong et al. 2022 Language Dynamics Distillation or a faithful next-state objective on the same SILG data
+- matched end-to-end shared recurrent baseline
+
+Compare on identical trajectories and matched parameter/data budgets:
 
 - task success
 - next-state prediction
 - action accuracy
 - held-out entity transfer
-- held-out dynamics transfer
+- held-out dynamics/mechanism transfer
 - held-out language-form transfer
 - model bytes
 - peak RSS
 - training wall time
 - CPU inference latency
 
-A language contribution is recognized only if the full model beats state/action/history-only and language-shuffle controls on held-out mechanisms, not merely held-out wording.
+The synthetic fixture remains a pipeline smoke test only and must not enter the public score table.
 
-### R0.3 Intervention-target / abstraction ablation
+A language contribution requires Full to exceed state/action/history-only, environment-ID-only, language shuffle and transition shuffle on held-out mechanisms. Wording-only transfer is insufficient.
 
-Run only after R0.1 and R0.2 produce valid public numbers.
+## P1 — R0.3 Intervention-target / abstraction ablation
+
+Run only after R0.1 and R0.2 produce valid public numbers and Gate L is operational.
 
 Conditions on the same trajectory data:
 
@@ -75,130 +111,93 @@ Conditions on the same trajectory data:
 5. transition/outcome shuffle
 6. environment-ID-only
 
-Measure both exact recovery up to shared permutation and abstraction-level recovery. Exact low-level identity must not be required when the intervention family only identifies a coarser causal abstraction.
+Measure:
 
-### R0.4 Japanese realism audit
+- Gate L: language-specific predictive information beyond state/action/history/reward/environment ID
+- Gate I: utterance/intervention partition recovery up to shared permutation or the finest intervention-supported abstraction
 
-Pinned source:
+Gate I is unauthorized until the selected benchmark exhibits enough intervention diversity to define a nontrivial evaluation-only partition without hand-written ontology.
 
-- official repository: `riken-grp/J-CRe3`
-- public metadata available date: 2026-04-06
+## P1 — Prior-art and novelty matrix
 
-Tasks:
-
-- record license, download command, checksum, split and annotation schema
-- reproduce text-only, vision-only and combined reference baselines if public scripts support them
-- separate direct reference, predicate-argument and bridging-reference conditions
-- separate subject omission and demonstrative expressions where annotations permit
-
-J-CRe3 results must not be averaged with SILG task success and do not substitute for R0.1.
-
-## P0 — Benchmark contract
-
-- Use `benchmarks/grounded_causal/evaluation_contract.py` for every measured experiment.
-- Reject train/test normalized-utterance overlap.
-- Reject gold action, next state or completed trajectory in model input.
-- Require at least two eligible domains and three canonical seeds for any research claim.
-- Canonical seeds are `1,7,19`; runs using other seeds are engineering checks unless preregistered.
-- Compare Correct, random, language-blind, state-only, environment-ID-only, target-label shuffle and outcome/transition shuffle on identical instances.
-- Save every domain × seed × condition cell, prediction coverage and abstention.
-- Record model bytes, peak RSS, training wall time and CPU inference latency.
-- Require raw logs, package lock, repository SHAs, dataset/environment checksum and artifact digest.
-- Internal candidate count or representation visualization is not a progress metric.
-
-## P0 — Latest prior-art consequence
-
-The following are already established research lines and cannot be presented as the contribution:
+Already established and not standalone contributions:
 
 - unknown-intervention causal representation identifiability
 - unknown multi-node intervention recovery
+- unknown soft-intervention inference
 - finite-sample recovery from few environments
-- causal abstraction recovery under subset interventions
+- causal abstraction under subset interventions
+- perturbation-target prediction
 - multi-environment interactive language grounding
 - language-conditioned dynamics pretraining
 - environment-first instruction-following pretraining
 - language-feature-conditioned intervention distribution modeling
 
-The remaining candidate question is `RQ-001-N2`:
+Candidate question:
 
-> On a fixed public interactive benchmark, does raw language contain statistically necessary information about an intervention partition or causal abstraction beyond state, action, history and environment identity, and can that information be recovered up to joint permutation without target labels, semantic parsers, object slots, pretrained language models or supplied perturbation-feature semantics?
+**RQ-001-N3**
+
+> On a fixed public interactive benchmark, does raw language provide predictive information about held-out mechanism changes beyond state, action, history, reward and environment identity; and, conditional on that gain, can an utterance-conditioned intervention partition be recovered up to joint permutation or the finest intervention-supported causal abstraction without target labels, semantic parsers, object slots, pretrained language models or supplied perturbation semantics?
 
 Status: **NARROWED, NOT ADOPTED**.
 
-Reject RQ-001-N2 when any of the following holds:
+Reject or narrow again when:
 
-1. A primary source already demonstrates the same joint recovery under equal or weaker assumptions.
-2. Reproduced full-language models do not consistently exceed state/action/history-only and language-shuffle controls on held-out mechanisms.
-3. The apparent gain disappears under entity Rename, environment-ID control or transition shuffle.
-4. The required intervention diversity is absent from the public benchmark and cannot be added without a hand-written ontology.
-5. Recovery is measured using target labels, completed trajectories or post-treatment features unavailable at inference.
-6. Recovery is only exact-name recovery and vanishes under a shared latent/language permutation.
-7. The strongest result is restricted to a synthetic fixture rather than the pinned public split.
+1. a primary source solves the same joint problem under equal or weaker assumptions;
+2. Full fails to exceed state/action/history-only and language shuffle on held-out mechanisms;
+3. gains disappear under entity Rename, environment-ID control or transition shuffle;
+4. the benchmark lacks intervention diversity and fixing it requires hand-written ontology;
+5. target labels, completed trajectories or post-treatment features are required;
+6. recovery is exact-name-only and vanishes under shared latent/language permutation;
+7. the strongest result remains synthetic rather than public;
+8. language gain exists but partition recovery is no better than state/action/history alone.
 
-## P1 — Reproducibility ledger
+## P2 — Japanese realism audit
 
-For each external baseline, save:
+Pinned source: official `riken-grp/J-CRe3` repository.
 
-- paper and official-code URL
-- repository commit SHA
-- package versions and platform
-- dataset/environment checksum
-- train/dev/test split
-- seeds
-- exact commands
-- raw logs
-- workflow run ID and artifact digest
-- expected paper metric and reproduced metric
-- acceptable tolerance and explanation for deviation
-- model bytes, peak RSS, train time, CPU inference latency
+Tasks:
 
-Current ledger entry:
+- pin license, commit, download command, checksum, split and annotation schema
+- reproduce public text-only, vision-only and combined reference baselines when supported
+- separate direct reference, predicate-argument and bridging reference
+- audit subject omission and demonstratives where annotations permit
 
-- Workflow run: `30101406916`
-- Artifact: `r0-silg-rtfm-probe-30101406916`
-- Digest: `sha256:ed463e76d5c528b2cf25d740847c77978dbe66d0ed5455a57289519ba0455afd`
-- Status: installation/schema/random control success; baseline reproduction incomplete
+J-CRe3 does not substitute for SILG R0.1 and must not be averaged into the same primary score.
 
-## P1 — Theory before new mechanism
+## P2 — Theory before new mechanism
 
-After R0 reproduction, select at most one central claim:
+After valid R0 reproduction, preregister at most one central claim:
 
 - impossibility theorem for joint language–causal alignment under a specified symmetry; or
-- sufficient-condition theorem for shared-permutation / abstraction recovery under explicit trajectory and intervention diversity.
+- sufficient-condition theorem for shared-permutation/abstraction recovery under explicit trajectory and intervention diversity.
 
-No architecture is authorized before the claim, baseline and stopping rule are preregistered.
-
-## P2 — New model gate
-
-A new model can begin only after all of the following:
-
-1. R0.1–R0.3 completed with valid external metrics
-2. novelty matrix completed through relevant 2026 primary literature
-3. one-sentence contribution relative to the strongest baseline
-4. primary metric and falsification threshold preregistered
-5. canonical branch and fixed benchmark used
-6. resource budget compatible with eventual sub-1GB inference
+No new architecture is authorized before baseline reproduction, novelty comparison, primary metric and stopping rule are preregistered.
 
 ## Frozen work
 
 - new opaque-token toy benchmarks
 - renamed span/slot/graph/tensor/assembly/attractor mechanisms
 - AF-014 derivatives before reproduction
-- memory/replay/sleep/forgetting optimization
+- memory/replay/fast weights/sleep/forgetting optimization
 - best-seed, domain-average-only or single-condition positives
-- prospective evaluation using after-state/completed trajectory
+- prospective evaluation using after-state or completed trajectory
 - new stacked PR chains
-- treating random-control reproduction as intelligence progress
+- treating random-control or training-path reproduction as intelligence progress
 - treating synthetic-fixture scores as public benchmark evidence
+- implementing Gate I before Gate L and intervention-diversity validation
 
 ## R0 completion rule
 
 R0 completes only when all are true:
 
-- at least one learned external public baseline reproduced
-- random/language-blind/state-only controls measured on identical instances
+- at least one learned external public capability baseline reproduced
+- random/language-blind/state-only/shuffle controls measured on identical instances
 - at least three canonical seed logs
+- full artifact/leakage contract passes
 - CPU/RSS/model-size measurements recorded
-- novelty matrix completed
-- RQ-001-N2 adopted, further narrowed or rejected
-- exactly one next-stage central claim selected
+- R0.2 matched public comparison completed
+- R0.3 ablation completed or formally rejected as undefined on the benchmark
+- novelty matrix completed through relevant 2026 primary literature
+- RQ-001-N3 adopted, further narrowed or rejected
+- exactly one next-stage central claim preregistered
