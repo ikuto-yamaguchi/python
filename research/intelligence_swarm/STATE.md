@@ -24,7 +24,8 @@
 - 固定初期instance matched評価経路: **1件（engineering smoke）**
 - 学習済み公開能力baseline再現: **0件**
 - R0.2正式再現: **0件**
-- R0.3 empirical intervention-target ablation: **未開始・SILGでは禁止**
+- R0.3 empirical intervention-target ablation: **正式棄却**
+- RQ-001-T1 theory-only candidate: **未採用**
 - J-CRe3日本語外部監査: **未再現**
 
 公開能力baselineとmatched controlsがevaluation contractを通るまで、新規機構族、知能原理、能力進歩を認定しない。
@@ -57,12 +58,12 @@
 
 Classification: **`matched_fixed_episode_smoke_completed / public_capability_baseline_not_reproduced / insufficient_training_budget`**。
 
-32,768-frame公式recurrent学習はseed `1,7,19`すべてでcheckpoint作成まで完走した。最初のmatched evaluationは、言語ablationが公式packed RNNへ長さ0のsequenceを渡したため停止した。canonical branchはtoken内容をmaskしつつ1-token padding lengthを維持するよう修正済み。
+32,768-frame公式recurrent学習はseed `1,7,19`すべてでcheckpoint作成まで完走した。最初のmatched evaluationは、言語ablationが公式packed RNNへ長さ0のsequenceを渡したため停止し、token内容をmaskしつつ1-token padding lengthを維持するよう修正済み。
 
-- Workflow run: `30117375864`
-- Status at E013 integration: **in progress**
+- Current corrected workflow run: `30120620610`
+- Status at RESET-E014 integration: **in progress**
 
-補正workflowが完了するまで、32,768-frame能力値やtrajectory資格を確定しない。
+補正workflowのartifact、完全checksum、matched fingerprint、policy competence、trajectory eligibilityが確定するまで、32,768-frame能力値を統合しない。
 
 ## R0.2 Environment-first status
 
@@ -99,38 +100,38 @@ R0.2を再開する前に、各seedで次を満たす。
 - gold action、after state、reward、done、post-treatment state、completed trajectory leakage
 - prediction側のimmutable `instance_fingerprint`
 - method × seed × domain × split完全coverage
-- duplicate / missing prediction
+- duplicate / missing predictionとduplicate method-seed run
 - domain × seed × condition cell統計
 - episode-level paired gap、Correct-only / control-only、exact McNemar検定
 - hierarchical cluster-bootstrap 95% CI
-- source/model/data/log SHA-256、code commit、model bytes、RSS、train time、CPU latency
+- run-level集計値とepisode recordsの再計算一致
+- full 40-hex SILG/RTFM source pins
+- full 64-hex checkpoint/model/data/log SHA-256
+- model bytes、RSS、training wall time、CPU latencyの有限・正値監査
+- `answer_leakage: false`、`pretrained_language_model: false`の明示
 
-strict controlsと完全prediction-to-artifact manifestが不足するため、現在の正式分類は **`initial_reproduction_failure`**。
+7件の回帰テストは成功した。Target-label shuffle、Outcome shuffle、immutable test dataset checksum、raw workflow log実体との独立joinが不足するため、現在の正式分類は **`initial_reproduction_failure`**。
 
 ## Prior-art and novelty boundary
 
-未知介入下のnonparametric CRL、unknown multi-node intervention、score-based CRL、subset-intervention causal abstraction、finite-sample few-environment recovery、environment-first instruction following、language-dynamics pretraining、multimodal shared-latent recovery、perturbation-to-intervention modeling、causal sufficiency/necessityは単独では既存範囲である。
+未知介入下のnonparametric CRL、unknown multi-node intervention、score-based CRL、subset-intervention causal abstraction、finite-sample few-environment recovery、environment-first instruction following、language-dynamics pretraining、multimodal shared-latent recovery、perturbation-to-intervention modeling、causal sufficiency/necessity、causal-world-modelと言語interfaceは単独では既存範囲である。
 
 広い「言語とtrajectoryから未知因果変数を発見する」は中心命題として採用しない。
 
-## Candidate research question status
+## Research-question decision
 
-SILG/RTFMはground-truth latent intervention family、target、mechanism pre/post operator、causal abstractionを定義しないため、Gate Iの直接benchmarkとして棄却した。
+SILG/RTFMはground-truth latent intervention family、target、mechanism pre/post operator、causal abstractionを定義しない。J-CRe3、CausalTriplet、ACCESS、MIB、CausalPhysを含む監査済み候補も、episode-aligned raw language、interactive trajectory、独立mechanism change、held-out mechanism ground truth、permutation-aware評価を同時に満たさない。
 
 - **Gate L — 継続・未達:** competent public policyとmatched controlsで、raw languageがstate/action/history/environment identityを超える外部能力を持つか測る。
-- **Gate I — empirical track blocked:** 監査したSILG/RTFM、J-CRe3、CausalTriplet、ACCESS、MIBは必要条件を同時に満たさない。
+- **Gate I empirical track — 正式棄却:** 現在の公開benchmark制約下で共同同定実験を開始しない。研究者がtarget/mechanism ontologyを後付けすることも禁止する。
+- **RQ-001-N5 — 棄却:** empirical joint-identification claimとして閉じる。
+- **RQ-001-T1 — theory-only candidate, not adopted:** 明示した観測・介入仮定の下で、言語がtrajectory-only causal equivalence classを厳密に細分化できる条件と不可能条件を特徴づける。
 
-現在の候補は **RQ-001-N5 — narrowed, not adopted**:
-
-> 独立にmechanism-changing variationを定義する公開benchmark上で、episode-aligned raw languageが完全な非言語trajectoryを条件とした後にもmechanism情報を持ち、trajectory-only CRLに残る同値類を厳密に細分化し、held-out mechanism能力を改善するか。
-
-必要条件は `I(M; L | X) > 0`。`X`はstate、action、history、reward、time、policy phase、environment identityを含む。
-
-適格benchmarkがnovelty audit完了までに見つからなければempirical Gate Iを閉じ、明示仮定を持つtheory-onlyの不可能性または十分条件へ限定する。
+必要条件 `I(M; L | X) > 0` は十分条件ではない。T1採用前にformal observation model、equivalence relation、既存multimodal ICA/CRLとの差、非自明なpositive/negative construction、事前登録が必要であり、R0.1完了前の新規architectureは禁止する。
 
 ## Current maximum bottleneck
 
-**補正済み32,768-frame matched-evaluation artifactを確定し、checkpoint、model、data、log provenance、policy competence、trajectory eligibilityを監査すること。合格するまでR0.2調整と新規architectureを禁止する。並行してGate-I適格公開benchmarkを最終監査し、見つからなければempirical RQを閉じる。**
+**補正済み32,768-frame matched-evaluation artifactを確定し、checkpoint、model、data、raw-log provenance、policy competence、trajectory eligibilityを監査すること。合格するまでR0.2調整と新規architectureを禁止する。Empirical Gate Iは閉じ、理論候補T1も事前登録条件を満たすまで開始しない。**
 
 ## Stage-transition rule
 
@@ -140,9 +141,9 @@ SILG/RTFMはground-truth latent intervention family、target、mechanism pre/pos
 2. immutable公開instance上のrandom / language-blind / state-only / shuffle対照
 3. canonical 3 seedと完全artifact/leakage contract
 4. R0.2のonline task success、typed next-state、実holdout付き比較
-5. R0.3を適格benchmarkで完了、またはundefined/unavailableとして正式棄却
+5. R0.3 empirical trackの正式棄却をgovernanceへ統合
 6. 2026年までのnovelty matrix
-7. 中心命題、主要指標、停止条件の事前登録
+7. exactly one中心命題、主要指標、反例、停止条件の事前登録
 
 ## Canonical branch policy
 
@@ -159,4 +160,4 @@ SILG/RTFMはground-truth latent intervention family、target、mechanism pre/pos
 
 ## Last integration
 
-2026-07-25: **RESET-E013**。補正済み32,768-frame workflowは実行中のため未確定値を統合せず、R0.1〜R0.3、prior-art境界、evaluation contract、RQ-001-N5、段階遷移条件を一本化した。学習済み公開能力baselineは0件であり、R0継続・段階遷移禁止を維持した。
+2026-07-25: **RESET-E014**。C007のempirical Gate-I棄却とtheory-only候補T1、D011のprovenance・集計再計算監査を統合した。補正済み32,768-frame workflow run `30120620610`は実行中のため未確定値を採用せず、学習済み公開能力baseline 0件、R0継続、段階遷移禁止を維持した。
