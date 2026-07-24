@@ -1,0 +1,47 @@
+{
+  "summary": {
+    "factorized": {
+      "held": {"accuracy": 0.055556, "inverse": 0.25, "goal_change": 0.236111, "failure_repair": 0.416667, "target_accuracy": 0.180556, "inference_ms": 0.926907},
+      "rename": {"accuracy": 0.027778, "inverse": 0.25, "goal_change": 0.222222, "failure_repair": 0.416667, "target_accuracy": 0.097222, "inference_ms": 0.983919},
+      "word_order": {"accuracy": 0.041667, "inverse": 0.166667, "goal_change": 0.263889, "failure_repair": 0.555556, "target_accuracy": 0.083333, "inference_ms": 0.942704},
+      "nested": {"accuracy": 0.013889, "inverse": 0.25, "goal_change": 0.277778, "failure_repair": 0.430556, "target_accuracy": 0.111111, "inference_ms": 0.981115},
+      "paragraph": {"accuracy": 0.027778, "inverse": 0.291667, "goal_change": 0.194444, "failure_repair": 0.486111, "target_accuracy": 0.138889, "inference_ms": 1.033171},
+      "free": {"accuracy": 0.0, "inverse": 0.194444, "goal_change": 0.236111, "failure_repair": 0.527778, "target_accuracy": 0.097222, "inference_ms": 1.062614},
+      "domain": {"accuracy": 0.027778, "inverse": 0.305556, "goal_change": 0.291667, "failure_repair": 0.611111, "target_accuracy": 0.152778, "inference_ms": 1.090041}
+    },
+    "shuffle": {
+      "held": {"accuracy": 0.0, "inverse": 0.263889, "goal_change": 0.277778, "failure_repair": 0.444444},
+      "rename": {"accuracy": 0.041667, "inverse": 0.263889, "goal_change": 0.319444, "failure_repair": 0.444444},
+      "word_order": {"accuracy": 0.027778, "inverse": 0.236111, "goal_change": 0.333333, "failure_repair": 0.583333},
+      "nested": {"accuracy": 0.0, "inverse": 0.291667, "goal_change": 0.236111, "failure_repair": 0.444444},
+      "paragraph": {"accuracy": 0.027778, "inverse": 0.236111, "goal_change": 0.25, "failure_repair": 0.402778},
+      "free": {"accuracy": 0.055556, "inverse": 0.25, "goal_change": 0.333333, "failure_repair": 0.5},
+      "domain": {"accuracy": 0.013889, "inverse": 0.263889, "goal_change": 0.277778, "failure_repair": 0.583333}
+    },
+    "shared": {
+      "held_accuracy": 0.013889,
+      "free_accuracy": 0.041667,
+      "domain_accuracy": 0.041667
+    },
+    "no_direction": {
+      "held_accuracy": 0.041667,
+      "free_accuracy": 0.027778,
+      "domain_accuracy": 0.027778
+    }
+  },
+  "chance": {"joint": 0.03125, "inverse": 0.25, "goal_change": 0.25, "failure_repair": 0.5},
+  "seeds": [1, 7, 19],
+  "model_bytes": 8660,
+  "training_seconds": 0.024404,
+  "peak_rss_kib_runtime_included": 168104,
+  "estimated_update_ops_per_episode": 2048,
+  "estimated_inference_ops_per_query": 65536,
+  "candidate_count": 32,
+  "post_treatment_features_used_at_test": false,
+  "answer_leakage": false,
+  "fixed_ontology_or_handwritten_slots_used_by_model": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
