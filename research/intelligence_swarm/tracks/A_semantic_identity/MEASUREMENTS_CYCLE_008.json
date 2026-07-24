@@ -1,0 +1,60 @@
+{
+  "cycle": 8,
+  "hypothesis": "Permutation-Symmetry Audit for Opaque-Lexicon Semantic Identifiability",
+  "seeds": [1, 7, 19],
+  "semantic_classes": 8,
+  "permutations_per_seed": 240,
+  "summary": {
+    "zero_shot_mean": 0.11597222222222221,
+    "zero_shot_std_across_seeds": 0.008260678648173831,
+    "chance": 0.125,
+    "calibration_curve": {
+      "0": 0.11597222222222221,
+      "1": 0.22708333333333333,
+      "2": 0.33784722222222224,
+      "4": 0.5559027777777777,
+      "8": 1.0
+    },
+    "all_indistinguishable_pairs": true
+  },
+  "raw": {
+    "1": {
+      "zero_shot_mean": 0.10729166666666666,
+      "zero_shot_std_over_permutations": 0.0998642742119968,
+      "zero_shot_min": 0.0,
+      "zero_shot_max": 0.375,
+      "calibration_curve": {"0": 0.10729166666666666, "1": 0.21875, "2": 0.33125, "4": 0.5520833333333334, "8": 1.0},
+      "indistinguishable_permutation_pairs": 240
+    },
+    "7": {
+      "zero_shot_mean": 0.11354166666666667,
+      "zero_shot_std_over_permutations": 0.11967385511139107,
+      "zero_shot_min": 0.0,
+      "zero_shot_max": 0.625,
+      "calibration_curve": {"0": 0.11354166666666667, "1": 0.22760416666666666, "2": 0.3375, "4": 0.5546875, "8": 1.0},
+      "indistinguishable_permutation_pairs": 240
+    },
+    "19": {
+      "zero_shot_mean": 0.12708333333333333,
+      "zero_shot_std_over_permutations": 0.11178398687746927,
+      "zero_shot_min": 0.0,
+      "zero_shot_max": 0.5,
+      "calibration_curve": {"0": 0.12708333333333333, "1": 0.23489583333333333, "2": 0.34479166666666666, "4": 0.5609375, "8": 1.0},
+      "indistinguishable_permutation_pairs": 240
+    }
+  },
+  "theoretical_zero_shot_upper_bound_without_bridge": 0.125,
+  "strict_progress_gate": false,
+  "decision": "stage_correction",
+  "answer_leakage": false,
+  "post_treatment_final_input": false,
+  "fixed_ontology": false,
+  "model_bytes": 0,
+  "estimated_ops_per_permutation": 8,
+  "runtime_seconds": 0.00734781299999554,
+  "peak_rss_kib": 109724,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
