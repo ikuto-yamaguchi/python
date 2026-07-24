@@ -1,0 +1,51 @@
+{
+  "cycle": "C_CAUSAL_GROUNDING_003",
+  "hypothesis": "Transformation-Equivariant Pre-Treatment Causal Units under Paired Coordinate Worlds",
+  "seeds": [1, 7, 19],
+  "chance": {"joint": 0.03125, "target": 0.125, "move": 0.25},
+  "mean": {
+    "equivariant": {
+      "held": {"joint": 0.0722222222, "target": 0.3777777778, "move": 0.2833333333},
+      "rotated": {"joint": 0.1, "target": 0.2777777778, "move": 0.2833333333},
+      "translated": {"joint": 0.0888888889, "target": 0.2944444444, "move": 0.2555555556},
+      "permuted": {"joint": 0.1055555556, "target": 0.3555555556, "move": 0.2944444444},
+      "counterfactual_order": {"joint": 0.0666666667, "target": 0.3277777778, "move": 0.1944444444},
+      "free": {"joint": 0.0444444444, "target": 0.3166666667, "move": 0.1666666667},
+      "domain": {"joint": 0.0388888889, "target": 0.2555555556, "move": 0.2277777778}
+    },
+    "absolute": {
+      "held": {"joint": 0.0388888889, "target": 0.2055555556, "move": 0.2777777778},
+      "rotated": {"joint": 0.0722222222, "target": 0.2111111111, "move": 0.3277777778},
+      "translated": {"joint": 0.0444444444, "target": 0.2333333333, "move": 0.2388888889},
+      "permuted": {"joint": 0.1055555556, "target": 0.2944444444, "move": 0.35},
+      "counterfactual_order": {"joint": 0.0388888889, "target": 0.2722222222, "move": 0.2333333333},
+      "free": {"joint": 0.0777777778, "target": 0.2444444444, "move": 0.2333333333},
+      "domain": {"joint": 0.0166666667, "target": 0.2166666667, "move": 0.2111111111}
+    },
+    "shuffled": {
+      "held": {"joint": 0.0555555556, "target": 0.3111111111, "move": 0.2722222222},
+      "rotated": {"joint": 0.0666666667, "target": 0.2388888889, "move": 0.25},
+      "translated": {"joint": 0.0777777778, "target": 0.2722222222, "move": 0.2333333333},
+      "permuted": {"joint": 0.0777777778, "target": 0.3055555556, "move": 0.2611111111},
+      "counterfactual_order": {"joint": 0.0555555556, "target": 0.2555555556, "move": 0.2222222222},
+      "free": {"joint": 0.0277777778, "target": 0.2166666667, "move": 0.2},
+      "domain": {"joint": 0.0388888889, "target": 0.2611111111, "move": 0.2222222222}
+    }
+  },
+  "resources": {
+    "matrix_bytes_float32_estimate": 8192,
+    "training_seconds_total": 12.674488305,
+    "peak_rss_kib_python_runtime_included": 167332,
+    "update_ops_estimate_per_episode": 2048,
+    "inference_ops_estimate_per_option": 2048,
+    "options_per_query": 32,
+    "inference_ops_estimate_per_query": 65536
+  },
+  "leakage_audit": {
+    "post_treatment_observation_used_at_test": false,
+    "final_outcome_used_for_training": false,
+    "identity_label_used_for_scoring": false,
+    "span_proposals_used": false,
+    "string_retrieval_used": false
+  }
+}
