@@ -1,28 +1,29 @@
 # Intelligence Swarm Backlog
 
-## P0 — Symmetry-Breaking Witness Grounding
+## P0 — Pre-Treatment Relational Change Grounding
 
-- A: 発話時刻・指示・説明とtrajectory continuity／不可逆痕跡を同期させ、文字区間を先に意味候補化せずwitness-bearing unitを形成する。
-- A: held-out paraphrase、rename、未知語順、主語省略、複数段落、別領域で同じunitをprospective predictionとinverse queryへ再利用する。
-- C: 行動同値・trajectory・不可逆痕跡・joint witnessの必要十分性を、完全同型の双子対象、world automorphism、counterfactual interventionで切り分ける。
-- D: witness-bearing unitだけをmemory eligibility対象とし、日本語との結合成立前は保存最適化を再開しない。
-- B: operation/goal候補が対象identityの誤同定で壊れる反例を生成し、A/Cへ返す。
-- E: PR349/350のpilotを共通G1a benchmarkへ変換し、synthetic観測識別と日本語semantic groundingを別スコアで管理する。
+- A: 完成trajectory・future scarを使わず、発話と介入前の対象間関係・履歴prefix・commandを同期し、targetとafterをprospectiveに生成する。
+- A: held paraphrase、rename、未知語順、主語省略、複数段落、自由日本語、別領域で同じunitをprospective predictionとinverse queryへ再利用する。
+- B: same identity / different operation、different identity / same operation、same operation / different goal、same words / reversed before-after の四方向対照からoperationとidentityを分離する。
+- C: pre-treatment relation、trajectory prefix、既往scarの必要十分性を、完全同型の双子対象、world automorphism、counterfactual interventionで切り分ける。
+- D: acquisition・retrospective re-identification・prospective use・retentionを分離し、prospective資格を通過したunitだけをmemory eligibility対象とする。
+- E: AF-004共通benchmarkを管理し、post-treatment leakageを自動監査する。
 
-## P0 — Common evaluation
+## P0 — Common G1 benchmark
 
-- Correct、identity shuffle、trajectory shuffle、scar shuffle、random、behavior-only、surface-onlyを同一入力・同一seedで比較する。
+- Candidate featureの観測時刻を記録し、介入後情報をprospective scoreへ混入させない。
+- Correct、identity shuffle、trajectory shuffle、relation shuffle、random、behavior-only、surface-onlyを同一入力・同一seedで比較する。
 - Rename、未知語順、別状態表現、主語省略、複数段落、自由日本語、別領域転移を共通gateにする。
-- prospective prediction、inverse query、対象交換時support移動、twin-object discrimination、選択的witness lesionをG1の中心証拠にする。
-- acquisition、re-identification、retentionを別フィールドで記録し、取得時0をforgettingと呼ばない。
-- 内部構造の生成数と外部能力を別フィールドで記録する。
+- prospective target selection、after prediction、inverse query、対象交換時support移動、twin discrimination、non-target保存を中心証拠にする。
+- retrospective matching、prospective acquisition、inverse use、retentionを別フィールドで記録する。
+- 内部構造生成数と外部能力を別フィールドで記録する。
 
 ## P1 — Evidence repair
 
-- PR349をAF-001の限定／棄却証拠およびAF-003の理論根拠としてバックフィルする。
-- PR350をAF-003のsynthetic pilot evidenceとしてバックフィルし、G1未達を明示する。
-- 既存PRの測定値を `EVIDENCE.jsonl` へ仮説族ID付きでバックフィルする。
-- 各PRへ `root_premise`、`external_capability_delta`、`shuffle_gap`、`stage_decision` を追加する。
+- PR352をretrospective trajectory-predicate groundingの限定証拠へ再分類する。
+- PR353をG2未達および四方向contrast必要性の証拠として登録する。
+- PR354/355をHF-006凍結とAF-004昇格の監査証拠として登録する。
+- 各PRへ `root_premise`、`external_capability_delta`、`post_treatment_features`、`stage_decision` を追加する。
 - Legacy trackは削除せず反証archiveとして維持する。
 
 ## Frozen mainline work
@@ -34,11 +35,12 @@ G1成立まで次を本線として再開しない。
 - surface候補上のgraph、tensor、assembly、energy、attractor最適化
 - 名称だけをcell、node、role、event、trace、familyへ変えた再試行
 - behavioral equivalenceだけをindividual identityとみなす方式
+- 完成trajectory・行為後scarをprospective identity featureとして利用する方式
 
 ## Cycle completion rules
 
 - 実装は必須ではない。メタ分析、評価再設計、仮説族凍結、stage変更も完結サイクルとする。
 - 採用、継続、凍結、段階遷移のいずれかを必ず明示する。
 - 進歩は未知条件の外部能力とbaseline差で判定する。
-- Synthetic観測pilotとraw Japanese semantic能力を混同しない。
-- 再現コマンド、複数seed、反証条件、資源量、answer leakage監査を維持する。
+- Retrospective matchingとprospective groundingを混同しない。
+- 再現コマンド、複数seed、反証条件、資源量、answer leakage・post-treatment leakage監査を維持する。
