@@ -1,0 +1,24 @@
+{
+  "cycle": 1,
+  "track": "C_causal_grounding",
+  "hypothesis": "Causal behavior alone identifies semantic identity only up to world automorphism; a symmetry-breaking continuity or anchor signal is required.",
+  "seeds": [1, 7, 19],
+  "mean": {
+    "passive": {"automorphisms": 12.0, "residual_identity_bits": 3.5849625007, "observations": 1.0, "audit_sec": 0.0016693830},
+    "repeat": {"automorphisms": 1.6666666667, "residual_identity_bits": 0.6666666667, "observations": 4.0, "audit_sec": 0.0055709980},
+    "object_swap": {"automorphisms": 48.0, "residual_identity_bits": 5.5849625007, "observations": 4.0, "audit_sec": 0.0056225387},
+    "object_value": {"automorphisms": 48.0, "residual_identity_bits": 5.5849625007, "observations": 8.0, "audit_sec": 0.0103923810},
+    "selective_full": {"automorphisms": 144.0, "residual_identity_bits": 7.1699250014, "observations": 24.0, "audit_sec": 0.0338810330}
+  },
+  "total_elapsed_sec": 0.1717350750,
+  "peak_rss_kib": 109476,
+  "model_bytes": 0,
+  "training_time_sec": 0,
+  "inference_time_sec": 0,
+  "candidate_graph_size": 0,
+  "estimated_ops": "O(n_object! * n_property! * Q * n_object * n_property)",
+  "progress_recognized": false,
+  "semantic_identity_gate_passed": false,
+  "highschool_level_passed": false,
+  "weak_smartphone_verified": false
+}
