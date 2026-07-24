@@ -1,0 +1,29 @@
+{
+  "track": "C_causal_grounding",
+  "cycle": 5,
+  "hypothesis": "Bidirectional Lesion-Consensus Causal Units from Cross-Lexicon Response Conservation",
+  "seeds": [1, 7, 19],
+  "consensus_channels_mean": 3.0,
+  "strict_seed_passes": 0,
+  "candidate_count": 32,
+  "model_bytes_per_domain": 7026,
+  "peak_rss_kib_runtime_included": 112536,
+  "runtime_sec": 23.181124622,
+  "estimated_update_ops_per_episode": 1536,
+  "estimated_inference_ops_per_query": 11264,
+  "key_results": {
+    "D_held": {"correct_joint": 0.0, "shuffle_joint": 0.125, "correct_inverse": 0.2083, "shuffle_inverse": 0.2083},
+    "D_free": {"correct_joint": 0.0833, "shuffle_joint": 0.0833, "correct_inverse": 0.1667, "shuffle_inverse": 0.0833},
+    "E_free": {"correct_joint": 0.0417, "shuffle_joint": 0.0417, "correct_inverse": 0.2917, "shuffle_inverse": 0.0417},
+    "F_free": {"correct_joint": 0.0833, "shuffle_joint": 0.0, "correct_inverse": 0.0833, "shuffle_inverse": 0.0833},
+    "F_goal_change": {"correct_joint": 0.0833, "shuffle_joint": 0.0, "correct_inverse": 0.125, "shuffle_inverse": 0.1667}
+  },
+  "post_treatment_information_used_at_test": false,
+  "shared_lexicon_across_domains": false,
+  "fixed_ontology_or_handwritten_slot_used": false,
+  "status": "falsified_bidirectional_lesion_consensus_not_semantic",
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
