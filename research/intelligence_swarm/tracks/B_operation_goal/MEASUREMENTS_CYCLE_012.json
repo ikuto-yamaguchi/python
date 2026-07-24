@@ -1,0 +1,54 @@
+{
+  "cycle": 12,
+  "hypothesis": "Latent Operation-Axis Birth from Anonymous Commutator Sparsity",
+  "summary": {
+    "correct": {
+      "d1:canonical": {"op_acc": 0.775, "prospective": 0.8166666666666667, "inverse": 0.775, "goal": 0.8166666666666667, "repair": 0.8166666666666667},
+      "d1:reverse": {"op_acc": 0.6666666666666666, "prospective": 0.8333333333333334, "inverse": 0.6666666666666666, "goal": 0.8333333333333334, "repair": 0.8333333333333334},
+      "d1:omit": {"op_acc": 0.475, "prospective": 0.7333333333333333, "inverse": 0.475, "goal": 0.7333333333333333, "repair": 0.7333333333333333},
+      "d1:paragraph": {"op_acc": 0.7166666666666667, "prospective": 0.8583333333333334, "inverse": 0.7166666666666667, "goal": 0.8583333333333334, "repair": 0.8583333333333334},
+      "d1:free": {"op_acc": 0.5916666666666667, "prospective": 0.7666666666666667, "inverse": 0.5916666666666667, "goal": 0.7666666666666667, "repair": 0.7666666666666667},
+      "d1:rename": {"op_acc": 0.2333333333333333, "prospective": 0.5416666666666666, "inverse": 0.2333333333333333, "goal": 0.5416666666666666, "repair": 0.5416666666666666},
+      "d2:canonical": {"op_acc": 0.6333333333333333, "prospective": 0.7416666666666667, "inverse": 0.6333333333333333, "goal": 0.7416666666666667, "repair": 0.7416666666666667},
+      "d2:reverse": {"op_acc": 0.5666666666666667, "prospective": 0.7333333333333333, "inverse": 0.5666666666666667, "goal": 0.7333333333333333, "repair": 0.7333333333333333},
+      "d2:omit": {"op_acc": 0.5916666666666667, "prospective": 0.8, "inverse": 0.5916666666666667, "goal": 0.8, "repair": 0.8},
+      "d2:paragraph": {"op_acc": 0.6, "prospective": 0.8, "inverse": 0.6, "goal": 0.8, "repair": 0.8},
+      "d2:free": {"op_acc": 0.6583333333333333, "prospective": 0.7416666666666667, "inverse": 0.6583333333333333, "goal": 0.7416666666666667, "repair": 0.7416666666666667},
+      "d2:rename": {"op_acc": 0.31666666666666665, "prospective": 0.625, "inverse": 0.31666666666666665, "goal": 0.625, "repair": 0.625},
+      "train_s": 0.0163,
+      "model_bytes": 5081.0
+    },
+    "random_surface": {
+      "d1:canonical": {"prospective": 0.8},
+      "d1:reverse": {"prospective": 0.8333333333333334},
+      "d1:omit": {"prospective": 0.6583333333333333},
+      "d1:paragraph": {"prospective": 0.775},
+      "d1:free": {"prospective": 0.75},
+      "d1:rename": {"prospective": 0.5416666666666666},
+      "d2:canonical": {"prospective": 0.8083333333333333},
+      "d2:reverse": {"prospective": 0.7083333333333334},
+      "d2:omit": {"prospective": 0.6333333333333333},
+      "d2:paragraph": {"prospective": 0.7916666666666666},
+      "d2:free": {"prospective": 0.7416666666666667},
+      "d2:rename": {"prospective": 0.575}
+    },
+    "axis_shuffle": {
+      "d1:canonical": {"prospective": 0.7833333333333333},
+      "d1:reverse": {"prospective": 0.825},
+      "d1:omit": {"prospective": 0.775},
+      "d1:paragraph": {"prospective": 0.75},
+      "d1:free": {"prospective": 0.8333333333333334},
+      "d1:rename": {"prospective": 0.6333333333333333},
+      "d2:canonical": {"prospective": 0.7833333333333333},
+      "d2:reverse": {"prospective": 0.7666666666666667},
+      "d2:omit": {"prospective": 0.8},
+      "d2:paragraph": {"prospective": 0.7083333333333334},
+      "d2:free": {"prospective": 0.7833333333333333},
+      "d2:rename": {"prospective": 0.7166666666666667}
+    }
+  },
+  "peak_rss_kib": 167000,
+  "answer_leakage": false,
+  "fixed_ontology_in_model": false,
+  "highschool_level": false
+}
