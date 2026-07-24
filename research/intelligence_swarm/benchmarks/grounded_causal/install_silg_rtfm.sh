@@ -29,7 +29,7 @@ python -m pip install --extra-index-url https://download.pytorch.org/whl/cpu \
   'torch==1.13.1+cpu' 'torchvision==0.14.1+cpu'
 python -m pip install \
   'gym==0.21.0' 'py-getch==1.0.1' 'pyyaml==6.0.1' \
-  'submitit==1.4.5' 'expman==0.1.1' \
+  'submitit==1.4.5' 'expman==0.0.7' \
   'vocab>=0.0.4' 'embeddings>=0.0.7' 'revtok>=0.0.3'
 python -m pip install --no-deps -e "$ROOT/RTFM"
 python -m pip install --no-deps -e "$ROOT/silg"
