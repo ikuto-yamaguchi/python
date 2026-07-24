@@ -1,0 +1,28 @@
+{
+  "cycle": "B_OPERATION_GOAL_001",
+  "hypothesis": "Witness-Conditioned Operation Equivariance without Span Programs",
+  "seeds": [1, 7, 19],
+  "chance": {"prospective": 0.125, "inverse": 0.125, "goal_change": 0.5, "failure_repair": 0.125},
+  "per_seed": [
+    {"seed": 1, "prospective": {"held": 0.1375, "rename": 0.11875, "word_order": 0.125, "nested": 0.125, "paragraph": 0.075, "free": 0.1375, "domain": 0.1375}, "shuffle": {"held": 0.125, "rename": 0.11875, "word_order": 0.11875, "nested": 0.13125, "paragraph": 0.08125, "free": 0.125, "domain": 0.14375}, "inverse_held": 0.14375, "inverse_domain": 0.0875, "goal_change": 0.56875, "goal_change_shuffle": 0.56875, "failure_repair": 0.1375, "failure_repair_shuffle": 0.1375},
+    {"seed": 7, "prospective": {"held": 0.15, "rename": 0.18125, "word_order": 0.1, "nested": 0.14375, "paragraph": 0.1375, "free": 0.15625, "domain": 0.1}, "shuffle": {"held": 0.15, "rename": 0.175, "word_order": 0.1, "nested": 0.1375, "paragraph": 0.13125, "free": 0.15, "domain": 0.1}, "inverse_held": 0.2, "inverse_domain": 0.18125, "goal_change": 0.45625, "goal_change_shuffle": 0.45625, "failure_repair": 0.1375, "failure_repair_shuffle": 0.13125},
+    {"seed": 19, "prospective": {"held": 0.1625, "rename": 0.10625, "word_order": 0.0875, "nested": 0.1375, "paragraph": 0.11875, "free": 0.13125, "domain": 0.10625}, "shuffle": {"held": 0.15625, "rename": 0.0875, "word_order": 0.075, "nested": 0.13125, "paragraph": 0.1125, "free": 0.11875, "domain": 0.1}, "inverse_held": 0.09375, "inverse_domain": 0.1125, "goal_change": 0.5125, "goal_change_shuffle": 0.5, "failure_repair": 0.1125, "failure_repair_shuffle": 0.10625}
+  ],
+  "mean": {
+    "prospective": {"held": 0.15, "rename": 0.13541666666666666, "word_order": 0.10416666666666667, "nested": 0.13541666666666666, "paragraph": 0.11041666666666666, "free": 0.14166666666666666, "domain": 0.11458333333333334},
+    "shuffle": {"held": 0.14375, "rename": 0.12708333333333333, "word_order": 0.09791666666666667, "nested": 0.13333333333333333, "paragraph": 0.10833333333333334, "free": 0.13125, "domain": 0.11458333333333333},
+    "inverse_held": 0.14583333333333334,
+    "inverse_domain": 0.12708333333333333,
+    "goal_change": 0.5125,
+    "goal_change_shuffle": 0.5083333333333333,
+    "failure_repair": 0.12916666666666668,
+    "failure_repair_shuffle": 0.125
+  },
+  "resources": {"matrix_bytes_float32_estimate": 131072, "training_seconds_total": 37.955334787999995, "peak_rss_kib_python_runtime_included": 160176, "update_ops_estimate_per_episode": 32768, "candidate_scoring_ops_estimate": 32768, "candidate_count_prospective": 8, "complexity": {"update": "O(TR)", "prospective": "O(KTR)", "inverse": "O(KTR)"}},
+  "leakage_audit": {"operation_label_used_by_model": false, "goal_slot_used_by_model": false, "span_boundaries_generated": false, "string_retrieval_used": false, "final_test_outcome_used_for_training": false},
+  "gates": {"G1_passed": false, "G2_passed": false},
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
