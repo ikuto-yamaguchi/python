@@ -1,0 +1,68 @@
+{
+  "cycle": "A_SEMANTIC_IDENTITY_001",
+  "hypothesis": "Utterance-Witness Synchrony Binding without Span Proposals",
+  "seeds": [1, 7, 19],
+  "mean": {
+    "correct": {
+      "held": 0.24305555555555555,
+      "rename": 0.22395833333333334,
+      "word_order": 0.21354166666666666,
+      "omission": 0.2204861111111111,
+      "paragraph": 0.1857638888888889,
+      "free": 0.1996527777777778,
+      "domain": 0.11284722222222222
+    },
+    "shuffled": {
+      "held": 0.1232638888888889,
+      "rename": 0.13541666666666669,
+      "word_order": 0.10416666666666667,
+      "omission": 0.14930555555555555,
+      "paragraph": 0.10590277777777778,
+      "free": 0.13541666666666666,
+      "domain": 0.11805555555555555
+    },
+    "surface": {"held": 0.012152777777777778, "domain": 0.008680555555555556},
+    "inverse_held": 0.1736111111111111,
+    "inverse_domain": 0.14409722222222224,
+    "lesions": {"trajectory_only": 0.2482638888888889, "scar_only": 0.1388888888888889}
+  },
+  "resources": {
+    "matrix_bytes_float32_estimate": 98304,
+    "text_dim": 256,
+    "witness_dim": 96,
+    "training_seconds_total": 25.985923483999954,
+    "peak_rss_kib_python_runtime_included": 128620,
+    "update_ops_estimate_per_episode": 24576,
+    "inference_ops_estimate_per_candidate": 24576,
+    "complexity": {"update": "O(TW)", "candidate_scoring": "O(KTW)"}
+  },
+  "leakage_audit": {
+    "identity_label_used_in_training": false,
+    "span_boundaries_generated": false,
+    "string_retrieval_used_by_main_method": false,
+    "final_test_outcome_used_for_training": false
+  },
+  "per_seed": [
+    {
+      "seed": 1,
+      "correct": {"held": 0.21875, "rename": 0.234375, "word_order": 0.20833333333333334, "omission": 0.23958333333333334, "paragraph": 0.1875, "free": 0.1875, "domain": 0.109375},
+      "shuffled": {"held": 0.11979166666666667, "rename": 0.15625, "word_order": 0.109375, "omission": 0.15104166666666666, "paragraph": 0.13020833333333334, "free": 0.10416666666666667, "domain": 0.09895833333333333},
+      "inverse_held": 0.1875, "inverse_domain": 0.140625,
+      "lesions": {"trajectory_only": 0.203125, "scar_only": 0.13020833333333334}
+    },
+    {
+      "seed": 7,
+      "correct": {"held": 0.265625, "rename": 0.24479166666666666, "word_order": 0.234375, "omission": 0.19791666666666666, "paragraph": 0.20833333333333334, "free": 0.21875, "domain": 0.11979166666666667},
+      "shuffled": {"held": 0.125, "rename": 0.13020833333333334, "word_order": 0.109375, "omission": 0.17708333333333334, "paragraph": 0.09895833333333333, "free": 0.15104166666666666, "domain": 0.125},
+      "inverse_held": 0.15625, "inverse_domain": 0.16145833333333334,
+      "lesions": {"trajectory_only": 0.28125, "scar_only": 0.15104166666666666}
+    },
+    {
+      "seed": 19,
+      "correct": {"held": 0.24479166666666666, "rename": 0.19270833333333334, "word_order": 0.19791666666666666, "omission": 0.22395833333333334, "paragraph": 0.16145833333333334, "free": 0.19270833333333334, "domain": 0.109375},
+      "shuffled": {"held": 0.125, "rename": 0.11979166666666667, "word_order": 0.09375, "omission": 0.11979166666666667, "paragraph": 0.08854166666666667, "free": 0.15104166666666666, "domain": 0.13020833333333334},
+      "inverse_held": 0.17708333333333334, "inverse_domain": 0.13020833333333334,
+      "lesions": {"trajectory_only": 0.2604166666666667, "scar_only": 0.13541666666666666}
+    }
+  ]
+}
