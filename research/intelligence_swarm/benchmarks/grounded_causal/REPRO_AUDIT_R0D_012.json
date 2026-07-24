@@ -1,0 +1,41 @@
+{
+  "audit_id": "R0D_012",
+  "date": "2026-07-25",
+  "branch": "research/intelligence-swarm-reconstruction-001",
+  "scope": "artifact provenance strictness for R0 benchmark reproduction",
+  "completed": [
+    "raw_log_path, model_path, and data_path are mandatory rather than warning-only",
+    "raw log, model, and data digests must be full 64-hex SHA-256 values",
+    "code_commit must be a full 40-hex Git commit SHA",
+    "reported model_bytes must equal the independently inspected model artifact size",
+    "resource values must be finite non-negative numbers",
+    "artifact manifest seeds must be exactly 1, 7, and 19",
+    "method x seed x domain x split Cartesian coverage remains mandatory"
+  ],
+  "required_methods": [
+    "correct",
+    "random",
+    "language_blind",
+    "state_only",
+    "target_label_shuffle",
+    "outcome_shuffle"
+  ],
+  "tests": {
+    "command": "python research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract.py",
+    "result": "10 tests passed",
+    "runtime_seconds": 2.272
+  },
+  "current_public_baseline_classification": "initial_reproduction_failure",
+  "classification_reasons": [
+    "the current public matched run does not yet contain target-label-shuffle and outcome-shuffle predictions",
+    "the current public run has not yet been emitted as a complete strict artifact manifest with independently readable raw log, model, and immutable data files for every method x seed x split cell",
+    "paper-scale public capability has not been reproduced"
+  ],
+  "claims": {
+    "new_memory_mechanism": false,
+    "new_architecture": false,
+    "capability_progress": false,
+    "novel_intelligence_principle": false,
+    "high_school_level_intelligence": false
+  }
+}
