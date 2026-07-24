@@ -16,7 +16,8 @@ HELD_OUT_CONDITIONS={"entity_holdout","dynamics_holdout","language_holdout"}
 FORBIDDEN_MODEL_INPUT_FIELDS={"gold_action","gold_state_after","gold_inverse","answer","label","completed_trajectory","post_treatment_state","state_after","action","reward","done","terminal_observation"}
 GOLD_LIKE_KEYS=set(FORBIDDEN_MODEL_INPUT_FIELDS)
 RESOURCE_FIELDS={"model_bytes","peak_rss_bytes","training_wall_seconds","cpu_inference_ms_per_item","raw_log_sha256","model_sha256","data_sha256","code_commit"}
-
+ARTIFACT_FIELDS=(("raw_log_path","raw_log_sha256"),("model_path","model_sha256"),("data_path","data_sha256"))
+CANONICAL_SEEDS={1,7,19}
 
 def read_jsonl(path:Path)->list[dict[str,Any]]:
     rows=[]
@@ -42,6 +43,13 @@ def file_sha256(path:Path)->str:
     with path.open("rb") as fh:
         for b in iter(lambda:fh.read(1<<20),b""): h.update(b)
     return h.hexdigest()
+
+def _is_hex(value:Any,n:int)->bool:
+    s=str(value)
+    return len(s)==n and all(c in "0123456789abcdefABCDEF" for c in s)
+
+def _finite_nonnegative(value:Any)->bool:
+    return isinstance(value,(int,float)) and not isinstance(value,bool) and math.isfinite(float(value)) and float(value)>=0
 
 def canonical_text(text:str)->str: return "".join(str(text).split()).casefold()
 def _truthy(row:dict[str,Any],key:str)->bool: return row.get(key) is True or row.get(key)==1 or str(row.get(key,False)).lower()=="true"
@@ -76,7 +84,6 @@ def _split_sig(row:dict[str,Any],*keys:str)->str|None:
     return None
 
 def instance_fingerprint(row:dict[str,Any])->str:
-    """Fingerprint immutable evaluation inputs; all methods must share this exact snapshot."""
     payload={k:row.get(k) for k in ("domain","seed","split","condition","utterance","state_before","history","valid_action_mask","entity_id","entity_signature","dynamics_id","dynamics_signature")}
     return stable_hash(payload)
 
@@ -142,26 +149,21 @@ def _paired_p(diffs:list[float],trials:int=20000,seed:int=20260724)->float:
     return (ext+1)/(trials+1)
 
 def _mcnemar_exact(correct_only:int,control_only:int)->float:
-    """Exact two-sided McNemar/binomial p-value for paired binary outcomes."""
     n=correct_only+control_only
     if n==0:return 1.0
-    k=min(correct_only,control_only)
-    tail=sum(math.comb(n,i) for i in range(k+1))/(2**n)
+    k=min(correct_only,control_only); tail=sum(math.comb(n,i) for i in range(k+1))/(2**n)
     return min(1.0,2.0*tail)
 
 def _cluster_bootstrap_ci(instance_diffs:dict[tuple[int,str,str],list[float]],trials:int=5000,seed:int=20260724)->tuple[float,float]:
-    """Resample seed/domain/condition cells, then instances within cells."""
     keys=sorted(instance_diffs)
     if not keys:return math.nan,math.nan
     rng=random.Random(seed); vals=[]
     for _ in range(trials):
         chosen=[keys[rng.randrange(len(keys))] for _ in keys]; sampled=[]
         for key in chosen:
-            xs=instance_diffs[key]
-            sampled.extend(xs[rng.randrange(len(xs))] for _ in xs)
+            xs=instance_diffs[key]; sampled.extend(xs[rng.randrange(len(xs))] for _ in xs)
         vals.append(statistics.mean(sampled))
-    vals.sort(); lo=vals[max(0,int(.025*len(vals))-1)]; hi=vals[min(len(vals)-1,int(.975*len(vals)))]
-    return lo,hi
+    vals.sort(); return vals[max(0,int(.025*len(vals))-1)],vals[min(len(vals)-1,int(.975*len(vals)))]
 
 def score(data:list[dict[str,Any]],preds:list[dict[str,Any]])->dict[str,Any]:
     data=adapt_dataset(data); by_id={str(r["instance_id"]):r for r in data}; eval_ids={i for i,r in by_id.items() if str(r["split"]).lower()!="train"}
@@ -179,8 +181,7 @@ def score(data:list[dict[str,Any]],preds:list[dict[str,Any]])->dict[str,Any]:
         snapshots[iid].add(supplied); method_ids[method].add(iid)
         item={"prospective":float(p["pred_state_after"]==gold["gold_state_after"]),"action":float(p["pred_action"]==gold["gold_action"])}
         if "gold_inverse" in gold and "pred_inverse" in p:item["inverse"]=float(p["pred_inverse"]==gold["gold_inverse"])
-        grouped[(method,int(gold["seed"]),str(gold["domain"]),str(gold["condition"]))].append(item)
-        outcomes[method][iid]=item
+        grouped[(method,int(gold["seed"]),str(gold["domain"]),str(gold["condition"]))].append(item); outcomes[method][iid]=item
     for iid,fps in snapshots.items():
         if len(fps)!=1: errors.append(f"instance {iid}: methods used different input snapshots")
     coverage={}
@@ -217,14 +218,12 @@ def score(data:list[dict[str,Any]],preds:list[dict[str,Any]])->dict[str,Any]:
                 if a>b:correct_only+=1
                 elif b>a:control_only+=1
                 else:ties+=1
-            instance_values=[x for xs in inst_by_cell.values() for x in xs]
-            blo,bhi=_cluster_bootstrap_ci(inst_by_cell) if instance_values else (math.nan,math.nan)
-            m,lo,hi=_mean_ci(diffs)
+            instance_values=[x for xs in inst_by_cell.values() for x in xs]; blo,bhi=_cluster_bootstrap_ci(inst_by_cell) if instance_values else (math.nan,math.nan); m,lo,hi=_mean_ci(diffs)
             gaps[ctrl][metric]={"paired_cells":len(diffs),"mean_gap":m,"min_cell_gap":min(diffs),"max_cell_gap":max(diffs),"positive_cell_fraction":sum(x>0 for x in diffs)/len(diffs),"ci95_low":lo,"ci95_high":hi,"paired_randomization_p_two_sided":_paired_p(diffs),"paired_instances":len(instance_values),"instance_mean_gap":statistics.mean(instance_values) if instance_values else math.nan,"instance_cluster_bootstrap_ci95_low":blo,"instance_cluster_bootstrap_ci95_high":bhi,"correct_only_instances":correct_only,"control_only_instances":control_only,"tied_instances":ties,"mcnemar_exact_p_two_sided":_mcnemar_exact(correct_only,control_only),"passes_mean_gap_0_10":m>=.10,"passes_every_cell_positive":min(diffs)>0,"passes_ci_excludes_zero":lo>0,"passes_instance_cluster_ci_excludes_zero":blo>0 if not math.isnan(blo) else False}
     return {"valid":not errors,"errors":errors,"prediction_rows":len(preds),"expected_eval_instances":len(eval_ids),"coverage":coverage,"same_instance_snapshot":not any("snapshot" in e for e in errors),"fingerprints_required":True,"cells":cells,"summary":dict(summary),"paired_gaps_vs_correct":gaps,"progress_contract":{"required_mean_gap":.10,"requires_all_three_seeds":True,"requires_same_instance_snapshot":True,"requires_explicit_instance_fingerprint":True,"requires_complete_prediction_coverage":True,"requires_ci_excludes_zero":True,"requires_instance_cluster_ci_excludes_zero":True,"internal_metrics_do_not_count":True}}
 
 def audit_artifacts(manifest:dict[str,Any],base_dir:Path)->dict[str,Any]:
-    errors=[]; warnings=[]; checks=[]; runs=manifest.get("runs")
+    errors=[]; checks=[]; runs=manifest.get("runs")
     if not isinstance(runs,list) or not runs:return {"valid":False,"errors":["manifest.runs must be a non-empty list"],"checks":[],"classification":"initial_reproduction_failure"}
     methods=set(); cells=set(); seeds=set(); domains=set(); splits=set()
     for i,run in enumerate(runs,1):
@@ -232,26 +231,30 @@ def audit_artifacts(manifest:dict[str,Any],base_dir:Path)->dict[str,Any]:
         miss=RESOURCE_FIELDS-run.keys()
         if miss:errors.append(f"run {i}: missing resource/provenance fields {sorted(miss)}")
         try: method=str(run["method"]);seed=int(run["seed"]);domain=str(run["domain"]);split=str(run["split"])
-        except KeyError as e:errors.append(f"run {i}: missing indexing field {e}");continue
+        except (KeyError,TypeError,ValueError) as e:errors.append(f"run {i}: invalid indexing field {e}");continue
+        if not domain:errors.append(f"run {i}: domain must be non-empty")
+        if not split:errors.append(f"run {i}: split must be non-empty")
         cell=(method,seed,domain,split)
         if cell in cells:errors.append(f"run {i}: duplicate run cell {cell}")
         cells.add(cell);methods.add(method);seeds.add(seed);domains.add(domain);splits.add(split)
         for key in ("model_bytes","peak_rss_bytes","training_wall_seconds","cpu_inference_ms_per_item"):
-            v=run.get(key)
-            if not isinstance(v,(int,float)) or v<0:errors.append(f"run {i}: {key} must be a non-negative number")
-        for pk,hk in (("raw_log_path","raw_log_sha256"),("model_path","model_sha256"),("data_path","data_sha256")):
+            if not _finite_nonnegative(run.get(key)):errors.append(f"run {i}: {key} must be a finite non-negative number")
+        if not _is_hex(run.get("code_commit"),40):errors.append(f"run {i}: code_commit must be a full 40-hex commit SHA")
+        for pk,hk in ARTIFACT_FIELDS:
             p=run.get(pk); expected=run.get(hk)
-            if p is None:warnings.append(f"run {i}: {pk} absent; checksum cannot be independently verified");continue
+            if not p:errors.append(f"run {i}: {pk} is required for independent checksum verification");continue
+            if not _is_hex(expected,64):errors.append(f"run {i}: {hk} must be a full 64-hex SHA-256");continue
             path=base_dir/str(p)
-            if not path.exists():errors.append(f"run {i}: missing artifact {path}");continue
-            actual=file_sha256(path);ok=actual==expected;checks.append({"run":i,"path":str(path),"expected":expected,"actual":actual,"ok":ok})
+            if not path.exists() or not path.is_file():errors.append(f"run {i}: missing artifact {path}");continue
+            actual=file_sha256(path);ok=actual==str(expected).lower();check={"run":i,"path":str(path),"expected":expected,"actual":actual,"ok":ok,"size_bytes":path.stat().st_size};checks.append(check)
             if not ok:errors.append(f"run {i}: checksum mismatch for {pk}")
+            if pk=="model_path" and _finite_nonnegative(run.get("model_bytes")) and int(run["model_bytes"])!=path.stat().st_size:errors.append(f"run {i}: model_bytes does not match model artifact size")
     required={"correct"}|REQUIRED_CONTROL_METHODS; missing_methods=required-methods
     if missing_methods:errors.append(f"manifest missing required methods {sorted(missing_methods)}")
-    if len(seeds)<3:errors.append(f"manifest needs >=3 seeds, found {sorted(seeds)}")
-    expected={(m,s,d,sp) for m in required for s in seeds for d in domains for sp in splits}; missing_cells=expected-cells
+    if seeds!=CANONICAL_SEEDS:errors.append(f"manifest seeds must be exactly {sorted(CANONICAL_SEEDS)}, found {sorted(seeds)}")
+    expected={(m,s,d,sp) for m in required for s in CANONICAL_SEEDS for d in domains for sp in splits}; missing_cells=expected-cells
     if missing_cells:errors.append(f"manifest incomplete Cartesian coverage: {len(missing_cells)} missing cells")
-    return {"valid":not errors,"errors":errors,"warnings":sorted(set(warnings)),"checks":checks,"methods":sorted(methods),"seeds":sorted(seeds),"domains":sorted(domains),"splits":sorted(splits),"runs":len(runs),"missing_run_cells":len(missing_cells),"missing_run_cell_examples":[list(x) for x in sorted(missing_cells)[:10]],"classification":"reproduced" if not errors else "initial_reproduction_failure"}
+    return {"valid":not errors,"errors":errors,"warnings":[],"checks":checks,"methods":sorted(methods),"seeds":sorted(seeds),"domains":sorted(domains),"splits":sorted(splits),"runs":len(runs),"missing_run_cells":len(missing_cells),"missing_run_cell_examples":[list(x) for x in sorted(missing_cells)[:10]],"independent_artifacts_required":True,"canonical_seeds":sorted(CANONICAL_SEEDS),"classification":"reproduced" if not errors else "initial_reproduction_failure"}
 
 def main(argv:list[str]|None=None)->int:
     p=argparse.ArgumentParser(); sub=p.add_subparsers(dest="command",required=True)
