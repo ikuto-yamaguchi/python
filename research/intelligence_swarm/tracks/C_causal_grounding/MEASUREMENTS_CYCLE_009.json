@@ -1,0 +1,59 @@
+{
+  "cycle": 9,
+  "track": "C_causal_grounding",
+  "hypothesis": "Factorized target-operation causal orbit is identifiable from minimal independent external witnesses",
+  "status": "identifiability_supported_capability_progress_not_claimed",
+  "seeds": [1, 7, 19],
+  "target_tokens": 4,
+  "operation_tokens": 4,
+  "initial_version_space": 576,
+  "budgets": [0, 1, 2, 3, 4],
+  "modes": ["active", "random", "outcome_shuffle"],
+  "results": {
+    "mean": {
+      "0": {
+        "active": {"prospective_joint": 0.0, "prospective_target": 0.0, "prospective_operation": 0.0, "inverse": 0.0, "counterfactual_composition": 0.0, "remaining_worlds": 576.0, "witnesses_used": 0.0},
+        "random": {"prospective_joint": 0.0, "prospective_target": 0.0, "prospective_operation": 0.0, "inverse": 0.0, "counterfactual_composition": 0.0, "remaining_worlds": 576.0, "witnesses_used": 0.0},
+        "outcome_shuffle": {"prospective_joint": 0.0, "prospective_target": 0.0, "prospective_operation": 0.0, "inverse": 0.0, "counterfactual_composition": 0.0, "remaining_worlds": 576.0, "witnesses_used": 0.0}
+      },
+      "1": {
+        "active": {"prospective_joint": 0.0625, "prospective_target": 0.0625, "prospective_operation": 0.0625, "inverse": 0.0625, "counterfactual_composition": 0.0625, "remaining_worlds": 36.0, "witnesses_used": 1.0},
+        "random": {"prospective_joint": 0.0625, "prospective_target": 0.0625, "prospective_operation": 0.0625, "inverse": 0.0625, "counterfactual_composition": 0.0625, "remaining_worlds": 36.0, "witnesses_used": 1.0},
+        "outcome_shuffle": {"prospective_joint": 0.0, "prospective_target": 0.0, "prospective_operation": 0.0, "inverse": 0.0, "counterfactual_composition": 0.0, "remaining_worlds": 36.0, "witnesses_used": 1.0}
+      },
+      "2": {
+        "active": {"prospective_joint": 0.25, "prospective_target": 0.25, "prospective_operation": 0.25, "inverse": 0.25, "counterfactual_composition": 0.25, "remaining_worlds": 4.0, "witnesses_used": 2.0},
+        "random": {"prospective_joint": 0.25, "prospective_target": 0.25, "prospective_operation": 0.25, "inverse": 0.25, "counterfactual_composition": 0.25, "remaining_worlds": 4.0, "witnesses_used": 2.0},
+        "outcome_shuffle": {"prospective_joint": 0.0, "prospective_target": 0.0, "prospective_operation": 0.0, "inverse": 0.0, "counterfactual_composition": 0.0, "remaining_worlds": 0.0, "witnesses_used": 2.0}
+      },
+      "3": {
+        "active": {"prospective_joint": 1.0, "prospective_target": 1.0, "prospective_operation": 1.0, "inverse": 1.0, "counterfactual_composition": 1.0, "remaining_worlds": 1.0, "witnesses_used": 3.0},
+        "random": {"prospective_joint": 0.5833333333333334, "prospective_target": 0.5833333333333334, "prospective_operation": 0.5833333333333334, "inverse": 0.5833333333333334, "counterfactual_composition": 0.5833333333333334, "remaining_worlds": 2.3333333333333335, "witnesses_used": 3.0},
+        "outcome_shuffle": {"prospective_joint": 0.0, "prospective_target": 0.0, "prospective_operation": 0.0, "inverse": 0.0, "counterfactual_composition": 0.0, "remaining_worlds": 0.0, "witnesses_used": 2.0}
+      },
+      "4": {
+        "active": {"prospective_joint": 1.0, "prospective_target": 1.0, "prospective_operation": 1.0, "inverse": 1.0, "counterfactual_composition": 1.0, "remaining_worlds": 1.0, "witnesses_used": 4.0},
+        "random": {"prospective_joint": 0.6666666666666666, "prospective_target": 0.6666666666666666, "prospective_operation": 0.6666666666666666, "inverse": 0.6666666666666666, "counterfactual_composition": 0.6666666666666666, "remaining_worlds": 1.6666666666666667, "witnesses_used": 4.0},
+        "outcome_shuffle": {"prospective_joint": 0.0, "prospective_target": 0.0, "prospective_operation": 0.0, "inverse": 0.0, "counterfactual_composition": 0.0, "remaining_worlds": 0.0, "witnesses_used": 2.0}
+      }
+    }
+  },
+  "runtime_seconds": 0.07735047300000986,
+  "peak_rss_kib": 115516,
+  "model_bytes_upper_bound": 4608,
+  "estimated_probe_simulations_max": 36864,
+  "answer_leakage": false,
+  "final_test_outcome_used_for_selection": false,
+  "limitations": [
+    "oracle segmentation of opaque target and operation tokens",
+    "known unary factorization and arity",
+    "synthetic finite permutation world",
+    "not raw-Japanese semantic birth"
+  ],
+  "g1_passed": false,
+  "g2_passed": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
