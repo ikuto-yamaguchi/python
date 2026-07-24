@@ -22,9 +22,11 @@ class Tests(unittest.TestCase):
    for m in METHODS:out.append({"instance_id":r["instance_id"],"method":m,"instance_fingerprint":fp,"pred_action":r["action"] if m=="correct" else 0,"pred_state_after":r["state_after"] if m=="correct" else r["state_before"]})
   return out
  def test_valid(self):
-  r=self.rows();self.assertTrue(ec.validate_dataset(r)["valid"]);s=ec.score(r,self.preds(r));self.assertTrue(s["valid"]);self.assertTrue(s["same_instance_snapshot"])
+  r=self.rows();self.assertTrue(ec.validate_dataset(r)["valid"]);s=ec.score(r,self.preds(r));self.assertTrue(s["valid"]);self.assertTrue(s["same_instance_snapshot"]);g=s["paired_gaps_vs_correct"]["random"]["action"];self.assertEqual(g["paired_instances"],9);self.assertEqual(g["correct_only_instances"],9);self.assertEqual(g["control_only_instances"],0);self.assertLess(g["mcnemar_exact_p_two_sided"],.01);self.assertGreater(g["instance_cluster_bootstrap_ci95_low"],0)
  def test_snapshot_mismatch(self):
   r=self.rows();p=self.preds(r);p[0]["instance_fingerprint"]="bad";s=ec.score(r,p);self.assertFalse(s["valid"]);self.assertTrue(any("snapshot mismatch" in e for e in s["errors"]))
+ def test_fingerprint_required(self):
+  r=self.rows();p=self.preds(r);p[0].pop("instance_fingerprint");s=ec.score(r,p);self.assertFalse(s["valid"]);self.assertTrue(any("instance_fingerprint" in e for e in s["errors"]))
  def test_leakage(self):
   r=self.rows();r[0]["model_input"]={"completed_trajectory":[]};self.assertFalse(ec.validate_dataset(r)["valid"])
  def test_overlap(self):
