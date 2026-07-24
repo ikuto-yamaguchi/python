@@ -1,0 +1,53 @@
+{
+  "track": "B_operation_goal",
+  "cycle": 3,
+  "hypothesis": "Cross-Domain Consequence-Invariant Operation Grounding",
+  "seeds": [1, 7, 19],
+  "chance": {"joint": 0.03125, "target": 0.125, "move": 0.25, "inverse": 0.125},
+  "summary": {
+    "consequence_invariant": {
+      "held": {"joint_accuracy": 0.2824074074074074, "target_accuracy": 0.4305555555555556, "move_accuracy": 0.5601851851851851, "inverse_accuracy": 0.38425925925925924, "inference_ms_per_query": 4.5282004907407885},
+      "word_order": {"joint_accuracy": 0.13425925925925927, "target_accuracy": 0.3611111111111111, "move_accuracy": 0.36574074074074076, "inverse_accuracy": 0.3287037037037037, "inference_ms_per_query": 4.427474703703638},
+      "nested": {"joint_accuracy": 0.11574074074074074, "target_accuracy": 0.2916666666666667, "move_accuracy": 0.33796296296296297, "inverse_accuracy": 0.3287037037037037, "inference_ms_per_query": 4.473241486111221},
+      "paragraph": {"joint_accuracy": 0.0787037037037037, "target_accuracy": 0.24537037037037038, "move_accuracy": 0.39351851851851855, "inverse_accuracy": 0.4027777777777778, "inference_ms_per_query": 4.427416587963006},
+      "free_japanese": {"joint_accuracy": 0.06481481481481481, "target_accuracy": 0.2824074074074074, "move_accuracy": 0.3148148148148148, "inverse_accuracy": 0.25462962962962965, "inference_ms_per_query": 4.458630120370326},
+      "goal_change": {"joint_accuracy": 0.18055555555555555, "target_accuracy": 0.375, "move_accuracy": 0.4398148148148148, "inverse_accuracy": 0.3472222222222222, "inference_ms_per_query": 4.420333518518128},
+      "failure_repair": {"joint_accuracy": 0.18055555555555555, "target_accuracy": 0.35648148148148145, "move_accuracy": 0.5509259259259259, "inverse_accuracy": 0.3333333333333333, "inference_ms_per_query": 4.420801949074168},
+      "cross_domain_B": {"joint_accuracy": 0.125, "target_accuracy": 0.3101851851851852, "move_accuracy": 0.39351851851851855, "inverse_accuracy": 0.3333333333333333, "inference_ms_per_query": 4.5081561851850545},
+      "cross_domain_C": {"joint_accuracy": 0.12037037037037036, "target_accuracy": 0.2777777777777778, "move_accuracy": 0.39814814814814814, "inverse_accuracy": 0.2777777777777778, "inference_ms_per_query": 4.555691907407217},
+      "model_bytes": 50579,
+      "training_seconds": 0.10750522833334723
+    },
+    "raw_effect": {
+      "held": {"joint_accuracy": 0.05555555555555555, "inverse_accuracy": 0.28240740740740744},
+      "cross_domain_B": {"joint_accuracy": 0.046296296296296294, "inverse_accuracy": 0.24537037037037038},
+      "cross_domain_C": {"joint_accuracy": 0.032407407407407406, "inverse_accuracy": 0.21296296296296297},
+      "model_bytes": 50579,
+      "training_seconds": 0.10440460333332642
+    },
+    "shuffled_effect": {
+      "held": {"joint_accuracy": 0.06944444444444445, "target_accuracy": 0.25, "move_accuracy": 0.23148148148148148, "inverse_accuracy": 0.06944444444444445},
+      "word_order": {"joint_accuracy": 0.041666666666666664, "inverse_accuracy": 0.12962962962962962},
+      "nested": {"joint_accuracy": 0.032407407407407406, "inverse_accuracy": 0.13425925925925924},
+      "paragraph": {"joint_accuracy": 0.018518518518518517, "inverse_accuracy": 0.125},
+      "free_japanese": {"joint_accuracy": 0.027777777777777776, "inverse_accuracy": 0.17592592592592593},
+      "goal_change": {"joint_accuracy": 0.041666666666666664, "inverse_accuracy": 0.125},
+      "failure_repair": {"joint_accuracy": 0.046296296296296294, "inverse_accuracy": 0.14814814814814814},
+      "cross_domain_B": {"joint_accuracy": 0.032407407407407406, "target_accuracy": 0.12037037037037038, "move_accuracy": 0.24074074074074073, "inverse_accuracy": 0.10648148148148148},
+      "cross_domain_C": {"joint_accuracy": 0.05092592592592592, "target_accuracy": 0.16666666666666666, "move_accuracy": 0.25, "inverse_accuracy": 0.12962962962962962},
+      "model_bytes": 50579,
+      "training_seconds": 0.10700152500000588
+    }
+  },
+  "peak_rss_kib_runtime_included": 114472,
+  "estimated_update_ops_per_episode": 12288,
+  "estimated_inference_ops_per_query": 41472,
+  "candidate_count": 32,
+  "post_treatment_information_used_at_test": false,
+  "domain_dictionary_or_shared_object_id_used": false,
+  "fixed_ontology_or_handwritten_slot_used_by_model": false,
+  "highschool_level_passed": false,
+  "native_japanese_communication_passed": false,
+  "weak_smartphone_verified": false,
+  "completion": false
+}
