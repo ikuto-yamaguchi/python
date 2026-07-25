@@ -17,10 +17,12 @@ on:
       - 'research/intelligence_swarm/benchmarks/grounded_causal/SILG_RTFM_REPRO_001.md'
   workflow_dispatch:
 
-# Canonical R0.1 launch marker: 2026-07-25T06:48:23Z
+# A 131072-frame three-seed CPU run can exceed one hour. Keep an active run alive
+# when later canonical-branch commits arrive; otherwise recurrent automation can
+# repeatedly cancel the only experiment that matters before it emits artifacts.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   rtfm-public-probe:
