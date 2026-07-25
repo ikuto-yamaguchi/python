@@ -67,14 +67,14 @@
     {
       "id": "matched_inference_budget",
       "author_files": [],
-      "local_symbols": ["audit_parameter_budget"],
+      "local_symbols": ["main"],
       "local_symbol_file": "research/intelligence_swarm/benchmarks/grounded_causal/r02_typed_comparison.py",
-      "required_evidence": ["environment_first_and_end_to_end_parameter_bytes_compared"]
+      "required_evidence": ["environment_first_and_end_to_end_parameter_bytes_compared", "hard_failure_on_mismatch"]
     },
     {
       "id": "online_task_success",
       "author_files": [],
-      "local_symbols": ["evaluate_method"],
+      "local_symbols": ["evaluate_method", "paired_gaps"],
       "local_symbol_file": "research/intelligence_swarm/benchmarks/grounded_causal/evaluate_r02_online_silg.py",
       "required_evidence": ["same_initial_instance_stream", "terminal_reward_task_success", "cpu_latency_and_rss"]
     }
