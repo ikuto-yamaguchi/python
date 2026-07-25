@@ -17,6 +17,8 @@ Classification: `matched_fixed_episode_32768_frame_staged_training_not_public_ca
 
 Run `30158106220` completed install、schema/random probe、131,072 requested frames × seeds `1,7,19` training、and matched Correct/Random/Language-blind/State-only/Language-shuffle evaluation. It then failed during the R0.2 typed trajectory/baseline step before dependency freeze and artifact upload. Workflow artifacts are empty. None of the new checkpoint、performance、resource、or log values are accepted.
 
+`R01_RUN_REQUEST.json` was refreshed at `2026-07-25T17:48:05Z` to execute the split-job workflow. A request or queued run is not evidence. Acceptance still requires a preserved immutable artifact and complete audit.
+
 Required next actions:
 
 1. Use only the canonical split-job workflow on `research/intelligence-swarm-reconstruction-001`.
@@ -45,7 +47,7 @@ Forbidden:
 
 ## P0 — Evaluation, statistics, leakage and provenance
 
-Implemented through D029:
+Implemented through D030:
 
 - SILG real-schema adaptation
 - train/test utterance overlap
@@ -64,16 +66,17 @@ Implemented through D029:
 - D027 exact six-method artifact coverage、one data path/hash per cell、one immutable code commit per bundle
 - D028 exact prediction topology: only `correct/random/language_blind/state_only/target_label_shuffle/outcome_shuffle`; reject extras、global omissions、per-instance omissions、per-cell omissions、and evaluation-external predictions
 - D029 core-contract enforcement: `evaluation_contract.py` itself rejects extra prediction/artifact methods、mixed full code commits、and different `data_path + data_sha256` identities within one `seed × domain × split × condition` cell
+- D030 strict prediction-payload schema: reject leaked gold state/action、answers/labels、reward、terminal output、episode success/return、future state、rollout、completed trajectory、unknown debug fields、non-finite predicted values、invalid actions、training-instance predictions、and incomplete six-method coverage
 
-D028 short CI run `30165709843` passed. D029 reports a successful focused local regression, while the current head has no published combined-status checks. These validate code paths only; they do not establish a real benchmark result.
+D030 focused regression fixes seven cases: clean payload pass; leaked `gold_state_after`; leaked `completed_trajectory`; unknown payload; invalid action; non-finite predicted state; missing outcome-shuffle prediction. PR-triggered method-topology run `30169591964` passed on the current head. These validate audit code only; no real R0 bundle has passed.
 
 Remaining:
 
 1. Do not add another auditor unless a preserved real bundle exposes a concrete false pass/failure.
-2. Apply the unified contract to the next preserved R0.1 artifact.
+2. Apply the unified contract, including D030, to the next preserved R0.1 artifact.
 3. Preserve the first failing condition and raw evidence.
 4. If target-label is undefined in SILG, record formal inapplicability instead of inventing labels.
-5. Require the core contract and companion auditors to agree on the same method registry、full code commit、and per-cell dataset identity.
+5. Require the core contract and companion auditors to agree on the same method registry、full code commit、per-cell dataset identity、and prediction payload schema.
 
 Formal classification remains **`initial_reproduction_failure`** until a real bundle passes.
 
@@ -82,8 +85,8 @@ Formal classification remains **`initial_reproduction_failure`** until a real bu
 Primary reference:
 
 - Gaddy & Klein 2019
-- `dgaddy/environment-learning`
-- commit `ac1e7cb62ae94c76f545bf942f0c8febce43891f`
+- authors' public repository `dgaddy/environment-learning`
+- current local method-reference marker `ac1e7cb62ae94c76f545bf942f0c8febce43891f` is not yet accepted as an immutable author-code pin
 
 Implemented:
 
@@ -102,17 +105,21 @@ RTFM S1 boundary:
 - entity holdout: formally inapplicable in S1
 - language-form holdout: formally inapplicable in S1
 
+Gaddy–Klein fidelity audit 001 classifies the current code as an incomplete method transfer, not a numerical reproduction. Blocking gaps:
+
+1. Pin the exact author-code commit and hash the inspected reference files.
+2. Add a fail-closed author-component → SILG-component mapping manifest.
+3. Keep the claim as task adaptation; do not compare RTFM numbers to ACL 2019 SHRDLURN/regex numbers.
+4. Do not claim the paper's data-efficiency result from a single language-data budget.
+5. Execute the authors' code on a native public task before claiming compatibility with its qualitative ablations.
+6. Start R0.2 only after an immutable R0.1 artifact exists and passes checkpoint/resource integrity.
+7. Download that artifact in the separate R0.2 job.
+8. Produce and audit the 3-seed signature-to-trajectory join artifact.
+9. Pass the real dynamics holdout audit.
+10. Measure task success、next-state prediction、action accuracy and transfer for all three methods and seeds.
+11. Confirm source-policy competence before attributing differences to representation learning.
+
 Run `30158106220` produced no preserved R0.2 artifact and is classified as failed. No task success、next-state prediction、action accuracy、or transfer result is accepted.
-
-Remaining:
-
-1. Start only after an immutable R0.1 artifact exists and passes basic checkpoint/resource integrity.
-2. Download that artifact in the separate R0.2 job.
-3. Produce and audit the 3-seed signature-to-trajectory join artifact.
-4. Pass the real dynamics holdout audit.
-5. Measure and audit task success、next-state prediction、action accuracy and transfer for all three methods and seeds.
-6. Confirm source-policy competence before attributing differences to representation learning.
-7. Use another public benchmark such as J-CRe3 only after its official split/code/dependencies are reproduced; do not create synthetic entity/language-form holdouts.
 
 Representation appearance、compression、clusteringは進歩に数えない。モデル調整は認可しない。
 
@@ -127,30 +134,45 @@ Integrated boundaries:
 - C023: state-dependent local-dynamics identifiability
 - C024: isolated causal effects of natural language
 - C025: mechanistic independence
+- C029: general-environment nonparametric CRL
 
-Previously retained boundaries include unknown-target CRL、finite-sample recovery、causal abstraction quotient/coarsening、grouped/multimodal CRL、interactive OpenLock transfer、concept/context-conditioned causal disentanglement、LLM-guided intervention selection、language-model graph priors。
+C029 adds that sufficiently rich environment-conditioned mechanism changes can identify latent variables and DAGs without known intervention type or target labels. Language that merely names or predicts an already identifiable environment signature is annotation, not joint identification.
 
-No new branch evidence after C025 changes the adoption decision. The novelty matrix remains incomplete and must still be closed through relevant 2026 primary work and official code.
+The novelty matrix must now separate:
+
+1. general-environment CRL
+2. environment-label prediction
+3. language-supplied residual information beyond all environment-conditioned distributions
+4. joint raw-utterance / residual-target identification under an external anti-recoding law
+
+The official `ignavierng/crl-general-environments` code is public but lacks a release and immutable dependency lock. Native reproduction is still required.
 
 ## P2 — Only admissible RQ reformulation, not adopted
 
 Candidate only:
 
-> 最強のnon-language estimator、mechanistic-independence criterion、完全なprospective interaction history、isolated-language-effect adjustmentを条件付けた後にも同一mechanistic component内に残るexplicit countermodel pairに対して、externally fixed・non-recodableなpopulation language contrastが不足するseparationを供給し、raw utterance equivalenceとresidual intervention-target partitionを有限標本またはconsistentに共同同定できるか。
+> 最強のgeneral-environment CRLを含むnon-language estimator、mechanistic-independence criterion、完全なprospective interaction history、isolated-language-effect adjustmentを条件付けた後にも残るexplicit countermodel pairに対して、externally fixed・non-recodableなpopulation language contrastが不足するseparationを供給し、raw utterance equivalenceとresidual intervention-target partitionを有限標本またはconsistentに共同同定できるか。
+
+Necessary but insufficient condition added by C029:
+
+`I(P_residual ; L | S_GE) > 0`
 
 Before adoption:
 
-1. explicit residual countermodel pair inside one mechanistic component
-2. positive-measure language-law separation
-3. outcome/trajectory/environment identity/factor-effect supportから復元不能なexternal anchor
-4. joint recodingを防ぐ条件
-5. strict joint-identification theorem
-6. anchor/residual-information除去時のimpossibility theorem
-7. finite-sampleまたはconsistency保証
-8. strongest non-language、mechanistic-independence、interactive-transfer、isolated-language-effect baselineとの比較
-9. unseen form/composition/target/system split
+1. audit whether observed environments satisfy general-environment sufficient-change assumptions
+2. maximal latent/DAG/target abstraction recoverable by the strongest non-language baseline
+3. explicit residual countermodel pair with identical environment-conditioned observation/transition laws
+4. positive-measure language-law separation not recoverable from environment ID、actions、rewards、outcomes、completed trajectories
+5. externally fixed denotation anchor
+6. proof that the residual joint automorphism group is trivial
+7. strict joint-identification theorem
+8. impossibility theorem when language only restates identifiable environment signatures
+9. finite-sampleまたはconsistency保証
 10. dependency-pinned public baseline reproduction
-11. exactly one preregistered claim、counterexample、stopping rule
+11. environment-supplied/blind、language-blind、state-only、target-label/outcome/environment-label shuffle controls on identical instances
+12. direct latent/DAG/utterance-partition/target-partition recovery
+13. exactly one preregistered claim、counterexample、stopping rule
+14. model bytes、RSS、wall time、CPU latency、raw logs、checksums、seeds `1/7/19` once experiments begin
 
 No implementation、synthetic benchmark、new architecture is authorised.
 
