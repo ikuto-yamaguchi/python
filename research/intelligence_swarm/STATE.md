@@ -26,10 +26,10 @@
 - R0.2正式再現: **0件**
 - R0.2 typed baseline/export/comparison/budget/holdout/manifest paths: **実装済み**
 - RTFM generator-side signature export: **実装・workflow接続済み**
-- R0.2 online SILG evaluator: **実装済み、workflow未接続・未実行**
+- R0.2 online SILG evaluator: **実装済み、実行未確認**
 - R0.3 empirical hidden intervention-target ablation: **正式棄却**
 - RQ-001 broad/current formulation: **棄却**
-- language-supplied missing separation beyond finite-sample unknown-target CRL: **未採用**
+- behavioural interactive transfer後のexternally anchored residual separation候補: **未採用**
 - J-CRe3日本語外部baseline: **未再現**
 
 公開能力baselineとmatched controlsがevaluation contractを通るまで、新規機構族、知能原理、能力進歩を認定しない。
@@ -76,7 +76,7 @@ Correctは1/60、Randomは4/60。policy competence不足であり、言語不要
 
 Classification: **`matched_fixed_episode_32768_frame_staged_training_not_public_capability_reproduction`**。
 
-Current canonical headに131,072-frameの検証済み完了run、artifact、checkpoint、能力値はない。workflow編集、trigger更新、run request、監査文書は能力進捗に数えない。headのcombined statusも未登録であり、実行開始・完了を推測しない。
+Verified pre-integration head `830b1d13b39f9ab450271a1cf286aeee7f38bf25`には131,072-frameの検証済み完了run、artifact、checkpoint、能力値、registered combined statusがない。workflow編集、trigger更新、run request、監査文書は能力進捗に数えず、実行開始・完了を推測しない。
 
 ## R0.2 Environment-first status
 
@@ -94,13 +94,13 @@ RTFM S1で公式に分割されるのはgenerator assignmentに基づく**dynami
 
 未完了点:
 
-1. generator signature sidecarはworkflowで出力されるが、typed trajectoryへimmutable joinされていない。
-2. holdout auditorは現在raw typed trajectoryを読むため、sidecar由来のreal dynamics holdoutをまだ正式評価できない。
-3. online evaluatorは実装済みだがcanonical workflowから呼ばれていない。
+1. generator signature sidecarとtyped trajectoryのimmutable joinはverified canonical stateで未確認。
+2. holdout auditorによるsidecar由来real dynamics splitの正式通過なし。
+3. online evaluatorの3-seed実行artifactなし。
 4. competentなR0.1 source policy trajectoryがない。
 5. task success、typed next-state、action accuracy、real dynamics transferの3-seed結果がない。
 
-Classification: **`generator_signature_and_online_evaluator_implemented_but_join_execution_and_qualified_source_policy_absent`**。
+Classification: **`generator_signature_and_online_evaluator_implemented_but_qualified_join_execution_and_source_policy_absent`**。
 
 ## Evaluation contract status
 
@@ -114,27 +114,23 @@ Classification: **`generator_signature_and_online_evaluator_implemented_but_join
 - D022: semantic aliasesによるgold/post-treatment leakageをfail-closed拒否
 - D023: semantic leakage auditorをcanonical CIのwatch・compile・testへ必須接続
 - D024: immutable実bundle結合後にdataset contract、semantic leakage、shuffle provenance、prediction coverage、paired/cluster statisticsを一括実行
-- D025: `domain × split × condition`の**観測済み疎topology**を固定し、存在しない直積cellを要求せず、全method・seedで同じtopologyを必須化
+- D025: `domain × split × condition`の観測済み疎topologyを固定し、存在しない直積cellを要求せず、全method・seedで同じtopologyを必須化
 
-D025は正当な疎い評価設計のfalse failureを除去するが、methodまたはseedだけのcell欠落は引き続き拒否する。実R0 prediction/data/resource bundleはD016〜D025をまだ通過していない。
+実R0 prediction/data/resource bundleはD016〜D025をまだ通過していない。
 
 Formal classification: **`initial_reproduction_failure`**。
 
 ## Prior-art and RQ boundary
 
-C021はLee, Jin, and Aragam 2026 `Beyond identifiability: Learning causal representations with few environments and finite samples`を監査した。未知full-rank linear decoder、未知linear SEM、未知multi-node targetsの下で、strongly separating intervention familyによりgraph、representation、decoder、targetを有限標本で回復し、必要環境数はlatent次元に対して対数オーダーである。
+C021はLee, Jin, and Aragam 2026の有限標本unknown-target CRL境界を追加した。strongly separating intervention familyでは、未知multi-node targets、graph、representation、decoderを言語なしで回復できるため、target namingや既知incidenceの言語化は同定寄与ではない。
 
-したがって、未知multi-node target回復、少数環境、target namingを言語固有の新規性とする案は棄却する。言語が既に回復可能なincidence signatureの関数なら、interactive responseやparaphraseを加えても因果同値類を縮小しない。
+C022はOpenLock型interactive causal transferを追加した。prospective task success、attempt count、first-solution transferが一致しても、異なるraw-language equivalenceとlatent partitionが同じinteraction policyを生成できるため、行動転移だけではjoint identifiabilityを証明しない。RQは完全なprospective interaction historyを条件付けた後にも残る同値類のstrict reductionを示す必要がある。
 
-2026年の隣接一次研究も境界確認した。
+2026年CLeaRのMarkham et al. `Intervening to learn and compose causally disentangled representations`は、与えられたconcept/context情報を用いるcausally disentangled representationとcomposition、およびそのidentifiability境界を扱う。concept-conditioned compositional disentanglement、context module、OOD concept compositionはRQ-001の新規性候補から除外する。一方、raw utterance equivalenceと未知target partitionのjoint identificationは同論文の保証ではない。
 
-- LeGIT: LLM priorでonline causal discoveryの介入target選択を支援する。latent representationとraw-language equivalenceのjoint identificationではない。
-- Sequential Causal Discovery with Noisy Language Model Priors: noisy LM expert knowledgeをPAG学習へ統合する。latent intervention partitionの同定定理ではない。
-- Coarsening Causal DAG Models: unknown-target interventional dataからpartition-refinement lattice上でcausal abstractionを学ぶ。languageなしで得られるcoarsening/refinement境界を先に適用すべき追加prior artである。
+唯一残る候補は、最強のnon-language estimatorと完全なprospective interaction historyを条件付けた後にも残るequivalence classに対して、environment identity、incidence、observation、action、outcome、completed trajectoryから復元不能なexternally anchored language contrastが不足するseparationを供給し、raw utterance equivalenceとrefined intervention-target partitionを有限標本またはconsistentに共同同定できるか、である。
 
-唯一残る候補は、最強のnon-language estimatorが明示的に残すequivalence classに対して、environment identity、incidence、observation、action、outcome、completed trajectoryから復元不能なexternally anchored language contrastが不足するseparationを供給し、raw utterance equivalenceとrefined intervention-target partitionを有限標本で共同同定できるか、である。
-
-この候補は**未採用**。採用には、残存countermodel、positive-measure language-law separation、anti-recoding anchor、strict equivalence-class reduction theorem、anchor除去時のimpossibility theorem、finite-sample estimator、non-language separating/non-separating比較、unseen form/composition/target/system split、公開baseline再現、exactly one preregistered claimが必要。
+この候補は**未採用**。採用には、残存countermodel、positive-measure language-law separation、anti-recoding anchor、strict equivalence-class reduction theorem、anchor除去時のimpossibility theorem、finite-sample/consistent estimator、non-language・behavioural-transfer比較、unseen form/composition/target/system split、公開baseline再現、exactly one preregistered claimが必要。
 
 新規architecture実験は認可しない。
 
@@ -171,4 +167,4 @@ C021はLee, Jin, and Aragam 2026 `Beyond identifiability: Learning causal repres
 
 ## Last integration
 
-2026-07-25: **RESET-E029**。R0.1能力証拠は増加なし。R0.2 generator-side dynamics signatureとonline evaluatorの実装を統合したが、immutable join・workflow実行・competent source policyは未完。D025 sparse-topology correction、C021 finite-sample unknown-target境界、2026年隣接prior artを反映した。公開能力baseline 0件、R0.2正式再現 0件、RQ未採用、`initial_reproduction_failure`、段階遷移禁止、高校生級未達を維持する。
+2026-07-25: **RESET-E030**。R0.1能力証拠は増加なし。R0.2は実装経路のみで、qualified join・online 3-seed artifact・competent source policyは未完。D025と`initial_reproduction_failure`を維持。C022 behavioural interactive transfer境界とMarkham et al. 2026 concept-conditioned causal disentanglement境界を追加し、RQ-001をさらに狭義化したが未採用。公開能力baseline 0件、R0.2正式再現 0件、段階遷移禁止、高校生級未達を維持する。
