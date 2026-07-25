@@ -128,7 +128,14 @@ def audit(manifest_path: Path, repo_root: Path) -> dict[str, Any]:
     comparison_rel = manifest.get("local_implementation", {}).get("comparison_harness")
     comparison = repo_root / str(comparison_rel)
     if comparison.is_file():
-        fragments = ["EndToEndModel", "StateOnlyModel", "audit_parameter_budget"]
+        fragments = [
+            "class EndToEndModel",
+            "class StateOnlyModel",
+            "env_inference_bytes = parameter_bytes(env_language, env_decoder)",
+            "e2e_inference_bytes = parameter_bytes(end_to_end)",
+            "if env_inference_bytes != e2e_inference_bytes",
+            "raise RuntimeError",
+        ]
         missing = source_has_all(comparison, fragments)
         if missing:
             errors.append(f"comparison harness lost required controls: {missing}")
@@ -136,7 +143,15 @@ def audit(manifest_path: Path, repo_root: Path) -> dict[str, Any]:
     online_rel = manifest.get("local_implementation", {}).get("online_evaluator")
     online = repo_root / str(online_rel)
     if online.is_file():
-        fragments = ["evaluate_method", "peak_rss", "latency"]
+        fragments = [
+            "def evaluate_method",
+            "episode_seed = seed * 1_000_003 + episode",
+            "initial_instance_fingerprint",
+            "win = float(obs[\"reward\"][0][0].item() > 0.5)",
+            "cpu_inference_ms_per_step",
+            "peak_rss_kib",
+            "def paired_gaps",
+        ]
         missing = source_has_all(online, fragments)
         if missing:
             errors.append(f"online evaluator lost required resource/task evidence: {missing}")
