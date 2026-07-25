@@ -2,10 +2,13 @@
 """Fail-closed end-to-end audit for R0 grounded-causal evaluation bundles.
 
 Every method×seed×domain×split×condition cell is bound to immutable data,
-prediction, model and raw-log artifacts.  The joined real bundle is then passed
-through evaluation_contract.py and the semantic alias/value leakage auditor, so
-artifact integrity, split leakage, prediction coverage, shuffle provenance and
-paired statistics cannot be reported independently.
+prediction, model and raw-log artifacts. The joined bundle is then passed
+through the dataset, semantic-leakage and paired-statistics contracts.
+
+A benchmark design is allowed to be sparse in split×condition space. For
+example, train/in_distribution and test/dynamics_holdout is valid without
+inventing train/dynamics_holdout. What must match exactly is the observed
+(domain, split, condition) topology across every required method and seed.
 """
 from __future__ import annotations
 
@@ -40,9 +43,15 @@ def _cell(run: dict[str, Any]) -> tuple[int, str, str, str]:
     )
 
 
-def _verify_file(base_dir: Path, run_index: int, run: dict[str, Any],
-                 path_key: str, hash_key: str, errors: list[str],
-                 checks: list[dict[str, Any]]) -> Path | None:
+def _verify_file(
+    base_dir: Path,
+    run_index: int,
+    run: dict[str, Any],
+    path_key: str,
+    hash_key: str,
+    errors: list[str],
+    checks: list[dict[str, Any]],
+) -> Path | None:
     relative = run.get(path_key)
     expected = run.get(hash_key)
     if not relative:
@@ -58,8 +67,12 @@ def _verify_file(base_dir: Path, run_index: int, run: dict[str, Any],
     actual = contract.file_sha256(path)
     ok = actual == str(expected).lower()
     checks.append({
-        "run": run_index, "path": str(path), "expected": expected,
-        "actual": actual, "ok": ok, "size_bytes": path.stat().st_size,
+        "run": run_index,
+        "path": str(path),
+        "expected": expected,
+        "actual": actual,
+        "ok": ok,
+        "size_bytes": path.stat().st_size,
     })
     if not ok:
         errors.append(f"run {run_index}: checksum mismatch for {path_key}")
@@ -67,9 +80,82 @@ def _verify_file(base_dir: Path, run_index: int, run: dict[str, Any],
     return path
 
 
+def _audit_observed_topology(runs: list[dict[str, Any]]) -> dict[str, Any]:
+    """Require identical observed cell topology, not an impossible Cartesian product."""
+    errors: list[str] = []
+    required_methods = {"correct"} | contract.REQUIRED_CONTROL_METHODS
+    topology: dict[tuple[str, int], set[tuple[str, str, str]]] = defaultdict(set)
+    methods: set[str] = set()
+    seeds: set[int] = set()
+
+    for index, run in enumerate(runs, 1):
+        if not isinstance(run, dict):
+            continue
+        try:
+            method = str(run["method"])
+            seed = int(run["seed"])
+            design_cell = (
+                str(run["domain"]),
+                str(run["split"]).lower(),
+                str(run["condition"]),
+            )
+        except (KeyError, TypeError, ValueError):
+            continue
+        methods.add(method)
+        seeds.add(seed)
+        topology[(method, seed)].add(design_cell)
+
+    missing_methods = required_methods - methods
+    if missing_methods:
+        errors.append(f"manifest missing required methods {sorted(missing_methods)}")
+    if seeds != contract.CANONICAL_SEEDS:
+        errors.append(
+            f"manifest seeds must be exactly {sorted(contract.CANONICAL_SEEDS)}, "
+            f"found {sorted(seeds)}"
+        )
+
+    reference: set[tuple[str, str, str]] | None = None
+    reference_key: tuple[str, int] | None = None
+    for method in sorted(required_methods):
+        for seed in sorted(contract.CANONICAL_SEEDS):
+            key = (method, seed)
+            cells = topology.get(key, set())
+            if not cells:
+                errors.append(f"missing observed topology for method/seed {key}")
+                continue
+            if reference is None:
+                reference = set(cells)
+                reference_key = key
+            elif cells != reference:
+                missing = sorted(reference - cells)
+                extra = sorted(cells - reference)
+                errors.append(
+                    f"method/seed {key} topology differs from {reference_key}: "
+                    f"missing={missing[:5]} extra={extra[:5]}"
+                )
+
+    return {
+        "valid": not errors,
+        "errors": errors,
+        "required_methods": sorted(required_methods),
+        "canonical_seeds": sorted(contract.CANONICAL_SEEDS),
+        "reference_method_seed": list(reference_key) if reference_key else None,
+        "observed_design_cells": [list(value) for value in sorted(reference or set())],
+        "requires_identical_observed_topology": True,
+        "requires_split_condition_cartesian_product": False,
+    }
+
+
 def audit_bundle(manifest: dict[str, Any], base_dir: Path) -> dict[str, Any]:
     base = contract.audit_artifacts(manifest, base_dir)
-    errors = list(base.get("errors", []))
+    # The older artifact audit demanded every split×condition Cartesian pair.
+    # That rejects valid sparse benchmark designs. Preserve all other failures;
+    # replace only that obsolete topology check with the observed-topology audit.
+    obsolete_prefix = "manifest incomplete Cartesian coverage:"
+    errors = [
+        message for message in base.get("errors", [])
+        if not str(message).startswith(obsolete_prefix)
+    ]
     checks = list(base.get("checks", []))
     runs = manifest.get("runs")
     if not isinstance(runs, list) or not runs:
@@ -79,6 +165,9 @@ def audit_bundle(manifest: dict[str, Any], base_dir: Path) -> dict[str, Any]:
             "checks": checks,
             "classification": "initial_reproduction_failure",
         }
+
+    topology_audit = _audit_observed_topology(runs)
+    errors.extend(f"cell_topology: {message}" for message in topology_audit["errors"])
 
     ids_by_method_cell: dict[tuple[str, int, str, str, str], set[str]] = {}
     data_hashes_by_cell: dict[tuple[int, str, str, str], set[str]] = defaultdict(set)
@@ -205,7 +294,8 @@ def audit_bundle(manifest: dict[str, Any], base_dir: Path) -> dict[str, Any]:
         "valid": False, "errors": ["no readable dataset rows"]
     }
     for prefix, audit in (
-        ("dataset", dataset_audit), ("semantic_leakage", semantic_audit),
+        ("dataset", dataset_audit),
+        ("semantic_leakage", semantic_audit),
         ("prediction_statistics", score_audit),
     ):
         errors.extend(f"{prefix}: {message}" for message in audit.get("errors", []))
@@ -221,6 +311,7 @@ def audit_bundle(manifest: dict[str, Any], base_dir: Path) -> dict[str, Any]:
         "exact_prediction_dataset_join_required": True,
         "same_dataset_hash_across_methods_required": True,
         "stable_model_identity_across_conditions_required": True,
+        "observed_cell_topology_audit": topology_audit,
         "full_dataset_contract_executed": True,
         "semantic_alias_value_leakage_executed": True,
         "paired_statistics_executed": True,
@@ -241,7 +332,8 @@ def main(argv: list[str] | None = None) -> int:
         result = audit_bundle(contract.read_json(args.manifest), args.base_dir)
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         result = {
-            "valid": False, "errors": [str(exc)],
+            "valid": False,
+            "errors": [str(exc)],
             "classification": "initial_reproduction_failure",
         }
     print(json.dumps(result, ensure_ascii=False, indent=2))
