@@ -1,0 +1,34 @@
+{
+  "requested_at_utc": "2026-07-25T08:49:45Z",
+  "track": "R0.1",
+  "benchmark": "SILG RTFM S1",
+  "workflow": ".github/workflows/r0_silg_rtfm_probe.yml",
+  "canonical_branch": "research/intelligence-swarm-reconstruction-001",
+  "frames_per_seed": 131072,
+  "seeds": [1, 7, 19],
+  "train_env": "silg:rtfm_train_s1-v0",
+  "test_env": "silg:rtfm_test_s1-v0",
+  "model": "official SILG multi recurrent",
+  "pretrained_language_model": false,
+  "controls": ["random", "language-blind", "state-only", "language-shuffle"],
+  "source_pins": {
+    "silg": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
+    "rtfm": "58f17955595b5a127c96d045d896fcbcc7d4b570"
+  },
+  "required_artifacts": [
+    "three checkpoints",
+    "raw install and training logs",
+    "matched control results",
+    "model bytes",
+    "peak RSS",
+    "training wall time",
+    "CPU inference latency",
+    "pip freeze",
+    "SHA-256 manifest"
+  ],
+  "claims_blocked_until_completion": [
+    "public baseline reproduced",
+    "capability progress",
+    "new intelligence principle"
+  ]
+}
