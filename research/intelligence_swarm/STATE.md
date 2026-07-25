@@ -15,9 +15,10 @@
 ## R0 status ledger
 
 - 公開環境control再現: **1件**
-- 公開学習経路実行: **131,072 requested frames × seeds 1/7/19のtraining step成功を確認。ただしartifact喪失のため再現完了とは認定しない**
+- 公開学習経路実行: **131,072 requested frames × seeds 1/7/19のtraining/matched-control step成功。ただしartifact喪失のため再現完了とは認定しない**
 - 学習済み公開能力baseline再現: **0件**
 - R0.2正式再現: **0件**
+- 実R0 bundleの統一evaluation contract通過: **0件**
 - R0.3 hidden intervention-target ablation: **棄却**
 - J-CRe3日本語外部baseline: **未再現**
 - 広義RQ-001: **棄却**
@@ -50,11 +51,11 @@
 
 これはpolicy competence不足であり、公開能力baseline再現ではない。
 
-### Run 30158106220 — terminal classification
+### Run 30158106220
 
-GitHub Actions run `30158106220`は、install、generator-signature test、random/schema probe、official recurrent 131,072-frame × 3 seed training、Correct/Random/Language-blind/State-only/Language-shuffle matched evaluationまで成功した。
+install、generator-signature test、random/schema probe、official recurrent 131,072-frame × 3 seed training、Correct/Random/Language-blind/State-only/Language-shuffle matched evaluationまで成功した。
 
-しかしjob全体はR0.2 typed trajectory/baseline工程中に`failure`で終了した。holdout audit、dependency freeze、artifact uploadは実行されず、workflow artifactは0件である。したがってcheckpoint、能力値、model bytes、RSS、runtime、CPU latency、raw logs、checksumsをaccepted evidenceへ昇格できない。
+しかしR0.2 typed trajectory/baseline工程中に`failure`で終了し、holdout audit、dependency freeze、artifact uploadは実行されず、workflow artifactは0件だった。checkpoint、能力値、model bytes、RSS、runtime、CPU latency、raw logs、checksumsはaccepted evidenceへ昇格しない。
 
 正式分類:
 
@@ -63,7 +64,7 @@ GitHub Actions run `30158106220`は、install、generator-signature test、rando
 - public capability reproduction: **未成立**
 - classification: **`initial_reproduction_failure_due_to_unpreserved_bundle_after_downstream_failure`**
 
-現在のcanonical workflowはR0.1とR0.2を別jobへ分離し、R0.1終了直後にfreeze/uploadしてからR0.2がimmutable artifactをdownloadする。次回はR0.2失敗によってR0.1 checkpointとmatched結果を失わない。
+canonical workflowはR0.1とR0.2を別jobへ分離し、R0.1終了直後にfreeze/uploadしてからR0.2がimmutable artifactをdownloadする。この境界を次回実行の必須条件とする。
 
 ## R0.2 Environment-first
 
@@ -81,11 +82,11 @@ GitHub Actions run `30158106220`は、install、generator-signature test、rando
 
 RTFM S1で正式に測定可能なtransferは**dynamicsのみ**。entity ontologyと言語生成familyはtrain/testで分離されないため、entity/language-form holdoutはformal inapplicabilityとする。
 
-Run `30158106220`ではR0.2工程が完了せず、artifactも残らなかった。task success、next-state prediction、action accuracy、dynamics holdout transferのaccepted 3-seed resultは0件である。
+accepted task success、next-state prediction、action accuracy、dynamics holdout transferの3-seed resultは0件である。
 
 ## Evaluation contract
 
-D015〜D027を統合する。
+D015〜D028を統合する。
 
 監査範囲:
 
@@ -96,13 +97,13 @@ D015〜D027を統合する。
 - exact global and per-cell seeds `1,7,19`
 - domain/split/condition presence
 - prediction coverage
-- random/language-blind/state-only/target-label shuffle/outcome shuffleの同一instance coverage
 - sparse observed cell topology
 - mean gap、minimum cell gap、paired/randomization/McNemar、episode-cluster CI
 - model bytes、RSS、training wall time、CPU latency、raw logs、commit、checksums
 - D027: 各cellで全6手法が同一data path/hashを使い、bundle全体が単一code commitに固定されること
+- D028: 各instance・各cellのprediction methodを `correct/random/language_blind/state_only/target_label_shuffle/outcome_shuffle` の厳密な6種へ固定し、余分・欠落・評価外predictionを拒否すること
 
-実R0 bundleは未通過。監査対象artifact自体が存在しないため、分類は **`initial_reproduction_failure`**。
+D028専用CI run `30165709843`は成功した。ただしこれは監査コードの回帰成功であり、実R0 bundle通過や能力進歩ではない。
 
 ## Prior-art and RQ boundary
 
@@ -139,4 +140,4 @@ C023〜C025までの境界を維持する。
 
 ## Last integration
 
-2026-07-26: **RESET-E033**。run `30158106220`は131,072-frame × 3 seed trainingとmatched controlsには成功したが、R0.2工程中にfailureとなりartifactを1件も保存できなかったため、公開baseline再現を認定しない。canonical workflowのR0.1/R0.2 job分離と先行artifact保存を正式経路として確認。D027を統合し、RQ-001未採用、`initial_reproduction_failure`、能力進歩未認定、高校生級未達を維持する。
+2026-07-26: **RESET-E034**。D028の厳密な6-method prediction topology監査と成功した専用CIを統合した。実R0 bundle、公開baseline値、checkpoint/resource/log/checksumは増えていない。run `30158106220`のartifact未保存failure、R0.2未完了、RQ-001未採用、`initial_reproduction_failure`、能力進歩未認定、高校生級未達を維持する。
