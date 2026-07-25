@@ -86,13 +86,15 @@ canonical workflowはR0.1とR0.2を別jobへ分離し、R0.1終了直後にfreez
 - immutable signature-to-trajectory join
 - same-initial-instance online evaluator
 - model/checkpoint bytes、RSS、training time、CPU latency、raw logs、checksums
+- `GADDY_KLEIN_SILG_COMPONENT_MAPPING.json` と `audit_gaddy_klein_component_mapping.py` によるfail-closedな著者code→SILG component mapping監査
+
+component mapping監査は、before/after-state transition encoding、discrete Gumbel message、message-conditioned next-state/action decoding、recurrent language encoder、environment-first順序、language phaseでのtransition/decoder freeze、End-to-end/State-only controls、Environment-first対End-to-end inference-budget一致、same-instance online評価、RTFM S1 holdout境界を検査する。
 
 RTFM S1で正式に測定可能なtransferは**dynamicsのみ**。entity ontologyと言語生成familyはtrain/testで分離されないため、entity/language-form holdoutはformal inapplicabilityとする。
 
 現portは高水準のtwo-stage method transferには対応するが、次のため再現主張は不可である。
 
 - RTFM移植はACL 2019 SHRDLURN/regex数値のnumerical reproductionではない
-- author component-to-SILG component mappingのfail-closed validatorがない
 - paper中心のlanguage-data-efficiency curveを未再現
 - 著者codeをnative taskで未実行
 - immutable R0.1 source artifactと3-seed dynamics-holdout結果がない
@@ -101,7 +103,7 @@ accepted task success、next-state prediction、action accuracy、dynamics holdo
 
 ## Evaluation contract
 
-D015〜D031を統合する。
+D015〜D032を統合する。
 
 監査範囲:
 
@@ -119,12 +121,13 @@ D015〜D031を統合する。
 - one immutable code commit per bundle and one data path/hash per cell
 - strict prediction payload schema and leakage rejection
 - D031: prediction JSONLとderived statistics artifact自体を必須checksummed evidenceにし、method/seed整合、有限JSON値、coverage/cell statistics/summaries/paired gapsを検査する
+- D032: dataset/schema、prediction payload、paired statistics、resource artifacts、prediction/statistics checksumを一つのfail-closed acceptance commandで同時に要求し、部分監査によるfalse acceptanceを禁止する
 
-D031専用CI run `30171670131`はsuccess。これは監査コードの回帰証拠に限定し、実benchmark成功には数えない。
+D032 unified acceptance-gate CI run `30173560733`とprediction-method-topology run `30173560729`はsuccess。これは監査コードの回帰証拠に限定し、実benchmark成功には数えない。
 
 ## Prior-art and RQ boundary
 
-C023〜C025、C029、C030までの境界を維持する。
+C023〜C025、C029〜C031までの境界を維持する。
 
 - state-dependent local dynamicsから言語なしで同定可能なparameterを命名するだけではjoint identificationではない
 - isolated language effectを同定してもraw utterance equivalenceとlatent target partitionは同定されない
@@ -132,14 +135,15 @@ C023〜C025、C029、C030までの境界を維持する。
 - general-environment nonparametric CRLは既知targetなしでも十分なenvironment variationからlatent DAG・variablesを識別し得る
 - lossy projected causal abstractionは複数low-level interventionを一つのhigh-level interventionへ潰しても、許容されたobservational/interventional/counterfactual queryを識別できる
 - high-level queryの完全回復は、abstraction fibre内部のfine target partitionやraw-language equivalenceの回復を意味しない
+- C031: JCI/test-time causal discoveryは、明示的なcontext assumptions下で言語なしにgraph equivalence classと未知intervention familyを推定し得る。未知target自体、test-time adaptation、target detection、context名の言語化はjoint semantic identificationではない
 
-残る候補は、最強の非言語CRLとprojected abstractionを適用した後にも同一fibre内に残るexplicit countermodel pairを、外部固定かつ共同再符号化不能なlanguage contrastがstrictly分離できるか、である。
+残る候補は、最強の非言語CRL、projected abstraction、unknown-target JCI/TICLを適用した後にも残るexplicit residual countermodel pairを、外部固定かつ共同再符号化不能なlanguage contrastがstrictly分離できるか、である。
 
-必要条件は `I(P_fiber ; L | A_proj, X, A, Y, H) > 0`。ただし十分条件ではなく、fibre-preserving joint automorphism groupが自明になることを事前登録された外部anchorで証明する必要がある。
+必要条件は `I(P_residual ; L | S_TICL, A_proj, X, A, Y, H) > 0`。ただし十分条件ではなく、target block、utterance class、context label、encoder/decoderを含むjoint automorphism groupが自明になることを事前登録された外部anchorで証明する必要がある。
 
 正式判断:
 
-> **NARROWED BEYOND LOSSY PROJECTED CAUSAL ABSTRACTIONS — NOT ADOPTED**
+> **NARROWED BEYOND UNKNOWN-TARGET JCI / TEST-TIME CAUSAL DISCOVERY — NOT ADOPTED**
 
 ## Stage-transition rule
 
@@ -164,4 +168,4 @@ C023〜C025、C029、C030までの境界を維持する。
 
 ## Last integration
 
-2026-07-26: **RESET-E037**。D031 prediction/statistics evidence-chain監査、Gaddy–Klein公開code commit/blob固定、C030 lossy projected causal abstraction境界を統合した。CI成功は監査コードの証拠に限定する。immutable R0.1 bundle、公開baseline値、R0.2結果、実contract通過は0件であり、`initial_reproduction_failure`、RQ-001未採用、能力進歩未認定、高校生級未達を維持する。
+2026-07-26: **RESET-E038**。D032 unified fail-closed acceptance gate、Gaddy–Klein著者code→SILG component mapping監査、C031 unknown-target JCI/test-time causal discovery境界を統合した。CI成功は監査コードの証拠に限定する。immutable R0.1 bundle、公開baseline値、R0.2結果、実contract通過は0件であり、`initial_reproduction_failure`、RQ-001未採用、能力進歩未認定、高校生級未達を維持する。
