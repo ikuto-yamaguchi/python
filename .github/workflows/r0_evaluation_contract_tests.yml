@@ -1,0 +1,44 @@
+name: R0 evaluation contract tests
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - '.github/workflows/r0_evaluation_contract_tests.yml'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_dataset_cell_coverage.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_evaluation_bundle.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_silg_schema.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_audit_dataset_cell_coverage.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_audit_evaluation_bundle.py'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  evaluation-contract:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile audit modules
+        run: |
+          python -m py_compile \
+            research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_dataset_cell_coverage.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_evaluation_bundle.py
+      - name: Run evaluation contract regression tests
+        working-directory: research/intelligence_swarm/benchmarks/grounded_causal
+        run: |
+          python -m unittest -v \
+            test_evaluation_contract.py \
+            test_evaluation_contract_silg_schema.py \
+            test_audit_dataset_cell_coverage.py \
+            test_audit_evaluation_bundle.py
