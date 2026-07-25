@@ -24,10 +24,10 @@
 - 131,072-frame staged reproduction: **current headで検証済み完了artifactなし**
 - 学習済み公開能力baseline再現: **0件**
 - R0.2正式再現: **0件**
-- R0.2 typed full-method / typed exporter / matched comparison harness: **実装済み、qualified public dataで未実行**
+- R0.2 typed full-method / typed exporter / matched comparison / matched-budget audit: **実装済み、qualified public dataで未実行**
 - R0.3 empirical hidden intervention-target ablation: **正式棄却**
 - RQ-001 broad/current formulation: **棄却**
-- externally anchored residual-symmetry refinement: **狭義化・未採用**
+- injective externally anchored language-effect separation: **狭義化・未採用**
 - J-CRe3日本語外部baseline: **未再現**
 
 公開能力baselineとmatched controlsがevaluation contractを通るまで、新規機構族、知能原理、能力進歩を認定しない。
@@ -81,7 +81,7 @@ Classification: **`matched_fixed_episode_32768_frame_staged_training_not_public_
 
 ### 131,072-frame status
 
-固定timeout、重複trigger、再起動問題は修正済みだが、RESET-E022時点のcanonical head `5dfa423808c2348a774eae1d64ddd8186cecf9be`には関連workflow run、combined status、検証済み完了artifactがない。未完了checkpoint、resource値、trajectory、能力値は採用しない。
+固定timeout、重複trigger、再起動問題は修正済みだが、RESET-E023統合前のcanonical head `4020516ec26920a2ea664626346458dfe5b57e56`にはcombined status、検証済み完了artifactがない。未完了checkpoint、resource値、trajectory、能力値は採用しない。
 
 次の唯一のR0.1作業は、stable workflow headから1本だけ実行し、3 checkpoint、raw log、source/model/data/prediction hash、RSS、学習時間、CPU latency、同一instance controls、policy competence、action-collapseを検証すること。
 
@@ -95,35 +95,30 @@ Canonical branchには以下がある。
 
 - `gaddy_klein_typed_baseline.py`: language-free transition pretraining、20 categorical message variables × 30 symbols、straight-through Gumbel-Softmax、shared typed next-state/action decoder、LSTM language encoder、direct message matching `0.01`、decoder freezing、typed CE/BCE/MSE、resource/hash reporting。
 - `export_silg_typed_policy_trajectories.py`: typed before/after fields、schema/cardinality、episode/seed/split/fingerprint provenance、dataset/schema SHA-256、unknown field fail-closed。
-- `r02_typed_comparison.py`: Environment-first、parameter-matched End-to-end、State-onlyを同一typed dataset・seed・splitで比較。Environment-firstとEnd-to-endのinference parameter bytes不一致は拒否する。
+- `r02_typed_comparison.py`: Environment-first、parameter-matched End-to-end、State-onlyを同一typed dataset・seed・splitで比較。
+- `audit_r02_matched_budget.py`: canonical seed、train/test、dataset hash、test prediction coverage、parameter bytes、transition-pretraining-only bytes、checkpoint hash、RSS、training time、CPU latency、action accuracy、typed next-state loss、equal row exposureをfail-closedで監査する。
 
-Cycle 011 harnessはaction accuracy、typed next-state loss、entity/dynamics/language-form holdout、独立online fieldがある場合だけtask success、CPU latency、training wall time、peak RSS、checkpoint bytes/hash、dataset hashを保存する。offline accuracyをtask successの代用にしない。
+Cycle 012は、`N` train rows、environment epochs `E`、language epochs `L`に対し、Environment-firstを`N*E + N*L`、End-to-endとState-onlyを`N*(E+L)`として総row exposureを一致させる。Environment-firstとEnd-to-endのinference parameter bytesも完全一致させる。offline accuracyをonline task successの代用にしない。
 
-Qualifiedな3-seed public trajectoryがないため未実行。Classification: **`matched_typed_offline_comparison_harness_implemented_execution_on_qualified_silg_data_blocked`**。
+Qualifiedな3-seed public trajectoryがないため未実行。Classification: **`matched_data_and_resource_audit_implemented_qualified_silg_execution_blocked`**。
 
 ## Evaluation contract status
 
-D015は実SILG schemaへ適合し、**18件の実行済み回帰テスト**を持つ。
+- D015: 実SILG schemaへ適合。**18件の実行済み回帰テスト**。
+- D016: 各`method × seed × domain × split × condition`のprediction-to-dataset immutable join。
+- D017: 各`domain × split × condition` cellにseed `1,7,19`が正確に揃うこと。
+- D018: target-label/outcome shuffleのdonor payloadと実適用payloadのhash一致、same-cell、bijection、derangement、self-shuffle禁止、semantic no-op禁止。
+- D019: entity/dynamics holdoutを`domain × split × condition × kind`単位で監査し、同一domain train signatureとの重複、signature欠落、seed欠落/余分、train reference欠落を拒否する。in-distribution cellの期待されるtrain overlapはholdout leakageへ誤分類しない。
 
-D016は各`method × seed × domain × split × condition`についてprediction-to-dataset immutable joinを要求する。
-
-D017は各`domain × split × condition` cellにseed `1,7,19`が正確に揃うことを要求する。
-
-D018はshuffleのdonor割当だけでなく、実際に適用されたpayloadを値レベルで監査する。
-
-- `target_label_shuffle`: `replace_gold_action_from_donor`、donor target hashとapplied payload hashの一致。
-- `outcome_shuffle`: `replace_gold_state_after_from_donor`、donor outcome hashとapplied payload hashの一致。
-- 同一cell、bijection、derangement、self-shuffle禁止に加え、各cellで最低1件のsemantic value changeを要求する。
-
-D018の4テストはローカル成功。current headのGitHub Actions完了結果は未確認なので、CI成功数としては計上しない。実shuffle prediction bundle、immutable test serialization、完全artifact join、competent baselineがないため、正式分類は **`initial_reproduction_failure`**。
+D018の4テストはローカル成功。D019の軽量workflow完了結果は未確認。実R0 prediction/data/artifact bundleはD016〜D019を通過していないため、正式分類は **`initial_reproduction_failure`**。
 
 ## Prior-art and novelty boundary
 
-既存境界にはunknown/uncoupled intervention CRL、general-environment CRL、subset-intervention causal abstraction、finite-sample CRL、trajectory-local parameter identifiability、auxiliary/temporal/multi-view/hidden-regime nonlinear ICA、grouping/weak supervision、mechanism sparsity、mechanistic independence、interactive grounding、environment-first、language-dynamics pretraining、WM3Cを含む。
+既存境界にはunknown/uncoupled intervention CRL、general-environment CRL、subset-intervention causal abstraction、finite-sample CRL、trajectory-local parameter identifiability、auxiliary/temporal/multi-view/hidden-regime nonlinear ICA、grouping/weak supervision、mechanism sparsity、mechanistic independence、interactive grounding、environment-first、language-dynamics pretraining、WM3C、isolated causal effects of languageを含む。
 
-C015は、明示的target labelがないことだけをlanguage necessityの根拠にする主張を追加で棄却した。Baumgartner et al. 2026は、trajectory間で変化するsystem parameterを、local transition graph、mechanism sparsity、Jacobian variation、graphical separationの条件下で、言語なしにpermutationとelement-wise diffeomorphismまで識別する。
+C016は、Lin, Morency and Ben-Michael, ICML 2025と公式`isolated-text-effects`実装を監査した。この研究は事前定義されたfocal language interventionの外部outcomeへの効果をfidelity、overlap、confounding-control条件下で推定するが、raw language equivalenceやunknown latent target partitionを回復しない。
 
-trajectory-onlyで残る対称性が`theta'_i = h_i(theta_(pi(i)))`なら、language generatorも`g'(theta',X,E,epsilon)=g(H^-1(theta'),X,E,epsilon)`と再定義でき、`p(X,E,L)`は不変である。したがってparameter naming、language-conditioned prediction、shuffle gap、fluent/compositional descriptionsだけではsymmetry breakingを証明しない。
+したがって、非ゼロの言語因果効果、良好なfidelity/overlap、shuffle gap、intervention prediction accuracyだけではlatent target partition同定の証拠にならない。effect identificationからpartition refinementへは、externally fixed semantics、exclusion、injective separating family、support、non-focal fidelity、no joint recoding、population generalisationを結ぶbridge theoremが必要である。
 
 ## Research-question decision
 
@@ -131,11 +126,11 @@ trajectory-onlyで残る対称性が`theta'_i = h_i(theta_(pi(i)))`なら、lang
 - Gate I empirical track / R0.3: **棄却**。
 - RQ-001-N5: **棄却**。
 - RQ-001 broad/current form: **棄却**。
-- Unknown target recovery、environment label recovery、parameter namingをlanguage-specific causal identificationとする案: **棄却**。
-- 唯一残る候補: general-environment、intervention-abstraction、trajectory-local parameter criteriaを使い切った後に残る明示的symmetryを、latentと共同再符号化できないexternally anchored language channelが未知utterance form/composition/systemでも厳密に除去できるか。
+- Unknown target recovery、environment label recovery、parameter naming、non-zero language effectをlanguage-specific causal identificationとする案: **棄却**。
+- 唯一残る候補: strongest non-language criteria後に残る明示的causal abstractionを、externally fixedでfidelity/overlapが検証され、latentと共同再符号化できないinjective language-effect familyが、unseen utterance form/composition/systemでも厳密に細分化できるか。
 - 上記候補: **未採用、preregistration候補のみ**。
 
-採用には、残存同値類、非言語criterionの失敗、外部anchor、positive refinement theorem、anchor除去時のimpossibility、anti-lookup population grammar、unseen-form/composition/system評価、consistent estimatorまたはpopulation-only宣言、公開baseline再現、事前登録が必要。
+採用には、残存同値類、非言語criterionの失敗、external anchor、effect-to-partition bridge theorem、exclusion/injectivity、anchorまたはinjectivity除去時のimpossibility、各intervention cellのfidelity/overlap、anti-lookup population grammar、unseen-form/composition/system評価、consistent estimatorまたはpopulation-only宣言、公開baseline再現、事前登録が必要。
 
 新規architecture実験は認可しない。
 
@@ -170,4 +165,4 @@ trajectory-onlyで残る対称性が`theta'_i = h_i(theta_(pi(i)))`なら、lang
 
 ## Last integration
 
-2026-07-25: **RESET-E022**。R0.2 Cycle 011のmatched typed comparison harness、C015のtrajectory-local parameter identifiabilityとexternally anchored symmetry-breaking境界、D018のsemantic shuffle payload監査を統合した。current headにR0.1完了run/artifactはなく、公開能力baseline 0件、`initial_reproduction_failure`、段階遷移禁止、高校生級未達を維持する。
+2026-07-25: **RESET-E023**。R0.2 Cycle 012のmatched data/resource audit、C016のisolated language effectとlatent-partition identificationの境界、D019のcondition-scoped holdout leakage監査を統合した。current headにR0.1完了artifactはなく、公開能力baseline 0件、`initial_reproduction_failure`、段階遷移禁止、高校生級未達を維持する。
