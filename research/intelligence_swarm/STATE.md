@@ -16,13 +16,14 @@
 
 - 公開環境control再現: **1件**
 - 公開学習経路実行: **131,072 requested frames × seeds 1/7/19のtraining/matched-control step成功。ただしartifact喪失のため再現完了とは認定しない**
+- immutable 131,072-frame R0.1 bundle: **0件**
 - 学習済み公開能力baseline再現: **0件**
 - R0.2正式再現: **0件**
 - 実R0 bundleの統一evaluation contract通過: **0件**
 - R0.3 hidden intervention-target ablation: **棄却**
 - J-CRe3日本語外部baseline: **未再現**
 - 広義RQ-001: **棄却**
-- 狭義RQ-001: **未採用**
+- 狭義RQ-001: **追加狭義化・未採用**
 - 評価分類: **`initial_reproduction_failure`**
 
 ## R0.1 SILG / RTFM
@@ -39,7 +40,7 @@
 - observation: 6×6 grid、wiki 80 token、task 40 token、inventory 8 token、valid-action mask 5、relative position 6×6×2
 - action space 5、maximum episode length 80
 
-従来のaccepted evidenceは32,768-requested-frame runのみ:
+accepted evidenceは32,768-requested-frame runのみ:
 
 - parameters `4,916,915`
 - state-dict audit `19,694,385 bytes`
@@ -51,59 +52,38 @@
 
 これはpolicy competence不足であり、公開能力baseline再現ではない。
 
-### Run 30158106220
-
-install、generator-signature test、random/schema probe、official recurrent 131,072-frame × 3 seed training、Correct/Random/Language-blind/State-only/Language-shuffle matched evaluationまで成功した。
-
-しかしR0.2 typed trajectory/baseline工程中に`failure`で終了し、holdout audit、dependency freeze、artifact uploadは実行されず、workflow artifactは0件だった。checkpoint、能力値、model bytes、RSS、runtime、CPU latency、raw logs、checksumsはaccepted evidenceへ昇格しない。
-
-正式分類:
-
-- execution progress: **training/matched-control step成功**
-- reproducible R0.1 bundle: **なし**
-- public capability reproduction: **未成立**
-- classification: **`initial_reproduction_failure_due_to_unpreserved_bundle_after_downstream_failure`**
+Run `30158106220`はinstall、generator-signature test、random/schema probe、official recurrent 131,072-frame × 3 seed training、Correct/Random/Language-blind/State-only/Language-shuffle matched evaluationまで成功した。しかしR0.2工程中にfailureとなり、artifact upload前に終了した。artifactは0件で、checkpoint、能力値、model bytes、RSS、runtime、CPU latency、raw logs、checksumsはaccepted evidenceへ昇格しない。
 
 canonical workflowはR0.1とR0.2を別jobへ分離し、R0.1終了直後にfreeze/uploadしてからR0.2がimmutable artifactをdownloadする。この境界を次回実行の必須条件とする。
 
 ## R0.2 Environment-first
 
-固定参照はGaddy & Klein 2019および著者公開codeである。
+固定参照:
 
-公開code参照は次へimmutable固定した。
-
+- Gaddy & Klein 2019
 - repository `kristyelee/environment-learning`
 - historical reference `dgaddy/environment-learning`
 - commit `98c0dc68926ee9535f15019922d2ca871b0ac0b5`
-- README、pretraining、evaluation、model、baseline、message-space、discrete-message utilityのGit blob SHAを `GADDY_KLEIN_PUBLIC_REFERENCE_MANIFEST.json` に保存
+- inspected reference-file Git blob SHAs in `GADDY_KLEIN_PUBLIC_REFERENCE_MANIFEST.json`
 
 実装済み:
 
-- language-free state transition pretraining後のinstruction following
+- language-free state-transition pretraining後のinstruction following
 - Environment-first / parameter-matched End-to-end / State-only
 - typed trajectory export
 - generator-side entity/dynamics/language-form signature export
 - immutable signature-to-trajectory join
 - same-initial-instance online evaluator
 - model/checkpoint bytes、RSS、training time、CPU latency、raw logs、checksums
-- `GADDY_KLEIN_SILG_COMPONENT_MAPPING.json` と `audit_gaddy_klein_component_mapping.py` によるfail-closedな著者code→SILG component mapping監査
-
-component mapping監査は、before/after-state transition encoding、discrete Gumbel message、message-conditioned next-state/action decoding、recurrent language encoder、environment-first順序、language phaseでのtransition/decoder freeze、End-to-end/State-only controls、Environment-first対End-to-end inference-budget一致、same-instance online評価、RTFM S1 holdout境界を検査する。
+- fail-closed author-code→SILG component mapping
 
 RTFM S1で正式に測定可能なtransferは**dynamicsのみ**。entity ontologyと言語生成familyはtrain/testで分離されないため、entity/language-form holdoutはformal inapplicabilityとする。
 
-現portは高水準のtwo-stage method transferには対応するが、次のため再現主張は不可である。
-
-- RTFM移植はACL 2019 SHRDLURN/regex数値のnumerical reproductionではない
-- paper中心のlanguage-data-efficiency curveを未再現
-- 著者codeをnative taskで未実行
-- immutable R0.1 source artifactと3-seed dynamics-holdout結果がない
-
-accepted task success、next-state prediction、action accuracy、dynamics holdout transferの3-seed resultは0件である。
+現portはmethod transferであり、ACL 2019 native-task numerical reproductionではない。著者code native task、language-data-efficiency curve、immutable R0.1 input、3-seed dynamics-holdout resultが未完了である。accepted task success、next-state prediction、action accuracy、transfer結果は0件。
 
 ## Evaluation contract
 
-D015〜D032を統合する。
+D015〜D033を統合する。
 
 監査範囲:
 
@@ -113,37 +93,30 @@ D015〜D032を統合する。
 - semantic alias leakage
 - exact global and per-cell seeds `1,7,19`
 - domain/split/condition presence
-- prediction coverage
-- sparse observed cell topology
+- prediction coverage and sparse observed cell topology
 - mean gap、minimum cell gap、paired randomization、McNemar、episode-cluster CI
 - model bytes、RSS、training wall time、CPU latency、raw logs、commit、checksums
 - exact six-method prediction/artifact topology
 - one immutable code commit per bundle and one data path/hash per cell
-- strict prediction payload schema and leakage rejection
-- D031: prediction JSONLとderived statistics artifact自体を必須checksummed evidenceにし、method/seed整合、有限JSON値、coverage/cell statistics/summaries/paired gapsを検査する
-- D032: dataset/schema、prediction payload、paired statistics、resource artifacts、prediction/statistics checksumを一つのfail-closed acceptance commandで同時に要求し、部分監査によるfalse acceptanceを禁止する
+- checksummed prediction JSONL and derived statistics artifacts
+- unified fail-closed acceptance command
+- **D033: `evaluation_contract.score()`本体がprediction payloadを直接検査し、gold/after-state/reward/terminal/return/success/future-state/rollout/completed-trajectory、未登録field、非有限値、valid-action schema外actionを拒否する**
 
-D032 unified acceptance-gate CI run `30173560733`とprediction-method-topology run `30173560729`はsuccess。これは監査コードの回帰証拠に限定し、実benchmark成功には数えない。
+現headのunified acceptance gate run `30175635819`とprediction-method-topology run `30175635818`はsuccess。これは監査コードの回帰証拠に限定し、実benchmark成功には数えない。
 
 ## Prior-art and RQ boundary
 
-C023〜C025、C029〜C031までの境界を維持する。
+C023〜C025、C029〜C032までの境界を維持する。
 
-- state-dependent local dynamicsから言語なしで同定可能なparameterを命名するだけではjoint identificationではない
-- isolated language effectを同定してもraw utterance equivalenceとlatent target partitionは同定されない
-- mechanistic independenceで識別可能なcomponentを命名しても内部partitionは同定されない
-- general-environment nonparametric CRLは既知targetなしでも十分なenvironment variationからlatent DAG・variablesを識別し得る
-- lossy projected causal abstractionは複数low-level interventionを一つのhigh-level interventionへ潰しても、許容されたobservational/interventional/counterfactual queryを識別できる
-- high-level queryの完全回復は、abstraction fibre内部のfine target partitionやraw-language equivalenceの回復を意味しない
-- C031: JCI/test-time causal discoveryは、明示的なcontext assumptions下で言語なしにgraph equivalence classと未知intervention familyを推定し得る。未知target自体、test-time adaptation、target detection、context名の言語化はjoint semantic identificationではない
+C032はLi・Kaba・RavanbakhshのAISTATS 2025 causal-abstraction identifiabilityを統合した。paired pre/post observations、未知のperfect subset interventions、faithfulness、regular mechanisms/noise、invertible smooth observation mapの下では、intervention familyのnon-descendant signatureから最大quotient causal abstractionを言語なしで識別できる。非atomic intervention、個別latent未回復、intervention-induced block発見は、それ自体ではlanguage-specific noveltyではない。
 
-残る候補は、最強の非言語CRL、projected abstraction、unknown-target JCI/TICLを適用した後にも残るexplicit residual countermodel pairを、外部固定かつ共同再符号化不能なlanguage contrastがstrictly分離できるか、である。
+残る候補は、benchmarkの非言語intervention familyが識別する最大quotientを先に計算し、そのblock内部に残る明示的countermodel pairを、外部固定かつ共同再符号化不能なlanguage lawがstrictly分離できるか、である。
 
-必要条件は `I(P_residual ; L | S_TICL, A_proj, X, A, Y, H) > 0`。ただし十分条件ではなく、target block、utterance class、context label、encoder/decoderを含むjoint automorphism groupが自明になることを事前登録された外部anchorで証明する必要がある。
+必要条件は `I(P_residual ; L | S_abs) > 0`。ただし十分条件ではなく、residual target member、utterance class、denotation map、encoder/decoderを含むwithin-block joint automorphism groupが自明になることを事前登録された外部anchorで証明する必要がある。
 
 正式判断:
 
-> **NARROWED BEYOND UNKNOWN-TARGET JCI / TEST-TIME CAUSAL DISCOVERY — NOT ADOPTED**
+> **NARROWED BEYOND INTERVENTION-INDUCED CAUSAL ABSTRACTION IDENTIFIABILITY — NOT ADOPTED**
 
 ## Stage-transition rule
 
@@ -168,4 +141,4 @@ C023〜C025、C029〜C031までの境界を維持する。
 
 ## Last integration
 
-2026-07-26: **RESET-E038**。D032 unified fail-closed acceptance gate、Gaddy–Klein著者code→SILG component mapping監査、C031 unknown-target JCI/test-time causal discovery境界を統合した。CI成功は監査コードの証拠に限定する。immutable R0.1 bundle、公開baseline値、R0.2結果、実contract通過は0件であり、`initial_reproduction_failure`、RQ-001未採用、能力進歩未認定、高校生級未達を維持する。
+2026-07-26: **RESET-E039**。C032 intervention-induced causal abstraction identifiability境界と、D033 core prediction-payload fail-closed validationを統合した。監査CI成功はaudit codeの証拠に限定する。immutable R0.1 bundle、公開baseline値、R0.2結果、実contract通過は0件であり、`initial_reproduction_failure`、RQ-001未採用、能力進歩未認定、高校生級未達を維持する。
