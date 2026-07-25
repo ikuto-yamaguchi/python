@@ -93,6 +93,14 @@ jobs:
             --output research/intelligence_swarm/benchmarks/grounded_causal/results \
             2>&1 | tee research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_RECURRENT_SMOKE.log
 
+      - name: Upload R0.1 training checkpoints and resource logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: r01-silg-rtfm-training-${{ github.run_id }}
+          path: research/intelligence_swarm/benchmarks/grounded_causal/results/
+          if-no-files-found: error
+          retention-days: 30
+
       - name: Evaluate recurrent and matched random/language-blind/state-only/language-shuffle controls
         run: |
           set -o pipefail
@@ -102,6 +110,20 @@ jobs:
             --seeds 1 7 19 \
             --episodes 20 \
             2>&1 | tee research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_MATCHED_EVAL.log
+
+      - name: Freeze and upload completed R0.1 matched-evaluation bundle
+        run: |
+          python -m pip freeze | sort > research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_R01_PIP_FREEZE.txt
+          sha256sum research/intelligence_swarm/benchmarks/grounded_causal/results/* \
+            > research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_R01_SHA256SUMS.txt || true
+
+      - name: Upload completed R0.1 matched-evaluation bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: r01-silg-rtfm-matched-${{ github.run_id }}
+          path: research/intelligence_swarm/benchmarks/grounded_causal/results/
+          if-no-files-found: error
+          retention-days: 30
 
       - name: Export qualified typed SILG trajectories and run matched R0.2 baselines
         run: |
