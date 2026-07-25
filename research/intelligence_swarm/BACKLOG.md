@@ -15,7 +15,7 @@ Accepted evidence remains the official SILG `multi` recurrent at 32,768 requeste
 
 Classification: `matched_fixed_episode_32768_frame_staged_training_not_public_capability_reproduction`。
 
-Current canonical headに131,072-frameの検証済み完了artifactはない。未完了・cancelled・duplicate runを証拠にしない。
+Current canonical headに131,072-frameの検証済み完了artifactはない。pre-integration head `8325ff9f63e8d782209cccce232170adc95689bb`にはcombined CI statusがなく、未完了・cancelled・duplicate runを証拠にしない。
 
 Authorized actions:
 
@@ -67,8 +67,9 @@ Required outputs:
 - D018: target-label/outcome shuffleのdonor payload hashと実適用payload hash一致、same-cell、bijection、derangement、self-shuffle/no-op禁止。
 - D019: entity/dynamics holdoutを`domain × split × condition × kind`単位で監査。同一domain train signatureとの重複、signature欠落、seed欠落/余分、train reference欠落をfail-closedで拒否。in-distribution cellの期待されるtrain overlapはholdout leakageへ誤分類しない。
 - D020: 全評価行に`episode_id`を要求し、Correct対Random/Language-blind/State-only/Target-label shuffle/Outcome shuffleを同一instanceで比較する。cell→episodeのhierarchical bootstrap、episode-level sign-flip、step-weighted gap、episode-equal gap、minimum cell gap、paired episode/step countを保存する。
+- D021: 各`method × seed × domain × split × condition` cellをprediction/data/raw-log/checkpoint/full commit/model bytes/RSS/training time/CPU latencyへ一対一結合する。exact six-method and seed coverage、shared dataset hash、stable checkpoint/commit、full checksumを要求し、post-manifest mutation、condition間checkpoint差替え、method間resource/artifact tupleコピーを拒否する。
 
-D018の4テストはローカル成功。D019/D020の軽量workflow完了結果は未確認。実semantic shuffle bundle、immutable test serialization、complete prediction/artifact joins、condition-scoped holdout pass、episode-cluster statistics pass、competent public capabilityがないため、正式分類は **`initial_reproduction_failure`**。
+D018の4テストはローカル成功。D019/D020/D021のCI完了結果は未確認。実semantic shuffle bundle、immutable test serialization、complete prediction/artifact joins、condition-scoped holdout pass、episode-cluster statistics pass、runtime/artifact-cell pass、competent public capabilityがないため、正式分類は **`initial_reproduction_failure`**。
 
 ## P1 — R0.2 Environment-first faithful transfer
 
@@ -116,6 +117,13 @@ Implemented paths:
    - train/test signature overlap zero
    - all-false placeholder禁止
    - test split全体のlanguage-form holdout扱い禁止
+6. `attach_r02_holdout_manifest.py`
+   - preregistered episode manifestを`domain/split/seed/episode_seed`で結合
+   - non-empty entity/dynamics/language-form signatures
+   - explicit Boolean holdout assignments
+   - manifest/input/output SHA-256
+   - duplicate/missing/extra/noncanonical/train-held-out entryをfail-closedで拒否
+   - prediction/reward/task-success/action-accuracy/next-state-errorからholdoutを推測しない
 
 Matched exposure contract for `N` train rows, environment epochs `E`, language epochs `L`:
 
@@ -130,11 +138,13 @@ Current blocking result:
 - current exporter sets `entity_holdout=false` for all rows;
 - current exporter sets `dynamics_holdout=false` for all rows;
 - entire public test split is labeled `language_holdout=true`;
+- immutable manifest join is implemented, but a valid preregistered manifest does not exist;
+- qualified competent three-seed source trajectories do not exist;
 - therefore no requested transfer metric is currently valid.
 
 Current classification:
 
-`initial_reproduction_failure`
+`immutable_holdout_join_implemented_manifest_generation_and_qualified_silg_execution_blocked`
 
 Before formal reproduction:
 
@@ -142,7 +152,7 @@ Before formal reproduction:
 - complete typed state schema
 - parameter/topology-matched controls
 - equal examples/steps/splits/row exposure
-- externally specified immutable holdout manifest
+- externally specified immutable holdout manifest generated before prediction/outcome inspection
 - real entity/dynamics/language-form signatures and disjoint cells
 - online task success
 - action accuracy and typed next-state metrics
@@ -154,7 +164,7 @@ Minimal next correction:
 
 1. pinned RTFM generator/configurationから、prediction/outcomeを見ずにimmutable holdout manifestを作成する。
 2. episodeをentity/dynamics/language-formの非重複cellへ割り当て、3 signatureを保存する。
-3. seed `1,7,19`を再exportする。
+3. seed `1,7,19`を再exportし、manifestをjoinする。
 4. `audit_r02_holdout_assignments.py`を通過してからmatched comparisonを実行する。
 
 Representation appearance、compression、clusteringは進歩に数えない。モデル調整は認可しない。
@@ -174,36 +184,37 @@ Rejected:
 - shuffle degradation、semantic naming、prediction improvement、non-zero isolated language effectだけでidentifiabilityを主張する
 - partial shared-latent discoveryを新規性とする
 - languageを追加modalityにすればtarget partitionが識別できるとする
+- schema/sensor/object/time/field groupingをlanguageが再記述するだけでjoint identificationとする
 
 ## P2 — Only admissible RQ reformulation, not adopted
 
 Preregistration candidate only:
 
-> non-language causal-representationとmultimodal partial-sharing identifiabilityを適用した後にも残る明示的なcausal abstractionを、discrete、stochastic、non-injectiveなpopulation language channelが、検証可能なseparation条件でstrictly refineし、unseen raw-language equivalence classesとlatent intervention-target partitionを共同同定できるか。
+> intervention-based、general-environment、trajectory-local、multimodal partial-sharing、known-observational-grouping identifiabilityを適用した後に、externally anchored population language channelが、otherwise unknownなobservational groupingと残存latent intervention-target partitionを共同同定できるか。
 
 Before adoption:
 
-1. formal non-language observation model and residual equivalence class
-2. applicable general-environment/intervention/trajectory/multimodal criteriaの評価
-3. non-language and partial-sharing separation条件が失敗する証明
-4. population language generator
-5. language-specific separation condition replacing smooth injectivity
-6. distinct residual partitions induce distinct unseen utterance distributions
-7. arbitrary latent merge/split and joint recoding禁止
-8. stochastic paraphrase and contextual polysemyの明示モデル
-9. multimodal partial-sharing CRLとの直接比較
-10. unseen-form/composition/system evaluation
-11. separation除去時のmatched impossibility theorem
-12. consistent estimatorまたはpopulation-only claimの明示
-13. public baseline reproductionとpreregistration
+1. G-CaRL-compatible known grouping適用後のformal residual equivalence class
+2. language informationがschema、sensor identity、object slot、time index、environment label、action historyから復元不能である証明
+3. grouping/latent partitionと共同再符号化不能なexternal language anchor
+4. groupingとpartitionをjointly identifyするtheorem
+5. anchor/grouping-separation除去時のmatched impossibility theorem
+6. direct grouping metadataとG-CaRLとの比較
+7. discrete/stochastic/non-injective population language generator
+8. paraphrase/polysemyとunseen-form/composition/system evaluation
+9. arbitrary merge/split and joint recoding禁止
+10. dependency-pinned public baseline reproduction
+11. exactly one preregistered claim、counterexample、stopping rule
 
 No implementation、synthetic benchmark、architectureは認可しない。
 
 ## P1 — Prior-art and novelty matrix
 
-2026年一次文献まで、unknown/uncoupled interventions、general-environment CRL、subset-intervention abstractions、finite-sample CRL、trajectory-local parameter identifiability、auxiliary/temporal/multi-view/hidden-regime ICA、grouping/weak supervision、mechanism sparsity、mechanistic independence、interactive grounding、environment-first、language-dynamics pretraining、causal world models、WM3C、isolated causal effects of natural language、multimodal partial-sharing CRLを比較する。
+2026年一次文献まで、unknown/uncoupled interventions、general-environment CRL、subset-intervention abstractions、finite-sample CRL、trajectory-local parameter identifiability、auxiliary/temporal/multi-view/hidden-regime ICA、grouping/weak supervision、mechanism sparsity、mechanistic independence、interactive grounding、environment-first、language-dynamics pretraining、causal world models、WM3C、isolated causal effects of natural language、multimodal partial-sharing CRL、known observational grouping CRLを比較する。
 
-C017でBenhamza, Clausel and Tami, arXiv:2605.19135を追加。partial shared-latent recoveryを新規性から除外し、raw languageにsmooth injectivityを仮定できないこと、non-injective parity channelではpartitionが識別不能であることを固定した。公式実装は確認できず、code reproductionは主張しない。
+C018でMorioka and Hyvärinen, ICML 2024とofficial `hmorioka/GCaRL` commit `0020bfce34736d61d70ab8175f061d02951a7ed4`を追加。known observational groupingを新規language contributionから除外し、`G=q(L)=r(X)`なら`I(P;G|X)=0`であるcounterexampleを固定した。official codeは存在するがexact dependency lockがなく、reproductionは主張しない。
+
+Novelty matrixは拡張されたがstage-transition用にclosedとは認定しない。
 
 ## P2 — Japanese realism audit
 
@@ -218,7 +229,7 @@ Pinned candidate: official `riken-grp/J-CRe3`。commit、license、downloads、c
 3. canonical 3-seed prediction/artifact/leakage contract
 4. qualified R0.2 online comparison with typed metrics and real holdouts
 5. formal R0.3 rejection
-6. novelty matrix through 2026
+6. novelty matrix through 2026 closed for the successor claim
 7. exactly one preregistered successor claim/theorem、counterexamples、stopping rule
 
 ## Frozen work
