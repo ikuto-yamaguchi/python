@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 """Export typed SILG/RTFM policy trajectories for the faithful R0.2 baseline.
 
-This is a dataset adapter only.  It preserves field boundaries and integer
-semantics that the legacy flat exporter discarded.  Language-free environment
-pretraining receives current typed state, selected action and next typed state;
-reward, termination and completed-trajectory values remain labels/provenance and
-are never included in ``state_before_fields``.
+This is a dataset adapter only. It preserves field boundaries and integer
+semantics that the legacy flat exporter discarded. Reward, termination and
+completed-trajectory values remain labels/provenance and are never included in
+``state_before_fields``.
 
-The file is intentionally separate from ``export_silg_policy_trajectories.py``
-so adding it does not restart an already-running long R0.1 workflow.  It should
-replace the legacy exporter in the workflow only after the active source-policy
-run has completed and its artifact has been collected.
+The file is separate from the legacy exporter so it does not restart an active
+long R0.1 workflow. It should be wired into that workflow only after the current
+source-policy artifact has been collected.
 """
 from __future__ import annotations
 
@@ -26,13 +24,8 @@ import numpy as np
 import torch
 
 LANGUAGE_FIELDS = ("wiki", "task")
-POST_TREATMENT_FIELDS = {
-    "reward",
-    "done",
-    "episode_return",
-    "episode_step",
-    "last_action",
-}
+LANGUAGE_ONLY_FIELDS = {"wiki", "wiki_len", "task", "task_len", "text", "text_len"}
+POST_TREATMENT_FIELDS = {"reward", "done", "episode_return", "episode_step", "last_action"}
 CANONICAL_SEEDS = (1, 7, 19)
 
 
@@ -72,7 +65,7 @@ def observation_fingerprint(obs: dict[str, torch.Tensor]) -> str:
 def state_fields(obs: dict[str, torch.Tensor]) -> dict[str, list[Any]]:
     fields: dict[str, list[Any]] = {}
     for key in sorted(obs):
-        if key in LANGUAGE_FIELDS or key in POST_TREATMENT_FIELDS:
+        if key in LANGUAGE_ONLY_FIELDS or key in POST_TREATMENT_FIELDS:
             continue
         value = obs[key]
         if torch.is_tensor(value):
@@ -80,62 +73,42 @@ def state_fields(obs: dict[str, torch.Tensor]) -> dict[str, list[Any]]:
     return fields
 
 
-def _space_high_cardinality(space: Any) -> int | None:
-    high = getattr(space, "high", None)
-    if high is None:
-        return None
-    try:
-        maximum = int(np.asarray(high).max())
-    except (TypeError, ValueError, OverflowError):
-        return None
-    if maximum < 0 or maximum >= 2**31 - 1:
-        return None
-    return maximum + 1
-
-
 def build_schema(env: Any, sample: dict[str, torch.Tensor]) -> list[dict[str, Any]]:
-    """Construct a deterministic typed schema from public environment metadata.
+    """Build an RTFM schema only from pinned public environment metadata.
 
-    ``name`` and text-like inventory fields are categorical IDs.  ``valid`` is a
-    binary mask.  Relative positions are represented as continuous coordinates,
-    avoiding an invented categorical ontology.  Absolute position and length
-    fields are bounded integer categories using the public observation-space
-    upper bounds when available.
+    SILG exposes shapes rather than Gym ``Space`` objects, so cardinalities must
+    not be inferred from observed train/test values. Token IDs use the pinned
+    tokenizer vocabulary; descriptor/inventory lengths use official maxima.
+    Coordinates are continuous regression targets and ``valid`` is binary.
     """
+    vocab_size = len(env.vocab)
+    if vocab_size < 2:
+        raise RuntimeError("invalid public tokenizer vocabulary")
+    metadata = {
+        "name": ("categorical", vocab_size),
+        "name_len": ("categorical", int(env.max_name) + 1),
+        "inv": ("categorical", vocab_size),
+        "inv_len": ("categorical", int(env.max_inv) + 1),
+        "valid": ("binary", None),
+        "rel_pos": ("continuous", None),
+        "pos": ("continuous", None),
+    }
     schema: list[dict[str, Any]] = []
-    observation_space = getattr(env, "observation_space", {})
-    vocab_size = len(getattr(env, "vocab", [])) or None
-    grid_vocab = int(getattr(env, "grid_vocab", 0)) or vocab_size
-
     for key in sorted(sample):
-        if key in LANGUAGE_FIELDS or key in POST_TREATMENT_FIELDS:
+        if key in LANGUAGE_ONLY_FIELDS or key in POST_TREATMENT_FIELDS:
             continue
         value = sample[key]
         if not torch.is_tensor(value):
             continue
-        item: dict[str, Any] = {"name": key, "shape": _shape(value)}
-        if key == "valid":
-            item["kind"] = "binary"
-        elif key == "rel_pos":
-            item["kind"] = "continuous"
-        else:
-            item["kind"] = "categorical"
-            cardinality: int | None = None
-            if key == "name":
-                cardinality = grid_vocab
-            elif key in {"inv", "name_token"}:
-                cardinality = vocab_size
-            try:
-                space = observation_space[key]
-            except (KeyError, TypeError):
-                space = None
-            cardinality = cardinality or _space_high_cardinality(space)
-            if cardinality is None:
-                raise RuntimeError(
-                    f"cannot derive non-leaky public cardinality for categorical field {key!r}; "
-                    "add a mapping from official environment metadata rather than inferring from rows"
-                )
-            item["cardinality"] = int(cardinality)
+        if key not in metadata:
+            raise RuntimeError(
+                f"unmapped RTFM state field {key!r}; classify it from official metadata "
+                "instead of inferring semantics from evaluation rows"
+            )
+        kind, cardinality = metadata[key]
+        item: dict[str, Any] = {"name": key, "kind": kind, "shape": _shape(value)}
+        if cardinality is not None:
+            item["cardinality"] = cardinality
         schema.append(item)
     if not schema:
         raise RuntimeError("empty typed state schema")
