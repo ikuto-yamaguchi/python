@@ -15,25 +15,25 @@ Accepted evidence remains the official SILG `multi` recurrent at 32,768 requeste
 
 Classification: `matched_fixed_episode_32768_frame_staged_training_not_public_capability_reproduction`。
 
-Run `30158106220` completed install、schema/random probe、131,072 requested frames × seeds `1,7,19` training、and matched Correct/Random/Language-blind/State-only/Language-shuffle evaluation. The job then failed during the R0.2 typed trajectory/baseline step. Holdout audit、dependency freeze、and artifact upload did not run; workflow artifacts are empty. None of the new checkpoint、performance、resource、or log values are accepted.
+Run `30158106220` completed install、schema/random probe、131,072 requested frames × seeds `1,7,19` training、and matched Correct/Random/Language-blind/State-only/Language-shuffle evaluation. It then failed during the R0.2 typed trajectory/baseline step before dependency freeze and artifact upload. Workflow artifacts are empty. None of the new checkpoint、performance、resource、or log values are accepted.
 
 Required next actions:
 
-1. Use only the canonical split-job workflow now on `research/intelligence-swarm-reconstruction-001`.
-2. Run the `r01-public-reproduction` job and verify that its immutable artifact uploads immediately after matched R0.1 evaluation.
-3. Retrieve and verify seed `1,7,19` checkpoints and actual frame counters before allowing R0.2 to consume them.
+1. Use only the canonical split-job workflow on `research/intelligence-swarm-reconstruction-001`.
+2. Run `r01-public-reproduction` and verify immutable artifact upload immediately after matched R0.1 evaluation.
+3. Retrieve and verify seed `1,7,19` checkpoints and actual frame counters before R0.2 consumes them.
 4. Verify Correct、Random、Language-blind、State-only、Language-shuffle use identical initial instances.
 5. Verify model bytes、peak RSS、training wall time、CPU latency、seed、split、raw logs、source/model/data/prediction checksums.
 6. Feed the preserved R0.1 bundle through the unified evaluation contract and preserve the first failure.
 7. Audit policy competence and action collapse before interpreting any ablation.
-8. Do not rerun R0.2 inside the same preservation boundary as R0.1.
+8. Do not place R0.2 inside the R0.1 preservation boundary.
 
 Queue control:
 
 - R0.1 workflow runs only on benchmark-code/run-request pushes or manual dispatch.
 - Governance/prior-art commits must not enqueue another long reproduction.
 - Existing pending/duplicate runs are not results.
-- R0.2 may start only by downloading the already-uploaded immutable R0.1 artifact.
+- R0.2 may start only by downloading an uploaded immutable R0.1 artifact.
 
 Forbidden:
 
@@ -45,7 +45,7 @@ Forbidden:
 
 ## P0 — Evaluation, statistics, leakage and provenance
 
-Implemented through D027:
+Implemented through D028:
 
 - SILG real-schema adaptation
 - train/test utterance overlap
@@ -61,11 +61,14 @@ Implemented through D027:
 - observed sparse `domain × split × condition` topology shared by all methods/seeds
 - mean gap、minimum cell gap、paired randomization、McNemar、episode-cluster bootstrap CI
 - model bytes、RSS、training wall time、CPU latency、raw logs、checksums
-- D027 exact six-method coverage、one data path/hash per cell、one immutable code commit per bundle
+- D027 exact six-method artifact coverage、one data path/hash per cell、one immutable code commit per bundle
+- D028 exact prediction topology: only `correct/random/language_blind/state_only/target_label_shuffle/outcome_shuffle`; reject extras、global omissions、per-instance omissions、per-cell omissions、and evaluation-external predictions
+
+D028 short CI run `30165709843` passed. This validates the regression path only; it does not establish a real benchmark result.
 
 Remaining:
 
-1. Do not add more auditors unless a preserved real bundle exposes a concrete false pass/failure.
+1. Do not add another auditor unless a preserved real bundle exposes a concrete false pass/failure.
 2. Apply the unified contract to the next preserved R0.1 artifact.
 3. Preserve the first failing condition and raw evidence.
 4. If target-label is undefined in SILG, record formal inapplicability instead of inventing labels.
