@@ -4,15 +4,16 @@
 
 - Public benchmark selected: **SILG RTFM stage 1**
 - Environment installation and reset/step probe: **completed**
-- Three-seed random control: **completed**
-- Official recurrent baseline: **not completed**
-- Language-blind: **not completed**
-- State-only: **not completed**
+- Historical non-canonical random probe (`0,1,2`): **completed; retained only as setup evidence**
+- Canonical seeds: **`1,7,19`**
+- Official recurrent 131,072-frame training: **executed previously, but no immutable accepted bundle exists**
+- Canonical matched recurrent/random/language-blind/state-only/language-shuffle values: **not accepted until an immutable bundle is recovered**
+- Public baseline reproduction: **not completed**
 - Capability or novelty claim: **none**
 
 This work fixes public source versions, the install path, environment split,
-observation/action schema and an executable three-seed control. It introduces
-no new architecture.
+observation/action schema and the canonical execution contract. It introduces no
+new architecture or toy hypothesis.
 
 ## Official sources and pins
 
@@ -23,6 +24,15 @@ no new architecture.
 | SILG package | PyPI | `0.0.1` |
 | Paper | NeurIPS 2021 | SILG shared recurrent architecture |
 
+The executable workflow and request additionally pin:
+
+- train environment: `silg:rtfm_train_s1-v0`
+- evaluation environment: `silg:rtfm_test_s1-v0`
+- model: official SILG `multi` recurrent
+- pretrained language model: disabled
+- requested frames: `131072` per seed
+- canonical seeds: `1, 7, 19`
+
 ## Official entry points and split
 
 The official launcher defines:
@@ -31,7 +41,7 @@ The official launcher defines:
 - validation/test: `silg:rtfm_test_s1-v0`
 - model: `multi`
 - entropy costs: `0.05`, `0.005`
-- launcher seeds: `range(4)`
+- launcher seeds: `range(4)` in the public launcher
 
 Published local entry point:
 
@@ -39,13 +49,17 @@ Published local entry point:
 python launch.py --local --envs rtfm
 ```
 
-Default training is large rather than a smoke test:
+Default public training is substantially larger than R0.1 qualification:
 
 - `total_frames = 100,000,000`
 - `num_actors = 30`
 - `batch_size = 24`
 - `unroll_length = 80`
 - `num_threads = 4`
+
+R0.1 is therefore a pinned public-baseline qualification run at 131,072 frames
+per canonical seed, not a numerical reproduction of the published 100M-frame
+score.
 
 ## Dependency reconstruction
 
@@ -63,14 +77,18 @@ compatibility failures were reproduced and minimally repaired:
    run to require NLE, ALFWorld, Messenger and Touchdown. The installer limits
    registration to RTFM without modifying RTFM itself.
 
-Successful runtime versions:
+Pinned runtime target:
 
-- Python 3.8.18
+- Python 3.8
 - Gym 0.21.0
 - PyTorch 1.13.1+cpu
 - torchvision 0.14.1+cpu
-- SILG 0.0.1 source
+- Transformers 4.30.2
+- SILG pinned source
 - RTFM pinned source
+
+The exact installed environment must be preserved in the run artifact via
+`pip freeze`; this document is not a substitute for that immutable evidence.
 
 ## Measured observation/action schema
 
@@ -90,56 +108,79 @@ The successful probe observed:
 | `rel_pos` | `[6, 6, 2]` |
 | `pos` | `[2]` |
 
-Actions are discrete: stay, up, down, left, right.
+Actions are discrete: stay, up, down, left, right. All learned and control
+conditions must consume the same initial environment instances and the same
+valid-action handling.
 
-## Three-seed random control
+## Historical random setup probe — not canonical evidence
 
-Condition: uniformly sample one action from the public `valid` mask.
+An early setup probe used seeds `0,1,2` before the canonical seed contract was
+fixed. It is retained only to show that installation, reset, stepping and basic
+resource capture worked:
 
-- seeds: `0, 1, 2`
 - episodes: 20 per seed, 60 total
 - wins: 6 / 60
-- mean win rate: **0.1000**
-- mean return: **-1.0823**
-- mean episode length: **15.1167**
-- mean wall time: **0.8522 s per 20-episode seed batch**
-- mean action-selection latency: **8.087 microseconds/action**
-- total probe wall time: **3.8286 s**
-- peak RSS: **232,992 KiB**
-- trainable model size: **0 bytes**
+- mean win rate: `0.1000`
+- mean return: `-1.0823`
+- mean episode length: `15.1167`
+- peak RSS: `232,992 KiB`
+- trainable model size: `0 bytes`
+- workflow run: `30100194601`
+- artifact digest: `sha256:c4f4102dce4d5929b1ea2a54c98572c5ea6e8c251d87625965752f42c1f11fe6`
 
-Per seed:
+These numbers must not be mixed with, substituted for, or statistically compared
+against the canonical `1,7,19` learned-baseline bundle.
 
-| Seed | Wins | Win rate | Return | Mean length |
-|---:|---:|---:|---:|---:|
-| 0 | 3 | 0.15 | -0.938 | 12.90 |
-| 1 | 1 | 0.05 | -1.158 | 13.90 |
-| 2 | 2 | 0.10 | -1.151 | 18.55 |
+## Canonical matched evaluation contract
 
-Canonical result:
+The current R0.1 job must use seeds `1,7,19` and compare on identical evaluation
+instances:
 
-- `results/SILG_RTFM_RANDOM_3SEED.json`
-- workflow run `30100194601`
-- artifact digest `sha256:c4f4102dce4d5929b1ea2a54c98572c5ea6e8c251d87625965752f42c1f11fe6`
+- Correct recurrent
+- Random
+- Language-blind
+- State-only
+- Language-shuffle
 
-## Leakage audit
+The accepted immutable bundle must contain:
 
-The control reads only current observation fields and the public valid-action
-mask. It does not consume future state, gold action, episode outcome, completed
-trajectory, test label or language-to-entity mapping. Model bytes are zero.
+- three checkpoints
+- per-seed and aggregate matched-condition results
+- model bytes
+- peak RSS
+- training wall time
+- CPU inference latency
+- raw install, training and evaluation logs
+- host and commit provenance
+- sorted `pip freeze`
+- SHA-256 manifest
+
+A previous long run completed training and matched controls but failed during
+later R0.2 work before artifact upload. Those unpreserved values remain
+inadmissible. The workflow now freezes and uploads the R0.1 bundle before the
+separate R0.2 job starts.
+
+## Leakage boundary
+
+Random reads only the current observation and public valid-action mask.
+Language-blind and state-only must differ from Correct only by preregistered input
+masking; they must not receive future state, gold action, reward, done status,
+completed trajectory, test labels or hidden language-to-entity mappings.
+All methods must be evaluated on the same instance identities.
 
 ## Next minimal work
 
-1. instantiate official `multi` recurrent model and measure parameter bytes;
-2. run reduced-frame training/evaluation for seeds 0,1,2;
-3. add language-blind and state-only input masks without changing episodes,
-   valid-action handling, optimizer or model capacity;
-4. compare all controls on identical validation instances;
-5. only after the sanity run, schedule a faithful 100M-frame reproduction.
+1. complete one split-job run from the current canonical branch;
+2. recover and checksum the immutable R0.1 artifact before any R0.2 result is used;
+3. audit checkpoint count, canonical seeds, condition coverage, instance identity,
+   dependencies, model bytes, RSS, wall time and CPU latency;
+4. classify any missing or inconsistent evidence as `initial_reproduction_failure`;
+5. only after qualification, consider a faithful larger-frame public reproduction.
 
 ## Research decision
 
-R0.1 remains **in progress**. One public environment/control is now reproducible,
-but the published recurrent baseline count remains zero. No intelligence
-principle, semantic-identity progress, novelty or high-school-level capability
-is claimed.
+R0.1 remains **in progress**. Installation and schema evidence exist, and a prior
+long run demonstrated executability, but the accepted learned public baseline
+count remains zero because no immutable canonical bundle has passed audit. No
+new intelligence principle, semantic-identity progress, novelty, capability
+progress or high-school-level intelligence is claimed.
