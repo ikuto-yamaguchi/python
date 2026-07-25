@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Single fail-closed acceptance gate for an R0 benchmark evidence bundle.
 
-This module does not add a model or research mechanism.  It prevents a bundle from
+This module does not add a model or research mechanism. It prevents a bundle from
 being accepted by running only a convenient subset of the existing contracts.
-Dataset/schema leakage, paired statistics, resource artifacts, prediction-payload
-leakage, and prediction/statistics checksums must all pass in one invocation.
+Dataset/schema leakage, alias-normalized leakage, paired statistics, resource
+artifacts, prediction-payload leakage, and prediction/statistics checksums must
+all pass in one invocation.
 """
 from __future__ import annotations
 
@@ -15,6 +16,7 @@ from typing import Any
 
 import audit_prediction_payload_leakage as prediction_payload
 import audit_prediction_statistics_artifacts as prediction_statistics
+import audit_schema_alias_leakage as schema_alias
 import evaluation_contract
 
 
@@ -37,6 +39,7 @@ def audit_acceptance(
     checks: dict[str, dict[str, Any]] = {}
 
     checks["dataset_contract"] = evaluation_contract.validate_dataset(data)
+    checks["schema_alias_leakage_contract"] = schema_alias.audit(data, predictions)
     checks["prediction_payload_contract"] = prediction_payload.audit_rows(data, predictions)
     checks["paired_statistics_contract"] = evaluation_contract.score(data, predictions)
     checks["resource_artifact_contract"] = evaluation_contract.audit_artifacts(manifest, base_dir)
@@ -56,6 +59,7 @@ def audit_acceptance(
         "errors": errors,
         "checks": checks,
         "acceptance_requires_all_contracts": True,
+        "alias_normalized_leakage_audit_required": True,
         "partial_contract_success_is_not_acceptance": True,
         "new_mechanism_introduced": False,
     }
