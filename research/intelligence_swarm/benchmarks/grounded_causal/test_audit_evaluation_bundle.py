@@ -99,6 +99,43 @@ class BundleAuditTests(unittest.TestCase):
             self.assertTrue(result["dataset_audit"]["valid"])
             self.assertTrue(result["prediction_statistics"]["valid"])
 
+    def test_sparse_split_condition_topology_is_valid(self):
+        runs = []
+        sparse_cells = [
+            ("rtfm_s1", "test", "in_distribution"),
+            ("rtfm_s1", "validation", "dynamics_holdout"),
+        ]
+        for method in METHODS:
+            for seed in (1, 7, 19):
+                for domain, split, condition in sparse_cells:
+                    runs.append({
+                        "method": method, "seed": seed, "domain": domain,
+                        "split": split, "condition": condition,
+                    })
+        result = bundle._audit_observed_topology(runs)
+        self.assertTrue(result["valid"], result["errors"])
+        self.assertFalse(result["requires_split_condition_cartesian_product"])
+        self.assertEqual(len(result["observed_design_cells"]), 2)
+
+    def test_topology_mismatch_between_method_seed_is_rejected(self):
+        runs = []
+        sparse_cells = [
+            ("rtfm_s1", "test", "in_distribution"),
+            ("rtfm_s1", "validation", "dynamics_holdout"),
+        ]
+        for method in METHODS:
+            for seed in (1, 7, 19):
+                for domain, split, condition in sparse_cells:
+                    if method == "state_only" and seed == 19 and condition == "dynamics_holdout":
+                        continue
+                    runs.append({
+                        "method": method, "seed": seed, "domain": domain,
+                        "split": split, "condition": condition,
+                    })
+        result = bundle._audit_observed_topology(runs)
+        self.assertFalse(result["valid"])
+        self.assertTrue(any("topology differs" in error for error in result["errors"]))
+
     def test_semantic_alias_leakage_fails_bundle(self):
         with tempfile.TemporaryDirectory() as td:
             base = Path(td); manifest = self.make_bundle(base)
