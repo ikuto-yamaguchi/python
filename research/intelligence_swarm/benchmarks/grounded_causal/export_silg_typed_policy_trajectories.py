@@ -6,9 +6,10 @@ semantics that the legacy flat exporter discarded. Reward, termination and
 completed-trajectory values remain labels/provenance and are never included in
 ``state_before_fields``.
 
-The file is separate from the legacy exporter so it does not restart an active
-long R0.1 workflow. It should be wired into that workflow only after the current
-source-policy artifact has been collected.
+Holdout assignments are not inferred by this exporter. They are attached later
+from the pre-outcome generator manifest. Raw rows therefore carry only false
+placeholder values, preventing the RTFM S1 test split from being mislabeled as
+a language-form holdout.
 """
 from __future__ import annotations
 
@@ -25,10 +26,8 @@ import torch
 
 LANGUAGE_FIELDS = ("wiki", "task")
 # RTFM exposes inventory as token IDs, but inventory is part of the physical
-# environment state rather than instruction language.  Excluding ``inv`` here
-# silently removed action-conditioned inventory transitions from the
-# Environment-first objective.  Only exogenous instruction channels and SILG's
-# concatenated text aliases are language-only.
+# environment state rather than instruction language. Only exogenous
+# instruction channels and SILG's concatenated text aliases are language-only.
 LANGUAGE_ONLY_FIELDS = {"wiki", "wiki_len", "task", "task_len", "text", "text_len"}
 POST_TREATMENT_FIELDS = {"reward", "done", "episode_return", "episode_step", "last_action"}
 CANONICAL_SEEDS = (1, 7, 19)
@@ -79,13 +78,7 @@ def state_fields(obs: dict[str, torch.Tensor]) -> dict[str, list[Any]]:
 
 
 def build_schema(env: Any, sample: dict[str, torch.Tensor]) -> list[dict[str, Any]]:
-    """Build an RTFM schema only from pinned public environment metadata.
-
-    SILG exposes shapes rather than Gym ``Space`` objects, so cardinalities must
-    not be inferred from observed train/test values. Token IDs use the pinned
-    tokenizer vocabulary; descriptor/inventory lengths use official maxima.
-    Coordinates are continuous regression targets and ``valid`` is binary.
-    """
+    """Build an RTFM schema only from pinned public environment metadata."""
     vocab_size = len(env.vocab)
     if vocab_size < 2:
         raise RuntimeError("invalid public tokenizer vocabulary")
@@ -205,7 +198,8 @@ def export_split(
                     "done": bool(nxt["done"].item()),
                     "entity_holdout": False,
                     "dynamics_holdout": False,
-                    "language_holdout": split == "test",
+                    "language_holdout": False,
+                    "holdout_assignment_source": "pending_pre_outcome_generator_manifest",
                 }
             )
             obs = nxt
@@ -253,6 +247,7 @@ def main() -> None:
                 "fields": [item["name"] for item in train_schema],
                 "dataset_sha256": digest,
                 "schema_sha256": schema_digest,
+                "holdout_assignment_source": "pending_pre_outcome_generator_manifest",
                 "out": str(args.out),
             },
             indent=2,
