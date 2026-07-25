@@ -27,7 +27,7 @@
 - R0.2正式再現: **0件**
 - R0.3 empirical intervention-target ablation: **正式棄却**
 - RQ-001-T1 current formulation: **棄却**
-- population-level restricted-auxiliary reformulation: **事前登録候補のみ・未採用**
+- narrowed population-grammar reformulation: **未採用**
 - J-CRe3日本語外部監査: **未再現**
 
 公開能力baselineとmatched controlsがevaluation contractを通るまで、新規機構族、知能原理、能力進歩を認定しない。
@@ -65,8 +65,6 @@ Completed workflow run `30120620610` reproduced the official SILG `multi` recurr
 
 ### Matched fixed-instance evaluation
 
-Each method used 20 episodes per seed, 60 episodes total, with identical initial-instance fingerprint streams.
-
 | Method | Win rate | Mean return | Mean episode length | CPU inference |
 |---|---:|---:|---:|---:|
 | Correct recurrent | `0.0167` | `-1.8827` | `46.80` | `7.229 ms/step` |
@@ -81,9 +79,9 @@ Classification: **`matched_fixed_episode_32768_frame_staged_training_not_public_
 
 ### Current staged run
 
-The first 131,072-frame attempt stopped because of a fixed 1,200-second reconstruction-harness subprocess timeout, not an official learner exception. The timeout now scales with requested frames and timeout failures preserve raw logs and hashes. The official model, loss, optimizer, seed, split and schema were unchanged.
+The first 131,072-frame attempt stopped because of a fixed reconstruction-harness timeout, not an official learner exception. Timeout handling now scales with frames and preserves logs and hashes.
 
-At RESET-E018, head workflow run `30133481693` is still in the official recurrent training step. No unfinished capability, resource, trajectory or R0.2 value is incorporated. Repeated governance-only updates are not treated as new evidence; the latest completed capability evidence remains the 32,768-frame result.
+At RESET-E019, workflow run `30136732061` has completed source installation and random/schema probing and remains in the official recurrent 131,072-frame training step. No unfinished capability, resource, checkpoint, trajectory, or R0.2 value is incorporated.
 
 ## R0.2 Environment-first status
 
@@ -99,48 +97,57 @@ The source policy was ineligible: seed 1 train success `0/40`; seed 7 `0/40` wit
 
 Classification: **`ineligible_failed-policy-trajectory_negative_diagnostic / not_R0.2_reproduction`**.
 
-The current implementation is a continuous environment-first adaptation, not the official Gaddy & Klein default structured discrete-message and direct message-alignment baseline. Flat MSE over mixed typed state is not a valid formal next-state metric.
+Gaddy & Klein 2019 and authors' code commit `ac1e7cb62ae94c76f545bf942f0c8febce43891f` are now the fixed method reference. The official full method uses language-free `E(s,s')->m`, reused `D(s,m)->s'`, a structured discrete message, direct environment/language message matching, an LSTM language module, and a pretrained decoder frozen by default.
 
-R0.2 remains blocked until every source-policy seed has majority-action share `<=0.90`, successful train episodes `>=5`, and at least two actions with `>=5%` support. Formal comparison requires typed transition loss, online task success, real entity/dynamics/language-form holdouts, matched parameter/data budget and identical-instance controls.
+The current SILG adaptation remains non-faithful: continuous width-48 message, no direct matching loss, GRU, flat MSE over mixed typed fields, no online task success, and no verified entity/dynamics/language-form holdouts.
+
+`audit_r02_gaddy_klein_fidelity.py` fails closed unless canonical seeds, disjoint episodes, typed schema/losses, real holdouts, non-collapsed successful source trajectories, official method-contract fields, matched inference topology, complete resource reporting, and `pretrained_language_model:false` are present.
+
+R0.2 classification: **`official_method_transfer_audited_current_dataset_blocked`**. No tuning is authorized until R0.1 source-policy competence passes.
 
 ## Evaluation contract status
 
-`evaluation_contract.py` and the SILG adapter audit:
+D015 adapts the contract directly to the concrete SILG exporter schema:
+
+- `text_tokens -> utterance`;
+- `action -> gold_action`;
+- `state_after -> gold_state_after`;
+- prospective-only default `model_input`;
+- reward, done, outcome, action label and after-state excluded from model input;
+- shared train/test `episode_id`, `episode_seed`, or `observation_fingerprint` rejected;
+- wholly missing required methods reported in coverage.
+
+The contract also audits:
 
 - train/test utterance and entity/dynamics overlap;
 - gold action, after-state, reward, done, post-treatment and completed-trajectory leakage;
 - immutable prediction-side `instance_fingerprint`;
 - complete `method × seed × domain × split × condition` prediction and artifact coverage;
-- duplicate/missing predictions and duplicate method-seed runs;
 - domain × seed × split × condition cells, paired gaps, exact McNemar and hierarchical bootstrap 95% CI;
-- run and top-level aggregate recomputation;
 - readable raw-log, model and immutable-data artifacts;
 - full source/code pins and SHA-256 values;
-- reported model bytes versus actual artifact size;
-- finite model bytes, RSS, training wall time and CPU latency;
-- canonical seeds `1,7,19`, `answer_leakage:false`, `pretrained_language_model:false`.
+- exact model bytes, finite RSS, wall time and CPU latency;
+- canonical seeds `1,7,19`, `answer_leakage:false`, `pretrained_language_model:false`;
+- shuffle donor existence, same-cell bijection, fixed-point-free derangement and no reuse.
 
-`target_label_shuffle` and `outcome_shuffle` require donor IDs/fingerprints, same-cell assignment, bijection, fixed-point-free derangement and no donor reuse. D014 has 15 passing regression tests.
-
-Missing real target-label/outcome shuffle predictions or formal target-label inapplicability, immutable serialized test checksum and complete artifact joins. Formal classification remains **`initial_reproduction_failure`**.
+D015 has **18 passing regression tests**. Missing real target-label/outcome shuffle predictions or formal target-label inapplicability, immutable serialized test checksum, complete artifact joins, and a competent public baseline remain. Formal classification remains **`initial_reproduction_failure`**.
 
 ## Prior-art and novelty boundary
 
-Unknown-target and multi-node intervention recovery, score/general-environment CRL, subset-intervention causal abstraction, finite-sample recovery, environment-first instruction following, language-dynamics pretraining, auxiliary-variable/temporal/multi-view/hidden-regime nonlinear ICA, grouping-based and weakly supervised CRL, mechanism sparsity, mechanistic independence and multimodal shared-latent recovery are existing boundaries.
+Unknown-target and multi-node intervention recovery, score/general-environment CRL, subset-intervention causal abstraction, finite-sample recovery, environment-first instruction following, language-dynamics pretraining, auxiliary-variable/temporal/multi-view/hidden-regime nonlinear ICA, grouping-based and weakly supervised CRL, mechanism sparsity, mechanistic independence, multimodal shared-latent recovery, and WM3C language-controlled block identification are existing boundaries.
 
-Broad claims that language is an auxiliary identifiability signal, shuffled language supplies contrastive negatives, unknown targets can be recovered, language and trajectory are two views of a shared latent, or utterance pair/group labels identify intervention semantics are not adopted as novelty.
+WM3C already covers composable language-conditioned latent dynamics and block-wise identifiability when language components and target blocks are supplied. These broad claims are not novel.
 
 ## Research-question decision
-
-SILG/RTFM does not define ground-truth latent intervention families, targets, mechanism operators or causal abstractions. Audited alternatives including J-CRe3, CausalTriplet, ACCESS, MIB and CausalPhys do not jointly provide episode-aligned raw language, interactive trajectories, independent mechanism changes, held-out mechanism ground truth and permutation-aware evaluation.
 
 - **Gate L — continued, not passed:** test whether raw language adds external capability beyond state/action/history/environment identity after a competent public policy exists.
 - **Gate I empirical track — rejected:** no joint-identification experiment and no researcher-authored target ontology on SILG.
 - **RQ-001-N5 — rejected.**
-- **RQ-001-T1 current form — rejected by C011.** On finite benchmark support, every observed utterance and every deterministic relation derived from it can be losslessly represented by a finite auxiliary index such as `U=index(L)`. Therefore “raw language exceeds every finite auxiliary representation” is not empirically demonstrable.
-- **Only admissible reformulation — not adopted:** under an explicit population grammar and a restricted auxiliary class that cannot copy utterance identity, test whether compositional relations over unseen utterance forms refine a known intervention-induced causal abstraction beyond complete non-language trajectories.
+- **RQ-001-T1 current form — rejected by finite-index collapse.**
+- **C012 re-encoding result:** without an explicit population grammar and restricted language-to-dynamics mechanisms, hidden language factors can be bijectively merged or reversibly split while preserving the observable distribution; even the number and size of target blocks are not jointly identifiable.
+- **Only admissible narrowed question — not adopted:** under a specified population grammar and a restricted non-lookup language-to-dynamics class, determine whether raw utterances jointly identify a nontrivial utterance factorization and a refinement of a known intervention-induced causal abstraction when neither language components nor target blocks are supplied.
 
-Before that reformulation can be preregistered it requires a formal population language generator, explicit admissible auxiliary class, exact causal-model equivalence relation, a known residual abstraction, unseen-form positive and negative constructions, a proof sketch, falsification rule and lookup-preventing split. No architecture or synthetic benchmark is authorized before preregistration and public baseline reproduction.
+Preregistration must rule out utterance-ID lookup and arbitrary splitting/merging, define the residual abstraction, supply positive and impossibility results, include unseen-form/tuple/target splits, and compare directly with WM3C and auxiliary/multi-view CRL. No implementation is authorized before public baseline reproduction and preregistration.
 
 ## Current maximum bottleneck
 
@@ -173,4 +180,4 @@ All work accumulates only on `research/intelligence-swarm-reconstruction-001`. E
 
 ## Last integration
 
-2026-07-25: **RESET-E018**。C011のfinite-index collapseによりRQ-001-T1現行形式を棄却し、population grammarとrestricted auxiliary classを明示する再定式化だけを未採用の事前登録候補として残した。D014の厳格評価contractを維持し、head workflow run `30133481693`は131,072-frame公式recurrent学習中のため未完了値を採用しない。公開能力baseline 0件、R0継続、段階遷移禁止、高校生級未達を維持する。
+2026-07-25: **RESET-E019**。C012でWM3C重複境界とraw-language factor再符号化による共同識別不能性を統合した。R0.2はGaddy & Klein公式full methodとの差をfail-closed監査へ固定した。D015で実SILG exporter schema、episode/seed/observation identity leakage、18 regression testsを統合した。workflow run `30136732061`は131,072-frame公式recurrent学習中であり未完了値を採用しない。公開能力baseline 0件、段階遷移禁止、高校生級未達を維持する。
