@@ -59,7 +59,7 @@ Required outputs:
 
 ## P0 — Evaluation, statistics, leakage and provenance
 
-Implemented through D023:
+Implemented through D024:
 
 - concrete SILG schema adaptation
 - immutable prediction-to-dataset joins
@@ -69,14 +69,15 @@ Implemented through D023:
 - episode-cluster hierarchical bootstrap・episode sign-flip・step/episode weighting・minimum cell gap
 - prediction/data/raw-log/checkpoint/full commit/model bytes/RSS/time/CPU latency cell binding
 - semantic aliases including `future_state`、completed `rollout_context`、`target_action`、`chosen_action`、`oracle_*`、reward/success/outcome aliases
-- D023でsemantic auditorをcanonical CIのwatch・compile・testへ必須接続
+- semantic auditorのcanonical CI必須接続
+- immutable実bundle結合後にdataset契約、semantic leakage、shuffle provenance、prediction coverage、paired/cluster statisticsを一括実行するend-to-end bundle audit
 
 Remaining:
 
-1. semantic companion auditorを`evaluation_contract.py`の単一public CLIへcomposeする。
-2. 新しい監査器を増やす前に、実R0 bundleをD016〜D023へ投入する。
-3. failure箇所だけを再現可能なlogとして固定する。
-4. evaluatorではなくdata/run欠陥なら実験側の最小修正だけを行う。
+1. 新しい監査器を増やさず、実R0 bundleをD016〜D024へ投入する。
+2. failure箇所だけを再現可能なlogとして固定する。
+3. evaluatorではなくdata/run欠陥なら実験側の最小修正だけを行う。
+4. target-labelがSILG schemaで定義不能ならformal inapplicability recordを固定し、擬似labelを作らない。
 
 Formal classification remains **`initial_reproduction_failure`**。
 
@@ -169,7 +170,7 @@ No implementation、synthetic benchmark、architecture is authorised.
 
 Matrix must remain current through relevant 2026 primary work and official code where available.
 
-C020 addition:
+Current accepted boundary:
 
 - Li, Kaba, and Ravanbakhsh, AISTATS 2025, `On the Identifiability of Causal Abstractions`
 - unknown subset interventionsから識別可能な最大因果抽象をintervention-induced quotientとして追加
