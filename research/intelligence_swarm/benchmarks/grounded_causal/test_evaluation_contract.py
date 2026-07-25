@@ -35,7 +35,15 @@ class Tests(unittest.TestCase):
     for m in METHODS:runs.append({"method":m,"seed":seed,"domain":"rtfm_s1","split":"test","condition":condition,"model_bytes":model.stat().st_size,"peak_rss_bytes":2,"training_wall_seconds":1,"cpu_inference_ms_per_item":.1,"raw_log_path":"r","raw_log_sha256":sha(raw),"model_path":"m","model_sha256":sha(model),"data_path":"d","data_sha256":sha(data),"code_commit":COMMIT})
   return {"runs":runs}
  def test_valid(self):
-  r=self.rows();self.assertTrue(ec.validate_dataset(r)["valid"]);s=ec.score(r,self.preds(r));self.assertTrue(s["valid"],s["errors"]);g=s["paired_gaps_vs_correct"]["random"]["action"];self.assertEqual(g["paired_instances"],9);self.assertLess(g["mcnemar_exact_p_two_sided"],.01);self.assertTrue(s["shuffle_assignment_audit"]["outcome_shuffle"]["provenance_required"]);self.assertTrue(all("split" in c for c in s["cells"]));self.assertTrue(s["progress_contract"]["requires_split_condition_cells"])
+  r=self.rows();q=ec.validate_dataset(r);self.assertTrue(q["valid"],q["errors"]);self.assertTrue(q["canonical_seed_topology_required"]);s=ec.score(r,self.preds(r));self.assertTrue(s["valid"],s["errors"]);g=s["paired_gaps_vs_correct"]["random"]["action"];self.assertEqual(g["paired_instances"],9);self.assertLess(g["mcnemar_exact_p_two_sided"],.01);self.assertTrue(s["shuffle_assignment_audit"]["outcome_shuffle"]["provenance_required"]);self.assertTrue(all("split" in c for c in s["cells"]));self.assertTrue(s["progress_contract"]["requires_split_condition_cells"])
+ def test_dataset_rejects_noncanonical_three_seed_set(self):
+  r=self.rows()
+  for row in r:
+   if row["seed"]==19: row["seed"]=23; row["instance_id"]=row["instance_id"].replace("19","23")
+  q=ec.validate_dataset(r);self.assertFalse(q["valid"]);self.assertTrue(any("exactly" in e for e in q["errors"]))
+ def test_dataset_rejects_seed_missing_from_one_cell(self):
+  r=[row for row in self.rows() if not(row["seed"]==19 and row.get("dynamics_holdout") is True)]
+  q=ec.validate_dataset(r);self.assertFalse(q["valid"]);self.assertTrue(any("dataset cell" in e for e in q["errors"]))
  def test_snapshot_mismatch(self):
   r=self.rows();p=self.preds(r);p[0]["instance_fingerprint"]="bad";self.assertFalse(ec.score(r,p)["valid"])
  def test_fingerprint_required(self):
@@ -54,7 +62,7 @@ class Tests(unittest.TestCase):
   r=self.rows();p=self.preds(r);row=next(x for x in p if x["method"]=="outcome_shuffle" and x["instance_id"].startswith("test-1"));donor=next(x for x in r if x["instance_id"].startswith("test-7"));row["control_source_instance_id"]=donor["instance_id"];row["control_source_fingerprint"]=ec.instance_fingerprint(ec.adapt_row(donor));q=ec.score(r,p);self.assertFalse(q["valid"]);self.assertTrue(any("crosses seed/domain/split/condition" in e for e in q["errors"]))
  def test_manifest_cartesian_and_provenance(self):
   with tempfile.TemporaryDirectory() as td:
-   b=Path(td);manifest=self.manifest(b);q=ec.audit_artifacts(manifest,b);self.assertTrue(q["valid"],q["errors"]);self.assertEqual(q["conditions"],["entity_holdout","in_distribution"]);manifest["runs"].pop();q=ec.audit_artifacts(manifest,b);self.assertFalse(q["valid"]);self.assertGreater(q["missing_run_cells"],0)
+   b=Path(td);manifest=self.manifest(b);q=ec.audit_artifacts(manifest,b);self.assertTrue(q["valid"],q["errors"]);manifest["runs"].pop();q=ec.audit_artifacts(manifest,b);self.assertFalse(q["valid"]);self.assertGreater(q["missing_run_cells"],0)
  def test_manifest_requires_condition(self):
   with tempfile.TemporaryDirectory() as td:
    b=Path(td);manifest=self.manifest(b);manifest["runs"][0].pop("condition");q=ec.audit_artifacts(manifest,b);self.assertFalse(q["valid"]);self.assertTrue(any("condition" in e for e in q["errors"]))
