@@ -20,18 +20,23 @@ class R0AcceptanceBundleTests(unittest.TestCase):
         self.manifest = {"runs": [{}]}
         self.base_dir = HERE
 
-    def patches(self, *, payload_valid=True, stats_valid=True):
+    def patches(self, *, alias_valid=True, payload_valid=True, stats_valid=True):
         return (
             mock.patch.object(AUDIT.evaluation_contract, "validate_dataset", return_value={"valid": True, "errors": []}),
+            mock.patch.object(
+                AUDIT.schema_alias,
+                "audit",
+                return_value={"valid": alias_valid, "errors": [] if alias_valid else ["goldStateAfter alias leakage"]},
+            ),
             mock.patch.object(AUDIT.prediction_payload, "audit_rows", return_value={"valid": payload_valid, "errors": [] if payload_valid else ["gold leakage"]}),
             mock.patch.object(AUDIT.evaluation_contract, "score", return_value={"valid": True, "errors": []}),
             mock.patch.object(AUDIT.evaluation_contract, "audit_artifacts", return_value={"valid": True, "errors": []}),
             mock.patch.object(AUDIT.prediction_statistics, "audit", return_value={"valid": stats_valid, "errors": [] if stats_valid else ["checksum mismatch"]}),
         )
 
-    def run_with(self, *, payload_valid=True, stats_valid=True):
-        patches = self.patches(payload_valid=payload_valid, stats_valid=stats_valid)
-        with patches[0], patches[1], patches[2], patches[3], patches[4]:
+    def run_with(self, *, alias_valid=True, payload_valid=True, stats_valid=True):
+        patches = self.patches(alias_valid=alias_valid, payload_valid=payload_valid, stats_valid=stats_valid)
+        with patches[0], patches[1], patches[2], patches[3], patches[4], patches[5]:
             return AUDIT.audit_acceptance(self.data, self.predictions, self.manifest, self.base_dir)
 
     def test_all_contracts_must_pass(self):
@@ -39,6 +44,14 @@ class R0AcceptanceBundleTests(unittest.TestCase):
         self.assertTrue(result["valid"], result["errors"])
         self.assertEqual(result["classification"], "reproduced")
         self.assertEqual(result["failed_contracts"], [])
+        self.assertTrue(result["alias_normalized_leakage_audit_required"])
+
+    def test_alias_failure_cannot_be_hidden_by_valid_score(self):
+        result = self.run_with(alias_valid=False)
+        self.assertFalse(result["valid"])
+        self.assertEqual(result["classification"], "initial_reproduction_failure")
+        self.assertIn("schema_alias_leakage_contract", result["failed_contracts"])
+        self.assertTrue(result["checks"]["paired_statistics_contract"]["valid"])
 
     def test_payload_failure_cannot_be_hidden_by_valid_score(self):
         result = self.run_with(payload_valid=False)
@@ -53,12 +66,16 @@ class R0AcceptanceBundleTests(unittest.TestCase):
         self.assertIn("prediction_statistics_evidence_contract", result["failed_contracts"])
 
     def test_multiple_failures_are_preserved(self):
-        result = self.run_with(payload_valid=False, stats_valid=False)
+        result = self.run_with(alias_valid=False, payload_valid=False, stats_valid=False)
         self.assertEqual(
             result["failed_contracts"],
-            ["prediction_payload_contract", "prediction_statistics_evidence_contract"],
+            [
+                "prediction_payload_contract",
+                "prediction_statistics_evidence_contract",
+                "schema_alias_leakage_contract",
+            ],
         )
-        self.assertEqual(len(result["errors"]), 2)
+        self.assertEqual(len(result["errors"]), 3)
 
 
 if __name__ == "__main__":
