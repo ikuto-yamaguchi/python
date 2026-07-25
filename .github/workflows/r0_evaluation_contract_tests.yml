@@ -11,12 +11,14 @@ on:
       - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_evaluation_bundle.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_shuffle_payloads.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_holdout_condition_integrity.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_episode_cluster_statistics.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_silg_schema.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/test_audit_dataset_cell_coverage.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/test_audit_evaluation_bundle.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/test_audit_shuffle_payloads.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/test_audit_holdout_condition_integrity.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_audit_episode_cluster_statistics.py'
   workflow_dispatch:
 
 concurrency:
@@ -39,7 +41,8 @@ jobs:
             research/intelligence_swarm/benchmarks/grounded_causal/audit_dataset_cell_coverage.py \
             research/intelligence_swarm/benchmarks/grounded_causal/audit_evaluation_bundle.py \
             research/intelligence_swarm/benchmarks/grounded_causal/audit_shuffle_payloads.py \
-            research/intelligence_swarm/benchmarks/grounded_causal/audit_holdout_condition_integrity.py
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_holdout_condition_integrity.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_episode_cluster_statistics.py
       - name: Run evaluation contract regression tests
         working-directory: research/intelligence_swarm/benchmarks/grounded_causal
         run: |
@@ -49,4 +52,5 @@ jobs:
             test_audit_dataset_cell_coverage.py \
             test_audit_evaluation_bundle.py \
             test_audit_shuffle_payloads.py \
-            test_audit_holdout_condition_integrity.py
+            test_audit_holdout_condition_integrity.py \
+            test_audit_episode_cluster_statistics.py
