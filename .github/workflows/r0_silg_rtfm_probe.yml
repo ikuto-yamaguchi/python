@@ -2,9 +2,9 @@ name: R0.1 SILG RTFM probe
 run-name: R0.1 SILG RTFM 131072-frame reproduction @ ${{ github.sha }}
 
 on:
-  pull_request:
+  push:
     branches:
-      - research/intelligence-swarm-governance-014
+      - research/intelligence-swarm-reconstruction-001
     paths:
       - '.github/workflows/r0_silg_rtfm_probe.yml'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/R01_RUN_REQUEST.json'
@@ -23,10 +23,10 @@ on:
       - 'research/intelligence_swarm/benchmarks/grounded_causal/SILG_RTFM_REPRO_001.md'
   workflow_dispatch:
 
-# Use the canonical head branch in the concurrency key for both PR and manual runs.
-# Keep an active long-running reproduction alive when unrelated commits arrive.
+# Governance/prior-art commits must not enqueue another five-hour reproduction.
+# An active run is kept alive; a deliberate benchmark-code or run-request push queues the next run.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref_name }}
+  group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: false
 
 jobs:
