@@ -80,15 +80,9 @@ Classification: **`matched_fixed_episode_32768_frame_staged_training_not_public_
 
 Gaddy & Klein 2019と著者code commit `ac1e7cb62ae94c76f545bf942f0c8febce43891f`を固定参照とする。
 
-Canonical workflowは現在、typed SILG trajectoryをseed `1/7/19`でexportし、Environment-first、parameter-matched End-to-end、State-onlyを同一episode exposure・epoch budgetで実行する経路へ接続されている。typed next-state/action metrics、checkpoint、model bytes、RSS、training time、CPU latencyを保存する設計である。
+Canonical workflowはtyped SILG trajectoryをseed `1/7/19`でexportし、Environment-first、parameter-matched End-to-end、State-onlyを同一episode exposure・epoch budgetで実行する経路へ接続されている。typed next-state/action metrics、checkpoint、model bytes、RSS、training time、CPU latencyを保存する設計である。
 
-ただしpinned RTFM generatorは、事前登録された以下のsidecarをまだ実出力していない。
-
-- `entity_signature`
-- `dynamics_signature`
-- `language_form_signature`
-
-さらにcompetentなR0.1 policy trajectoryがない。したがってonline task success、typed next-state prediction、action accuracy、real entity/dynamics/language-form transferは未認定・未測定である。
+ただしpinned RTFM generatorは、事前登録された`entity_signature`、`dynamics_signature`、`language_form_signature` sidecarをまだ実出力していない。competentなR0.1 policy trajectoryもないため、online task success、typed next-state prediction、action accuracy、real transferは未認定・未測定である。
 
 Classification: **`typed_execution_path_connected_but_generator_signatures_and_qualified_source_policy_absent`**。
 
@@ -103,8 +97,9 @@ Classification: **`typed_execution_path_connected_but_generator_signatures_and_q
 - D021: prediction/data/log/checkpoint/commit/model bytes/RSS/time/latency cell binding
 - D022: semantic aliasesによるgold/post-treatment leakageをfail-closed拒否
 - D023: semantic leakage auditorをcanonical CIのwatch・compile・testへ必須接続
+- D024: immutable実bundleの結合後に`validate_dataset()`、semantic alias/value leakage、shuffle provenance、prediction coverage、paired/cluster statisticsを一括実行するend-to-end bundle auditへ統合
 
-semantic checksはcompanion auditorであり、`evaluation_contract.py`単独CLIへは未統合。実R0 prediction/data/resource bundleはD016〜D023を通過していない。
+D024によりartifact integrityと評価統計を別々に通過させる経路は閉じた。ただし実R0 prediction/data/resource bundleはD016〜D024をまだ通過していない。
 
 Formal classification: **`initial_reproduction_failure`**。
 
@@ -153,4 +148,4 @@ C020はLi, Kaba, and Ravanbakhsh, AISTATS 2025を監査し、未知subset interv
 
 ## Last integration
 
-2026-07-25: **RESET-E027**。R0.2 typed execution-path接続、C020 intervention-induced quotient境界、D023 semantic leakage CI enforcementを統合した。R0.1の完了artifact・能力証拠は増えておらず、公開能力baseline 0件、`initial_reproduction_failure`、段階遷移禁止、高校生級未達を維持する。
+2026-07-25: **RESET-E028**。D024 end-to-end bundle auditを統合した。R0.1の完了artifact・能力証拠は増えておらず、公開能力baseline 0件、R0.2正式再現 0件、C020狭義RQ未採用、`initial_reproduction_failure`、段階遷移禁止、高校生級未達を維持する。
