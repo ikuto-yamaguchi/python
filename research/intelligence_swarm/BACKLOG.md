@@ -15,7 +15,7 @@ Accepted evidence remains the official SILG `multi` recurrent at 32,768 requeste
 
 Classification: `matched_fixed_episode_32768_frame_staged_training_not_public_capability_reproduction`。
 
-Current canonical headに131,072-frameの検証済み完了artifactはない。workflow修正、trigger更新、run要求、監査文書は能力進捗に数えない。
+Current canonical headに131,072-frameの検証済み完了artifactはない。workflow修正、trigger更新、run要求、監査文書は能力進捗に数えない。combined statusが空である場合、run開始や完了を推測しない。
 
 Authorized actions:
 
@@ -50,7 +50,7 @@ Required controls:
 Required outputs:
 
 - per-instance prediction/fingerprint
-- complete `method × seed × domain × split × condition` coverage
+- complete `method × seed × domain × split × condition` coverage over the preregistered observed topology
 - win/return/episode length
 - source/model/data/raw-log/prediction hashes
 - model bytes/RSS/training time/CPU latency
@@ -59,7 +59,7 @@ Required outputs:
 
 ## P0 — Evaluation, statistics, leakage and provenance
 
-Implemented through D024:
+Implemented through D025:
 
 - concrete SILG schema adaptation
 - immutable prediction-to-dataset joins
@@ -71,10 +71,11 @@ Implemented through D024:
 - semantic aliases including `future_state`、completed `rollout_context`、`target_action`、`chosen_action`、`oracle_*`、reward/success/outcome aliases
 - semantic auditorのcanonical CI必須接続
 - immutable実bundle結合後にdataset契約、semantic leakage、shuffle provenance、prediction coverage、paired/cluster statisticsを一括実行するend-to-end bundle audit
+- observed `domain × split × condition` sparse topologyを全method・seedで固定し、存在しない直積cellを要求しない一方、method/seed固有のcell欠落は拒否
 
 Remaining:
 
-1. 新しい監査器を増やさず、実R0 bundleをD016〜D024へ投入する。
+1. 新しい監査器を増やさず、実R0 bundleをD016〜D025へ投入する。
 2. failure箇所だけを再現可能なlogとして固定する。
 3. evaluatorではなくdata/run欠陥なら実験側の最小修正だけを行う。
 4. target-labelがSILG schemaで定義不能ならformal inapplicability recordを固定し、擬似labelを作らない。
@@ -89,7 +90,7 @@ Primary reference:
 - `dgaddy/environment-learning`
 - commit `ac1e7cb62ae94c76f545bf942f0c8febce43891f`
 
-Implemented and connected paths:
+Implemented paths:
 
 1. `gaddy_klein_typed_baseline.py`
    - language-free transition pretraining
@@ -108,22 +109,33 @@ Implemented and connected paths:
 3. `r02_typed_comparison.py`
    - Environment-first / parameter-matched End-to-end / State-only
    - equal episode exposure、seed、split、epoch budget
-   - online task successをoffline accuracyで代用しない
-4. matched-budget、holdout、immutable-manifest audits
-5. canonical R0.1 workflowからtyped export・3-method comparison・holdout auditへ接続
+   - offline typed next-state/action metrics
+4. `export_rtfm_generator_signatures.py`
+   - outcome非依存でpinned generator内部からentity/dynamics/language-form signatureを抽出
+   - RTFM S1ではdynamics holdoutだけをreal holdoutとして認定
+5. `evaluate_r02_online_silg.py`
+   - 3手法を同じseed・同じinitial-instance streamでonline評価
+   - task success、return、episode length、model/checkpoint bytes、RSS、wall time、CPU latency、paired gap
+6. matched-budget、holdout、immutable-manifest audits
+7. canonical workflowからgenerator signature export、typed export、3-method offline comparisonへ接続
 
 Current blockers:
 
-- pinned RTFM generatorから`entity_signature`、`dynamics_signature`、`language_form_signature`をepisode sidecarとしてまだ実出力していない
+- generator signature sidecarとtyped trajectoryのimmutable joinが未接続
+- holdout auditorはsidecarが付与されていないtyped trajectoryを読んでいる
+- online SILG evaluatorは実装済みだがcanonical workflow未接続
 - competent qualified three-seed source policy trajectoriesがない
-- online task success、typed next-state、action accuracy、real transfer metricsがない
+- task success、typed next-state、action accuracy、real dynamics transferの3-seed結果がない
+- RTFM S1はentity ontologyと言語生成familyをtrain/testで分離しないため、real entity/language-form holdoutはS1単独では測定不能
 
 Minimal next correction:
 
-1. pinned generator/configuration stateから、rollout outcomeを見る前に3 signature sidecarを出力する。
-2. versioned preregistration JSONを固定する。
-3. manifestを生成・joinし、holdout auditを通す。
-4. competent R0.1 trajectoryが得られた後だけmatched comparisonを正式実行する。
+1. generator signature sidecarを`(domain, split, seed, episode_seed)`でtyped trajectoryへimmutable joinする。
+2. join後datasetをholdout auditへ入力し、real dynamics holdoutだけを認定する。
+3. `evaluate_r02_online_silg.py`をcanonical workflowへ接続する。
+4. RTFM S1のentity/language-form holdoutはformal inapplicabilityとして記録し、擬似holdoutを作らない。
+5. competent R0.1 trajectoryが得られた後だけmatched comparisonを正式認定する。
+6. entity/language-form transferには、公式にそのsplitを持つ別公開benchmark（候補J-CRe3を含む）の再現が必要。
 
 Representation appearance、compression、clusteringは進歩に数えない。モデル調整は認可しない。
 
@@ -144,25 +156,28 @@ Rejected:
 - text embeddingをfeature-conditioned intervention modelへ渡すだけで新しいcausal identificationとする
 - unseen perturbation predictionやtarget probabilityをpartition identifiabilityの証拠とする
 - intervention-induced quotientを言語で命名・予測することをstrict refinementとする
+- strongly separating environmentsで既に回復可能なunknown multi-node targetsを言語の新規貢献とする
+- LLM priorによる介入target選択やnoisy graph prior統合をraw-language/latent-partition joint identificationと同一視する
 
 ## P2 — Only admissible RQ reformulation, not adopted
 
 Preregistration candidate only:
 
-> 最強のnon-language intervention-induced quotientを先に構成した後、externally fixed denotational anchorを持つpopulation language channelが、残存quotient blockをstrict refinementし、raw utterance equivalenceとrefined intervention-target partitionを共同同定できるか。
+> 最強のnon-language estimatorを先に適用し、その設計が明示的なseparation条件を満たさないか既存model class外である場合に、externally fixed denotational anchorを持つpopulation language channelが不足するcontrastを供給し、raw utterance equivalenceとresidual intervention-target partitionを有限標本で共同同定できるか。
 
 Before adoption:
 
-1. non-language quotient equivalence classの明示
+1. strongest applicable non-language method後にも残るexplicit countermodel
 2. residual-equivalent models間のpositive-measure language-law separation
-3. outcome、target label、environment ID、completed trajectoryから独立なexternal anchor
+3. environment identity、incidence、observation、action、outcome、completed trajectoryから復元不能なexternal anchor
 4. joint recodingを防ぐanti-recoding condition
-5. quotient block strict-refinement theorem
+5. strict equivalence-class reduction theorem
 6. anchor/residual-information条件除去時のimpossibility theorem
-7. non-language quotient、quotient-label language、genuinely residual languageの直接ablation
-8. unseen utterance form/composition/target combination/system split
-9. dependency-pinned public baseline reproduction
-10. exactly one preregistered claim、counterexample、stopping rule
+7. finite-sampleまたはconsistency保証を持つestimator
+8. non-language strongly separating / deliberately non-separating / quotient-label languageとの直接比較
+9. unseen utterance form/composition/target combination/system split
+10. dependency-pinned public baseline reproduction
+11. exactly one preregistered claim、counterexample、stopping rule
 
 No implementation、synthetic benchmark、architecture is authorised.
 
@@ -173,9 +188,18 @@ Matrix must remain current through relevant 2026 primary work and official code 
 Current accepted boundary:
 
 - Li, Kaba, and Ravanbakhsh, AISTATS 2025, `On the Identifiability of Causal Abstractions`
-- unknown subset interventionsから識別可能な最大因果抽象をintervention-induced quotientとして追加
-- quotientを命名・予測するlanguageはlatent partitionをstrict refinementしないcounterexampleを固定
-- official implementationは一次記録から未特定
+  - unknown subset interventionsから識別可能な最大因果抽象をintervention-induced quotientとして追加
+- Lee, Jin, and Aragam 2026, `Beyond identifiability: Learning causal representations with few environments and finite samples`
+  - strongly separating未知multi-node intervention下でgraph、representation、decoder、targetsを有限標本回復
+  - logarithmic number of environments
+  - official implementationは一次記録から未特定
+- `Coarsening Causal DAG Models`, CLeaR 2026
+  - unknown-target interventional dataからpartition-refinement lattice上のcausal abstractionを学習
+  - residual partition refinementをlanguage固有と主張する前に比較必須
+- `LeGIT: LLM Guided Intervention Targeting for Online Causal Discovery`, ICLR 2026 submission
+  - LLM priorによる介入target選択。latent joint identifiabilityとは別問題
+- `Sequential Causal Discovery with Noisy Language Model Priors`, TMLR 2026
+  - noisy LM expert priorをPAG学習へ統合。latent intervention partition同定ではない
 
 ## Stage transition
 
@@ -184,7 +208,7 @@ Current accepted boundary:
 1. competent learned external public capability baseline 1件以上
 2. immutable matched controls
 3. complete canonical three-seed prediction/artifact/leakage qualification
-4. qualified R0.2 online comparison with real entity/dynamics/language-form holdouts
+4. qualified R0.2 online comparison with real dynamics holdout、かつentity/language-form transferの別公開splitまたはformal inapplicability boundary
 5. retained R0.3 rejection
 6. novelty matrix closed through relevant 2026 primary work and official code
 7. exactly one preregistered successor claim with theorem、counterexample、stopping rule
