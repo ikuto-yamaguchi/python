@@ -14,8 +14,10 @@ on:
       - 'research/intelligence_swarm/benchmarks/grounded_causal/export_silg_typed_policy_trajectories.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/export_rtfm_generator_signatures.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/test_export_rtfm_generator_signatures.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/attach_r02_holdout_manifest.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/gaddy_klein_typed_baseline.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/r02_typed_comparison.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/evaluate_r02_online_silg.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_r02_holdout_assignments.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/SILG_RTFM_REPRO_001.md'
@@ -101,17 +103,21 @@ jobs:
             --episodes 20 \
             2>&1 | tee research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_MATCHED_EVAL.log
 
-      - name: Export typed SILG trajectories and run matched R0.2 baselines
+      - name: Export qualified typed SILG trajectories and run matched R0.2 baselines
         run: |
           set -euo pipefail
           results="research/intelligence_swarm/benchmarks/grounded_causal/results"
           : > "$results/SILG_RTFM_R02_TYPED.log"
-          : > "$results/SILG_RTFM_TYPED_TRAJECTORIES_3SEED.jsonl"
+          : > "$results/SILG_RTFM_TYPED_TRAJECTORIES_QUALIFIED_3SEED.jsonl"
           : > "$results/SILG_RTFM_GENERATOR_SIGNATURES_3SEED.jsonl"
           for seed in 1 7 19; do
-            data="$results/SILG_RTFM_TYPED_TRAJECTORIES_SEED_${seed}.jsonl"
+            raw="$results/SILG_RTFM_TYPED_TRAJECTORIES_RAW_SEED_${seed}.jsonl"
+            data="$results/SILG_RTFM_TYPED_TRAJECTORIES_QUALIFIED_SEED_${seed}.jsonl"
             signatures="$results/SILG_RTFM_GENERATOR_SIGNATURES_SEED_${seed}.jsonl"
+            join_summary="$results/SILG_RTFM_HOLDOUT_JOIN_SEED_${seed}.json"
             out="$results/SILG_RTFM_R02_TYPED_COMPARISON_SEED_${seed}.json"
+            online="$results/SILG_RTFM_R02_ONLINE_SEED_${seed}.json"
+
             /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/export_rtfm_generator_signatures.py \
               --silg-root "$RUNNER_TEMP/r0_silg/silg" \
               --seed "$seed" \
@@ -120,15 +126,24 @@ jobs:
               --out "$signatures" \
               2>&1 | tee -a "$results/SILG_RTFM_R02_TYPED.log"
             cat "$signatures" >> "$results/SILG_RTFM_GENERATOR_SIGNATURES_3SEED.jsonl"
+
             /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/export_silg_typed_policy_trajectories.py \
               --silg-root "$RUNNER_TEMP/r0_silg/silg" \
               --checkpoint "$results/SILG_RTFM_TRAINED_STATE_SEED_${seed}.pt" \
               --seed "$seed" \
               --train-episodes 40 \
               --test-episodes 20 \
-              --out "$data" \
+              --out "$raw" \
               2>&1 | tee -a "$results/SILG_RTFM_R02_TYPED.log"
-            cat "$data" >> "$results/SILG_RTFM_TYPED_TRAJECTORIES_3SEED.jsonl"
+
+            python research/intelligence_swarm/benchmarks/grounded_causal/attach_r02_holdout_manifest.py \
+              --trajectories "$raw" \
+              --manifest "$signatures" \
+              --out "$data" \
+              --summary "$join_summary" \
+              2>&1 | tee -a "$results/SILG_RTFM_R02_TYPED.log"
+            cat "$data" >> "$results/SILG_RTFM_TYPED_TRAJECTORIES_QUALIFIED_3SEED.jsonl"
+
             /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/r02_typed_comparison.py \
               --data "$data" \
               --out "$out" \
@@ -136,15 +151,24 @@ jobs:
               --env-epochs 8 \
               --lang-epochs 8 \
               2>&1 | tee -a "$results/SILG_RTFM_R02_TYPED.log"
+
+            /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/evaluate_r02_online_silg.py \
+              --silg-root "$RUNNER_TEMP/r0_silg/silg" \
+              --data "$data" \
+              --comparison "$out" \
+              --seed "$seed" \
+              --episodes 20 \
+              --out "$online" \
+              2>&1 | tee -a "$results/SILG_RTFM_R02_TYPED.log"
           done
 
-      - name: Audit real entity, dynamics and language-form holdouts
+      - name: Audit real RTFM S1 holdout assignments
         if: always()
         run: |
           set -o pipefail
           results="research/intelligence_swarm/benchmarks/grounded_causal/results"
           python research/intelligence_swarm/benchmarks/grounded_causal/audit_r02_holdout_assignments.py \
-            "$results/SILG_RTFM_TYPED_TRAJECTORIES_3SEED.jsonl" \
+            "$results/SILG_RTFM_TYPED_TRAJECTORIES_QUALIFIED_3SEED.jsonl" \
             --output "$results/SILG_RTFM_R02_HOLDOUT_AUDIT.json" \
             2>&1 | tee "$results/SILG_RTFM_R02_HOLDOUT_AUDIT.log" || true
 
