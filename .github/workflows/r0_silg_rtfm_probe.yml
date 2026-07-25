@@ -17,6 +17,7 @@ on:
       - 'research/intelligence_swarm/benchmarks/grounded_causal/attach_r02_holdout_manifest.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/gaddy_klein_typed_baseline.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/r02_typed_comparison.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/run_r02_typed_comparison.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/evaluate_r02_online_silg.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_r02_holdout_assignments.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh'
@@ -149,7 +150,7 @@ jobs:
               --trajectories "$raw" --manifest "$signatures" --out "$data" --summary "$join_summary" \
               2>&1 | tee -a "$results/SILG_RTFM_R02_TYPED.log"
             cat "$data" >> "$results/SILG_RTFM_TYPED_TRAJECTORIES_QUALIFIED_3SEED.jsonl"
-            /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/r02_typed_comparison.py \
+            /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/run_r02_typed_comparison.py \
               --data "$data" --out "$out" --seed "$seed" --env-epochs 8 --lang-epochs 8 \
               2>&1 | tee -a "$results/SILG_RTFM_R02_TYPED.log"
             /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/evaluate_r02_online_silg.py \
