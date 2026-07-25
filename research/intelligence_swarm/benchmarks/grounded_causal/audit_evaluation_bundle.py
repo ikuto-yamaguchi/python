@@ -9,12 +9,20 @@ Standard library only.
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-import evaluation_contract as contract
+HERE = Path(__file__).resolve().parent
+SPEC = importlib.util.spec_from_file_location(
+    "evaluation_contract", HERE / "evaluation_contract.py"
+)
+if SPEC is None or SPEC.loader is None:
+    raise RuntimeError("cannot load sibling evaluation_contract.py")
+contract = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(contract)
 
 PREDICTION_ARTIFACT_FIELDS = ("prediction_path", "prediction_sha256")
 
