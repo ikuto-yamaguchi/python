@@ -2,7 +2,7 @@
 
 Date: 2026-07-26
 Branch: `research/intelligence-swarm-reconstruction-001`
-Status: primary-code revision pin completed; public baseline reproduction and R0.2 reproduction remain incomplete
+Status: public revision and component mapping completed; native public baseline and immutable R0.2 reproduction remain incomplete
 
 ## Scope
 
@@ -17,7 +17,7 @@ The ACL record describes a two-stage method: language-free state transitions are
 
 ## Immutable public-code reference
 
-The inspected author-code snapshot is now pinned in:
+The inspected author-code snapshot is pinned in:
 
 `GADDY_KLEIN_PUBLIC_REFERENCE_MANIFEST.json`
 
@@ -30,7 +30,32 @@ Pinned revision:
 
 The manifest records Git blob SHAs for `README.md`, `pretrain.py`, `evaluate.py`, `model.py`, `baseline_model.py`, `message_flags.py`, and `discrete_util.py`. It also records the public-code entrypoints, the `--baseline` control, the default 500,000 pretraining iterations, and the default 20-by-30 discrete message space.
 
-This closes the previous “author-code commit is not pinned” gap. It does not establish native-task execution or SILG/RTFM reproduction.
+This closes the previous author-code revision gap. It does not establish native-task execution or SILG/RTFM reproduction.
+
+## Machine-audited component mapping
+
+The author-code-to-SILG mapping is now declared in:
+
+`GADDY_KLEIN_SILG_COMPONENT_MAPPING.json`
+
+and checked by:
+
+`audit_gaddy_klein_component_mapping.py`
+
+The validator fails closed when any declared local symbol disappears, the pinned public revision changes, the 20-by-30 message default changes, decoder freezing is no longer the default, canonical seeds change, or RTFM S1 is falsely claimed to provide entity or language-form holdouts. It also checks source evidence for:
+
+- transition-to-message encoding from before/after state;
+- discrete Gumbel message construction;
+- message-conditioned typed next-state and action decoding;
+- recurrent language-to-message encoding;
+- detached environment-message matching;
+- environment pretraining before language training;
+- transition/decoder freezing during language training;
+- no-pretraining End-to-end and State-only controls;
+- hard failure on Environment-first versus End-to-end inference-budget mismatch;
+- same-instance online task success, CPU latency, RSS, and paired gaps.
+
+Regression tests reject a missing local component, public revision drift, and fabricated RTFM S1 holdout support.
 
 ## What the current SILG port matches
 
@@ -50,35 +75,26 @@ These properties are consistent with the high-level two-stage design in the pape
 
 ### 1. The port is a task adaptation, not a numerical reproduction
 
-The author code targets SHRDLURN block stacking and regular-expression string manipulation. RTFM S1 has a different observation/action schema and recurrent source policy. Consequently, R0.2 can be called a faithful *method transfer* only after a documented component mapping and matched ablations; it cannot use the paper's published numbers as an expected numerical target.
+The author code targets SHRDLURN block stacking and regular-expression string manipulation. RTFM S1 has a different observation/action schema and recurrent source policy. Consequently, R0.2 can be called a faithful *method transfer* only after matched execution succeeds; it cannot use the paper's published numbers as an expected numerical target.
 
-### 2. Component-level mapping is not yet machine-audited
-
-The current implementation documents the conceptual mapping in prose and code, but no fail-closed manifest checks that every claimed author-code component has a declared SILG counterpart. The minimum manifest must distinguish:
-
-- transition-to-message encoder;
-- message-conditioned state-transition decoder;
-- language-to-message encoder;
-- representation matching objective;
-- discrete versus continuous message setting;
-- decoder freezing or training schedule;
-- no-pretraining baseline;
-- inference-time parameter budget.
-
-### 3. Data-efficiency axis is not reproduced
+### 2. Data-efficiency axis is not reproduced
 
 The paper's central empirical claim concerns improvement when instructional data are limited. The current R0.2 run uses one fixed trajectory quantity and compares methods at that quantity. This can test an environment-first baseline, but it does not reproduce the paper's data-efficiency curve. No data-efficiency claim is permitted until preregistered language-data fractions are evaluated with identical environment-transition pretraining data, seeds, and splits.
 
-### 4. Public code has not been executed in its native task
+### 3. Public code has not been executed in its native task
 
 The authors' code has not been run on its original public tasks in this branch. Therefore compatibility with the pinned implementation and expected qualitative ablations remains unverified. This is a public-baseline reproduction gap, not evidence against the method.
+
+### 4. Immutable three-seed R0.2 results are absent
+
+No accepted bundle yet contains all three canonical seeds, matched data and splits, Environment-first/End-to-end/State-only checkpoints, online task success, typed next-state prediction, action accuracy, dynamics-holdout transfer, model bytes, peak RSS, training wall time, CPU inference latency, raw logs, dependency versions, and checksums.
 
 ## Current classification
 
 - Gaddy--Klein primary-source audit: completed
 - exact author-code revision and reference-file blob pin: completed
+- machine-audited author-to-SILG component mapping: implemented
 - native public-code reproduction: not completed
-- machine-audited author-to-SILG component mapping: not completed
 - SILG/RTFM method transfer: implemented, immutable execution result not yet accepted
 - numerical reproduction of ACL 2019 results: inapplicable to RTFM and not claimed
 - new architecture: none
@@ -88,7 +104,7 @@ The authors' code has not been run on its original public tasks in this branch. 
 
 ## Next minimum actions
 
-1. Add a fail-closed author-code-to-SILG component-mapping manifest and validator without changing the model family.
-2. Preserve the currently requested split-job run artifacts before any further long run is triggered.
-3. If the split-job run fails, use its R0.2 artifact/log to correct only the first reproducible failure.
+1. Run the component-mapping regression test in canonical CI and save the JSON audit output with the R0.2 artifact.
+2. Preserve the split-job R0.1 artifact before R0.2 starts.
+3. If the split-job run fails, use its first reproducible R0.2 error and change only the minimum required code.
 4. Do not add data-efficiency sweeps until the single-budget, three-seed R0.1/R0.2 reproduction is complete.
