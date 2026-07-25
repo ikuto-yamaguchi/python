@@ -7,154 +7,116 @@
 ## Current stage
 
 - Stage: **R0 Research Reconstruction — public capability reproduction and benchmark qualification**
-- Semantic Identity Gate G1: **未達**
-- Operation/Goal Gate G2: **未達**
-- Formal memory eligibility: **未達**
-- 学術的新規性: **未確立**
-- 査読可能な中心命題: **未確立**
 - Active mechanism family: **なし**
 - A〜Dの新規toy仮説、別branch、新規memory/replay/fast-weights/sleep/forgetting: **停止**
 - 過去stacked draft PR: **negative-results archive。新作業のbaseにしない**
+- 学術的新規性、中心命題、能力進歩: **未確立**
 
 ## R0 status ledger
 
 - 公開環境control再現: **1件**
-- 公開学習経路再現: **1件（SILG/RTFM、32,768-frame staged budget、seed 1/7/19）**
-- 固定初期instance matched評価経路: **1件**
-- 131,072-frame staged reproduction: **検証済み完了artifactなし**
+- 公開学習経路再現: **1件（SILG/RTFM、32,768 requested frames、seed 1/7/19）**
 - 学習済み公開能力baseline再現: **0件**
 - R0.2正式再現: **0件**
-- R0.2 typed baseline/export/comparison/budget/holdout/manifest paths: **実装済み**
-- RTFM generator-side signature export: **実装・workflow接続済み**
-- R0.2 online SILG evaluator: **実装済み、実行未確認**
-- R0.3 empirical hidden intervention-target ablation: **正式棄却**
-- RQ-001 broad/current formulation: **棄却**
-- behavioural interactive transfer後のexternally anchored residual separation候補: **未採用**
+- R0.3 hidden intervention-target ablation: **棄却**
 - J-CRe3日本語外部baseline: **未再現**
+- 広義RQ-001: **棄却**
+- 狭義RQ-001: **未採用**
 
-公開能力baselineとmatched controlsがevaluation contractを通るまで、新規機構族、知能原理、能力進歩を認定しない。
+## R0.1 SILG / RTFM
 
-## Pinned SILG / RTFM reproduction
+固定条件:
 
-- SILG commit: `2af07578e1264029a240fcfb78d4ac0aea16f5de`
-- RTFM commit: `58f17955595b5a127c96d045d896fcbcc7d4b570`
-- Train: `silg:rtfm_train_s1-v0`
-- Test: `silg:rtfm_test_s1-v0`
-- Seeds: `1,7,19`
-- Model: official `multi` recurrent
-- Pretrained language model: **なし**
-- Python 3.8.18 / Ubuntu 22.04
-- Core pins: `torch==1.13.1+cpu`, `torchvision==0.14.1+cpu`, `gym==0.21.0`, `numpy==1.24.4`, `transformers==4.30.2`, `expman==0.0.7`, `ujson==5.10.0`
-- Observation: 6×6 grid、wiki 80 token、task 40 token、inventory 8 token、valid-action mask 5、relative position 6×6×2
-- Action space: 5、maximum episode length: 80
+- SILG `2af07578e1264029a240fcfb78d4ac0aea16f5de`
+- RTFM `58f17955595b5a127c96d045d896fcbcc7d4b570`
+- train `silg:rtfm_train_s1-v0`
+- test `silg:rtfm_test_s1-v0`
+- official `multi` recurrent
+- pretrained language modelなし
+- seeds `1,7,19`
+- observation: 6×6 grid、wiki 80 token、task 40 token、inventory 8 token、valid-action mask 5、relative position 6×6×2
+- action space 5、maximum episode length 80
 
-## R0.1 public recurrent evidence
+Accepted evidence remains the 32,768-requested-frame run:
 
-Accepted completed evidence remains the 32,768-requested-frame, 32,800-checkpoint run for seeds `1,7,19`.
+- parameters `4,916,915`
+- state-dict audit `19,694,385 bytes`
+- maximum RSS `505,600 KiB`
+- total three-seed training wall time `1,033.885 s`
+- CPU forward audit `6.911 ms/step`
+- Correct `1/60`、Random `4/60`
+- Language-blind / State-only / Language-shuffle `1/60` each
 
-| Seed | Training wall time | Peak RSS | Trained model bytes |
-|---:|---:|---:|---:|
-| 1 | 341.906 s | 480,076 KiB | 19,693,911 |
-| 7 | 346.898 s | 505,600 KiB | 19,693,911 |
-| 19 | 341.882 s | 483,056 KiB | 19,693,990 |
+これはpolicy competence不足であり、公開能力baseline再現ではない。
 
-- Parameters: `4,916,915`
-- State-dict audit size: `19,694,385 bytes`
-- CPU forward audit: `6.911 ms/step`
-- Total three-seed training wall time: `1,033.885 s`
-- Maximum RSS: `505,600 KiB`
+### Active 131,072-frame run
 
-| Method | Win rate | Mean return | Mean episode length | CPU inference |
-|---|---:|---:|---:|---:|
-| Correct recurrent | `0.0167` | `-1.8827` | `46.80` | `7.229 ms/step` |
-| Random valid action | `0.0667` | `-1.1513` | `15.23` | `0.0081 ms/step` |
-| Language-blind | `0.0167` | `-2.0417` | `54.75` | `4.424 ms/step` |
-| State-only | `0.0167` | `-2.1963` | `62.48` | `4.103 ms/step` |
-| Language-shuffle | `0.0167` | `-1.9347` | `49.40` | `7.252 ms/step` |
+GitHub Actions run `30158106220` は、install、generator-signature test、random/schema probeを完了し、official recurrent 131,072-frame × 3 seed学習stepを実行中として確認済み。checkpoint、matched controls、artifact、能力値は未取得であり、完了までは進歩に数えない。
 
-Correctは1/60、Randomは4/60。policy competence不足であり、言語不要の証拠ではない。
+PR累積diffにbenchmark workflowが含まれるため無関係なgovernance commitでも長時間runがqueueされる問題を確認した。workflowをbenchmark-code/run-requestの**pushまたはmanual dispatchだけ**で起動する構成へ変更し、今後の統合commitによる重複queueを停止した。既にpendingのrunは成果に数えない。
 
-Classification: **`matched_fixed_episode_32768_frame_staged_training_not_public_capability_reproduction`**。
+## R0.2 Environment-first
 
-Verified pre-integration head `830b1d13b39f9ab450271a1cf286aeee7f38bf25`には131,072-frameの検証済み完了run、artifact、checkpoint、能力値、registered combined statusがない。workflow編集、trigger更新、run request、監査文書は能力進捗に数えず、実行開始・完了を推測しない。
+固定参照はGaddy & Klein 2019および著者code commit `ac1e7cb62ae94c76f545bf942f0c8febce43891f`。
 
-## R0.2 Environment-first status
+実装済み:
 
-Gaddy & Klein 2019と著者code commit `ac1e7cb62ae94c76f545bf942f0c8febce43891f`を固定参照とする。
+- language-free state transition pretraining後のinstruction following
+- Environment-first / parameter-matched End-to-end / State-only
+- typed trajectory export
+- generator-side entity/dynamics/language-form signature export
+- immutable signature-to-trajectory join
+- same-initial-instance online evaluator
+- model/checkpoint bytes、RSS、training time、CPU latency、raw logs、checksums
 
-実装済み経路:
+RTFM S1で正式に測定可能なtransferは**dynamicsのみ**。entity ontologyと言語生成familyはtrain/testで分離されないため、entity/language-form holdoutはS1ではformal inapplicabilityとする。
 
-- `gaddy_klein_typed_baseline.py`: language-free transition pretraining後にinstruction followingへ接続
-- `r02_typed_comparison.py`: Environment-first / parameter-matched End-to-end / State-only
-- `export_rtfm_generator_signatures.py`: rollout outcomeを参照せずgenerator内部からepisode signatureを出力
-- `evaluate_r02_online_silg.py`: 同一seed・同一初期instance stream上で3手法のonline task successを測定
-- model/checkpoint bytes、RSS、training time、CPU inference、raw log、checksum保存経路
+未完了:
 
-RTFM S1で公式に分割されるのはgenerator assignmentに基づく**dynamics**である。entity ontologyとlanguage generation familyはtrain/testで分離されないため、S1単独ではreal entity holdoutとlanguage-form holdoutを認定しない。
+- qualified 3-seed join artifact
+- real dynamics holdout audit pass
+- online task success、next-state prediction、action accuracyの3-seed結果
+- competent R0.1 source-policy trajectory
 
-未完了点:
+## Evaluation contract
 
-1. generator signature sidecarとtyped trajectoryのimmutable joinはverified canonical stateで未確認。
-2. holdout auditorによるsidecar由来real dynamics splitの正式通過なし。
-3. online evaluatorの3-seed実行artifactなし。
-4. competentなR0.1 source policy trajectoryがない。
-5. task success、typed next-state、action accuracy、real dynamics transferの3-seed結果がない。
+D015〜D025に加え、D026としてdataset全体と各`domain × split × condition` cellについてcanonical seed `1,7,19`、train/evaluation presence、domain/split/condition非欠落をfail-closed監査する。
 
-Classification: **`generator_signature_and_online_evaluator_implemented_but_qualified_join_execution_and_source_policy_absent`**。
+監査範囲:
 
-## Evaluation contract status
+- train/test utterance overlap
+- entity/dynamics split leakage
+- gold action/after-state/completed trajectory/post-treatment leakage
+- semantic alias leakage
+- prediction coverage
+- random/language-blind/state-only/target-label shuffle/outcome shuffleの同一instance coverage
+- sparse observed cell topology
+- mean gap、minimum cell gap、paired/randomization/McNemar、episode-cluster CI
+- model bytes、RSS、training wall time、CPU latency、raw logs、commit、checksums
 
-- D015: 実SILG schema適合とcore leakage checks
-- D016: immutable prediction-to-dataset join
-- D017: exact seed coverage `1,7,19`
-- D018: target-label/outcome shuffle provenance・bijection・derangement・no-op rejection
-- D019: entity/dynamics holdout leakage
-- D020: episode-cluster bootstrap・sign-flip・minimum cell gap
-- D021: prediction/data/log/checkpoint/commit/model bytes/RSS/time/latency cell binding
-- D022: semantic aliasesによるgold/post-treatment leakageをfail-closed拒否
-- D023: semantic leakage auditorをcanonical CIのwatch・compile・testへ必須接続
-- D024: immutable実bundle結合後にdataset contract、semantic leakage、shuffle provenance、prediction coverage、paired/cluster statisticsを一括実行
-- D025: `domain × split × condition`の観測済み疎topologyを固定し、存在しない直積cellを要求せず、全method・seedで同じtopologyを必須化
-
-実R0 prediction/data/resource bundleはD016〜D025をまだ通過していない。
-
-Formal classification: **`initial_reproduction_failure`**。
+実R0 bundleは未通過。分類は **`initial_reproduction_failure`**。
 
 ## Prior-art and RQ boundary
 
-C021はLee, Jin, and Aragam 2026の有限標本unknown-target CRL境界を追加した。strongly separating intervention familyでは、未知multi-node targets、graph、representation、decoderを言語なしで回復できるため、target namingや既知incidenceの言語化は同定寄与ではない。
+C023はstate-dependent local dynamics identifiabilityを追加した。trajectoryとlocal sparsityから言語なしで同定できるsystem parameterを言語で命名するだけではjoint identificationにならない。
 
-C022はOpenLock型interactive causal transferを追加した。prospective task success、attempt count、first-solution transferが一致しても、異なるraw-language equivalenceとlatent partitionが同じinteraction policyを生成できるため、行動転移だけではjoint identifiabilityを証明しない。RQは完全なprospective interaction historyを条件付けた後にも残る同値類のstrict reductionを示す必要がある。
+C024はisolated causal effects of natural languageを追加した。既知の言語介入属性の外部結果への因果効果が識別できても、raw utterance equivalenceとlatent intervention-target partitionは識別されない。
 
-2026年CLeaRのMarkham et al. `Intervening to learn and compose causally disentangled representations`は、与えられたconcept/context情報を用いるcausally disentangled representationとcomposition、およびそのidentifiability境界を扱う。concept-conditioned compositional disentanglement、context module、OOD concept compositionはRQ-001の新規性候補から除外する。一方、raw utterance equivalenceと未知target partitionのjoint identificationは同論文の保証ではない。
+残るRQ候補は、最強のnon-language estimator、完全なinteraction history、isolated-language-effect adjustmentを条件付けた後にも残るequivalence classに対し、environment identity、incidence、observation、action、outcome、completed trajectoryから復元不能で、latent representationと共同再符号化できない外部固定language contrastがstrict reductionを与えるか、である。
 
-唯一残る候補は、最強のnon-language estimatorと完全なprospective interaction historyを条件付けた後にも残るequivalence classに対して、environment identity、incidence、observation、action、outcome、completed trajectoryから復元不能なexternally anchored language contrastが不足するseparationを供給し、raw utterance equivalenceとrefined intervention-target partitionを有限標本またはconsistentに共同同定できるか、である。
-
-この候補は**未採用**。採用には、残存countermodel、positive-measure language-law separation、anti-recoding anchor、strict equivalence-class reduction theorem、anchor除去時のimpossibility theorem、finite-sample/consistent estimator、non-language・behavioural-transfer比較、unseen form/composition/target/system split、公開baseline再現、exactly one preregistered claimが必要。
-
-新規architecture実験は認可しない。
-
-## Current maximum bottleneck
-
-**一つのcleanな131,072-frame公式recurrent runを完了・監査し、competentな外部公開baselineを得ること。**
-
-それまではR0.2 tuning、RQ-001 implementation、新規architectureを禁止する。
+この候補は**未採用**。採用にはexplicit countermodel、anti-recoding anchor、strict joint-identification theorem、anchor除去時のimpossibility theorem、finite-sample/consistency保証、公開baseline再現、exactly one preregistered claimが必要。
 
 ## Stage-transition rule
 
-次stageは以下すべての完了後だけ提案できる。
+次stageは以下すべての完了後だけ提案する。
 
-1. 学習済み外部公開能力baseline 1件以上
-2. immutable-instance random/language-blind/state-only/shuffle controls
-3. canonical 3-seed prediction/artifact/leakage contract
-4. R0.2 online task success、typed next-state、実dynamics holdout、およびentity/language-form transferを測れる別の公開splitまたはformal inapplicability boundary
-5. R0.3 formal rejection
-6. 2026年一次文献まで閉じたnovelty matrix
-7. exactly one preregistered successor claim/theorem、counterexample、停止条件
-
-## Canonical branch policy
-
-全作業は`research/intelligence-swarm-reconstruction-001`だけへ累積する。既存stacked draftsはnegative-results archiveであり、実験baseにしない。
+1. competent learned external public capability baseline 1件以上
+2. immutable matched controls
+3. complete canonical three-seed prediction/artifact/leakage qualification
+4. qualified R0.2 online comparison with real dynamics holdoutとentity/language-formの別公開splitまたはformal inapplicability boundary
+5. R0.3 rejection維持
+6. relevant 2026 primary workまで閉じたnovelty matrix
+7. exactly one preregistered successor claim/theorem/counterexample/stopping rule
 
 ## Current status
 
@@ -167,4 +129,4 @@ C022はOpenLock型interactive causal transferを追加した。prospective task 
 
 ## Last integration
 
-2026-07-25: **RESET-E030**。R0.1能力証拠は増加なし。R0.2は実装経路のみで、qualified join・online 3-seed artifact・competent source policyは未完。D025と`initial_reproduction_failure`を維持。C022 behavioural interactive transfer境界とMarkham et al. 2026 concept-conditioned causal disentanglement境界を追加し、RQ-001をさらに狭義化したが未採用。公開能力baseline 0件、R0.2正式再現 0件、段階遷移禁止、高校生級未達を維持する。
+2026-07-25: **RESET-E031**。R0.1 run `30158106220`の学習中状態を記録したが、能力証拠は増加なし。PR統合commitによる重複長時間run queueを停止。D026 seed/domain/cell topology監査、C023 local-dynamics境界、C024 isolated-language-effect境界を統合。R0.1未再現、R0.2未完了、RQ-001未採用、`initial_reproduction_failure`、高校生級未達を維持する。
