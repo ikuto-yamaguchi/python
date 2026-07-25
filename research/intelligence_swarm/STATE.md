@@ -66,11 +66,16 @@ install、generator-signature test、random/schema probe、official recurrent 13
 
 canonical workflowはR0.1とR0.2を別jobへ分離し、R0.1終了直後にfreeze/uploadしてからR0.2がimmutable artifactをdownloadする。この境界を次回実行の必須条件とする。
 
-`R01_RUN_REQUEST.json`は2026-07-25T17:48:05Zにsplit-job再実行要求へ更新された。要求投入は結果ではなく、対応するimmutable artifactと監査ログが確認されるまでaccepted evidenceは0件のままとする。
-
 ## R0.2 Environment-first
 
-固定参照はGaddy & Klein 2019および著者公開code `dgaddy/environment-learning`。
+固定参照はGaddy & Klein 2019および著者公開codeである。
+
+公開code参照は次へimmutable固定した。
+
+- repository `kristyelee/environment-learning`
+- historical reference `dgaddy/environment-learning`
+- commit `98c0dc68926ee9535f15019922d2ca871b0ac0b5`
+- README、pretraining、evaluation、model、baseline、message-space、discrete-message utilityのGit blob SHAを `GADDY_KLEIN_PUBLIC_REFERENCE_MANIFEST.json` に保存
 
 実装済み:
 
@@ -84,19 +89,19 @@ canonical workflowはR0.1とR0.2を別jobへ分離し、R0.1終了直後にfreez
 
 RTFM S1で正式に測定可能なtransferは**dynamicsのみ**。entity ontologyと言語生成familyはtrain/testで分離されないため、entity/language-form holdoutはformal inapplicabilityとする。
 
-Gaddy–Klein fidelity audit 001により、現portは高水準のtwo-stage method transferには対応するが、次のため再現主張は不可と確定した。
+現portは高水準のtwo-stage method transferには対応するが、次のため再現主張は不可である。
 
-- 著者codeのimmutable commitと参照ファイルhashがartifactへ固定されていない
-- SHRDLURN/regex用の原実装からRTFMへのtask adaptationであり、ACL 2019数値のnumerical reproductionではない
-- author component-to-SILG component mappingのfail-closed manifestがない
+- RTFM移植はACL 2019 SHRDLURN/regex数値のnumerical reproductionではない
+- author component-to-SILG component mappingのfail-closed validatorがない
 - paper中心のlanguage-data-efficiency curveを未再現
 - 著者codeをnative taskで未実行
+- immutable R0.1 source artifactと3-seed dynamics-holdout結果がない
 
 accepted task success、next-state prediction、action accuracy、dynamics holdout transferの3-seed resultは0件である。
 
 ## Evaluation contract
 
-D015〜D030を統合する。
+D015〜D031を統合する。
 
 監査範囲:
 
@@ -108,30 +113,33 @@ D015〜D030を統合する。
 - domain/split/condition presence
 - prediction coverage
 - sparse observed cell topology
-- mean gap、minimum cell gap、paired/randomization/McNemar、episode-cluster CI
+- mean gap、minimum cell gap、paired randomization、McNemar、episode-cluster CI
 - model bytes、RSS、training wall time、CPU latency、raw logs、commit、checksums
-- D027: 各cellで全6手法が同一data path/hashを使い、bundle全体が単一code commitに固定されること
-- D028: 各instance・各cellのprediction methodを `correct/random/language_blind/state_only/target_label_shuffle/outcome_shuffle` の厳密な6種へ固定し、余分・欠落・評価外predictionを拒否すること
-- D029: core `evaluation_contract.py`単独でも未登録method、mixed full code commit、同一cell内の異なる`data_path + data_sha256`を拒否し、companion auditorを迂回できないこと
-- D030: prediction JSONL自体のstrict schemaを検査し、gold action/state、reward、terminal output、episode success/return、future state、rollout、completed trajectory、未登録debug field、非有限値、valid-action外予測、train predictionを拒否すること
+- exact six-method prediction/artifact topology
+- one immutable code commit per bundle and one data path/hash per cell
+- strict prediction payload schema and leakage rejection
+- D031: prediction JSONLとderived statistics artifact自体を必須checksummed evidenceにし、method/seed整合、有限JSON値、coverage/cell statistics/summaries/paired gapsを検査する
 
-D030 focused testsはclean six-method coverage、gold/completed-trajectory leakage、未登録payload、invalid action、non-finite state、coverage欠落を固定した。現headのPR-triggered prediction-method-topology run `30169591964`は成功したが、実R0 bundle通過や能力進歩ではない。
+D031専用CI run `30171670131`はsuccess。これは監査コードの回帰証拠に限定し、実benchmark成功には数えない。
 
 ## Prior-art and RQ boundary
 
-C023〜C025およびC029までの境界を維持する。
+C023〜C025、C029、C030までの境界を維持する。
 
 - state-dependent local dynamicsから言語なしで同定可能なparameterを命名するだけではjoint identificationではない
 - isolated language effectを同定してもraw utterance equivalenceとlatent target partitionは同定されない
 - mechanistic independenceで識別可能なcomponentを命名しても内部partitionは同定されない
-- general-environment nonparametric CRLは、既知のintervention type/targetなしでも十分に変動するenvironment-conditioned mechanismsからlatent DAG・variablesを識別し得る
-- languageが識別済みenvironment signatureを命名・予測・言い換えるだけなら、新しいpopulation-identification sourceではない
+- general-environment nonparametric CRLは既知targetなしでも十分なenvironment variationからlatent DAG・variablesを識別し得る
+- lossy projected causal abstractionは複数low-level interventionを一つのhigh-level interventionへ潰しても、許容されたobservational/interventional/counterfactual queryを識別できる
+- high-level queryの完全回復は、abstraction fibre内部のfine target partitionやraw-language equivalenceの回復を意味しない
 
-残る候補は、最強のgeneral-environment CRLを含むnon-language estimator、mechanistic-independence criterion、完全なinteraction history、isolated-language-effect adjustmentを条件付けた後にも残るexplicit countermodel pairを、外部固定かつ共同再符号化不能なlanguage contrastがstrictly分離できるか、である。
+残る候補は、最強の非言語CRLとprojected abstractionを適用した後にも同一fibre内に残るexplicit countermodel pairを、外部固定かつ共同再符号化不能なlanguage contrastがstrictly分離できるか、である。
 
-C029は必要条件 `I(P_residual ; L | S_GE) > 0` を追加した。ただし十分条件ではなく、utterance classes・residual target blocks・environment signatures・denotation mapのjoint automorphism groupが自明であることを事前登録された外部anchorで証明する必要がある。
+必要条件は `I(P_fiber ; L | A_proj, X, A, Y, H) > 0`。ただし十分条件ではなく、fibre-preserving joint automorphism groupが自明になることを事前登録された外部anchorで証明する必要がある。
 
-この候補は**未採用**。採用にはexplicit countermodel、anti-recoding anchor、strict joint-identification theorem、anchor除去時のimpossibility theorem、finite-sample/consistency保証、dependency-pinned public baseline reproduction、exactly one preregistered claimが必要。
+正式判断:
+
+> **NARROWED BEYOND LOSSY PROJECTED CAUSAL ABSTRACTIONS — NOT ADOPTED**
 
 ## Stage-transition rule
 
@@ -156,4 +164,4 @@ C029は必要条件 `I(P_residual ; L | S_GE) > 0` を追加した。ただし�
 
 ## Last integration
 
-2026-07-26: **RESET-E036**。D030 prediction-payload leakage監査、Gaddy–Klein R0.2 fidelity audit 001、C029 general-environment nonparametric CRL境界、split-job R0.1/R0.2実行要求更新を統合した。PR-triggered topology CI成功は監査コードの証拠に限定する。immutable R0.1 bundle、公開baseline値、R0.2結果、実contract通過は0件であり、`initial_reproduction_failure`、RQ-001未採用、能力進歩未認定、高校生級未達を維持する。
+2026-07-26: **RESET-E037**。D031 prediction/statistics evidence-chain監査、Gaddy–Klein公開code commit/blob固定、C030 lossy projected causal abstraction境界を統合した。CI成功は監査コードの証拠に限定する。immutable R0.1 bundle、公開baseline値、R0.2結果、実contract通過は0件であり、`initial_reproduction_failure`、RQ-001未採用、能力進歩未認定、高校生級未達を維持する。
