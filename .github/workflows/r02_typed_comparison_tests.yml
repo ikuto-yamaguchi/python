@@ -13,6 +13,8 @@ on:
       - 'research/intelligence_swarm/benchmarks/grounded_causal/test_audit_r02_matched_budget.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/attach_r02_holdout_manifest.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/test_attach_r02_holdout_manifest.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/build_r02_preregistered_holdout_manifest.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_build_r02_preregistered_holdout_manifest.py'
   workflow_dispatch:
 
 concurrency:
@@ -37,4 +39,5 @@ jobs:
           python -m unittest -v \
             test_r02_typed_comparison.py \
             test_audit_r02_matched_budget.py \
-            test_attach_r02_holdout_manifest.py
+            test_attach_r02_holdout_manifest.py \
+            test_build_r02_preregistered_holdout_manifest.py
