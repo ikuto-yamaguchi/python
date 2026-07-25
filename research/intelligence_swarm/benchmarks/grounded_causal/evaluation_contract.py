@@ -28,6 +28,15 @@ FORBIDDEN_MODEL_INPUT_FIELDS = {
     "completed_trajectory", "post_treatment_state", "state_after", "action",
     "reward", "done", "terminal_observation", "episode_return", "episode_success",
 }
+FORBIDDEN_PREDICTION_FIELDS = {
+    "gold_action", "gold_state_after", "gold_inverse", "answer", "label",
+    "reward", "done", "terminal_observation", "episode_return", "episode_success",
+    "completed_trajectory", "rollout", "future_state", "next_state_gold",
+    "oracle_action", "target_action", "post_treatment_state", "state_after",
+}
+ALLOWED_PREDICTION_FIELDS = PRED_REQUIRED | {
+    "pred_inverse", "control_source_instance_id", "control_source_fingerprint",
+}
 GOLD_LIKE_KEYS = set(FORBIDDEN_MODEL_INPUT_FIELDS)
 RESOURCE_FIELDS = {"model_bytes", "peak_rss_bytes", "training_wall_seconds", "cpu_inference_ms_per_item", "raw_log_sha256", "model_sha256", "data_sha256", "code_commit"}
 ARTIFACT_FIELDS = (("raw_log_path", "raw_log_sha256"), ("model_path", "model_sha256"), ("data_path", "data_sha256"))
@@ -69,6 +78,22 @@ def _is_hex(value: Any,n:int)->bool:
 
 def _finite_nonnegative(value: Any)->bool:
     return isinstance(value,(int,float)) and not isinstance(value,bool) and math.isfinite(float(value)) and float(value)>=0
+
+
+def _finite_json(value:Any)->bool:
+    if value is None or isinstance(value,(bool,str,int)): return True
+    if isinstance(value,float): return math.isfinite(value)
+    if isinstance(value,list): return all(_finite_json(item) for item in value)
+    if isinstance(value,dict): return all(isinstance(key,str) and _finite_json(item) for key,item in value.items())
+    return False
+
+
+def _action_is_valid(action:Any,mask:Any)->bool:
+    if mask is None: return True
+    if not isinstance(action,int) or isinstance(action,bool): return False
+    if isinstance(mask,list): return 0<=action<len(mask) and bool(mask[action])
+    if isinstance(mask,dict): return bool(mask.get(str(action),mask.get(action,False)))
+    return False
 
 
 def canonical_text(value: Any)->str:
@@ -252,15 +277,25 @@ def _validate_shuffle_assignments(preds:list[dict[str,Any]],by_id:dict[str,dict[
 
 def score(data:list[dict[str,Any]],preds:list[dict[str,Any]])->dict[str,Any]:
     adapted=adapt_dataset(data); by_id={str(r["instance_id"]):r for r in adapted}; eval_ids={i for i,r in by_id.items() if str(r["split"]).lower()!="train"}
-    errors=[]; seen=set(); method_ids=defaultdict(set); grouped=defaultdict(list); snapshots=defaultdict(set); outcomes=defaultdict(dict)
+    errors=[]; seen=set(); method_ids=defaultdict(set); grouped=defaultdict(list); snapshots=defaultdict(set); outcomes=defaultdict(dict); payload_findings=[]
     for index,pred in enumerate(preds,1):
         missing=PRED_REQUIRED-pred.keys()
         if missing: errors.append(f"prediction row {index}: missing {sorted(missing)}"); continue
         iid=str(pred["instance_id"]); method=str(pred["method"]); key=(iid,method)
+        leaked=sorted(set(pred)&FORBIDDEN_PREDICTION_FIELDS); unexpected_fields=sorted(set(pred)-ALLOWED_PREDICTION_FIELDS)
+        if leaked:
+            payload_findings.append({"row":index,"instance_id":iid,"kind":"forbidden_gold_or_outcome_fields","fields":leaked})
+            errors.append(f"prediction row {index}: forbidden gold/outcome fields {leaked}")
+        if unexpected_fields:
+            payload_findings.append({"row":index,"instance_id":iid,"kind":"unregistered_prediction_fields","fields":unexpected_fields})
+            errors.append(f"prediction row {index}: unregistered fields {unexpected_fields}")
+        if not _finite_json(pred.get("pred_state_after")): errors.append(f"prediction row {index}: pred_state_after contains non-finite or unsupported values")
+        if "pred_inverse" in pred and not _finite_json(pred.get("pred_inverse")): errors.append(f"prediction row {index}: pred_inverse contains non-finite or unsupported values")
         if key in seen: errors.append(f"prediction row {index}: duplicate instance/method={key}"); continue
         seen.add(key); gold=by_id.get(iid)
         if gold is None: errors.append(f"prediction row {index}: unknown instance_id={iid}"); continue
         if str(gold["split"]).lower()=="train": errors.append(f"prediction row {index}: prediction supplied for train instance={iid}"); continue
+        if not _action_is_valid(pred.get("pred_action"),gold.get("valid_action_mask",gold.get("valid"))): errors.append(f"prediction row {index}: pred_action is outside the instance valid-action schema")
         fp=str(pred["instance_fingerprint"])
         if fp!=instance_fingerprint(gold): errors.append(f"prediction row {index}: instance snapshot mismatch for {iid}/{method}")
         snapshots[iid].add(fp); method_ids[method].add(iid)
@@ -308,7 +343,7 @@ def score(data:list[dict[str,Any]],preds:list[dict[str,Any]])->dict[str,Any]:
                 else:ties+=1
             values=[v for vs in groups.values() for v in vs]; boot_low,boot_high=_cluster_bootstrap_ci(groups) if values else (math.nan,math.nan); mean,low,high=_mean_ci(diffs)
             gaps[control][metric]={"paired_cells":len(diffs),"mean_gap":mean,"min_cell_gap":min(diffs),"max_cell_gap":max(diffs),"positive_cell_fraction":sum(v>0 for v in diffs)/len(diffs),"ci95_low":low,"ci95_high":high,"paired_randomization_p_two_sided":_paired_p(diffs),"paired_instances":len(values),"instance_mean_gap":statistics.mean(values) if values else math.nan,"instance_cluster_bootstrap_ci95_low":boot_low,"instance_cluster_bootstrap_ci95_high":boot_high,"correct_only_instances":a,"control_only_instances":b,"tied_instances":ties,"mcnemar_exact_p_two_sided":_mcnemar_exact(a,b),"passes_mean_gap_0_10":mean>=.10,"passes_every_cell_positive":min(diffs)>0,"passes_ci_excludes_zero":low>0,"passes_instance_cluster_ci_excludes_zero":boot_low>0 if not math.isnan(boot_low) else False}
-    return {"valid":not errors,"errors":errors,"prediction_rows":len(preds),"expected_eval_instances":len(eval_ids),"coverage":coverage,"same_instance_snapshot":not any("snapshot" in e for e in errors),"fingerprints_required":True,"shuffle_assignment_audit":shuffle_audit,"cells":cells,"summary":dict(summary),"paired_gaps_vs_correct":gaps,"progress_contract":{"required_mean_gap":.10,"requires_all_three_seeds":True,"requires_same_instance_snapshot":True,"requires_explicit_instance_fingerprint":True,"requires_complete_prediction_coverage":True,"requires_shuffle_provenance":True,"requires_within_cell_derangement":True,"requires_split_condition_cells":True,"requires_ci_excludes_zero":True,"requires_instance_cluster_ci_excludes_zero":True,"internal_metrics_do_not_count":True}}
+    return {"valid":not errors,"errors":errors,"classification":"qualified" if not errors else "initial_reproduction_failure","prediction_rows":len(preds),"expected_eval_instances":len(eval_ids),"coverage":coverage,"same_instance_snapshot":not any("snapshot" in e for e in errors),"fingerprints_required":True,"prediction_payload_findings":payload_findings,"strict_prediction_schema":True,"forbidden_prediction_fields":sorted(FORBIDDEN_PREDICTION_FIELDS),"finite_prediction_values_checked":True,"valid_action_schema_checked":True,"shuffle_assignment_audit":shuffle_audit,"cells":cells,"summary":dict(summary),"paired_gaps_vs_correct":gaps,"progress_contract":{"required_mean_gap":.10,"requires_all_three_seeds":True,"requires_same_instance_snapshot":True,"requires_explicit_instance_fingerprint":True,"requires_complete_prediction_coverage":True,"requires_shuffle_provenance":True,"requires_within_cell_derangement":True,"requires_split_condition_cells":True,"requires_ci_excludes_zero":True,"requires_instance_cluster_ci_excludes_zero":True,"internal_metrics_do_not_count":True}}
 
 
 def audit_artifacts(manifest:dict[str,Any],base_dir:Path)->dict[str,Any]:
