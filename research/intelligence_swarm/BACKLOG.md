@@ -2,7 +2,7 @@
 
 ## P0 — Complete one clean SILG recurrent reproduction
 
-Completed evidence remains the official SILG `multi` recurrent at 32,768 requested frames for seeds `1,7,19`, with matched fixed-instance controls:
+Accepted evidence remains the official SILG `multi` recurrent at 32,768 requested frames for seeds `1,7,19`, with matched fixed-instance controls:
 
 - parameters: `4,916,915`
 - state-dict audit bytes: `19,694,385`
@@ -15,11 +15,11 @@ Completed evidence remains the official SILG `multi` recurrent at 32,768 request
 
 Classification: `matched_fixed_episode_32768_frame_staged_training_not_public_capability_reproduction`。
 
-RESET-E022時点で、canonical headに131,072-frameの関連workflow run、combined status、検証済み完了artifactはない。未完了・cancelled・duplicate runを証拠にしない。
+RESET-E023統合前head `4020516ec26920a2ea664626346458dfe5b57e56`にcombined statusや131,072-frameの検証済み完了artifactはない。未完了・cancelled・duplicate runを証拠にしない。
 
 Authorized actions:
 
-1. stable workflow headからexactly one 131,072-frame runを起動する。
+1. stable workflow headからexactly one 131,072-frame runを起動・完了する。
 2. seed `1,7,19`の3 checkpointとraw logsを検証する。
 3. Correct、Random、Language-blind、State-only、Language-shuffleを同一immutable instanceで評価する。
 4. source/model/data/raw-log/prediction SHA-256、code commit、model bytes、RSS、training wall time、CPU latency、seed、splitを保存する。
@@ -61,36 +61,13 @@ Required outputs:
 
 ## P0 — Evaluation, statistics, leakage and provenance
 
-D015は実SILG exporter schemaへ適合し、18件の実行済み回帰テストを持つ。
+- D015: 実SILG exporter schemaへ適合。18件の実行済み回帰テスト。
+- D016: prediction path/hash、可読JSONL、method一致、unique instance、dataset/prediction instance-set一致、fingerprint一致、shared dataset hash、stable model SHA/code commit。
+- D017: every `domain × split × condition` cell must contain exactly seeds `1,7,19`。
+- D018: target-label/outcome shuffleのdonor payload hashと実適用payload hash一致、same-cell、bijection、derangement、self-shuffle/no-op禁止。
+- D019: entity/dynamics holdoutを`domain × split × condition × kind`単位で監査。同一domain train signatureとの重複、signature欠落、seed欠落/余分、train reference欠落をfail-closedで拒否。in-distribution cellの期待されるtrain overlapはholdout leakageへ誤分類しない。
 
-D016:
-
-- prediction path/hash
-- readable prediction JSONL
-- method identity agreement
-- unique instance IDs
-- exact dataset/prediction instance-set equality
-- fingerprint agreement
-- shared immutable dataset hash
-- stable model SHA/code commit
-
-D017:
-
-- every `domain × split × condition` cell must contain exactly seeds `1,7,19`
-- missing/extra/noncanonical seeds fail closed
-
-D018:
-
-- `target_label_shuffle`は`replace_gold_action_from_donor`
-- `outcome_shuffle`は`replace_gold_state_after_from_donor`
-- donor payload SHA-256と実際に適用したpayload SHA-256の一致
-- same-cell assignment、bijection、derangement、no self-shuffle
-- 各cellで最低1件のsemantic value change
-- no-op shuffleや申告donorと異なるpayloadは`initial_reproduction_failure`
-
-D018の4テストはローカル成功。GitHub Actions完了結果はcurrent headで未確認なのでCI成功数には加えない。
-
-Formal classification remains **`initial_reproduction_failure`** because real semantic shuffle bundles、immutable test serialization、complete prediction/artifact joins、competent public capabilityがない。
+D018の4テストはローカル成功。D019の軽量workflow完了結果は未確認。実semantic shuffle bundle、immutable test serialization、complete prediction/artifact joins、condition-scoped holdout pass、competent public capabilityがないため、正式分類は **`initial_reproduction_failure`**。
 
 ## P1 — R0.2 Environment-first faithful transfer
 
@@ -121,20 +98,35 @@ Implemented paths:
    - text/reward/done/outcome exclusion
 3. `r02_typed_comparison.py`
    - Environment-first / End-to-end / State-only on identical typed data, seed and split
-   - Environment-firstとEnd-to-endのinference parameter bytesを完全一致させる
-   - action accuracy、typed next-state loss、real holdouts、online fieldがある場合だけtask success、CPU latency、training time、RSS、checkpoint/data hashesを保存
+   - Environment-firstとEnd-to-endのinference parameter bytes完全一致
+   - action accuracy、typed next-state loss、real holdouts、独立online fieldがある場合だけtask success、CPU latency、training time、RSS、checkpoint/data hashes
    - offline accuracyをonline task successへ代用しない
+4. `audit_r02_matched_budget.py`
+   - canonical seed、non-empty train/test、dataset SHA-256
+   - complete test prediction coverage
+   - inference parameter equalityとtransition-pretraining-only bytesの分離
+   - checkpoint bytes/hash、training wall time、peak RSS、CPU latency
+   - action accuracy、typed next-state loss
+   - equal total row exposure
+
+Matched exposure contract for `N` train rows, environment epochs `E`, language epochs `L`:
+
+- Environment-first: `N*E + N*L`
+- End-to-end: `N*(E+L)`
+- State-only: `N*(E+L)`
+
+Offline checksが通っても独立online SILG task successがなければ、`matched_offline_budget_audit_passed_online_task_success_pending`とする。
 
 Current classification:
 
-`matched_typed_offline_comparison_harness_implemented_execution_on_qualified_silg_data_blocked`
+`matched_data_and_resource_audit_implemented_qualified_silg_execution_blocked`
 
 Before formal reproduction:
 
 - competent non-collapsed 3-seed source trajectories
 - complete typed state schema
 - parameter/topology-matched controls
-- equal examples/steps/splits
+- equal examples/steps/splits/row exposure
 - real entity/dynamics/language-form holdouts
 - online task success
 - action accuracy and typed next-state metrics
@@ -156,34 +148,36 @@ Rejected:
 - grammar/mechanism restrictionなしでlanguage factorsとlatent target blocksを共同識別する
 - unknown target recovery、environment label recovery、parameter namingをlanguage-specific causal identificationとする
 - target不明、environment不完全、nonlinear/nonparametricであることだけをlanguage necessityとする
-- shuffle degradation、semantic naming、prediction improvementだけでidentifiabilityを主張する
+- shuffle degradation、semantic naming、prediction improvement、non-zero isolated language effectだけでidentifiabilityを主張する
 
 ## P2 — Only admissible RQ reformulation, not adopted
 
 Preregistration candidate only:
 
-> general-environment、intervention-abstraction、trajectory-local parameter-identifiability criteriaを適用した後にも残る明示的なcausal symmetryを、latent representationと共同再符号化できないexternally anchored raw-language channelが、unseen utterance forms、compositions、systemsでstrictly refineできるか。
+> strongest non-language causal-representation criteriaを適用した後にも残る明示的なcausal abstractionを、externally fixedでfidelity/overlapが検証され、latent representationと共同再符号化できないinjective language-effect familyが、unseen utterance forms、compositions、systemsでstrictly refineできるか。
 
 Before adoption:
 
 1. formal non-language observation model and residual equivalence class
 2. applicable general-environment/intervention/trajectory graphical criteriaの評価
 3. non-language separation/variation条件が失敗する証明
-4. jointly transformできないexternal language anchor
-5. strict refinement theorem
-6. anchor除去時のmatched impossibility construction
-7. utterance-ID/environment-ID/target-label/component/parameter-name/paraphrase shortcut排除
-8. unseen-form/composition/system evaluation
-9. consistent estimatorまたはpopulation-only claimの明示
-10. public baseline reproductionとpreregistration
+4. externally fixed semantics and no joint recoding
+5. exclusion and injective/separating effect family
+6. effect-to-partition strict-refinement bridge theorem
+7. anchor/injectivity/exclusion除去時のmatched impossibility constructions
+8. fidelity and overlap diagnostics for every intervention cell
+9. utterance-ID/environment-ID/target-label/component/parameter-name/paraphrase shortcut排除
+10. unseen-form/composition/system evaluation
+11. consistent estimatorまたはpopulation-only claimの明示
+12. public baseline reproductionとpreregistration
 
 No implementation、synthetic benchmark、architectureは認可しない。
 
 ## P1 — Prior-art and novelty matrix
 
-2026年一次文献まで、unknown/uncoupled interventions、general-environment CRL、subset-intervention abstractions、finite-sample CRL、trajectory-local parameter identifiability、auxiliary/temporal/multi-view/hidden-regime ICA、grouping/weak supervision、mechanism sparsity、mechanistic independence、interactive grounding、environment-first、language-dynamics pretraining、causal world models、WM3Cを比較する。
+2026年一次文献まで、unknown/uncoupled interventions、general-environment CRL、subset-intervention abstractions、finite-sample CRL、trajectory-local parameter identifiability、auxiliary/temporal/multi-view/hidden-regime ICA、grouping/weak supervision、mechanism sparsity、mechanistic independence、interactive grounding、environment-first、language-dynamics pretraining、causal world models、WM3C、isolated causal effects of natural languageを比較する。
 
-C015でBaumgartner et al. 2026を追加。explicit target label不在だけではlanguage necessityにならず、parameter namingは残存reparameterization symmetryを除去しない。
+C016でLin, Morency and Ben-Michael, ICML 2025と公式`isolated-text-effects`を追加。effect identificationとlatent-partition identificationを明確に分離し、非ゼロ言語効果をpartition identificationの根拠として棄却した。
 
 ## P2 — Japanese realism audit
 
