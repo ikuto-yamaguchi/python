@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Attach preregistered R0.2 holdout assignments to typed SILG trajectories.
 
-This is a dataset-governance adapter, not a model.  The manifest must be
-created before model predictions or evaluation outcomes are inspected.  It is
-joined by (domain, split, seed, episode_seed), and every exported episode must
-have exactly one manifest record.  No holdout is inferred from observed model
+This is a dataset-governance adapter, not a model. The manifest must be created
+before model predictions or evaluation outcomes are inspected. It is joined by
+(domain, split, seed, episode_seed), and every exported episode must have
+exactly one manifest record. No holdout is inferred from observed model
 performance.
 """
 from __future__ import annotations
@@ -28,6 +28,8 @@ HOLDOUT_FIELDS = (
     "dynamics_holdout",
     "language_holdout",
 )
+RAW_ASSIGNMENT_SOURCE = "pending_pre_outcome_generator_manifest"
+QUALIFIED_ASSIGNMENT_SOURCE = "pre_outcome_generator_manifest"
 
 
 def sha256(path: Path) -> str:
@@ -82,11 +84,28 @@ def validate_manifest(rows: list[dict[str, Any]]) -> dict[tuple[str, str, int, i
     return by_key
 
 
+def validate_raw_trajectory_assignments(rows: list[dict[str, Any]]) -> None:
+    """Reject holdout inference before the immutable generator-manifest join."""
+    for row in rows:
+        item_key = key(row)
+        source = row.get("holdout_assignment_source")
+        if source != RAW_ASSIGNMENT_SOURCE:
+            raise ValueError(
+                f"{item_key}: raw trajectory holdout source must be {RAW_ASSIGNMENT_SOURCE!r}, got {source!r}"
+            )
+        enabled = [field for field in HOLDOUT_FIELDS if row.get(field) is not False]
+        if enabled:
+            raise ValueError(
+                f"{item_key}: raw trajectory inferred holdout fields before manifest join: {enabled}"
+            )
+
+
 def attach(
     trajectories: list[dict[str, Any]],
     manifest_rows: list[dict[str, Any]],
     manifest_path: Path,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    validate_raw_trajectory_assignments(trajectories)
     manifest = validate_manifest(manifest_rows)
     trajectory_keys = {key(row) for row in trajectories}
     manifest_keys = set(manifest)
@@ -99,15 +118,20 @@ def attach(
         )
 
     output: list[dict[str, Any]] = []
+    manifest_digest = sha256(manifest_path)
     for row in trajectories:
         assignment = manifest[key(row)]
         merged = dict(row)
         for field in SIGNATURE_FIELDS + HOLDOUT_FIELDS:
             merged[field] = assignment[field]
-        merged["holdout_manifest_sha256"] = sha256(manifest_path)
+        merged["holdout_assignment_source"] = QUALIFIED_ASSIGNMENT_SOURCE
+        merged["holdout_manifest_sha256"] = manifest_digest
         output.append(merged)
 
-    episode_assignments = {key(row): tuple(bool(manifest[key(row)][f]) for f in HOLDOUT_FIELDS) for row in trajectories}
+    episode_assignments = {
+        key(row): tuple(bool(manifest[key(row)][field]) for field in HOLDOUT_FIELDS)
+        for row in trajectories
+    }
     counts = Counter()
     for assignment in episode_assignments.values():
         for field, enabled in zip(HOLDOUT_FIELDS, assignment):
@@ -119,9 +143,10 @@ def attach(
         "trajectory_rows": len(trajectories),
         "episodes": len(episode_assignments),
         "manifest_rows": len(manifest_rows),
-        "manifest_sha256": sha256(manifest_path),
+        "manifest_sha256": manifest_digest,
         "held_out_episode_counts": dict(sorted(counts.items())),
         "canonical_seeds": list(CANONICAL_SEEDS),
+        "holdout_assignment_source": QUALIFIED_ASSIGNMENT_SOURCE,
     }
     return output, summary
 
