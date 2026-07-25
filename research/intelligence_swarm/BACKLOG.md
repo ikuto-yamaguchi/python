@@ -1,8 +1,8 @@
 # Intelligence Swarm Backlog
 
-## P0 — Complete one clean SILG recurrent reproduction
+## P0 — Preserve one clean SILG recurrent reproduction bundle
 
-従来のaccepted evidenceはofficial SILG `multi` recurrent at 32,768 requested frames、seeds `1,7,19`:
+Accepted evidence remains the official SILG `multi` recurrent at 32,768 requested frames、seeds `1,7,19`:
 
 - parameters `4,916,915`
 - state-dict audit `19,694,385 bytes`
@@ -15,23 +15,25 @@
 
 Classification: `matched_fixed_episode_32768_frame_staged_training_not_public_capability_reproduction`。
 
-Current run `30158106220` has successfully completed install, generator-signature tests, canonical random/schema probing, official recurrent training at 131,072 requested frames for seeds `1,7,19`, and matched Correct/Random/Language-blind/State-only/Language-shuffle evaluation. It is currently executing qualified typed trajectory export and matched R0.2 baselines. None of its values are accepted until artifact upload and unified audit complete.
+Run `30158106220` completed install、schema/random probe、131,072 requested frames × seeds `1,7,19` training、and matched Correct/Random/Language-blind/State-only/Language-shuffle evaluation. The job then failed during the R0.2 typed trajectory/baseline step. Holdout audit、dependency freeze、and artifact upload did not run; workflow artifacts are empty. None of the new checkpoint、performance、resource、or log values are accepted.
 
 Required next actions:
 
-1. Do not modify or cancel the active run.
-2. On completion, retrieve and verify seed `1,7,19` checkpoints and actual frame counters.
-3. Verify Correct、Random、Language-blind、State-only、Language-shuffle use identical initial instances.
-4. Verify model bytes、peak RSS、training wall time、CPU latency、seed、split、raw logs、source/model/data/prediction checksums.
-5. Feed the completed bundle through the unified evaluation contract and preserve the first failure.
-6. Audit policy competence and action collapse before interpreting any ablation.
-7. If failure occurs, preserve the reproducible log and apply only the smallest verified fix.
+1. Use only the canonical split-job workflow now on `research/intelligence-swarm-reconstruction-001`.
+2. Run the `r01-public-reproduction` job and verify that its immutable artifact uploads immediately after matched R0.1 evaluation.
+3. Retrieve and verify seed `1,7,19` checkpoints and actual frame counters before allowing R0.2 to consume them.
+4. Verify Correct、Random、Language-blind、State-only、Language-shuffle use identical initial instances.
+5. Verify model bytes、peak RSS、training wall time、CPU latency、seed、split、raw logs、source/model/data/prediction checksums.
+6. Feed the preserved R0.1 bundle through the unified evaluation contract and preserve the first failure.
+7. Audit policy competence and action collapse before interpreting any ablation.
+8. Do not rerun R0.2 inside the same preservation boundary as R0.1.
 
 Queue control:
 
 - R0.1 workflow runs only on benchmark-code/run-request pushes or manual dispatch.
 - Governance/prior-art commits must not enqueue another long reproduction.
 - Existing pending/duplicate runs are not results.
+- R0.2 may start only by downloading the already-uploaded immutable R0.1 artifact.
 
 Forbidden:
 
@@ -39,11 +41,11 @@ Forbidden:
 - favorable seed/instance selection
 - failed-policy trajectory tuning
 - interpreting incompetent-policy ablations as language irrelevance
-- counting workflow edits, triggers, queued/cancelled runs, documents, or unaudited step success as capability progress
+- counting workflow edits、queued/cancelled runs、documents、or unaudited step success as capability progress
 
 ## P0 — Evaluation, statistics, leakage and provenance
 
-Implemented through D026, now directly enforced by `evaluation_contract.py` and bundle auditors:
+Implemented through D027:
 
 - SILG real-schema adaptation
 - train/test utterance overlap
@@ -59,11 +61,12 @@ Implemented through D026, now directly enforced by `evaluation_contract.py` and 
 - observed sparse `domain × split × condition` topology shared by all methods/seeds
 - mean gap、minimum cell gap、paired randomization、McNemar、episode-cluster bootstrap CI
 - model bytes、RSS、training wall time、CPU latency、raw logs、checksums
+- D027 exact six-method coverage、one data path/hash per cell、one immutable code commit per bundle
 
 Remaining:
 
-1. Do not add more auditors unless the real bundle exposes a concrete false pass/failure.
-2. Feed run `30158106220` artifact into the unified contract after upload.
+1. Do not add more auditors unless a preserved real bundle exposes a concrete false pass/failure.
+2. Apply the unified contract to the next preserved R0.1 artifact.
 3. Preserve the first failing condition and raw evidence.
 4. If target-label is undefined in SILG, record formal inapplicability instead of inventing labels.
 
@@ -94,18 +97,17 @@ RTFM S1 boundary:
 - entity holdout: formally inapplicable in S1
 - language-form holdout: formally inapplicable in S1
 
-Current execution:
-
-- run `30158106220` is executing qualified typed trajectory export and matched R0.2 baselines after successful R0.1 training and matched controls.
+Run `30158106220` produced no preserved R0.2 artifact and is classified as failed. No task success、next-state prediction、action accuracy、or transfer result is accepted.
 
 Remaining:
 
-1. Complete the active workflow step and artifact upload.
-2. Produce and audit the 3-seed signature-to-trajectory join artifact.
-3. Pass the real dynamics holdout audit.
-4. Measure and audit task success、next-state prediction、action accuracy and transfer for all three methods and seeds.
-5. Confirm source-policy competence before attributing differences to representation learning.
-6. Use another public benchmark such as J-CRe3 only after its official split/code/dependencies are reproduced; do not create synthetic entity/language-form holdouts.
+1. Start only after an immutable R0.1 artifact exists and passes basic checkpoint/resource integrity.
+2. Download that artifact in the separate R0.2 job.
+3. Produce and audit the 3-seed signature-to-trajectory join artifact.
+4. Pass the real dynamics holdout audit.
+5. Measure and audit task success、next-state prediction、action accuracy and transfer for all three methods and seeds.
+6. Confirm source-policy competence before attributing differences to representation learning.
+7. Use another public benchmark such as J-CRe3 only after its official split/code/dependencies are reproduced; do not create synthetic entity/language-form holdouts.
 
 Representation appearance、compression、clusteringは進歩に数えない。モデル調整は認可しない。
 
@@ -115,11 +117,11 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 ## P1 — Prior-art and novelty matrix
 
-Newly integrated boundaries:
+Integrated boundaries:
 
-- C023: state-dependent local-dynamics identifiability. Trajectory/local sparsityで言語なしに同定可能なsystem parameterを言語で命名するだけではjoint identificationではない。
-- C024: isolated causal effects of natural language. 既知の言語介入属性の外部結果への効果が識別できても、raw utterance equivalenceやlatent target partitionは識別されない。
-- C025: mechanistic independence. Support、sparsity、高階作用構造から識別可能なmechanistic componentを言語で命名しても、その内部のraw-language equivalenceや細粒度target partitionは共同同定されない。
+- C023: state-dependent local-dynamics identifiability
+- C024: isolated causal effects of natural language
+- C025: mechanistic independence
 
 Previously retained boundaries include unknown-target CRL、finite-sample recovery、causal abstraction quotient/coarsening、grouped/multimodal CRL、interactive OpenLock transfer、concept/context-conditioned causal disentanglement、LLM-guided intervention selection、language-model graph priors。
 
