@@ -2,7 +2,7 @@
 
 Date: 2026-07-26
 Branch: `research/intelligence-swarm-reconstruction-001`
-Status: audit completed; public baseline reproduction and R0.2 reproduction remain incomplete
+Status: primary-code revision pin completed; public baseline reproduction and R0.2 reproduction remain incomplete
 
 ## Scope
 
@@ -11,9 +11,26 @@ This audit does not introduce an operation/goal toy hypothesis, a new mechanism 
 ## Primary sources checked
 
 1. David Gaddy and Dan Klein, *Pre-Learning Environment Representations for Data-Efficient Neural Instruction Following*, ACL 2019, ACL Anthology P19-1188.
-2. Authors' public repository: `dgaddy/environment-learning`, titled “Code for Pre-Learning Environment Representations for Data-Efficient Neural Instruction Following”.
+2. Public repository currently resolved as `kristyelee/environment-learning` (historically referenced as `dgaddy/environment-learning`).
 
 The ACL record describes a two-stage method: language-free state transitions are used first to induce a latent representation of actions, and language supervision is connected afterward. The public repository README exposes separate pretraining (`pretrain.py`) and language-learning/evaluation (`evaluate.py`) paths, plus a no-pretraining baseline (`--baseline`). It also states Python 3, PyTorch 1.0 or later, and `absl-py` as its requirements.
+
+## Immutable public-code reference
+
+The inspected author-code snapshot is now pinned in:
+
+`GADDY_KLEIN_PUBLIC_REFERENCE_MANIFEST.json`
+
+Pinned revision:
+
+- repository: `kristyelee/environment-learning`
+- branch: `master`
+- commit: `98c0dc68926ee9535f15019922d2ca871b0ac0b5`
+- commit message: `folder`
+
+The manifest records Git blob SHAs for `README.md`, `pretrain.py`, `evaluate.py`, `model.py`, `baseline_model.py`, `message_flags.py`, and `discrete_util.py`. It also records the public-code entrypoints, the `--baseline` control, the default 500,000 pretraining iterations, and the default 20-by-30 discrete message space.
+
+This closes the previous “author-code commit is not pinned” gap. It does not establish native-task execution or SILG/RTFM reproduction.
 
 ## What the current SILG port matches
 
@@ -29,21 +46,15 @@ The current canonical R0.2 code preserves the central experimental separation:
 
 These properties are consistent with the high-level two-stage design in the paper and public README.
 
-## Fidelity gaps that block a reproduction claim
+## Fidelity gaps that still block a reproduction claim
 
-### 1. Author-code commit is not pinned
-
-The canonical repository pins SILG and RTFM commits, but it does not pin a commit SHA for `dgaddy/environment-learning`. `METHOD_REFERENCE_COMMIT` in `r02_typed_comparison.py` refers to the local port history, not an immutable author-code revision. Therefore the exact public implementation inspected cannot yet be reconstructed from the R0.2 artifact bundle.
-
-Required minimum correction: record the author repository commit SHA and hashes of the specific reference files used (`README.md`, `pretrain.py`, `evaluate.py`, `model.py`, `baseline_model.py`, and relevant discrete-message utilities). Do not import its task-specific SHRDLURN/regex data pipeline into SILG.
-
-### 2. The port is a task adaptation, not a numerical reproduction
+### 1. The port is a task adaptation, not a numerical reproduction
 
 The author code targets SHRDLURN block stacking and regular-expression string manipulation. RTFM S1 has a different observation/action schema and recurrent source policy. Consequently, R0.2 can be called a faithful *method transfer* only after a documented component mapping and matched ablations; it cannot use the paper's published numbers as an expected numerical target.
 
-### 3. Component-level mapping is not yet machine-audited
+### 2. Component-level mapping is not yet machine-audited
 
-The current implementation documents the conceptual mapping in prose and code, but no fail-closed manifest checks that every claimed author-code component has a declared SILG counterpart. The minimum manifest should distinguish:
+The current implementation documents the conceptual mapping in prose and code, but no fail-closed manifest checks that every claimed author-code component has a declared SILG counterpart. The minimum manifest must distinguish:
 
 - transition-to-message encoder;
 - message-conditioned state-transition decoder;
@@ -54,20 +65,21 @@ The current implementation documents the conceptual mapping in prose and code, b
 - no-pretraining baseline;
 - inference-time parameter budget.
 
-### 4. Data-efficiency axis is not reproduced
+### 3. Data-efficiency axis is not reproduced
 
 The paper's central empirical claim concerns improvement when instructional data are limited. The current R0.2 run uses one fixed trajectory quantity and compares methods at that quantity. This can test an environment-first baseline, but it does not reproduce the paper's data-efficiency curve. No data-efficiency claim is permitted until preregistered language-data fractions are evaluated with identical environment-transition pretraining data, seeds, and splits.
 
-### 5. Public code has not been executed in its native task
+### 4. Public code has not been executed in its native task
 
-The authors' code has not been run on its original public tasks in this branch. Therefore compatibility with the inspected implementation and expected qualitative ablations remains unverified. This is a public-baseline reproduction gap, not evidence against the method.
+The authors' code has not been run on its original public tasks in this branch. Therefore compatibility with the pinned implementation and expected qualitative ablations remains unverified. This is a public-baseline reproduction gap, not evidence against the method.
 
 ## Current classification
 
-- Gaddy--Klein primary-source audit: completed for the paper record and public README
-- exact author-code revision pin: missing
+- Gaddy--Klein primary-source audit: completed
+- exact author-code revision and reference-file blob pin: completed
 - native public-code reproduction: not completed
-- SILG/RTFM method transfer: implemented, execution result not yet accepted
+- machine-audited author-to-SILG component mapping: not completed
+- SILG/RTFM method transfer: implemented, immutable execution result not yet accepted
 - numerical reproduction of ACL 2019 results: inapplicable to RTFM and not claimed
 - new architecture: none
 - novelty or intelligence-principle claim: prohibited
@@ -76,8 +88,7 @@ The authors' code has not been run on its original public tasks in this branch. 
 
 ## Next minimum actions
 
-1. Pin and hash the authors' public-code revision without modifying the R0.2 model family.
-2. Add a component-mapping manifest that fails closed when the local port or reference hashes drift.
-3. Preserve the currently requested split-job run artifacts before any further long run is triggered.
-4. If the split-job run fails, use its R0.2 artifact/log to correct only the first reproducible failure.
-5. Do not add data-efficiency sweeps until the single-budget, three-seed R0.1/R0.2 reproduction is complete.
+1. Add a fail-closed author-code-to-SILG component-mapping manifest and validator without changing the model family.
+2. Preserve the currently requested split-job run artifacts before any further long run is triggered.
+3. If the split-job run fails, use its R0.2 artifact/log to correct only the first reproducible failure.
+4. Do not add data-efficiency sweeps until the single-budget, three-seed R0.1/R0.2 reproduction is complete.
