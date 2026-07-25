@@ -15,9 +15,9 @@
 ## R0 status ledger
 
 - 公開環境control再現: **1件**
-- 公開学習経路再現: **1件（SILG/RTFM、32,768 requested frames、seed 1/7/19）**
+- 公開学習経路再現: **1件（SILG/RTFM、131,072 requested frames、seed 1/7/19のtraining step成功。artifact監査前）**
 - 学習済み公開能力baseline再現: **0件**
-- R0.2正式再現: **0件**
+- R0.2正式再現: **0件（実データ比較step実行中）**
 - R0.3 hidden intervention-target ablation: **棄却**
 - J-CRe3日本語外部baseline: **未再現**
 - 広義RQ-001: **棄却**
@@ -37,7 +37,7 @@
 - observation: 6×6 grid、wiki 80 token、task 40 token、inventory 8 token、valid-action mask 5、relative position 6×6×2
 - action space 5、maximum episode length 80
 
-Accepted evidence remains the 32,768-requested-frame run:
+従来のaccepted evidenceは32,768-requested-frame run:
 
 - parameters `4,916,915`
 - state-dict audit `19,694,385 bytes`
@@ -51,9 +51,11 @@ Accepted evidence remains the 32,768-requested-frame run:
 
 ### Active 131,072-frame run
 
-GitHub Actions run `30158106220` は、install、generator-signature test、random/schema probeを完了し、official recurrent 131,072-frame × 3 seed学習stepを実行中として確認済み。checkpoint、matched controls、artifact、能力値は未取得であり、完了までは進歩に数えない。
+GitHub Actions run `30158106220` は、install、generator-signature test、random/schema probe、official recurrent 131,072-frame × 3 seed training、Correct/Random/Language-blind/State-only/Language-shuffle matched evaluationをすべて成功した。現在はqualified typed SILG trajectory exportとR0.2 matched baseline stepを実行中である。
 
-PR累積diffにbenchmark workflowが含まれるため無関係なgovernance commitでも長時間runがqueueされる問題を確認した。workflowをbenchmark-code/run-requestの**pushまたはmanual dispatchだけ**で起動する構成へ変更し、今後の統合commitによる重複queueを停止した。既にpendingのrunは成果に数えない。
+checkpoint、能力値、resource値、raw logs、checksumはworkflow artifact uploadと統一監査が完了するまでaccepted evidenceへ昇格しない。training/matched-control step成功は実行進捗だが、能力進歩ではない。
+
+R0.1 workflowはbenchmark-code/run-requestのpushまたはmanual dispatchだけで起動し、governance/prior-art統合commitでは重複長時間runを追加しない。実行中runをcancelしない。
 
 ## R0.2 Environment-first
 
@@ -71,16 +73,19 @@ PR累積diffにbenchmark workflowが含まれるため無関係なgovernance com
 
 RTFM S1で正式に測定可能なtransferは**dynamicsのみ**。entity ontologyと言語生成familyはtrain/testで分離されないため、entity/language-form holdoutはS1ではformal inapplicabilityとする。
 
+現在、run `30158106220`内でqualified typed trajectory exportとmatched R0.2 baseline比較を実行中。
+
 未完了:
 
-- qualified 3-seed join artifact
+- workflow step完了とartifact upload
+- qualified 3-seed join artifactの監査通過
 - real dynamics holdout audit pass
-- online task success、next-state prediction、action accuracyの3-seed結果
-- competent R0.1 source-policy trajectory
+- online task success、next-state prediction、action accuracyの3-seed accepted result
+- competent R0.1 source-policy確認
 
 ## Evaluation contract
 
-D015〜D025に加え、D026としてdataset全体と各`domain × split × condition` cellについてcanonical seed `1,7,19`、train/evaluation presence、domain/split/condition非欠落をfail-closed監査する。
+D015〜D026を統合し、dataset全体と各`domain × split × condition` cellについてcanonical seed `1,7,19`、train/evaluation presence、domain/split/condition非欠落を`evaluation_contract.py`本体でfail-closed監査する。
 
 監査範囲:
 
@@ -102,7 +107,9 @@ C023はstate-dependent local dynamics identifiabilityを追加した。trajector
 
 C024はisolated causal effects of natural languageを追加した。既知の言語介入属性の外部結果への因果効果が識別できても、raw utterance equivalenceとlatent intervention-target partitionは識別されない。
 
-残るRQ候補は、最強のnon-language estimator、完全なinteraction history、isolated-language-effect adjustmentを条件付けた後にも残るequivalence classに対し、environment identity、incidence、observation、action、outcome、completed trajectoryから復元不能で、latent representationと共同再符号化できない外部固定language contrastがstrict reductionを与えるか、である。
+C025はmechanistic independenceを追加した。support、sparsity、高階作用構造から非線形・非可逆mixing下でも識別可能なmechanistic componentを言語で命名するだけでは、その内部のraw-language equivalenceや細粒度target partitionを共同同定しない。
+
+残るRQ候補は、最強のnon-language estimator、mechanistic-independence criterion、完全なinteraction history、isolated-language-effect adjustmentを条件付けた後にも同一mechanistic component内に残る具体的countermodel pairに対し、environment identity、incidence、observation、action、outcome、completed trajectoryから復元不能で、latent representationと共同再符号化できない外部固定language contrastがstrict reductionを与えるか、である。
 
 この候補は**未採用**。採用にはexplicit countermodel、anti-recoding anchor、strict joint-identification theorem、anchor除去時のimpossibility theorem、finite-sample/consistency保証、公開baseline再現、exactly one preregistered claimが必要。
 
@@ -129,4 +136,4 @@ C024はisolated causal effects of natural languageを追加した。既知の言
 
 ## Last integration
 
-2026-07-25: **RESET-E031**。R0.1 run `30158106220`の学習中状態を記録したが、能力証拠は増加なし。PR統合commitによる重複長時間run queueを停止。D026 seed/domain/cell topology監査、C023 local-dynamics境界、C024 isolated-language-effect境界を統合。R0.1未再現、R0.2未完了、RQ-001未採用、`initial_reproduction_failure`、高校生級未達を維持する。
+2026-07-25: **RESET-E032**。R0.1 run `30158106220`の131,072-frame × 3 seed trainingとmatched controls成功、R0.2実データ比較中を記録。artifact統一監査前のため公開能力baselineは未再現、能力進歩は未認定。D026の本体統合とC025 mechanistic-independence境界を反映。R0.2未完了、RQ-001未採用、`initial_reproduction_failure`、高校生級未達を維持する。
