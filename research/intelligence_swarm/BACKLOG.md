@@ -45,7 +45,7 @@ Forbidden:
 
 ## P0 — Evaluation, statistics, leakage and provenance
 
-Implemented through D028:
+Implemented through D029:
 
 - SILG real-schema adaptation
 - train/test utterance overlap
@@ -63,8 +63,9 @@ Implemented through D028:
 - model bytes、RSS、training wall time、CPU latency、raw logs、checksums
 - D027 exact six-method artifact coverage、one data path/hash per cell、one immutable code commit per bundle
 - D028 exact prediction topology: only `correct/random/language_blind/state_only/target_label_shuffle/outcome_shuffle`; reject extras、global omissions、per-instance omissions、per-cell omissions、and evaluation-external predictions
+- D029 core-contract enforcement: `evaluation_contract.py` itself rejects extra prediction/artifact methods、mixed full code commits、and different `data_path + data_sha256` identities within one `seed × domain × split × condition` cell
 
-D028 short CI run `30165709843` passed. This validates the regression path only; it does not establish a real benchmark result.
+D028 short CI run `30165709843` passed. D029 reports a successful focused local regression, while the current head has no published combined-status checks. These validate code paths only; they do not establish a real benchmark result.
 
 Remaining:
 
@@ -72,6 +73,7 @@ Remaining:
 2. Apply the unified contract to the next preserved R0.1 artifact.
 3. Preserve the first failing condition and raw evidence.
 4. If target-label is undefined in SILG, record formal inapplicability instead of inventing labels.
+5. Require the core contract and companion auditors to agree on the same method registry、full code commit、and per-cell dataset identity.
 
 Formal classification remains **`initial_reproduction_failure`** until a real bundle passes.
 
@@ -127,6 +129,8 @@ Integrated boundaries:
 - C025: mechanistic independence
 
 Previously retained boundaries include unknown-target CRL、finite-sample recovery、causal abstraction quotient/coarsening、grouped/multimodal CRL、interactive OpenLock transfer、concept/context-conditioned causal disentanglement、LLM-guided intervention selection、language-model graph priors。
+
+No new branch evidence after C025 changes the adoption decision. The novelty matrix remains incomplete and must still be closed through relevant 2026 primary work and official code.
 
 ## P2 — Only admissible RQ reformulation, not adopted
 
