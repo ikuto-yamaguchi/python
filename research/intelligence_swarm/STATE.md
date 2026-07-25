@@ -2,7 +2,7 @@
 
 ## Mission
 
-1GB未満・弱いスマートフォンCPUで実行可能な知能モデルを長期目標とし、生の日本語と環境相互作用から対象・状態・操作・因果構造を獲得する原理を研究する。ただし現在は原理発明を停止し、公開研究の再現、評価資格、新規性境界を確立する。
+1GB未満・弱いスマートフォンCPUで実行可能な知能モデルを長期目標とする。ただし現在は新原理の発明を停止し、公開benchmark再現、評価資格、既存研究との境界、反証可能な中心命題の確立を優先する。
 
 ## Current stage
 
@@ -13,24 +13,22 @@
 - 学術的新規性: **未確立**
 - 査読可能な中心命題: **未確立**
 - Active mechanism family: **なし**
-- AF-001〜AF-014: **PAUSED**
-- A〜Dの新規toy仮説、別branch、新規memory機構: **停止**
-- 過去stacked draft PR: **negative-results archive**
+- A〜Dの新規toy仮説、別branch、新規memory/replay/fast-weights/sleep/forgetting: **停止**
+- 過去stacked draft PR: **negative-results archive。新作業のbaseにしない**
 
 ## R0 status ledger
 
 - 公開環境control再現: **1件**
-- 公開学習経路再現: **1件（32,768-frame staged budget、3 seed）**
+- 公開学習経路再現: **1件（SILG/RTFM、32,768-frame staged budget、seed 1/7/19）**
 - 固定初期instance matched評価経路: **1件**
-- 131,072-frame staged reproduction: **完了artifact未取得**
+- 131,072-frame staged reproduction: **current headで検証済み完了artifactなし**
 - 学習済み公開能力baseline再現: **0件**
 - R0.2正式再現: **0件**
-- R0.2 typed full-method path: **実装済み**
-- R0.2 typed SILG exporter path: **実装済み・未実行**
-- R0.3 empirical intervention-target ablation: **正式棄却**
+- R0.2 typed full-method / typed exporter / matched comparison harness: **実装済み、qualified public dataで未実行**
+- R0.3 empirical hidden intervention-target ablation: **正式棄却**
 - RQ-001 broad/current formulation: **棄却**
-- language-added residual-abstraction refinement: **狭義化・未採用**
-- J-CRe3日本語外部監査: **未再現**
+- externally anchored residual-symmetry refinement: **狭義化・未採用**
+- J-CRe3日本語外部baseline: **未再現**
 
 公開能力baselineとmatched controlsがevaluation contractを通るまで、新規機構族、知能原理、能力進歩を認定しない。
 
@@ -77,95 +75,89 @@ Completed workflow run `30120620610` reproduced the official SILG `multi` recurr
 | State-only | `0.0167` | `-2.1963` | `62.48` | `4.103 ms/step` |
 | Language-shuffle | `0.0167` | `-1.9347` | `49.40` | `7.252 ms/step` |
 
-Correct was 1/60 and Random was 4/60. This demonstrates insufficient policy competence, not that language is unnecessary.
+Correctは1/60、Randomは4/60。これはpolicy competence不足であり、言語不要の証拠ではない。
 
-Classification: **`matched_fixed_episode_32768_frame_staged_training_not_public_capability_reproduction`**.
+Classification: **`matched_fixed_episode_32768_frame_staged_training_not_public_capability_reproduction`**。
 
 ### 131,072-frame status
 
-The initial attempt stopped because of a fixed reconstruction-harness timeout. Timeout handling was corrected. Subsequent long runs were repeatedly restarted by branch/PR triggers; workflow concurrency and trigger scope were corrected so unrelated commits no longer restart the expensive job.
+固定timeout、重複trigger、再起動問題は修正済みだが、RESET-E022時点のcanonical head `5dfa423808c2348a774eae1d64ddd8186cecf9be`には関連workflow run、combined status、検証済み完了artifactがない。未完了checkpoint、resource値、trajectory、能力値は採用しない。
 
-At RESET-E021, no completed 131,072-frame artifact is verified at the current canonical head. No unfinished checkpoint, resource value, trajectory or capability result is incorporated. The next authorized action is one clean manual or path-triggered run followed by artifact verification.
+次の唯一のR0.1作業は、stable workflow headから1本だけ実行し、3 checkpoint、raw log、source/model/data/prediction hash、RSS、学習時間、CPU latency、同一instance controls、policy competence、action-collapseを検証すること。
 
 ## R0.2 Environment-first status
 
-The old public-trajectory offline comparison is a negative diagnostic only:
+旧trajectory比較はnegative diagnosticのみ。source policyはseed 1でtrain success `0/40`、seed 7で`0/40`かつmajority action `97.42%`、seed 19で`1/40`、全test `0/20`で不適格。
 
-- Environment-first action accuracy: `0.6840`
-- End-to-end: `0.6907`
-- State-only: `0.7240`
-- Environment-first language-blind: `0.6840`
-- Environment-first language-shuffle: `0.6840`
+Gaddy & Klein 2019と著者code commit `ac1e7cb62ae94c76f545bf942f0c8febce43891f`を固定参照とする。
 
-The source policy was ineligible: seed 1 train success `0/40`; seed 7 `0/40` with `97.42%` majority action; seed 19 `1/40`; all test sets `0/20`.
+Canonical branchには以下がある。
 
-Gaddy & Klein 2019 and authors' code commit `ac1e7cb62ae94c76f545bf942f0c8febce43891f` remain the fixed method reference.
+- `gaddy_klein_typed_baseline.py`: language-free transition pretraining、20 categorical message variables × 30 symbols、straight-through Gumbel-Softmax、shared typed next-state/action decoder、LSTM language encoder、direct message matching `0.01`、decoder freezing、typed CE/BCE/MSE、resource/hash reporting。
+- `export_silg_typed_policy_trajectories.py`: typed before/after fields、schema/cardinality、episode/seed/split/fingerprint provenance、dataset/schema SHA-256、unknown field fail-closed。
+- `r02_typed_comparison.py`: Environment-first、parameter-matched End-to-end、State-onlyを同一typed dataset・seed・splitで比較。Environment-firstとEnd-to-endのinference parameter bytes不一致は拒否する。
 
-The faithful path now contains:
+Cycle 011 harnessはaction accuracy、typed next-state loss、entity/dynamics/language-form holdout、独立online fieldがある場合だけtask success、CPU latency、training wall time、peak RSS、checkpoint bytes/hash、dataset hashを保存する。offline accuracyをtask successの代用にしない。
 
-- `gaddy_klein_typed_baseline.py`: language-free transition pretraining, 20 categorical message variables × 30 symbols, straight-through Gumbel-Softmax, shared typed next-state/action decoder, LSTM language encoder, direct message matching (`0.01`), decoder freezing, typed losses and resource/hash reporting;
-- `export_silg_typed_policy_trajectories.py`: preserves `state_before_fields`, `state_after_fields`, `state_schema`, categorical cardinalities, episode/seed/split/fingerprint provenance, dataset SHA-256 and schema SHA-256.
-
-Typed export rules currently classify `name` and `inv` as categorical, `name_len` and `inv_len` as bounded categorical, `valid` as binary, and `rel_pos`/`pos` as continuous. Text fields, reward, done and post-treatment outcomes are excluded from environment state. Unknown fields/cardinalities fail closed.
-
-Neither path has a qualified three-seed execution because no competent source-policy artifact exists. R0.2 classification remains **`typed_discrete_message_and_typed_export_paths_implemented_execution_blocked`**.
-
-No R0.2 result is accepted until competent non-collapsed source trajectories, typed export, parameter/topology-matched End-to-end and State-only controls, equal data/steps/splits, real entity/dynamics/language-form holdouts, online task success, action accuracy, typed next-state metrics, CPU latency and complete artifacts exist.
+Qualifiedな3-seed public trajectoryがないため未実行。Classification: **`matched_typed_offline_comparison_harness_implemented_execution_on_qualified_silg_data_blocked`**。
 
 ## Evaluation contract status
 
-D015 directly adapts concrete SILG exporter rows and has **18 executed passing regression tests**.
+D015は実SILG schemaへ適合し、**18件の実行済み回帰テスト**を持つ。
 
-D016 adds an immutable prediction-to-dataset join for every `method × seed × domain × split × condition` run: prediction path/hash, readable JSONL, method identity, unique instance IDs, exact dataset/prediction instance-set equality, fingerprint agreement, shared dataset hash and stable model/code identity.
+D016は各`method × seed × domain × split × condition`についてprediction-to-dataset immutable joinを要求する。
 
-D017 adds fail-closed dataset cell coverage. Every `domain × split × condition` evaluation cell must contain exactly canonical seeds `1,7,19`; missing, extra or noncanonical seeds are rejected and recorded with the dataset SHA-256. A separate lightweight evaluation-contract workflow was added so these tests do not restart the long SILG training job.
+D017は各`domain × split × condition` cellにseed `1,7,19`が正確に揃うことを要求する。
 
-D016/D017 completion results are not yet verified at the canonical head, so the confirmed passing-test count remains 18. Existing evidence lacks a complete immutable six-method prediction artifact join.
+D018はshuffleのdonor割当だけでなく、実際に適用されたpayloadを値レベルで監査する。
 
-Formal classification remains **`initial_reproduction_failure`**.
+- `target_label_shuffle`: `replace_gold_action_from_donor`、donor target hashとapplied payload hashの一致。
+- `outcome_shuffle`: `replace_gold_state_after_from_donor`、donor outcome hashとapplied payload hashの一致。
+- 同一cell、bijection、derangement、self-shuffle禁止に加え、各cellで最低1件のsemantic value changeを要求する。
+
+D018の4テストはローカル成功。current headのGitHub Actions完了結果は未確認なので、CI成功数としては計上しない。実shuffle prediction bundle、immutable test serialization、完全artifact join、competent baselineがないため、正式分類は **`initial_reproduction_failure`**。
 
 ## Prior-art and novelty boundary
 
-Existing boundaries include unknown/uncoupled multi-node intervention recovery, score/general-environment CRL, subset-intervention causal abstraction, finite-sample CRL, environment-first instruction following, language-dynamics pretraining, auxiliary/temporal/multi-view/hidden-regime nonlinear ICA, grouping and weak supervision, mechanism sparsity, mechanistic independence, multimodal shared-latent recovery and WM3C language-controlled block identification.
+既存境界にはunknown/uncoupled intervention CRL、general-environment CRL、subset-intervention causal abstraction、finite-sample CRL、trajectory-local parameter identifiability、auxiliary/temporal/multi-view/hidden-regime nonlinear ICA、grouping/weak supervision、mechanism sparsity、mechanistic independence、interactive grounding、environment-first、language-dynamics pretraining、WM3Cを含む。
 
-C013 excludes unknown-target recovery as a language novelty claim under strongly separating intervention designs.
+C015は、明示的target labelがないことだけをlanguage necessityの根拠にする主張を追加で棄却した。Baumgartner et al. 2026は、trajectory間で変化するsystem parameterを、local transition graph、mechanism sparsity、Jacobian variation、graphical separationの条件下で、言語なしにpermutationとelement-wise diffeomorphismまで識別する。
 
-C014 further excludes the claim that language is required merely because targets are unknown, environment labels are incomplete, dynamics are nonlinear or observation mixing is nonparametric. General-environment CRL already supplies identifiability under sufficient mechanism changes, while subset-intervention work characterizes the residual causal abstraction when interventions are insufficient.
-
-If `L ⟂ M | X,E`, equivalently `I(M;L | X,E)=0`, language cannot refine the causal-model equivalence class left by non-language observations. Language-shuffle degradation, environment classification, semantic naming or finite-sample prediction gains alone do not establish identifiability.
+trajectory-onlyで残る対称性が`theta'_i = h_i(theta_(pi(i)))`なら、language generatorも`g'(theta',X,E,epsilon)=g(H^-1(theta'),X,E,epsilon)`と再定義でき、`p(X,E,L)`は不変である。したがってparameter naming、language-conditioned prediction、shuffle gap、fluent/compositional descriptionsだけではsymmetry breakingを証明しない。
 
 ## Research-question decision
 
-- **Gate L — continued, not passed:** evaluate whether raw language adds external capability only after a competent public policy exists.
-- **Gate I empirical track / R0.3 — rejected:** no joint-identification experiment and no researcher-authored target ontology on SILG.
-- **RQ-001-N5 — rejected.**
-- **RQ-001 broad/current form — rejected.**
-- **Unknown-target recovery as language contribution — rejected.**
-- **Only admissible narrowed question — not adopted:** after exhausting general-environment non-language statistics, determine whether raw language supplies an independent separating relation that strictly refines a formally specified residual causal abstraction on unseen utterance forms and intervention compositions.
+- Gate L: **継続、未通過**。
+- Gate I empirical track / R0.3: **棄却**。
+- RQ-001-N5: **棄却**。
+- RQ-001 broad/current form: **棄却**。
+- Unknown target recovery、environment label recovery、parameter namingをlanguage-specific causal identificationとする案: **棄却**。
+- 唯一残る候補: general-environment、intervention-abstraction、trajectory-local parameter criteriaを使い切った後に残る明示的symmetryを、latentと共同再符号化できないexternally anchored language channelが未知utterance form/composition/systemでも厳密に除去できるか。
+- 上記候補: **未採用、preregistration候補のみ**。
 
-Adoption requires a deficient intervention design and exact residual equivalence class, proof that general-environment sufficient-change conditions fail, `I(M;L|X,E)>0`, anti-lookup grammar, restrictions against arbitrary factor re-encoding, a positive refinement theorem, matched impossibility theorem without language separation, unseen-form/tuple/target tests, finite-sample or consistent estimation and direct prior-art comparisons.
+採用には、残存同値類、非言語criterionの失敗、外部anchor、positive refinement theorem、anchor除去時のimpossibility、anti-lookup population grammar、unseen-form/composition/system評価、consistent estimatorまたはpopulation-only宣言、公開baseline再現、事前登録が必要。
 
-No implementation is authorized before public baseline reproduction and preregistration.
+新規architecture実験は認可しない。
 
 ## Current maximum bottleneck
 
-**Produce one clean, completed 131,072-frame official recurrent run at the stable workflow head, verify its artifacts under the immutable matched protocol, and test policy competence. Until then, R0.2 tuning, new architecture and RQ-001 implementation remain forbidden.**
+**一つのcleanな131,072-frame公式recurrent runを完了・監査し、competentな外部公開baselineを得ること。** それまではR0.2 tuning、RQ-001 implementation、新規architectureを禁止する。
 
 ## Stage-transition rule
 
-A next stage may be proposed only after all are complete:
+次stageは以下すべての完了後だけ提案できる。
 
-1. at least one learned external public capability baseline;
-2. immutable-instance random/language-blind/state-only/shuffle controls;
-3. canonical three-seed artifact and leakage contract;
-4. R0.2 online task success, typed next-state and real holdouts;
-5. formal R0.3 empirical rejection in governance;
-6. novelty matrix through relevant 2026 primary work;
-7. exactly one preregistered claim/theorem, counterexamples and stopping conditions.
+1. 学習済み外部公開能力baseline 1件以上。
+2. immutable-instance random/language-blind/state-only/shuffle controls。
+3. canonical 3-seed prediction/artifact/leakage contract。
+4. R0.2 online task success、typed next-state、実holdout。
+5. R0.3 formal rejection。
+6. 2026年一次文献まで閉じたnovelty matrix。
+7. exactly one preregistered successor claim/theorem、counterexample、停止条件。
 
 ## Canonical branch policy
 
-All work accumulates only on `research/intelligence-swarm-reconstruction-001`. Existing stacked drafts remain negative-results archives and are not experiment bases.
+全作業は`research/intelligence-swarm-reconstruction-001`だけへ累積する。既存stacked draftsはnegative-results archiveであり、実験baseにしない。
 
 ## Current status
 
@@ -178,4 +170,4 @@ All work accumulates only on `research/intelligence-swarm-reconstruction-001`. E
 
 ## Last integration
 
-2026-07-25: **RESET-E021**。R0.2 Cycle 010のtyped SILG exporter、C014のgeneral-environment conditional-sufficiency境界、D017の`domain × split × condition`別canonical three-seed監査を統合した。131,072-frameについてcurrent headで検証済み完了artifactはなく、古い実行中表記を撤回した。公開能力baseline 0件、`initial_reproduction_failure`、段階遷移禁止、高校生級未達を維持する。
+2026-07-25: **RESET-E022**。R0.2 Cycle 011のmatched typed comparison harness、C015のtrajectory-local parameter identifiabilityとexternally anchored symmetry-breaking境界、D018のsemantic shuffle payload監査を統合した。current headにR0.1完了run/artifactはなく、公開能力baseline 0件、`initial_reproduction_failure`、段階遷移禁止、高校生級未達を維持する。
