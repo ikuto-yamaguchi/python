@@ -24,6 +24,11 @@ import numpy as np
 import torch
 
 LANGUAGE_FIELDS = ("wiki", "task")
+# RTFM exposes inventory as token IDs, but inventory is part of the physical
+# environment state rather than instruction language.  Excluding ``inv`` here
+# silently removed action-conditioned inventory transitions from the
+# Environment-first objective.  Only exogenous instruction channels and SILG's
+# concatenated text aliases are language-only.
 LANGUAGE_ONLY_FIELDS = {"wiki", "wiki_len", "task", "task_len", "text", "text_len"}
 POST_TREATMENT_FIELDS = {"reward", "done", "episode_return", "episode_step", "last_action"}
 CANONICAL_SEEDS = (1, 7, 19)
