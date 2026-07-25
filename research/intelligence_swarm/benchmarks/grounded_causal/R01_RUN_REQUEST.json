@@ -1,9 +1,10 @@
 {
-  "requested_at_utc": "2026-07-25T08:49:45Z",
+  "requested_at_utc": "2026-07-25T15:48:26Z",
   "track": "R0.1",
   "benchmark": "SILG RTFM S1",
   "workflow": ".github/workflows/r0_silg_rtfm_probe.yml",
   "canonical_branch": "research/intelligence-swarm-reconstruction-001",
+  "request_reason": "Execute the split-job workflow so the completed 131072-frame three-seed R0.1 training and matched controls are frozen and uploaded before any R0.2 work begins.",
   "frames_per_seed": 131072,
   "seeds": [1, 7, 19],
   "train_env": "silg:rtfm_train_s1-v0",
