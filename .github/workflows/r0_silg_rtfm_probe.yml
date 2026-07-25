@@ -1,5 +1,5 @@
-name: R0.1 SILG RTFM probe
-run-name: R0.1 SILG RTFM 131072-frame reproduction @ ${{ github.sha }}
+name: R0.1/R0.2 SILG RTFM reproduction
+run-name: R0.1/R0.2 SILG RTFM reproduction @ ${{ github.sha }}
 
 on:
   push:
@@ -23,27 +23,24 @@ on:
       - 'research/intelligence_swarm/benchmarks/grounded_causal/SILG_RTFM_REPRO_001.md'
   workflow_dispatch:
 
-# Governance/prior-art commits must not enqueue another five-hour reproduction.
-# An active run is kept alive; a deliberate benchmark-code or run-request push queues the next run.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: false
 
 jobs:
-  rtfm-public-probe:
+  r01-public-reproduction:
     runs-on: ubuntu-22.04
     timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: '3.8'
           cache: pip
-
       - name: Record host and immutable run provenance
         run: |
-          mkdir -p research/intelligence_swarm/benchmarks/grounded_causal/results
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results"
+          mkdir -p "$results"
           {
             echo "github_repository=${GITHUB_REPOSITORY}"
             echo "github_workflow=${GITHUB_WORKFLOW}"
@@ -51,7 +48,6 @@ jobs:
             echo "github_run_attempt=${GITHUB_RUN_ATTEMPT}"
             echo "github_event_name=${GITHUB_EVENT_NAME}"
             echo "github_ref=${GITHUB_REF}"
-            echo "github_head_ref=${GITHUB_HEAD_REF}"
             echo "github_sha=${GITHUB_SHA}"
             git rev-parse HEAD
             git status --short
@@ -60,64 +56,45 @@ jobs:
             lscpu
             free -h
             python --version
-          } | tee research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_HOST.txt
-
+          } | tee "$results/SILG_RTFM_HOST.txt"
       - name: Install pinned public sources
         run: |
           set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results"
           /usr/bin/time -v bash research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh "$RUNNER_TEMP/r0_silg" \
-            2>&1 | tee research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_INSTALL.log
-
+            2>&1 | tee "$results/SILG_RTFM_INSTALL.log"
       - name: Test generator-signature extraction
-        run: |
-          python research/intelligence_swarm/benchmarks/grounded_causal/test_export_rtfm_generator_signatures.py
-
+        run: python research/intelligence_swarm/benchmarks/grounded_causal/test_export_rtfm_generator_signatures.py
       - name: Run canonical-seed random control and schema probe
         run: |
           set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results"
           /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/silg_rtfm_probe.py \
-            --env silg:rtfm_train_s1-v0 \
-            --seeds 1 7 19 \
-            --episodes 20 \
-            --max-steps 80 \
-            --output research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_RANDOM_CANONICAL_3SEED.json \
-            2>&1 | tee research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_RANDOM_CANONICAL.log
-
-      - name: Run official multi recurrent 131072-frame staged training and persist checkpoints
+            --env silg:rtfm_train_s1-v0 --seeds 1 7 19 --episodes 20 --max-steps 80 \
+            --output "$results/SILG_RTFM_RANDOM_CANONICAL_3SEED.json" \
+            2>&1 | tee "$results/SILG_RTFM_RANDOM_CANONICAL.log"
+      - name: Run official multi recurrent 131072-frame training
         run: |
           set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results"
           /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py \
-            --silg-root "$RUNNER_TEMP/r0_silg/silg" \
-            --seeds 1 7 19 \
-            --frames 131072 \
-            --output research/intelligence_swarm/benchmarks/grounded_causal/results \
-            2>&1 | tee research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_RECURRENT_SMOKE.log
-
-      - name: Upload R0.1 training checkpoints and resource logs
-        uses: actions/upload-artifact@v4
-        with:
-          name: r01-silg-rtfm-training-${{ github.run_id }}
-          path: research/intelligence_swarm/benchmarks/grounded_causal/results/
-          if-no-files-found: error
-          retention-days: 30
-
-      - name: Evaluate recurrent and matched random/language-blind/state-only/language-shuffle controls
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" --seeds 1 7 19 --frames 131072 --output "$results" \
+            2>&1 | tee "$results/SILG_RTFM_RECURRENT_SMOKE.log"
+      - name: Evaluate matched R0.1 controls
         run: |
           set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results"
           /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/run_silg_matched_eval.py \
-            --silg-root "$RUNNER_TEMP/r0_silg/silg" \
-            --results research/intelligence_swarm/benchmarks/grounded_causal/results \
-            --seeds 1 7 19 \
-            --episodes 20 \
-            2>&1 | tee research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_MATCHED_EVAL.log
-
-      - name: Freeze and upload completed R0.1 matched-evaluation bundle
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" --results "$results" --seeds 1 7 19 --episodes 20 \
+            2>&1 | tee "$results/SILG_RTFM_MATCHED_EVAL.log"
+      - name: Freeze R0.1 bundle
+        if: always()
         run: |
-          python -m pip freeze | sort > research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_R01_PIP_FREEZE.txt
-          sha256sum research/intelligence_swarm/benchmarks/grounded_causal/results/* \
-            > research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_R01_SHA256SUMS.txt || true
-
-      - name: Upload completed R0.1 matched-evaluation bundle
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results"
+          python -m pip freeze | sort > "$results/SILG_RTFM_R01_PIP_FREEZE.txt"
+          sha256sum "$results"/* > "$results/SILG_RTFM_R01_SHA256SUMS.txt" || true
+      - name: Upload immutable R0.1 bundle
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: r01-silg-rtfm-matched-${{ github.run_id }}
@@ -125,7 +102,28 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Export qualified typed SILG trajectories and run matched R0.2 baselines
+  r02-environment-first:
+    needs: r01-public-reproduction
+    runs-on: ubuntu-22.04
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+          cache: pip
+      - name: Install identical pinned public sources
+        run: |
+          set -o pipefail
+          mkdir -p research/intelligence_swarm/benchmarks/grounded_causal/results
+          /usr/bin/time -v bash research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh "$RUNNER_TEMP/r0_silg" \
+            2>&1 | tee research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_R02_INSTALL.log
+      - name: Download immutable R0.1 checkpoints and matched results
+        uses: actions/download-artifact@v4
+        with:
+          name: r01-silg-rtfm-matched-${{ github.run_id }}
+          path: research/intelligence_swarm/benchmarks/grounded_causal/results/
+      - name: Run matched R0.2 Environment-first baselines
         run: |
           set -euo pipefail
           results="research/intelligence_swarm/benchmarks/grounded_causal/results"
@@ -139,74 +137,44 @@ jobs:
             join_summary="$results/SILG_RTFM_HOLDOUT_JOIN_SEED_${seed}.json"
             out="$results/SILG_RTFM_R02_TYPED_COMPARISON_SEED_${seed}.json"
             online="$results/SILG_RTFM_R02_ONLINE_SEED_${seed}.json"
-
             /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/export_rtfm_generator_signatures.py \
-              --silg-root "$RUNNER_TEMP/r0_silg/silg" \
-              --seed "$seed" \
-              --train-episodes 40 \
-              --test-episodes 20 \
-              --out "$signatures" \
+              --silg-root "$RUNNER_TEMP/r0_silg/silg" --seed "$seed" --train-episodes 40 --test-episodes 20 --out "$signatures" \
               2>&1 | tee -a "$results/SILG_RTFM_R02_TYPED.log"
             cat "$signatures" >> "$results/SILG_RTFM_GENERATOR_SIGNATURES_3SEED.jsonl"
-
             /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/export_silg_typed_policy_trajectories.py \
-              --silg-root "$RUNNER_TEMP/r0_silg/silg" \
-              --checkpoint "$results/SILG_RTFM_TRAINED_STATE_SEED_${seed}.pt" \
-              --seed "$seed" \
-              --train-episodes 40 \
-              --test-episodes 20 \
-              --out "$raw" \
+              --silg-root "$RUNNER_TEMP/r0_silg/silg" --checkpoint "$results/SILG_RTFM_TRAINED_STATE_SEED_${seed}.pt" \
+              --seed "$seed" --train-episodes 40 --test-episodes 20 --out "$raw" \
               2>&1 | tee -a "$results/SILG_RTFM_R02_TYPED.log"
-
             python research/intelligence_swarm/benchmarks/grounded_causal/attach_r02_holdout_manifest.py \
-              --trajectories "$raw" \
-              --manifest "$signatures" \
-              --out "$data" \
-              --summary "$join_summary" \
+              --trajectories "$raw" --manifest "$signatures" --out "$data" --summary "$join_summary" \
               2>&1 | tee -a "$results/SILG_RTFM_R02_TYPED.log"
             cat "$data" >> "$results/SILG_RTFM_TYPED_TRAJECTORIES_QUALIFIED_3SEED.jsonl"
-
             /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/r02_typed_comparison.py \
-              --data "$data" \
-              --out "$out" \
-              --seed "$seed" \
-              --env-epochs 8 \
-              --lang-epochs 8 \
+              --data "$data" --out "$out" --seed "$seed" --env-epochs 8 --lang-epochs 8 \
               2>&1 | tee -a "$results/SILG_RTFM_R02_TYPED.log"
-
             /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/evaluate_r02_online_silg.py \
-              --silg-root "$RUNNER_TEMP/r0_silg/silg" \
-              --data "$data" \
-              --comparison "$out" \
-              --seed "$seed" \
-              --episodes 20 \
-              --out "$online" \
+              --silg-root "$RUNNER_TEMP/r0_silg/silg" --data "$data" --comparison "$out" --seed "$seed" --episodes 20 --out "$online" \
               2>&1 | tee -a "$results/SILG_RTFM_R02_TYPED.log"
           done
-
       - name: Audit real RTFM S1 holdout assignments
         if: always()
         run: |
-          set -o pipefail
           results="research/intelligence_swarm/benchmarks/grounded_causal/results"
           python research/intelligence_swarm/benchmarks/grounded_causal/audit_r02_holdout_assignments.py \
             "$results/SILG_RTFM_TYPED_TRAJECTORIES_QUALIFIED_3SEED.jsonl" \
             --output "$results/SILG_RTFM_R02_HOLDOUT_AUDIT.json" \
             2>&1 | tee "$results/SILG_RTFM_R02_HOLDOUT_AUDIT.log" || true
-
-      - name: Freeze installed versions
+      - name: Freeze R0.2 bundle
         if: always()
         run: |
-          python -m pip freeze | sort > research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_PIP_FREEZE.txt
-          sha256sum \
-            research/intelligence_swarm/benchmarks/grounded_causal/results/* \
-            > research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_SHA256SUMS.txt || true
-
-      - name: Upload reproducibility bundle
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results"
+          python -m pip freeze | sort > "$results/SILG_RTFM_R02_PIP_FREEZE.txt"
+          sha256sum "$results"/* > "$results/SILG_RTFM_R02_SHA256SUMS.txt" || true
+      - name: Upload R0.2 reproducibility bundle
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: r0-silg-rtfm-probe-${{ github.run_id }}
+          name: r02-silg-rtfm-environment-first-${{ github.run_id }}
           path: research/intelligence_swarm/benchmarks/grounded_causal/results/
           if-no-files-found: error
           retention-days: 30
