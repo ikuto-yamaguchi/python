@@ -66,9 +66,11 @@ install、generator-signature test、random/schema probe、official recurrent 13
 
 canonical workflowはR0.1とR0.2を別jobへ分離し、R0.1終了直後にfreeze/uploadしてからR0.2がimmutable artifactをdownloadする。この境界を次回実行の必須条件とする。
 
+`R01_RUN_REQUEST.json`は2026-07-25T17:48:05Zにsplit-job再実行要求へ更新された。要求投入は結果ではなく、対応するimmutable artifactと監査ログが確認されるまでaccepted evidenceは0件のままとする。
+
 ## R0.2 Environment-first
 
-固定参照はGaddy & Klein 2019および著者code commit `ac1e7cb62ae94c76f545bf942f0c8febce43891f`。
+固定参照はGaddy & Klein 2019および著者公開code `dgaddy/environment-learning`。
 
 実装済み:
 
@@ -82,17 +84,25 @@ canonical workflowはR0.1とR0.2を別jobへ分離し、R0.1終了直後にfreez
 
 RTFM S1で正式に測定可能なtransferは**dynamicsのみ**。entity ontologyと言語生成familyはtrain/testで分離されないため、entity/language-form holdoutはformal inapplicabilityとする。
 
+Gaddy–Klein fidelity audit 001により、現portは高水準のtwo-stage method transferには対応するが、次のため再現主張は不可と確定した。
+
+- 著者codeのimmutable commitと参照ファイルhashがartifactへ固定されていない
+- SHRDLURN/regex用の原実装からRTFMへのtask adaptationであり、ACL 2019数値のnumerical reproductionではない
+- author component-to-SILG component mappingのfail-closed manifestがない
+- paper中心のlanguage-data-efficiency curveを未再現
+- 著者codeをnative taskで未実行
+
 accepted task success、next-state prediction、action accuracy、dynamics holdout transferの3-seed resultは0件である。
 
 ## Evaluation contract
 
-D015〜D029を統合する。
+D015〜D030を統合する。
 
 監査範囲:
 
 - train/test utterance overlap
 - entity/dynamics split leakage
-- gold action/after-state/completed trajectory/post-treatment leakage
+- gold action/after-state/completed-trajectory/post-treatment leakage
 - semantic alias leakage
 - exact global and per-cell seeds `1,7,19`
 - domain/split/condition presence
@@ -103,20 +113,25 @@ D015〜D029を統合する。
 - D027: 各cellで全6手法が同一data path/hashを使い、bundle全体が単一code commitに固定されること
 - D028: 各instance・各cellのprediction methodを `correct/random/language_blind/state_only/target_label_shuffle/outcome_shuffle` の厳密な6種へ固定し、余分・欠落・評価外predictionを拒否すること
 - D029: core `evaluation_contract.py`単独でも未登録method、mixed full code commit、同一cell内の異なる`data_path + data_sha256`を拒否し、companion auditorを迂回できないこと
+- D030: prediction JSONL自体のstrict schemaを検査し、gold action/state、reward、terminal output、episode success/return、future state、rollout、completed trajectory、未登録debug field、非有限値、valid-action外予測、train predictionを拒否すること
 
-D028専用CI run `30165709843`は成功した。D029のfocused local regressionも成功記録がある。ただし現headのpublished combined statusは空であり、いずれも実R0 bundle通過や能力進歩ではない。
+D030 focused testsはclean six-method coverage、gold/completed-trajectory leakage、未登録payload、invalid action、non-finite state、coverage欠落を固定した。現headのPR-triggered prediction-method-topology run `30169591964`は成功したが、実R0 bundle通過や能力進歩ではない。
 
 ## Prior-art and RQ boundary
 
-C023〜C025までの境界を維持する。
+C023〜C025およびC029までの境界を維持する。
 
 - state-dependent local dynamicsから言語なしで同定可能なparameterを命名するだけではjoint identificationではない
 - isolated language effectを同定してもraw utterance equivalenceとlatent target partitionは同定されない
 - mechanistic independenceで識別可能なcomponentを命名しても内部partitionは同定されない
+- general-environment nonparametric CRLは、既知のintervention type/targetなしでも十分に変動するenvironment-conditioned mechanismsからlatent DAG・variablesを識別し得る
+- languageが識別済みenvironment signatureを命名・予測・言い換えるだけなら、新しいpopulation-identification sourceではない
 
-残る候補は、最強のnon-language estimator、mechanistic-independence criterion、完全なinteraction history、isolated-language-effect adjustmentを条件付けた後にも残るexplicit countermodel pairを、外部固定かつ共同再符号化不能なlanguage contrastがstrictly分離できるか、である。
+残る候補は、最強のgeneral-environment CRLを含むnon-language estimator、mechanistic-independence criterion、完全なinteraction history、isolated-language-effect adjustmentを条件付けた後にも残るexplicit countermodel pairを、外部固定かつ共同再符号化不能なlanguage contrastがstrictly分離できるか、である。
 
-この候補は**未採用**。採用にはexplicit countermodel、anti-recoding anchor、strict joint-identification theorem、anchor除去時のimpossibility theorem、finite-sample/consistency保証、公開baseline再現、exactly one preregistered claimが必要。
+C029は必要条件 `I(P_residual ; L | S_GE) > 0` を追加した。ただし十分条件ではなく、utterance classes・residual target blocks・environment signatures・denotation mapのjoint automorphism groupが自明であることを事前登録された外部anchorで証明する必要がある。
+
+この候補は**未採用**。採用にはexplicit countermodel、anti-recoding anchor、strict joint-identification theorem、anchor除去時のimpossibility theorem、finite-sample/consistency保証、dependency-pinned public baseline reproduction、exactly one preregistered claimが必要。
 
 ## Stage-transition rule
 
@@ -141,4 +156,4 @@ C023〜C025までの境界を維持する。
 
 ## Last integration
 
-2026-07-26: **RESET-E035**。D029のcore-contract内method registry・single-code-commit・cell内dataset identity監査を統合した。実R0 bundle、公開baseline値、checkpoint/resource/log/checksumは増えていない。run `30158106220`のartifact未保存failure、R0.2未完了、RQ-001未採用、`initial_reproduction_failure`、能力進歩未認定、高校生級未達を維持する。
+2026-07-26: **RESET-E036**。D030 prediction-payload leakage監査、Gaddy–Klein R0.2 fidelity audit 001、C029 general-environment nonparametric CRL境界、split-job R0.1/R0.2実行要求更新を統合した。PR-triggered topology CI成功は監査コードの証拠に限定する。immutable R0.1 bundle、公開baseline値、R0.2結果、実contract通過は0件であり、`initial_reproduction_failure`、RQ-001未採用、能力進歩未認定、高校生級未達を維持する。
