@@ -86,7 +86,7 @@ accepted task success、next-state prediction、action accuracy、dynamics holdo
 
 ## Evaluation contract
 
-D015〜D028を統合する。
+D015〜D029を統合する。
 
 監査範囲:
 
@@ -102,8 +102,9 @@ D015〜D028を統合する。
 - model bytes、RSS、training wall time、CPU latency、raw logs、commit、checksums
 - D027: 各cellで全6手法が同一data path/hashを使い、bundle全体が単一code commitに固定されること
 - D028: 各instance・各cellのprediction methodを `correct/random/language_blind/state_only/target_label_shuffle/outcome_shuffle` の厳密な6種へ固定し、余分・欠落・評価外predictionを拒否すること
+- D029: core `evaluation_contract.py`単独でも未登録method、mixed full code commit、同一cell内の異なる`data_path + data_sha256`を拒否し、companion auditorを迂回できないこと
 
-D028専用CI run `30165709843`は成功した。ただしこれは監査コードの回帰成功であり、実R0 bundle通過や能力進歩ではない。
+D028専用CI run `30165709843`は成功した。D029のfocused local regressionも成功記録がある。ただし現headのpublished combined statusは空であり、いずれも実R0 bundle通過や能力進歩ではない。
 
 ## Prior-art and RQ boundary
 
@@ -140,4 +141,4 @@ C023〜C025までの境界を維持する。
 
 ## Last integration
 
-2026-07-26: **RESET-E034**。D028の厳密な6-method prediction topology監査と成功した専用CIを統合した。実R0 bundle、公開baseline値、checkpoint/resource/log/checksumは増えていない。run `30158106220`のartifact未保存failure、R0.2未完了、RQ-001未採用、`initial_reproduction_failure`、能力進歩未認定、高校生級未達を維持する。
+2026-07-26: **RESET-E035**。D029のcore-contract内method registry・single-code-commit・cell内dataset identity監査を統合した。実R0 bundle、公開baseline値、checkpoint/resource/log/checksumは増えていない。run `30158106220`のartifact未保存failure、R0.2未完了、RQ-001未採用、`initial_reproduction_failure`、能力進歩未認定、高校生級未達を維持する。
