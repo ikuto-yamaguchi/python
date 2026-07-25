@@ -27,25 +27,52 @@ class BundleAuditTests(unittest.TestCase):
         rows = []
         for seed in (1, 7, 19):
             rows.append({
-                "instance_id": f"i-{seed}", "domain": "rtfm_s1", "seed": seed,
-                "split": "test", "condition": "in_distribution",
-                "utterance": [seed], "state_before": [0, seed],
+                "instance_id": f"train-{seed}", "domain": "rtfm_s1", "seed": seed,
+                "split": "train", "condition": "in_distribution",
+                "utterance": [900, seed], "state_before": [0, seed],
                 "gold_action": 1, "gold_state_after": [1, seed],
+                "entity_signature": f"train-e-{seed}",
+                "dynamics_signature": f"train-d-{seed}",
             })
+            for item in (0, 1):
+                rows.append({
+                    "instance_id": f"i-{seed}-{item}", "domain": "rtfm_s1", "seed": seed,
+                    "split": "test", "condition": "in_distribution",
+                    "utterance": [seed, item], "state_before": [0, seed, item],
+                    "gold_action": item, "gold_state_after": [1, seed, item],
+                    "entity_signature": f"test-e-{seed}-{item}",
+                    "dynamics_signature": f"test-d-{seed}-{item}",
+                })
         data = base / "data.jsonl"
         data.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
         raw = base / "raw.log"; raw.write_text("raw", encoding="utf-8")
         model = base / "model.pt"; model.write_bytes(b"model")
         runs = []
         for seed in (1, 7, 19):
-            gold = next(row for row in rows if row["seed"] == seed)
+            eval_rows = [row for row in rows if row["seed"] == seed and row["split"] == "test"]
+            donor = {
+                eval_rows[0]["instance_id"]: eval_rows[1],
+                eval_rows[1]["instance_id"]: eval_rows[0],
+            }
             for method in METHODS:
                 pred = base / f"pred-{method}-{seed}.jsonl"
-                pred.write_text(json.dumps({
-                    "instance_id": gold["instance_id"], "method": method,
-                    "instance_fingerprint": contract.instance_fingerprint(gold),
-                    "pred_action": 1, "pred_state_after": gold["gold_state_after"],
-                }) + "\n", encoding="utf-8")
+                prediction_rows = []
+                for gold in eval_rows:
+                    row = {
+                        "instance_id": gold["instance_id"], "method": method,
+                        "instance_fingerprint": contract.instance_fingerprint(gold),
+                        "pred_action": gold["gold_action"],
+                        "pred_state_after": gold["gold_state_after"],
+                    }
+                    if method in contract.SHUFFLE_METHODS:
+                        source = donor[gold["instance_id"]]
+                        row["control_source_instance_id"] = source["instance_id"]
+                        row["control_source_fingerprint"] = contract.instance_fingerprint(source)
+                    prediction_rows.append(row)
+                pred.write_text(
+                    "".join(json.dumps(row) + "\n" for row in prediction_rows),
+                    encoding="utf-8",
+                )
                 runs.append({
                     "method": method, "seed": seed, "domain": "rtfm_s1",
                     "split": "test", "condition": "in_distribution",
@@ -59,13 +86,33 @@ class BundleAuditTests(unittest.TestCase):
                 })
         return {"runs": runs}
 
-    def test_valid_exact_join(self):
+    def test_valid_exact_join_runs_complete_contract(self):
         with tempfile.TemporaryDirectory() as td:
             base = Path(td)
             result = bundle.audit_bundle(self.make_bundle(base), base)
             self.assertTrue(result["valid"], result["errors"])
-            self.assertEqual(result["prediction_rows_read"], 18)
+            self.assertEqual(result["prediction_rows_read"], 36)
             self.assertTrue(result["exact_prediction_dataset_join_required"])
+            self.assertTrue(result["full_dataset_contract_executed"])
+            self.assertTrue(result["semantic_alias_value_leakage_executed"])
+            self.assertTrue(result["paired_statistics_executed"])
+            self.assertTrue(result["dataset_audit"]["valid"])
+            self.assertTrue(result["prediction_statistics"]["valid"])
+
+    def test_semantic_alias_leakage_fails_bundle(self):
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td); manifest = self.make_bundle(base)
+            data = base / manifest["runs"][0]["data_path"]
+            rows = [json.loads(line) for line in data.read_text(encoding="utf-8").splitlines()]
+            target = next(row for row in rows if row["split"] == "test")
+            target["model_input"] = {"future_state": target["gold_state_after"]}
+            data.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
+            for run in manifest["runs"]:
+                run["data_sha256"] = sha(data)
+            result = bundle.audit_bundle(manifest, base)
+            self.assertFalse(result["valid"])
+            self.assertTrue(any("semantic_leakage" in error for error in result["errors"]))
+            self.assertEqual(result["classification"], "initial_reproduction_failure")
 
     def test_missing_prediction_artifact_fails_closed(self):
         with tempfile.TemporaryDirectory() as td:
@@ -81,9 +128,9 @@ class BundleAuditTests(unittest.TestCase):
             base = Path(td); manifest = self.make_bundle(base)
             run = manifest["runs"][0]
             path = base / run["prediction_path"]
-            row = json.loads(path.read_text(encoding="utf-8"))
-            row["instance_id"] = "wrong-instance"
-            path.write_text(json.dumps(row) + "\n", encoding="utf-8")
+            rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+            rows[0]["instance_id"] = "wrong-instance"
+            path.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
             run["prediction_sha256"] = sha(path)
             result = bundle.audit_bundle(manifest, base)
             self.assertFalse(result["valid"])
