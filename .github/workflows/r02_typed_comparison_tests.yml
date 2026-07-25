@@ -9,6 +9,8 @@ on:
       - 'research/intelligence_swarm/benchmarks/grounded_causal/gaddy_klein_typed_baseline.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/r02_typed_comparison.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/test_r02_typed_comparison.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_r02_matched_budget.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_audit_r02_matched_budget.py'
   workflow_dispatch:
 
 concurrency:
@@ -27,7 +29,9 @@ jobs:
           cache: pip
       - name: Install CPU PyTorch
         run: python -m pip install --disable-pip-version-check torch==2.3.1 --index-url https://download.pytorch.org/whl/cpu
-      - name: Run R0.2 typed comparison regression tests
+      - name: Run R0.2 typed comparison and matched-budget regression tests
+        working-directory: research/intelligence_swarm/benchmarks/grounded_causal
         run: |
           python -m unittest -v \
-            research/intelligence_swarm/benchmarks/grounded_causal/test_r02_typed_comparison.py
+            test_r02_typed_comparison.py \
+            test_audit_r02_matched_budget.py
