@@ -12,6 +12,8 @@ on:
       - 'research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/run_silg_matched_eval.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/export_silg_typed_policy_trajectories.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/export_rtfm_generator_signatures.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_export_rtfm_generator_signatures.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/gaddy_klein_typed_baseline.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/r02_typed_comparison.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_r02_holdout_assignments.py'
@@ -64,6 +66,10 @@ jobs:
           /usr/bin/time -v bash research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh "$RUNNER_TEMP/r0_silg" \
             2>&1 | tee research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_INSTALL.log
 
+      - name: Test generator-signature extraction
+        run: |
+          python research/intelligence_swarm/benchmarks/grounded_causal/test_export_rtfm_generator_signatures.py
+
       - name: Run canonical-seed random control and schema probe
         run: |
           set -o pipefail
@@ -101,9 +107,19 @@ jobs:
           results="research/intelligence_swarm/benchmarks/grounded_causal/results"
           : > "$results/SILG_RTFM_R02_TYPED.log"
           : > "$results/SILG_RTFM_TYPED_TRAJECTORIES_3SEED.jsonl"
+          : > "$results/SILG_RTFM_GENERATOR_SIGNATURES_3SEED.jsonl"
           for seed in 1 7 19; do
             data="$results/SILG_RTFM_TYPED_TRAJECTORIES_SEED_${seed}.jsonl"
+            signatures="$results/SILG_RTFM_GENERATOR_SIGNATURES_SEED_${seed}.jsonl"
             out="$results/SILG_RTFM_R02_TYPED_COMPARISON_SEED_${seed}.json"
+            /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/export_rtfm_generator_signatures.py \
+              --silg-root "$RUNNER_TEMP/r0_silg/silg" \
+              --seed "$seed" \
+              --train-episodes 40 \
+              --test-episodes 20 \
+              --out "$signatures" \
+              2>&1 | tee -a "$results/SILG_RTFM_R02_TYPED.log"
+            cat "$signatures" >> "$results/SILG_RTFM_GENERATOR_SIGNATURES_3SEED.jsonl"
             /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/export_silg_typed_policy_trajectories.py \
               --silg-root "$RUNNER_TEMP/r0_silg/silg" \
               --checkpoint "$results/SILG_RTFM_TRAINED_STATE_SEED_${seed}.pt" \
