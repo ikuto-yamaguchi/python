@@ -163,7 +163,6 @@ def run_seed(
         "--batch_size", "2",
         "--unroll_length", "20",
         "--disable_cuda",
-        "--disable_checkpoint",
         "--entropy_cost", "0.05",
     ]
     env = os.environ.copy()
