@@ -11,9 +11,10 @@ on:
       - 'research/intelligence_swarm/benchmarks/grounded_causal/silg_rtfm_probe.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/run_silg_matched_eval.py'
-      - 'research/intelligence_swarm/benchmarks/grounded_causal/export_silg_policy_trajectories.py'
-      - 'research/intelligence_swarm/benchmarks/grounded_causal/environment_first_baseline.py'
-      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_r02_trajectory_eligibility.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/export_silg_typed_policy_trajectories.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/gaddy_klein_typed_baseline.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/r02_typed_comparison.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_r02_holdout_assignments.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/SILG_RTFM_REPRO_001.md'
   workflow_dispatch:
@@ -94,40 +95,42 @@ jobs:
             --episodes 20 \
             2>&1 | tee research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_MATCHED_EVAL.log
 
-      - name: Export public recurrent-policy trajectories and run R0.2 baselines
+      - name: Export typed SILG trajectories and run matched R0.2 baselines
         run: |
           set -euo pipefail
-          : > research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_R02.log
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results"
+          : > "$results/SILG_RTFM_R02_TYPED.log"
+          : > "$results/SILG_RTFM_TYPED_TRAJECTORIES_3SEED.jsonl"
           for seed in 1 7 19; do
-            data="research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_POLICY_TRAJECTORIES_SEED_${seed}.jsonl"
-            out="research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_ENVIRONMENT_FIRST_SEED_${seed}.json"
-            /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/export_silg_policy_trajectories.py \
+            data="$results/SILG_RTFM_TYPED_TRAJECTORIES_SEED_${seed}.jsonl"
+            out="$results/SILG_RTFM_R02_TYPED_COMPARISON_SEED_${seed}.json"
+            /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/export_silg_typed_policy_trajectories.py \
               --silg-root "$RUNNER_TEMP/r0_silg/silg" \
-              --checkpoint "research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_TRAINED_STATE_SEED_${seed}.pt" \
+              --checkpoint "$results/SILG_RTFM_TRAINED_STATE_SEED_${seed}.pt" \
               --seed "$seed" \
               --train-episodes 40 \
               --test-episodes 20 \
               --out "$data" \
-              2>&1 | tee -a research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_R02.log
-            /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/environment_first_baseline.py \
+              2>&1 | tee -a "$results/SILG_RTFM_R02_TYPED.log"
+            cat "$data" >> "$results/SILG_RTFM_TYPED_TRAJECTORIES_3SEED.jsonl"
+            /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/r02_typed_comparison.py \
               --data "$data" \
               --out "$out" \
               --seed "$seed" \
               --env-epochs 8 \
               --lang-epochs 8 \
-              2>&1 | tee -a research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_R02.log
+              2>&1 | tee -a "$results/SILG_RTFM_R02_TYPED.log"
           done
 
-      - name: Audit R0.2 trajectory eligibility
+      - name: Audit real entity, dynamics and language-form holdouts
         if: always()
         run: |
           set -o pipefail
-          python research/intelligence_swarm/benchmarks/grounded_causal/audit_r02_trajectory_eligibility.py \
-            research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_POLICY_TRAJECTORIES_SEED_1.jsonl \
-            research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_POLICY_TRAJECTORIES_SEED_7.jsonl \
-            research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_POLICY_TRAJECTORIES_SEED_19.jsonl \
-            --output research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_R02_TRAJECTORY_ELIGIBILITY.json \
-            2>&1 | tee research/intelligence_swarm/benchmarks/grounded_causal/results/SILG_RTFM_R02_TRAJECTORY_ELIGIBILITY.log || true
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results"
+          python research/intelligence_swarm/benchmarks/grounded_causal/audit_r02_holdout_assignments.py \
+            "$results/SILG_RTFM_TYPED_TRAJECTORIES_3SEED.jsonl" \
+            --output "$results/SILG_RTFM_R02_HOLDOUT_AUDIT.json" \
+            2>&1 | tee "$results/SILG_RTFM_R02_HOLDOUT_AUDIT.log" || true
 
       - name: Freeze installed versions
         if: always()
