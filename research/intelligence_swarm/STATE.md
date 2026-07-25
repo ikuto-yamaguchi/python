@@ -54,7 +54,7 @@ accepted evidenceは32,768-requested-frame runのみ:
 
 Run `30158106220`はinstall、generator-signature test、random/schema probe、official recurrent 131,072-frame × 3 seed training、Correct/Random/Language-blind/State-only/Language-shuffle matched evaluationまで成功した。しかしR0.2工程中にfailureとなり、artifact upload前に終了した。artifactは0件で、checkpoint、能力値、model bytes、RSS、runtime、CPU latency、raw logs、checksumsはaccepted evidenceへ昇格しない。
 
-canonical workflowはR0.1とR0.2を別jobへ分離し、R0.1終了直後にfreeze/uploadしてからR0.2がimmutable artifactをdownloadする。この境界を次回実行の必須条件とする。
+canonical workflowはR0.1とR0.2を別jobへ分離し、R0.1終了直後にfreeze/uploadしてからR0.2がimmutable artifactをdownloadする。この境界を次回実行の必須条件とする。`R01_RUN_REQUEST.json`更新は再実行要求にすぎず、accepted evidenceではない。
 
 ## R0.2 Environment-first
 
@@ -76,6 +76,7 @@ canonical workflowはR0.1とR0.2を別jobへ分離し、R0.1終了直後にfreez
 - same-initial-instance online evaluator
 - model/checkpoint bytes、RSS、training time、CPU latency、raw logs、checksums
 - fail-closed author-code→SILG component mapping
+- holdout manifest join時のdomain/split/seed/episode_seed整合と重複・欠落拒否
 
 RTFM S1で正式に測定可能なtransferは**dynamicsのみ**。entity ontologyと言語生成familyはtrain/testで分離されないため、entity/language-form holdoutはformal inapplicabilityとする。
 
@@ -83,7 +84,7 @@ RTFM S1で正式に測定可能なtransferは**dynamicsのみ**。entity ontolog
 
 ## Evaluation contract
 
-D015〜D033を統合する。
+D015〜D034を統合する。
 
 監査範囲:
 
@@ -100,23 +101,26 @@ D015〜D033を統合する。
 - one immutable code commit per bundle and one data path/hash per cell
 - checksummed prediction JSONL and derived statistics artifacts
 - unified fail-closed acceptance command
-- **D033: `evaluation_contract.score()`本体がprediction payloadを直接検査し、gold/after-state/reward/terminal/return/success/future-state/rollout/completed-trajectory、未登録field、非有限値、valid-action schema外actionを拒否する**
+- D033: `evaluation_contract.score()`本体がprediction payloadを直接検査し、gold/after-state/reward/terminal/return/success/future-state/rollout/completed-trajectory、未登録field、非有限値、valid-action schema外actionを拒否する
+- **D034: keyをcase-foldし非英数字を除去して正規化し、camelCase・kebab-case・空白・句読点variantを含むnested `model_input`、`model_input_fields`、prediction top-levelのoracle/outcome/completed-trajectory aliasを拒否する**
 
-現headのunified acceptance gate run `30175635819`とprediction-method-topology run `30175635818`はsuccess。これは監査コードの回帰証拠に限定し、実benchmark成功には数えない。
+現headのunified acceptance gate run `30177596329`とprediction-method-topology run `30177596328`はsuccess。これは監査コードの回帰証拠に限定し、実benchmark成功には数えない。alias-normalized auditor専用workflowは追加されたが、実bundle受入の代替ではない。
 
 ## Prior-art and RQ boundary
 
-C023〜C025、C029〜C032までの境界を維持する。
+C023〜C025、C029〜C033までの境界を維持する。
 
-C032はLi・Kaba・RavanbakhshのAISTATS 2025 causal-abstraction identifiabilityを統合した。paired pre/post observations、未知のperfect subset interventions、faithfulness、regular mechanisms/noise、invertible smooth observation mapの下では、intervention familyのnon-descendant signatureから最大quotient causal abstractionを言語なしで識別できる。非atomic intervention、個別latent未回復、intervention-induced block発見は、それ自体ではlanguage-specific noveltyではない。
+C033はBenhamza・Clausel・Tamiの2026年partial-latent-sharing multimodal CRLを統合した。言語を一つのmodalityとして扱い、明示的なrank、properness、partial-sharing graph、independence、non-overlap、mixing-density、sparsity条件が成立すれば、shared/modality-specific latent componentは言語固有原理なしにcomponent-wiseまで識別可能である。
 
-残る候補は、benchmarkの非言語intervention familyが識別する最大quotientを先に計算し、そのblock内部に残る明示的countermodel pairを、外部固定かつ共同再符号化不能なlanguage lawがstrictly分離できるか、である。
+したがって、language/state/action/outcome間のshared block alignment、partial sharing、cross-modal reconstruction、Wasserstein alignment、shared-latent transfer、human-readable namingは、それ自体ではraw utterance equivalenceとfine intervention-target partitionの共同同定を示さない。
 
-必要条件は `I(P_residual ; L | S_abs) > 0`。ただし十分条件ではなく、residual target member、utterance class、denotation map、encoder/decoderを含むwithin-block joint automorphism groupが自明になることを事前登録された外部anchorで証明する必要がある。
+残る候補は、最強の非言語causal abstractionとmultimodal partial-sharing同定を適用した後、既に識別されたshared component内部に残る明示的countermodel pairを、事前登録された外部固定denotation lawがstrictly分離し、target member・utterance class・denotation・encoder/decoderのjoint recodingをすべて除去できるか、である。
+
+必要条件は `I(P_residual ; L | S_MM) > 0`。ただし十分条件ではなく、残存joint automorphism groupが外部anchorにより自明になることを証明する必要がある。
 
 正式判断:
 
-> **NARROWED BEYOND INTERVENTION-INDUCED CAUSAL ABSTRACTION IDENTIFIABILITY — NOT ADOPTED**
+> **NARROWED BEYOND PARTIALLY SHARED MULTIMODAL COMPONENT-WISE IDENTIFIABILITY — NOT ADOPTED**
 
 ## Stage-transition rule
 
@@ -141,4 +145,4 @@ C032はLi・Kaba・RavanbakhshのAISTATS 2025 causal-abstraction identifiability
 
 ## Last integration
 
-2026-07-26: **RESET-E039**。C032 intervention-induced causal abstraction identifiability境界と、D033 core prediction-payload fail-closed validationを統合した。監査CI成功はaudit codeの証拠に限定する。immutable R0.1 bundle、公開baseline値、R0.2結果、実contract通過は0件であり、`initial_reproduction_failure`、RQ-001未採用、能力進歩未認定、高校生級未達を維持する。
+2026-07-26: **RESET-E040**。C033 partial-latent-sharing multimodal CRL境界、D034 alias-normalized schema leakage監査、R0.2 holdout-manifest joinの整合強化を統合した。監査CI成功はaudit codeの証拠に限定する。immutable R0.1 bundle、公開baseline値、R0.2結果、実contract通過は0件であり、`initial_reproduction_failure`、RQ-001未採用、能力進歩未認定、高校生級未達を維持する。
