@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-07-25T19:04:00Z",
+  "purpose": "Immutable primary-code reference for the R0.2 Gaddy-Klein method transfer. This manifest does not claim numerical reproduction on SILG/RTFM.",
+  "paper": {
+    "title": "Pre-Learning Environment Representations for Data-Efficient Neural Instruction Following",
+    "authors": ["David Gaddy", "Dan Klein"],
+    "venue": "ACL 2019",
+    "acl_anthology_id": "P19-1188"
+  },
+  "public_code": {
+    "repository": "kristyelee/environment-learning",
+    "historical_reference_name": "dgaddy/environment-learning",
+    "default_branch": "master",
+    "commit": "98c0dc68926ee9535f15019922d2ca871b0ac0b5",
+    "commit_message": "folder",
+    "reference_files": {
+      "README.md": "fdfb477695cfafcd67292d6087744785e2ef0bb7",
+      "pretrain.py": "6a132c02c8353b2141bc33889ab392a4103d164b",
+      "evaluate.py": "089b6388948e1e4a21aa81bab5a5ccbc45cfb822",
+      "model.py": "03697cbac7ad07662c06cd86a7989149b47cf295",
+      "baseline_model.py": "9b2964d0517806c0921206afd9f829fae2b625f6",
+      "message_flags.py": "7aa75aafc12f2b4f9c6abfaa3dba6e185ac341de",
+      "discrete_util.py": "ec0814da3269068ba84c62d9a44e240d5100cbb9"
+    }
+  },
+  "author_code_contract": {
+    "environment_pretraining_entrypoint": "pretrain.py",
+    "language_learning_and_evaluation_entrypoint": "evaluate.py",
+    "no_pretraining_control": "evaluate.py --baseline",
+    "default_pretrain_iterations": 500000,
+    "message_space_default": {
+      "type": "discrete",
+      "variables": 20,
+      "symbols_per_variable": 30
+    },
+    "declared_requirements": ["Python 3", "PyTorch >= 1.0", "absl-py"]
+  },
+  "silg_transfer_boundary": {
+    "classification": "method_transfer_not_numerical_reproduction",
+    "allowed_claims": [
+      "language-free transition pretraining precedes language learning",
+      "environment representation is connected to instruction following afterward",
+      "a no-pretraining end-to-end control is compared under matched data and parameter budgets"
+    ],
+    "forbidden_claims": [
+      "ACL 2019 published numbers reproduced on RTFM",
+      "entity holdout measured in RTFM S1",
+      "language-form holdout measured in RTFM S1",
+      "new intelligence principle",
+      "capability progress before immutable three-seed results pass audit"
+    ]
+  }
+}
