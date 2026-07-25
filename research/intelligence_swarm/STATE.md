@@ -24,10 +24,10 @@
 - 131,072-frame staged reproduction: **current headで検証済み完了artifactなし**
 - 学習済み公開能力baseline再現: **0件**
 - R0.2正式再現: **0件**
-- R0.2 typed full-method / typed exporter / matched comparison / matched-budget audit: **実装済み、qualified public dataで未実行**
+- R0.2 typed full-method / typed exporter / matched comparison / matched-budget / holdout audit: **実装済み、qualified public dataで未実行**
 - R0.3 empirical hidden intervention-target ablation: **正式棄却**
 - RQ-001 broad/current formulation: **棄却**
-- injective externally anchored language-effect separation: **狭義化・未採用**
+- non-injective discrete language separation beyond multimodal partial sharing: **狭義化・未採用**
 - J-CRe3日本語外部baseline: **未再現**
 
 公開能力baselineとmatched controlsがevaluation contractを通るまで、新規機構族、知能原理、能力進歩を認定しない。
@@ -81,7 +81,7 @@ Classification: **`matched_fixed_episode_32768_frame_staged_training_not_public_
 
 ### 131,072-frame status
 
-固定timeout、重複trigger、再起動問題は修正済みだが、RESET-E023統合前のcanonical head `4020516ec26920a2ea664626346458dfe5b57e56`にはcombined status、検証済み完了artifactがない。未完了checkpoint、resource値、trajectory、能力値は採用しない。
+固定timeout、重複trigger、再起動問題は修正済みだが、current canonical headに検証済み完了artifactはない。未完了checkpoint、resource値、trajectory、能力値は採用しない。
 
 次の唯一のR0.1作業は、stable workflow headから1本だけ実行し、3 checkpoint、raw log、source/model/data/prediction hash、RSS、学習時間、CPU latency、同一instance controls、policy competence、action-collapseを検証すること。
 
@@ -97,10 +97,13 @@ Canonical branchには以下がある。
 - `export_silg_typed_policy_trajectories.py`: typed before/after fields、schema/cardinality、episode/seed/split/fingerprint provenance、dataset/schema SHA-256、unknown field fail-closed。
 - `r02_typed_comparison.py`: Environment-first、parameter-matched End-to-end、State-onlyを同一typed dataset・seed・splitで比較。
 - `audit_r02_matched_budget.py`: canonical seed、train/test、dataset hash、test prediction coverage、parameter bytes、transition-pretraining-only bytes、checkpoint hash、RSS、training time、CPU latency、action accuracy、typed next-state loss、equal row exposureをfail-closedで監査する。
+- `audit_r02_holdout_assignments.py`: entity/dynamics/language-form holdoutの実在、seed `1,7,19`、condition-specific signature、train/test非重複、placeholder禁止をfail-closedで監査する。
 
 Cycle 012は、`N` train rows、environment epochs `E`、language epochs `L`に対し、Environment-firstを`N*E + N*L`、End-to-endとState-onlyを`N*(E+L)`として総row exposureを一致させる。Environment-firstとEnd-to-endのinference parameter bytesも完全一致させる。offline accuracyをonline task successの代用にしない。
 
-Qualifiedな3-seed public trajectoryがないため未実行。Classification: **`matched_data_and_resource_audit_implemented_qualified_silg_execution_blocked`**。
+Cycle 013は現exporterで`entity_holdout=false`、`dynamics_holdout=false`が全行に固定され、test全体が`language_holdout=true`であることを確認した。このdatasetではheld-out entity/dynamics/language-form transferを測定できない。予測や結果を見ずに、pinned RTFM generator/configurationから外部固定したimmutable holdout manifestと`entity_signature`、`dynamics_signature`、`language_form_signature`を作成し、3 seedを再exportするまでモデル調整を禁止する。
+
+Classification: **`initial_reproduction_failure`**。
 
 ## Evaluation contract status
 
@@ -109,16 +112,17 @@ Qualifiedな3-seed public trajectoryがないため未実行。Classification: *
 - D017: 各`domain × split × condition` cellにseed `1,7,19`が正確に揃うこと。
 - D018: target-label/outcome shuffleのdonor payloadと実適用payloadのhash一致、same-cell、bijection、derangement、self-shuffle禁止、semantic no-op禁止。
 - D019: entity/dynamics holdoutを`domain × split × condition × kind`単位で監査し、同一domain train signatureとの重複、signature欠落、seed欠落/余分、train reference欠落を拒否する。in-distribution cellの期待されるtrain overlapはholdout leakageへ誤分類しない。
+- D020: SILG stepを独立標本として扱わず、`episode_id`を必須化し、cellを再標本化した後にepisode全体を再標本化するhierarchical bootstrapとepisode-level sign-flip検定を保存する。step-weighted gap、episode-equal gap、minimum cell gap、paired episode/step countを併記する。
 
-D018の4テストはローカル成功。D019の軽量workflow完了結果は未確認。実R0 prediction/data/artifact bundleはD016〜D019を通過していないため、正式分類は **`initial_reproduction_failure`**。
+D018の4テストはローカル成功。D019/D020の軽量workflow完了結果は未確認。実R0 prediction/data/artifact bundleはD016〜D020を通過していないため、正式分類は **`initial_reproduction_failure`**。
 
 ## Prior-art and novelty boundary
 
-既存境界にはunknown/uncoupled intervention CRL、general-environment CRL、subset-intervention causal abstraction、finite-sample CRL、trajectory-local parameter identifiability、auxiliary/temporal/multi-view/hidden-regime nonlinear ICA、grouping/weak supervision、mechanism sparsity、mechanistic independence、interactive grounding、environment-first、language-dynamics pretraining、WM3C、isolated causal effects of languageを含む。
+既存境界にはunknown/uncoupled intervention CRL、general-environment CRL、subset-intervention causal abstraction、finite-sample CRL、trajectory-local parameter identifiability、auxiliary/temporal/multi-view/hidden-regime nonlinear ICA、grouping/weak supervision、mechanism sparsity、mechanistic independence、interactive grounding、environment-first、language-dynamics pretraining、WM3C、isolated causal effects of language、multimodal partial-sharing CRLを含む。
 
-C016は、Lin, Morency and Ben-Michael, ICML 2025と公式`isolated-text-effects`実装を監査した。この研究は事前定義されたfocal language interventionの外部outcomeへの効果をfidelity、overlap、confounding-control条件下で推定するが、raw language equivalenceやunknown latent target partitionを回復しない。
+C017はBenhamza, Clausel and Tami, arXiv:2605.19135を監査した。複数モダリティに部分共有されるlatentの回復、shared/modality-specific分離、nonlinear multimodal mixing下の部分共有causal representationは、明示仮定下で既存研究の範囲である。公式実装は確認できず、code reproductionは主張しない。
 
-したがって、非ゼロの言語因果効果、良好なfidelity/overlap、shuffle gap、intervention prediction accuracyだけではlatent target partition同定の証拠にならない。effect identificationからpartition refinementへは、externally fixed semantics、exclusion、injective separating family、support、non-focal fidelity、no joint recoding、population generalisationを結ぶbridge theoremが必要である。
+Raw languageはsmooth injective modalityではなく、離散、確率的、可変長、paraphrase/polysemyを持つ。parity counterexampleでは、2 target blockと1 merged parity blockが同じ`p(X,L)`を作りながらpartitionを異ならせる。cross-modal alignment、mutual information、reconstruction、paraphrase consistency、language-shuffle gapだけではpartitionを同定しない。
 
 ## Research-question decision
 
@@ -126,11 +130,11 @@ C016は、Lin, Morency and Ben-Michael, ICML 2025と公式`isolated-text-effects
 - Gate I empirical track / R0.3: **棄却**。
 - RQ-001-N5: **棄却**。
 - RQ-001 broad/current form: **棄却**。
-- Unknown target recovery、environment label recovery、parameter naming、non-zero language effectをlanguage-specific causal identificationとする案: **棄却**。
-- 唯一残る候補: strongest non-language criteria後に残る明示的causal abstractionを、externally fixedでfidelity/overlapが検証され、latentと共同再符号化できないinjective language-effect familyが、unseen utterance form/composition/systemでも厳密に細分化できるか。
+- Unknown target recovery、environment label recovery、parameter naming、non-zero language effect、partial shared-latent discoveryをlanguage-specific causal identificationとする案: **棄却**。
+- 唯一残る候補: non-language CRLとmultimodal partial-sharing identifiability適用後に残る明示的causal abstractionを、discrete、stochastic、non-injectiveなpopulation language channelが検証可能なseparation条件で厳密に細分化し、unseen raw-language equivalenceとlatent intervention-target partitionを共同同定できるか。
 - 上記候補: **未採用、preregistration候補のみ**。
 
-採用には、残存同値類、非言語criterionの失敗、external anchor、effect-to-partition bridge theorem、exclusion/injectivity、anchorまたはinjectivity除去時のimpossibility、各intervention cellのfidelity/overlap、anti-lookup population grammar、unseen-form/composition/system評価、consistent estimatorまたはpopulation-only宣言、公開baseline再現、事前登録が必要。
+採用には、population language generator、残存同値類、language-specific separation条件、異なるpartitionがunseen utterance distributionを分離する証明、arbitrary merge/splitとjoint recoding禁止、paraphrase/polysemyの明示モデル、multimodal partial-sharing CRLとの比較、unseen-form/composition/system評価、separation失敗時のimpossibility theorem、公開baseline再現、事前登録が必要。
 
 新規architecture実験は認可しない。
 
@@ -165,4 +169,4 @@ C016は、Lin, Morency and Ben-Michael, ICML 2025と公式`isolated-text-effects
 
 ## Last integration
 
-2026-07-25: **RESET-E023**。R0.2 Cycle 012のmatched data/resource audit、C016のisolated language effectとlatent-partition identificationの境界、D019のcondition-scoped holdout leakage監査を統合した。current headにR0.1完了artifactはなく、公開能力baseline 0件、`initial_reproduction_failure`、段階遷移禁止、高校生級未達を維持する。
+2026-07-25: **RESET-E024**。R0.2 Cycle 013のholdout assignment不成立、C017のmultimodal partial-sharing境界とnon-injective language counterexample、D020のepisode-clustered paired statisticsを統合した。current headにR0.1完了artifactはなく、公開能力baseline 0件、`initial_reproduction_failure`、段階遷移禁止、高校生級未達を維持する。
