@@ -47,7 +47,7 @@ Forbidden:
 
 ## P0 — Evaluation, statistics, leakage and provenance
 
-Implemented through D034:
+Implemented through D035:
 
 - SILG real-schema adaptation
 - train/test utterance overlap
@@ -66,23 +66,24 @@ Implemented through D034:
 - single full code commit and one data path/hash per cell
 - checksummed prediction JSONL and derived statistics artifacts
 - unified fail-closed acceptance command
-- D033 core scorer validation for leaked gold/after-state/reward/terminal/return/success/future-state/rollout/completed-trajectory fields, unregistered fields, non-finite values, and invalid actions
+- D033 core scorer validation for leaked gold/after-state/reward/terminal/return/success/future-state/rollout/completed-trajectory fields、unregistered fields、non-finite values、and invalid actions
 - D034 alias-normalized recursive schema audit for camelCase、kebab-case、spaces、punctuation variants in `model_input_fields`、nested `model_input`、and prediction keys
+- D035 mandatory invocation of the alias-normalized auditor inside `audit_r0_acceptance_bundle.py`, together with core contract、prediction payload、paired statistics、resource provenance、and prediction/statistics checksum audits
 
 Current focused CI:
 
-- unified acceptance gate run `30177596329`: success
-- prediction method topology run `30177596328`: success
+- unified acceptance gate run `30179464716`: success
+- prediction method topology run `30179464653`: success
 
 These runs validate audit code only. No real R0 bundle has passed.
 
 Remaining:
 
-1. Apply the unified D015–D034 gate to the next preserved R0.1 artifact.
+1. Apply the unified D015–D035 gate to the next preserved R0.1 artifact.
 2. Preserve all component errors and the first actionable root cause.
 3. If target-label is undefined in SILG, record formal inapplicability instead of inventing labels.
 4. Require core contract and companion auditors to agree on method registry、code commit、per-cell dataset identity、prediction payload、prediction/statistics checksums、resource provenance、and alias-normalized schema findings.
-5. Do not add another auditor unless a preserved real bundle exposes a concrete false pass/failure not covered by D034.
+5. Do not add another auditor unless a preserved real bundle exposes a concrete false pass/failure not covered by D035.
 
 Formal classification remains **`initial_reproduction_failure`** until a real bundle passes.
 
@@ -145,8 +146,9 @@ Integrated boundaries:
 - C031: unknown-target JCI / test-time causal discovery
 - C032: intervention-induced causal abstraction identifiability
 - C033: partially shared multimodal causal representation identifiability
+- C034: score-based causal representation learning under linear/general transformations
 
-C033 adds that, under explicit rank、properness、partial-sharing graph、independence、non-overlap、mixing-density、and sparsity assumptions, shared and modality-specific latent components can be identified observationally up to permutation/component-wise smooth bijections. Treating language as one modality therefore removes ordinary multimodal shared-block alignment from the novelty space.
+C034 adds that under explicit intervention-diversity、smoothness、invertibility、score-estimation、and discrepancy assumptions, latent variables、DAG、and unknown intervention-target correspondence are identifiable and constructively recoverable without language. The official consolidated repository `acarturk-e/score-based-crl` is verified, but an exact commit and immutable native reproduction remain outstanding.
 
 The novelty matrix must now separate:
 
@@ -155,34 +157,41 @@ The novelty matrix must now separate:
 3. unknown-target graph/context/target recovery under JCI/TICL assumptions;
 4. maximal quotient abstraction induced by the actual intervention family;
 5. partial-sharing multimodal component identification;
-6. residual within-component partition recovery after all applicable non-language and multimodal sufficient statistics;
-7. language-supplied information beyond observations、actions、outcomes、interaction history、environment/context signatures、detected targets、quotient signatures、and multimodal shared-block incidence;
-8. joint raw-utterance / residual-target identification under an external anti-recoding law.
+6. score-based latent/graph/target recovery under the strongest applicable linear or diffeomorphic theorem;
+7. residual partition recovery after all applicable non-language sufficient statistics;
+8. language-supplied information beyond observations、actions、outcomes、interaction history、environment/context signatures、score differences、detected targets、quotient signatures、and multimodal incidence;
+9. joint raw-utterance / residual-target identification under an external anti-recoding law.
 
-A paper-specific immutable official repository for C033 was not verified. Public baseline reproduction remains required if author-controlled code becomes available.
+Required score-based prior-art work:
+
+1. map SILG episodes to observational/interventional environments;
+2. audit hard/soft、single-node/multi-node、score-estimation、smoothness、invertibility、and intervention-diversity assumptions;
+3. pin an exact commit of `acarturk-e/score-based-crl`;
+4. preserve the selected environment specification、subdirectory、command、raw outputs、and checksums;
+5. reproduce the strongest applicable LSCALE-I、GSCALE-I、or UMNI-CRL baseline before any language-specific superiority claim.
 
 ## P2 — Only admissible RQ reformulation, not adopted
 
 Candidate only:
 
-> 最強の非言語causal abstractionとmultimodal partial-sharing同定を適用した後、既に識別されたshared component内部に残るcountermodel pairに対して、externally fixed・non-recodableなpopulation language contrastが不足するseparationを供給し、raw utterance equivalenceとresidual intervention-target partitionを有限標本またはconsistentに共同同定できるか。
+> 最強の適用可能なscore-based CRLと他の非言語causal abstractionを適用した後、その許容変換でquotientしても残るcountermodel pairに対して、externally fixed・non-recodableなpopulation language contrastが不足するseparationを供給し、raw utterance equivalenceとresidual intervention-target partitionを有限標本またはconsistentに共同同定できるか。
 
 Necessary but insufficient condition:
 
-`I(P_residual ; L | S_MM) > 0`
+`I(P_residual ; L | S_SCRL) > 0`
 
 Before adoption:
 
-1. map SILG observations、instructions、actions、outcomes to modalities and latent subsets;
-2. audit rank、properness、partial-sharing graph、independence、non-overlap、mixing-density、and sparsity assumptions;
-3. compute the maximal non-language quotient and multimodal shared/specific representation;
-4. exhibit an identical-observable-law countermodel pair inside a recovered shared component;
-5. prove the language contrast is unavailable from observations、actions、outcomes、environment identity、completed trajectories、and multimodal incidence;
+1. map SILG observations、instructions、actions、outcomes to observational/interventional environments and modalities;
+2. audit the strongest applicable score-based and non-score identifiability assumptions;
+3. compute the maximal non-language quotient、graph、target incidence、and score-based representation;
+4. exhibit an identical-observable-law countermodel pair after score-based recovery;
+5. prove the language contrast is unavailable from observations、actions、outcomes、environment identity、scores、detected targets、and completed trajectories;
 6. fix an external denotational anchor before fitting;
 7. prove the target/utterance/denotation/encoder-decoder joint automorphism group becomes trivial;
-8. give an impossibility theorem when language only names or paraphrases a recovered component;
+8. give an impossibility theorem when language only names or paraphrases a recovered node、environment、or component;
 9. use direct recovery metrics for utterance classes and residual target blocks;
-10. reproduce an applicable public non-language or multimodal baseline;
+10. reproduce the strongest applicable official score-based baseline;
 11. preregister exactly one claim、counterexample、and stopping rule;
 12. require model bytes、RSS、wall time、CPU latency、raw logs、checksums、seeds `1/7/19` once experiments begin.
 
