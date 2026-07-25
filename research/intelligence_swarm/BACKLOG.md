@@ -28,6 +28,7 @@ Required next actions:
 7. Preserve every failed component and the first minimal actionable root cause.
 8. Audit source-policy competence and action collapse before interpreting any ablation.
 9. Do not place R0.2 inside the R0.1 preservation boundary.
+10. Treat `R01_RUN_REQUEST.json` changes only as execution requests, never as evidence.
 
 Queue control:
 
@@ -46,7 +47,7 @@ Forbidden:
 
 ## P0 — Evaluation, statistics, leakage and provenance
 
-Implemented through D033:
+Implemented through D034:
 
 - SILG real-schema adaptation
 - train/test utterance overlap
@@ -66,21 +67,22 @@ Implemented through D033:
 - checksummed prediction JSONL and derived statistics artifacts
 - unified fail-closed acceptance command
 - D033 core scorer validation for leaked gold/after-state/reward/terminal/return/success/future-state/rollout/completed-trajectory fields, unregistered fields, non-finite values, and invalid actions
+- D034 alias-normalized recursive schema audit for camelCase、kebab-case、spaces、punctuation variants in `model_input_fields`、nested `model_input`、and prediction keys
 
 Current focused CI:
 
-- unified acceptance gate run `30175635819`: success
-- prediction method topology run `30175635818`: success
+- unified acceptance gate run `30177596329`: success
+- prediction method topology run `30177596328`: success
 
 These runs validate audit code only. No real R0 bundle has passed.
 
 Remaining:
 
-1. Do not add another auditor unless a preserved real bundle exposes a concrete false pass/failure.
-2. Apply the unified D015–D033 gate to the next preserved R0.1 artifact.
-3. Preserve all component errors and the first actionable root cause.
-4. If target-label is undefined in SILG, record formal inapplicability instead of inventing labels.
-5. Require core contract and companion auditors to agree on method registry、code commit、per-cell dataset identity、prediction payload、prediction/statistics checksums、and resource provenance.
+1. Apply the unified D015–D034 gate to the next preserved R0.1 artifact.
+2. Preserve all component errors and the first actionable root cause.
+3. If target-label is undefined in SILG, record formal inapplicability instead of inventing labels.
+4. Require core contract and companion auditors to agree on method registry、code commit、per-cell dataset identity、prediction payload、prediction/statistics checksums、resource provenance、and alias-normalized schema findings.
+5. Do not add another auditor unless a preserved real bundle exposes a concrete false pass/failure not covered by D034.
 
 Formal classification remains **`initial_reproduction_failure`** until a real bundle passes.
 
@@ -101,6 +103,7 @@ Implemented:
 - typed before/after trajectory export without reward/outcome leakage
 - generator-side entity/dynamics/language-form signatures
 - immutable `(domain, split, seed, episode_seed)` join
+- holdout-manifest validation for duplicate/missing rows and domain/split/seed/episode_seed mismatch
 - offline next-state/action comparison
 - same-initial-instance online task evaluation
 - checkpoint/model bytes、RSS、wall time、CPU latency、logs、hashes
@@ -141,8 +144,9 @@ Integrated boundaries:
 - C030: lossy projected causal abstraction
 - C031: unknown-target JCI / test-time causal discovery
 - C032: intervention-induced causal abstraction identifiability
+- C033: partially shared multimodal causal representation identifiability
 
-C032 adds that unknown perfect subset interventions can identify a maximal quotient causal abstraction from paired pre/post observations under explicit assumptions. Therefore non-atomic unknown interventions、failure of individual latent recovery、or discovery/naming of quotient blocks do not establish language-specific joint identification.
+C033 adds that, under explicit rank、properness、partial-sharing graph、independence、non-overlap、mixing-density、and sparsity assumptions, shared and modality-specific latent components can be identified observationally up to permutation/component-wise smooth bijections. Treating language as one modality therefore removes ordinary multimodal shared-block alignment from the novelty space.
 
 The novelty matrix must now separate:
 
@@ -150,35 +154,37 @@ The novelty matrix must now separate:
 2. projected high-level causal-query identification;
 3. unknown-target graph/context/target recovery under JCI/TICL assumptions;
 4. maximal quotient abstraction induced by the actual intervention family;
-5. residual within-block partition recovery after all applicable non-language sufficient statistics;
-6. language-supplied information beyond observations、actions、outcomes、interaction history、environment/context signatures、detected targets、and quotient signatures;
-7. joint raw-utterance / residual-target identification under an external anti-recoding law.
+5. partial-sharing multimodal component identification;
+6. residual within-component partition recovery after all applicable non-language and multimodal sufficient statistics;
+7. language-supplied information beyond observations、actions、outcomes、interaction history、environment/context signatures、detected targets、quotient signatures、and multimodal shared-block incidence;
+8. joint raw-utterance / residual-target identification under an external anti-recoding law.
 
-A paper-specific immutable official repository for C032 was not verified. Public baseline reproduction remains required when official code becomes available.
+A paper-specific immutable official repository for C033 was not verified. Public baseline reproduction remains required if author-controlled code becomes available.
 
 ## P2 — Only admissible RQ reformulation, not adopted
 
 Candidate only:
 
-> benchmarkのunknown intervention familyから最大non-language quotient abstractionを計算した後にも残るwithin-block countermodel pairに対して、externally fixed・non-recodableなpopulation language contrastが不足するseparationを供給し、raw utterance equivalenceとresidual intervention-target partitionを有限標本またはconsistentに共同同定できるか。
+> 最強の非言語causal abstractionとmultimodal partial-sharing同定を適用した後、既に識別されたshared component内部に残るcountermodel pairに対して、externally fixed・non-recodableなpopulation language contrastが不足するseparationを供給し、raw utterance equivalenceとresidual intervention-target partitionを有限標本またはconsistentに共同同定できるか。
 
 Necessary but insufficient condition:
 
-`I(P_residual ; L | S_abs) > 0`
+`I(P_residual ; L | S_MM) > 0`
 
 Before adoption:
 
-1. construct intervention-family non-descendant signatures for the benchmark;
-2. compute the maximal quotient partition and quotient graph identifiable without language;
-3. exhibit a within-block countermodel pair;
-4. prove the language contrast is unavailable from observations、actions、outcomes、environment identity、and completed trajectories;
-5. fix an external denotational anchor before fitting;
-6. prove the within-block target/utterance/denotation/encoder joint automorphism group becomes trivial;
-7. give an impossibility theorem when language only names or paraphrases a quotient block;
-8. use direct recovery metrics for utterance classes and residual target blocks;
-9. reproduce an applicable public non-language baseline;
-10. preregister exactly one claim、counterexample、and stopping rule;
-11. require model bytes、RSS、wall time、CPU latency、raw logs、checksums、seeds `1/7/19` once experiments begin.
+1. map SILG observations、instructions、actions、outcomes to modalities and latent subsets;
+2. audit rank、properness、partial-sharing graph、independence、non-overlap、mixing-density、and sparsity assumptions;
+3. compute the maximal non-language quotient and multimodal shared/specific representation;
+4. exhibit an identical-observable-law countermodel pair inside a recovered shared component;
+5. prove the language contrast is unavailable from observations、actions、outcomes、environment identity、completed trajectories、and multimodal incidence;
+6. fix an external denotational anchor before fitting;
+7. prove the target/utterance/denotation/encoder-decoder joint automorphism group becomes trivial;
+8. give an impossibility theorem when language only names or paraphrases a recovered component;
+9. use direct recovery metrics for utterance classes and residual target blocks;
+10. reproduce an applicable public non-language or multimodal baseline;
+11. preregister exactly one claim、counterexample、and stopping rule;
+12. require model bytes、RSS、wall time、CPU latency、raw logs、checksums、seeds `1/7/19` once experiments begin.
 
 No implementation、synthetic benchmark、new architecture is authorised.
 
