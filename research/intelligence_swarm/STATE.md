@@ -84,7 +84,7 @@ RTFM S1で正式に測定可能なtransferは**dynamicsのみ**。entity ontolog
 
 ## Evaluation contract
 
-D015〜D034を統合する。
+D015〜D035を統合する。
 
 監査範囲:
 
@@ -102,25 +102,26 @@ D015〜D034を統合する。
 - checksummed prediction JSONL and derived statistics artifacts
 - unified fail-closed acceptance command
 - D033: `evaluation_contract.score()`本体がprediction payloadを直接検査し、gold/after-state/reward/terminal/return/success/future-state/rollout/completed-trajectory、未登録field、非有限値、valid-action schema外actionを拒否する
-- **D034: keyをcase-foldし非英数字を除去して正規化し、camelCase・kebab-case・空白・句読点variantを含むnested `model_input`、`model_input_fields`、prediction top-levelのoracle/outcome/completed-trajectory aliasを拒否する**
+- D034: keyをcase-foldし非英数字を除去して正規化し、camelCase・kebab-case・空白・句読点variantを含むnested `model_input`、`model_input_fields`、prediction top-levelのoracle/outcome/completed-trajectory aliasを拒否する
+- **D035: `audit_r0_acceptance_bundle.py`がalias-normalized schema leakage auditorを必須実行し、core contract・prediction payload・paired statistics・resource provenance・prediction/statistics checksumと同じ単一受入経路でfail-closed判定する**
 
-現headのunified acceptance gate run `30177596329`とprediction-method-topology run `30177596328`はsuccess。これは監査コードの回帰証拠に限定し、実benchmark成功には数えない。alias-normalized auditor専用workflowは追加されたが、実bundle受入の代替ではない。
+現headのunified acceptance gate run `30179464716`とprediction-method-topology run `30179464653`はsuccess。これは監査コードの回帰証拠に限定し、実benchmark成功には数えない。実R0 bundleの受入通過は0件である。
 
 ## Prior-art and RQ boundary
 
-C023〜C025、C029〜C033までの境界を維持する。
+C023〜C025、C029〜C034までの境界を維持する。
 
-C033はBenhamza・Clausel・Tamiの2026年partial-latent-sharing multimodal CRLを統合した。言語を一つのmodalityとして扱い、明示的なrank、properness、partial-sharing graph、independence、non-overlap、mixing-density、sparsity条件が成立すれば、shared/modality-specific latent componentは言語固有原理なしにcomponent-wiseまで識別可能である。
+C034はVarıcıらのJMLR 2025 score-based CRLを統合した。線形観測ではnodeごとの1介入、一般非線形観測ではnodeごとの2つのdistinct hard interventionなど明示的条件下で、未知のenvironment-target対応を含め、latent variables・DAG・intervention targetを言語なしで識別・構成的に回復できる領域がある。公式code `acarturk-e/score-based-crl`も確認済みだが、exact commitを固定したimmutable再現は未実施である。
 
-したがって、language/state/action/outcome間のshared block alignment、partial sharing、cross-modal reconstruction、Wasserstein alignment、shared-latent transfer、human-readable namingは、それ自体ではraw utterance equivalenceとfine intervention-target partitionの共同同定を示さない。
+したがって、unknown intervention-environment correspondence、一般非線形観測、score/density differenceからのlatent recovery、既に回復可能なnode/environmentへの言語命名は新規性候補から除外する。完全なscore-based recovery後でも、target block・utterance class・denotation・language encoderを共同置換すれば意味対応は変えられるため、raw-language equivalenceとの共同同定は成立しない。
 
-残る候補は、最強の非言語causal abstractionとmultimodal partial-sharing同定を適用した後、既に識別されたshared component内部に残る明示的countermodel pairを、事前登録された外部固定denotation lawがstrictly分離し、target member・utterance class・denotation・encoder/decoderのjoint recodingをすべて除去できるか、である。
+残る候補は、最強の適用可能なscore-based CRLを実行し、その許容変換でquotientした後にも残る明示的countermodel pairを、事前登録された外部固定denotation lawがstrictly分離し、target member・utterance class・denotation・encoder/decoderのjoint recodingをすべて除去できるか、である。
 
-必要条件は `I(P_residual ; L | S_MM) > 0`。ただし十分条件ではなく、残存joint automorphism groupが外部anchorにより自明になることを証明する必要がある。
+必要条件は `I(P_residual ; L | S_SCRL) > 0`。ただし十分条件ではなく、残存joint automorphism groupが外部anchorにより自明になることを証明する必要がある。
 
 正式判断:
 
-> **NARROWED BEYOND PARTIALLY SHARED MULTIMODAL COMPONENT-WISE IDENTIFIABILITY — NOT ADOPTED**
+> **NARROWED BEYOND SCORE-BASED IDENTIFIABILITY AND ACHIEVABILITY — NOT ADOPTED**
 
 ## Stage-transition rule
 
@@ -145,4 +146,4 @@ C033はBenhamza・Clausel・Tamiの2026年partial-latent-sharing multimodal CRL�
 
 ## Last integration
 
-2026-07-26: **RESET-E040**。C033 partial-latent-sharing multimodal CRL境界、D034 alias-normalized schema leakage監査、R0.2 holdout-manifest joinの整合強化を統合した。監査CI成功はaudit codeの証拠に限定する。immutable R0.1 bundle、公開baseline値、R0.2結果、実contract通過は0件であり、`initial_reproduction_failure`、RQ-001未採用、能力進歩未認定、高校生級未達を維持する。
+2026-07-26: **RESET-E041**。C034 score-based CRLの識別・構成可能性と公式code境界、D035 alias-normalized leakage auditorの統一受入ゲート必須接続を統合した。監査CI成功はaudit codeの証拠に限定する。immutable R0.1 bundle、公開baseline値、R0.2結果、実contract通過は0件であり、`initial_reproduction_failure`、RQ-001未採用、能力進歩未認定、高校生級未達を維持する。
