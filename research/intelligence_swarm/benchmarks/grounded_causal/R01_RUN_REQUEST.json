@@ -1,10 +1,10 @@
 {
-  "requested_at_utc": "2026-07-25T15:48:26Z",
-  "track": "R0.1",
+  "requested_at_utc": "2026-07-25T15:58:12Z",
+  "track": "R0.1/R0.2",
   "benchmark": "SILG RTFM S1",
   "workflow": ".github/workflows/r0_silg_rtfm_probe.yml",
   "canonical_branch": "research/intelligence-swarm-reconstruction-001",
-  "request_reason": "Execute the split-job workflow so the completed 131072-frame three-seed R0.1 training and matched controls are frozen and uploaded before any R0.2 work begins.",
+  "request_reason": "Execute the split-job workflow: first freeze the 131072-frame three-seed R0.1 checkpoints and matched controls as an immutable artifact, then run the R0.2 Environment-first, parameter-matched End-to-end, and State-only comparisons from that artifact.",
   "frames_per_seed": 131072,
   "seeds": [1, 7, 19],
   "train_env": "silg:rtfm_train_s1-v0",
@@ -12,23 +12,31 @@
   "model": "official SILG multi recurrent",
   "pretrained_language_model": false,
   "controls": ["random", "language-blind", "state-only", "language-shuffle"],
+  "r02_methods": ["environment-first", "end-to-end", "state-only"],
+  "r02_metrics": ["task success", "next-state prediction", "action accuracy", "dynamics holdout transfer"],
+  "r02_inapplicable_holdouts": ["entity", "language-form"],
   "source_pins": {
     "silg": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
     "rtfm": "58f17955595b5a127c96d045d896fcbcc7d4b570"
   },
   "required_artifacts": [
-    "three checkpoints",
+    "three R0.1 checkpoints",
     "raw install and training logs",
-    "matched control results",
+    "matched R0.1 control results",
+    "typed R0.2 trajectories",
+    "generator-side dynamics signatures",
+    "immutable holdout joins",
+    "R0.2 offline and online results",
     "model bytes",
     "peak RSS",
     "training wall time",
     "CPU inference latency",
     "pip freeze",
-    "SHA-256 manifest"
+    "SHA-256 manifests"
   ],
   "claims_blocked_until_completion": [
     "public baseline reproduced",
+    "R0.2 reproduced",
     "capability progress",
     "new intelligence principle"
   ]
