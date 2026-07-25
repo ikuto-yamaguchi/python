@@ -2,9 +2,9 @@ name: R0.1 SILG RTFM probe
 run-name: R0.1 SILG RTFM 131072-frame reproduction @ ${{ github.sha }}
 
 on:
-  push:
+  pull_request:
     branches:
-      - research/intelligence-swarm-reconstruction-001
+      - research/intelligence-swarm-governance-014
     paths:
       - '.github/workflows/r0_silg_rtfm_probe.yml'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/R01_RUN_REQUEST.json'
@@ -23,11 +23,10 @@ on:
       - 'research/intelligence_swarm/benchmarks/grounded_causal/SILG_RTFM_REPRO_001.md'
   workflow_dispatch:
 
-# A 131072-frame three-seed CPU run can exceed one hour. Keep an active run alive
-# when later canonical-branch commits arrive; otherwise recurrent automation can
-# repeatedly cancel the only experiment that matters before it emits artifacts.
+# Use the canonical head branch in the concurrency key for both PR and manual runs.
+# Keep an active long-running reproduction alive when unrelated commits arrive.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref_name }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref_name }}
   cancel-in-progress: false
 
 jobs:
@@ -52,6 +51,7 @@ jobs:
             echo "github_run_attempt=${GITHUB_RUN_ATTEMPT}"
             echo "github_event_name=${GITHUB_EVENT_NAME}"
             echo "github_ref=${GITHUB_REF}"
+            echo "github_head_ref=${GITHUB_HEAD_REF}"
             echo "github_sha=${GITHUB_SHA}"
             git rev-parse HEAD
             git status --short
