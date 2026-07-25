@@ -1,0 +1,32 @@
+name: R0 prediction and statistics artifact tests
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_statistics_artifacts.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/test_audit_prediction_statistics_artifacts.py
+      - .github/workflows/r0_prediction_statistics_artifact_tests.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prediction-statistics-artifacts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile auditor and tests
+        run: |
+          python -m py_compile \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_statistics_artifacts.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/test_audit_prediction_statistics_artifacts.py
+      - name: Run focused regression
+        working-directory: research/intelligence_swarm/benchmarks/grounded_causal
+        run: python test_audit_prediction_statistics_artifacts.py
