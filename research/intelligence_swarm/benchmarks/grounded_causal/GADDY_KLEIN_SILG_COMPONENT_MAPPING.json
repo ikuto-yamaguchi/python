@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "classification_on_failure": "initial_reproduction_failure",
+  "claim_scope": "faithful_method_transfer_not_numerical_reproduction",
+  "public_reference": {
+    "repository": "kristyelee/environment-learning",
+    "historical_repository": "dgaddy/environment-learning",
+    "commit": "98c0dc68926ee9535f15019922d2ca871b0ac0b5",
+    "manifest": "GADDY_KLEIN_PUBLIC_REFERENCE_MANIFEST.json"
+  },
+  "local_implementation": {
+    "path": "research/intelligence_swarm/benchmarks/grounded_causal/gaddy_klein_typed_baseline.py",
+    "comparison_harness": "research/intelligence_swarm/benchmarks/grounded_causal/r02_typed_comparison.py",
+    "online_evaluator": "research/intelligence_swarm/benchmarks/grounded_causal/evaluate_r02_online_silg.py"
+  },
+  "components": [
+    {
+      "id": "transition_to_message_encoder",
+      "author_files": ["model.py", "pretrain.py"],
+      "local_symbols": ["TransitionMessageEncoder", "StructuredMessage"],
+      "required_evidence": ["state_before_and_after_input", "discrete_gumbel_message"]
+    },
+    {
+      "id": "message_conditioned_transition_decoder",
+      "author_files": ["model.py", "pretrain.py"],
+      "local_symbols": ["TypedDecoder", "typed_transition_loss"],
+      "required_evidence": ["current_state_and_message_input", "typed_next_state_prediction", "action_prediction"]
+    },
+    {
+      "id": "language_to_message_encoder",
+      "author_files": ["model.py", "evaluate.py"],
+      "local_symbols": ["LanguageMessageEncoder"],
+      "required_evidence": ["recurrent_instruction_encoder", "same_message_shape_as_environment_encoder"]
+    },
+    {
+      "id": "representation_matching_objective",
+      "author_files": ["evaluate.py", "model.py"],
+      "local_symbols": ["symmetric_message_kl", "train_language"],
+      "required_evidence": ["environment_message_detached", "explicit_message_matching_loss"]
+    },
+    {
+      "id": "environment_pretraining_schedule",
+      "author_files": ["pretrain.py"],
+      "local_symbols": ["train_environment", "train_language"],
+      "required_evidence": ["environment_stage_precedes_language_stage", "transition_encoder_frozen_during_language_stage"]
+    },
+    {
+      "id": "decoder_freezing_schedule",
+      "author_files": ["evaluate.py"],
+      "local_symbols": ["Config", "train_language"],
+      "required_evidence": ["freeze_decoder_default_true", "decoder_parameters_disabled_when_frozen"]
+    },
+    {
+      "id": "no_pretraining_baseline",
+      "author_files": ["baseline_model.py", "evaluate.py"],
+      "local_symbols": ["EndToEndModel"],
+      "local_symbol_file": "research/intelligence_swarm/benchmarks/grounded_causal/r02_typed_comparison.py",
+      "required_evidence": ["trained_without_environment_pretraining", "same_typed_rows_and_split"]
+    },
+    {
+      "id": "state_only_control",
+      "author_files": [],
+      "local_symbols": ["StateOnlyModel"],
+      "local_symbol_file": "research/intelligence_swarm/benchmarks/grounded_causal/r02_typed_comparison.py",
+      "required_evidence": ["no_instruction_tokens"]
+    },
+    {
+      "id": "matched_inference_budget",
+      "author_files": [],
+      "local_symbols": ["audit_parameter_budget"],
+      "local_symbol_file": "research/intelligence_swarm/benchmarks/grounded_causal/r02_typed_comparison.py",
+      "required_evidence": ["environment_first_and_end_to_end_parameter_bytes_compared"]
+    },
+    {
+      "id": "online_task_success",
+      "author_files": [],
+      "local_symbols": ["evaluate_method"],
+      "local_symbol_file": "research/intelligence_swarm/benchmarks/grounded_causal/evaluate_r02_online_silg.py",
+      "required_evidence": ["same_initial_instance_stream", "terminal_reward_task_success", "cpu_latency_and_rss"]
+    }
+  ],
+  "fixed_method_properties": {
+    "pretrained_language_model": false,
+    "message_variables": 20,
+    "message_symbols": 30,
+    "freeze_decoder_default": true,
+    "canonical_seeds": [1, 7, 19],
+    "formal_rtfm_s1_holdouts": {
+      "entity": false,
+      "dynamics": true,
+      "language_form": false
+    }
+  },
+  "prohibited_claims": [
+    "numerical reproduction of ACL 2019 on RTFM",
+    "held-out entity transfer on RTFM S1",
+    "held-out language-form transfer on RTFM S1",
+    "new architecture",
+    "new intelligence principle",
+    "capability progress before immutable three-seed results"
+  ]
+}
