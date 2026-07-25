@@ -2,7 +2,7 @@
 
 ## Mission
 
-1GB未満・弱いスマートフォンCPUで実行可能な知能モデルを長期目標とする。ただし現在は新原理の発明を停止し、公開benchmark再現、評価資格、既存研究との境界、反証可能な中心命題の確立を優先する。
+長期目標は、1GB未満で弱いスマートフォンCPU上でも高速に動作し、日本語コミュニケーション・知識・推論を備える知能モデルである。ただし現在は新しい知能原理や機構族の発明を停止し、公開benchmark再現、評価資格、既存研究との境界、反証可能な中心命題の確立を優先する。
 
 ## Current stage
 
@@ -24,10 +24,10 @@
 - 131,072-frame staged reproduction: **current headで検証済み完了artifactなし**
 - 学習済み公開能力baseline再現: **0件**
 - R0.2正式再現: **0件**
-- R0.2 typed full-method / typed exporter / matched comparison / matched-budget / holdout audit / immutable-manifest join: **実装済み、qualified public dataで未実行**
+- R0.2 typed baseline/export/comparison/budget/holdout/manifest paths: **実装済み、qualified public dataで未実行**
 - R0.3 empirical hidden intervention-target ablation: **正式棄却**
 - RQ-001 broad/current formulation: **棄却**
-- joint grouping-and-partition identification beyond known observational grouping: **狭義化・未採用**
+- anchored joint language-equivalence / intervention-partition identification: **狭義化・未採用**
 - J-CRe3日本語外部baseline: **未再現**
 
 公開能力baselineとmatched controlsがevaluation contractを通るまで、新規機構族、知能原理、能力進歩を認定しない。
@@ -43,8 +43,8 @@
 - Pretrained language model: **なし**
 - Python 3.8.18 / Ubuntu 22.04
 - Core pins: `torch==1.13.1+cpu`, `torchvision==0.14.1+cpu`, `gym==0.21.0`, `numpy==1.24.4`, `transformers==4.30.2`, `expman==0.0.7`, `ujson==5.10.0`
-- Observation: 6×6 grid, wiki 80 token, task 40 token, inventory 8 token, valid-action mask 5, relative position 6×6×2
-- Action space: 5; maximum episode length: 80
+- Observation: 6×6 grid、wiki 80 token、task 40 token、inventory 8 token、valid-action mask 5、relative position 6×6×2
+- Action space: 5、maximum episode length: 80
 
 ## R0.1 public recurrent status
 
@@ -81,62 +81,62 @@ Classification: **`matched_fixed_episode_32768_frame_staged_training_not_public_
 
 ### 131,072-frame status
 
-固定timeout、重複trigger、再起動問題は修正済みだが、current canonical headに検証済み完了artifactはない。pre-integration head `8325ff9f63e8d782209cccce232170adc95689bb`にはcombined CI statusが登録されていなかった。未完了checkpoint、resource値、trajectory、能力値は採用しない。
+固定timeout、重複trigger、再起動問題は修正済みだが、current canonical headに検証済み完了artifactはない。未完了checkpoint、resource値、trajectory、能力値は採用しない。
 
-次の唯一のR0.1作業は、stable workflow headから1本だけ実行し、3 checkpoint、raw log、source/model/data/prediction hash、RSS、学習時間、CPU latency、同一instance controls、policy competence、action-collapseを検証すること。
+次の唯一のR0.1作業は、stable workflow headからexactly one clean runを完了し、3 checkpoint、raw log、source/model/data/prediction hash、RSS、学習時間、CPU latency、同一instance controls、policy competence、action collapseを検証すること。
 
 ## R0.2 Environment-first status
 
-旧trajectory比較はnegative diagnosticのみ。source policyはseed 1でtrain success `0/40`、seed 7で`0/40`かつmajority action `97.42%`、seed 19で`1/40`、全test `0/20`で不適格。
-
 Gaddy & Klein 2019と著者code commit `ac1e7cb62ae94c76f545bf942f0c8febce43891f`を固定参照とする。
 
-Canonical branchには以下がある。
+Canonical branchには、faithful typed baseline、typed SILG exporter、parameter-matched Environment-first / End-to-end / State-only comparison、matched-budget audit、holdout audit、immutable manifest joinがある。
 
-- `gaddy_klein_typed_baseline.py`: language-free transition pretraining、20 categorical message variables × 30 symbols、straight-through Gumbel-Softmax、shared typed next-state/action decoder、LSTM language encoder、direct message matching `0.01`、decoder freezing、typed CE/BCE/MSE、resource/hash reporting。
-- `export_silg_typed_policy_trajectories.py`: typed before/after fields、schema/cardinality、episode/seed/split/fingerprint provenance、dataset/schema SHA-256、unknown field fail-closed。
-- `r02_typed_comparison.py`: Environment-first、parameter-matched End-to-end、State-onlyを同一typed dataset・seed・splitで比較。
-- `audit_r02_matched_budget.py`: canonical seed、train/test、dataset hash、test prediction coverage、parameter bytes、transition-pretraining-only bytes、checkpoint hash、RSS、training time、CPU latency、action accuracy、typed next-state loss、equal row exposureをfail-closedで監査する。
-- `audit_r02_holdout_assignments.py`: entity/dynamics/language-form holdoutの実在、seed `1,7,19`、condition-specific signature、train/test非重複、placeholder禁止をfail-closedで監査する。
-- `attach_r02_holdout_manifest.py`: preregistered episode manifestを`domain/split/seed/episode_seed`でtyped trajectoryへ結合し、3 signature、Boolean holdout assignment、manifest/input/output SHA-256を保存する。duplicate/missing/extra/noncanonical/train-held-out entryを拒否する。
+Cycle 015で`build_r02_preregistered_holdout_manifest.py`を追加した。generator metadataと事前登録済みsignature集合だけからepisode-level manifestを構築し、action、reward、done、return、task success、prediction、action accuracy、next-state lossを入力として拒否する。seed `1/7/19`、一意episode key、非空signature、test metadata内の実在、3-seed coverage、train holdout禁止、metadata/spec/output SHA-256を必須化した。
 
-Cycle 012は、`N` train rows、environment epochs `E`、language epochs `L`に対し、Environment-firstを`N*E + N*L`、End-to-endとState-onlyを`N*(E+L)`として総row exposureを一致させる。Environment-firstとEnd-to-endのinference parameter bytesも完全一致させる。offline accuracyをonline task successの代用にしない。
+ただしpinned RTFM generatorはまだ以下のsidecarを実出力していない。
 
-Cycle 013は現exporterで`entity_holdout=false`、`dynamics_holdout=false`が全行に固定され、test全体が`language_holdout=true`であることを確認した。このdatasetではheld-out entity/dynamics/language-form transferを測定できない。
+- `entity_signature`
+- `dynamics_signature`
+- `language_form_signature`
 
-Cycle 014はimmutable holdout manifest joinを実装したが、pinned RTFM generator/configurationからprediction/outcome閲覧前に生成したvalid manifest自体は未作成である。qualified three-seed source trajectory、実holdout、online task success、typed next-state、action accuracy、matched comparisonは未実行。
+したがってqualified three-seed source trajectory、実holdout、online task success、typed next-state prediction、action accuracy、matched comparisonは未実行。
 
-Classification: **`immutable_holdout_join_implemented_manifest_generation_and_qualified_silg_execution_blocked`**。
+Classification: **`preregistered_holdout_manifest_builder_implemented_generator_signature_sidecar_and_qualified_silg_execution_blocked`**。
 
 ## Evaluation contract status
 
-- D015: 実SILG schemaへ適合。**18件の実行済み回帰テスト**。
-- D016: 各`method × seed × domain × split × condition`のprediction-to-dataset immutable join。
-- D017: 各`domain × split × condition` cellにseed `1,7,19`が正確に揃うこと。
-- D018: target-label/outcome shuffleのdonor payloadと実適用payloadのhash一致、same-cell、bijection、derangement、self-shuffle禁止、semantic no-op禁止。
-- D019: entity/dynamics holdoutを`domain × split × condition × kind`単位で監査し、同一domain train signatureとの重複、signature欠落、seed欠落/余分、train reference欠落を拒否する。in-distribution cellの期待されるtrain overlapはholdout leakageへ誤分類しない。
-- D020: SILG stepを独立標本として扱わず、`episode_id`を必須化し、cellを再標本化した後にepisode全体を再標本化するhierarchical bootstrapとepisode-level sign-flip検定を保存する。step-weighted gap、episode-equal gap、minimum cell gap、paired episode/step countを併記する。
-- D021: 各評価cellへprediction/data/raw-log/checkpointのpath/hash、full commit、model bytes、RSS、training time、CPU latencyを結合する。exact method/seed/cell coverage、shared dataset hash、stable checkpoint/commitを要求し、post-manifest mutation、condition間checkpoint差替え、method間resource/artifact tupleコピーを拒否する。
+- D015: 実SILG schemaへ適合。18件の回帰テスト。
+- D016: immutable prediction-to-dataset join。
+- D017: exact seed coverage `1,7,19`。
+- D018: target-label/outcome shuffle donor provenance、same-cell、bijection、derangement、semantic no-op禁止。
+- D019: entity/dynamics holdout leakageをcondition単位で監査。
+- D020: episode-cluster hierarchical bootstrap、episode sign-flip、step/episode weighted gap、minimum cell gap。
+- D021: prediction/data/raw-log/checkpoint/full commit/model bytes/RSS/training time/CPU latencyのcell binding。
+- D022: `future_state`、`rollout_context`、`target_action`、`oracle_*`等のaliasによるsemantic model-input leakageをfail-closedで拒否。prospective allowlistは`utterance`、`state_before`、`history`、`valid_action_mask`。
 
-D018の4テストはローカル成功。D019/D020/D021のCI完了結果は未確認。実R0 prediction/data/artifact bundleはD016〜D021を通過していないため、正式分類は **`initial_reproduction_failure`**。
+D022の4テストはローカル成功したが、GitHub Actions完了は未確認。実R0 prediction/data/artifact bundleはD016〜D022を通過していないため、正式分類は **`initial_reproduction_failure`**。
 
 ## Prior-art and novelty boundary
 
-既存境界にはunknown/uncoupled intervention CRL、general-environment CRL、subset-intervention causal abstraction、finite-sample CRL、trajectory-local parameter identifiability、auxiliary/temporal/multi-view/hidden-regime nonlinear ICA、grouping/weak supervision、mechanism sparsity、mechanistic independence、interactive grounding、environment-first、language-dynamics pretraining、WM3C、isolated causal effects of language、multimodal partial-sharing CRL、known observational grouping CRLを含む。
+既存境界にはunknown/uncoupled intervention CRL、general-environment CRL、subset-intervention causal abstraction、finite-sample CRL、trajectory-local parameter identifiability、auxiliary/temporal/multi-view/hidden-regime nonlinear ICA、grouping/weak supervision、mechanism sparsity、interactive grounding、environment-first、language-dynamics pretraining、WM3C、isolated causal effects of language、multimodal partial-sharing CRL、known observational grouping CRL、feature-conditioned generative intervention modelsを含む。
 
-C018はMorioka and Hyvärinen, ICML 2024と公式`hmorioka/GCaRL` commit `0020bfce34736d61d70ab8175f061d02951a7ed4`を監査した。既知の観測groupingは言語なしのidentifiability routeであり、言語がschema/sensor/object/time/field group metadataを予測・再記述するだけではgroupingとlatent intervention partitionの共同同定にならない。公式codeは存在するがexact dependency lockがなく、再現は主張しない。
+C018はknown observational groupingが言語なしのidentifiability routeであることを確認した。
+
+C019はSchneider et al., ICML 2025のGenerative Intervention Modelsを監査した。観測されたperturbation featureから未知atomic intervention分布を学習し、未見perturbationの分布変化を予測する既存研究である。したがって、utterance embeddingをfeature-to-intervention modelへ渡すだけ、未知target確率を出すだけ、未見perturbationを予測するだけでは新規のlanguage-specific causal identificationにならない。
+
+C019のcounterexampleは、language encoder、intervention generator、latent causal model、decoderを共同再符号化しても`p(X,Y,L)`を保存でき、完璧な予測でもlatent intervention-target partitionが一意とは限らないことを固定した。公式実装は一次記録と対象GitHub検索から特定できず、再現は開始していない。
 
 ## Research-question decision
 
-- Gate L: **継続、未通過**。
-- Gate I empirical track / R0.3: **棄却**。
-- RQ-001-N5: **棄却**。
-- RQ-001 broad/current form: **棄却**。
-- Unknown target recovery、environment label recovery、parameter naming、non-zero language effect、partial shared-latent discovery、known groupingのlanguage再記述をlanguage-specific causal identificationとする案: **棄却**。
-- 唯一残る候補: intervention/general-environment/trajectory-local/multimodal partial-sharing/known-grouping identifiability適用後に残るcausal abstractionについて、externally anchored population language channelが未知observational groupingと残存latent intervention-target partitionを共同同定できるか。
-- 上記候補: **未採用、preregistration候補のみ**。
+- Gate L: **継続、未通過**
+- Gate I empirical track / R0.3: **棄却**
+- RQ-001-N5: **棄却**
+- RQ-001 broad/current form: **棄却**
+- unknown-target prediction、environment label recovery、parameter naming、non-zero language effect、partial shared-latent discovery、known groupingのlanguage再記述、feature-conditioned unknown-target predictionをlanguage-specific causal identificationとする案: **棄却**
+- 唯一残る候補: feature-conditioned generative intervention modelsを含む既存identifiability route適用後に、externally fixed denotational anchorを持つpopulation language channelがraw utterance equivalenceと残存latent intervention-target partitionを共同同定できるか
+- 上記候補: **未採用、preregistration候補のみ**
 
-採用には、G-CaRL互換grouping適用後の残存同値類、言語情報がschema/state/historyから復元不能である証明、grouping/latentと共同再符号化不能なanchor、joint grouping-and-partition theorem、anchor除去時のimpossibility theorem、direct grouping metadata/G-CaRL比較、unseen-form/composition/system評価、dependency-pinned public baseline再現、事前登録が必要。
+採用には、予測可能性とpartition identifiabilityの形式的分離、joint recoding後の残存同値類、outcome/target label/environment ID/completed trajectoryから独立なexternal anchor、一意性定理、anchor除去時のimpossibility theorem、GIM型baselineとの直接比較、unseen form/composition/target-combination/system split、dependency-pinned public baseline再現、exactly one preregistered claimが必要。
 
 新規architecture実験は認可しない。
 
@@ -171,4 +171,4 @@ C018はMorioka and Hyvärinen, ICML 2024と公式`hmorioka/GCaRL` commit `0020bf
 
 ## Last integration
 
-2026-07-25: **RESET-E025**。R0.2 Cycle 014のimmutable holdout manifest join、C018のknown observational grouping境界、D021のruntime/resource/artifact cell bindingを統合した。current headにR0.1完了artifactはなく、公開能力baseline 0件、`initial_reproduction_failure`、段階遷移禁止、高校生級未達を維持する。
+2026-07-25: **RESET-E026**。R0.2 Cycle 015のpreregistered manifest builder、C019のfeature-conditioned intervention boundary、D022のsemantic alias leakage auditを統合した。R0.1の能力証拠は増えておらず、公開能力baseline 0件、`initial_reproduction_failure`、段階遷移禁止、高校生級未達を維持する。
