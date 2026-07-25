@@ -22,13 +22,14 @@
 - 公開環境control再現: **1件**
 - 公開学習経路再現: **1件（32,768-frame staged budget、3 seed）**
 - 固定初期instance matched評価経路: **1件**
-- 131,072-frame staged run: **実行中・未統合**
+- 131,072-frame staged reproduction: **完了artifact未取得**
 - 学習済み公開能力baseline再現: **0件**
 - R0.2正式再現: **0件**
-- R0.2 typed full-method path: **実装済み・dataset/online評価でblocked**
+- R0.2 typed full-method path: **実装済み**
+- R0.2 typed SILG exporter path: **実装済み・未実行**
 - R0.3 empirical intervention-target ablation: **正式棄却**
 - RQ-001 broad/current formulation: **棄却**
-- residual-abstraction refinement reformulation: **未採用**
+- language-added residual-abstraction refinement: **狭義化・未採用**
 - J-CRe3日本語外部監査: **未再現**
 
 公開能力baselineとmatched controlsがevaluation contractを通るまで、新規機構族、知能原理、能力進歩を認定しない。
@@ -80,11 +81,11 @@ Correct was 1/60 and Random was 4/60. This demonstrates insufficient policy comp
 
 Classification: **`matched_fixed_episode_32768_frame_staged_training_not_public_capability_reproduction`**.
 
-### Current staged run
+### 131,072-frame status
 
-The first 131,072-frame attempt stopped because of a fixed reconstruction-harness timeout, not an official learner exception. Timeout handling now scales with frames and preserves logs and hashes.
+The initial attempt stopped because of a fixed reconstruction-harness timeout. Timeout handling was corrected. Subsequent long runs were repeatedly restarted by branch/PR triggers; workflow concurrency and trigger scope were corrected so unrelated commits no longer restart the expensive job.
 
-At RESET-E020, workflow run `30138560445` has completed checkout, Python setup, host recording, pinned-source installation and canonical random/schema probing, and remains in the official recurrent 131,072-frame training step. No unfinished capability, resource, checkpoint, trajectory or R0.2 value is incorporated.
+At RESET-E021, no completed 131,072-frame artifact is verified at the current canonical head. No unfinished checkpoint, resource value, trajectory or capability result is incorporated. The next authorized action is one clean manual or path-triggered run followed by artifact verification.
 
 ## R0.2 Environment-first status
 
@@ -100,40 +101,26 @@ The source policy was ineligible: seed 1 train success `0/40`; seed 7 `0/40` wit
 
 Gaddy & Klein 2019 and authors' code commit `ac1e7cb62ae94c76f545bf942f0c8febce43891f` remain the fixed method reference.
 
-Cycle 009 adds `gaddy_klein_typed_baseline.py` with:
+The faithful path now contains:
 
-- language-free transition pretraining;
-- 20 categorical message variables × 30 symbols;
-- straight-through Gumbel-Softmax;
-- shared typed next-state/action decoder;
-- LSTM language encoder;
-- direct environment/language message matching, weight `0.01`;
-- pretrained decoder frozen during language training by default;
-- categorical CE, binary BCE and continuous MSE;
-- seed `1,7,19`, episode-disjointness, dataset hash, parameter bytes, wall time and RSS reporting.
+- `gaddy_klein_typed_baseline.py`: language-free transition pretraining, 20 categorical message variables × 30 symbols, straight-through Gumbel-Softmax, shared typed next-state/action decoder, LSTM language encoder, direct message matching (`0.01`), decoder freezing, typed losses and resource/hash reporting;
+- `export_silg_typed_policy_trajectories.py`: preserves `state_before_fields`, `state_after_fields`, `state_schema`, categorical cardinalities, episode/seed/split/fingerprint provenance, dataset SHA-256 and schema SHA-256.
 
-The entry point rejects flattened `state_before/state_after` rows and requires `state_before_fields`, `state_after_fields` and `state_schema`. It has not been executed because the active R0.1 run is unfinished and the current exporter does not preserve typed field boundaries.
+Typed export rules currently classify `name` and `inv` as categorical, `name_len` and `inv_len` as bounded categorical, `valid` as binary, and `rel_pos`/`pos` as continuous. Text fields, reward, done and post-treatment outcomes are excluded from environment state. Unknown fields/cardinalities fail closed.
 
-R0.2 classification: **`typed_discrete_message_method_path_implemented_dataset_and_online_evaluation_blocked`**.
+Neither path has a qualified three-seed execution because no competent source-policy artifact exists. R0.2 classification remains **`typed_discrete_message_and_typed_export_paths_implemented_execution_blocked`**.
 
-No R0.2 result is accepted until competent non-collapsed source trajectories, typed export, parameter/topology-matched end-to-end and state-only controls, real entity/dynamics/language-form holdouts, online task success, action accuracy, typed next-state metrics, CPU latency and complete artifacts exist.
+No R0.2 result is accepted until competent non-collapsed source trajectories, typed export, parameter/topology-matched End-to-end and State-only controls, equal data/steps/splits, real entity/dynamics/language-form holdouts, online task success, action accuracy, typed next-state metrics, CPU latency and complete artifacts exist.
 
 ## Evaluation contract status
 
-D015 directly adapts concrete SILG exporter rows and has **18 executed passing regression tests**. It audits prospective-only input construction, utterance/entity/dynamics overlap, gold/post-treatment/completed-trajectory leakage, immutable fingerprints, full `method × seed × domain × split × condition` coverage, paired statistics, McNemar, hierarchical bootstrap CI, readable artifacts, full hashes, resources and canonical seeds.
+D015 directly adapts concrete SILG exporter rows and has **18 executed passing regression tests**.
 
-D016 adds `audit_evaluation_bundle.py`, requiring for every run:
+D016 adds an immutable prediction-to-dataset join for every `method × seed × domain × split × condition` run: prediction path/hash, readable JSONL, method identity, unique instance IDs, exact dataset/prediction instance-set equality, fingerprint agreement, shared dataset hash and stable model/code identity.
 
-- `prediction_path` and full `prediction_sha256`;
-- readable prediction JSONL;
-- manifest/prediction method agreement;
-- unique prediction instance IDs;
-- exact prediction/dataset instance-set equality;
-- per-row fingerprint agreement;
-- one dataset hash shared across all methods in a cell;
-- stable model SHA and code commit for a method/seed across split and condition cells.
+D017 adds fail-closed dataset cell coverage. Every `domain × split × condition` evaluation cell must contain exactly canonical seeds `1,7,19`; missing, extra or noncanonical seeds are rejected and recorded with the dataset SHA-256. A separate lightweight evaluation-contract workflow was added so these tests do not restart the long SILG training job.
 
-D016 regression tests are committed but not yet executed by GitHub Actions, so no new passing-test count is claimed. Existing SILG evidence lacks a complete immutable six-method prediction artifact join.
+D016/D017 completion results are not yet verified at the canonical head, so the confirmed passing-test count remains 18. Existing evidence lacks a complete immutable six-method prediction artifact join.
 
 Formal classification remains **`initial_reproduction_failure`**.
 
@@ -141,7 +128,11 @@ Formal classification remains **`initial_reproduction_failure`**.
 
 Existing boundaries include unknown/uncoupled multi-node intervention recovery, score/general-environment CRL, subset-intervention causal abstraction, finite-sample CRL, environment-first instruction following, language-dynamics pretraining, auxiliary/temporal/multi-view/hidden-regime nonlinear ICA, grouping and weak supervision, mechanism sparsity, mechanistic independence, multimodal shared-latent recovery and WM3C language-controlled block identification.
 
-C013 adds Lee, Jin and Aragam 2026. Under a strongly separating intervention design in their linear setting, unknown multi-node targets, latent graph, representation and decoder are recoverable from non-language data with `O(log d)` environments and finite-sample guarantees. Therefore unknown-target recovery is not an admissible language novelty claim.
+C013 excludes unknown-target recovery as a language novelty claim under strongly separating intervention designs.
+
+C014 further excludes the claim that language is required merely because targets are unknown, environment labels are incomplete, dynamics are nonlinear or observation mixing is nonparametric. General-environment CRL already supplies identifiability under sufficient mechanism changes, while subset-intervention work characterizes the residual causal abstraction when interventions are insufficient.
+
+If `L ⟂ M | X,E`, equivalently `I(M;L | X,E)=0`, language cannot refine the causal-model equivalence class left by non-language observations. Language-shuffle degradation, environment classification, semantic naming or finite-sample prediction gains alone do not establish identifiability.
 
 ## Research-question decision
 
@@ -150,15 +141,15 @@ C013 adds Lee, Jin and Aragam 2026. Under a strongly separating intervention des
 - **RQ-001-N5 — rejected.**
 - **RQ-001 broad/current form — rejected.**
 - **Unknown-target recovery as language contribution — rejected.**
-- **Only admissible narrowed question — not adopted:** under a specified population grammar, restricted non-lookup language-to-dynamics class and a known non-strongly-separating intervention family, determine whether raw utterances supply missing separating relations that strictly refine its residual causal abstraction on unseen forms and intervention compositions.
+- **Only admissible narrowed question — not adopted:** after exhausting general-environment non-language statistics, determine whether raw language supplies an independent separating relation that strictly refines a formally specified residual causal abstraction on unseen utterance forms and intervention compositions.
 
-Adoption requires an explicit deficient intervention design and residual abstraction, anti-lookup grammar, restrictions against arbitrary factor merging/splitting, a positive refinement theorem, matched impossibility result, unseen-form/tuple/target tests, finite-sample or consistent estimation, and comparison with logarithmic-environment unknown-target CRL, causal-abstraction, WM3C and auxiliary/multi-view baselines.
+Adoption requires a deficient intervention design and exact residual equivalence class, proof that general-environment sufficient-change conditions fail, `I(M;L|X,E)>0`, anti-lookup grammar, restrictions against arbitrary factor re-encoding, a positive refinement theorem, matched impossibility theorem without language separation, unseen-form/tuple/target tests, finite-sample or consistent estimation and direct prior-art comparisons.
 
 No implementation is authorized before public baseline reproduction and preregistration.
 
 ## Current maximum bottleneck
 
-**Complete and fully verify workflow run `30138560445` under the immutable matched protocol. Until policy competence exists, R0.2 tuning, new architecture and any RQ-001 implementation remain forbidden.**
+**Produce one clean, completed 131,072-frame official recurrent run at the stable workflow head, verify its artifacts under the immutable matched protocol, and test policy competence. Until then, R0.2 tuning, new architecture and RQ-001 implementation remain forbidden.**
 
 ## Stage-transition rule
 
@@ -187,4 +178,4 @@ All work accumulates only on `research/intelligence-swarm-reconstruction-001`. E
 
 ## Last integration
 
-2026-07-25: **RESET-E020**。C013で有限標本・少数環境のunknown-target CRLを統合し、unknown-target回復を言語の新規貢献候補から除外した。R0.2 Cycle 009でtyped structured-message full-method pathを実装したが、typed datasetとonline評価がなく未実行・未認定。D016でprediction artifactとimmutable datasetの厳密joinを追加したが、新テストは未実行のためD015の18件を最新の確認済み件数とする。workflow run `30138560445`は131,072-frame公式recurrent学習中であり未完了値を採用しない。公開能力baseline 0件、段階遷移禁止、高校生級未達を維持する。
+2026-07-25: **RESET-E021**。R0.2 Cycle 010のtyped SILG exporter、C014のgeneral-environment conditional-sufficiency境界、D017の`domain × split × condition`別canonical three-seed監査を統合した。131,072-frameについてcurrent headで検証済み完了artifactはなく、古い実行中表記を撤回した。公開能力baseline 0件、`initial_reproduction_failure`、段階遷移禁止、高校生級未達を維持する。
