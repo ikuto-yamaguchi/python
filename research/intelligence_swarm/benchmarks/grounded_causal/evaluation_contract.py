@@ -19,6 +19,7 @@ from typing import Any, Iterable
 CANONICAL_REQUIRED = {"instance_id", "domain", "seed", "split", "condition", "utterance", "state_before", "gold_action", "gold_state_after"}
 PRED_REQUIRED = {"instance_id", "method", "instance_fingerprint", "pred_action", "pred_state_after"}
 REQUIRED_CONTROL_METHODS = {"random", "language_blind", "state_only", "target_label_shuffle", "outcome_shuffle"}
+REQUIRED_METHODS = {"correct"} | REQUIRED_CONTROL_METHODS
 SHUFFLE_METHODS = {"target_label_shuffle", "outcome_shuffle"}
 SHUFFLE_REQUIRED = {"control_source_instance_id", "control_source_fingerprint"}
 HELD_OUT_CONDITIONS = {"entity_holdout", "dynamics_holdout", "language_holdout"}
@@ -268,15 +269,16 @@ def score(data:list[dict[str,Any]],preds:list[dict[str,Any]])->dict[str,Any]:
         grouped[(method,int(gold["seed"]),str(gold["domain"]),str(gold["split"]).lower(),str(gold["condition"]))].append(item); outcomes[method][iid]=item
     for iid,fps in snapshots.items():
         if len(fps)!=1: errors.append(f"instance {iid}: methods used different input snapshots")
-    required={"correct"}|REQUIRED_CONTROL_METHODS; coverage={}
+    required=REQUIRED_METHODS; coverage={}
+    unexpected=set(method_ids)-required
+    if unexpected: errors.append(f"unexpected prediction methods: {sorted(unexpected)}")
     for method in sorted(required|set(method_ids)):
         ids=method_ids.get(method,set()); missing=eval_ids-ids; extra=ids-eval_ids
         coverage[method]={"expected":len(eval_ids),"predicted":len(ids&eval_ids),"coverage":len(ids&eval_ids)/max(1,len(eval_ids)),"missing":len(missing),"extra":len(extra),"missing_examples":sorted(missing)[:5]}
         if missing: errors.append(f"method {method}: incomplete prediction coverage")
         if extra: errors.append(f"method {method}: predictions outside evaluation set")
-    absent=REQUIRED_CONTROL_METHODS-set(method_ids)
-    if absent: errors.append(f"missing required control methods: {sorted(absent)}")
-    if "correct" not in method_ids: errors.append("missing method='correct'")
+    absent=required-set(method_ids)
+    if absent: errors.append(f"missing required methods: {sorted(absent)}")
     shuffle_errors,shuffle_audit=_validate_shuffle_assignments(preds,by_id,eval_ids); errors.extend(shuffle_errors)
     cells=[]
     for (method,seed,domain,split,condition),items in sorted(grouped.items()):
@@ -312,7 +314,7 @@ def score(data:list[dict[str,Any]],preds:list[dict[str,Any]])->dict[str,Any]:
 def audit_artifacts(manifest:dict[str,Any],base_dir:Path)->dict[str,Any]:
     errors=[]; checks=[]; runs=manifest.get("runs")
     if not isinstance(runs,list) or not runs:return {"valid":False,"errors":["manifest.runs must be a non-empty list"],"checks":[],"classification":"initial_reproduction_failure"}
-    methods=set(); cells=set(); seeds=set(); domains=set(); topology=set()
+    methods=set(); cells=set(); seeds=set(); domains=set(); topology=set(); commits=set(); identity=defaultdict(set)
     for index,run in enumerate(runs,1):
         if not isinstance(run,dict): errors.append(f"run {index}: must be an object"); continue
         missing=RESOURCE_FIELDS-run.keys()
@@ -325,6 +327,8 @@ def audit_artifacts(manifest:dict[str,Any],base_dir:Path)->dict[str,Any]:
         cell=(method,seed,domain,split,condition)
         if cell in cells: errors.append(f"run {index}: duplicate run cell {cell}")
         cells.add(cell); methods.add(method); seeds.add(seed); domains.add(domain); topology.add((domain,split,condition))
+        commits.add(str(run.get("code_commit","")))
+        identity[(seed,domain,split,condition)].add((str(run.get("data_path","")),str(run.get("data_sha256",""))))
         for key in ("model_bytes","peak_rss_bytes","training_wall_seconds","cpu_inference_ms_per_item"):
             if not _finite_nonnegative(run.get(key)): errors.append(f"run {index}: {key} must be a finite non-negative number")
         if not _is_hex(run.get("code_commit"),40): errors.append(f"run {index}: code_commit must be a full 40-hex commit SHA")
@@ -337,12 +341,16 @@ def audit_artifacts(manifest:dict[str,Any],base_dir:Path)->dict[str,Any]:
             actual=file_sha256(path); ok=actual==str(expected).lower(); checks.append({"run":index,"path":str(path),"expected":expected,"actual":actual,"ok":ok,"size_bytes":path.stat().st_size})
             if not ok: errors.append(f"run {index}: checksum mismatch for {path_key}")
             if path_key=="model_path" and _finite_nonnegative(run.get("model_bytes")) and int(run["model_bytes"])!=path.stat().st_size: errors.append(f"run {index}: model_bytes does not match model artifact size")
-    required={"correct"}|REQUIRED_CONTROL_METHODS; missing_methods=required-methods
+    required=REQUIRED_METHODS; missing_methods=required-methods; unexpected_methods=methods-required
     if missing_methods: errors.append(f"manifest missing required methods {sorted(missing_methods)}")
+    if unexpected_methods: errors.append(f"manifest contains unexpected methods {sorted(unexpected_methods)}")
+    if len(commits)!=1: errors.append(f"manifest must use exactly one code_commit, found {sorted(commits)}")
+    for cell_key,values in sorted(identity.items()):
+        if len(values)!=1: errors.append(f"manifest cell {cell_key}: methods must share one data_path/data_sha256, found {sorted(values)}")
     if seeds!=CANONICAL_SEEDS: errors.append(f"manifest seeds must be exactly {sorted(CANONICAL_SEEDS)}, found {sorted(seeds)}")
     expected={(m,s,d,sp,c) for m in required for s in CANONICAL_SEEDS for d,sp,c in topology}; missing_cells=expected-cells
     if missing_cells: errors.append(f"manifest incomplete observed-topology coverage: {len(missing_cells)} missing cells")
-    return {"valid":not errors,"errors":errors,"warnings":[],"checks":checks,"methods":sorted(methods),"seeds":sorted(seeds),"domains":sorted(domains),"observed_topology":[list(v) for v in sorted(topology)],"runs":len(runs),"missing_run_cells":len(missing_cells),"missing_run_cell_examples":[list(v) for v in sorted(missing_cells)[:10]],"independent_artifacts_required":True,"condition_index_required":True,"canonical_seeds":sorted(CANONICAL_SEEDS),"classification":"reproduced" if not errors else "initial_reproduction_failure"}
+    return {"valid":not errors,"errors":errors,"warnings":[],"checks":checks,"methods":sorted(methods),"seeds":sorted(seeds),"domains":sorted(domains),"observed_topology":[list(v) for v in sorted(topology)],"runs":len(runs),"missing_run_cells":len(missing_cells),"missing_run_cell_examples":[list(v) for v in sorted(missing_cells)[:10]],"independent_artifacts_required":True,"condition_index_required":True,"exact_method_topology_required":True,"single_commit_required":True,"same_dataset_per_cell_required":True,"canonical_seeds":sorted(CANONICAL_SEEDS),"classification":"reproduced" if not errors else "initial_reproduction_failure"}
 
 
 def main(argv:list[str]|None=None)->int:
