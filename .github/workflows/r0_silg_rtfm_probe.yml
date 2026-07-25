@@ -1,4 +1,5 @@
 name: R0.1 SILG RTFM probe
+run-name: R0.1 SILG RTFM 131072-frame reproduction @ ${{ github.sha }}
 
 on:
   push:
@@ -16,7 +17,7 @@ on:
       - 'research/intelligence_swarm/benchmarks/grounded_causal/SILG_RTFM_REPRO_001.md'
   workflow_dispatch:
 
-# Canonical R0.1 launch marker: 2026-07-25T05:51:18Z
+# Canonical R0.1 launch marker: 2026-07-25T06:48:23Z
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
