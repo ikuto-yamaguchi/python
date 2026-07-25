@@ -1,10 +1,10 @@
 {
-  "requested_at_utc": "2026-07-25T15:58:12Z",
+  "requested_at_utc": "2026-07-25T16:52:01Z",
   "track": "R0.1/R0.2",
   "benchmark": "SILG RTFM S1",
   "workflow": ".github/workflows/r0_silg_rtfm_probe.yml",
   "canonical_branch": "research/intelligence-swarm-reconstruction-001",
-  "request_reason": "Execute the split-job workflow: first freeze the 131072-frame three-seed R0.1 checkpoints and matched controls as an immutable artifact, then run the R0.2 Environment-first, parameter-matched End-to-end, and State-only comparisons from that artifact.",
+  "request_reason": "Re-run the split-job workflow from the latest canonical head. Freeze the 131072-frame three-seed R0.1 checkpoints, matched same-instance controls, dependency versions, resource measurements, raw logs, and checksums as an immutable artifact before any R0.2 work begins.",
   "frames_per_seed": 131072,
   "seeds": [1, 7, 19],
   "train_env": "silg:rtfm_train_s1-v0",
