@@ -1,0 +1,29 @@
+name: R0 explicit holdout condition tests
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_explicit_holdout_condition.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/test_audit_explicit_holdout_condition.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_r0_acceptance_bundle.py
+      - .github/workflows/r0_explicit_holdout_condition_tests.yml
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: research/intelligence_swarm/benchmarks/grounded_causal
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile contracts
+        run: python -m py_compile evaluation_contract.py audit_explicit_holdout_condition.py audit_r0_acceptance_bundle.py test_audit_explicit_holdout_condition.py
+      - name: Run regression tests
+        run: python test_audit_explicit_holdout_condition.py
