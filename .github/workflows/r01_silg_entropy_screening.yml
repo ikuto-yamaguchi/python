@@ -11,6 +11,7 @@ on:
       - 'research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/run_silg_matched_eval.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/run_silg_policy_diagnostics.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_silg_official_eval_parity.py'
   workflow_dispatch:
 
 concurrency:
@@ -116,6 +117,15 @@ jobs:
             --silg-root "$RUNNER_TEMP/r0_silg/silg" --results "$results" --seeds 1 7 19 --episodes 20 \
             --out "$results/SILG_RTFM_POLICY_DIAGNOSTICS_3SEED.json" \
             2>&1 | tee "$results/SILG_RTFM_POLICY_DIAGNOSTICS.log"
+      - name: Compare official and matched evaluation semantics
+        if: always()
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_entropy_0005"
+          python research/intelligence_swarm/benchmarks/grounded_causal/audit_silg_official_eval_parity.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" --results "$results" --seeds 1 7 19 --episodes 20 \
+            --out "$results/SILG_RTFM_OFFICIAL_EVAL_PARITY_3SEED.json" \
+            2>&1 | tee "$results/SILG_RTFM_OFFICIAL_EVAL_PARITY.log"
       - name: Apply unchanged R0.1 qualification gate
         run: |
           set -o pipefail
