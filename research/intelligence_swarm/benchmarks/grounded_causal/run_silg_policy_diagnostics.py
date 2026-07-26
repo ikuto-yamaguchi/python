@@ -87,7 +87,11 @@ def run_seed(root: Path, checkpoint: Path, seed: int, episodes: int) -> dict[str
         initial_state_norm = state_l2(agent_state)
         steps = 0
 
-        while not bool(obs["done"].item()):
+        # SILG/TorchBeast marks the observation returned by initial() as done=True
+        # to signal a recurrent-state reset.  It is nevertheless the first valid
+        # observation and must be passed through the policy once.  Checking done
+        # before that first policy step produces an empty diagnostic stream.
+        while True:
             valid = obs["valid"].detach().bool().reshape(-1)
             if not bool(valid.any().item()):
                 raise RuntimeError(f"episode {episode_seed}: no valid action")
@@ -117,6 +121,8 @@ def run_seed(root: Path, checkpoint: Path, seed: int, episodes: int) -> dict[str
             agent_state = next_state
             obs = env.step(torch.tensor([[action]], dtype=torch.int64))
             steps += 1
+            if bool(obs["done"].item()):
+                break
 
         reward = scalar(obs, "reward")
         episode_return = scalar(obs, "episode_return")
