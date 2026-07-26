@@ -9,6 +9,8 @@ R0の目的は、監査項目を増やすことではなく、**固定された�
 - 既存stacked draft PRはnegative-results archiveとして扱い、新作業のbaseにしない。
 - 新規監査は、実bundleで具体的なfalse pass／false failureが発生した場合だけ追加する。
 - 外部baseline再現までは、新しい知能原理・能力進歩・高校生級到達を認定しない。
+- **「検証したが駄目だった」で作業を閉じない。失敗原因、最小修正、同一budget再実験、停止判定までを1サイクルとする。**
+- 次runの変更変数・固定変数・反証条件・停止条件が定義されていないiterationは未完了とする。
 
 ## P0 — R0.1 SILG/RTFM baseline competence recovery
 
@@ -44,6 +46,7 @@ R0の目的は、監査項目を増やすことではなく、**固定された�
 - favorable seed、instance選別、追加frameによる見かけ改善は禁止。
 - 1サイクルの上限は6 screening run + 3-seed confirmation 2案。
 - 改善が出ない場合も、どの原因分類を棄却したかを成果として残す。
+- 単発失敗後は、同一原因だけを変更した次runを必ず定義する。
 
 ### E1 — Official-fidelity reconstruction
 
@@ -138,13 +141,29 @@ D015〜D035を凍結する。次の実bundleまでは新規auditorを追加し�
 
 ## P1 — J-CRe3 external Japanese baseline
 
-1. 最新一次文献、公式code、exact commit、dataset/licenseを確認。
-2. 公式評価commandをそのまま再現。
-3. model bytes、RSS、runtime、seed、split、raw logs、checksumsを保存。
-4. random／language-blind／state-only／shuffleの定義可否を明示。
-5. 公式値との差を、実装・最適化・表現・データの4分類で診断。
+固定参照:
 
-公式再現が完了するまで独自改善を入れない。再現後のみ同一resource budget下で改善案をscreeningする。
+- 一次論文: Ueda et al., LREC-COLING 2024 / Journal of Natural Language Processing 2024。
+- 公式repository: `riken-grp/J-CRe3`。
+- datasetは実世界対話、1人称視点動画、発話mentionと物体bounding boxのcross-modal参照を含む。
+
+次の実行順:
+
+1. 公式repositoryのexact commitを固定する。
+2. dataset取得手順、license、容量、checksumを記録する。
+3. 公式baseline実装と評価commandの有無を確認する。
+4. 公式baselineが含まれる場合は、無改変で数値再現する。
+5. 公式baselineが含まれない場合は、論文記載のtext coreference + phrase grounding構成を、依存versionを固定して再構成する。
+6. model bytes、peak RSS、runtime、seed、split、raw logs、prediction、checksumsを保存する。
+7. random、text-only、vision-only、mention-shuffle、frame/object-shuffle対照を、task定義を壊さない範囲で事前登録する。
+8. 公式値との差を、実装・最適化・表現・データの4分類で診断する。
+9. 失敗時は原因だけを変えた次runを定義し、単発で終了しない。
+
+注意:
+
+- J-CRe3は日本語実世界参照解決baselineであり、SILGのinteractive policy competenceを代替しない。
+- 公式再現が完了するまで独自architecture改善を入れない。
+- 再現後のみ、同一resource budget下で性能最大化screeningへ進む。
 
 ## P1 — R0.2 Environment-first
 
