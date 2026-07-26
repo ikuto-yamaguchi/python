@@ -97,6 +97,37 @@ def _finite_nonnegative(value: Any) -> bool:
     return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(float(value)) and float(value) >= 0
 
 
+def _finite_positive(value: Any) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(float(value)) and float(value) > 0
+
+
+def _resolve_contained_artifact(base_dir: Path, relative: Any) -> tuple[Path | None, str | None]:
+    """Resolve an artifact only when it is a non-symlinked file inside base_dir."""
+    raw = str(relative)
+    rel = Path(raw)
+    if not raw or rel.is_absolute():
+        return None, "artifact path must be a non-empty relative path"
+    if any(part == ".." for part in rel.parts):
+        return None, "artifact path must not contain parent traversal"
+    root = base_dir.resolve()
+    cursor = base_dir
+    for part in rel.parts:
+        cursor = cursor / part
+        if cursor.is_symlink():
+            return None, "artifact path must not traverse symlinks"
+    try:
+        resolved = (base_dir / rel).resolve(strict=True)
+    except OSError as exc:
+        return None, f"artifact path cannot be resolved: {exc}"
+    if resolved != root and root not in resolved.parents:
+        return None, "artifact resolves outside the bundle root"
+    if not resolved.is_file():
+        return None, "artifact is not a regular file"
+    if resolved.stat().st_size <= 0:
+        return None, "artifact must be non-empty"
+    return resolved, None
+
+
 def _finite_json(value: Any) -> bool:
     if value is None or isinstance(value, (bool, str, int)):
         return True
@@ -450,17 +481,20 @@ def audit_artifacts(manifest: dict[str, Any], base_dir: Path) -> dict[str, Any]:
         if cell in cells: errors.append(f"run {index}: duplicate run cell {cell}")
         cells.add(cell); methods.add(method); seeds.add(seed); domains.add(domain); topology.add((domain, split, condition)); commits.add(str(run.get("code_commit", ""))); identity[(seed, domain, split, condition)].add((str(run.get("data_path", "")), str(run.get("data_sha256", ""))))
         for key in ("model_bytes", "peak_rss_bytes", "training_wall_seconds", "cpu_inference_ms_per_item"):
-            if not _finite_nonnegative(run.get(key)): errors.append(f"run {index}: {key} must be a finite non-negative number")
+            if not _finite_positive(run.get(key)): errors.append(f"run {index}: {key} must be a finite positive number")
         if not _is_hex(run.get("code_commit"), 40): errors.append(f"run {index}: code_commit must be a full 40-hex commit SHA")
         for path_key, hash_key in ARTIFACT_FIELDS:
             rel, expected = run.get(path_key), run.get(hash_key)
             if not rel: errors.append(f"run {index}: {path_key} is required for independent checksum verification"); continue
             if not _is_hex(expected, 64): errors.append(f"run {index}: {hash_key} must be a full 64-hex SHA-256"); continue
-            path = base_dir / str(rel)
-            if not path.is_file(): errors.append(f"run {index}: missing artifact {path}"); continue
-            actual = file_sha256(path); ok = actual == str(expected).lower(); checks.append({"run": index, "path": str(path), "expected": expected, "actual": actual, "ok": ok, "size_bytes": path.stat().st_size})
+            path, containment_error = _resolve_contained_artifact(base_dir, rel)
+            if containment_error is not None:
+                errors.append(f"run {index}: {path_key} {containment_error}")
+                continue
+            assert path is not None
+            actual = file_sha256(path); ok = actual == str(expected).lower(); checks.append({"run": index, "path": str(path.relative_to(base_dir.resolve())), "expected": expected, "actual": actual, "ok": ok, "size_bytes": path.stat().st_size, "contained": True})
             if not ok: errors.append(f"run {index}: checksum mismatch for {path_key}")
-            if path_key == "model_path" and _finite_nonnegative(run.get("model_bytes")) and int(run["model_bytes"]) != path.stat().st_size: errors.append(f"run {index}: model_bytes does not match model artifact size")
+            if path_key == "model_path" and _finite_positive(run.get("model_bytes")) and int(run["model_bytes"]) != path.stat().st_size: errors.append(f"run {index}: model_bytes does not match model artifact size")
     required = REQUIRED_METHODS; missing_methods, unexpected_methods = required - methods, methods - required
     if missing_methods: errors.append(f"manifest missing required methods {sorted(missing_methods)}")
     if unexpected_methods: errors.append(f"manifest contains unexpected methods {sorted(unexpected_methods)}")
@@ -470,7 +504,7 @@ def audit_artifacts(manifest: dict[str, Any], base_dir: Path) -> dict[str, Any]:
     if seeds != CANONICAL_SEEDS: errors.append(f"manifest seeds must be exactly {sorted(CANONICAL_SEEDS)}, found {sorted(seeds)}")
     expected = {(m, s, d, sp, c) for m in required for s in CANONICAL_SEEDS for d, sp, c in topology}; missing_cells = expected - cells
     if missing_cells: errors.append(f"manifest incomplete observed-topology coverage: {len(missing_cells)} missing cells")
-    return {"valid": not errors, "errors": errors, "warnings": [], "checks": checks, "methods": sorted(methods), "seeds": sorted(seeds), "domains": sorted(domains), "observed_topology": [list(v) for v in sorted(topology)], "runs": len(runs), "missing_run_cells": len(missing_cells), "missing_run_cell_examples": [list(v) for v in sorted(missing_cells)[:10]], "independent_artifacts_required": True, "condition_index_required": True, "exact_method_topology_required": True, "single_commit_required": True, "same_dataset_per_cell_required": True, "canonical_seeds": sorted(CANONICAL_SEEDS), "classification": "reproduced" if not errors else "initial_reproduction_failure"}
+    return {"valid": not errors, "errors": errors, "warnings": [], "checks": checks, "methods": sorted(methods), "seeds": sorted(seeds), "domains": sorted(domains), "observed_topology": [list(v) for v in sorted(topology)], "runs": len(runs), "missing_run_cells": len(missing_cells), "missing_run_cell_examples": [list(v) for v in sorted(missing_cells)[:10]], "independent_artifacts_required": True, "positive_resource_measurements_required": True, "artifact_path_containment_required": True, "nonempty_artifacts_required": True, "condition_index_required": True, "exact_method_topology_required": True, "single_commit_required": True, "same_dataset_per_cell_required": True, "canonical_seeds": sorted(CANONICAL_SEEDS), "classification": "reproduced" if not errors else "initial_reproduction_failure"}
 
 
 def main(argv: list[str] | None = None) -> int:
