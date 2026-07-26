@@ -42,7 +42,9 @@ ALLOWED_PREDICTION_FIELDS = PRED_REQUIRED | {
 RESOURCE_FIELDS = {"model_bytes", "peak_rss_bytes", "training_wall_seconds", "cpu_inference_ms_per_item", "raw_log_sha256", "model_sha256", "data_sha256", "code_commit"}
 ARTIFACT_FIELDS = (("raw_log_path", "raw_log_sha256"), ("model_path", "model_sha256"), ("data_path", "data_sha256"))
 CANONICAL_SEEDS = {1, 7, 19}
+TRAIN_SPLITS = {"train"}
 EVAL_SPLITS = {"test", "eval", "validation", "valid"}
+ALLOWED_SPLITS = TRAIN_SPLITS | EVAL_SPLITS
 
 
 def normalize_schema_key(value: Any) -> str:
@@ -247,6 +249,8 @@ def validate_dataset(rows: list[dict[str, Any]]) -> dict[str, Any]:
             errors.append(f"row {index}: domain must be non-empty")
         if not split:
             errors.append(f"row {index}: split must be non-empty")
+        elif split not in ALLOWED_SPLITS:
+            errors.append(f"row {index}: unregistered split={split!r}; allowed={sorted(ALLOWED_SPLITS)}")
         if not condition:
             errors.append(f"row {index}: condition must be non-empty")
         domains.add(domain); conditions.add(condition); splits[split] += 1
@@ -316,7 +320,7 @@ def validate_dataset(rows: list[dict[str, Any]]) -> dict[str, Any]:
     if not domains: errors.append("need >=1 domain")
     missing_holdouts = HELD_OUT_CONDITIONS - {name for c in conditions for name in HELD_OUT_CONDITIONS if name in c}
     if missing_holdouts: warnings.append(f"missing held-out conditions: {sorted(missing_holdouts)}")
-    return {"valid": not errors, "errors": errors, "warnings": sorted(set(warnings)), "instances": len(adapted), "domains": sorted(domains), "seeds": sorted(seeds), "conditions": sorted(conditions), "split_counts": dict(sorted(splits.items())), "utterance_overlap": overlap, "utterance_normalization": "NFKC + casefold + remove whitespace/control-format characters", "holdout_integrity": holdout, "split_identity_leakage": split_leakage, "leakage_rows": leakage, "schema_alias_findings": alias_findings, "schema_alias_normalization": "NFKC + casefold + remove non-ASCII-alphanumeric", "silg_rows_adapted": silg_rows, "dataset_sha256": stable_hash(adapted), "instance_fingerprints_sha256": stable_hash(fingerprints), "seed_domain_split_condition_topology": {str(k): sorted(v) for k, v in sorted(topology.items())}, "canonical_seed_topology_required": True, "adapted_schema": True, "silg_text_tokens_supported": True, "episode_split_isolation_required": True, "unicode_utterance_overlap_required": True, "alias_normalized_leakage_required": True}
+    return {"valid": not errors, "errors": errors, "warnings": sorted(set(warnings)), "instances": len(adapted), "domains": sorted(domains), "seeds": sorted(seeds), "conditions": sorted(conditions), "split_counts": dict(sorted(splits.items())), "utterance_overlap": overlap, "utterance_normalization": "NFKC + casefold + remove whitespace/control-format characters", "holdout_integrity": holdout, "split_identity_leakage": split_leakage, "leakage_rows": leakage, "schema_alias_findings": alias_findings, "schema_alias_normalization": "NFKC + casefold + remove non-ASCII-alphanumeric", "silg_rows_adapted": silg_rows, "dataset_sha256": stable_hash(adapted), "instance_fingerprints_sha256": stable_hash(fingerprints), "seed_domain_split_condition_topology": {str(k): sorted(v) for k, v in sorted(topology.items())}, "canonical_seed_topology_required": True, "adapted_schema": True, "silg_text_tokens_supported": True, "episode_split_isolation_required": True, "unicode_utterance_overlap_required": True, "alias_normalized_leakage_required": True, "allowed_train_splits": sorted(TRAIN_SPLITS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "split_scope_fail_closed": True}
 
 
 def _mean_ci(values: list[float]) -> tuple[float, float, float]:
@@ -388,8 +392,14 @@ def _validate_shuffle_assignments(preds: list[dict[str, Any]], by_id: dict[str, 
 
 
 def score(data: list[dict[str, Any]], preds: list[dict[str, Any]]) -> dict[str, Any]:
-    adapted = adapt_dataset(data); by_id = {str(r["instance_id"]): r for r in adapted}; eval_ids = {i for i, r in by_id.items() if str(r["split"]).lower() != "train"}
+    adapted = adapt_dataset(data)
+    by_id = {str(r["instance_id"]): r for r in adapted}
+    dataset_splits = {str(r.get("split", "")).lower() for r in adapted}
+    invalid_dataset_splits = sorted(dataset_splits - ALLOWED_SPLITS)
+    eval_ids = {i for i, r in by_id.items() if str(r["split"]).lower() in EVAL_SPLITS}
     errors, seen = [], set(); method_ids, grouped, snapshots, outcomes = defaultdict(set), defaultdict(list), defaultdict(set), defaultdict(dict)
+    if invalid_dataset_splits:
+        errors.append(f"dataset contains unregistered splits: {invalid_dataset_splits}; allowed={sorted(ALLOWED_SPLITS)}")
     payload_findings, alias_findings = [], []
     for index, pred in enumerate(preds, 1):
         missing = PRED_REQUIRED - pred.keys()
@@ -412,7 +422,10 @@ def score(data: list[dict[str, Any]], preds: list[dict[str, Any]]) -> dict[str, 
         if key in seen: errors.append(f"prediction row {index}: duplicate instance/method={key}"); continue
         seen.add(key); gold = by_id.get(iid)
         if gold is None: errors.append(f"prediction row {index}: unknown instance_id={iid}"); continue
-        if str(gold["split"]).lower() == "train": errors.append(f"prediction row {index}: prediction supplied for train instance={iid}"); continue
+        gold_split = str(gold["split"]).lower()
+        if gold_split not in EVAL_SPLITS:
+            errors.append(f"prediction row {index}: prediction supplied for non-evaluation split={gold_split!r} instance={iid}")
+            continue
         if not _action_is_valid(pred.get("pred_action"), gold.get("valid_action_mask", gold.get("valid"))): errors.append(f"prediction row {index}: pred_action is outside the instance valid-action schema")
         fp = str(pred["instance_fingerprint"])
         if fp != instance_fingerprint(gold): errors.append(f"prediction row {index}: instance snapshot mismatch for {iid}/{method}")
@@ -461,7 +474,7 @@ def score(data: list[dict[str, Any]], preds: list[dict[str, Any]]) -> dict[str, 
                 else: ties += 1
             values = [v for vs in groups.values() for v in vs]; boot_low, boot_high = _cluster_bootstrap_ci(groups) if values else (math.nan, math.nan); mean, low, high = _mean_ci(diffs)
             gaps[control][metric] = {"paired_cells": len(diffs), "mean_gap": mean, "min_cell_gap": min(diffs), "max_cell_gap": max(diffs), "positive_cell_fraction": sum(v > 0 for v in diffs) / len(diffs), "ci95_low": low, "ci95_high": high, "paired_randomization_p_two_sided": _paired_p(diffs), "paired_instances": len(values), "instance_mean_gap": statistics.mean(values) if values else math.nan, "instance_cluster_bootstrap_ci95_low": boot_low, "instance_cluster_bootstrap_ci95_high": boot_high, "correct_only_instances": a, "control_only_instances": b, "tied_instances": ties, "mcnemar_exact_p_two_sided": _mcnemar_exact(a, b), "passes_mean_gap_0_10": mean >= .10, "passes_every_cell_positive": min(diffs) > 0, "passes_ci_excludes_zero": low > 0, "passes_instance_cluster_ci_excludes_zero": boot_low > 0 if not math.isnan(boot_low) else False}
-    return {"valid": not errors, "errors": errors, "classification": "qualified" if not errors else "initial_reproduction_failure", "prediction_rows": len(preds), "expected_eval_instances": len(eval_ids), "coverage": coverage, "same_instance_snapshot": not any("snapshot" in e for e in errors), "fingerprints_required": True, "prediction_payload_findings": payload_findings, "prediction_schema_alias_findings": alias_findings, "strict_prediction_schema": True, "forbidden_prediction_fields": sorted(FORBIDDEN_PREDICTION_FIELDS), "alias_normalized_prediction_leakage_required": True, "finite_prediction_values_checked": True, "valid_action_schema_checked": True, "shuffle_assignment_audit": shuffle_audit, "cells": cells, "summary": dict(summary), "paired_gaps_vs_correct": gaps, "progress_contract": {"required_mean_gap": .10, "requires_all_three_seeds": True, "requires_same_instance_snapshot": True, "requires_explicit_instance_fingerprint": True, "requires_complete_prediction_coverage": True, "requires_shuffle_provenance": True, "requires_within_cell_derangement": True, "requires_split_condition_cells": True, "requires_ci_excludes_zero": True, "requires_instance_cluster_ci_excludes_zero": True, "internal_metrics_do_not_count": True}}
+    return {"valid": not errors, "errors": errors, "classification": "qualified" if not errors else "initial_reproduction_failure", "prediction_rows": len(preds), "expected_eval_instances": len(eval_ids), "coverage": coverage, "same_instance_snapshot": not any("snapshot" in e for e in errors), "fingerprints_required": True, "prediction_payload_findings": payload_findings, "prediction_schema_alias_findings": alias_findings, "strict_prediction_schema": True, "forbidden_prediction_fields": sorted(FORBIDDEN_PREDICTION_FIELDS), "alias_normalized_prediction_leakage_required": True, "finite_prediction_values_checked": True, "valid_action_schema_checked": True, "shuffle_assignment_audit": shuffle_audit, "cells": cells, "summary": dict(summary), "paired_gaps_vs_correct": gaps, "progress_contract": {"required_mean_gap": .10, "requires_all_three_seeds": True, "requires_same_instance_snapshot": True, "requires_explicit_instance_fingerprint": True, "requires_complete_prediction_coverage": True, "requires_shuffle_provenance": True, "requires_within_cell_derangement": True, "requires_split_condition_cells": True, "requires_ci_excludes_zero": True, "requires_instance_cluster_ci_excludes_zero": True, "internal_metrics_do_not_count": True}, "allowed_train_splits": sorted(TRAIN_SPLITS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "split_scope_fail_closed": True}
 
 
 def audit_artifacts(manifest: dict[str, Any], base_dir: Path) -> dict[str, Any]:
