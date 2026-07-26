@@ -165,6 +165,16 @@ def _truthy(row: dict[str, Any], key: str) -> bool:
     return row.get(key) is True or row.get(key) == 1 or str(row.get(key, False)).lower() == "true"
 
 
+def _condition_parts(row: dict[str, Any]) -> set[str]:
+    raw = unicodedata.normalize("NFKC", str(row.get("condition", ""))).casefold()
+    return {part for part in re.split(r"[+,|\s]+", raw) if part}
+
+
+def _declares_holdout(row: dict[str, Any], name: str) -> bool:
+    key = f"{name}_holdout"
+    return _truthy(row, key) or key in _condition_parts(row)
+
+
 def adapt_row(row: dict[str, Any]) -> dict[str, Any]:
     out = dict(row)
     if "utterance" not in out and isinstance(out.get("text_tokens"), list):
@@ -233,6 +243,7 @@ def validate_dataset(rows: list[dict[str, Any]]) -> dict[str, Any]:
     fingerprints = {}
     leakage = silg_rows = 0
     alias_findings = []
+    explicit_holdout_findings = []
     topology, per_seed_splits = defaultdict(set), defaultdict(set)
     for index, row in enumerate(adapted, 1):
         missing = CANONICAL_REQUIRED - row.keys()
@@ -288,6 +299,15 @@ def validate_dataset(rows: list[dict[str, Any]]) -> dict[str, Any]:
         es, ds = _split_sig(row, "entity_id", "entity_signature"), _split_sig(row, "dynamics_id", "dynamics_signature")
         if es: entities[split].add(es)
         if ds: dynamics[split].add(ds)
+        for holdout_name, signature in (("entity", es), ("dynamics", ds)):
+            if not _declares_holdout(row, holdout_name):
+                continue
+            finding = {"row": index, "instance_id": iid, "split": split, "condition": condition, "holdout": holdout_name, "signature_present": signature is not None, "signature": signature}
+            explicit_holdout_findings.append(finding)
+            if split not in EVAL_SPLITS:
+                errors.append(f"row {index}: explicit {holdout_name}_holdout must be on a registered evaluation split, found {split!r}")
+            if signature is None:
+                errors.append(f"row {index}: explicit {holdout_name}_holdout requires {holdout_name}_id or {holdout_name}_signature")
         if row.get("episode_id") is not None: episode_splits[str(row["episode_id"])].add(split)
         if row.get("episode_seed") is not None: episode_seed_splits[str(row["episode_seed"])].add(split)
         if row.get("observation_fingerprint") is not None: observation_splits[str(row["observation_fingerprint"])].add(split)
@@ -298,14 +318,22 @@ def validate_dataset(rows: list[dict[str, Any]]) -> dict[str, Any]:
         overlap[split] = {"count": len(shared), "examples": [{"normalized": value, "train_instance_ids": texts["train"][value][:5], "eval_instance_ids": values[value][:5]} for value in shared[:5]]}
         if split in EVAL_SPLITS and shared: errors.append(f"Unicode-normalized utterance leakage train->{split}: {len(shared)} utterances")
     holdout = {}
-    for name, mapping in (("entity", entities), ("dynamics", dynamics)):
+    mappings = {"entity": entities, "dynamics": dynamics}
+    for name, mapping in mappings.items():
         train_values = mapping.get("train", set())
         for split, values in mapping.items():
             if split == "train": continue
             shared = train_values & values
             holdout[f"{name}:train->{split}"] = {"train_unique": len(train_values), "eval_unique": len(values), "overlap": len(shared)}
-            if any(str(r.get("split", "")).lower() == split and _truthy(r, f"{name}_holdout") for r in adapted) and shared:
+            if any(str(r.get("split", "")).lower() == split and _declares_holdout(r, name) for r in adapted) and shared:
                 errors.append(f"{name} holdout violation train->{split}: {len(shared)} shared signatures")
+    for finding in explicit_holdout_findings:
+        signature = finding.get("signature")
+        if signature is not None and signature in mappings[finding["holdout"]].get("train", set()):
+            errors.append(f"row {finding['row']}: explicit {finding['holdout']}_holdout reuses a train signature for instance={finding['instance_id']}")
+            finding["overlaps_train"] = True
+        else:
+            finding["overlaps_train"] = False
     split_leakage = {}
     for name, mapping in (("episode_id", episode_splits), ("episode_seed", episode_seed_splits), ("observation_fingerprint", observation_splits)):
         shared = sorted(k for k, v in mapping.items() if "train" in v and v & EVAL_SPLITS)
@@ -320,7 +348,7 @@ def validate_dataset(rows: list[dict[str, Any]]) -> dict[str, Any]:
     if not domains: errors.append("need >=1 domain")
     missing_holdouts = HELD_OUT_CONDITIONS - {name for c in conditions for name in HELD_OUT_CONDITIONS if name in c}
     if missing_holdouts: warnings.append(f"missing held-out conditions: {sorted(missing_holdouts)}")
-    return {"valid": not errors, "errors": errors, "warnings": sorted(set(warnings)), "instances": len(adapted), "domains": sorted(domains), "seeds": sorted(seeds), "conditions": sorted(conditions), "split_counts": dict(sorted(splits.items())), "utterance_overlap": overlap, "utterance_normalization": "NFKC + casefold + remove whitespace/control-format characters", "holdout_integrity": holdout, "split_identity_leakage": split_leakage, "leakage_rows": leakage, "schema_alias_findings": alias_findings, "schema_alias_normalization": "NFKC + casefold + remove non-ASCII-alphanumeric", "silg_rows_adapted": silg_rows, "dataset_sha256": stable_hash(adapted), "instance_fingerprints_sha256": stable_hash(fingerprints), "seed_domain_split_condition_topology": {str(k): sorted(v) for k, v in sorted(topology.items())}, "canonical_seed_topology_required": True, "adapted_schema": True, "silg_text_tokens_supported": True, "episode_split_isolation_required": True, "unicode_utterance_overlap_required": True, "alias_normalized_leakage_required": True, "allowed_train_splits": sorted(TRAIN_SPLITS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "split_scope_fail_closed": True}
+    return {"valid": not errors, "errors": errors, "warnings": sorted(set(warnings)), "instances": len(adapted), "domains": sorted(domains), "seeds": sorted(seeds), "conditions": sorted(conditions), "split_counts": dict(sorted(splits.items())), "utterance_overlap": overlap, "utterance_normalization": "NFKC + casefold + remove whitespace/control-format characters", "holdout_integrity": holdout, "explicit_holdout_findings": explicit_holdout_findings, "explicit_condition_holdout_required": True, "split_identity_leakage": split_leakage, "leakage_rows": leakage, "schema_alias_findings": alias_findings, "schema_alias_normalization": "NFKC + casefold + remove non-ASCII-alphanumeric", "silg_rows_adapted": silg_rows, "dataset_sha256": stable_hash(adapted), "instance_fingerprints_sha256": stable_hash(fingerprints), "seed_domain_split_condition_topology": {str(k): sorted(v) for k, v in sorted(topology.items())}, "canonical_seed_topology_required": True, "adapted_schema": True, "silg_text_tokens_supported": True, "episode_split_isolation_required": True, "unicode_utterance_overlap_required": True, "alias_normalized_leakage_required": True, "allowed_train_splits": sorted(TRAIN_SPLITS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "split_scope_fail_closed": True}
 
 
 def _mean_ci(values: list[float]) -> tuple[float, float, float]:
