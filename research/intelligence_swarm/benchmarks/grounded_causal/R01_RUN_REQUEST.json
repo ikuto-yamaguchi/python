@@ -1,10 +1,11 @@
 {
-  "requested_at_utc": "2026-07-26T01:05:54Z",
+  "requested_at_utc": "2026-07-26T01:50:34Z",
   "track": "R0.1/R0.2",
   "benchmark": "SILG RTFM S1",
   "workflow": ".github/workflows/r0_silg_rtfm_probe.yml",
   "canonical_branch": "research/intelligence-swarm-reconstruction-001",
-  "request_reason": "Execute the split-job workflow from the current canonical head after the inventory-state, generator-manifest holdout, official action-dimension, and valid-action-masked offline policy fixes. The R0.1 job must freeze and upload the 131072-frame three-seed checkpoints, matched same-instance controls, dependency versions, resource measurements, raw logs, and checksums before R0.2 begins. R0.2 must consume only that immutable artifact and preserve any reproducible failure bundle. Do not add toy hypotheses or alter the official recurrent baseline.",
+  "request_reason": "Execute the split-job workflow from the current canonical head 01da0299dceedb55b81ad2ca45bc34c8734c567d after all currently integrated R0.1 schema, checkpoint-freeze, same-instance control, inventory-state, generator-manifest holdout, official action-dimension, and valid-action-masked policy fixes. The R0.1 job must freeze and upload the 131072-frame three-seed checkpoints, matched controls, dependency versions, model/resource measurements, raw logs, and checksums before R0.2 begins. R0.2 must consume only that immutable artifact and preserve a reproducible failure bundle. Do not add toy hypotheses or alter the official recurrent baseline.",
+  "requested_from_head": "01da0299dceedb55b81ad2ca45bc34c8734c567d",
   "frames_per_seed": 131072,
   "seeds": [1, 7, 19],
   "train_env": "silg:rtfm_train_s1-v0",
