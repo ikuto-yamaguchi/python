@@ -4,7 +4,7 @@
 
 R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで進める。A〜Dは新しいtoy仮説、別branch、新規機構族を作らない。既存stacked draft PRはnegative-results archiveとして保持し、新作業のbaseにしない。
 
-外部baselineを再現するまで、新規機構族、新しい知能原理、能力進歩、高校生級到達を認定しない。単発失敗で終了せず、失敗分類、根拠、原因だけを変える最小修正、同一budget再run、採用・棄却・停止判定までを1サイクルとする。宣言した変更値が実commandへ到達していないrunは仮説検証として無効とする。実行中の同一screeningを重複発行しない。
+外部baselineを再現するまで、新規機構族、新しい知能原理、能力進歩、高校生級到達を認定しない。単発失敗で終了せず、失敗分類、根拠、原因だけを変える最小修正、同一budget再run、採用・棄却・停止判定までを1サイクルとする。高コスト学習済みartifactが有効なら、監査障害だけを直すために再学習してはならない。
 
 ## A–D allocation
 
@@ -28,106 +28,82 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 ### Baseline immutable failure: run 30203026269
 
 - artifact ID `8633105142`
-- digest `sha256:43ab7f1df82e9eba98c132b2e84a9ec55dbfdd726795fb43f7608fe288e00eef`
 - Correct `0/60`、Random `4/60`、Language-blind `1/60`、State-only `0/60`、Language-shuffle `0/60`
 - Correct return `-2.0749993`、Random return `-1.1513333`
-- answer leakage `false`、same-instance成立
+- same-instance成立、answer leakage `false`
 
 ### Invalid screening execution: run 30208660095
 
-- artifact ID `8634594371`
-- intended factor: `entropy_cost=0.005`
-- actual factor in every seed command: `entropy_cost=0.05`
-- Correct `3/60`、Random `4/60`、Language-blind `3/60`、State-only `1/60`、Language-shuffle `3/60`
-- Correct return `-1.6356662`、Random return `-1.1513333`
-- classification: `experiment-factor-routing_failure`
+要求`entropy_cost=0.005`に対し全seedの実commandが`0.05`だった。artifact `8634594371`は0.05の追加negative resultとしてのみ保存する。
 
-このrunは0.005仮説の採否に使わない。0.05の追加negative resultとして保存する。
+### Valid screening execution: run 30215555334
 
-### Active corrected run: R01-SCREEN-002-E059
+- job ID `89830932884`
+- execution commit `cbd4af3d89718df76cc481f7c730ed80334ef223`
+- artifact ID `8636643017`
+- artifact digest `sha256:094ba8d6fba428c15e1dfa43298f3af9943d9fae840a072a691d3f420c5bcec2`
+- artifact size `72,690,803 bytes`
+- `entropy_cost=0.005`は全seedの完全commandへ到達済み
+- actual framesは全seed `131,080`
+- peak RSS `1,370,676 / 1,337,440 / 1,247,468 KiB`
+- training wall `1447.61 / 1519.27 / 1436.77 s`
+- Correct `0/60`
+- Random `4/60`
+- Language-blind `2/60`
+- State-only `0/60`
+- Language-shuffle `0/60`
+- Correct return `-2.1523326`
+- Random return `-1.1513333`
+- same-instance成立
+- chosen-action valid fractionは全seed `1.0`
+- masked policy entropy平均はseed 1/7/19で`1.273 / 1.216 / 1.133`
 
-変更要因は1つだけ:
+数値上、entropy低下はbaseline competenceを改善せず、`entropy_cost`単独原因は棄却候補。ただしqualificationが監査実装障害でskipされたため、以下を完了するまでiterationを閉じない。
 
-- `entropy_cost: 0.05 -> 0.005`
+### Immediate recovery task: artifact-only requalification
 
-実行状態:
+1. `.github/workflows/r01_silg_entropy_requalify.yml`でsource run `30215555334`、artifact `r01-silg-rtfm-entropy-0005-30215555334`を取得する。
+2. source bundleのentropy値、seed topology、checkpoint、actual framesをfail-closed確認する。
+3. pinned SILG/RTFMを再導入する。
+4. 修正済み`audit_silg_official_eval_parity.py`でofficial continuous streamとfresh seeded instancesを再比較する。
+5. 既存matched resultへ`qualify_r01_source_policy.py`を無変更適用する。
+6. requalification run ID、artifact ID/digest、parity JSON、qualification JSON、checksumを保存する。
+7. 高コストtrainingは再実行しない。
 
-- workflow: `.github/workflows/r01_silg_entropy_screening.yml`
-- run ID: `30215555334`
-- job ID: `89830932884`
-- execution commit: `cbd4af3d89718df76cc481f7c730ed80334ef223`
-- locator取得時点: install、source pin、generator schema、random/schema probe成功
-- current step: official `multi` recurrentの3-seed training
-- current artifacts: `0`
+### Root cause fixed
 
-実行契約:
+`Environment.initial()`は新しいepisodeの境界として`done=True`を含むが、parity監査のfresh-instance経路だけがこれを終了済みと解釈してstepを0回にした。`run_silg_matched_eval.py`と同様にlocal `done=False`で開始し、最初の`env.step()`後からdoneを読むよう修正した。
 
-- training summary top-level、各seed record、各seed commandの3箇所で`0.005`をfail-closed検証する。
-- 1箇所でも不一致ならmatched evaluation前に停止し、性能仮説の結果として扱わない。
-- run完了前に同一screeningを再dispatchしない。
+### Decision after requalification
 
-固定:
-
-- architecture、source pins、dataset、frames、seeds、split、actors、batch、unroll、matched instances
-
-完了後の必須取得:
-
-1. job conclusion、step一覧、artifact ID・digest。
-2. Correct / Random / Language-blind / State-only / Language-shuffleのsame-instance結果。
-3. checkpoint bytes・SHA-256・actual frames。
-4. model parameters/state bytes、peak RSS、training wall、CPU latency。
-5. seed、split、dependency lock、raw logs、artifact digest。
-6. answer leakage、schema leakage、prediction provenance。
-7. action histogram、valid-action率、policy entropy、episode length、reward到達率。
-8. mask前後logit、invalid-action mass、gradient norm、policy/value loss。
-9. 実際に適用されたentropy valueと完全command。
-10. qualification JSONと最初のactionable failure。
-
-採用条件:
-
-- Correct success > 0
-- Correct win rate > Random
-- Correct return > Random
-- 3-seed平均改善かつ最低seedを悪化させない
-- Language-blind / State-only / Language-shuffleを上回る
-
-棄却条件:
-
-- `0.005`適用が証明された同一契約runでCorrectがRandomを上回らない、またはCorrect successが0なら、entropy cost単独原因を棄却する。
-
-棄却後の次の単一原因:
-
-1. official evaluation/default parity
-2. recurrent reset/detach、optimizer/checkpoint restore
-3. learning rate、gradient clipping、unroll
-4. parameter数±2%以内の容量配分
-5. language/state fusion位置
-
-最大6 screening runまたは事前停止条件まで継続する。「検証したが駄目」でcycleを閉じない。
+- qualificationが`zero_source_policy_success`、`correct_not_above_random_win_rate`、`correct_not_above_random_return`なら、entropy単独原因を正式棄却する。
+- parityに大きな差がありofficial protocolだけがcompetenceを示す場合、次の単一原因をevaluation/default parityとする。
+- 両protocolでcompetenceがない場合、次の単一原因をrecurrent state / optimizer restoreへ進める。
+- いずれの場合も「駄目だった」で終了せず、次screening contractを同じcanonical branchへ発行する。
 
 ## P0 — Evaluation contract freeze
 
-D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示すまで新規auditorを追加しない。
+D015〜D035を凍結する。今回の変更は新規auditorではなく、既存parity監査のzero-step bug修正である。実bundleが具体的なfalse pass/failureを示すまで監査項目を増やさない。
 
-毎runで、matched random/language-blind/state-only/applicable shuffle、model/checkpoint bytes、peak RSS、training runtime、CPU latency、seed、split、actual frames、commit、dependency、raw logs、checksums、leakageを保存する。監査codeの回帰成功は数値baseline再現には数えない。
+毎runでrandom/language-blind/state-only/applicable shuffle、model/checkpoint bytes、RSS、runtime、CPU latency、seed、split、actual frames、commit、dependency、raw logs、checksums、leakageを保存する。
 
 ## P1 — External official reproductions
 
 ### J-CRe3
 
-一次論文はUeda et al., LREC-COLING 2024、公式repositoryは `riken-grp/J-CRe3`。exact commit、dataset、license、checksum、official commandを固定し、random、text-only、vision-only、mention-shuffle、frame/object-shuffleをmatched評価する。
+Ueda et al., LREC-COLING 2024、公式repository `riken-grp/J-CRe3`。exact commit、dataset、license、checksum、official commandを固定し、random、text-only、vision-only、mention-shuffle、frame/object-shuffleをmatched評価する。
 
 ### ReCITE
 
 ACL 2026のlanguage-only causal relation benchmarkとして別列で扱う。exact commit、dataset release、official split、prompt/model/temperature/seed、RSS/runtime、raw predictions、random/entity-order/marker/sentence shuffleを保存する。
 
-### Multi-View CRL / GPI / C3 / MCDRL
+### Multi-View CRL / GPI / C3 / MCDRL / CmIR
 
-各official codeのexact commit、dependency、dataset、主表command、model/RSS/runtime/seed/split/raw output/checksumを固定する。これらの論文値を本研究の能力証拠へ流用しない。
+各official codeの有無、exact commit、dependency、dataset、主表command、model/RSS/runtime/seed/split/raw output/checksumを固定する。論文値を本研究の能力証拠へ流用しない。
 
 ## P1 — R0.2 Environment-first
 
-immutable R0.1 competence bundleが `qualified_for_r02=true` を満たした後のみ開始する。Environment-first、parameter-matched End-to-end、State-onlyを比較し、source policy competence、3-seed平均改善、最低seed非悪化、next-state prediction、action accuracy、online task successを確認する。
+immutable R0.1 competence bundleが`qualified_for_r02=true`を満たした後のみ開始する。Environment-first、parameter-matched End-to-end、State-onlyを比較し、source policy competence、3-seed平均改善、最低seed非悪化、next-state prediction、action accuracy、online task successを確認する。
 
 ## Closed — R0.3
 
@@ -135,9 +111,9 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 ## Prior-art and RQ-001
 
-score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、CmIR、ReCITE、C3 Regularization、MCDRL、local-structure dynamical-system identification等の境界を維持する。
+score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、CmIR、ReCITE、C3、MCDRL等の境界を維持する。
 
-C037としてCVPR 2026 **Multi-Modal Image Fusion via Intervention-Stable Feature Learning**を追加する。complementary masking、same-region random masking、modality dropoutを介入として、介入を跨いで安定なcross-modal featureを抽出するため、intervention-stable multimodal feature selectionやrobust dependency discoveryだけではRQ-001の新規性を認定しない。一次論文は確認済みだが、author-official codeとexact commitは未解決であり、再現済みbaselineには数えない。
+C038としてACL 2026 **Learning Invariant Modality Representation for Robust Multimodal Learning from a Causal Inference Perspective**を明示する。各modalityのcausal-invariant / environment-specific spurious分解、invariance・mutual-information・reconstruction制約、OOD/noise robustnessだけではRQ-001の新規性を認定しない。ACL Anthology一次論文は確認済みだが、掲載ページ上にauthor-official codeは確認できず、公式再現は0件である。
 
 - 広義RQ-001: **棄却**
 - 狭義RQ-001: **追加狭域化・未採用**
@@ -150,8 +126,8 @@ C037としてCVPR 2026 **Multi-Modal Image Fusion via Intervention-Stable Featur
 
 ## Status
 
-- immutable R0.1 bundle: **2件・不合格**
-- valid entropy=0.005 screening: **run 30215555334 training中**
+- immutable R0.1 bundle: **3件**
+- valid entropy=0.005 screening: **artifact保存済み・requalification中**
 - 外部baseline再現: **0件**
 - 新規機構族: **未認定**
 - 新規知能原理: **未発見**
