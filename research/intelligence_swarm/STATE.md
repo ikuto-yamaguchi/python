@@ -35,6 +35,17 @@
 
 単発失敗、CI失敗、artifact欠落、低性能は停止理由ではなく、次の原因診断入力である。
 
+## Iteration completion contract
+
+各iterationは、文書更新だけでは完了しない。少なくとも次のいずれか1件を含める。
+
+- preserved public-baseline reproduction artifact
+- 実測性能差とmatched control
+- 失敗原因を裏付けるmetric/code差分
+- 原因だけを変えた再実験結果
+
+さらに、失敗iterationでは次回runの変更変数、固定変数、反証条件、停止条件を同時に確定する。次runを定義せずに終了してはならない。
+
 ## R0 status ledger
 
 - 公開環境control再現: **1件**
@@ -43,7 +54,7 @@
 - R0.2正式再現: **0件**
 - 実R0 bundleの統一evaluation contract通過: **0件**
 - R0.3 hidden intervention-target ablation: **棄却**
-- J-CRe3日本語外部baseline: **未再現**
+- J-CRe3日本語外部baseline: **公式paper・公式repository確認済み、数値再現未実施**
 - 広義RQ-001: **棄却**
 - 狭義RQ-001: **追加狭義化・未採用**
 - 評価分類: **`initial_reproduction_failure`**
@@ -126,7 +137,13 @@ immutable R0.1 competence bundle通過後のみ開始する。
 5. leakage。
 6. RQ-001の採用・狭域化・棄却条件。
 
-ただし、新規文献追加だけのiterationは禁止する。各iterationには性能実験結果、失敗原因、再現差分のいずれかを必須とする。
+今回の確認:
+
+- SILG/RTFMは既存の公式benchmark・公式codeを基準として継続する。新しい公式後継baselineへの置換根拠は確認されていない。
+- J-CRe3は2024年一次論文と公式repository `riken-grp/J-CRe3`を確認した。exact commit、dataset取得、公式評価command、baseline数値のimmutable再現は未完了。
+- J-CRe3は日本語実世界参照解決baselineであり、SILGのinteractive policy competenceを代替しない。別々の外部baselineとして扱う。
+
+新規文献追加だけのiterationは禁止する。各iterationには性能実験結果、失敗原因、再現差分のいずれかを必須とする。
 
 正式判断:
 
@@ -155,4 +172,4 @@ immutable R0.1 competence bundle通過後のみ開始する。
 
 ## Last integration
 
-2026-07-26: **RESET-E042**。R0の主目的を監査拡張から固定制約下の性能最大化へ変更し、「検証失敗で終了」を禁止した。失敗分類、原因特定、最小修正、同一budget再実験、停止条件判定までを1サイクルとして必須化した。高校生級未達、能力進歩未認定を維持する。
+2026-07-26: **RESET-E043**。失敗iterationを次run未定義のまま閉じることを禁止するcompletion contractを追加した。J-CRe3の一次論文と公式repositoryを固定し、数値再現は未完了とした。SILGとJ-CRe3を代替関係にせず、interactive policy competenceと日本語実世界参照解決の別baselineとして維持する。外部baseline再現0件、能力進歩未認定、高校生級未達を維持する。
