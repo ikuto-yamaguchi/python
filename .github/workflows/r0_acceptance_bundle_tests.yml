@@ -14,6 +14,8 @@ on:
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_metric_coverage.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_payload_leakage.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_statistics_artifacts.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_statistics_recomputation_binding.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/test_audit_statistics_recomputation_binding.py
       - .github/workflows/r0_acceptance_bundle_tests.yml
   pull_request:
     paths:
@@ -26,6 +28,8 @@ on:
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_metric_coverage.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_payload_leakage.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_statistics_artifacts.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_statistics_recomputation_binding.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/test_audit_statistics_recomputation_binding.py
       - .github/workflows/r0_acceptance_bundle_tests.yml
   workflow_dispatch:
 
@@ -48,7 +52,10 @@ jobs:
             research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_metric_coverage.py \
             research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_payload_leakage.py \
             research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_statistics_artifacts.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_statistics_recomputation_binding.py \
             research/intelligence_swarm/benchmarks/grounded_causal/audit_r0_acceptance_bundle.py
-      - name: Run unified acceptance regression tests
+      - name: Run unified acceptance and recomputation regression tests
         working-directory: research/intelligence_swarm/benchmarks/grounded_causal
-        run: python -m unittest -v test_audit_r0_acceptance_bundle.py
+        run: |
+          python -m unittest -v test_audit_r0_acceptance_bundle.py
+          python test_audit_statistics_recomputation_binding.py
