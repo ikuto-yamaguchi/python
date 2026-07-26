@@ -39,7 +39,7 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 10. 失敗runは次の単一原因候補とmatched rerunを発行するまで未完了とし、「検証したが駄目」で閉じない。
 11. runの進捗はR0.1 run ID、job conclusion、artifact ID、qualification JSON、checksum manifestでのみ認定する。
 12. artifactが存在すれば即座に取得し、最初のactionable failureへ次の単一原因screening contractを接続する。
-13. RESET-E051のcanonical headからR0.1を再要求し、workflow実行結果が取れない限り開始・成功・改善を推定しない。
+13. RESET-E052のcanonical headからR0.1を再要求し、workflow実行結果が取れない限り開始・成功・改善を推定しない。
 
 最適化順は、公式差分除去、recurrent/optimizer修復、learning rate・entropy・unroll・gradient clipping、parameter数±2%以内の容量配分、fusion位置の順とする。
 
@@ -104,6 +104,8 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 Markham et al., CLeaR 2026により、intervention-conditioned context module、causal concept disentanglement、compositional reuse、OOD composition自体は新規性候補から除外する。公式repositoryは未解決。
 
+Baumgartner et al., CLeaR 2026により、raw trajectory、state-dependent local causal structure、system-parameter disentanglement、permutation/diffeomorphismまでのidentifiability、それを実装するsparsity-regularised transformer自体は新規性候補から除外する。author-official repositoryは今回固定できていないため、再現対象へ昇格せずcode-unresolved列に置く。
+
 LeGITにより、language-guided target selection、low-data warm-start、言語知識と数値因果探索の組合せ自体は新規性候補から除外する。公式codeは未解決。
 
 Imai & NakamuraのGPI系研究と公開softwareにより、LLM等の生成AI内部表現をtext/image/videoのtreatmentまたはconfounder表現として利用し、生成データ、overlap改善、double machine learningへ接続すること自体は新規性候補から除外する。
@@ -112,17 +114,17 @@ Yao et al.のMulti-View CRL with Partial Observabilityと公式 `CausalLearningA
 
 ### Required prior-art actions
 
-1. Markham et al. 2026とLeGITの公式repository公開有無を継続監査する。
+1. Markham et al. 2026、Baumgartner et al. 2026、LeGITのauthor-official repository公開有無を継続監査する。
 2. GPIのcanonical repositoryとexact commitを固定し、text-as-treatment最小exampleを再現する。
 3. `CausalLearningAI/multiview-crl` のexact commitを固定し、numericalとthree-view multimodal experimentを無改変再現する。
-4. 最強の非言語CRL、LeGIT型target-selection、介入context-module型composition、GPI型生成表現因果推定、partial-observability multi-view CRLをnovelty matrixの別列へ置く。
+4. 最強の非言語CRL、LeGIT型target-selection、介入context-module型composition、GPI型生成表現因果推定、partial-observability multi-view CRL、local-structure dynamical-system identificationをnovelty matrixの別列へ置く。
 5. これらの論文上の性能値を本研究の能力証拠へ流用しない。
 6. RQ-001採用候補は、上記すべてを差し引いた後に残るlanguage固有追加情報だけに限定する。
 
 - 広義RQ-001: **棄却**
 - 狭義RQ-001: **追加狭域化・未採用**
 
-採用には、上記baseline再現後にも残るcountermodel pair、externally fixedでjoint recoding不能なdenotation law、target selection・context composition・既成生成表現利用・multi-view shared-factor recoveryを超えるlanguage固有追加情報、事前登録済みclaim/counterexample/stopping ruleが必要。
+採用には、上記baseline再現後にも残るcountermodel pair、externally fixedでjoint recoding不能なdenotation law、target selection・context composition・既成生成表現利用・multi-view shared-factor recovery・local-structure trajectory identificationを超えるlanguage固有追加情報、事前登録済みclaim/counterexample/stopping ruleが必要。
 
 ## Stage transition
 
