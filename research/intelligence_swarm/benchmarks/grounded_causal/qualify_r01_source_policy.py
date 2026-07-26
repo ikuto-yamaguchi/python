@@ -3,9 +3,8 @@
 
 This does not modify SILG or introduce a new model. It decides whether the
 preserved official recurrent R0.1 bundle demonstrates enough source-policy
-competence to make downstream representation/transfer comparisons meaningful.
-A failed gate emits an actionable next-run contract instead of treating a
-single failed experiment as a completed research iteration.
+competence and reproducibility evidence to make downstream representation and
+transfer comparisons meaningful.
 """
 from __future__ import annotations
 
@@ -34,6 +33,20 @@ def load_json(path: Path) -> dict[str, Any]:
     return value
 
 
+def _positive_number(value: Any) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and value > 0
+
+
+def _valid_sha256(value: Any) -> bool:
+    if not isinstance(value, str) or len(value) != 64:
+        return False
+    try:
+        int(value, 16)
+    except ValueError:
+        return False
+    return True
+
+
 def classify_failures(training: dict[str, Any], matched: dict[str, Any]) -> tuple[list[str], str, dict[str, Any]]:
     failures: list[str] = []
 
@@ -52,7 +65,26 @@ def classify_failures(training: dict[str, Any], matched: dict[str, Any]) -> tupl
     if requested_frames <= 0:
         failures.append("invalid_requested_frame_budget")
 
+    model_audit = training.get("model_audit", {})
+    if not isinstance(model_audit, dict) or model_audit.get("completed") is not True:
+        failures.append("missing_model_audit")
+    else:
+        for field in ("parameters", "trainable_parameters", "state_dict_bytes", "cpu_forward_latency_ms_per_step"):
+            if not _positive_number(model_audit.get(field)):
+                failures.append(f"invalid_model_audit_{field}")
+        if not _valid_sha256(model_audit.get("state_dict_sha256")):
+            failures.append("invalid_model_audit_state_dict_sha256")
+
     runs = training.get("runs", [])
+    if not isinstance(runs, list):
+        runs = []
+        failures.append("invalid_training_runs")
+    run_seeds = [int(run.get("seed", -1)) for run in runs if isinstance(run, dict)]
+    if tuple(run_seeds) != EXPECTED_SEEDS:
+        failures.append("training_run_seed_topology_mismatch")
+    if len(set(run_seeds)) != len(run_seeds):
+        failures.append("duplicate_training_seed")
+
     run_by_seed = {int(run.get("seed", -1)): run for run in runs if isinstance(run, dict)}
     for seed in EXPECTED_SEEDS:
         run = run_by_seed.get(seed)
@@ -61,10 +93,30 @@ def classify_failures(training: dict[str, Any], matched: dict[str, Any]) -> tupl
             continue
         if not bool(run.get("completed")):
             failures.append(f"training_incomplete_seed_{seed}")
+        if not _positive_number(run.get("wall_seconds")):
+            failures.append(f"missing_training_wall_time_seed_{seed}")
+
+        resource = run.get("resource", {})
+        if not isinstance(resource, dict) or not _positive_number(resource.get("peak_rss_kib")):
+            failures.append(f"missing_peak_rss_seed_{seed}")
+        if isinstance(resource, dict) and resource.get("exit_status") not in (None, 0):
+            failures.append(f"nonzero_resource_exit_status_seed_{seed}")
+
+        if not _valid_sha256(run.get("log_sha256")):
+            failures.append(f"invalid_training_log_sha256_seed_{seed}")
+
         checkpoint = run.get("checkpoint", {})
-        actual_frames = int(checkpoint.get("frames_in_checkpoint", -1)) if isinstance(checkpoint, dict) else -1
-        if requested_frames > 0 and actual_frames < requested_frames:
-            failures.append(f"frame_budget_not_reached_seed_{seed}")
+        if not isinstance(checkpoint, dict):
+            checkpoint = {}
+        actual_frames = int(checkpoint.get("frames_in_checkpoint", -1))
+        if requested_frames > 0 and actual_frames != requested_frames:
+            failures.append(f"checkpoint_frame_budget_mismatch_seed_{seed}")
+        for field in ("official_checkpoint_bytes", "model_state_bytes"):
+            if not _positive_number(checkpoint.get(field)):
+                failures.append(f"missing_checkpoint_{field}_seed_{seed}")
+        for field in ("official_checkpoint_sha256", "model_state_sha256"):
+            if not _valid_sha256(checkpoint.get(field)):
+                failures.append(f"invalid_checkpoint_{field}_seed_{seed}")
 
     if matched.get("status") != "success":
         failures.append("matched_evaluation_not_successful")
@@ -106,18 +158,28 @@ def classify_failures(training: dict[str, Any], matched: dict[str, Any]) -> tupl
         if correct_return <= random_return:
             failures.append("correct_not_above_random_return")
 
-    structural = {
+    structural_exact = {
         "source_pin_mismatch",
         "training_not_successful",
         "training_seed_mismatch",
         "invalid_requested_frame_budget",
+        "invalid_training_runs",
+        "training_run_seed_topology_mismatch",
+        "duplicate_training_seed",
         "matched_evaluation_not_successful",
         "evaluation_seed_mismatch",
         "matched_control_set_mismatch",
         "initial_instance_mismatch",
         "answer_leakage_not_explicitly_false",
     }
-    if any(failure in structural or failure.startswith(("missing_", "training_incomplete_", "frame_budget_")) for failure in failures):
+    structural_prefixes = (
+        "missing_",
+        "invalid_",
+        "training_incomplete_",
+        "checkpoint_frame_budget_",
+        "nonzero_resource_",
+    )
+    if any(failure in structural_exact or failure.startswith(structural_prefixes) for failure in failures):
         classification = "implementation_or_artifact_failure"
     elif any(failure.startswith("correct_not_above_") or failure == "zero_source_policy_success" for failure in failures):
         classification = "optimization_or_policy_competence_failure"
@@ -149,6 +211,7 @@ def main() -> None:
             "seeds": list(EXPECTED_SEEDS),
             "same_instance_controls": sorted(EXPECTED_METHODS),
             "architecture_change_allowed": False,
+            "resource_and_checksum_audit_required": True,
         },
         "next_run_contract": None if qualified else {
             "iteration_complete": False,
@@ -156,6 +219,7 @@ def main() -> None:
                 "compare official command/defaults and deterministic harness patch",
                 "inspect action distribution, valid-action use, entropy and episode termination",
                 "inspect recurrent reset/detach, frame counting, optimizer and checkpoint restore",
+                "repair only the missing or invalid reproducibility evidence when the policy itself qualifies",
             ],
             "allowed_change": "one diagnosed cause only; keep model family, frames, seeds, split and instances fixed",
             "required_retest": "repeat matched correct/random/language-blind/state-only/language-shuffle evaluation",
