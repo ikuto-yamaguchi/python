@@ -60,21 +60,28 @@ accepted evidenceは32,768 frames runのみ:
 - Random `4/60`
 - Language-blind / State-only / Language-shuffle `1/60`
 
-これはpolicy competence不足であり、公開能力baseline再現ではない。131,072-frame runはR0.2中のfailureでartifactが失われたため受理しない。
+これはpolicy competence不足であり、公開能力baseline再現ではない。
 
 ## Active execution
 
+- push workflow run: `30203026269` / run number `285`
+- workflow head: `5d9f137296a64fc401560356470ac27f520cbeff`
+- job: `r01-public-reproduction`
+- confirmed completed steps: pinned public-source install、generator-signature test、canonical-seed random control、schema probe
+- current confirmed step at locator capture: `Run official multi recurrent 131072-frame training` **in progress**
+- artifact count at locator capture: **0**
+- run status is execution evidence only。completion、qualification、能力改善とは認定しない。
+
+実行契約:
+
 1. `qualify_r01_source_policy.py`をR0.1とR0.2の間に置く。
-2. R0.1は終了直後にcheckpoint、matched predictions、resource、raw logs、dependency lock、checksums、qualification結果を、成功・失敗にかかわらず保存する。
-3. qualificationはsource pin、seeds `1/7/19`、actual checkpoint frames、全checkpoint完了、same-instance control、answer-leakage false、Correct/Randomのwin・returnをfail-closedで確認する。
-4. `Correct <= Random`、Correct success zero、frame未達、seed/method/instance不整合、artifact欠落のいずれかならR0.2を開始しない。
-5. 不合格時は `implementation_or_artifact_failure` または `optimization_or_policy_competence_failure` に分類し、固定条件、診断項目、変更可能な単一原因、matched再試験、停止条件を `next_run_contract` として保存する。
-6. R0.2 jobはdownload後にもqualification artifactの `qualified_for_r02=true` を再確認する。
-7. 次runではaction histogram、valid-action率、entropy、episode length、reward到達率、mask前後logit、invalid-action mass、gradient norm、policy/value lossをseed別に保存し、公式実装との差、recurrent reset/detach、optimizer、termination、frame counting、mask、checkpoint restoreを診断する。
-8. 原因だけを変える最大6 screening runを行い、有望案だけseeds `1,7,19`へ昇格する。
-9. screening runが失敗しても、停止条件を満たさない限り次の単一原因候補へ進み、失敗報告のみでcycleを閉じない。
-10. 実装忠実度が未確定ならarchitecture変更へ進まず、official command/defaults、checkpoint restore、frame counting、mask、recurrent state、optimizerの順に差分を潰す。
-11. RESET-E052ではcanonical headからR0.1数値runを再要求する。run ID、job conclusion、artifact ID、qualification JSON、checksum manifestが揃うまで開始・成功・能力進歩を認定しない。
+2. R0.1終了直後にcheckpoint、matched predictions、resource、raw logs、dependency lock、checksums、qualification結果を成否にかかわらず保存する。
+3. qualificationはsource pin、seeds `1/7/19`、actual checkpoint frames、全checkpoint完成、same-instance control、answer-leakage false、Correct/Randomのwin・returnをfail-closed確認する。
+4. `Correct <= Random`、Correct success zero、frame未達、seed/method/instance不整合、artifact欠落ならR0.2を開始しない。
+5. 不合格時は、失敗分類、固定条件、診断値、変更可能な単一原因、matched再試験、停止条件を `next_run_contract` として保存する。
+6. action histogram、valid-action率、entropy、episode length、reward到達率、mask前後logit、invalid-action mass、gradient norm、policy/value lossをseed別に保存する。
+7. 原因だけを変える最大6 screening runを行い、有望案だけseeds `1,7,19`へ昇格する。
+8. 停止条件を満たさない限り、失敗報告だけでcycleを閉じない。
 
 ## Evaluation contract
 
@@ -82,29 +89,23 @@ D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示す
 
 毎runでrandom/language-blind/state-only/applicable shuffle、model/checkpoint bytes、peak RSS、runtime、CPU latency、seed、split、actual frames、commit、dependency、raw logs、checksums、leakageを保存する。
 
-監査codeの回帰成功はR0.1数値再現や能力進歩には数えない。
-
 ## Prior-art and RQ boundary
 
 J-CRe3はLREC-COLING 2024の日本語実世界multimodal reference-resolution datasetであり、日本語groundingの外部baselineとして扱うが、SILG/RTFMのinteractive policy competenceを代替しない。
 
-2025 score-based CRLと2026年3月の有限標本CRLにより、unknown target、少数environment、finite-sample recoveryはRQ-001の新規性根拠から除外済みである。
+2025 score-based CRLと2026年有限標本CRLにより、unknown target、少数environment、finite-sample recoveryはRQ-001の新規性根拠から除外済みである。
 
-Markham et al., CLeaR 2026により、intervention-conditioned context module、因果概念disentanglement、compositional reuse、OOD compositionだけではRQ-001の新規性にならない。公式repositoryは未解決のため再現済みとは扱わない。
+Markham et al., CLeaR 2026、Baumgartner et al., CLeaR 2026、LeGIT、GPI、Yao et al. Multi-View CRLの既存境界を維持する。
 
-Baumgartner et al., CLeaR 2026は、raw trajectoryからstate-dependent local causal structureを用いて動的系パラメータをpermutationとdiffeomorphismまで識別し、sparsity-regularised transformerで回復する。したがって、trajectoryから局所的因果構造・system parameter・disentangled representationを回復すること自体はRQ-001の新規性候補から除外する。今回の監査ではauthor-official repositoryを固定できておらず、official-code reproductionは0件のままとする。
+Mai & Han, ACL 2026のCmIRは、言語・音響・視覚modalitiesを因果不変表現と環境固有spurious表現へ分離し、invariance、mutual-information、reconstruction制約によってOOD・noise robustnessを改善する。したがって、multimodal invariant/spurious decomposition、環境横断の安定予測、再構成付き因果不変表現だけではRQ-001の新規性を認定しない。author-official codeとexact commitは未固定であり、再現済みbaselineには数えない。
 
-LeGITにより、自然言語meta-informationを使ったintervention target選択、低データ初期局面のLLM warm-start、言語知識と数値因果探索の組合せ自体はRQ-001の新規性候補から除外する。公式codeは未解決である。
-
-Imai & NakamuraのGPI系研究は、生成AIが生成・抽出したtext/image/video内部表現を、因果・予測推定へ利用する公開softwareを提供する。したがって、LLM内部表現を用いたtext-as-treatment、text/image-as-confounder、生成データによるoverlap改善、double machine learningによる効果推定だけではRQ-001の新規性にならない。GPIはinteractive policy learningやhidden intervention-target recoveryを直接扱うbaselineではないため、SILG/J-CRe3とは別列でnovelty matrixへ置く。
-
-Yao et al.のMulti-View CRL with Partial Observabilityは、画像・テキストを含む複数viewから、部分観測下のshared causal factorsを識別する公式実装 `CausalLearningAI/multiview-crl` を公開している。したがって、言語を含むmulti-view alignment、partial observability、shared latent recovery、multimodal contrastive learningだけではRQ-001の新規性を認定しない。exact commit、environment、dataset checksum、数値再現は未完了である。
+Saklad et al., ACL 2026のReCITEは、実世界textから因果関係を抽出・推論する公開benchmarkと公式code/dataを提供し、既存LLMの性能不足を示す。これはhidden intervention-target recoveryではないが、language-only causal-relation inferenceをRQ-001のlanguage固有能力と混同しないためnovelty matrixの別列へ置く。公式repository `Ryan-Saklad/ReCITE` のexact commit、dataset checksum、evaluation command、model access条件は未固定である。
 
 正式判断:
 
-> **RQ-001: NARROWED BEYOND LANGUAGE-GUIDED TARGET SELECTION, INTERVENTION-CONDITIONED COMPOSITION, GENERATIVE-REPRESENTATION CAUSAL INFERENCE, PARTIALLY OBSERVED MULTI-VIEW CRL, AND LOCAL-STRUCTURE DYNAMICAL-SYSTEM IDENTIFICATION — NOT ADOPTED**
+> **RQ-001: NARROWED BEYOND LANGUAGE-GUIDED TARGET SELECTION, INTERVENTION-CONDITIONED COMPOSITION, GENERATIVE-REPRESENTATION CAUSAL INFERENCE, PARTIALLY OBSERVED MULTI-VIEW CRL, LOCAL-STRUCTURE DYNAMICAL-SYSTEM IDENTIFICATION, MULTIMODAL CAUSAL-INVARIANT DECOMPOSITION, AND LANGUAGE-ONLY CAUSAL-RELATION INFERENCE — NOT ADOPTED**
 
-採用には、最強の非言語baseline、LeGIT型target-selection baseline、介入context-module型composition baseline、GPI型生成表現因果推定baseline、Multi-View CRL baseline、local-structure dynamical-system identification baselineの再現後にも残るcountermodel pair、外部固定でjoint recoding不能なdenotation law、既存のtrajectory/local-structure recoveryを超えるlanguage固有追加情報の直接証拠、事前登録済みclaim/counterexample/stopping ruleが必要。
+採用には、上記baseline再現後にも残るcountermodel pair、外部固定でjoint recoding不能なdenotation law、既存のlanguage-only causal extraction・multimodal invariance・trajectory/local-structure recoveryを超えるlanguage固有追加情報の直接証拠、事前登録済みclaim/counterexample/stopping ruleが必要。
 
 ## Stage transition
 
@@ -121,4 +122,4 @@ Yao et al.のMulti-View CRL with Partial Observabilityは、画像・テキス�
 
 ## Last integration
 
-2026-07-26: **RESET-E052**。R0.1/J-CRe3/R0.2の受理可能artifactが0件であることを維持し、canonical headからR0.1数値runを再要求する。Baumgartner et al., CLeaR 2026をprior-art境界へ追加し、raw trajectory、state-dependent local causal structure、system-parameter disentanglementだけではRQ-001を採用しない。author-official codeは未固定であり、外部baseline再現、能力進歩、新規知能原理、高校生級到達はいずれも未認定のままとする。
+2026-07-26: **RESET-E053**。R0.1 push run `30203026269`が固定source導入・generator-signature・random/schema probeを通過し、131,072-frame学習工程へ到達した事実を実行中証拠として統合した。artifactは未生成であり、再現成功・能力改善とは認定しない。ACL 2026のCmIRとReCITEをprior-art/benchmark境界へ追加し、multimodal causal-invariant decompositionとlanguage-only causal-relation inferenceだけではRQ-001を採用しない。外部baseline再現0、能力進歩未認定、高校生級未達を維持する。
