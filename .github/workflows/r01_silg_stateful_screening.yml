@@ -1,4 +1,5 @@
 name: R0.1 SILG official stateful screening
+# R01-SCREEN-003-E062 explicit push activation; no experimental setting changed.
 run-name: R0.1 SILG stateful=true @ ${{ github.sha }}
 
 on:
