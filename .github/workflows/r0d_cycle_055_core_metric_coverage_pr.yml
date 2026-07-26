@@ -1,0 +1,49 @@
+name: R0D Cycle 055 core metric coverage PR
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - research/intelligence_swarm/benchmarks/grounded_causal/apply_r0d_cycle_055_core_metric_coverage.py
+      - .github/workflows/r0d_cycle_055_core_metric_coverage_pr.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply-test-commit:
+    if: github.head_ref == 'research/intelligence-swarm-reconstruction-001'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/intelligence-swarm-reconstruction-001
+          fetch-depth: 0
+      - name: Apply core patch
+        run: python research/intelligence_swarm/benchmarks/grounded_causal/apply_r0d_cycle_055_core_metric_coverage.py
+      - name: Run core regressions
+        run: |
+          python -m py_compile research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
+          python research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_metric_coverage_core.py
+      - name: Record result
+        run: |
+          cat > research/intelligence_swarm/governance/REPORT_R0D_CYCLE_055.md <<'MD'
+          # R0-D Cycle 055 — direct core optional-metric coverage
+
+          `evaluation_contract.score()` now rejects partial `gold_inverse`, selective per-method `pred_inverse` omission, and prediction-only inverse output. Inverse cell means, confidence intervals, minimum-cell gaps, and paired tests are emitted only after complete same-instance coverage across all six registered methods.
+
+          Scope is R0 reproducibility/statistics/leakage auditing only. No memory, replay, fast weights, sleep, forgetting, or new mechanism was added. Any violation is `initial_reproduction_failure`; no real R0 reproduction is accepted by this change alone.
+          MD
+      - name: Commit to canonical branch
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py research/intelligence_swarm/governance/REPORT_R0D_CYCLE_055.md
+          if git diff --cached --quiet; then
+            echo 'No changes to commit'
+          else
+            git commit -m 'r0d: enforce optional metric coverage in core scorer'
+            git push origin HEAD:research/intelligence-swarm-reconstruction-001
+          fi
