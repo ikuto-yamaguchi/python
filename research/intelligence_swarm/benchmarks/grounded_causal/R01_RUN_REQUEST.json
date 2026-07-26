@@ -1,6 +1,6 @@
 {
-  "requested_at_utc": "2026-07-26T14:40:00Z",
-  "integration": "R01-SCREEN-002-E054",
+  "requested_at_utc": "2026-07-26T15:30:00Z",
+  "integration": "R01-SCREEN-002-E055",
   "track": "R0.1",
   "benchmark": "SILG RTFM S1",
   "workflow": ".github/workflows/r01_silg_entropy_screening.yml",
@@ -72,7 +72,7 @@
     "correct success greater than zero",
     "three-seed mean improves and minimum seed does not regress"
   ],
-  "failure_policy": "If entropy_cost=0.005 also fails, retain initial_reproduction_failure, reject entropy_cost as the sole cause, and proceed to exactly one next diagnosed factor in this order: official evaluation/default parity; recurrent reset/detach and optimizer/checkpoint restore; learning rate/gradient clipping/unroll. Do not create a new mechanism family, toy hypothesis, branch, or PR chain.",
+  "failure_policy": "If entropy_cost=0.005 also fails, retain initial_reproduction_failure, reject entropy_cost as the sole cause, and continue the same cycle with exactly one next diagnosed factor: first official evaluation/default parity, then recurrent reset/detach and optimizer/checkpoint restore, then learning rate/gradient clipping/unroll. A failed run is not a completed iteration until the next screening contract is issued or a preregistered stop condition is met. Do not create a new mechanism family, toy hypothesis, branch, or PR chain.",
   "claims_blocked_until_completion": [
     "public baseline reproduced",
     "capability progress",
