@@ -8,6 +8,7 @@ on:
       - '.github/workflows/r0_silg_rtfm_run_locator.yml'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/R01_RUN_REQUEST.json'
       - '.github/workflows/r0_silg_rtfm_probe.yml'
+      - '.github/workflows/r01_silg_entropy_screening.yml'
   workflow_dispatch:
 
 permissions:
@@ -15,32 +16,43 @@ permissions:
   contents: read
 
 jobs:
-  locate-latest-push-run:
+  locate-latest-push-runs:
     runs-on: ubuntu-22.04
     timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: canonical
+            workflow: r0_silg_rtfm_probe.yml
+          - label: entropy-0005
+            workflow: r01_silg_entropy_screening.yml
     steps:
-      - name: Query latest canonical push runs and artifacts
+      - name: Query latest ${{ matrix.label }} push run, jobs, and artifacts
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           BRANCH: research/intelligence-swarm-reconstruction-001
-          WORKFLOW: r0_silg_rtfm_probe.yml
+          WORKFLOW: ${{ matrix.workflow }}
+          LABEL: ${{ matrix.label }}
         run: |
           set -euo pipefail
+          prefix="r0_silg_${LABEL}"
           gh api --method GET \
             -H 'Accept: application/vnd.github+json' \
             "/repos/${REPO}/actions/workflows/${WORKFLOW}/runs" \
             -f branch="${BRANCH}" -f event=push -f per_page=10 \
-            > r0_silg_push_runs.json
-          python - <<'PY'
+            > "${prefix}_push_runs.json"
+          PREFIX="${prefix}" python - <<'PY'
           import json
+          import os
           from pathlib import Path
 
-          payload = json.loads(Path('r0_silg_push_runs.json').read_text(encoding='utf-8'))
+          prefix = os.environ['PREFIX']
+          payload = json.loads(Path(f'{prefix}_push_runs.json').read_text(encoding='utf-8'))
           runs = payload.get('workflow_runs', [])
-          summary = []
-          for run in runs:
-              summary.append({
+          summary = [
+              {
                   'id': run.get('id'),
                   'run_number': run.get('run_number'),
                   'status': run.get('status'),
@@ -50,28 +62,32 @@ jobs:
                   'created_at': run.get('created_at'),
                   'updated_at': run.get('updated_at'),
                   'html_url': run.get('html_url'),
-              })
-          Path('r0_silg_push_run_summary.json').write_text(
+              }
+              for run in runs
+          ]
+          Path(f'{prefix}_push_run_summary.json').write_text(
               json.dumps(summary, ensure_ascii=False, indent=2) + '\n',
               encoding='utf-8',
           )
           print(json.dumps(summary, ensure_ascii=False, indent=2))
           if not summary:
-              raise SystemExit('No push-triggered R0 SILG workflow run was found')
-          print(f"LATEST_R0_SILG_PUSH_RUN_ID={summary[0]['id']}")
+              raise SystemExit(f'No push-triggered run was found for {prefix}')
+          print(f'LATEST_PUSH_RUN_ID={summary[0]["id"]}')
           PY
-          latest_id=$(python -c "import json; print(json.load(open('r0_silg_push_run_summary.json'))[0]['id'])")
+          latest_id=$(PREFIX="${prefix}" python -c "import json, os; print(json.load(open(os.environ['PREFIX'] + '_push_run_summary.json'))[0]['id'])")
           gh api --method GET \
             -H 'Accept: application/vnd.github+json' \
             "/repos/${REPO}/actions/runs/${latest_id}/jobs" \
-            > r0_silg_latest_jobs.json
+            > "${prefix}_latest_jobs.json"
           gh api --method GET \
             -H 'Accept: application/vnd.github+json' \
             "/repos/${REPO}/actions/runs/${latest_id}/artifacts" \
-            > r0_silg_latest_artifacts.json
-          python - <<'PY'
+            > "${prefix}_latest_artifacts.json"
+          PREFIX="${prefix}" python - <<'PY'
           import json
-          for path in ('r0_silg_latest_jobs.json', 'r0_silg_latest_artifacts.json'):
+          import os
+          prefix = os.environ['PREFIX']
+          for path in (f'{prefix}_latest_jobs.json', f'{prefix}_latest_artifacts.json'):
               print(f'--- {path} ---')
               print(json.dumps(json.load(open(path)), ensure_ascii=False, indent=2))
           PY
@@ -79,11 +95,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: r0-silg-push-run-locator-${{ github.run_id }}
-          path: |
-            r0_silg_push_runs.json
-            r0_silg_push_run_summary.json
-            r0_silg_latest_jobs.json
-            r0_silg_latest_artifacts.json
+          name: r0-silg-${{ matrix.label }}-run-locator-${{ github.run_id }}
+          path: r0_silg_${{ matrix.label }}_*.json
           if-no-files-found: warn
           retention-days: 30
