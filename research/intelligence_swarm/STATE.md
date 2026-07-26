@@ -70,10 +70,9 @@ accepted evidenceは32,768 frames runのみ:
 6. R0.2 jobはdownload後にもqualification artifactの `qualified_for_r02=true` を再確認する。
 7. 次runではaction histogram、valid-action率、entropy、episode length、reward到達率、mask前後logit、invalid-action mass、gradient norm、policy/value lossをseed別に保存し、公式実装との差、recurrent reset/detach、optimizer、termination、frame counting、mask、checkpoint restoreを診断する。
 8. 原因だけを変える最大6 screening runを行い、有望案だけseeds `1,7,19`へ昇格する。
-9. RESET-E048のcanonical headからR0.1 run requestを更新し、数値実験を再要求する。
-10. screening runが失敗しても、停止条件を満たさない限り次の単一原因候補へ進み、失敗報告のみでcycleを閉じない。
-
-このゲートは新しいモデルやtoy仮説ではなく、無能力なsource policyからR0.2の見かけ上の差を作ることを防ぎ、失敗から次の性能改善runへ接続する実行制御である。
+9. RESET-E049では、PR #409 head `dba26a23a67f05712ae83143d99107f9effd5702`から取得できたPR連動workflowが監査系3本だけであったことを記録する。ただし取得APIはpull-request-triggered runに限定されるため、push型R0.1の不存在証拠とは扱わない。
+10. E049のcanonical headからR0.1 run requestを再発行し、run IDとartifact IDが取得できるまで、開始・完了・成功を認定しない。
+11. screening runが失敗しても、停止条件を満たさない限り次の単一原因候補へ進み、失敗報告のみでcycleを閉じない。
 
 ## Evaluation contract
 
@@ -81,7 +80,7 @@ D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示す
 
 毎runでrandom/language-blind/state-only/applicable shuffle、model/checkpoint bytes、peak RSS、runtime、CPU latency、seed、split、actual frames、commit、dependency、raw logs、checksums、leakageを保存する。
 
-現headで確認できたworkflow successはartifact-path containment、unified acceptance gate、prediction-method topologyの監査系のみであり、R0.1数値再現や能力進歩には数えない。
+PR #409 head `dba26a23...`で確認できたPR連動workflowは、artifact-path containment、unified acceptance gate、prediction-method topologyの3本がsuccessである。これは監査codeの回帰証拠に限定し、R0.1数値再現や能力進歩には数えない。
 
 ## Prior-art and RQ boundary
 
@@ -89,11 +88,9 @@ J-CRe3はLREC-COLING 2024の日本語実世界multimodal reference-resolution da
 
 2025 score-based CRLと2026年3月の有限標本CRLにより、unknown target、少数environment、finite-sample recoveryはRQ-001の新規性根拠から除外済みである。
 
-2026年のMarkham et al.は、任意に表現力の高いblack-box generative modelへ介入型context moduleを付加し、因果的にdisentangledな概念表現とOOD compositionを学習できる枠組みおよび識別結果を提示した。したがって、context-conditioned intervention、因果概念のdisentanglement、学習済み表現のcompositional reuseだけではRQ-001の新規性にならない。公式コードは今回の監査では未固定であり、exact commit再現は未実施とする。
+Markham et al., CLeaR 2026は、任意に表現力の高いblack-box generative modelへ介入型context moduleを付加し、因果的にdisentangledな概念表現とOOD compositionを学習する枠組み、および識別結果を提示した。PMLR正式掲載ページを再監査したが、related materialとして公式repositoryは確認できなかったため、状態を **paper/PMLR確認済み・official code unresolved** とする。context-conditioned intervention、因果概念disentanglement、compositional reuseだけではRQ-001の新規性にならない。
 
-LeGITは、システム変数の自然言語meta-informationとLLMの世界知識を使って初期のintervention targetを選択し、数値的online causal discoveryをwarm-startする。したがって、自然言語記述を使った介入候補選択、低データ初期局面でのLLM warm-start、言語知識と数値因果探索の組合せ自体はRQ-001の新規性候補から除外する。
-
-LeGITのproject pageには`Code`表記があるが、2026-07-26時点の監査では公開repository URLへ解決できず、OpenReviewにも公式code URLは提示されていない。したがって状態を **paper/project-page確認済み・official code unresolved** に訂正する。exact commit、dependency、prompt、split、seed、raw output、checksumを固定した再現は未実施であり、性能証拠として認定しない。
+LeGITは、システム変数の自然言語meta-informationとLLMの世界知識を使って初期のintervention targetを選択し、数値的online causal discoveryをwarm-startする。自然言語記述を使った介入候補選択、低データ初期局面でのLLM warm-start、言語知識と数値因果探索の組合せ自体はRQ-001の新規性候補から除外する。公式codeは未解決のため性能証拠として認定しない。
 
 正式判断:
 
@@ -116,4 +113,4 @@ LeGITのproject pageには`Code`表記があるが、2026-07-26時点の監査�
 
 ## Last integration
 
-2026-07-26: **RESET-E048**。Markham et al. 2026の介入context module・因果disentanglement・OOD compositionをprior-art境界へ追加し、RQ-001をさらに狭域化した。監査系CI以外の受理可能な数値artifactは確認できず、R0.1/J-CRe3/R0.2は0件のまま。失敗報告のみでcycleを閉じず、停止条件まで最大6 screening runを継続する実行規則とR0.1再実行要求を維持する。能力進歩未認定、高校生級未達。
+2026-07-25: **RESET-E049**。PR #409現headとPR連動CIを確認し、push型R0.1 runの不存在を誤認しないよう証拠境界を修正した。Markham et al. 2026はPMLR正式掲載を確認したがofficial codeは未解決。R0.1/J-CRe3/R0.2の受理可能artifactは0件のまま。E049 headから数値run requestを再発行し、run ID・artifact ID・qualification結果が得られるまで進捗認定しない。能力進歩未認定、高校生級未達。
