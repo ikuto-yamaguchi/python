@@ -76,6 +76,30 @@ jobs:
             --silg-root "$RUNNER_TEMP/r0_silg/silg" --seeds 1 7 19 --frames 131072 \
             --entropy-cost 0.005 --output "$results" \
             2>&1 | tee "$results/SILG_RTFM_RECURRENT_SMOKE.log"
+      - name: Verify the declared screening factor reached every seed command
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('research/intelligence_swarm/benchmarks/grounded_causal/results_entropy_0005/SILG_RTFM_RECURRENT_SMOKE_3SEED.json')
+          d = json.loads(p.read_text(encoding='utf-8'))
+          if d.get('entropy_cost') != 0.005:
+              raise SystemExit(f"top-level entropy_cost mismatch: {d.get('entropy_cost')!r}")
+          runs = d.get('runs', [])
+          if len(runs) != 3:
+              raise SystemExit(f"expected 3 seed runs, got {len(runs)}")
+          for run in runs:
+              if run.get('entropy_cost') != 0.005:
+                  raise SystemExit(f"seed {run.get('seed')} entropy mismatch: {run.get('entropy_cost')!r}")
+              cmd = [str(x) for x in run.get('command', [])]
+              try:
+                  i = cmd.index('--entropy_cost')
+              except ValueError:
+                  raise SystemExit(f"seed {run.get('seed')} command lacks --entropy_cost")
+              if i + 1 >= len(cmd) or cmd[i + 1] != '0.005':
+                  raise SystemExit(f"seed {run.get('seed')} command did not receive 0.005: {cmd}")
+          print('verified entropy_cost=0.005 for all three seed commands')
+          PY
       - name: Evaluate matched controls on identical instances
         run: |
           set -o pipefail
