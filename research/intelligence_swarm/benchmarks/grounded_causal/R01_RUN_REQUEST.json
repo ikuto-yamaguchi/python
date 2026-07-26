@@ -1,6 +1,6 @@
 {
-  "requested_at_utc": "2026-07-26T15:30:00Z",
-  "integration": "R01-SCREEN-002-E055",
+  "requested_at_utc": "2026-07-26T18:38:43Z",
+  "integration": "R01-SCREEN-002-E058",
   "track": "R0.1",
   "benchmark": "SILG RTFM S1",
   "workflow": ".github/workflows/r01_silg_entropy_screening.yml",
@@ -24,12 +24,20 @@
     "answer_leakage": false,
     "same_instance_controls": true
   },
+  "invalid_run": {
+    "run_id": 30208660095,
+    "artifact_id": 8634594371,
+    "requested_entropy_cost": 0.005,
+    "actual_entropy_cost": 0.05,
+    "classification": "experiment-factor-routing_failure",
+    "use_for_entropy_hypothesis": false
+  },
   "screening_run_index": 2,
   "one_changed_factor": {
     "name": "entropy_cost",
     "from": 0.05,
     "to": 0.005,
-    "rationale": "The pinned official SILG launch.py defines both 0.05 and 0.005 for RTFM. Immutable run 30203026269 evaluated 0.05 and failed with zero correct success while random achieved 4/60. Test the remaining official value without changing architecture, sources, data, seeds, split, frame request, actor count, batch size, unroll length, or matched evaluation instances."
+    "rationale": "Re-run the remaining official entropy value after adding fail-closed routing checks. Keep architecture, sources, data, seeds, split, frames, actor count, batch size, unroll length, and matched evaluation instances fixed."
   },
   "fixed_contract": {
     "frames_per_seed": 131072,
@@ -47,7 +55,8 @@
   },
   "source_pins": {
     "silg": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
-    "rtfm": "58f17955595b5a127c96d045d896fcbcc7d4b570"
+    "rtfm": "58f17955595b5a127c96d045d896fcbcc7d4b570",
+    "routing_fix_commit": "54a1f1f3c09ed0a8d526ae4d877057cfa33cd3d6"
   },
   "required_artifacts": [
     "three checkpoints with actual frame count, bytes and SHA-256",
@@ -59,6 +68,7 @@
     "policy entropy and episode termination statistics",
     "pre-mask and post-mask logits plus invalid-action probability mass",
     "gradient norm and policy/value losses",
+    "actual entropy value and complete command for every seed",
     "raw install, training, evaluation and qualification logs",
     "pip freeze",
     "file-size manifest",
@@ -66,13 +76,14 @@
   ],
   "qualification": [
     "all three checkpoints complete",
+    "entropy_cost=0.005 proven in summary, every seed record, and every seed command",
     "answer leakage false",
     "correct win rate greater than random",
     "correct return greater than random",
     "correct success greater than zero",
     "three-seed mean improves and minimum seed does not regress"
   ],
-  "failure_policy": "If entropy_cost=0.005 also fails, retain initial_reproduction_failure, reject entropy_cost as the sole cause, and continue the same cycle with exactly one next diagnosed factor: first official evaluation/default parity, then recurrent reset/detach and optimizer/checkpoint restore, then learning rate/gradient clipping/unroll. A failed run is not a completed iteration until the next screening contract is issued or a preregistered stop condition is met. Do not create a new mechanism family, toy hypothesis, branch, or PR chain.",
+  "failure_policy": "If 0.005 reaches every seed command and Correct still does not exceed Random or has zero success, reject entropy_cost as the sole cause and continue with official evaluation/default parity as the next single factor. If no job starts, record it as an execution blocker rather than a model result. Do not close the iteration until the next screening contract is issued or a preregistered stop condition is met.",
   "claims_blocked_until_completion": [
     "public baseline reproduced",
     "capability progress",
