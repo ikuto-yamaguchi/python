@@ -7,8 +7,9 @@ Dataset/schema leakage, alias-normalized leakage, explicit holdout-condition
 integrity, registered train/evaluation split scope, paired statistics, complete
 same-instance metric coverage, resource artifacts, strictly-positive measured
 resources, bundle-contained artifact paths, prediction-payload leakage,
-prediction-cell binding, prediction/statistics checksums, and deterministic
-statistics recomputation must all pass together.
+prediction-cell binding, prediction/statistics checksums, deterministic
+statistics recomputation, and public-baseline provenance/reproduction must all
+pass together.
 """
 from __future__ import annotations
 
@@ -25,6 +26,7 @@ import audit_prediction_eval_split_scope as prediction_eval_split_scope
 import audit_prediction_metric_coverage as prediction_metric_coverage
 import audit_prediction_payload_leakage as prediction_payload
 import audit_prediction_statistics_artifacts as prediction_statistics
+import audit_public_baseline_reproduction as public_baseline_reproduction
 import audit_schema_alias_leakage as schema_alias
 import audit_statistics_recomputation_binding as statistics_recomputation
 import evaluation_contract
@@ -63,6 +65,7 @@ def audit_acceptance(
     checks["statistics_recomputation_binding_contract"] = statistics_recomputation.audit(
         data, predictions, manifest, base_dir
     )
+    checks["public_baseline_reproduction_contract"] = public_baseline_reproduction.audit(manifest)
 
     failed = sorted(name for name, result in checks.items() if result.get("valid") is not True)
     errors = [
@@ -98,6 +101,10 @@ def audit_acceptance(
         "pooled_or_reused_prediction_artifacts_forbidden": True,
         "saved_statistics_must_equal_fresh_recomputation": True,
         "statistics_checksum_alone_is_not_acceptance": True,
+        "public_baseline_source_must_be_immutable": True,
+        "public_baseline_expected_observed_values_required": True,
+        "public_baseline_tolerances_preregistered": True,
+        "public_baseline_observations_bound_to_statistics_checksum": True,
         "partial_contract_success_is_not_acceptance": True,
         "new_mechanism_introduced": False,
     }
