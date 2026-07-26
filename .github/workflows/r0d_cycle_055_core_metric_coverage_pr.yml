@@ -3,7 +3,7 @@ name: R0D Cycle 055 core metric coverage PR
 on:
   pull_request:
     branches:
-      - main
+      - research/intelligence-swarm-governance-014
     paths:
       - research/intelligence_swarm/benchmarks/grounded_causal/apply_r0d_cycle_055_core_metric_coverage.py
       - .github/workflows/r0d_cycle_055_core_metric_coverage_pr.yml
