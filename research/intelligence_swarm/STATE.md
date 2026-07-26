@@ -21,7 +21,7 @@
 
 ## Non-termination rule
 
-「検証したが駄目だった」で終了しない。失敗runは、失敗分類、metric/log/code差分に基づく原因、最小修正、同一budget・instance再run、採用・棄却・停止判定まで未完了とする。宣言した変更変数が実際のcommand・artifactへ到達しないrunは仮説検証として無効とし、配線修復後に同一screeningを再実行する。
+「検証したが駄目だった」で終了しない。失敗runは、失敗分類、metric/log/code差分に基づく原因、最小修正、同一budget・instance再run、採用・棄却・停止判定まで未完了とする。宣言した変更変数が実際のcommand・artifactへ到達しないrunは仮説検証として無効とし、配線修復後に同一screeningを再実行する。実行中の高コストrunと同じscreeningを重複発行しない。
 
 ## R0 status ledger
 
@@ -58,9 +58,9 @@
 
 このrunは0.005仮説の検証ではない。0.05 baselineの追加negative resultとしてのみ保存し、entropy_cost単独原因は未検証とする。
 
-## Active corrected screening E058
+## Active corrected screening E059
 
-`R01_RUN_REQUEST.json`を`R01-SCREEN-002-E058`として更新し、修正済み`.github/workflows/r01_silg_entropy_screening.yml`をcanonical branchのpushで起動する要求を発行した。workflowはtraining summary、各seed record、各seed commandのすべてで`entropy_cost=0.005`をfail-closed確認する。
+有効な`entropy_cost=0.005` screeningはGitHub Actions run `30215555334`、job `89830932884`として開始された。execution commitは`cbd4af3d89718df76cc481f7c730ed80334ef223`。locator取得時点ではinstall、source pin、generator schema、random/schema probeが成功し、official `multi` recurrentの3-seed学習stepが実行中、artifactは0件である。
 
 固定条件:
 
@@ -70,8 +70,9 @@
 - `131,072` frames × seeds `1/7/19`
 - same-instance Random / Language-blind / State-only / Language-shuffle
 - model/checkpoint bytes、RSS、runtime、CPU latency、seed、split、raw logs、checksums、leakage
+- training summary、各seed record、各seed commandの全てで`entropy_cost=0.005`をfail-closed確認
 
-直前head `1cbde2903447fa40f49088bbccc4053c9886b5d6`のPR連動workflow 4件はすべて`action_required`でjob未開始だった。これはモデル性能結果ではなくexecution blockerとして扱う。E058 push後のrun ID、job conclusion、artifact ID、qualification JSONが確認されるまで、0.005仮説の採否を判定しない。
+run完了前に同一screeningを再発行しない。完了後はartifact ID/digest、qualification JSON、全seed command、controls、resource、leakage、policy diagnosticsを取得し、entropy単独原因の採用・棄却を判定する。棄却時はofficial evaluation/default parityを次の単一原因として同一budgetで検証する。
 
 ## Evaluation contract
 
@@ -79,11 +80,13 @@ D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示す
 
 ## Prior-art and RQ boundary
 
-2025 C3 Regularization、2026 MCDRL、CmIR、score-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、local-structure dynamical-system identification等の既存境界を維持する。今回の一次文献再監査でも、language-guided target selection、multimodal causal invariance、text-defined confounder intervention、causal sufficiency/necessity regularizationだけでRQ-001を採用できる直接証拠は得られていない。
+2025 C3 Regularization、2026 MCDRL、CmIR、score-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、local-structure dynamical-system identification等の既存境界を維持する。
+
+C037としてCVPR 2026 **Multi-Modal Image Fusion via Intervention-Stable Feature Learning**を追加する。同研究はcomplementary masking、同一領域random masking、modality dropoutを介入として用い、介入を跨いで安定なcross-modal featureを選択するCausal Feature Integratorを提案する。したがって、介入masking、modality dropout、intervention-stable multimodal feature selection、頑健なcross-modal dependency抽出だけではRQ-001の新規性を認定しない。CVPR一次論文は確認済みだが、author-official repository、exact commit、dependency、dataset command、数値再現は未解決である。
 
 正式判断:
 
-> **RQ-001: FURTHER NARROWED — NOT ADOPTED**
+> **RQ-001: FURTHER NARROWED BEYOND INTERVENTION-STABLE MULTIMODAL FEATURE LEARNING — NOT ADOPTED**
 
 採用には、既存baseline再現後にも残るcountermodel pair、外部固定でjoint recoding不能なdenotation law、language固有追加情報の直接証拠、事前登録済みclaim/counterexample/stopping ruleが必要。
 
@@ -102,4 +105,4 @@ D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示す
 
 ## Last integration
 
-2026-07-26: **RESET-E058**。修正済みentropy=0.005専用workflowを起動するrun requestをcanonical branchへ発行した。前headの`action_required`はexecution blockerであり性能結果には数えない。外部baseline再現0、能力進歩未認定、高校生級未達を維持する。
+2026-07-26: **RESET-E059**。有効なentropy=0.005 run `30215555334`が3-seed学習中であることをrun/job/artifact locatorで確認し、重複runを禁止したまま正式追跡対象へ固定した。C037 intervention-stable multimodal feature learningをprior-art境界へ追加した。外部baseline再現0、能力進歩未認定、高校生級未達を維持する。
