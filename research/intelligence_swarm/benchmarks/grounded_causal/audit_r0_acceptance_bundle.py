@@ -4,10 +4,11 @@
 This module does not add a model or research mechanism. It prevents a bundle from
 being accepted by running only a convenient subset of the existing contracts.
 Dataset/schema leakage, alias-normalized leakage, explicit holdout-condition
-integrity, paired statistics, complete same-instance metric coverage, resource
-artifacts, strictly-positive measured resources, bundle-contained artifact paths,
-prediction-payload leakage, prediction-cell binding, prediction/statistics
-checksums, and deterministic statistics recomputation must all pass together.
+integrity, registered train/evaluation split scope, paired statistics, complete
+same-instance metric coverage, resource artifacts, strictly-positive measured
+resources, bundle-contained artifact paths, prediction-payload leakage,
+prediction-cell binding, prediction/statistics checksums, and deterministic
+statistics recomputation must all pass together.
 """
 from __future__ import annotations
 
@@ -20,6 +21,7 @@ import audit_artifact_path_containment as artifact_path_containment
 import audit_explicit_holdout_condition as explicit_holdout_condition
 import audit_nonzero_measurements as nonzero_measurements
 import audit_prediction_cell_binding as prediction_cell_binding
+import audit_prediction_eval_split_scope as prediction_eval_split_scope
 import audit_prediction_metric_coverage as prediction_metric_coverage
 import audit_prediction_payload_leakage as prediction_payload
 import audit_prediction_statistics_artifacts as prediction_statistics
@@ -49,6 +51,7 @@ def audit_acceptance(
     checks["dataset_contract"] = evaluation_contract.validate_dataset(data)
     checks["schema_alias_leakage_contract"] = schema_alias.audit(data, predictions)
     checks["explicit_holdout_condition_contract"] = explicit_holdout_condition.audit(data)
+    checks["prediction_eval_split_scope_contract"] = prediction_eval_split_scope.audit(data, predictions)
     checks["prediction_payload_contract"] = prediction_payload.audit_rows(data, predictions)
     checks["prediction_metric_coverage_contract"] = prediction_metric_coverage.audit(data, predictions)
     checks["paired_statistics_contract"] = evaluation_contract.score(data, predictions)
@@ -79,6 +82,10 @@ def audit_acceptance(
         "explicit_holdout_condition_labels_are_authoritative": True,
         "held_out_signature_presence_required": True,
         "train_holdout_signature_disjointness_required": True,
+        "registered_split_vocabulary_required": True,
+        "allowed_train_split": "train",
+        "allowed_evaluation_splits": ["eval", "test", "valid", "validation"],
+        "nonregistered_debug_calibration_posthoc_splits_forbidden": True,
         "same_instance_metric_coverage_required": True,
         "selective_metric_reporting_forbidden": True,
         "optional_gold_metrics_must_be_all_or_none": True,
