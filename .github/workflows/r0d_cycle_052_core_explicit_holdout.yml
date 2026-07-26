@@ -1,0 +1,51 @@
+name: R0D Cycle 052 core explicit holdout
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - research/intelligence_swarm/benchmarks/grounded_causal/apply_r0d_cycle_052_core_explicit_holdout.py
+      - .github/workflows/r0d_cycle_052_core_explicit_holdout.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: r0d-cycle-052-core-explicit-holdout
+  cancel-in-progress: false
+
+jobs:
+  apply-test-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/intelligence-swarm-reconstruction-001
+          fetch-depth: 0
+
+      - name: Apply idempotent core patch
+        run: python research/intelligence_swarm/benchmarks/grounded_causal/apply_r0d_cycle_052_core_explicit_holdout.py
+
+      - name: Run focused regression
+        run: |
+          python -m py_compile \
+            research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_explicit_holdout_core.py
+          python research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_explicit_holdout_core.py
+
+      - name: Commit cumulative result to canonical branch
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add \
+            research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_explicit_holdout_core.py \
+            research/intelligence_swarm/governance/REPORT_R0D_CYCLE_052.md
+          if git diff --cached --quiet; then
+            echo 'No changes to commit'
+          else
+            git commit -m 'r0d: enforce explicit holdout conditions in core contract'
+            git push origin HEAD:research/intelligence-swarm-reconstruction-001
+          fi
