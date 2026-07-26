@@ -11,6 +11,7 @@ on:
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_artifact_path_containment.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_nonzero_measurements.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_cell_binding.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_eval_split_scope.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_metric_coverage.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_payload_leakage.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_statistics_artifacts.py
@@ -25,6 +26,7 @@ on:
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_artifact_path_containment.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_nonzero_measurements.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_cell_binding.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_eval_split_scope.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_metric_coverage.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_payload_leakage.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_statistics_artifacts.py
@@ -49,6 +51,7 @@ jobs:
             research/intelligence_swarm/benchmarks/grounded_causal/audit_artifact_path_containment.py \
             research/intelligence_swarm/benchmarks/grounded_causal/audit_nonzero_measurements.py \
             research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_cell_binding.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_eval_split_scope.py \
             research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_metric_coverage.py \
             research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_payload_leakage.py \
             research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_statistics_artifacts.py \
