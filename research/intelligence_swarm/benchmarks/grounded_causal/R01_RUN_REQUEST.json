@@ -1,50 +1,35 @@
 {
-  "requested_at_utc": "2026-07-26T18:38:43Z",
-  "integration": "R01-SCREEN-002-E058",
+  "requested_at_utc": "2026-07-26T21:35:00Z",
+  "integration": "R01-SCREEN-003-E062",
   "track": "R0.1",
   "benchmark": "SILG RTFM S1",
-  "workflow": ".github/workflows/r01_silg_entropy_screening.yml",
+  "workflow": ".github/workflows/r01_silg_stateful_screening.yml",
   "canonical_branch": "research/intelligence-swarm-reconstruction-001",
-  "execution_ref_policy": "Resolve the immutable execution commit from GITHUB_SHA and record it in the artifact.",
-  "prior_run": {
-    "run_id": 30203026269,
-    "artifact_id": 8633105142,
-    "artifact_digest": "sha256:43ab7f1df82e9eba98c132b2e84a9ec55dbfdd726795fb43f7608fe288e00eef",
-    "classification": "initial_reproduction_failure",
-    "substantive_classification": "optimization_or_policy_competence_failure",
-    "actual_frames_per_seed": 131080,
-    "correct_win_rate": 0.0,
-    "random_win_rate": 0.06666666666666667,
-    "language_blind_win_rate": 0.016666666666666666,
-    "state_only_win_rate": 0.0,
-    "language_shuffle_win_rate": 0.0,
-    "correct_return_mean": -2.0749992966651916,
-    "random_return_mean": -1.151333263516426,
-    "correct_minus_random_return": -0.9236660331487656,
-    "answer_leakage": false,
-    "same_instance_controls": true
+  "reference_failures": {
+    "baseline_run_id": 30203026269,
+    "entropy_run_id": 30215555334,
+    "requalification_run_id": 30219453396,
+    "requalification_artifact_id": 8636783476,
+    "requalification_artifact_digest": "sha256:f752a62497362a38aeda76e3917210d1eb6eb31903743f7ee08232fc75104f12",
+    "closed_causes": [
+      "entropy_cost reduction alone",
+      "evaluation protocol mismatch as the main explanation"
+    ]
   },
-  "invalid_run": {
-    "run_id": 30208660095,
-    "artifact_id": 8634594371,
-    "requested_entropy_cost": 0.005,
-    "actual_entropy_cost": 0.05,
-    "classification": "experiment-factor-routing_failure",
-    "use_for_entropy_hypothesis": false
-  },
-  "screening_run_index": 2,
+  "screening_run_index": 3,
   "one_changed_factor": {
-    "name": "entropy_cost",
-    "from": 0.05,
-    "to": 0.005,
-    "rationale": "Re-run the remaining official entropy value after adding fail-closed routing checks. Keep architecture, sources, data, seeds, split, frames, actor count, batch size, unroll length, and matched evaluation instances fixed."
+    "name": "stateful",
+    "from": false,
+    "to": true,
+    "rationale": "Official SILG model.multi creates its LSTM core only when --stateful is set. Every prior R0.1 command omitted the flag and every preserved recurrent-state norm was zero. Activate the official recurrent path without introducing a new architecture."
   },
   "fixed_contract": {
     "frames_per_seed": 131072,
     "seeds": [1, 7, 19],
     "train_env": "silg:rtfm_train_s1-v0",
     "test_env": "silg:rtfm_test_s1-v0",
-    "model": "official SILG multi recurrent",
+    "model_family": "official SILG multi",
+    "entropy_cost": 0.05,
     "pretrained_language_model": false,
     "num_actors": 2,
     "num_threads": 1,
@@ -55,35 +40,36 @@
   },
   "source_pins": {
     "silg": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
-    "rtfm": "58f17955595b5a127c96d045d896fcbcc7d4b570",
-    "routing_fix_commit": "54a1f1f3c09ed0a8d526ae4d877057cfa33cd3d6"
+    "rtfm": "58f17955595b5a127c96d045d896fcbcc7d4b570"
   },
+  "factor_routing_proof": [
+    "--stateful appears in every seed training command",
+    "every checkpoint contains core.* LSTM weights",
+    "every seed diagnostic has recurrent_state_l2_after_mean greater than zero"
+  ],
   "required_artifacts": [
     "three checkpoints with actual frame count, bytes and SHA-256",
     "matched correct/random/language-blind/state-only/language-shuffle results",
+    "official continuous-stream and fresh-instance parity",
     "model parameters and state bytes",
     "per-seed peak RSS and training wall time",
     "CPU inference latency",
     "action histogram and valid-action rate",
-    "policy entropy and episode termination statistics",
-    "pre-mask and post-mask logits plus invalid-action probability mass",
-    "gradient norm and policy/value losses",
-    "actual entropy value and complete command for every seed",
-    "raw install, training, evaluation and qualification logs",
-    "pip freeze",
-    "file-size manifest",
-    "SHA-256 manifest"
+    "policy entropy, recurrent-state norms and episode termination statistics",
+    "raw install, patch, training, evaluation and qualification logs",
+    "pip freeze, file-size manifest and SHA-256 manifest",
+    "leakage result"
   ],
   "qualification": [
-    "all three checkpoints complete",
-    "entropy_cost=0.005 proven in summary, every seed record, and every seed command",
+    "all three stateful checkpoints complete",
+    "stateful factor routing proven",
     "answer leakage false",
     "correct win rate greater than random",
     "correct return greater than random",
     "correct success greater than zero",
     "three-seed mean improves and minimum seed does not regress"
   ],
-  "failure_policy": "If 0.005 reaches every seed command and Correct still does not exceed Random or has zero success, reject entropy_cost as the sole cause and continue with official evaluation/default parity as the next single factor. If no job starts, record it as an execution blocker rather than a model result. Do not close the iteration until the next screening contract is issued or a preregistered stop condition is met.",
+  "failure_policy": "If factor routing fails, repair only the routing and repeat this screening. If recurrent state is active but Correct remains incompetent, reject missing stateful core as the sole cause and issue the next single-factor contract unroll_length 20 to 80. Do not end with a negative result alone.",
   "claims_blocked_until_completion": [
     "public baseline reproduced",
     "capability progress",
