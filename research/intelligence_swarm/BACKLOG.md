@@ -4,7 +4,7 @@
 
 R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで進める。A〜Dは新しいtoy仮説、別branch、新規機構族を作らない。既存stacked draft PRはnegative-results archiveとして保持し、新作業のbaseにしない。
 
-外部baselineを再現するまで、新規機構族、新しい知能原理、能力進歩、高校生級到達を認定しない。単発失敗で終了せず、失敗分類、根拠、原因だけを変える最小修正、同一budget再run、採用・棄却・停止判定までを1サイクルとする。既に同一screeningが実行中の場合は重複dispatchせず、完了・artifact判定・次の単一原因決定まで追跡する。
+外部baselineを再現するまで、新規機構族、新しい知能原理、能力進歩、高校生級到達を認定しない。単発失敗で終了せず、失敗分類、根拠、原因だけを変える最小修正、同一budget再run、採用・棄却・停止判定までを1サイクルとする。宣言した変更値が実commandへ到達していないrunは仮説検証として無効とする。
 
 ## A–D allocation
 
@@ -21,37 +21,43 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 - RTFM `58f17955595b5a127c96d045d896fcbcc7d4b570`
 - official `multi` recurrent
 - seeds `1,7,19`
-- `131,072 requested frames`、actual baseline `131,080` frames
+- `131,072 requested frames`
 - train `silg:rtfm_train_s1-v0`
 - test `silg:rtfm_test_s1-v0`
 
-### Completed immutable failure: run 30203026269
+### Baseline immutable failure: run 30203026269
 
-- conclusion: qualification failure
-- artifact ID: `8633105142`
-- artifact digest: `sha256:43ab7f1df82e9eba98c132b2e84a9ec55dbfdd726795fb43f7608fe288e00eef`
-- Correct `0/60`、return `-2.0749993`
-- Random `4/60`、return `-1.1513333`
-- Language-blind `1/60`
-- State-only `0/60`
-- Language-shuffle `0/60`
-- answer leakage: `false`
-- same-instance controls: 成立
-- classification: `initial_reproduction_failure / optimization_or_policy_competence_failure`
+- artifact ID `8633105142`
+- digest `sha256:43ab7f1df82e9eba98c132b2e84a9ec55dbfdd726795fb43f7608fe288e00eef`
+- Correct `0/60`、Random `4/60`、Language-blind `1/60`、State-only `0/60`、Language-shuffle `0/60`
+- Correct return `-2.0749993`、Random return `-1.1513333`
+- answer leakage `false`、same-instance成立
 
-このrunはimmutable evidence保存の前進だが、公開能力baseline再現ではない。
+### Invalid screening execution: run 30208660095
 
-### Active next run: R01-SCREEN-002-E055
+- artifact ID `8634594371`
+- digest `sha256:aa2efd6a30d26074a4ddf39195b93f8dc046f164f87446a384e7d808bd5e5fbf`
+- intended factor: `entropy_cost=0.005`
+- actual factor in every seed command: `entropy_cost=0.05`
+- Correct `3/60`、Random `4/60`、Language-blind `3/60`、State-only `1/60`、Language-shuffle `3/60`
+- Correct return `-1.6356662`、Random return `-1.1513333`
+- qualification: `correct_not_above_random_win_rate`、`correct_not_above_random_return`
+- answer leakage `false`、same-instance成立
 
-- execution request commit: `3648f10c44ceab68891a08d5cf9ca174d739dd74`
-- workflow run ID: `30208660095`
-- RESET-E056 audit時点: **in progress**
-- completed steps: checkout、Python setup、host provenance、pinned source install、generator schema、canonical random/schema probe
-- current step: official `multi` recurrent 131,072-frame training
+このrunは0.005仮説の採否に使わない。0.05の追加seed反復としてnegative result archiveへ保存する。
 
-変更する要因は1つだけ:
+### Active corrected run: R01-SCREEN-002-E057
+
+変更要因は1つだけ:
 
 - `entropy_cost: 0.05 -> 0.005`
+
+実行修正:
+
+- `.github/workflows/r01_silg_entropy_screening.yml`
+- commit `54a1f1f3c09ed0a8d526ae4d877057cfa33cd3d6`
+- training summary top-level、各seed record、各seed commandの3箇所で`0.005`をfail-closed検証する。
+- 1箇所でも不一致ならmatched evaluation前に失敗させ、性能仮説の結果として扱わない。
 
 固定:
 
@@ -66,6 +72,7 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 5. answer leakage、schema leakage、prediction provenance。
 6. action histogram、valid-action率、policy entropy、episode length、reward到達率。
 7. mask前後logit、invalid-action mass、gradient norm、policy/value loss。
+8. 実際に適用されたentropy valueと完全command。
 
 採用条件:
 
@@ -73,20 +80,11 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 - Correct win rate > Random
 - Correct return > Random
 - 3-seed平均改善かつ最低seedを悪化させない
-- language使用案ではLanguage-blind / State-only / Language-shuffleを上回る
+- Language-blind / State-only / Language-shuffleを上回る
 
 棄却条件:
 
-- 同一契約でCorrectがRandomを上回らない、またはCorrect successが0なら、`entropy_cost`単独原因を棄却する。
-
-run完了後の必須処理:
-
-1. job conclusion、artifact ID、artifact digestを取得する。
-2. artifact内のqualification、matched predictions、policy diagnostics、resource logs、checksums、leakageを読む。
-3. baseline run `30203026269`との差をseed別・平均・最低seedで比較する。
-4. 採用条件を満たさなければentropy単独原因を棄却する。
-5. 最初のactionable failureを1件だけ選び、次の単一原因screening contractを同じbranchへ発行する。
-6. artifact欠損なら性能仮説へ進まず、upload path / `always()` / cancellation / retentionを単一原因として修復する。
+- `0.005`適用が証明された同一契約runでCorrectがRandomを上回らない、またはCorrect successが0なら、entropy cost単独原因を棄却する。
 
 次の原因順序:
 
@@ -104,57 +102,19 @@ D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示す
 
 毎runで、matched random/language-blind/state-only/applicable shuffle、model/checkpoint bytes、peak RSS、training runtime、CPU latency、seed、split、actual frames、commit、dependency、raw logs、checksums、leakageを保存する。監査codeの回帰成功は数値baseline再現には数えない。
 
-## P1 — J-CRe3
+## P1 — External official reproductions
 
-一次論文はUeda et al., LREC-COLING 2024、公式repositoryは `riken-grp/J-CRe3`。
+### J-CRe3
 
-1. exact commit、dataset、license、容量、checksumを固定する。
-2. official baseline、dependency、evaluation commandを無改変で実行する。
-3. model bytes、RSS、runtime、seed、split、prediction、raw log、checksumを保存する。
-4. random、text-only、vision-only、mention-shuffle、frame/object-shuffleを事前登録する。
-5. 失敗分類と最小修正を行い、単発失敗で終了しない。
+一次論文はUeda et al., LREC-COLING 2024、公式repositoryは `riken-grp/J-CRe3`。exact commit、dataset、license、checksum、official commandを固定し、random、text-only、vision-only、mention-shuffle、frame/object-shuffleをmatched評価する。
 
-J-CRe3は日本語multimodal reference resolution baselineであり、SILGのinteractive policy competenceを代替しない。
+### ReCITE
 
-## P1 — ReCITE official-code reproduction
+ACL 2026のlanguage-only causal relation benchmarkとして別列で扱う。exact commit、dataset release、official split、prompt/model/temperature/seed、RSS/runtime、raw predictions、random/entity-order/marker/sentence shuffleを保存する。
 
-Saklad et al., ACL 2026のReCITEは実世界textから因果関係を抽出・推論するbenchmarkであり、hidden intervention-target recoveryやinteractive policy competenceとは別列で扱う。
+### Multi-View CRL / GPI / C3 / MCDRL
 
-1. exact commit、dataset release、license、checksum、task schemaを固定する。
-2. official evaluation commandとreported splitを無改変で再現する。
-3. model、prompt、temperature、seed、runtime、peak RSS、raw predictions、scoreを保存する。
-4. random label、entity/order shuffle、causal-marker masking、sentence shuffle、retrieval-onlyを事前登録する。
-5. 失敗時は単一原因rerunへ接続する。
-
-## P1 — Multi-View CRL official-code reproduction
-
-Yao et al., ICLR 2024の公式repository `CausalLearningAI/multiview-crl` を対象とする。exact commit・environment・dataset checksumを固定し、official three-view実験とtext/image removal、text/cross-instance shuffle、random representationを比較する。
-
-## P1 — GPI official-software reproduction
-
-canonical repository、PyPI、documentation version、exact commitを固定し、text-as-treatment公開exampleを無改変再現する。representationなし、random、shuffle、alternative frozen representationをmatched比較する。
-
-## P1 — C3 Regularization official-code audit
-
-Wang et al., ICML 2025 **Towards the Causal Complete Cause of Multi-Modal Representation Learning** と公式code link `WangJingyao07/Multi-Modal-Base` をC035として扱う。
-
-1. exact commit、license、dependency、dataset、pretrained weightsの有無を固定する。
-2. paperの主表に対応するofficial commandを特定する。
-3. causal sufficiency、causal necessity、C3 risk、最終task metricを保存する。
-4. no-C3、randomized counterfactual branch、instrument-shuffle、modality-shuffleをmatched比較する。
-5. model bytes、RSS、runtime、seed、split、raw output、checksumを保存する。
-6. 数値再現までは、C3を本研究の能力証拠に数えない。
-
-## P1 — MCDRL official-code audit
-
-Liang et al., CVPR 2026 **Multimodal Causality-Driven Representation Learning for Generalizable Medical Image Segmentation** をC036として扱う。
-
-1. CVPR版論文、supplement、project page、author repositoryを突合する。
-2. official codeが確認できた場合だけexact commit、license、dependency、dataset、pretrained weights、主表commandを固定する。
-3. text-defined confounder dictionary、causal intervention network、domain-generalization metricを記録する。
-4. no-text-confounder、dictionary shuffle、intervention-off、image-only、prompt shuffleをmatched controls候補として事前登録する。
-5. model bytes、RSS、runtime、seed、split、raw output、checksumを保存する。
-6. 医用segmentation domain generalizationをhidden intervention-target groundingやinteractive policy competenceの証拠として流用しない。
+各official codeのexact commit、dependency、dataset、主表command、model/RSS/runtime/seed/split/raw output/checksumを固定する。これらの論文値を本研究の能力証拠へ流用しない。
 
 ## P1 — R0.2 Environment-first
 
@@ -166,9 +126,7 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 ## Prior-art and RQ-001
 
-既存境界として、score-based CRL、有限標本CRL、Markham et al.、Baumgartner et al.、LeGIT、GPI、Multi-View CRL、CmIR、ReCITE、C3 Regularization、MCDRLを維持する。
-
-C3 Regularizationにより、multimodal representationの因果的十分性・必要性、instrumental variableを用いたC3 risk、counterfactual twin branch、plug-and-play regularizationは既存境界へ含める。MCDRLにより、text-defined confounder dictionary、multimodal causal intervention、domain-confounder removal、OOD segmentation generalizationも既存境界へ含める。これらだけではRQ-001を採用しない。
+score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、CmIR、ReCITE、C3 Regularization、MCDRL等の境界を維持する。今回の最新一次文献再監査でも、これらを越えるRQ-001採用根拠は得られていない。
 
 - 広義RQ-001: **棄却**
 - 狭義RQ-001: **追加狭域化・未採用**
@@ -181,7 +139,8 @@ C3 Regularizationにより、multimodal representationの因果的十分性・�
 
 ## Status
 
-- immutable R0.1 bundle: **1件・不合格**
+- immutable R0.1 bundle: **2件・不合格**
+- valid entropy=0.005 screening: **未完了**
 - 外部baseline再現: **0件**
 - 新規機構族: **未認定**
 - 新規知能原理: **未発見**
