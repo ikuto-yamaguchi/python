@@ -13,7 +13,7 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 - **C**: 最新一次文献・公式codeとの重複監査、novelty matrix更新。
 - **D**: D015〜D035、matched controls、resource provenance、leakage、RQ-001判定。
 
-## P0 — SILG/RTFM competence recovery
+## P0 — Execute and qualify SILG/RTFM R0.1
 
 固定条件:
 
@@ -25,17 +25,25 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 
 現accepted evidenceは32,768 framesのみ。Correct `1/60`、Random `4/60`、Language-blind / State-only / Language-shuffle `1/60`であり、competent public baselineではない。
 
-### E045 next execution
+### E046 execution gate
 
-1. canonical split-jobでR0.1だけを実行する。
-2. R0.1終了直後にcheckpoint、prediction、resource、raw log、dependency lock、checksumを保存する。
-3. requested framesとactual environment steps、seed、split、initial instance identityを検証する。
-4. D015〜D035を保存済みbundleへ適用する。
-5. seedごとにaction histogram、valid-action率、policy entropy、episode length、reward到達率、mask前後logit、invalid-action mass、gradient norm、policy/value lossを保存する。
-6. recurrent reset/detach、optimizer restore、termination、frame counting、mask、checkpoint restoreを公式実装と比較する。
-7. Correct / Random / Language-blind / State-only / Language-shuffleを同一instanceで評価する。
-8. 失敗を `implementation_mismatch`、`optimization_failure`、`representation_bottleneck`、`exploration_or_signal_failure`、`artifact_failure` のいずれかへ分類する。
-9. 原因だけを変える最大6件のscreening runを行い、有望案だけseeds `1,7,19`へ昇格する。
+1. canonical split-jobでR0.1を実行する。
+2. 成否にかかわらずR0.1終了直後にcheckpoint、matched result、resource、raw log、dependency lock、checksum、qualification JSONを保存する。
+3. `qualify_r01_source_policy.py`で以下をfail-closed確認する。
+   - source pins
+   - seeds `1/7/19`
+   - requested framesとcheckpoint actual frames
+   - 全seed checkpoint完成
+   - Correct / Random / Language-blind / State-only / Language-shuffleの存在
+   - same initial instance stream
+   - answer leakageが明示的にfalse
+   - Correctのwin rateとreturnがRandomを上回る
+4. 不合格ならR0.2を開始しない。R0.2側でもdownloadしたqualification JSONを再検証する。
+5. 不合格bundleにはfailure list、`implementation_or_artifact_failure` または `optimization_or_policy_competence_failure`、固定条件、診断項目、単一変更制約、matched再試験、停止条件を保存する。
+6. action histogram、valid-action率、policy entropy、episode length、reward到達率、mask前後logit、invalid-action mass、gradient norm、policy/value lossをseed別に追加保存する。
+7. official command/defaultsとdeterminism patch、recurrent reset/detach、optimizer、termination、frame counting、mask、checkpoint restoreの差を診断する。
+8. 原因だけを変える最大6 screening runを実施する。各runは同一frames、seeds/split、instances、model familyを維持する。
+9. 有望候補だけseeds `1,7,19`へ昇格する。
 
 最適化順は、公式差分除去、recurrent/optimizer修復、learning rate・entropy・unroll・gradient clipping、parameter数±2%以内の容量配分、fusion位置の順とする。
 
@@ -63,7 +71,7 @@ J-CRe3は日本語multimodal reference resolution baselineであり、SILGのint
 
 ## P1 — R0.2 Environment-first
 
-immutable R0.1 competence bundle通過後のみ開始する。Environment-first、parameter-matched End-to-end、State-onlyを比較し、source policy competence、3-seed平均改善、最低seed非悪化、next-state prediction、action accuracy、online task successを確認する。
+immutable R0.1 competence bundleが `qualified_for_r02=true` を満たした後のみ開始する。Environment-first、parameter-matched End-to-end、State-onlyを比較し、source policy competence、3-seed平均改善、最低seed非悪化、next-state prediction、action accuracy、online task successを確認する。
 
 ## Closed — R0.3
 
@@ -71,12 +79,27 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 ## Prior-art and RQ-001
 
-2025 score-based CRLに加え、2026年3月の有限標本CRLは、対数個の未知multi-node intervention環境からlatent graph、mixing matrix、representation、unknown intervention targetsを有限標本で回復できる条件を示す。unknown target、少数environment、finite-sample recoveryだけではRQ-001を採用しない。
+2025 score-based CRLと2026年3月有限標本CRLにより、unknown target、少数environment、finite-sample recoveryだけではRQ-001を採用しない。
+
+LeGITは、自然言語のvariable meta-informationとLLM世界知識を使ってonline causal discovery初期のintervention targetを選び、数値的選択をwarm-startする。したがって以下を新規性候補から除外する。
+
+- language descriptionから介入候補を選ぶこと
+- low-data初期局面をLLMでwarm-startすること
+- language/world knowledgeと数値的causal discoveryを組み合わせること
+- target-selection改善だけをlanguage grounding原理とみなすこと
+
+Required next prior-art action:
+
+1. LeGIT project pageのcode link先を特定する。
+2. exact official-code commit、dependency、prompt、benchmark split、seed、raw output、checksumを固定する。
+3. Asia、Child、Insurance、Alarmの少なくとも1つでofficial target-selection baselineをimmutable再現する。
+4. random、numerical-only、LLM-only、meta-information shuffleを同一budgetで比較する。
+5. 再現前はLeGIT由来の能力差を本研究の証拠へ流用しない。
 
 - 広義RQ-001: **棄却**
-- 狭義RQ-001: **未採用**
+- 狭義RQ-001: **追加狭域化・未採用**
 
-採用には、最強の非言語公式baseline再現後にも残るcountermodel pair、externally fixedでjoint recoding不能なdenotation law、language固有追加情報の直接証拠、事前登録済みclaim/counterexample/stopping ruleが必要。
+採用には、最強の非言語baselineとLeGIT型baselineの再現後にも残るcountermodel pair、externally fixedでjoint recoding不能なdenotation law、target selectionを超えるlanguage固有追加情報の直接証拠、事前登録済みclaim/counterexample/stopping ruleが必要。
 
 ## Stage transition
 
