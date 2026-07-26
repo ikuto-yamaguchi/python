@@ -26,9 +26,9 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 - random / language-blind / state-only / language-shuffle
 - same-instance matched evaluation
 
-### Closed cause: entropy cost
+### Closed causes
 
-Valid source run `30215555334` and requalification run `30219453396` established:
+Valid entropy source run `30215555334` and artifact-only requalification run `30219453396` established:
 
 - `entropy_cost=0.005` reached every seed command
 - Correct `0/60`
@@ -48,9 +48,7 @@ Decision:
 
 公式`vzhong/silg`の`model.multi.Model`は`flags.stateful=true`の場合だけ`nn.LSTM` coreを生成する。parser defaultはfalseである。従来training commandは`--stateful`を含まず、全seedのdiagnostic recurrent-state normは常に0だった。
 
-したがって従来bundleの正確な名称は`official multi non-stateful`であり、competent recurrent baseline再現ではない。
-
-次runの変更要因は一つだけ:
+変更要因は一つだけ:
 
 - `stateful: false → true`
 
@@ -69,6 +67,18 @@ Decision:
 - patch contract: `patch_silg_stateful_screening.py`
 - workflow: `.github/workflows/r01_silg_stateful_screening.yml`
 
+最新実行状態:
+
+- run `30221587227` / job `89844840438`: 3-seed training中
+- run `30221650935`: pending
+
+重複処理契約:
+
+1. 最初に完了し、factor routing・checkpoint LSTM core・non-zero recurrent state・artifact integrityを満たしたbundleをprimary evidenceとする。
+2. 後続runはprimary runがexecution failure、artifact loss、factor-routing failureになった場合だけfallbackとする。
+3. 同じ条件の二runを独立な能力改善証拠や追加seedとして重複計上しない。
+4. 既存二runの状態が確定するまで同一screening requestを追加発行しない。
+
 必須fail-closed証拠:
 
 1. 全seed commandに`--stateful`
@@ -85,13 +95,15 @@ Decision:
 判定:
 
 - CorrectがRandomを上回りCorrect success>0ならstateful factorを採用候補とし、three-seed最低値と資源制約を確認する。
-- recurrent stateが有効でもcompetenceがない場合、stateful不足単独原因を棄却し、次は公式defaultとの最大差である`unroll_length: 20 → 80`を単一要因として検証する。
-- factor routingやcheckpoint core証明が失敗した場合は性能結果として扱わず、配線だけを修復して同一runを再実行する。
+- recurrent stateが有効でもcompetenceがない場合、stateful不足単独原因を棄却し、次は`unroll_length: 20 → 80`を単一要因として検証する。
+- factor routingやcheckpoint core証明が失敗した場合は性能結果として扱わず、配線だけを修復して保存済み有効artifactを最大限再利用する。
 - 「駄目だった」で終了しない。
 
 ## P0 — Evaluation contract freeze
 
 D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示すまで監査項目を増やさない。毎runでcontrols、resource、seed/split、checksums、leakageを保存する。
+
+現在のPR headでは、prediction method topologyとartifact path containmentは成功した一方、unified acceptance gateとR0D core metric coverageは失敗している。これらの失敗はstateful model performanceと混同せず、該当jobの最小root causeだけを切り分ける。実bundleに関係しない新規auditor追加は禁止する。
 
 ## P1 — External official reproductions
 
@@ -99,11 +111,13 @@ D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示す
 
 Ueda et al., LREC-COLING 2024、公式repository `riken-grp/J-CRe3`。exact commit、dataset、license、checksum、official commandを固定し、random、text-only、vision-only、mention-shuffle、frame/object-shuffleをmatched評価する。数値再現は0件。
 
-### Adjacent prior art
+### Latest prior-art boundary
 
-score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、ReCITE、C3、MCDRL、CmIR、CAIRをnovelty matrixの別列で維持する。論文値を本研究の能力証拠へ流用しない。
+CVPR 2026 PCMCIは、optimal-transport-based cross-modal intervention、action-relation-aware back-door blocking、deconfounded text embeddingをmediatorとするfront-door adjustmentで長期行動認識のconfounderを抑える。これら単独はRQ-001新規性から除外する。CVF一次論文は確認済み、author-official code・exact commit・公式数値再現は未解決。
 
-CAIRはrationaleをcausal mediatorとして扱い、interventional utilityをreward化するmultimodal emotion reasoningである。causal-mediator reward、information bottleneck adaptive optimization、rationale faithfulnessだけではRQ-001を採用しない。
+CVPR 2026 CausalLensは、training-free・single-passでLVLM decoder hidden stateへ介入し、sensitivityで選択したvisual-reliable attention headを補正する。sensitivity-guided hidden-state interventionや低遅延visual-grounding correctionだけではRQ-001を採用しない。SILG/J-CRe3代替baselineではない。
+
+score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、ReCITE、C3、MCDRL、CmIR、CAIR等もnovelty matrixの別列で維持し、論文値を本研究の能力証拠へ流用しない。
 
 ## P1 — R0.2 Environment-first
 
@@ -120,6 +134,10 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 採用には、既存baselineを差し引いた後にも残るlanguage固有追加情報、countermodel pair、joint recoding不能な外部denotation law、事前登録済みclaim/counterexample/stopping ruleが必要。
 
+正式境界:
+
+> **FURTHER NARROWED BEYOND PROGRESSIVE CROSS-MODAL DECONFOUNDING AND SENSITIVITY-GUIDED HIDDEN-STATE INTERVENTION — NOT ADOPTED**
+
 ## Stage transition
 
 次stageは、competent external baseline、immutable matched controls、canonical three-seed qualification、qualified R0.2、R0.3棄却維持、novelty matrix、中心命題の事前登録がすべて完了した場合だけ提案する。
@@ -129,7 +147,7 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 - immutable R0.1 artifacts: **4件**
 - competent external baseline: **0件**
 - J-CRe3 numerical reproduction: **0件**
-- active stateful screening: **実行要求発行対象**
+- active stateful screening: **1 run training中、1 run pending**
 - 新規機構族: **未認定**
 - 新規知能原理: **未発見**
 - 能力進歩: **未認定**
