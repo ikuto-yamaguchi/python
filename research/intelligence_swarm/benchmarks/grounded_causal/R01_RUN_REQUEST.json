@@ -1,26 +1,35 @@
 {
-  "requested_at_utc": "2026-07-26T12:49:00Z",
-  "integration": "R01-SCREEN-002",
+  "requested_at_utc": "2026-07-26T14:40:00Z",
+  "integration": "R01-SCREEN-002-E054",
   "track": "R0.1",
   "benchmark": "SILG RTFM S1",
   "workflow": ".github/workflows/r01_silg_entropy_screening.yml",
   "canonical_branch": "research/intelligence-swarm-reconstruction-001",
   "execution_ref_policy": "Resolve the immutable execution commit from GITHUB_SHA and record it in the artifact.",
   "prior_run": {
-    "run_id": 30197201735,
-    "artifact_id": 8631188542,
+    "run_id": 30203026269,
+    "artifact_id": 8633105142,
+    "artifact_digest": "sha256:43ab7f1df82e9eba98c132b2e84a9ec55dbfdd726795fb43f7608fe288e00eef",
     "classification": "initial_reproduction_failure",
     "substantive_classification": "optimization_or_policy_competence_failure",
-    "correct_win_rate": 0.016666666666666666,
+    "actual_frames_per_seed": 131080,
+    "correct_win_rate": 0.0,
     "random_win_rate": 0.06666666666666667,
-    "correct_minus_random_return": -0.8886660307645802
+    "language_blind_win_rate": 0.016666666666666666,
+    "state_only_win_rate": 0.0,
+    "language_shuffle_win_rate": 0.0,
+    "correct_return_mean": -2.0749992966651916,
+    "random_return_mean": -1.151333263516426,
+    "correct_minus_random_return": -0.9236660331487656,
+    "answer_leakage": false,
+    "same_instance_controls": true
   },
   "screening_run_index": 2,
   "one_changed_factor": {
     "name": "entropy_cost",
     "from": 0.05,
     "to": 0.005,
-    "rationale": "The pinned official SILG launch.py defines both 0.05 and 0.005 for RTFM. The failed immutable run evaluated only 0.05. This run tests the remaining official value without changing architecture, data, seeds, split, frame request, actor count, batch size, unroll length, or matched evaluation instances."
+    "rationale": "The pinned official SILG launch.py defines both 0.05 and 0.005 for RTFM. Immutable run 30203026269 evaluated 0.05 and failed with zero correct success while random achieved 4/60. Test the remaining official value without changing architecture, sources, data, seeds, split, frame request, actor count, batch size, unroll length, or matched evaluation instances."
   },
   "fixed_contract": {
     "frames_per_seed": 131072,
@@ -46,6 +55,10 @@
     "model parameters and state bytes",
     "per-seed peak RSS and training wall time",
     "CPU inference latency",
+    "action histogram and valid-action rate",
+    "policy entropy and episode termination statistics",
+    "pre-mask and post-mask logits plus invalid-action probability mass",
+    "gradient norm and policy/value losses",
     "raw install, training, evaluation and qualification logs",
     "pip freeze",
     "file-size manifest",
@@ -56,9 +69,10 @@
     "answer leakage false",
     "correct win rate greater than random",
     "correct return greater than random",
-    "correct success greater than zero"
+    "correct success greater than zero",
+    "three-seed mean improves and minimum seed does not regress"
   ],
-  "failure_policy": "If this official entropy value also fails, retain initial_reproduction_failure, reject entropy_cost as the sole cause, and proceed to exactly one next diagnosed factor. Do not create a new mechanism family, toy hypothesis, branch, or PR chain.",
+  "failure_policy": "If entropy_cost=0.005 also fails, retain initial_reproduction_failure, reject entropy_cost as the sole cause, and proceed to exactly one next diagnosed factor in this order: official evaluation/default parity; recurrent reset/detach and optimizer/checkpoint restore; learning rate/gradient clipping/unroll. Do not create a new mechanism family, toy hypothesis, branch, or PR chain.",
   "claims_blocked_until_completion": [
     "public baseline reproduced",
     "capability progress",
