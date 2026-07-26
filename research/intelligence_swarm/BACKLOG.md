@@ -4,7 +4,7 @@
 
 R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで進める。A〜Dは新しいtoy仮説、別branch、新規機構族を作らない。既存stacked draft PRはnegative-results archiveとして保持し、新作業のbaseにしない。
 
-外部baselineを再現するまで、新規機構族、新しい知能原理、能力進歩、高校生級到達を認定しない。単発失敗で終了せず、失敗分類、根拠、原因だけを変える最小修正、同一budget再run、採用・棄却・停止判定までを1サイクルとする。
+外部baselineを再現するまで、新規機構族、新しい知能原理、能力進歩、高校生級到達を認定しない。単発失敗で終了せず、失敗分類、根拠、原因だけを変える最小修正、同一budget再run、採用・棄却・停止判定までを1サイクルとする。既に同一screeningが実行中の場合は重複dispatchせず、完了・artifact判定・次の単一原因決定まで追跡する。
 
 ## A–D allocation
 
@@ -43,7 +43,11 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 
 ### Active next run: R01-SCREEN-002-E055
 
-実行要求commit: `3648f10c44ceab68891a08d5cf9ca174d739dd74`
+- execution request commit: `3648f10c44ceab68891a08d5cf9ca174d739dd74`
+- workflow run ID: `30208660095`
+- RESET-E056 audit時点: **in progress**
+- completed steps: checkout、Python setup、host provenance、pinned source install、generator schema、canonical random/schema probe
+- current step: official `multi` recurrent 131,072-frame training
 
 変更する要因は1つだけ:
 
@@ -75,6 +79,15 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 
 - 同一契約でCorrectがRandomを上回らない、またはCorrect successが0なら、`entropy_cost`単独原因を棄却する。
 
+run完了後の必須処理:
+
+1. job conclusion、artifact ID、artifact digestを取得する。
+2. artifact内のqualification、matched predictions、policy diagnostics、resource logs、checksums、leakageを読む。
+3. baseline run `30203026269`との差をseed別・平均・最低seedで比較する。
+4. 採用条件を満たさなければentropy単独原因を棄却する。
+5. 最初のactionable failureを1件だけ選び、次の単一原因screening contractを同じbranchへ発行する。
+6. artifact欠損なら性能仮説へ進まず、upload path / `always()` / cancellation / retentionを単一原因として修復する。
+
 次の原因順序:
 
 1. official evaluation/default parity
@@ -83,7 +96,7 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 4. parameter数±2%以内の容量配分
 5. language/state fusion位置
 
-最大6 screening runまたは事前停止条件まで継続する。「検証したが駄目」でcycleを閉じない。失敗時は、次の単一原因screening contractを同じcanonical branchへ発行するまでiteration未完了とする。
+最大6 screening runまたは事前停止条件まで継続する。「検証したが駄目」でcycleを閉じない。
 
 ## P0 — Evaluation contract freeze
 
@@ -132,6 +145,17 @@ Wang et al., ICML 2025 **Towards the Causal Complete Cause of Multi-Modal Repres
 5. model bytes、RSS、runtime、seed、split、raw output、checksumを保存する。
 6. 数値再現までは、C3を本研究の能力証拠に数えない。
 
+## P1 — MCDRL official-code audit
+
+Liang et al., CVPR 2026 **Multimodal Causality-Driven Representation Learning for Generalizable Medical Image Segmentation** をC036として扱う。
+
+1. CVPR版論文、supplement、project page、author repositoryを突合する。
+2. official codeが確認できた場合だけexact commit、license、dependency、dataset、pretrained weights、主表commandを固定する。
+3. text-defined confounder dictionary、causal intervention network、domain-generalization metricを記録する。
+4. no-text-confounder、dictionary shuffle、intervention-off、image-only、prompt shuffleをmatched controls候補として事前登録する。
+5. model bytes、RSS、runtime、seed、split、raw output、checksumを保存する。
+6. 医用segmentation domain generalizationをhidden intervention-target groundingやinteractive policy competenceの証拠として流用しない。
+
 ## P1 — R0.2 Environment-first
 
 immutable R0.1 competence bundleが `qualified_for_r02=true` を満たした後のみ開始する。Environment-first、parameter-matched End-to-end、State-onlyを比較し、source policy competence、3-seed平均改善、最低seed非悪化、next-state prediction、action accuracy、online task successを確認する。
@@ -142,9 +166,9 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 ## Prior-art and RQ-001
 
-既存境界として、score-based CRL、有限標本CRL、Markham et al.、Baumgartner et al.、LeGIT、GPI、Multi-View CRL、CmIR、ReCITE、C3 Regularizationを維持する。
+既存境界として、score-based CRL、有限標本CRL、Markham et al.、Baumgartner et al.、LeGIT、GPI、Multi-View CRL、CmIR、ReCITE、C3 Regularization、MCDRLを維持する。
 
-C3 Regularizationにより、multimodal representationの因果的十分性・必要性、instrumental variableを用いたC3 risk、counterfactual twin branch、plug-and-play regularizationは既存境界へ含める。これらだけではRQ-001を採用しない。
+C3 Regularizationにより、multimodal representationの因果的十分性・必要性、instrumental variableを用いたC3 risk、counterfactual twin branch、plug-and-play regularizationは既存境界へ含める。MCDRLにより、text-defined confounder dictionary、multimodal causal intervention、domain-confounder removal、OOD segmentation generalizationも既存境界へ含める。これらだけではRQ-001を採用しない。
 
 - 広義RQ-001: **棄却**
 - 狭義RQ-001: **追加狭域化・未採用**
