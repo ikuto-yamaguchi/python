@@ -21,7 +21,7 @@
 
 ## Non-termination rule
 
-「検証したが駄目だった」で終了しない。失敗runは、失敗分類、metric/log/code差分に基づく原因、最小修正、同一budget・instance再run、採用・棄却・停止判定まで未完了とする。さらに、宣言した変更変数が実際のcommand・artifactへ到達したことを確認できないrunは仮説検証として無効とし、配線修復後に同一screeningを再実行する。
+「検証したが駄目だった」で終了しない。失敗runは、失敗分類、metric/log/code差分に基づく原因、最小修正、同一budget・instance再run、採用・棄却・停止判定まで未完了とする。宣言した変更変数が実際のcommand・artifactへ到達しないrunは仮説検証として無効とし、配線修復後に同一screeningを再実行する。
 
 ## R0 status ledger
 
@@ -47,26 +47,20 @@
 
 ## Invalid R01-SCREEN-002 execution: run 30208660095
 
-- job `r01-public-reproduction`: qualification failure
 - artifact ID: `8634594371`
-- artifact digest: `sha256:aa2efd6a30d26074a4ddf39195b93f8dc046f164f87446a384e7d808bd5e5fbf`
 - requested hypothesis: `entropy_cost 0.05 -> 0.005`
-- **actual command for all seeds: `--entropy_cost 0.05`**
-- Correct win rate `3/60 = 0.0500`
-- Random win rate `4/60 = 0.0667`
-- Correct return `-1.6356662`
-- Random return `-1.1513333`
-- Language-blind `3/60`、State-only `1/60`、Language-shuffle `3/60`
+- actual command for all seeds: `--entropy_cost 0.05`
+- Correct `3/60`、Random `4/60`、Language-blind `3/60`、State-only `1/60`、Language-shuffle `3/60`
+- Correct return `-1.6356662`、Random return `-1.1513333`
 - same-instance controls: 成立
 - answer leakage: `false`
-- peak training RSS: seed 1 `1,539,572 KiB`、seed 7 `1,294,524 KiB`、seed 19 `1,687,408 KiB`
-- training wall: 約23分35秒〜23分59秒/seed
+- classification: `experiment-factor-routing_failure`
 
-このrunは0.005仮説の検証ではない。0.05 baselineの追加反復としてのみ保存し、entropy_cost単独原因は**未検証**とする。
+このrunは0.005仮説の検証ではない。0.05 baselineの追加negative resultとしてのみ保存し、entropy_cost単独原因は未検証とする。
 
-## Active correction
+## Active corrected screening E058
 
-`.github/workflows/r01_silg_entropy_screening.yml`へ、学習summaryと各seed commandがすべて`entropy_cost=0.005`であることを評価前にfail-closed検証するstepを追加した。commit `54a1f1f3c09ed0a8d526ae4d877057cfa33cd3d6`から正しい同一budget rerunを発行する。
+`R01_RUN_REQUEST.json`を`R01-SCREEN-002-E058`として更新し、修正済み`.github/workflows/r01_silg_entropy_screening.yml`をcanonical branchのpushで起動する要求を発行した。workflowはtraining summary、各seed record、各seed commandのすべてで`entropy_cost=0.005`をfail-closed確認する。
 
 固定条件:
 
@@ -77,13 +71,15 @@
 - same-instance Random / Language-blind / State-only / Language-shuffle
 - model/checkpoint bytes、RSS、runtime、CPU latency、seed、split、raw logs、checksums、leakage
 
+直前head `1cbde2903447fa40f49088bbccc4053c9886b5d6`のPR連動workflow 4件はすべて`action_required`でjob未開始だった。これはモデル性能結果ではなくexecution blockerとして扱う。E058 push後のrun ID、job conclusion、artifact ID、qualification JSONが確認されるまで、0.005仮説の採否を判定しない。
+
 ## Evaluation contract
 
 D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示すまで新規auditorを追加しない。
 
 ## Prior-art and RQ boundary
 
-2025 C3 Regularization、2026 MCDRL、CmIR、score-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE等の既存境界を維持する。今回の一次文献再監査でも、language-guided target selection、multimodal causal invariance、text-defined confounder intervention、causal sufficiency/necessity regularizationだけでRQ-001を採用できる新しい直接証拠は確認していない。
+2025 C3 Regularization、2026 MCDRL、CmIR、score-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、local-structure dynamical-system identification等の既存境界を維持する。今回の一次文献再監査でも、language-guided target selection、multimodal causal invariance、text-defined confounder intervention、causal sufficiency/necessity regularizationだけでRQ-001を採用できる直接証拠は得られていない。
 
 正式判断:
 
@@ -106,4 +102,4 @@ D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示す
 
 ## Last integration
 
-2026-07-26: **RESET-E057**。run `30208660095`はentropy 0.005 screeningとして無効であり、実際には全seedで0.05が使われたことをartifactとcommandから確認した。仮説を棄却せず、配線をfail-closed化して正しい0.005 rerunへ接続した。外部baseline再現0、能力進歩未認定、高校生級未達を維持する。
+2026-07-26: **RESET-E058**。修正済みentropy=0.005専用workflowを起動するrun requestをcanonical branchへ発行した。前headの`action_required`はexecution blockerであり性能結果には数えない。外部baseline再現0、能力進歩未認定、高校生級未達を維持する。
