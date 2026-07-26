@@ -25,8 +25,12 @@ def valid_training() -> dict:
                 "wall_seconds": 100.0,
                 "log_sha256": SHA,
                 "resource": {"peak_rss_kib": 500000, "exit_status": 0},
+                "command": [
+                    "python", "run_exp.py", "--total_frames", "131072",
+                    "--batch_size", "2", "--unroll_length", "20",
+                ],
                 "checkpoint": {
-                    "frames_in_checkpoint": 131072,
+                    "frames_in_checkpoint": 131080,
                     "official_checkpoint_bytes": 1000,
                     "official_checkpoint_sha256": SHA,
                     "model_state_bytes": 900,
@@ -69,16 +73,30 @@ def valid_matched() -> dict:
 
 
 class QualificationResourceAuditTests(unittest.TestCase):
-    def test_complete_bundle_qualifies(self) -> None:
+    def test_complete_bundle_qualifies_at_first_official_update_boundary(self) -> None:
         failures, classification, _ = classify_failures(valid_training(), valid_matched())
         self.assertEqual([], failures)
         self.assertEqual("qualified", classification)
 
-    def test_checkpoint_frame_count_must_equal_requested_budget(self) -> None:
+    def test_exact_requested_count_is_rejected_when_not_an_update_boundary(self) -> None:
         training = valid_training()
-        training["runs"][0]["checkpoint"]["frames_in_checkpoint"] = 131073
+        training["runs"][0]["checkpoint"]["frames_in_checkpoint"] = 131072
         failures, classification, _ = classify_failures(training, valid_matched())
-        self.assertIn("checkpoint_frame_budget_mismatch_seed_1", failures)
+        self.assertIn("checkpoint_frame_boundary_mismatch_seed_1", failures)
+        self.assertEqual("implementation_or_artifact_failure", classification)
+
+    def test_arbitrary_extra_training_is_rejected(self) -> None:
+        training = valid_training()
+        training["runs"][0]["checkpoint"]["frames_in_checkpoint"] = 131120
+        failures, classification, _ = classify_failures(training, valid_matched())
+        self.assertIn("checkpoint_frame_boundary_mismatch_seed_1", failures)
+        self.assertEqual("implementation_or_artifact_failure", classification)
+
+    def test_missing_frame_update_contract_is_rejected(self) -> None:
+        training = valid_training()
+        training["runs"][0]["command"] = ["python", "run_exp.py", "--total_frames", "131072"]
+        failures, classification, _ = classify_failures(training, valid_matched())
+        self.assertIn("missing_frame_update_contract_seed_1", failures)
         self.assertEqual("implementation_or_artifact_failure", classification)
 
     def test_missing_peak_rss_is_rejected(self) -> None:
