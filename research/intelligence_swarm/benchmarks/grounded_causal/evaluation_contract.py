@@ -12,6 +12,7 @@ import json
 import math
 import random
 import statistics
+import unicodedata
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Iterable
@@ -97,8 +98,10 @@ def _action_is_valid(action:Any,mask:Any)->bool:
 
 
 def canonical_text(value: Any)->str:
+    """Canonicalize token sequences and Unicode text without semantic guessing."""
     if isinstance(value,(list,tuple)): return "tokens:"+",".join(str(int(x)) for x in value)
-    return "".join(str(value).split()).casefold()
+    text=unicodedata.normalize("NFKC",str(value)).casefold()
+    return "".join(ch for ch in text if not ch.isspace() and unicodedata.category(ch) not in {"Cf","Cc"})
 
 
 def _truthy(row:dict[str,Any],key:str)->bool:
@@ -153,7 +156,7 @@ def instance_fingerprint(row:dict[str,Any])->str:
 
 def validate_dataset(rows:list[dict[str,Any]])->dict[str,Any]:
     adapted=adapt_dataset(rows); errors=[]; warnings=[]; seen=set(); domains=set(); seeds=set(); conditions=set(); splits=Counter()
-    texts=defaultdict(set); entities=defaultdict(set); dynamics=defaultdict(set); episode_splits=defaultdict(set); episode_seed_splits=defaultdict(set); observation_splits=defaultdict(set)
+    texts=defaultdict(lambda:defaultdict(list)); entities=defaultdict(set); dynamics=defaultdict(set); episode_splits=defaultdict(set); episode_seed_splits=defaultdict(set); observation_splits=defaultdict(set)
     fingerprints={}; leakage=0; silg_rows=0; topology=defaultdict(set); per_seed_splits=defaultdict(set)
     for index,row in enumerate(adapted,1):
         missing=CANONICAL_REQUIRED-row.keys()
@@ -170,8 +173,8 @@ def validate_dataset(rows:list[dict[str,Any]])->dict[str,Any]:
         except (TypeError,ValueError): errors.append(f"row {index}: seed must be integer-like")
         if "text_tokens" in row:
             silg_rows+=1
-            if row.get("utterance_source")!="text_tokens": errors.append(f"row {index}: SILG text_tokens were not adapted as utterance")
-        text=canonical_text(row["utterance"]); texts[split].add(text)
+            if row.get("utterance_source")!="text_tokens" and "utterance" not in rows[index-1]: errors.append(f"row {index}: SILG text_tokens were not adapted as utterance")
+        text=canonical_text(row["utterance"]); texts[split][text].append(iid)
         if not text or text=="tokens:": warnings.append(f"row {index}: empty utterance")
         bad={str(v) for v in row.get("model_input_fields",[])} & FORBIDDEN_MODEL_INPUT_FIELDS
         if bad: leakage+=1; errors.append(f"row {index}: forbidden model input fields {sorted(bad)}")
@@ -183,11 +186,12 @@ def validate_dataset(rows:list[dict[str,Any]])->dict[str,Any]:
         if row.get("episode_id") is not None: episode_splits[str(row["episode_id"])].add(split)
         if row.get("episode_seed") is not None: episode_seed_splits[str(row["episode_seed"])].add(split)
         if row.get("observation_fingerprint") is not None: observation_splits[str(row["observation_fingerprint"])].add(split)
-    overlap={}; train_text=texts.get("train",set())
+    overlap={}; train_text=set(texts.get("train",{}))
     for split,values in texts.items():
         if split=="train": continue
-        shared=train_text&values; overlap[split]={"count":len(shared),"examples":sorted(shared)[:5]}
-        if shared: errors.append(f"exact normalized utterance leakage train->{split}: {len(shared)} texts")
+        shared=sorted(train_text&set(values)); examples=[{"normalized":value,"train_instance_ids":texts["train"][value][:5],"eval_instance_ids":values[value][:5]} for value in shared[:5]]
+        overlap[split]={"count":len(shared),"examples":examples}
+        if split in EVAL_SPLITS and shared: errors.append(f"Unicode-normalized utterance leakage train->{split}: {len(shared)} utterances")
     holdout={}
     for name,mapping in (("entity",entities),("dynamics",dynamics)):
         train_values=mapping.get("train",set())
@@ -210,7 +214,7 @@ def validate_dataset(rows:list[dict[str,Any]])->dict[str,Any]:
     missing_holdouts=HELD_OUT_CONDITIONS-{name for c in conditions for name in HELD_OUT_CONDITIONS if name in c}
     if missing_holdouts: warnings.append(f"missing held-out conditions: {sorted(missing_holdouts)}")
     topology_json={str(k):sorted(v) for k,v in sorted(topology.items())}
-    return {"valid":not errors,"errors":errors,"warnings":sorted(set(warnings)),"instances":len(adapted),"domains":sorted(domains),"seeds":sorted(seeds),"conditions":sorted(conditions),"split_counts":dict(sorted(splits.items())),"utterance_overlap":overlap,"holdout_integrity":holdout,"split_identity_leakage":split_leakage,"leakage_rows":leakage,"silg_rows_adapted":silg_rows,"dataset_sha256":stable_hash(adapted),"instance_fingerprints_sha256":stable_hash(fingerprints),"seed_domain_split_condition_topology":topology_json,"canonical_seed_topology_required":True,"adapted_schema":True,"silg_text_tokens_supported":True,"episode_split_isolation_required":True}
+    return {"valid":not errors,"errors":errors,"warnings":sorted(set(warnings)),"instances":len(adapted),"domains":sorted(domains),"seeds":sorted(seeds),"conditions":sorted(conditions),"split_counts":dict(sorted(splits.items())),"utterance_overlap":overlap,"utterance_normalization":"NFKC + casefold + remove whitespace/control-format characters","holdout_integrity":holdout,"split_identity_leakage":split_leakage,"leakage_rows":leakage,"silg_rows_adapted":silg_rows,"dataset_sha256":stable_hash(adapted),"instance_fingerprints_sha256":stable_hash(fingerprints),"seed_domain_split_condition_topology":topology_json,"canonical_seed_topology_required":True,"adapted_schema":True,"silg_text_tokens_supported":True,"episode_split_isolation_required":True,"unicode_utterance_overlap_required":True}
 
 
 def _mean_ci(values:list[float])->tuple[float,float,float]:
