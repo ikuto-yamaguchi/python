@@ -25,6 +25,7 @@ class R0AcceptanceBundleTests(unittest.TestCase):
         *,
         alias_valid=True,
         payload_valid=True,
+        metric_coverage_valid=True,
         stats_valid=True,
         measurements_valid=True,
         paths_valid=True,
@@ -37,7 +38,13 @@ class R0AcceptanceBundleTests(unittest.TestCase):
                 "audit",
                 return_value={"valid": alias_valid, "errors": [] if alias_valid else ["goldStateAfter alias leakage"]},
             ),
+            mock.patch.object(AUDIT.explicit_holdout_condition, "audit", return_value={"valid": True, "errors": []}),
             mock.patch.object(AUDIT.prediction_payload, "audit_rows", return_value={"valid": payload_valid, "errors": [] if payload_valid else ["gold leakage"]}),
+            mock.patch.object(
+                AUDIT.prediction_metric_coverage,
+                "audit",
+                return_value={"valid": metric_coverage_valid, "errors": [] if metric_coverage_valid else ["selective metric omission"]},
+            ),
             mock.patch.object(AUDIT.evaluation_contract, "score", return_value={"valid": True, "errors": []}),
             mock.patch.object(AUDIT.evaluation_contract, "audit_artifacts", return_value={"valid": True, "errors": []}),
             mock.patch.object(
@@ -63,6 +70,7 @@ class R0AcceptanceBundleTests(unittest.TestCase):
         *,
         alias_valid=True,
         payload_valid=True,
+        metric_coverage_valid=True,
         stats_valid=True,
         measurements_valid=True,
         paths_valid=True,
@@ -71,12 +79,13 @@ class R0AcceptanceBundleTests(unittest.TestCase):
         patches = self.patches(
             alias_valid=alias_valid,
             payload_valid=payload_valid,
+            metric_coverage_valid=metric_coverage_valid,
             stats_valid=stats_valid,
             measurements_valid=measurements_valid,
             paths_valid=paths_valid,
             cell_binding_valid=cell_binding_valid,
         )
-        with patches[0], patches[1], patches[2], patches[3], patches[4], patches[5], patches[6], patches[7], patches[8]:
+        with patches[0], patches[1], patches[2], patches[3], patches[4], patches[5], patches[6], patches[7], patches[8], patches[9], patches[10]:
             return AUDIT.audit_acceptance(self.data, self.predictions, self.manifest, self.base_dir)
 
     def test_all_contracts_must_pass(self):
@@ -85,6 +94,10 @@ class R0AcceptanceBundleTests(unittest.TestCase):
         self.assertEqual(result["classification"], "reproduced")
         self.assertEqual(result["failed_contracts"], [])
         self.assertTrue(result["alias_normalized_leakage_audit_required"])
+        self.assertTrue(result["same_instance_metric_coverage_required"])
+        self.assertTrue(result["selective_metric_reporting_forbidden"])
+        self.assertTrue(result["optional_gold_metrics_must_be_all_or_none"])
+        self.assertTrue(result["all_methods_must_report_each_preregistered_metric"])
         self.assertTrue(result["strictly_positive_measured_resources_required"])
         self.assertTrue(result["nonempty_resource_artifacts_required"])
         self.assertTrue(result["artifact_paths_must_be_bundle_contained"])
@@ -104,6 +117,13 @@ class R0AcceptanceBundleTests(unittest.TestCase):
         self.assertFalse(result["valid"])
         self.assertEqual(result["classification"], "initial_reproduction_failure")
         self.assertIn("prediction_payload_contract", result["failed_contracts"])
+        self.assertTrue(result["checks"]["paired_statistics_contract"]["valid"])
+
+    def test_selective_metric_omission_rejects_otherwise_valid_bundle(self):
+        result = self.run_with(metric_coverage_valid=False)
+        self.assertFalse(result["valid"])
+        self.assertEqual(result["classification"], "initial_reproduction_failure")
+        self.assertIn("prediction_metric_coverage_contract", result["failed_contracts"])
         self.assertTrue(result["checks"]["paired_statistics_contract"]["valid"])
 
     def test_zero_placeholder_measurement_rejects_otherwise_valid_bundle(self):
@@ -134,19 +154,20 @@ class R0AcceptanceBundleTests(unittest.TestCase):
         self.assertIn("prediction_statistics_evidence_contract", result["failed_contracts"])
 
     def test_multiple_failures_are_preserved(self):
-        result = self.run_with(alias_valid=False, payload_valid=False, stats_valid=False, measurements_valid=False, paths_valid=False, cell_binding_valid=False)
+        result = self.run_with(alias_valid=False, payload_valid=False, metric_coverage_valid=False, stats_valid=False, measurements_valid=False, paths_valid=False, cell_binding_valid=False)
         self.assertEqual(
             result["failed_contracts"],
             [
                 "artifact_path_containment_contract",
                 "nonzero_measurement_contract",
                 "prediction_cell_binding_contract",
+                "prediction_metric_coverage_contract",
                 "prediction_payload_contract",
                 "prediction_statistics_evidence_contract",
                 "schema_alias_leakage_contract",
             ],
         )
-        self.assertEqual(len(result["errors"]), 6)
+        self.assertEqual(len(result["errors"]), 7)
 
 
 if __name__ == "__main__":
