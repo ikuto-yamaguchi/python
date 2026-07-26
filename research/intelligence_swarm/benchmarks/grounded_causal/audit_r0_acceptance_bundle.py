@@ -4,10 +4,10 @@
 This module does not add a model or research mechanism. It prevents a bundle from
 being accepted by running only a convenient subset of the existing contracts.
 Dataset/schema leakage, alias-normalized leakage, explicit holdout-condition
-integrity, paired statistics, resource artifacts, strictly-positive measured
-resources, bundle-contained artifact paths, prediction-payload leakage,
-prediction-cell binding, and prediction/statistics checksums must all pass in
-one invocation.
+integrity, paired statistics, complete same-instance metric coverage, resource
+artifacts, strictly-positive measured resources, bundle-contained artifact paths,
+prediction-payload leakage, prediction-cell binding, and prediction/statistics
+checksums must all pass in one invocation.
 """
 from __future__ import annotations
 
@@ -20,6 +20,7 @@ import audit_artifact_path_containment as artifact_path_containment
 import audit_explicit_holdout_condition as explicit_holdout_condition
 import audit_nonzero_measurements as nonzero_measurements
 import audit_prediction_cell_binding as prediction_cell_binding
+import audit_prediction_metric_coverage as prediction_metric_coverage
 import audit_prediction_payload_leakage as prediction_payload
 import audit_prediction_statistics_artifacts as prediction_statistics
 import audit_schema_alias_leakage as schema_alias
@@ -48,6 +49,7 @@ def audit_acceptance(
     checks["schema_alias_leakage_contract"] = schema_alias.audit(data, predictions)
     checks["explicit_holdout_condition_contract"] = explicit_holdout_condition.audit(data)
     checks["prediction_payload_contract"] = prediction_payload.audit_rows(data, predictions)
+    checks["prediction_metric_coverage_contract"] = prediction_metric_coverage.audit(data, predictions)
     checks["paired_statistics_contract"] = evaluation_contract.score(data, predictions)
     checks["resource_artifact_contract"] = evaluation_contract.audit_artifacts(manifest, base_dir)
     checks["nonzero_measurement_contract"] = nonzero_measurements.audit(manifest, base_dir)
@@ -73,6 +75,10 @@ def audit_acceptance(
         "explicit_holdout_condition_labels_are_authoritative": True,
         "held_out_signature_presence_required": True,
         "train_holdout_signature_disjointness_required": True,
+        "same_instance_metric_coverage_required": True,
+        "selective_metric_reporting_forbidden": True,
+        "optional_gold_metrics_must_be_all_or_none": True,
+        "all_methods_must_report_each_preregistered_metric": True,
         "strictly_positive_measured_resources_required": True,
         "nonempty_resource_artifacts_required": True,
         "artifact_paths_must_be_bundle_contained": True,
