@@ -1,0 +1,69 @@
+{
+  "run_id": 30203026269,
+  "head_sha": "5d9f137296a64fc401560356470ac27f520cbeff",
+  "artifact": {
+    "id": 8633105142,
+    "name": "r01-silg-rtfm-matched-30203026269",
+    "size_bytes": 72686203,
+    "digest": "sha256:43ab7f1df82e9eba98c132b2e84a9ec55dbfdd726795fb43f7608fe288e00eef",
+    "expires_at": "2026-08-25T14:28:29Z"
+  },
+  "status": "initial_reproduction_failure",
+  "substantive_classification": "optimization_or_policy_competence_failure",
+  "source_pins": {
+    "silg": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
+    "rtfm": "58f17955595b5a127c96d045d896fcbcc7d4b570"
+  },
+  "environment": {
+    "train": "silg:rtfm_train_s1-v0",
+    "test": "silg:rtfm_test_s1-v0",
+    "model": "official SILG multi recurrent",
+    "pretrained_language_model": false,
+    "seeds": [1, 7, 19],
+    "frames_requested_per_seed": 131072,
+    "frames_actual_per_seed": 131080,
+    "entropy_cost": 0.05,
+    "num_actors": 2,
+    "num_threads": 1,
+    "batch_size": 2,
+    "unroll_length": 20
+  },
+  "model_audit": {
+    "parameters": 4916915,
+    "trainable_parameters": 4916915,
+    "state_dict_bytes": 19694385,
+    "cpu_forward_latency_ms_per_step": 7.74509655
+  },
+  "training_runs": [
+    {"seed": 1, "wall_seconds": 1441.805184767, "peak_rss_kib": 1442552, "checkpoint_frames": 131080},
+    {"seed": 7, "wall_seconds": 1450.075102688, "peak_rss_kib": 1000412, "checkpoint_frames": 131080},
+    {"seed": 19, "wall_seconds": 1449.289279035, "peak_rss_kib": 1235964, "checkpoint_frames": 131080}
+  ],
+  "matched_evaluation": {
+    "episodes_per_method_seed": 20,
+    "same_initial_instance_stream": true,
+    "correct_win_rate": 0.0,
+    "random_win_rate": 0.06666666666666667,
+    "language_blind_win_rate": 0.016666666666666666,
+    "state_only_win_rate": 0.0,
+    "language_shuffle_win_rate": 0.0,
+    "correct_return_mean": -2.0749992966651916,
+    "random_return_mean": -1.151333263516426,
+    "correct_minus_random_return": -0.9236660331487656
+  },
+  "qualification_failures": [
+    "zero_source_policy_success",
+    "correct_not_above_random_win_rate",
+    "correct_not_above_random_return"
+  ],
+  "diagnosis": {
+    "entropy_0_005_screening_required": true,
+    "reason": "The official launcher includes entropy_cost 0.005 and 0.05, but this immutable run used 0.05. The next run changes only entropy_cost to 0.005 while preserving sources, architecture, seeds, splits, frame budget and matched instances.",
+    "claims_blocked": [
+      "public baseline reproduced",
+      "capability progress",
+      "new intelligence principle",
+      "high-school-level intelligence"
+    ]
+  }
+}
