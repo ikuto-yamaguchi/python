@@ -21,7 +21,7 @@
 
 ## Non-termination rule
 
-「検証したが駄目だった」で終了しない。失敗runは、失敗分類、metric/log/code差分に基づく原因、最小修正、同一budget・instance再run、採用・棄却・停止判定まで未完了とする。文書・監査更新だけでiterationを閉じず、数値run requestまで同じ統合内で発行する。
+「検証したが駄目だった」で終了しない。失敗runは、失敗分類、metric/log/code差分に基づく原因、最小修正、同一budget・instance再run、採用・棄却・停止判定まで未完了とする。文書・監査更新だけでiterationを閉じず、数値run requestまたは次の単一原因screening contractまで同じ統合内で発行する。
 
 ## R0 status ledger
 
@@ -30,6 +30,7 @@
 - 学習済み公開能力baseline再現: **0件**
 - J-CRe3 numerical reproduction: **0件**
 - J-ORA numerical reproduction: **0件**
+- GPI official-software reproduction: **0件**
 - R0.2正式再現: **0件**
 - 実R0 bundleのevaluation contract通過: **0件**
 - R0.3 hidden intervention-target ablation: **棄却**
@@ -70,9 +71,8 @@ accepted evidenceは32,768 frames runのみ:
 6. R0.2 jobはdownload後にもqualification artifactの `qualified_for_r02=true` を再確認する。
 7. 次runではaction histogram、valid-action率、entropy、episode length、reward到達率、mask前後logit、invalid-action mass、gradient norm、policy/value lossをseed別に保存し、公式実装との差、recurrent reset/detach、optimizer、termination、frame counting、mask、checkpoint restoreを診断する。
 8. 原因だけを変える最大6 screening runを行い、有望案だけseeds `1,7,19`へ昇格する。
-9. RESET-E049では、PR #409 head `dba26a23a67f05712ae83143d99107f9effd5702`から取得できたPR連動workflowが監査系3本だけであったことを記録する。ただし取得APIはpull-request-triggered runに限定されるため、push型R0.1の不存在証拠とは扱わない。
-10. E049のcanonical headからR0.1 run requestを再発行し、run IDとartifact IDが取得できるまで、開始・完了・成功を認定しない。
-11. screening runが失敗しても、停止条件を満たさない限り次の単一原因候補へ進み、失敗報告のみでcycleを閉じない。
+9. screening runが失敗しても、停止条件を満たさない限り次の単一原因候補へ進み、失敗報告のみでcycleを閉じない。
+10. 実装忠実度が未確定ならarchitecture変更へ進まず、official command/defaults、checkpoint restore、frame counting、mask、recurrent state、optimizerの順に差分を潰す。
 
 ## Evaluation contract
 
@@ -80,7 +80,7 @@ D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示す
 
 毎runでrandom/language-blind/state-only/applicable shuffle、model/checkpoint bytes、peak RSS、runtime、CPU latency、seed、split、actual frames、commit、dependency、raw logs、checksums、leakageを保存する。
 
-PR #409 head `dba26a23...`で確認できたPR連動workflowは、artifact-path containment、unified acceptance gate、prediction-method topologyの3本がsuccessである。これは監査codeの回帰証拠に限定し、R0.1数値再現や能力進歩には数えない。
+監査codeの回帰成功はR0.1数値再現や能力進歩には数えない。
 
 ## Prior-art and RQ boundary
 
@@ -88,15 +88,17 @@ J-CRe3はLREC-COLING 2024の日本語実世界multimodal reference-resolution da
 
 2025 score-based CRLと2026年3月の有限標本CRLにより、unknown target、少数environment、finite-sample recoveryはRQ-001の新規性根拠から除外済みである。
 
-Markham et al., CLeaR 2026は、任意に表現力の高いblack-box generative modelへ介入型context moduleを付加し、因果的にdisentangledな概念表現とOOD compositionを学習する枠組み、および識別結果を提示した。PMLR正式掲載ページを再監査したが、related materialとして公式repositoryは確認できなかったため、状態を **paper/PMLR確認済み・official code unresolved** とする。context-conditioned intervention、因果概念disentanglement、compositional reuseだけではRQ-001の新規性にならない。
+Markham et al., CLeaR 2026により、intervention-conditioned context module、因果概念disentanglement、compositional reuse、OOD compositionだけではRQ-001の新規性にならない。公式repositoryは未解決のため再現済みとは扱わない。
 
-LeGITは、システム変数の自然言語meta-informationとLLMの世界知識を使って初期のintervention targetを選択し、数値的online causal discoveryをwarm-startする。自然言語記述を使った介入候補選択、低データ初期局面でのLLM warm-start、言語知識と数値因果探索の組合せ自体はRQ-001の新規性候補から除外する。公式codeは未解決のため性能証拠として認定しない。
+LeGITにより、自然言語meta-informationを使ったintervention target選択、低データ初期局面のLLM warm-start、言語知識と数値因果探索の組合せ自体はRQ-001の新規性候補から除外する。公式codeは未解決である。
+
+Imai & NakamuraのGPI系研究は、生成AIが生成・抽出したtext/image/video内部表現を、因果・予測推定へ利用する公開softwareを提供する。したがって、LLM内部表現を用いたtext-as-treatment、text/image-as-confounder、生成データによるoverlap改善、double machine learningによる効果推定だけではRQ-001の新規性にならない。GPIはinteractive policy learningやhidden intervention-target recoveryを直接扱うbaselineではないため、SILG/J-CRe3とは別列でnovelty matrixへ置く。
 
 正式判断:
 
-> **RQ-001: NARROWED BEYOND LANGUAGE-GUIDED TARGET SELECTION AND INTERVENTION-CONDITIONED COMPOSITION — NOT ADOPTED**
+> **RQ-001: NARROWED BEYOND LANGUAGE-GUIDED TARGET SELECTION, INTERVENTION-CONDITIONED COMPOSITION, AND GENERATIVE-REPRESENTATION CAUSAL INFERENCE — NOT ADOPTED**
 
-採用には、最強の非言語baseline、LeGIT型target-selection baseline、介入context-module型composition baselineの再現後にも残るcountermodel pair、外部固定でjoint recoding不能なdenotation law、target selectionやcontext compositionを超えるlanguage固有追加情報の直接証拠、事前登録済みclaim/counterexample/stopping ruleが必要。
+採用には、最強の非言語baseline、LeGIT型target-selection baseline、介入context-module型composition baseline、GPI型生成表現因果推定baselineの再現後にも残るcountermodel pair、外部固定でjoint recoding不能なdenotation law、target selection・context composition・既成表現利用を超えるlanguage固有追加情報の直接証拠、事前登録済みclaim/counterexample/stopping ruleが必要。
 
 ## Stage transition
 
@@ -113,4 +115,4 @@ LeGITは、システム変数の自然言語meta-informationとLLMの世界知�
 
 ## Last integration
 
-2026-07-25: **RESET-E049**。PR #409現headとPR連動CIを確認し、push型R0.1 runの不存在を誤認しないよう証拠境界を修正した。Markham et al. 2026はPMLR正式掲載を確認したがofficial codeは未解決。R0.1/J-CRe3/R0.2の受理可能artifactは0件のまま。E049 headから数値run requestを再発行し、run ID・artifact ID・qualification結果が得られるまで進捗認定しない。能力進歩未認定、高校生級未達。
+2026-07-26: **RESET-E050**。canonical branchのR0.1/J-CRe3/R0.2受理可能artifactが0件であることを維持し、GPI系一次研究と公開softwareをprior-art境界へ追加した。LLM内部表現を用いたtext/image/video因果推定は新規性候補から除外し、GPIを別列の公式software再現対象に追加した。失敗runは次の単一原因screening contractまで未完了とし、能力進歩未認定、高校生級未達を維持する。
