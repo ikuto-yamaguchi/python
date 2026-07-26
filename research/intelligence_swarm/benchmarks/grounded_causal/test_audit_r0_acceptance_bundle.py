@@ -24,6 +24,7 @@ class R0AcceptanceBundleTests(unittest.TestCase):
         self,
         *,
         alias_valid=True,
+        split_scope_valid=True,
         payload_valid=True,
         metric_coverage_valid=True,
         stats_valid=True,
@@ -36,6 +37,7 @@ class R0AcceptanceBundleTests(unittest.TestCase):
             mock.patch.object(AUDIT.evaluation_contract, "validate_dataset", return_value={"valid": True, "errors": []}),
             mock.patch.object(AUDIT.schema_alias, "audit", return_value={"valid": alias_valid, "errors": [] if alias_valid else ["goldStateAfter alias leakage"]}),
             mock.patch.object(AUDIT.explicit_holdout_condition, "audit", return_value={"valid": True, "errors": []}),
+            mock.patch.object(AUDIT.prediction_eval_split_scope, "audit", return_value={"valid": split_scope_valid, "errors": [] if split_scope_valid else ["unregistered split='debug'"]}),
             mock.patch.object(AUDIT.prediction_payload, "audit_rows", return_value={"valid": payload_valid, "errors": [] if payload_valid else ["gold leakage"]}),
             mock.patch.object(AUDIT.prediction_metric_coverage, "audit", return_value={"valid": metric_coverage_valid, "errors": [] if metric_coverage_valid else ["selective metric omission"]}),
             mock.patch.object(AUDIT.evaluation_contract, "score", return_value={"valid": True, "errors": []}),
@@ -49,7 +51,7 @@ class R0AcceptanceBundleTests(unittest.TestCase):
 
     def run_with(self, **kwargs):
         patches = self.patches(**kwargs)
-        with patches[0], patches[1], patches[2], patches[3], patches[4], patches[5], patches[6], patches[7], patches[8], patches[9], patches[10], patches[11]:
+        with patches[0], patches[1], patches[2], patches[3], patches[4], patches[5], patches[6], patches[7], patches[8], patches[9], patches[10], patches[11], patches[12]:
             return AUDIT.audit_acceptance(self.data, self.predictions, self.manifest, self.base_dir)
 
     def test_all_contracts_must_pass(self):
@@ -58,6 +60,10 @@ class R0AcceptanceBundleTests(unittest.TestCase):
         self.assertEqual(result["classification"], "reproduced")
         self.assertEqual(result["failed_contracts"], [])
         self.assertTrue(result["alias_normalized_leakage_audit_required"])
+        self.assertTrue(result["registered_split_vocabulary_required"])
+        self.assertEqual(result["allowed_train_split"], "train")
+        self.assertEqual(result["allowed_evaluation_splits"], ["eval", "test", "valid", "validation"])
+        self.assertTrue(result["nonregistered_debug_calibration_posthoc_splits_forbidden"])
         self.assertTrue(result["same_instance_metric_coverage_required"])
         self.assertTrue(result["selective_metric_reporting_forbidden"])
         self.assertTrue(result["optional_gold_metrics_must_be_all_or_none"])
@@ -75,6 +81,13 @@ class R0AcceptanceBundleTests(unittest.TestCase):
         result = self.run_with(alias_valid=False)
         self.assertFalse(result["valid"])
         self.assertIn("schema_alias_leakage_contract", result["failed_contracts"])
+        self.assertTrue(result["checks"]["paired_statistics_contract"]["valid"])
+
+    def test_unregistered_split_cannot_be_hidden_by_valid_score(self):
+        result = self.run_with(split_scope_valid=False)
+        self.assertFalse(result["valid"])
+        self.assertEqual(result["classification"], "initial_reproduction_failure")
+        self.assertIn("prediction_eval_split_scope_contract", result["failed_contracts"])
         self.assertTrue(result["checks"]["paired_statistics_contract"]["valid"])
 
     def test_payload_failure_cannot_be_hidden_by_valid_score(self):
@@ -116,13 +129,14 @@ class R0AcceptanceBundleTests(unittest.TestCase):
         self.assertTrue(result["checks"]["paired_statistics_contract"]["valid"])
 
     def test_multiple_failures_are_preserved(self):
-        result = self.run_with(alias_valid=False, payload_valid=False, metric_coverage_valid=False, stats_valid=False, recomputation_valid=False, measurements_valid=False, paths_valid=False, cell_binding_valid=False)
+        result = self.run_with(alias_valid=False, split_scope_valid=False, payload_valid=False, metric_coverage_valid=False, stats_valid=False, recomputation_valid=False, measurements_valid=False, paths_valid=False, cell_binding_valid=False)
         self.assertEqual(
             result["failed_contracts"],
             [
                 "artifact_path_containment_contract",
                 "nonzero_measurement_contract",
                 "prediction_cell_binding_contract",
+                "prediction_eval_split_scope_contract",
                 "prediction_metric_coverage_contract",
                 "prediction_payload_contract",
                 "prediction_statistics_evidence_contract",
@@ -130,7 +144,7 @@ class R0AcceptanceBundleTests(unittest.TestCase):
                 "statistics_recomputation_binding_contract",
             ],
         )
-        self.assertEqual(len(result["errors"]), 8)
+        self.assertEqual(len(result["errors"]), 9)
 
 
 if __name__ == "__main__":
