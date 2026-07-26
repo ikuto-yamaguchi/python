@@ -21,7 +21,7 @@
 
 ## Non-termination rule
 
-「検証したが駄目だった」で終了しない。失敗runは、失敗分類、metric/log/code差分に基づく原因、最小修正、同一budget・instance再run、採用・棄却・停止判定まで未完了とする。
+「検証したが駄目だった」で終了しない。失敗runは、失敗分類、metric/log/code差分に基づく原因、最小修正、同一budget・instance再run、採用・棄却・停止判定まで未完了とする。文書・監査更新だけでiterationを閉じず、数値run requestまで同じ統合内で発行する。
 
 ## R0 status ledger
 
@@ -60,9 +60,9 @@ accepted evidenceは32,768 frames runのみ:
 
 これはpolicy competence不足であり、公開能力baseline再現ではない。131,072-frame runはR0.2中のfailureでartifactが失われたため受理しない。
 
-## E046 active execution
+## Active execution
 
-1. `qualify_r01_source_policy.py`をR0.1とR0.2の間に追加した。
+1. `qualify_r01_source_policy.py`をR0.1とR0.2の間に置く。
 2. R0.1は終了直後にcheckpoint、matched predictions、resource、raw logs、dependency lock、checksums、qualification結果を、成功・失敗にかかわらず保存する。
 3. qualificationはsource pin、seeds `1/7/19`、actual checkpoint frames、全checkpoint完了、same-instance control、answer-leakage false、Correct/Randomのwin・returnをfail-closedで確認する。
 4. `Correct <= Random`、Correct success zero、frame未達、seed/method/instance不整合、artifact欠落のいずれかならR0.2を開始しない。
@@ -70,6 +70,7 @@ accepted evidenceは32,768 frames runのみ:
 6. R0.2 jobはdownload後にもqualification artifactの `qualified_for_r02=true` を再確認する。
 7. 次runではaction histogram、valid-action率、entropy、episode length、reward到達率、mask前後logit、invalid-action mass、gradient norm、policy/value lossをseed別に保存し、公式実装との差、recurrent reset/detach、optimizer、termination、frame counting、mask、checkpoint restoreを診断する。
 8. 原因だけを変える最大6 screening runを行い、有望案だけseeds `1,7,19`へ昇格する。
+9. 今回の文書更新後のcanonical headからR0.1 run requestを更新し、数値実験を再要求する。
 
 このゲートは新しいモデルやtoy仮説ではなく、無能力なsource policyからR0.2の見かけ上の差を作ることを防ぎ、失敗から次の性能改善runへ接続する実行制御である。
 
@@ -79,15 +80,17 @@ D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示す
 
 毎runでrandom/language-blind/state-only/applicable shuffle、model/checkpoint bytes、peak RSS、runtime、CPU latency、seed、split、actual frames、commit、dependency、raw logs、checksums、leakageを保存する。
 
+現headで確認できたworkflow successはartifact-path containment、unified acceptance gate、prediction-method topologyの監査系のみであり、R0.1数値再現や能力進歩には数えない。
+
 ## Prior-art and RQ boundary
 
 J-CRe3はLREC-COLING 2024の日本語実世界multimodal reference-resolution datasetであり、日本語groundingの外部baselineとして扱うが、SILG/RTFMのinteractive policy competenceを代替しない。
 
 2025 score-based CRLと2026年3月の有限標本CRLにより、unknown target、少数environment、finite-sample recoveryはRQ-001の新規性根拠から除外済みである。
 
-LeGIT（ICLR 2026 submission、2026年2月改訂）は、システム変数の自然言語meta-informationとLLMの世界知識を使って初期のintervention targetを選択し、数値的online causal discoveryをwarm-startする。4つの現実的benchmarkでrandom・数値選択・humanと比較している。したがって、自然言語記述を使った介入候補選択、低データ初期局面でのLLM warm-start、言語知識と数値因果探索の組合せ自体はRQ-001の新規性候補から除外する。
+LeGITは、システム変数の自然言語meta-informationとLLMの世界知識を使って初期のintervention targetを選択し、数値的online causal discoveryをwarm-startする。したがって、自然言語記述を使った介入候補選択、低データ初期局面でのLLM warm-start、言語知識と数値因果探索の組合せ自体はRQ-001の新規性候補から除外する。
 
-LeGITのproject pageはpaperとcode linkを提示しているが、今回のcanonical repository内ではexact commitを固定したimmutable official-code reproductionは未実施である。よって性能証拠としては認定しない。
+LeGITのproject pageには`Code`表記があるが、2026-07-26時点の監査では公開repository URLへ解決できず、OpenReviewにも公式code URLは提示されていない。したがって状態を **paper/project-page確認済み・official code unresolved** に訂正する。exact commit、dependency、prompt、split、seed、raw output、checksumを固定した再現は未実施であり、性能証拠として認定しない。
 
 正式判断:
 
@@ -110,4 +113,4 @@ LeGITのproject pageはpaperとcode linkを提示しているが、今回のcano
 
 ## Last integration
 
-2026-07-25: **RESET-E046**。R0.1の実行成功だけでR0.2へ進む欠陥を修正し、source-policy competenceのfail-closed資格ゲート、失敗分類、次run契約、R0.2側の二重確認を実装した。LeGITのlanguage-guided intervention selectionをprior-art境界へ統合した。新しい保存済みR0.1数値、J-CRe3数値、R0.2結果はまだ存在しないため、外部baseline再現0件、能力進歩未認定、高校生級未達を維持する。
+2026-07-26: **RESET-E047**。監査文書だけでiterationを閉じない規則を明文化し、現headのsuccessが監査系CIだけであることを記録した。LeGITのcode状態をofficial-code確認済みからofficial-code unresolvedへ訂正した。外部baseline、J-CRe3、R0.2の新しい数値再現は0件のままであり、能力進歩未認定、高校生級未達を維持する。
