@@ -4,8 +4,9 @@
 This module does not add a model or research mechanism. It prevents a bundle from
 being accepted by running only a convenient subset of the existing contracts.
 Dataset/schema leakage, alias-normalized leakage, paired statistics, resource
-artifacts, strictly-positive measured resources, prediction-payload leakage, and
-prediction/statistics checksums must all pass in one invocation.
+artifacts, strictly-positive measured resources, bundle-contained artifact paths,
+prediction-payload leakage, and prediction/statistics checksums must all pass in
+one invocation.
 """
 from __future__ import annotations
 
@@ -14,6 +15,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+import audit_artifact_path_containment as artifact_path_containment
 import audit_nonzero_measurements as nonzero_measurements
 import audit_prediction_payload_leakage as prediction_payload
 import audit_prediction_statistics_artifacts as prediction_statistics
@@ -45,6 +47,7 @@ def audit_acceptance(
     checks["paired_statistics_contract"] = evaluation_contract.score(data, predictions)
     checks["resource_artifact_contract"] = evaluation_contract.audit_artifacts(manifest, base_dir)
     checks["nonzero_measurement_contract"] = nonzero_measurements.audit(manifest, base_dir)
+    checks["artifact_path_containment_contract"] = artifact_path_containment.audit(manifest, base_dir)
     checks["prediction_statistics_evidence_contract"] = prediction_statistics.audit(manifest, base_dir)
 
     failed = sorted(name for name, result in checks.items() if result.get("valid") is not True)
@@ -64,6 +67,8 @@ def audit_acceptance(
         "alias_normalized_leakage_audit_required": True,
         "strictly_positive_measured_resources_required": True,
         "nonempty_resource_artifacts_required": True,
+        "artifact_paths_must_be_bundle_contained": True,
+        "absolute_parent_escape_and_symlink_paths_forbidden": True,
         "partial_contract_success_is_not_acceptance": True,
         "new_mechanism_introduced": False,
     }
