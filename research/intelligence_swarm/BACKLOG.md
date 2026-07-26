@@ -4,7 +4,7 @@
 
 R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで進める。A〜Dは新しいtoy仮説、別branch、新規機構族を作らない。既存stacked draft PRはnegative-results archiveとして保持し、新作業のbaseにしない。
 
-外部baselineを再現するまで、新規機構族、新しい知能原理、能力進歩、高校生級到達を認定しない。単発失敗で終了せず、失敗分類、根拠、原因だけを変える最小修正、同一budget再run、採用・棄却・停止判定までを1サイクルとする。宣言した変更値が実commandへ到達していないrunは仮説検証として無効とする。
+外部baselineを再現するまで、新規機構族、新しい知能原理、能力進歩、高校生級到達を認定しない。単発失敗で終了せず、失敗分類、根拠、原因だけを変える最小修正、同一budget再run、採用・棄却・停止判定までを1サイクルとする。宣言した変更値が実commandへ到達していないrunは仮説検証として無効とする。実行中の同一screeningを重複発行しない。
 
 ## A–D allocation
 
@@ -44,42 +44,44 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 
 このrunは0.005仮説の採否に使わない。0.05の追加negative resultとして保存する。
 
-### Active corrected run: R01-SCREEN-002-E058
+### Active corrected run: R01-SCREEN-002-E059
 
 変更要因は1つだけ:
 
 - `entropy_cost: 0.05 -> 0.005`
 
-実行契約:
+実行状態:
 
 - workflow: `.github/workflows/r01_silg_entropy_screening.yml`
-- routing fix commit: `54a1f1f3c09ed0a8d526ae4d877057cfa33cd3d6`
-- run request commit: `1a91abd9708a5c2d83fc88a9768c73e69368b4eb`
+- run ID: `30215555334`
+- job ID: `89830932884`
+- execution commit: `cbd4af3d89718df76cc481f7c730ed80334ef223`
+- locator取得時点: install、source pin、generator schema、random/schema probe成功
+- current step: official `multi` recurrentの3-seed training
+- current artifacts: `0`
+
+実行契約:
+
 - training summary top-level、各seed record、各seed commandの3箇所で`0.005`をfail-closed検証する。
 - 1箇所でも不一致ならmatched evaluation前に停止し、性能仮説の結果として扱わない。
-
-直前headのPR連動workflowは4件とも`action_required`、job 0件だった。これはmodel failureではない。E058 push後に以下を取得するまでactiveのままとする。
-
-1. entropy screening workflow run ID。
-2. job conclusionとstep一覧。
-3. artifact ID・digest。
-4. qualification JSON。
-5. 各seedの完全commandと実entropy値。
+- run完了前に同一screeningを再dispatchしない。
 
 固定:
 
 - architecture、source pins、dataset、frames、seeds、split、actors、batch、unroll、matched instances
 
-必須出力:
+完了後の必須取得:
 
-1. Correct / Random / Language-blind / State-only / Language-shuffleのsame-instance結果。
-2. checkpoint bytes・SHA-256・actual frames。
-3. model parameters/state bytes、peak RSS、training wall、CPU latency。
-4. seed、split、dependency lock、raw logs、artifact digest。
-5. answer leakage、schema leakage、prediction provenance。
-6. action histogram、valid-action率、policy entropy、episode length、reward到達率。
-7. mask前後logit、invalid-action mass、gradient norm、policy/value loss。
-8. 実際に適用されたentropy valueと完全command。
+1. job conclusion、step一覧、artifact ID・digest。
+2. Correct / Random / Language-blind / State-only / Language-shuffleのsame-instance結果。
+3. checkpoint bytes・SHA-256・actual frames。
+4. model parameters/state bytes、peak RSS、training wall、CPU latency。
+5. seed、split、dependency lock、raw logs、artifact digest。
+6. answer leakage、schema leakage、prediction provenance。
+7. action histogram、valid-action率、policy entropy、episode length、reward到達率。
+8. mask前後logit、invalid-action mass、gradient norm、policy/value loss。
+9. 実際に適用されたentropy valueと完全command。
+10. qualification JSONと最初のactionable failure。
 
 採用条件:
 
@@ -93,7 +95,7 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 
 - `0.005`適用が証明された同一契約runでCorrectがRandomを上回らない、またはCorrect successが0なら、entropy cost単独原因を棄却する。
 
-次の原因順序:
+棄却後の次の単一原因:
 
 1. official evaluation/default parity
 2. recurrent reset/detach、optimizer/checkpoint restore
@@ -133,7 +135,9 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 ## Prior-art and RQ-001
 
-score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、CmIR、ReCITE、C3 Regularization、MCDRL、local-structure dynamical-system identification等の境界を維持する。今回の最新一次文献再監査でも、これらを越えるRQ-001採用根拠は得られていない。
+score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、CmIR、ReCITE、C3 Regularization、MCDRL、local-structure dynamical-system identification等の境界を維持する。
+
+C037としてCVPR 2026 **Multi-Modal Image Fusion via Intervention-Stable Feature Learning**を追加する。complementary masking、same-region random masking、modality dropoutを介入として、介入を跨いで安定なcross-modal featureを抽出するため、intervention-stable multimodal feature selectionやrobust dependency discoveryだけではRQ-001の新規性を認定しない。一次論文は確認済みだが、author-official codeとexact commitは未解決であり、再現済みbaselineには数えない。
 
 - 広義RQ-001: **棄却**
 - 狭義RQ-001: **追加狭域化・未採用**
@@ -147,7 +151,7 @@ score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、CmIR、ReCI
 ## Status
 
 - immutable R0.1 bundle: **2件・不合格**
-- valid entropy=0.005 screening: **E058実行要求済み・結果未確認**
+- valid entropy=0.005 screening: **run 30215555334 training中**
 - 外部baseline再現: **0件**
 - 新規機構族: **未認定**
 - 新規知能原理: **未発見**
