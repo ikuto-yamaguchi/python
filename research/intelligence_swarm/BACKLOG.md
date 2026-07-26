@@ -8,7 +8,7 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 
 ## A–D allocation
 
-- **A**: SILG/RTFM、J-CRe3、J-ORAの公式code・dataset・command・dependency固定と無改変再現。
+- **A**: SILG/RTFM、J-CRe3、J-ORA、GPIの公式code・dataset・command・dependency固定と無改変再現。
 - **B**: 実装不一致、最適化不足、表現ボトルネック、探索・学習信号不足の診断と制約内最適化。
 - **C**: 最新一次文献・公式codeとの重複監査、novelty matrix更新。
 - **D**: D015〜D035、matched controls、resource provenance、leakage、RQ-001判定。
@@ -37,8 +37,8 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 8. 原因だけを変える最大6 screening runを同一frames・split・instances・model familyで実施する。
 9. 有望候補だけseeds `1,7,19`へ昇格する。
 10. 失敗runは次の単一原因候補とmatched rerunを発行するまで未完了とし、「検証したが駄目」で閉じない。
-11. push型workflowの存在確認はPR連動run一覧だけで代用しない。必ずR0.1 run ID、job conclusion、artifact ID、qualification JSONで判定する。
-12. E049 run request後、artifactが存在すれば即座に取得し、最初のactionable failureへ次の単一原因screening contractを接続する。
+11. runの進捗はR0.1 run ID、job conclusion、artifact ID、qualification JSON、checksum manifestでのみ認定する。
+12. artifactが存在すれば即座に取得し、最初のactionable failureへ次の単一原因screening contractを接続する。
 
 最適化順は、公式差分除去、recurrent/optimizer修復、learning rate・entropy・unroll・gradient clipping、parameter数±2%以内の容量配分、fusion位置の順とする。
 
@@ -50,7 +50,7 @@ D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示す
 
 毎runで、matched random/language-blind/state-only/applicable shuffle、model/checkpoint bytes、peak RSS、training runtime、CPU latency、seed、split、actual frames、commit、dependency、raw logs、checksums、leakageを保存する。
 
-PR #409 head `dba26a23a67f05712ae83143d99107f9effd5702`のPR連動CIでは、prediction method topology、unified acceptance gate、artifact path containmentの3本が成功した。これは監査codeの回帰証拠だけであり、数値baseline再現には数えない。
+監査codeの回帰成功は数値baseline再現には数えない。
 
 ## P1 — J-CRe3
 
@@ -64,6 +64,18 @@ PR #409 head `dba26a23a67f05712ae83143d99107f9effd5702`のPR連動CIでは、pre
 
 J-CRe3は日本語multimodal reference resolution baselineであり、SILGのinteractive policy competenceを代替しない。
 
+## P1 — GPI official-software reproduction
+
+Imai & NakamuraのGPIは、生成AI内部表現を用いたtext/image/videoの因果・予測推定を公開softwareとして提供する。SILG/J-CRe3とは目的が異なるため別列で再現する。
+
+1. canonical repository、PyPI release、documentation versionを固定する。
+2. exact commit、package version、license、dependency、example data、commandを保存する。
+3. text-as-treatmentの最小公開exampleを無改変で再現する。
+4. effect estimate、standard error、runtime、peak RSS、model、seed、split、raw output、checksumを保存する。
+5. representationなし、random representation、shuffled representation、frozen alternative representationのmatched controlを追加する。
+6. GPIの成功をinteractive policy competenceやhidden intervention-target recoveryの証拠へ流用しない。
+7. 失敗時はdependency/model access、representation extraction、overlap/propensity、estimator、artifactのいずれかへ分類し、単一原因rerunへ接続する。
+
 ## P1 — R0.2 Environment-first
 
 immutable R0.1 competence bundleが `qualified_for_r02=true` を満たした後のみ開始する。Environment-first、parameter-matched End-to-end、State-onlyを比較し、source policy competence、3-seed平均改善、最低seed非悪化、next-state prediction、action accuracy、online task successを確認する。
@@ -76,22 +88,24 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 2025 score-based CRLと2026年3月有限標本CRLにより、unknown target、少数environment、finite-sample recoveryだけではRQ-001を採用しない。
 
-Markham et al., CLeaR 2026は、black-box generative modelへ介入型context moduleを追加し、因果的disentanglementとOOD compositionを実現する枠組み・識別結果を提示した。PMLR正式掲載ページを確認したが公式repositoryは確認できず、状態は **paper/PMLR確認済み・official code unresolved**。context-conditioned intervention、causal concept disentanglement、compositional reuse自体は新規性候補から除外する。
+Markham et al., CLeaR 2026により、intervention-conditioned context module、causal concept disentanglement、compositional reuse、OOD composition自体は新規性候補から除外する。公式repositoryは未解決。
 
-LeGITは自然言語meta-informationとLLM世界知識でonline causal discovery初期のintervention targetを選び、数値的選択をwarm-startする。language-guided target selection、low-data warm-start、言語知識と数値因果探索の組合せ自体は新規性候補から除外する。公式codeは未解決。
+LeGITにより、language-guided target selection、low-data warm-start、言語知識と数値因果探索の組合せ自体は新規性候補から除外する。公式codeは未解決。
+
+Imai & NakamuraのGPI系研究と公開softwareにより、LLM等の生成AI内部表現をtext/image/videoのtreatmentまたはconfounder表現として利用し、生成データ、overlap改善、double machine learningへ接続すること自体は新規性候補から除外する。
 
 ### Required prior-art actions
 
-1. Markham et al. 2026は著者ページ・補足資料を継続確認し、repository未公開ならcode-unavailableをnovelty matrixへ固定する。
-2. repositoryが公開された場合のみexact commit、dependency、dataset、command、seed、raw output、checksumを固定する。
-3. LeGITはcanonical repository URLを継続調査し、未公開ならcode-unavailableとnovelty matrixへ明記する。
-4. 最強の非言語CRL、LeGIT型target-selection、介入context-module型compositionを別列でnovelty matrixへ追加する。
-5. これらの再現前は論文上の性能差を本研究の能力証拠へ流用しない。
+1. Markham et al. 2026とLeGITの公式repository公開有無を継続監査する。
+2. GPIのcanonical repositoryとexact commitを固定し、text-as-treatment最小exampleを再現する。
+3. 最強の非言語CRL、LeGIT型target-selection、介入context-module型composition、GPI型生成表現因果推定をnovelty matrixの別列へ置く。
+4. これらの論文上の性能値を本研究の能力証拠へ流用しない。
+5. RQ-001採用候補は、上記すべてを差し引いた後に残るlanguage固有追加情報だけに限定する。
 
 - 広義RQ-001: **棄却**
 - 狭義RQ-001: **追加狭域化・未採用**
 
-採用には、上記baseline再現後にも残るcountermodel pair、externally fixedでjoint recoding不能なdenotation law、target selection・context compositionを超えるlanguage固有追加情報、事前登録済みclaim/counterexample/stopping ruleが必要。
+採用には、上記baseline再現後にも残るcountermodel pair、externally fixedでjoint recoding不能なdenotation law、target selection・context composition・既成生成表現利用を超えるlanguage固有追加情報、事前登録済みclaim/counterexample/stopping ruleが必要。
 
 ## Stage transition
 
