@@ -14,7 +14,7 @@
 
 ## A–D responsibilities
 
-- **A**: SILG/RTFM、J-CRe3/J-ORA、GPIの公式再現とimmutable artifact保存。
+- **A**: SILG/RTFM、J-CRe3/J-ORA、GPI、Multi-View CRLの公式再現とimmutable artifact保存。
 - **B**: 実装・最適化・表現・探索/信号の失敗診断と、原因だけを変える最小run。
 - **C**: 最新一次文献・公式codeとの重複監査、novelty matrix。
 - **D**: frozen D015〜D035、matched controls、resource、leakage、RQ-001判定。
@@ -74,7 +74,7 @@ accepted evidenceは32,768 frames runのみ:
 8. 原因だけを変える最大6 screening runを行い、有望案だけseeds `1,7,19`へ昇格する。
 9. screening runが失敗しても、停止条件を満たさない限り次の単一原因候補へ進み、失敗報告のみでcycleを閉じない。
 10. 実装忠実度が未確定ならarchitecture変更へ進まず、official command/defaults、checkpoint restore、frame counting、mask、recurrent state、optimizerの順に差分を潰す。
-11. RESET-E051ではcanonical headからR0.1数値runを再要求する。run ID、job conclusion、artifact ID、qualification JSON、checksum manifestが揃うまで開始・成功・能力進歩を認定しない。
+11. RESET-E052ではcanonical headからR0.1数値runを再要求する。run ID、job conclusion、artifact ID、qualification JSON、checksum manifestが揃うまで開始・成功・能力進歩を認定しない。
 
 ## Evaluation contract
 
@@ -92,6 +92,8 @@ J-CRe3はLREC-COLING 2024の日本語実世界multimodal reference-resolution da
 
 Markham et al., CLeaR 2026により、intervention-conditioned context module、因果概念disentanglement、compositional reuse、OOD compositionだけではRQ-001の新規性にならない。公式repositoryは未解決のため再現済みとは扱わない。
 
+Baumgartner et al., CLeaR 2026は、raw trajectoryからstate-dependent local causal structureを用いて動的系パラメータをpermutationとdiffeomorphismまで識別し、sparsity-regularised transformerで回復する。したがって、trajectoryから局所的因果構造・system parameter・disentangled representationを回復すること自体はRQ-001の新規性候補から除外する。今回の監査ではauthor-official repositoryを固定できておらず、official-code reproductionは0件のままとする。
+
 LeGITにより、自然言語meta-informationを使ったintervention target選択、低データ初期局面のLLM warm-start、言語知識と数値因果探索の組合せ自体はRQ-001の新規性候補から除外する。公式codeは未解決である。
 
 Imai & NakamuraのGPI系研究は、生成AIが生成・抽出したtext/image/video内部表現を、因果・予測推定へ利用する公開softwareを提供する。したがって、LLM内部表現を用いたtext-as-treatment、text/image-as-confounder、生成データによるoverlap改善、double machine learningによる効果推定だけではRQ-001の新規性にならない。GPIはinteractive policy learningやhidden intervention-target recoveryを直接扱うbaselineではないため、SILG/J-CRe3とは別列でnovelty matrixへ置く。
@@ -100,9 +102,9 @@ Yao et al.のMulti-View CRL with Partial Observabilityは、画像・テキス�
 
 正式判断:
 
-> **RQ-001: NARROWED BEYOND LANGUAGE-GUIDED TARGET SELECTION, INTERVENTION-CONDITIONED COMPOSITION, GENERATIVE-REPRESENTATION CAUSAL INFERENCE, AND PARTIALLY OBSERVED MULTI-VIEW CRL — NOT ADOPTED**
+> **RQ-001: NARROWED BEYOND LANGUAGE-GUIDED TARGET SELECTION, INTERVENTION-CONDITIONED COMPOSITION, GENERATIVE-REPRESENTATION CAUSAL INFERENCE, PARTIALLY OBSERVED MULTI-VIEW CRL, AND LOCAL-STRUCTURE DYNAMICAL-SYSTEM IDENTIFICATION — NOT ADOPTED**
 
-採用には、最強の非言語baseline、LeGIT型target-selection baseline、介入context-module型composition baseline、GPI型生成表現因果推定baseline、Multi-View CRL baselineの再現後にも残るcountermodel pair、外部固定でjoint recoding不能なdenotation law、target selection・context composition・既成表現利用・multi-view shared-factor recoveryを超えるlanguage固有追加情報の直接証拠、事前登録済みclaim/counterexample/stopping ruleが必要。
+採用には、最強の非言語baseline、LeGIT型target-selection baseline、介入context-module型composition baseline、GPI型生成表現因果推定baseline、Multi-View CRL baseline、local-structure dynamical-system identification baselineの再現後にも残るcountermodel pair、外部固定でjoint recoding不能なdenotation law、既存のtrajectory/local-structure recoveryを超えるlanguage固有追加情報の直接証拠、事前登録済みclaim/counterexample/stopping ruleが必要。
 
 ## Stage transition
 
@@ -119,4 +121,4 @@ Yao et al.のMulti-View CRL with Partial Observabilityは、画像・テキス�
 
 ## Last integration
 
-2026-07-26: **RESET-E051**。R0.1/J-CRe3/R0.2の受理可能artifactが0件であることを維持し、canonical headからR0.1数値runを再要求する。公式 `CausalLearningAI/multiview-crl` をprior-artと公式再現対象へ追加し、partial observability下の言語を含むmulti-view alignment/shared-factor recoveryのみではRQ-001を採用しない。外部baseline再現、能力進歩、新規知能原理、高校生級到達はいずれも未認定のままとする。
+2026-07-26: **RESET-E052**。R0.1/J-CRe3/R0.2の受理可能artifactが0件であることを維持し、canonical headからR0.1数値runを再要求する。Baumgartner et al., CLeaR 2026をprior-art境界へ追加し、raw trajectory、state-dependent local causal structure、system-parameter disentanglementだけではRQ-001を採用しない。author-official codeは未固定であり、外部baseline再現、能力進歩、新規知能原理、高校生級到達はいずれも未認定のままとする。
