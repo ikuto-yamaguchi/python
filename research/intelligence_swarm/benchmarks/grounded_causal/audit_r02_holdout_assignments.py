@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Fail-closed audit for R0.2 entity/dynamics/language-form holdouts.
+"""Fail-closed audit for real R0.2 RTFM S1 holdout assignments.
 
-This is an evaluation contract, not a new model or mechanism. It rejects the
-legacy placeholder convention where entity/dynamics holdouts are always false
-and every test row is called a language holdout.
+RTFM S1 exposes a generator-defined dynamics split.  It does not expose
+independently held-out entity or language-form splits.  This evaluator therefore
+requires a clean three-seed dynamics holdout and rejects any attempt to label
+entity/language-form transfer as measured.  It is an evaluation contract, not a
+new model or mechanism.
 """
 from __future__ import annotations
 
@@ -15,9 +17,10 @@ from pathlib import Path
 from typing import Any
 
 CANONICAL_SEEDS = (1, 7, 19)
-HOLDOUTS = {
+DYNAMICS_CONDITION = "dynamics_holdout"
+DYNAMICS_SIGNATURE = "dynamics_signature"
+INAPPLICABLE = {
     "entity_holdout": "entity_signature",
-    "dynamics_holdout": "dynamics_signature",
     "language_holdout": "language_form_signature",
 }
 
@@ -47,7 +50,9 @@ def audit(rows: list[dict[str, Any]], path: Path) -> dict[str, Any]:
     for row in rows:
         by_split[str(row.get("split", ""))].append(row)
 
-    if not by_split.get("train") or not by_split.get("test"):
+    train = by_split.get("train", [])
+    test = by_split.get("test", [])
+    if not train or not test:
         failures.append("both train and test rows are required")
 
     observed_seeds = {int(row["seed"]) for row in rows if "seed" in row}
@@ -56,47 +61,54 @@ def audit(rows: list[dict[str, Any]], path: Path) -> dict[str, Any]:
             f"canonical seeds required: expected={list(CANONICAL_SEEDS)} observed={sorted(observed_seeds)}"
         )
 
-    train = by_split.get("train", [])
-    test = by_split.get("test", [])
-    cells: dict[str, Any] = {}
+    selected = [row for row in test if bool(row.get(DYNAMICS_CONDITION, False))]
+    dynamics_seeds = {int(row["seed"]) for row in selected if "seed" in row}
+    test_signatures = {str(row.get(DYNAMICS_SIGNATURE, "")) for row in selected}
+    test_signatures.discard("")
+    train_signatures = {str(row.get(DYNAMICS_SIGNATURE, "")) for row in train}
+    train_signatures.discard("")
+    overlap = sorted(test_signatures & train_signatures)
 
-    for condition, signature_field in HOLDOUTS.items():
-        selected = [row for row in test if bool(row.get(condition, False))]
-        condition_seeds = {int(row["seed"]) for row in selected if "seed" in row}
-        signatures = {str(row.get(signature_field, "")) for row in selected}
-        signatures.discard("")
-        train_signatures = {str(row.get(signature_field, "")) for row in train}
-        train_signatures.discard("")
-        overlap = sorted(signatures & train_signatures)
+    if not selected:
+        failures.append("dynamics_holdout: no held-out test rows")
+    if dynamics_seeds != set(CANONICAL_SEEDS):
+        failures.append(
+            f"dynamics_holdout: missing canonical seed coverage; observed={sorted(dynamics_seeds)}"
+        )
+    if any(DYNAMICS_SIGNATURE not in row or not str(row.get(DYNAMICS_SIGNATURE, "")) for row in selected):
+        failures.append(f"dynamics_holdout: missing {DYNAMICS_SIGNATURE}")
+    if overlap:
+        failures.append(
+            f"dynamics_holdout: train/test signature leakage ({len(overlap)} overlaps)"
+        )
+    if any(bool(row.get(DYNAMICS_CONDITION, False)) for row in train):
+        failures.append("dynamics_holdout: train rows cannot be marked held out")
 
-        if not selected:
-            failures.append(f"{condition}: no held-out test rows")
-        if condition_seeds != set(CANONICAL_SEEDS):
+    inapplicable_cells: dict[str, Any] = {}
+    for condition, signature_field in INAPPLICABLE.items():
+        marked = [row for row in rows if bool(row.get(condition, False))]
+        if marked:
             failures.append(
-                f"{condition}: missing canonical seed coverage; observed={sorted(condition_seeds)}"
+                f"{condition}: RTFM S1 has no qualified split; marked_rows={len(marked)}"
             )
-        if any(signature_field not in row or not str(row.get(signature_field, "")) for row in selected):
-            failures.append(f"{condition}: missing {signature_field}")
-        if overlap:
-            failures.append(
-                f"{condition}: train/test signature leakage ({len(overlap)} overlaps)"
-            )
-
-        cells[condition] = {
-            "rows": len(selected),
-            "seeds": sorted(condition_seeds),
-            "unique_signatures": len(signatures),
-            "train_overlap_count": len(overlap),
-            "overlap_examples": overlap[:10],
+        inapplicable_cells[condition] = {
+            "applicable": False,
+            "marked_rows": len(marked),
+            "signature_field": signature_field,
+            "reason": "RTFM S1 does not define an independent generator-backed split",
         }
 
-    # Explicitly reject the current placeholder annotation pattern.
-    if test and all(not bool(row.get("entity_holdout", False)) for row in test):
-        failures.append("placeholder entity_holdout=False for every test row")
-    if test and all(not bool(row.get("dynamics_holdout", False)) for row in test):
-        failures.append("placeholder dynamics_holdout=False for every test row")
-    if test and all(bool(row.get("language_holdout", False)) for row in test):
-        failures.append("test split cannot be relabeled wholesale as language-form holdout")
+    assignment_sources = {str(row.get("holdout_assignment_source", "")) for row in rows}
+    if assignment_sources != {"pre_outcome_generator_manifest"}:
+        failures.append(
+            "holdout assignments must come only from pre_outcome_generator_manifest; "
+            f"observed={sorted(assignment_sources)}"
+        )
+    missing_manifest_hash = sum(
+        1 for row in rows if not str(row.get("holdout_manifest_sha256", ""))
+    )
+    if missing_manifest_hash:
+        failures.append(f"missing holdout manifest SHA-256 on {missing_manifest_hash} rows")
 
     status = "pass" if not failures else "initial_reproduction_failure"
     return {
@@ -105,7 +117,21 @@ def audit(rows: list[dict[str, Any]], path: Path) -> dict[str, Any]:
         "dataset_sha256": dataset_sha256(path),
         "rows": len(rows),
         "canonical_seeds": list(CANONICAL_SEEDS),
-        "cells": cells,
+        "holdout_scope": {
+            "dynamics": "applicable",
+            "entity": "inapplicable",
+            "language_form": "inapplicable",
+        },
+        "dynamics_holdout": {
+            "rows": len(selected),
+            "seeds": sorted(dynamics_seeds),
+            "unique_test_signatures": len(test_signatures),
+            "train_overlap_count": len(overlap),
+            "overlap_examples": overlap[:10],
+        },
+        "inapplicable_cells": inapplicable_cells,
+        "assignment_sources": sorted(assignment_sources),
+        "missing_manifest_hash_rows": missing_manifest_hash,
         "failures": failures,
     }
 
