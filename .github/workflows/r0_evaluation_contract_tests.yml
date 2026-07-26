@@ -14,6 +14,7 @@ on:
       - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_holdout_condition_integrity.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_episode_cluster_statistics.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_model_input_semantic_leakage.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/qualify_r01_source_policy.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_method_identity.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_silg_schema.py'
@@ -24,6 +25,7 @@ on:
       - 'research/intelligence_swarm/benchmarks/grounded_causal/test_audit_holdout_condition_integrity.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/test_audit_episode_cluster_statistics.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/test_audit_model_input_semantic_leakage.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_qualify_r01_source_policy.py'
   workflow_dispatch:
 
 concurrency:
@@ -50,7 +52,9 @@ jobs:
             research/intelligence_swarm/benchmarks/grounded_causal/audit_holdout_condition_integrity.py \
             research/intelligence_swarm/benchmarks/grounded_causal/audit_episode_cluster_statistics.py \
             research/intelligence_swarm/benchmarks/grounded_causal/audit_model_input_semantic_leakage.py \
-            research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_method_identity.py
+            research/intelligence_swarm/benchmarks/grounded_causal/qualify_r01_source_policy.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_method_identity.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/test_qualify_r01_source_policy.py
       - name: Run evaluation contract regression tests
         working-directory: research/intelligence_swarm/benchmarks/grounded_causal
         run: |
@@ -64,4 +68,5 @@ jobs:
             test_audit_shuffle_payloads.py \
             test_audit_holdout_condition_integrity.py \
             test_audit_episode_cluster_statistics.py \
-            test_audit_model_input_semantic_leakage.py
+            test_audit_model_input_semantic_leakage.py \
+            test_qualify_r01_source_policy.py
