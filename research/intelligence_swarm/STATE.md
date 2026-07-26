@@ -21,7 +21,7 @@
 
 ## Non-termination rule
 
-「検証したが駄目だった」で終了しない。失敗runは、失敗分類、metric/log/code差分に基づく原因、最小修正、同一budget・instance再run、採用・棄却・停止判定まで未完了とする。文書・監査更新だけでiterationを閉じず、数値run requestまたは次の単一原因screening contractまで同じ統合内で発行する。
+「検証したが駄目だった」で終了しない。失敗runは、失敗分類、metric/log/code差分に基づく原因、最小修正、同一budget・instance再run、採用・棄却・停止判定まで未完了とする。文書・監査更新だけでiterationを閉じず、数値run requestまたは次の単一原因screening contractまで同じ統合内で発行する。ただし既に同一screeningが実行中の場合は重複dispatchせず、そのrunを完了・artifact判定まで追跡する。
 
 ## R0 status ledger
 
@@ -93,10 +93,12 @@
 
 ### Active screening R01-SCREEN-002-E055
 
-canonical branchから実行要求を発行済み。変更する要因は1つだけとする。
-
+- workflow run ID: `30208660095`
+- workflow head: `3648f10c44ceab68891a08d5cf9ca174d739dd74`
+- current state at RESET-E056 audit: **in progress**
+- completed: checkout、Python setup、host provenance、pinned SILG/RTFM install、generator schema、canonical random/schema probe
+- in progress: official `multi` recurrent 131,072-frame training
 - changed factor: `entropy_cost 0.05 -> 0.005`
-- workflow: `.github/workflows/r01_silg_entropy_screening.yml`
 - fixed: model family、source pins、frames、seeds、split、actors、batch、unroll、same-instance controls
 - required retest: Correct / Random / Language-blind / State-only / Language-shuffle
 - required diagnostics: action histogram、valid-action率、policy entropy、episode termination、mask前後logit、invalid-action mass、gradient norm、policy/value loss
@@ -104,7 +106,7 @@ canonical branchから実行要求を発行済み。変更する要因は1つだ
 - failure後: official evaluation/default parity、recurrent/optimizer、learning-rate/gradientの順で次の単一原因へ進む
 - stop: 最大6 screening runまたは事前停止条件まで継続
 
-実行要求commitは `3648f10c44ceab68891a08d5cf9ca174d739dd74`。これはrun開始・成功の証拠ではなく、数値実験のdispatchである。
+runは未完了であり、新artifact、性能改善、外部baseline再現はまだ認定しない。同一条件の重複runは発行しない。
 
 ## Evaluation contract
 
@@ -116,13 +118,15 @@ D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示す
 
 J-CRe3はLREC-COLING 2024の日本語実世界multimodal reference-resolution datasetであり、日本語groundingの外部baselineとして扱うが、SILG/RTFMのinteractive policy competenceを代替しない。
 
-2025 score-based CRLと2026年有限標本CRLにより、unknown target、少数environment、finite-sample recoveryはRQ-001の新規性根拠から除外済みである。Markham et al.、Baumgartner et al.、LeGIT、GPI、Multi-View CRL、CmIR、ReCITEの境界を維持する。
+2025 score-based CRLと2026年有限標本CRLにより、unknown target、少数environment、finite-sample recoveryはRQ-001の新規性根拠から除外済みである。Markham et al.、Baumgartner et al.、LeGIT、GPI、Multi-View CRL、CmIR、ReCITE、C3 Regularizationの境界を維持する。
 
-C035としてWang et al., ICML 2025 **Towards the Causal Complete Cause of Multi-Modal Representation Learning** を追加する。同研究は、multimodal representationの因果的十分性と必要性をC3 riskとして測定し、instrumental variable、real/hypothetical twin branches、counterfactual modelingによるC3 Regularizationを提示する。公式code linkは `WangJingyao07/Multi-Modal-Base`。したがって、multimodal representationのcausal sufficiency/necessity測定、counterfactual necessity regularization、plug-and-play causal-completeness regularizationだけではRQ-001の新規性を認定しない。exact commit・dependency・dataset・数値再現は未完了である。
+C035としてWang et al., ICML 2025 **Towards the Causal Complete Cause of Multi-Modal Representation Learning** を維持する。同研究はmultimodal representationの因果的十分性と必要性をC3 riskとして測定し、instrumental variable、real/hypothetical twin branches、counterfactual modelingによるC3 Regularizationを提示する。exact commit・dependency・dataset・数値再現は未完了である。
+
+C036としてLiang et al., CVPR 2026 **Multimodal Causality-Driven Representation Learning for Generalizable Medical Image Segmentation** を境界へ追加する。同研究はVLMのcross-modal表現、text promptで構成するdomain-confounder dictionary、causal intervention networkを用い、domain-specific variationを抑制しつつ構造情報を保持する。したがって、text-defined confounder dictionary、multimodal causal intervention、domain-confounder removal、OOD segmentation generalizationだけではRQ-001の新規性を認定しない。これは医用画像segmentationのdomain-generalization研究であり、hidden intervention-target groundingやinteractive policy competenceの直接baselineではない。一次論文は確認済みだが、author-official code、exact commit、dependency、dataset commandの固定と数値再現は未完了である。
 
 正式判断:
 
-> **RQ-001: NARROWED BEYOND LANGUAGE-GUIDED TARGET SELECTION, INTERVENTION-CONDITIONED COMPOSITION, GENERATIVE-REPRESENTATION CAUSAL INFERENCE, PARTIALLY OBSERVED MULTI-VIEW CRL, LOCAL-STRUCTURE DYNAMICAL-SYSTEM IDENTIFICATION, MULTIMODAL CAUSAL-INVARIANT DECOMPOSITION, LANGUAGE-ONLY CAUSAL-RELATION INFERENCE, AND CAUSAL SUFFICIENCY/NECESSITY REGULARIZATION — NOT ADOPTED**
+> **RQ-001: NARROWED BEYOND LANGUAGE-GUIDED TARGET SELECTION, INTERVENTION-CONDITIONED COMPOSITION, GENERATIVE-REPRESENTATION CAUSAL INFERENCE, PARTIALLY OBSERVED MULTI-VIEW CRL, LOCAL-STRUCTURE DYNAMICAL-SYSTEM IDENTIFICATION, MULTIMODAL CAUSAL-INVARIANT DECOMPOSITION, LANGUAGE-ONLY CAUSAL-RELATION INFERENCE, CAUSAL SUFFICIENCY/NECESSITY REGULARIZATION, AND TEXT-DEFINED CONFOUNDER INTERVENTION — NOT ADOPTED**
 
 採用には、上記baseline再現後にも残るcountermodel pair、外部固定でjoint recoding不能なdenotation law、language固有追加情報の直接証拠、事前登録済みclaim/counterexample/stopping ruleが必要。
 
@@ -141,4 +145,4 @@ C035としてWang et al., ICML 2025 **Towards the Causal Complete Cause of Multi
 
 ## Last integration
 
-2026-07-26: **RESET-E055**。R01-SCREEN-002をcanonical branchから再dispatchし、`entropy_cost 0.05 -> 0.005`だけを変えるmatched screeningを固定した。C035としてC3 Regularizationの一次論文と公式code linkを重複境界へ統合した。run開始・数値結果は未確認であり、外部baseline再現0、能力進歩未認定、高校生級未達を維持する。
+2026-07-26: **RESET-E056**。R01-SCREEN-002 run `30208660095`がpinned install・schema/random probeを通過し、official recurrent 131,072-frame training中であることを統合した。同一screeningの重複dispatchは禁止し、完了後のartifact・matched controls・resource・leakage・診断値を待って採否を決める。C036としてCVPR 2026 MCDRLを重複境界へ追加した。run未完了、外部baseline再現0、能力進歩未認定、高校生級未達を維持する。
