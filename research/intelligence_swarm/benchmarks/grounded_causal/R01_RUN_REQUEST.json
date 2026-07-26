@@ -1,11 +1,11 @@
 {
-  "requested_at_utc": "2026-07-26T05:48:47Z",
+  "requested_at_utc": "2026-07-26T06:00:00Z",
   "track": "R0.1/R0.2",
   "benchmark": "SILG RTFM S1",
   "workflow": ".github/workflows/r0_silg_rtfm_probe.yml",
   "canonical_branch": "research/intelligence-swarm-reconstruction-001",
-  "request_reason": "Execute the split-job workflow from canonical head 76cd49dcb4b281235b699a4f08fc6c3e9df62f97. Do not close this iteration on governance or short audit CI. Preserve the official SILG multi recurrent baseline, 131072 frames, seeds 1/7/19, fixed train/test split, matched instances, and random/language-blind/state-only/language-shuffle controls. Save immutable R0.1 artifacts even when qualification fails. If source-policy competence fails, classify the evidence-backed cause and continue only with the minimum one-variable matched diagnostic allowed by the preregistered maximum-six-screening rule. Do not create a new mechanism family, toy hypothesis, branch, or PR chain.",
-  "requested_from_head": "76cd49dcb4b281235b699a4f08fc6c3e9df62f97",
+  "request_reason": "Execute the split-job workflow from RESET-E048 canonical head 68a55a93f1d6f2922fecdc9788ae7d6793937903. Do not close this cycle after a failed run or governance-only update. Preserve the official SILG multi recurrent baseline at 131072 frames with seeds 1/7/19, fixed train/test split, matched instances, and random/language-blind/state-only/language-shuffle controls. Save immutable R0.1 artifacts even when qualification fails. If competence fails, classify the evidence-backed cause, change exactly one factor, and issue the next matched screening run unless a preregistered stopping condition has been met. Maximum six screening runs. Do not create a new mechanism family, toy hypothesis, branch, or PR chain.",
+  "requested_from_head": "68a55a93f1d6f2922fecdc9788ae7d6793937903",
   "frames_per_seed": 131072,
   "seeds": [1, 7, 19],
   "train_env": "silg:rtfm_train_s1-v0",
@@ -49,9 +49,17 @@
       "one changed causal factor",
       "fixed variables",
       "matched rerun contract",
-      "adopt reject or stop decision"
+      "adopt reject or stop decision",
+      "next screening request unless stopping condition is met"
     ],
-    "maximum_screening_runs": 6
+    "maximum_screening_runs": 6,
+    "screening_order": [
+      "official implementation and default differences",
+      "recurrent state and optimizer correctness",
+      "learning rate entropy unroll and gradient clipping",
+      "parameter-matched capacity allocation",
+      "language-state fusion position"
+    ]
   },
   "r02_methods": ["environment-first", "end-to-end", "state-only"],
   "r02_metrics": ["task success", "next-state prediction", "valid-action-masked action accuracy", "dynamics holdout transfer"],
