@@ -18,6 +18,7 @@ on:
       - 'research/intelligence_swarm/benchmarks/grounded_causal/gaddy_klein_typed_baseline.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/r02_typed_comparison.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/run_r02_typed_comparison.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/evaluate_r02_offline_policy_metrics.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/evaluate_r02_online_silg.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_r02_holdout_assignments.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh'
@@ -137,6 +138,7 @@ jobs:
             signatures="$results/SILG_RTFM_GENERATOR_SIGNATURES_SEED_${seed}.jsonl"
             join_summary="$results/SILG_RTFM_HOLDOUT_JOIN_SEED_${seed}.json"
             out="$results/SILG_RTFM_R02_TYPED_COMPARISON_SEED_${seed}.json"
+            policy="$results/SILG_RTFM_R02_OFFLINE_POLICY_METRICS_SEED_${seed}.json"
             online="$results/SILG_RTFM_R02_ONLINE_SEED_${seed}.json"
             /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/export_rtfm_generator_signatures.py \
               --silg-root "$RUNNER_TEMP/r0_silg/silg" --seed "$seed" --train-episodes 40 --test-episodes 20 --out "$signatures" \
@@ -152,6 +154,9 @@ jobs:
             cat "$data" >> "$results/SILG_RTFM_TYPED_TRAJECTORIES_QUALIFIED_3SEED.jsonl"
             /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/run_r02_typed_comparison.py \
               --data "$data" --out "$out" --seed "$seed" --env-epochs 8 --lang-epochs 8 \
+              2>&1 | tee -a "$results/SILG_RTFM_R02_TYPED.log"
+            /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/evaluate_r02_offline_policy_metrics.py \
+              --data "$data" --comparison "$out" --seed "$seed" --out "$policy" \
               2>&1 | tee -a "$results/SILG_RTFM_R02_TYPED.log"
             /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/evaluate_r02_online_silg.py \
               --silg-root "$RUNNER_TEMP/r0_silg/silg" --data "$data" --comparison "$out" --seed "$seed" --episodes 20 --out "$online" \
