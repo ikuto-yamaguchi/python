@@ -1,10 +1,10 @@
 {
-  "requested_at_utc": "2026-07-25T23:51:48Z",
+  "requested_at_utc": "2026-07-26T01:05:54Z",
   "track": "R0.1/R0.2",
   "benchmark": "SILG RTFM S1",
   "workflow": ".github/workflows/r0_silg_rtfm_probe.yml",
   "canonical_branch": "research/intelligence-swarm-reconstruction-001",
-  "request_reason": "Execute the split-job workflow from the current canonical head. The R0.1 job must freeze and upload the 131072-frame three-seed checkpoints, matched same-instance controls, dependency versions, resource measurements, raw logs, and checksums before any R0.2 work begins. Do not add toy hypotheses or alter the official recurrent baseline. If execution fails, preserve the partial R0.1 bundle and reproducible failure logs, then make only the smallest necessary correction.",
+  "request_reason": "Execute the split-job workflow from the current canonical head after the inventory-state, generator-manifest holdout, official action-dimension, and valid-action-masked offline policy fixes. The R0.1 job must freeze and upload the 131072-frame three-seed checkpoints, matched same-instance controls, dependency versions, resource measurements, raw logs, and checksums before R0.2 begins. R0.2 must consume only that immutable artifact and preserve any reproducible failure bundle. Do not add toy hypotheses or alter the official recurrent baseline.",
   "frames_per_seed": 131072,
   "seeds": [1, 7, 19],
   "train_env": "silg:rtfm_train_s1-v0",
@@ -13,17 +13,18 @@
   "pretrained_language_model": false,
   "controls": ["random", "language-blind", "state-only", "language-shuffle"],
   "r02_methods": ["environment-first", "end-to-end", "state-only"],
-  "r02_metrics": ["task success", "next-state prediction", "action accuracy", "dynamics holdout transfer"],
+  "r02_metrics": ["task success", "next-state prediction", "valid-action-masked action accuracy", "dynamics holdout transfer"],
   "r02_inapplicable_holdouts": ["entity", "language-form"],
   "source_pins": {
     "silg": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
-    "rtfm": "58f17955595b5a127c96d045d896fcbcc7d4b570"
+    "rtfm": "58f17955595b5a127c96d045d896fcbcc7d4b570",
+    "gaddy_klein_public_code": "98c0dc68926ee9535f15019922d2ca871b0ac0b5"
   },
   "required_artifacts": [
     "three R0.1 checkpoints",
     "raw install and training logs",
     "matched R0.1 control results",
-    "typed R0.2 trajectories",
+    "typed R0.2 trajectories including inventory state",
     "generator-side dynamics signatures",
     "immutable holdout joins",
     "R0.2 offline and online results",
