@@ -21,57 +21,37 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 - RTFM `58f17955595b5a127c96d045d896fcbcc7d4b570`
 - official `multi` recurrent
 - seeds `1,7,19`
-- `131,072 requested frames`、actual `131,080` frames
+- `131,072 requested frames`、actual baseline `131,080` frames
 - train `silg:rtfm_train_s1-v0`
 - test `silg:rtfm_test_s1-v0`
 
 ### Completed immutable failure: run 30203026269
 
-- job: `r01-public-reproduction`
 - conclusion: qualification failure
 - artifact ID: `8633105142`
-- artifact bytes: `72,686,203`
 - artifact digest: `sha256:43ab7f1df82e9eba98c132b2e84a9ec55dbfdd726795fb43f7608fe288e00eef`
-- three checkpoints: 保存済み
-- same-instance matched controls: 成立
-- answer leakage: `false`
-- R0.2: skip
-
-Results:
-
-- Correct `0/60`、win rate `0.0000`、return `-2.0749993`
-- Random `4/60`、win rate `0.0667`、return `-1.1513333`
+- Correct `0/60`、return `-2.0749993`
+- Random `4/60`、return `-1.1513333`
 - Language-blind `1/60`
 - State-only `0/60`
 - Language-shuffle `0/60`
-- Correct−Random return `-0.9236660`
-
-Resources:
-
-- seed 1: wall `24:01.80`、peak RSS `1,442,552 KiB`
-- seed 7: wall `24:10.06`、peak RSS `1,000,412 KiB`
-- seed 19: wall `24:09.28`、peak RSS `1,235,964 KiB`
-- matched evaluation: 約`150 s`、peak RSS `301,556 KiB`
-
-Classification:
-
-- `initial_reproduction_failure`
-- substantive: `optimization_or_policy_competence_failure`
-- failures: `zero_source_policy_success`、`correct_not_above_random_win_rate`、`correct_not_above_random_return`
+- answer leakage: `false`
+- same-instance controls: 成立
+- classification: `initial_reproduction_failure / optimization_or_policy_competence_failure`
 
 このrunはimmutable evidence保存の前進だが、公開能力baseline再現ではない。
 
-### Active next run: R01-SCREEN-002
+### Active next run: R01-SCREEN-002-E055
+
+実行要求commit: `3648f10c44ceab68891a08d5cf9ca174d739dd74`
 
 変更する要因は1つだけ:
 
 - `entropy_cost: 0.05 -> 0.005`
 
-根拠:
+固定:
 
-- pinned official SILG `launch.py`にRTFM用として両値が存在する。
-- 直近immutable runは`0.05`だけを評価した。
-- architecture、source、data、frames、seeds、split、actors、batch、unroll、matched instancesは変更しない。
+- architecture、source pins、dataset、frames、seeds、split、actors、batch、unroll、matched instances
 
 必須出力:
 
@@ -103,15 +83,13 @@ Classification:
 4. parameter数±2%以内の容量配分
 5. language/state fusion位置
 
-最大6 screening runまたは事前停止条件まで継続する。「検証したが駄目」でcycleを閉じない。
+最大6 screening runまたは事前停止条件まで継続する。「検証したが駄目」でcycleを閉じない。失敗時は、次の単一原因screening contractを同じcanonical branchへ発行するまでiteration未完了とする。
 
 ## P0 — Evaluation contract freeze
 
 D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示すまで新規auditorを追加しない。
 
-毎runで、matched random/language-blind/state-only/applicable shuffle、model/checkpoint bytes、peak RSS、training runtime、CPU latency、seed、split、actual frames、commit、dependency、raw logs、checksums、leakageを保存する。
-
-run `30203026269`では主要artifactとleakageは保存できたが、action histogram、valid-action率、mask前後logit、invalid-action mass、gradient normの構造化診断が不足した。次runではこれを欠落させない。監査codeの回帰成功は数値baseline再現には数えない。
+毎runで、matched random/language-blind/state-only/applicable shuffle、model/checkpoint bytes、peak RSS、training runtime、CPU latency、seed、split、actual frames、commit、dependency、raw logs、checksums、leakageを保存する。監査codeの回帰成功は数値baseline再現には数えない。
 
 ## P1 — J-CRe3
 
@@ -143,6 +121,17 @@ Yao et al., ICLR 2024の公式repository `CausalLearningAI/multiview-crl` を対
 
 canonical repository、PyPI、documentation version、exact commitを固定し、text-as-treatment公開exampleを無改変再現する。representationなし、random、shuffle、alternative frozen representationをmatched比較する。
 
+## P1 — C3 Regularization official-code audit
+
+Wang et al., ICML 2025 **Towards the Causal Complete Cause of Multi-Modal Representation Learning** と公式code link `WangJingyao07/Multi-Modal-Base` をC035として扱う。
+
+1. exact commit、license、dependency、dataset、pretrained weightsの有無を固定する。
+2. paperの主表に対応するofficial commandを特定する。
+3. causal sufficiency、causal necessity、C3 risk、最終task metricを保存する。
+4. no-C3、randomized counterfactual branch、instrument-shuffle、modality-shuffleをmatched比較する。
+5. model bytes、RSS、runtime、seed、split、raw output、checksumを保存する。
+6. 数値再現までは、C3を本研究の能力証拠に数えない。
+
 ## P1 — R0.2 Environment-first
 
 immutable R0.1 competence bundleが `qualified_for_r02=true` を満たした後のみ開始する。Environment-first、parameter-matched End-to-end、State-onlyを比較し、source policy competence、3-seed平均改善、最低seed非悪化、next-state prediction、action accuracy、online task successを確認する。
@@ -153,9 +142,9 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 ## Prior-art and RQ-001
 
-既存境界として、score-based CRL、有限標本CRL、Markham et al.、Baumgartner et al.、LeGIT、GPI、Multi-View CRL、CmIR、ReCITEを維持する。
+既存境界として、score-based CRL、有限標本CRL、Markham et al.、Baumgartner et al.、LeGIT、GPI、Multi-View CRL、CmIR、ReCITE、C3 Regularizationを維持する。
 
-今回の最新一次文献・公式code再監査では、この境界を覆す採用根拠を確認していない。CmIRはACL 2026一次論文確認済み・author-official code未固定、J-CRe3は一次論文確認済み・数値再現未完了である。
+C3 Regularizationにより、multimodal representationの因果的十分性・必要性、instrumental variableを用いたC3 risk、counterfactual twin branch、plug-and-play regularizationは既存境界へ含める。これらだけではRQ-001を採用しない。
 
 - 広義RQ-001: **棄却**
 - 狭義RQ-001: **追加狭域化・未採用**
