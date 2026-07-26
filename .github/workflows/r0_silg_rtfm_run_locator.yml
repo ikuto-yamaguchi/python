@@ -10,6 +10,7 @@ on:
       - '.github/workflows/r0_silg_rtfm_probe.yml'
       - '.github/workflows/r01_silg_entropy_screening.yml'
       - '.github/workflows/r01_silg_entropy_requalify.yml'
+      - '.github/workflows/r01_silg_stateful_screening.yml'
   workflow_dispatch:
 
 permissions:
@@ -30,6 +31,8 @@ jobs:
             workflow: r01_silg_entropy_screening.yml
           - label: entropy-0005-requalification
             workflow: r01_silg_entropy_requalify.yml
+          - label: stateful
+            workflow: r01_silg_stateful_screening.yml
     steps:
       - name: Query latest ${{ matrix.label }} push run, jobs, and artifacts
         env:
