@@ -1,0 +1,104 @@
+name: R0.1 SILG RTFM entropy screening
+run-name: R0.1 SILG RTFM entropy=0.005 @ ${{ github.sha }}
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - '.github/workflows/r01_silg_entropy_screening.yml'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/R01_RUN_REQUEST.json'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py'
+  workflow_dispatch:
+
+concurrency:
+  group: r01-silg-entropy-screening-${{ github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  entropy-0005-screening:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+          cache: pip
+      - name: Record immutable provenance
+        run: |
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_entropy_0005"
+          mkdir -p "$results"
+          {
+            echo "screening_factor=entropy_cost"
+            echo "screening_value=0.005"
+            echo "fixed_reference_value=0.05"
+            echo "github_run_id=${GITHUB_RUN_ID}"
+            echo "github_run_attempt=${GITHUB_RUN_ATTEMPT}"
+            echo "github_sha=${GITHUB_SHA}"
+            git rev-parse HEAD
+            git status --short
+            date -u
+            uname -a
+            lscpu
+            free -h
+            python --version
+          } | tee "$results/SILG_RTFM_HOST.txt"
+      - name: Install pinned SILG and RTFM
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_entropy_0005"
+          /usr/bin/time -v bash research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh "$RUNNER_TEMP/r0_silg" \
+            2>&1 | tee "$results/SILG_RTFM_INSTALL.log"
+      - name: Verify generator schema
+        run: python research/intelligence_swarm/benchmarks/grounded_causal/test_export_rtfm_generator_signatures.py
+      - name: Run canonical random control and schema probe
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_entropy_0005"
+          /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/silg_rtfm_probe.py \
+            --env silg:rtfm_train_s1-v0 --seeds 1 7 19 --episodes 20 --max-steps 80 \
+            --output "$results/SILG_RTFM_RANDOM_CANONICAL_3SEED.json" \
+            2>&1 | tee "$results/SILG_RTFM_RANDOM_CANONICAL.log"
+      - name: Train official multi recurrent with entropy 0.005
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_entropy_0005"
+          /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" --seeds 1 7 19 --frames 131072 \
+            --entropy-cost 0.005 --output "$results" \
+            2>&1 | tee "$results/SILG_RTFM_RECURRENT_SMOKE.log"
+      - name: Evaluate matched controls on identical instances
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_entropy_0005"
+          /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/run_silg_matched_eval.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" --results "$results" --seeds 1 7 19 --episodes 20 \
+            2>&1 | tee "$results/SILG_RTFM_MATCHED_EVAL.log"
+      - name: Apply unchanged R0.1 qualification gate
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_entropy_0005"
+          python research/intelligence_swarm/benchmarks/grounded_causal/qualify_r01_source_policy.py \
+            --training "$results/SILG_RTFM_RECURRENT_SMOKE_3SEED.json" \
+            --matched "$results/SILG_RTFM_MATCHED_EVAL_3SEED.json" \
+            --output "$results/SILG_RTFM_R01_QUALIFICATION.json" \
+            2>&1 | tee "$results/SILG_RTFM_R01_QUALIFICATION.log"
+      - name: Freeze logs, dependencies, sizes, and checksums
+        if: always()
+        run: |
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_entropy_0005"
+          python -m pip freeze | sort > "$results/SILG_RTFM_R01_PIP_FREEZE.txt"
+          find "$results" -maxdepth 1 -type f -printf '%f %s bytes\n' | sort > "$results/SILG_RTFM_R01_FILE_SIZES.txt"
+          sha256sum "$results"/* > "$results/SILG_RTFM_R01_SHA256SUMS.txt" || true
+      - name: Upload immutable entropy screening bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r01-silg-rtfm-entropy-0005-${{ github.run_id }}
+          path: research/intelligence_swarm/benchmarks/grounded_causal/results_entropy_0005/
+          if-no-files-found: error
+          retention-days: 30
