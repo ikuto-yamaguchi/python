@@ -1,11 +1,11 @@
 {
-  "requested_at_utc": "2026-07-26T05:02:10Z",
+  "requested_at_utc": "2026-07-26T06:00:00Z",
   "track": "R0.1/R0.2",
   "benchmark": "SILG RTFM S1",
   "workflow": ".github/workflows/r0_silg_rtfm_probe.yml",
   "canonical_branch": "research/intelligence-swarm-reconstruction-001",
-  "request_reason": "Execute the split-job workflow from canonical head 59a4cf36a4ec372d8dcfceca0ceba01286a6dcf5. The R0.1 qualification gate now also requires exact checkpoint frame counts, model and checkpoint bytes, peak RSS, training wall time, CPU inference latency, raw-log checksums, checkpoint checksums, and exact seed-run topology before R0.2 may start. Preserve the official SILG multi recurrent baseline, pretrained-language-model prohibition, 131072 frames, seeds 1/7/19, matched controls, fixed splits and same instances. If policy competence or evidence fails, upload the immutable partial bundle and classify the cause; do not create a new mechanism or alter the baseline.",
-  "requested_from_head": "59a4cf36a4ec372d8dcfceca0ceba01286a6dcf5",
+  "request_reason": "Execute the split-job workflow after RESET-E047 from canonical head 34a90762ec83a6e39af912d8660cea2bdc0da1a0. Do not close this iteration on governance or audit CI. Preserve the official SILG multi recurrent baseline, 131072 frames, seeds 1/7/19, fixed train/test split, matched instances, and random/language-blind/state-only/language-shuffle controls. Save immutable artifacts even when qualification fails. If source-policy competence fails, classify the evidence-backed cause and continue with a one-variable matched diagnostic run under the preregistered maximum-six-screening rule. Do not create a new mechanism family, toy hypothesis, or branch.",
+  "requested_from_head": "34a90762ec83a6e39af912d8660cea2bdc0da1a0",
   "frames_per_seed": 131072,
   "seeds": [1, 7, 19],
   "train_env": "silg:rtfm_train_s1-v0",
@@ -26,6 +26,33 @@
     "Correct return greater than Random",
     "Correct success greater than zero"
   ],
+  "required_diagnostics": [
+    "per-seed action histogram",
+    "valid-action ratio",
+    "policy entropy",
+    "episode length",
+    "reward reach rate",
+    "pre-mask and post-mask logits",
+    "invalid-action probability mass",
+    "gradient norm",
+    "policy loss",
+    "value loss",
+    "recurrent reset and detach behavior",
+    "optimizer and checkpoint restore behavior",
+    "termination and frame counting"
+  ],
+  "failure_cycle": {
+    "single_run_failure_may_close_iteration": false,
+    "required_outputs": [
+      "failure classification",
+      "metric/log/code evidence",
+      "one changed causal factor",
+      "fixed variables",
+      "matched rerun contract",
+      "adopt reject or stop decision"
+    ],
+    "maximum_screening_runs": 6
+  },
   "r02_methods": ["environment-first", "end-to-end", "state-only"],
   "r02_metrics": ["task success", "next-state prediction", "valid-action-masked action accuracy", "dynamics holdout transfer"],
   "r02_inapplicable_holdouts": ["entity", "language-form"],
@@ -39,6 +66,7 @@
     "raw install and training logs",
     "matched R0.1 control results",
     "R0.1 qualification JSON and log",
+    "per-seed policy and optimization diagnostics",
     "typed R0.2 trajectories including inventory state",
     "generator-side dynamics signatures",
     "immutable holdout joins",
@@ -54,6 +82,7 @@
     "public baseline reproduced",
     "R0.2 reproduced",
     "capability progress",
-    "new intelligence principle"
+    "new intelligence principle",
+    "high-school-level intelligence"
   ]
 }
