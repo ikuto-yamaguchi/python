@@ -8,6 +8,7 @@ on:
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_r0_acceptance_bundle.py
       - research/intelligence_swarm/benchmarks/grounded_causal/test_audit_r0_acceptance_bundle.py
       - research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_nonzero_measurements.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_payload_leakage.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_statistics_artifacts.py
       - .github/workflows/r0_acceptance_bundle_tests.yml
@@ -16,6 +17,7 @@ on:
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_r0_acceptance_bundle.py
       - research/intelligence_swarm/benchmarks/grounded_causal/test_audit_r0_acceptance_bundle.py
       - research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_nonzero_measurements.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_payload_leakage.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_statistics_artifacts.py
       - .github/workflows/r0_acceptance_bundle_tests.yml
@@ -34,6 +36,7 @@ jobs:
         run: |
           python -m py_compile \
             research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_nonzero_measurements.py \
             research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_payload_leakage.py \
             research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_statistics_artifacts.py \
             research/intelligence_swarm/benchmarks/grounded_causal/audit_r0_acceptance_bundle.py
