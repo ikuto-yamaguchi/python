@@ -47,6 +47,41 @@ def _valid_sha256(value: Any) -> bool:
     return True
 
 
+def _command_int_option(command: Any, option: str) -> int | None:
+    if not isinstance(command, list):
+        return None
+    try:
+        index = command.index(option)
+    except ValueError:
+        return None
+    if index + 1 >= len(command):
+        return None
+    try:
+        value = int(command[index + 1])
+    except (TypeError, ValueError):
+        return None
+    return value if value > 0 else None
+
+
+def _official_frame_boundary(run: dict[str, Any], requested_frames: int) -> tuple[int | None, int | None]:
+    """Return the first learner-update boundary at/above the requested budget.
+
+    SILG stops only after a complete learner batch. For the pinned recurrent
+    command, one update consumes ``batch_size * unroll_length`` frames. Thus a
+    non-divisible requested budget legitimately produces a small, deterministic
+    overshoot; accepting arbitrary ``>=`` values would hide accidental extra
+    training, so the exact first boundary is required.
+    """
+    command = run.get("command")
+    batch_size = _command_int_option(command, "--batch_size")
+    unroll_length = _command_int_option(command, "--unroll_length")
+    if batch_size is None or unroll_length is None or requested_frames <= 0:
+        return None, None
+    update_frames = batch_size * unroll_length
+    expected_checkpoint_frames = ((requested_frames + update_frames - 1) // update_frames) * update_frames
+    return expected_checkpoint_frames, update_frames
+
+
 def classify_failures(training: dict[str, Any], matched: dict[str, Any]) -> tuple[list[str], str, dict[str, Any]]:
     failures: list[str] = []
 
@@ -109,8 +144,11 @@ def classify_failures(training: dict[str, Any], matched: dict[str, Any]) -> tupl
         if not isinstance(checkpoint, dict):
             checkpoint = {}
         actual_frames = int(checkpoint.get("frames_in_checkpoint", -1))
-        if requested_frames > 0 and actual_frames != requested_frames:
-            failures.append(f"checkpoint_frame_budget_mismatch_seed_{seed}")
+        expected_frames, update_frames = _official_frame_boundary(run, requested_frames)
+        if expected_frames is None or update_frames is None:
+            failures.append(f"missing_frame_update_contract_seed_{seed}")
+        elif actual_frames != expected_frames:
+            failures.append(f"checkpoint_frame_boundary_mismatch_seed_{seed}")
         for field in ("official_checkpoint_bytes", "model_state_bytes"):
             if not _positive_number(checkpoint.get(field)):
                 failures.append(f"missing_checkpoint_{field}_seed_{seed}")
@@ -176,7 +214,7 @@ def classify_failures(training: dict[str, Any], matched: dict[str, Any]) -> tupl
         "missing_",
         "invalid_",
         "training_incomplete_",
-        "checkpoint_frame_budget_",
+        "checkpoint_frame_boundary_",
         "nonzero_resource_",
     )
     if any(failure in structural_exact or failure.startswith(structural_prefixes) for failure in failures):
@@ -212,6 +250,7 @@ def main() -> None:
             "same_instance_controls": sorted(EXPECTED_METHODS),
             "architecture_change_allowed": False,
             "resource_and_checksum_audit_required": True,
+            "frame_budget_semantics": "first complete official learner-update boundary at or above requested frames",
         },
         "next_run_contract": None if qualified else {
             "iteration_complete": False,
