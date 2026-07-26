@@ -269,3 +269,5 @@ jobs:
             git commit -m 'r0d: enforce core optional metric coverage'
             git push origin HEAD:research/intelligence-swarm-reconstruction-001
           fi
+
+# Retriggered after confirming the core scorer still lacked fail-closed optional metric coverage.
