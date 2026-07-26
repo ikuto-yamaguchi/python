@@ -9,6 +9,7 @@ on:
       - 'research/intelligence_swarm/benchmarks/grounded_causal/R01_RUN_REQUEST.json'
       - '.github/workflows/r0_silg_rtfm_probe.yml'
       - '.github/workflows/r01_silg_entropy_screening.yml'
+      - '.github/workflows/r01_silg_entropy_requalify.yml'
   workflow_dispatch:
 
 permissions:
@@ -27,6 +28,8 @@ jobs:
             workflow: r0_silg_rtfm_probe.yml
           - label: entropy-0005
             workflow: r01_silg_entropy_screening.yml
+          - label: entropy-0005-requalification
+            workflow: r01_silg_entropy_requalify.yml
     steps:
       - name: Query latest ${{ matrix.label }} push run, jobs, and artifacts
         env:
