@@ -58,7 +58,6 @@
 - matched evaluation: 正常終了
 - R0.2: qualification failureによりskip
 - artifact ID: `8633105142`
-- artifact name: `r01-silg-rtfm-matched-30203026269`
 - artifact bytes: `72,686,203`
 - artifact digest: `sha256:43ab7f1df82e9eba98c132b2e84a9ec55dbfdd726795fb43f7608fe288e00eef`
 - answer leakage: `false`
@@ -83,7 +82,6 @@
 - seed 19 training wall: `24:09.28`、peak RSS `1,235,964 KiB`
 - matched evaluation wall: 約`150 s`
 - matched evaluator peak RSS: `301,556 KiB`
-- Correct CPU inference: seed別を含むartifactに保存。集約値は次screening比較時に固定する。
 
 資格失敗:
 
@@ -93,17 +91,20 @@
 
 これはimmutable artifact保存の成功であり、公開能力baseline再現または能力進歩ではない。
 
-### Next screening
+### Active screening R01-SCREEN-002-E055
 
-次runは公式SILG設定内の単一要因だけを変更する。
+canonical branchから実行要求を発行済み。変更する要因は1つだけとする。
 
 - changed factor: `entropy_cost 0.05 -> 0.005`
-- rationale: pinned official `launch.py`に存在する残りのRTFM設定値を比較する
+- workflow: `.github/workflows/r01_silg_entropy_screening.yml`
 - fixed: model family、source pins、frames、seeds、split、actors、batch、unroll、same-instance controls
 - required retest: Correct / Random / Language-blind / State-only / Language-shuffle
+- required diagnostics: action histogram、valid-action率、policy entropy、episode termination、mask前後logit、invalid-action mass、gradient norm、policy/value loss
 - reject entropy as sole cause if: CorrectがRandomを上回らない、またはCorrect successが0のまま
-- failure後: 次の単一原因はofficial evaluation/default parity、recurrent/optimizer、learning-rate/gradientの順で選ぶ
+- failure後: official evaluation/default parity、recurrent/optimizer、learning-rate/gradientの順で次の単一原因へ進む
 - stop: 最大6 screening runまたは事前停止条件まで継続
+
+実行要求commitは `3648f10c44ceab68891a08d5cf9ca174d739dd74`。これはrun開始・成功の証拠ではなく、数値実験のdispatchである。
 
 ## Evaluation contract
 
@@ -111,19 +112,17 @@ D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示す
 
 毎runでrandom/language-blind/state-only/applicable shuffle、model/checkpoint bytes、peak RSS、runtime、CPU latency、seed、split、actual frames、commit、dependency、raw logs、checksums、leakageを保存する。
 
-今回のbundleではartifact、source pins、actual frames、seeds、matched streams、checksums、leakageを保存した。一方、要求していたaction histogram、valid-action率、mask前後logit、invalid-action mass、gradient normの構造化出力は不足しており、次screening artifactで必須化する。
-
 ## Prior-art and RQ boundary
 
 J-CRe3はLREC-COLING 2024の日本語実世界multimodal reference-resolution datasetであり、日本語groundingの外部baselineとして扱うが、SILG/RTFMのinteractive policy competenceを代替しない。
 
 2025 score-based CRLと2026年有限標本CRLにより、unknown target、少数environment、finite-sample recoveryはRQ-001の新規性根拠から除外済みである。Markham et al.、Baumgartner et al.、LeGIT、GPI、Multi-View CRL、CmIR、ReCITEの境界を維持する。
 
-今回の一次文献・公式code再監査では、既存境界を覆す新しい採用根拠を確認していない。CmIRはACL 2026一次論文を確認済みだがauthor-official code未固定、J-CRe3は一次論文を確認済みで数値再現未完了である。
+C035としてWang et al., ICML 2025 **Towards the Causal Complete Cause of Multi-Modal Representation Learning** を追加する。同研究は、multimodal representationの因果的十分性と必要性をC3 riskとして測定し、instrumental variable、real/hypothetical twin branches、counterfactual modelingによるC3 Regularizationを提示する。公式code linkは `WangJingyao07/Multi-Modal-Base`。したがって、multimodal representationのcausal sufficiency/necessity測定、counterfactual necessity regularization、plug-and-play causal-completeness regularizationだけではRQ-001の新規性を認定しない。exact commit・dependency・dataset・数値再現は未完了である。
 
 正式判断:
 
-> **RQ-001: NARROWED BEYOND LANGUAGE-GUIDED TARGET SELECTION, INTERVENTION-CONDITIONED COMPOSITION, GENERATIVE-REPRESENTATION CAUSAL INFERENCE, PARTIALLY OBSERVED MULTI-VIEW CRL, LOCAL-STRUCTURE DYNAMICAL-SYSTEM IDENTIFICATION, MULTIMODAL CAUSAL-INVARIANT DECOMPOSITION, AND LANGUAGE-ONLY CAUSAL-RELATION INFERENCE — NOT ADOPTED**
+> **RQ-001: NARROWED BEYOND LANGUAGE-GUIDED TARGET SELECTION, INTERVENTION-CONDITIONED COMPOSITION, GENERATIVE-REPRESENTATION CAUSAL INFERENCE, PARTIALLY OBSERVED MULTI-VIEW CRL, LOCAL-STRUCTURE DYNAMICAL-SYSTEM IDENTIFICATION, MULTIMODAL CAUSAL-INVARIANT DECOMPOSITION, LANGUAGE-ONLY CAUSAL-RELATION INFERENCE, AND CAUSAL SUFFICIENCY/NECESSITY REGULARIZATION — NOT ADOPTED**
 
 採用には、上記baseline再現後にも残るcountermodel pair、外部固定でjoint recoding不能なdenotation law、language固有追加情報の直接証拠、事前登録済みclaim/counterexample/stopping ruleが必要。
 
@@ -142,4 +141,4 @@ J-CRe3はLREC-COLING 2024の日本語実世界multimodal reference-resolution da
 
 ## Last integration
 
-2026-07-26: **RESET-E054**。run `30203026269`の131,072-frame × 3-seed学習、matched controls、immutable artifact保存を確認した。qualificationはCorrect `0/60`、Random `4/60`、Correct−Random return `-0.9236660`で棄却された。R0.2をskipし、`entropy_cost 0.05 -> 0.005`だけを変える次screeningを継続する。能力進歩未認定、高校生級未達を維持する。
+2026-07-26: **RESET-E055**。R01-SCREEN-002をcanonical branchから再dispatchし、`entropy_cost 0.05 -> 0.005`だけを変えるmatched screeningを固定した。C035としてC3 Regularizationの一次論文と公式code linkを重複境界へ統合した。run開始・数値結果は未確認であり、外部baseline再現0、能力進歩未認定、高校生級未達を維持する。
