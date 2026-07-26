@@ -28,6 +28,7 @@ class R0AcceptanceBundleTests(unittest.TestCase):
         stats_valid=True,
         measurements_valid=True,
         paths_valid=True,
+        cell_binding_valid=True,
     ):
         return (
             mock.patch.object(AUDIT.evaluation_contract, "validate_dataset", return_value={"valid": True, "errors": []}),
@@ -49,6 +50,11 @@ class R0AcceptanceBundleTests(unittest.TestCase):
                 "audit",
                 return_value={"valid": paths_valid, "errors": [] if paths_valid else ["artifact path escapes bundle root"]},
             ),
+            mock.patch.object(
+                AUDIT.prediction_cell_binding,
+                "audit",
+                return_value={"valid": cell_binding_valid, "errors": [] if cell_binding_valid else ["prediction row cell does not match declared cell"]},
+            ),
             mock.patch.object(AUDIT.prediction_statistics, "audit", return_value={"valid": stats_valid, "errors": [] if stats_valid else ["checksum mismatch"]}),
         )
 
@@ -60,6 +66,7 @@ class R0AcceptanceBundleTests(unittest.TestCase):
         stats_valid=True,
         measurements_valid=True,
         paths_valid=True,
+        cell_binding_valid=True,
     ):
         patches = self.patches(
             alias_valid=alias_valid,
@@ -67,8 +74,9 @@ class R0AcceptanceBundleTests(unittest.TestCase):
             stats_valid=stats_valid,
             measurements_valid=measurements_valid,
             paths_valid=paths_valid,
+            cell_binding_valid=cell_binding_valid,
         )
-        with patches[0], patches[1], patches[2], patches[3], patches[4], patches[5], patches[6], patches[7]:
+        with patches[0], patches[1], patches[2], patches[3], patches[4], patches[5], patches[6], patches[7], patches[8]:
             return AUDIT.audit_acceptance(self.data, self.predictions, self.manifest, self.base_dir)
 
     def test_all_contracts_must_pass(self):
@@ -81,6 +89,8 @@ class R0AcceptanceBundleTests(unittest.TestCase):
         self.assertTrue(result["nonempty_resource_artifacts_required"])
         self.assertTrue(result["artifact_paths_must_be_bundle_contained"])
         self.assertTrue(result["absolute_parent_escape_and_symlink_paths_forbidden"])
+        self.assertTrue(result["prediction_rows_must_match_declared_run_cell"])
+        self.assertTrue(result["pooled_or_reused_prediction_artifacts_forbidden"])
 
     def test_alias_failure_cannot_be_hidden_by_valid_score(self):
         result = self.run_with(alias_valid=False)
@@ -111,24 +121,32 @@ class R0AcceptanceBundleTests(unittest.TestCase):
         self.assertTrue(result["checks"]["resource_artifact_contract"]["valid"])
         self.assertTrue(result["checks"]["nonzero_measurement_contract"]["valid"])
 
+    def test_prediction_cell_mismatch_rejects_otherwise_valid_bundle(self):
+        result = self.run_with(cell_binding_valid=False)
+        self.assertFalse(result["valid"])
+        self.assertEqual(result["classification"], "initial_reproduction_failure")
+        self.assertIn("prediction_cell_binding_contract", result["failed_contracts"])
+        self.assertTrue(result["checks"]["prediction_statistics_evidence_contract"]["valid"])
+
     def test_statistics_checksum_failure_rejects_otherwise_valid_bundle(self):
         result = self.run_with(stats_valid=False)
         self.assertFalse(result["valid"])
         self.assertIn("prediction_statistics_evidence_contract", result["failed_contracts"])
 
     def test_multiple_failures_are_preserved(self):
-        result = self.run_with(alias_valid=False, payload_valid=False, stats_valid=False, measurements_valid=False, paths_valid=False)
+        result = self.run_with(alias_valid=False, payload_valid=False, stats_valid=False, measurements_valid=False, paths_valid=False, cell_binding_valid=False)
         self.assertEqual(
             result["failed_contracts"],
             [
                 "artifact_path_containment_contract",
                 "nonzero_measurement_contract",
+                "prediction_cell_binding_contract",
                 "prediction_payload_contract",
                 "prediction_statistics_evidence_contract",
                 "schema_alias_leakage_contract",
             ],
         )
-        self.assertEqual(len(result["errors"]), 5)
+        self.assertEqual(len(result["errors"]), 6)
 
 
 if __name__ == "__main__":
