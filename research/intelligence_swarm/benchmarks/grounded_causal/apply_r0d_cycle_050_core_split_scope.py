@@ -135,4 +135,4 @@ The core contract now registers exactly:
 Any unregistered split is `initial_reproduction_failure`. No benchmark reproduction, capability progress, new mechanism, or intelligence principle is claimed.
 ''', encoding="utf-8")
 
-# Trigger marker: workflow already exists before this push.
+# Trigger marker: retry workflow dispatch via canonical branch push (cycle 050 completion).
