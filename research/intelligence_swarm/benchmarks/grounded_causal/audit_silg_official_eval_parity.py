@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Audit parity between SILG's official test loop and the matched R0.1 evaluator.
 
-This script does not alter training or architecture.  It evaluates the same pinned
+This script does not alter training or architecture. It evaluates the same pinned
 checkpoint under two explicitly separated protocols:
 
 1. ``official_continuous_stream`` mirrors ``vzhong/silg@2af0757:run_exp.test``:
@@ -134,13 +134,19 @@ def fresh_seeded_instances(root: Path, checkpoint: Path, seed: int, episodes: in
         observation = env.initial()
         agent_state = model.initial_state(batch_size=1)
         steps = 0
-        while not bool(observation["done"].item()):
+        # Environment.initial() intentionally carries done=True as the boundary
+        # marker inherited from SILG's auto-reset wrapper. It does not mean that
+        # the newly created episode should be skipped. Mirror run_silg_matched_eval:
+        # always take at least one action, then read done from env.step().
+        done = False
+        while not done:
             t0 = time.perf_counter_ns()
             with torch.no_grad():
                 output, agent_state = model(observation, agent_state)
             inference_ns.append(time.perf_counter_ns() - t0)
             observation = env.step(output["action"])
             steps += 1
+            done = bool(observation["done"].item())
         reward = float(observation["reward"][0][0].item())
         records.append({
             "episode_index": episode,
