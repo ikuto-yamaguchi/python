@@ -8,7 +8,7 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 
 ## A–D allocation
 
-- **A**: SILG/RTFM、J-CRe3、J-ORA、GPIの公式code・dataset・command・dependency固定と無改変再現。
+- **A**: SILG/RTFM、J-CRe3、J-ORA、GPI、Multi-View CRLの公式code・dataset・command・dependency固定と無改変再現。
 - **B**: 実装不一致、最適化不足、表現ボトルネック、探索・学習信号不足の診断と制約内最適化。
 - **C**: 最新一次文献・公式codeとの重複監査、novelty matrix更新。
 - **D**: D015〜D035、matched controls、resource provenance、leakage、RQ-001判定。
@@ -39,6 +39,7 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 10. 失敗runは次の単一原因候補とmatched rerunを発行するまで未完了とし、「検証したが駄目」で閉じない。
 11. runの進捗はR0.1 run ID、job conclusion、artifact ID、qualification JSON、checksum manifestでのみ認定する。
 12. artifactが存在すれば即座に取得し、最初のactionable failureへ次の単一原因screening contractを接続する。
+13. RESET-E051のcanonical headからR0.1を再要求し、workflow実行結果が取れない限り開始・成功・改善を推定しない。
 
 最適化順は、公式差分除去、recurrent/optimizer修復、learning rate・entropy・unroll・gradient clipping、parameter数±2%以内の容量配分、fusion位置の順とする。
 
@@ -63,6 +64,19 @@ D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示す
 5. 失敗分類と最小修正を行い、単発失敗で終了しない。
 
 J-CRe3は日本語multimodal reference resolution baselineであり、SILGのinteractive policy competenceを代替しない。
+
+## P1 — Multi-View CRL official-code reproduction
+
+Yao et al., ICLR 2024の公式repositoryは `CausalLearningAI/multiview-crl`。画像・テキストを含む複数viewとpartial observability下のshared causal-factor recoveryを扱うため、RQ-001のmultimodal/shared-latent境界として別列で再現する。
+
+1. exact commit、MIT license、`env.yaml`、tokenizer assets、numerical/multimodal commandを固定する。
+2. numerical experimentを無改変でtrain/evaluateし、raw output、model bytes、peak RSS、runtime、seed、dependency、checksumを保存する。
+3. Multimodal3DIdentのdataset version、download source、archive checksum、展開後manifestを固定する。
+4. official three-view `(img0,img1,txt0)` experimentを無改変で実行する。
+5. matched controlsとしてtext-view removal、image-view removal、text shuffle、cross-instance view shuffle、random representationを事前登録する。
+6. shared-factor recovery、view-specific recovery、OOD/held-out評価を公式metricで保存する。
+7. 成功してもSILGのinteractive competenceやRQ-001のlanguage-specific causal contributionへ流用しない。
+8. 失敗時はenvironment、dataset、training stability、evaluation、artifactのいずれかへ分類し、原因だけを変えるrerunへ接続する。
 
 ## P1 — GPI official-software reproduction
 
@@ -94,18 +108,21 @@ LeGITにより、language-guided target selection、low-data warm-start、言語
 
 Imai & NakamuraのGPI系研究と公開softwareにより、LLM等の生成AI内部表現をtext/image/videoのtreatmentまたはconfounder表現として利用し、生成データ、overlap改善、double machine learningへ接続すること自体は新規性候補から除外する。
 
+Yao et al.のMulti-View CRL with Partial Observabilityと公式 `CausalLearningAI/multiview-crl` により、言語を含むmulti-view alignment、partial observability、shared causal-factor recovery、multimodal contrastive learningだけでは新規性を認定しない。
+
 ### Required prior-art actions
 
 1. Markham et al. 2026とLeGITの公式repository公開有無を継続監査する。
 2. GPIのcanonical repositoryとexact commitを固定し、text-as-treatment最小exampleを再現する。
-3. 最強の非言語CRL、LeGIT型target-selection、介入context-module型composition、GPI型生成表現因果推定をnovelty matrixの別列へ置く。
-4. これらの論文上の性能値を本研究の能力証拠へ流用しない。
-5. RQ-001採用候補は、上記すべてを差し引いた後に残るlanguage固有追加情報だけに限定する。
+3. `CausalLearningAI/multiview-crl` のexact commitを固定し、numericalとthree-view multimodal experimentを無改変再現する。
+4. 最強の非言語CRL、LeGIT型target-selection、介入context-module型composition、GPI型生成表現因果推定、partial-observability multi-view CRLをnovelty matrixの別列へ置く。
+5. これらの論文上の性能値を本研究の能力証拠へ流用しない。
+6. RQ-001採用候補は、上記すべてを差し引いた後に残るlanguage固有追加情報だけに限定する。
 
 - 広義RQ-001: **棄却**
 - 狭義RQ-001: **追加狭域化・未採用**
 
-採用には、上記baseline再現後にも残るcountermodel pair、externally fixedでjoint recoding不能なdenotation law、target selection・context composition・既成生成表現利用を超えるlanguage固有追加情報、事前登録済みclaim/counterexample/stopping ruleが必要。
+採用には、上記baseline再現後にも残るcountermodel pair、externally fixedでjoint recoding不能なdenotation law、target selection・context composition・既成生成表現利用・multi-view shared-factor recoveryを超えるlanguage固有追加情報、事前登録済みclaim/counterexample/stopping ruleが必要。
 
 ## Stage transition
 
