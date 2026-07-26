@@ -1,0 +1,118 @@
+name: R0.1 SILG entropy artifact requalification
+run-name: Requalify entropy=0.005 artifact 8636643017 @ ${{ github.sha }}
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - '.github/workflows/r01_silg_entropy_requalify.yml'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_silg_official_eval_parity.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/qualify_r01_source_policy.py'
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: 'Source workflow run ID'
+        required: true
+        default: '30215555334'
+      source_artifact_name:
+        description: 'Source artifact name'
+        required: true
+        default: 'r01-silg-rtfm-entropy-0005-30215555334'
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  requalify-preserved-artifact:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+          cache: pip
+      - name: Resolve source artifact
+        id: source
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "run_id=${{ inputs.source_run_id }}" >> "$GITHUB_OUTPUT"
+            echo "artifact_name=${{ inputs.source_artifact_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_id=30215555334" >> "$GITHUB_OUTPUT"
+            echo "artifact_name=r01-silg-rtfm-entropy-0005-30215555334" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Download preserved entropy screening artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ steps.source.outputs.artifact_name }}
+          path: research/intelligence_swarm/benchmarks/grounded_causal/results_entropy_0005
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ steps.source.outputs.run_id }}
+      - name: Verify immutable source bundle
+        run: |
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_entropy_0005"
+          test -f "$results/SILG_RTFM_RECURRENT_SMOKE_3SEED.json"
+          test -f "$results/SILG_RTFM_MATCHED_EVAL_3SEED.json"
+          test -f "$results/SILG_RTFM_TRAINED_STATE_SEED_1.pt"
+          test -f "$results/SILG_RTFM_TRAINED_STATE_SEED_7.pt"
+          test -f "$results/SILG_RTFM_TRAINED_STATE_SEED_19.pt"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('research/intelligence_swarm/benchmarks/grounded_causal/results_entropy_0005/SILG_RTFM_RECURRENT_SMOKE_3SEED.json')
+          d = json.loads(p.read_text(encoding='utf-8'))
+          assert d['entropy_cost'] == 0.005
+          assert [r['seed'] for r in d['runs']] == [1, 7, 19]
+          assert all(r['completed'] for r in d['runs'])
+          assert all(r['checkpoint']['frames_in_checkpoint'] >= 131072 for r in d['runs'])
+          print('source bundle verified')
+          PY
+      - name: Install pinned SILG and RTFM
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_entropy_0005"
+          /usr/bin/time -v bash research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh "$RUNNER_TEMP/r0_silg" \
+            2>&1 | tee "$results/SILG_RTFM_REQUALIFY_INSTALL.log"
+      - name: Re-run corrected official versus matched parity audit
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_entropy_0005"
+          python research/intelligence_swarm/benchmarks/grounded_causal/audit_silg_official_eval_parity.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" --results "$results" --seeds 1 7 19 --episodes 20 \
+            --out "$results/SILG_RTFM_OFFICIAL_EVAL_PARITY_3SEED.json" \
+            2>&1 | tee "$results/SILG_RTFM_OFFICIAL_EVAL_PARITY_REQUALIFY.log"
+      - name: Apply unchanged R0.1 qualification gate
+        if: always()
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_entropy_0005"
+          python research/intelligence_swarm/benchmarks/grounded_causal/qualify_r01_source_policy.py \
+            --training "$results/SILG_RTFM_RECURRENT_SMOKE_3SEED.json" \
+            --matched "$results/SILG_RTFM_MATCHED_EVAL_3SEED.json" \
+            --output "$results/SILG_RTFM_R01_QUALIFICATION.json" \
+            2>&1 | tee "$results/SILG_RTFM_R01_QUALIFICATION_REQUALIFY.log"
+      - name: Freeze requalification provenance and checksums
+        if: always()
+        run: |
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_entropy_0005"
+          {
+            echo "source_run_id=${{ steps.source.outputs.run_id }}"
+            echo "source_artifact_name=${{ steps.source.outputs.artifact_name }}"
+            echo "requalification_run_id=${GITHUB_RUN_ID}"
+            echo "requalification_sha=${GITHUB_SHA}"
+            date -u
+          } > "$results/SILG_RTFM_REQUALIFICATION_PROVENANCE.txt"
+          sha256sum "$results"/* > "$results/SILG_RTFM_REQUALIFICATION_SHA256SUMS.txt" || true
+      - name: Upload immutable requalification addendum
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r01-silg-rtfm-entropy-0005-requalification-${{ github.run_id }}
+          path: research/intelligence_swarm/benchmarks/grounded_causal/results_entropy_0005/
+          if-no-files-found: error
+          retention-days: 30
