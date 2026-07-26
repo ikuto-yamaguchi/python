@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
-"""Deterministic, resource-audited reproduction of SILG's official `multi`
+"""Deterministic, resource-audited reproduction of SILG's official ``multi``
 recurrent learner on RTFM S1.
 
-No model architecture is changed. The only external-source patch makes actor
+No model architecture is changed.  The only external-source patch makes actor
 and evaluation RNGs deterministic functions of the declared experiment seed.
-The official Train class still performs the learning and final checkpoint.
+The official ``Train`` class still performs learning and writes the final
+checkpoint.  Training hyperparameters that are exposed here are restricted to
+values present in the official SILG launcher; each screening run must change
+exactly one declared factor.
 """
 from __future__ import annotations
 
@@ -20,6 +23,8 @@ import sys
 import time
 from pathlib import Path
 from typing import Any
+
+OFFICIAL_ENTROPY_COSTS = (0.05, 0.005)
 
 
 def sha256(path: Path) -> str:
@@ -89,9 +94,9 @@ def parse_time_v(stderr: str) -> dict[str, Any]:
         "exit_status": r"Exit status:\s*(\d+)",
     }
     for key, pattern in patterns.items():
-        m = re.search(pattern, stderr)
-        if m:
-            out[key] = int(m.group(1)) if key in {"peak_rss_kib", "exit_status"} else float(m.group(1))
+        match = re.search(pattern, stderr)
+        if match:
+            out[key] = int(match.group(1)) if key in {"peak_rss_kib", "exit_status"} else float(match.group(1))
     return out
 
 
@@ -122,12 +127,7 @@ def extract_final_model(savedir: Path, output_dir: Path, seed: int) -> dict[str,
 
 
 def default_seed_timeout_seconds(frames: int) -> int:
-    """Scale the process timeout with the declared training budget.
-
-    The previous fixed 1,200-second limit was sufficient for 32,768 frames but
-    killed the unchanged official learner at 131,072 frames before completion.
-    This is a harness-only resource bound; it does not alter training behavior.
-    """
+    """Scale the process timeout with the declared training budget."""
     return max(1200, int(math.ceil(frames / 32768.0) * 600))
 
 
@@ -145,6 +145,7 @@ def run_seed(
     seed: int,
     frames: int,
     timeout_seconds: int,
+    entropy_cost: float,
 ) -> dict[str, Any]:
     savedir = (output_dir / f"official_exp_seed_{seed}").resolve()
     xpid = f"rtfm-multi-r01-smoke-seed-{seed}"
@@ -163,7 +164,7 @@ def run_seed(
         "--batch_size", "2",
         "--unroll_length", "20",
         "--disable_cuda",
-        "--entropy_cost", "0.05",
+        "--entropy_cost", str(entropy_cost),
     ]
     env = os.environ.copy()
     env["OMP_NUM_THREADS"] = "1"
@@ -179,9 +180,7 @@ def run_seed(
             capture_output=True,
             timeout=timeout_seconds,
         )
-        stdout = proc.stdout
-        stderr = proc.stderr
-        returncode = proc.returncode
+        stdout, stderr, returncode = proc.stdout, proc.stderr, proc.returncode
     except subprocess.TimeoutExpired as exc:
         timed_out = True
         stdout = _as_text(exc.stdout)
@@ -197,6 +196,7 @@ def run_seed(
     return {
         "seed": seed,
         "frames_requested": frames,
+        "entropy_cost": entropy_cost,
         "returncode": returncode,
         "wall_seconds": wall,
         "timeout_seconds": timeout_seconds,
@@ -246,18 +246,25 @@ env.close()
 
 
 def main() -> None:
-    p = argparse.ArgumentParser()
-    p.add_argument("--silg-root", type=Path, required=True)
-    p.add_argument("--output", type=Path, required=True)
-    p.add_argument("--seeds", type=int, nargs="+", default=[1, 7, 19])
-    p.add_argument("--frames", type=int, default=2048)
-    p.add_argument(
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--silg-root", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--seeds", type=int, nargs="+", default=[1, 7, 19])
+    parser.add_argument("--frames", type=int, default=2048)
+    parser.add_argument(
+        "--entropy-cost",
+        type=float,
+        default=0.05,
+        choices=OFFICIAL_ENTROPY_COSTS,
+        help="official SILG RTFM launcher sweep value; screening changes this factor only",
+    )
+    parser.add_argument(
         "--seed-timeout-seconds",
         type=int,
         default=None,
         help="per-seed learner timeout; default scales with --frames",
     )
-    args = p.parse_args()
+    args = parser.parse_args()
     args.output = args.output.resolve()
     args.output.mkdir(parents=True, exist_ok=True)
     timeout_seconds = args.seed_timeout_seconds or default_seed_timeout_seconds(args.frames)
@@ -265,12 +272,12 @@ def main() -> None:
     patch = deterministic_patch(args.silg_root)
     model = inspect_model(args.silg_root, args.output)
     runs = [
-        run_seed(args.silg_root, args.output, seed, args.frames, timeout_seconds)
+        run_seed(args.silg_root, args.output, seed, args.frames, timeout_seconds, args.entropy_cost)
         for seed in args.seeds
     ]
     payload = {
-        "status": "success" if all(r["completed"] for r in runs) else "failed",
-        "classification": "official_recurrent_training_checkpoint_smoke_not_full_baseline_reproduction",
+        "status": "success" if all(run["completed"] for run in runs) else "failed",
+        "classification": "official_recurrent_training_checkpoint_screening_not_full_baseline_reproduction",
         "source_pins": {
             "silg": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
             "rtfm": "58f17955595b5a127c96d045d896fcbcc7d4b570",
@@ -281,6 +288,9 @@ def main() -> None:
         "pretrained_language_model": False,
         "seeds": args.seeds,
         "frames_per_seed": args.frames,
+        "entropy_cost": args.entropy_cost,
+        "official_rtfm_entropy_sweep": list(OFFICIAL_ENTROPY_COSTS),
+        "screening_change": "entropy_cost_only",
         "seed_timeout_seconds": timeout_seconds,
         "determinism_patch": patch,
         "model_audit": model,
