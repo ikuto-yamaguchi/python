@@ -6,8 +6,8 @@ being accepted by running only a convenient subset of the existing contracts.
 Dataset/schema leakage, alias-normalized leakage, explicit holdout-condition
 integrity, paired statistics, complete same-instance metric coverage, resource
 artifacts, strictly-positive measured resources, bundle-contained artifact paths,
-prediction-payload leakage, prediction-cell binding, and prediction/statistics
-checksums must all pass in one invocation.
+prediction-payload leakage, prediction-cell binding, prediction/statistics
+checksums, and deterministic statistics recomputation must all pass together.
 """
 from __future__ import annotations
 
@@ -24,6 +24,7 @@ import audit_prediction_metric_coverage as prediction_metric_coverage
 import audit_prediction_payload_leakage as prediction_payload
 import audit_prediction_statistics_artifacts as prediction_statistics
 import audit_schema_alias_leakage as schema_alias
+import audit_statistics_recomputation_binding as statistics_recomputation
 import evaluation_contract
 
 
@@ -56,6 +57,9 @@ def audit_acceptance(
     checks["artifact_path_containment_contract"] = artifact_path_containment.audit(manifest, base_dir)
     checks["prediction_cell_binding_contract"] = prediction_cell_binding.audit(manifest, base_dir)
     checks["prediction_statistics_evidence_contract"] = prediction_statistics.audit(manifest, base_dir)
+    checks["statistics_recomputation_binding_contract"] = statistics_recomputation.audit(
+        data, predictions, manifest, base_dir
+    )
 
     failed = sorted(name for name, result in checks.items() if result.get("valid") is not True)
     errors = [
@@ -85,6 +89,8 @@ def audit_acceptance(
         "absolute_parent_escape_and_symlink_paths_forbidden": True,
         "prediction_rows_must_match_declared_run_cell": True,
         "pooled_or_reused_prediction_artifacts_forbidden": True,
+        "saved_statistics_must_equal_fresh_recomputation": True,
+        "statistics_checksum_alone_is_not_acceptance": True,
         "partial_contract_success_is_not_acceptance": True,
         "new_mechanism_introduced": False,
     }
