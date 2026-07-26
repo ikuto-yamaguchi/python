@@ -13,7 +13,7 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 - **C**: 最新一次文献・公式codeとの重複監査、novelty matrix更新。
 - **D**: D015〜D035、matched controls、resource provenance、leakage、RQ-001判定。
 
-## P0 — Complete and qualify active SILG/RTFM R0.1 run
+## P0 — SILG/RTFM R0.1 screening cycle
 
 固定条件:
 
@@ -21,37 +21,89 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 - RTFM `58f17955595b5a127c96d045d896fcbcc7d4b570`
 - official `multi` recurrent
 - seeds `1,7,19`
-- primary budget `131,072 requested frames`
+- `131,072 requested frames`、actual `131,080` frames
+- train `silg:rtfm_train_s1-v0`
+- test `silg:rtfm_test_s1-v0`
 
-現accepted evidenceは32,768 framesのみ。Correct `1/60`、Random `4/60`、Language-blind / State-only / Language-shuffle `1/60`であり、competent public baselineではない。
+### Completed immutable failure: run 30203026269
 
-### Active run evidence
-
-- run ID: `30203026269`
-- run number: `285`
-- workflow head: `5d9f137296a64fc401560356470ac27f520cbeff`
 - job: `r01-public-reproduction`
-- completed: source install、generator-signature test、random control、schema probe
-- locator capture時点: official multi recurrent 131,072-frame training **in progress**
-- artifact: **0件**
+- conclusion: qualification failure
+- artifact ID: `8633105142`
+- artifact bytes: `72,686,203`
+- artifact digest: `sha256:43ab7f1df82e9eba98c132b2e84a9ec55dbfdd726795fb43f7608fe288e00eef`
+- three checkpoints: 保存済み
+- same-instance matched controls: 成立
+- answer leakage: `false`
+- R0.2: skip
 
-### Immediate execution contract
+Results:
 
-1. run `30203026269`のjob conclusionを取得する。
-2. 成否にかかわらず、artifact ID、checkpoint、matched result、resource、raw log、dependency lock、checksum、qualification JSONを取得する。
-3. artifactが0件のまま終了した場合は `implementation_or_artifact_failure` として、upload境界・`always()`条件・disk path・job cancellation/concurrencyを最初の単一原因候補にする。
-4. artifactが存在する場合は `qualify_r01_source_policy.py` でsource pins、seeds、actual frames、checkpoint完成、same-instance controls、answer leakage、Correct対Randomをfail-closed確認する。
-5. `Correct <= Random` またはCorrect success zeroの場合は、action histogram、valid-action率、entropy、episode length、reward到達率、mask前後logit、invalid-action mass、gradient norm、policy/value lossから最初のactionable failureを1件だけ選ぶ。
-6. 不合格ならR0.2を開始しない。R0.2側でもdownloadしたqualification JSONを再検証する。
-7. 不合格bundleにはfailure list、failure class、固定条件、診断項目、単一変更制約、matched再試験、停止条件を保存する。
-8. 原因だけを変える最大6 screening runを同一frames・split・instances・model familyで実施する。
-9. 有望候補だけseeds `1,7,19`へ昇格する。
-10. 失敗runは次の単一原因候補とmatched rerunを発行するまで未完了とし、「検証したが駄目」で閉じない。
-11. runの進捗はrun ID、job conclusion、artifact ID、qualification JSON、checksum manifestでのみ認定する。
+- Correct `0/60`、win rate `0.0000`、return `-2.0749993`
+- Random `4/60`、win rate `0.0667`、return `-1.1513333`
+- Language-blind `1/60`
+- State-only `0/60`
+- Language-shuffle `0/60`
+- Correct−Random return `-0.9236660`
 
-最適化順は、公式差分除去、recurrent/optimizer修復、learning rate・entropy・unroll・gradient clipping、parameter数±2%以内の容量配分、fusion位置の順とする。
+Resources:
 
-採用には同一frame・parameter budget、3-seed平均改善、最低seed非悪化、Correct>Random、language使用案ではlanguage-blind/state-only/shuffle超過を要求する。
+- seed 1: wall `24:01.80`、peak RSS `1,442,552 KiB`
+- seed 7: wall `24:10.06`、peak RSS `1,000,412 KiB`
+- seed 19: wall `24:09.28`、peak RSS `1,235,964 KiB`
+- matched evaluation: 約`150 s`、peak RSS `301,556 KiB`
+
+Classification:
+
+- `initial_reproduction_failure`
+- substantive: `optimization_or_policy_competence_failure`
+- failures: `zero_source_policy_success`、`correct_not_above_random_win_rate`、`correct_not_above_random_return`
+
+このrunはimmutable evidence保存の前進だが、公開能力baseline再現ではない。
+
+### Active next run: R01-SCREEN-002
+
+変更する要因は1つだけ:
+
+- `entropy_cost: 0.05 -> 0.005`
+
+根拠:
+
+- pinned official SILG `launch.py`にRTFM用として両値が存在する。
+- 直近immutable runは`0.05`だけを評価した。
+- architecture、source、data、frames、seeds、split、actors、batch、unroll、matched instancesは変更しない。
+
+必須出力:
+
+1. Correct / Random / Language-blind / State-only / Language-shuffleのsame-instance結果。
+2. checkpoint bytes・SHA-256・actual frames。
+3. model parameters/state bytes、peak RSS、training wall、CPU latency。
+4. seed、split、dependency lock、raw logs、artifact digest。
+5. answer leakage、schema leakage、prediction provenance。
+6. action histogram、valid-action率、policy entropy、episode length、reward到達率。
+7. mask前後logit、invalid-action mass、gradient norm、policy/value loss。
+
+採用条件:
+
+- Correct success > 0
+- Correct win rate > Random
+- Correct return > Random
+- 3-seed平均改善かつ最低seedを悪化させない
+- language使用案ではLanguage-blind / State-only / Language-shuffleを上回る
+
+棄却条件:
+
+- 同一契約でCorrectがRandomを上回らない、またはCorrect successが0なら、`entropy_cost`単独原因を棄却する。
+
+次の原因順序:
+
+1. official evaluation/default parity
+2. recurrent reset/detach、optimizer/checkpoint restore
+3. learning rate、gradient clipping、unroll
+4. parameter数±2%以内の容量配分
+5. language/state fusion位置
+
+最大6 screening runまたは事前停止条件まで継続する。「検証したが駄目」でcycleを閉じない。
 
 ## P0 — Evaluation contract freeze
 
@@ -59,7 +111,7 @@ D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示す
 
 毎runで、matched random/language-blind/state-only/applicable shuffle、model/checkpoint bytes、peak RSS、training runtime、CPU latency、seed、split、actual frames、commit、dependency、raw logs、checksums、leakageを保存する。
 
-監査codeの回帰成功は数値baseline再現には数えない。
+run `30203026269`では主要artifactとleakageは保存できたが、action histogram、valid-action率、mask前後logit、invalid-action mass、gradient normの構造化診断が不足した。次runではこれを欠落させない。監査codeの回帰成功は数値baseline再現には数えない。
 
 ## P1 — J-CRe3
 
@@ -75,34 +127,21 @@ J-CRe3は日本語multimodal reference resolution baselineであり、SILGのint
 
 ## P1 — ReCITE official-code reproduction
 
-Saklad et al., ACL 2026のReCITEは、実世界textから因果関係を抽出・推論するbenchmarkであり、公式code/dataは `Ryan-Saklad/ReCITE` と報告されている。hidden intervention-target recoveryやinteractive policy competenceとは別列で扱う。
+Saklad et al., ACL 2026のReCITEは実世界textから因果関係を抽出・推論するbenchmarkであり、hidden intervention-target recoveryやinteractive policy competenceとは別列で扱う。
 
 1. exact commit、dataset release、license、checksum、task schemaを固定する。
 2. official evaluation commandとreported splitを無改変で再現する。
-3. model、prompt、temperature、seed、split、runtime、peak RSS、raw predictions、score、checksumを保存する。
-4. random label、entity/order shuffle、causal-marker masking、sentence shuffle、retrieval-only baselineを事前登録する。
-5. 成功してもlanguage-only causal relation extractionをRQ-001のhidden-target grounding証拠へ流用しない。
-6. 失敗時はdataset、model access、prompt/evaluation、parser、artifactのいずれかへ分類し、単一原因rerunへ接続する。
+3. model、prompt、temperature、seed、runtime、peak RSS、raw predictions、scoreを保存する。
+4. random label、entity/order shuffle、causal-marker masking、sentence shuffle、retrieval-onlyを事前登録する。
+5. 失敗時は単一原因rerunへ接続する。
 
 ## P1 — Multi-View CRL official-code reproduction
 
-Yao et al., ICLR 2024の公式repositoryは `CausalLearningAI/multiview-crl`。
-
-1. exact commit、MIT license、`env.yaml`、tokenizer assets、numerical/multimodal commandを固定する。
-2. numerical experimentを無改変でtrain/evaluateし、raw output、model bytes、peak RSS、runtime、seed、dependency、checksumを保存する。
-3. Multimodal3DIdentのdataset version、download source、archive checksum、展開後manifestを固定する。
-4. official three-view `(img0,img1,txt0)` experimentを無改変で実行する。
-5. text-view removal、image-view removal、text shuffle、cross-instance view shuffle、random representationを事前登録する。
-6. 失敗時はenvironment、dataset、training stability、evaluation、artifactのいずれかへ分類し、原因だけを変えるrerunへ接続する。
+Yao et al., ICLR 2024の公式repository `CausalLearningAI/multiview-crl` を対象とする。exact commit・environment・dataset checksumを固定し、official three-view実験とtext/image removal、text/cross-instance shuffle、random representationを比較する。
 
 ## P1 — GPI official-software reproduction
 
-1. canonical repository、PyPI release、documentation versionを固定する。
-2. exact commit、package version、license、dependency、example data、commandを保存する。
-3. text-as-treatmentの最小公開exampleを無改変で再現する。
-4. effect estimate、standard error、runtime、peak RSS、model、seed、split、raw output、checksumを保存する。
-5. representationなし、random representation、shuffled representation、frozen alternative representationのmatched controlを追加する。
-6. 失敗時はdependency/model access、representation extraction、overlap/propensity、estimator、artifactのいずれかへ分類し、単一原因rerunへ接続する。
+canonical repository、PyPI、documentation version、exact commitを固定し、text-as-treatment公開exampleを無改変再現する。representationなし、random、shuffle、alternative frozen representationをmatched比較する。
 
 ## P1 — R0.2 Environment-first
 
@@ -114,23 +153,14 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 ## Prior-art and RQ-001
 
-既存境界として、score-based CRL、有限標本CRL、Markham et al.、Baumgartner et al.、LeGIT、GPI、Multi-View CRLを維持する。
+既存境界として、score-based CRL、有限標本CRL、Markham et al.、Baumgartner et al.、LeGIT、GPI、Multi-View CRL、CmIR、ReCITEを維持する。
 
-Mai & Han, ACL 2026のCmIRにより、multimodal invariant/spurious decomposition、環境横断の安定予測、mutual-information/reconstruction制約付き因果不変表現だけでは新規性を認定しない。author-official codeは未固定。
-
-Saklad et al., ACL 2026のReCITEにより、language-only causal-relation extraction/inferenceをhidden intervention-target groundingと混同しない。公式repository exact commitと再現は未完了。
-
-### Required prior-art actions
-
-1. CmIRのauthor-official repository公開有無を監査する。
-2. `Ryan-Saklad/ReCITE` のexact commit、dataset、command、reported metricsを固定して無改変再現する。
-3. Markham、Baumgartner、LeGITのauthor-official repository公開有無を継続監査する。
-4. GPIとMulti-View CRLの公式再現を進める。
-5. 各論文上の性能値を本研究の能力証拠へ流用しない。
-6. RQ-001採用候補は、既存のlanguage-only causal extraction、multimodal invariance、target selection、context composition、生成表現利用、multi-view recovery、trajectory identificationを差し引いた後に残るlanguage固有追加情報だけに限定する。
+今回の最新一次文献・公式code再監査では、この境界を覆す採用根拠を確認していない。CmIRはACL 2026一次論文確認済み・author-official code未固定、J-CRe3は一次論文確認済み・数値再現未完了である。
 
 - 広義RQ-001: **棄却**
 - 狭義RQ-001: **追加狭域化・未採用**
+
+採用には、既存baselineを差し引いた後にも残るlanguage固有追加情報、countermodel pair、joint recoding不能な外部denotation law、事前登録済みclaim/counterexample/stopping ruleが必要。
 
 ## Stage transition
 
@@ -138,6 +168,7 @@ Saklad et al., ACL 2026のReCITEにより、language-only causal-relation extrac
 
 ## Status
 
+- immutable R0.1 bundle: **1件・不合格**
 - 外部baseline再現: **0件**
 - 新規機構族: **未認定**
 - 新規知能原理: **未発見**
