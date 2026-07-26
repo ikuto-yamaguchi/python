@@ -70,7 +70,8 @@ accepted evidenceは32,768 frames runのみ:
 6. R0.2 jobはdownload後にもqualification artifactの `qualified_for_r02=true` を再確認する。
 7. 次runではaction histogram、valid-action率、entropy、episode length、reward到達率、mask前後logit、invalid-action mass、gradient norm、policy/value lossをseed別に保存し、公式実装との差、recurrent reset/detach、optimizer、termination、frame counting、mask、checkpoint restoreを診断する。
 8. 原因だけを変える最大6 screening runを行い、有望案だけseeds `1,7,19`へ昇格する。
-9. 今回の文書更新後のcanonical headからR0.1 run requestを更新し、数値実験を再要求する。
+9. RESET-E048のcanonical headからR0.1 run requestを更新し、数値実験を再要求する。
+10. screening runが失敗しても、停止条件を満たさない限り次の単一原因候補へ進み、失敗報告のみでcycleを閉じない。
 
 このゲートは新しいモデルやtoy仮説ではなく、無能力なsource policyからR0.2の見かけ上の差を作ることを防ぎ、失敗から次の性能改善runへ接続する実行制御である。
 
@@ -88,15 +89,17 @@ J-CRe3はLREC-COLING 2024の日本語実世界multimodal reference-resolution da
 
 2025 score-based CRLと2026年3月の有限標本CRLにより、unknown target、少数environment、finite-sample recoveryはRQ-001の新規性根拠から除外済みである。
 
+2026年のMarkham et al.は、任意に表現力の高いblack-box generative modelへ介入型context moduleを付加し、因果的にdisentangledな概念表現とOOD compositionを学習できる枠組みおよび識別結果を提示した。したがって、context-conditioned intervention、因果概念のdisentanglement、学習済み表現のcompositional reuseだけではRQ-001の新規性にならない。公式コードは今回の監査では未固定であり、exact commit再現は未実施とする。
+
 LeGITは、システム変数の自然言語meta-informationとLLMの世界知識を使って初期のintervention targetを選択し、数値的online causal discoveryをwarm-startする。したがって、自然言語記述を使った介入候補選択、低データ初期局面でのLLM warm-start、言語知識と数値因果探索の組合せ自体はRQ-001の新規性候補から除外する。
 
 LeGITのproject pageには`Code`表記があるが、2026-07-26時点の監査では公開repository URLへ解決できず、OpenReviewにも公式code URLは提示されていない。したがって状態を **paper/project-page確認済み・official code unresolved** に訂正する。exact commit、dependency、prompt、split、seed、raw output、checksumを固定した再現は未実施であり、性能証拠として認定しない。
 
 正式判断:
 
-> **RQ-001: NARROWED BEYOND LANGUAGE-GUIDED INTERVENTION SELECTION — NOT ADOPTED**
+> **RQ-001: NARROWED BEYOND LANGUAGE-GUIDED TARGET SELECTION AND INTERVENTION-CONDITIONED COMPOSITION — NOT ADOPTED**
 
-採用には、最強の非言語baselineとLeGIT型language-guided target-selection baselineの再現後にも残るcountermodel pair、外部固定でjoint recoding不能なdenotation law、target selectionを超えるlanguage固有追加情報の直接証拠、事前登録済みclaim/counterexample/stopping ruleが必要。
+採用には、最強の非言語baseline、LeGIT型target-selection baseline、介入context-module型composition baselineの再現後にも残るcountermodel pair、外部固定でjoint recoding不能なdenotation law、target selectionやcontext compositionを超えるlanguage固有追加情報の直接証拠、事前登録済みclaim/counterexample/stopping ruleが必要。
 
 ## Stage transition
 
@@ -113,4 +116,4 @@ LeGITのproject pageには`Code`表記があるが、2026-07-26時点の監査�
 
 ## Last integration
 
-2026-07-26: **RESET-E047**。監査文書だけでiterationを閉じない規則を明文化し、現headのsuccessが監査系CIだけであることを記録した。LeGITのcode状態をofficial-code確認済みからofficial-code unresolvedへ訂正した。外部baseline、J-CRe3、R0.2の新しい数値再現は0件のままであり、能力進歩未認定、高校生級未達を維持する。
+2026-07-26: **RESET-E048**。Markham et al. 2026の介入context module・因果disentanglement・OOD compositionをprior-art境界へ追加し、RQ-001をさらに狭域化した。監査系CI以外の受理可能な数値artifactは確認できず、R0.1/J-CRe3/R0.2は0件のまま。失敗報告のみでcycleを閉じず、停止条件まで最大6 screening runを継続する実行規則とR0.1再実行要求を維持する。能力進歩未認定、高校生級未達。
