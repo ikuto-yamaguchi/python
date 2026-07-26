@@ -25,7 +25,7 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 
 現accepted evidenceは32,768 framesのみ。Correct `1/60`、Random `4/60`、Language-blind / State-only / Language-shuffle `1/60`であり、competent public baselineではない。
 
-### E046 execution gate
+### Immediate execution contract
 
 1. canonical split-jobでR0.1を実行する。
 2. 成否にかかわらずR0.1終了直後にcheckpoint、matched result、resource、raw log、dependency lock、checksum、qualification JSONを保存する。
@@ -44,6 +44,7 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 7. official command/defaultsとdeterminism patch、recurrent reset/detach、optimizer、termination、frame counting、mask、checkpoint restoreの差を診断する。
 8. 原因だけを変える最大6 screening runを実施する。各runは同一frames、seeds/split、instances、model familyを維持する。
 9. 有望候補だけseeds `1,7,19`へ昇格する。
+10. governanceや監査文書の更新だけでiterationを閉じない。次の数値run requestを同じ統合内で発行する。
 
 最適化順は、公式差分除去、recurrent/optimizer修復、learning rate・entropy・unroll・gradient clipping、parameter数±2%以内の容量配分、fusion位置の順とする。
 
@@ -55,7 +56,7 @@ D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示す
 
 毎runで、matched random/language-blind/state-only/applicable shuffle、model/checkpoint bytes、peak RSS、training runtime、CPU latency、seed、split、actual frames、commit、dependency、raw logs、checksums、leakageを保存する。
 
-監査CI、文書更新、queued/cancelled runは能力進歩に数えない。
+監査CI、文書更新、queued/cancelled runは能力進歩に数えない。現headで確認できたworkflowはartifact-path、unified-acceptance、prediction-topologyの監査系successのみであり、R0.1数値再現とは扱わない。
 
 ## P1 — J-CRe3
 
@@ -88,13 +89,18 @@ LeGITは、自然言語のvariable meta-informationとLLM世界知識を使っ�
 - language/world knowledgeと数値的causal discoveryを組み合わせること
 - target-selection改善だけをlanguage grounding原理とみなすこと
 
+### LeGIT code-status correction
+
+project pageには`Code`表記があるが、2026-07-26時点の監査では公開repository URLへ解決できず、OpenReviewにも公式code URLは提示されていない。したがって「公式コード確認済み」ではなく、**paper/project-page確認済み・official code unresolved**とする。exact commit、dependency、prompt、split、seed、raw output、checksumの固定は未着手であり、再現可能な外部baselineには数えない。
+
 Required next prior-art action:
 
-1. LeGIT project pageのcode link先を特定する。
-2. exact official-code commit、dependency、prompt、benchmark split、seed、raw output、checksumを固定する。
-3. Asia、Child、Insurance、Alarmの少なくとも1つでofficial target-selection baselineをimmutable再現する。
-4. random、numerical-only、LLM-only、meta-information shuffleを同一budgetで比較する。
-5. 再現前はLeGIT由来の能力差を本研究の証拠へ流用しない。
+1. 著者またはproject pageが公開するcanonical repository URLを特定する。
+2. URLが特定できなければcode-unavailableとしてnovelty matrixへ明記し、論文記載だけを境界監査へ用いる。
+3. repositoryが得られた場合のみexact commit、dependency、prompt、benchmark split、seed、raw output、checksumを固定する。
+4. Asia、Child、Insurance、Alarmの少なくとも1つでofficial target-selection baselineをimmutable再現する。
+5. random、numerical-only、LLM-only、meta-information shuffleを同一budgetで比較する。
+6. 再現前はLeGIT由来の能力差を本研究の証拠へ流用しない。
 
 - 広義RQ-001: **棄却**
 - 狭義RQ-001: **追加狭域化・未採用**
