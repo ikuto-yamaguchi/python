@@ -62,18 +62,25 @@ Corrected artifact-only requalification:
 
 Official continuous streamは合計`1/60`、fresh seeded instancesは`0/60`であり、protocol差は小さくseed間で一貫しなかった。`entropy_cost=0.005`単独原因とevaluation protocol mismatch主因は正式棄却する。
 
-## Newly identified training-fidelity defect
+## Active official-stateful screening
 
-公式SILG `model.multi.Model`は、parser flag `--stateful`がtrueのときだけLSTM coreを生成する。公式parserのdefaultは`stateful=false`である。これまでのR0.1 training commandは`--stateful`を渡しておらず、policy diagnosticsでも全seedのrecurrent-state L2 normが常に`0.0`だった。
-
-したがって、これまで「official multi recurrent」と記録していたbundleは、実際には**official multi non-stateful**である。この名称誤りを訂正し、次screeningは公式flag `stateful: false → true`だけを変更する。
+公式SILG `model.multi.Model`は、parser flag `--stateful`がtrueのときだけLSTM coreを生成する。公式parserのdefaultは`stateful=false`である。従来R0.1 commandは`--stateful`を渡さず、全seedのrecurrent-state L2 normも常に`0.0`だったため、従来bundleは**official multi non-stateful**である。
 
 追加済み:
 
 - `patch_silg_stateful_screening.py`
 - `.github/workflows/r01_silg_stateful_screening.yml`
 
-次runでは、全seed commandの`--stateful`、checkpoint内`core.*` weights、診断時のnon-zero recurrent stateをfail-closed確認する。entropy `0.05`、actors `2`、batch `2`、unroll `20`、frames、seeds、split、matched instancesは固定する。
+2026-07-26の最新locatorでは、stateful workflowは次の二runを検出した。
+
+- run `30221587227`: `stateful-screening` job `89844840438`、3-seed training中
+- run `30221650935`: pending
+
+最初に完了し、factor-routing・checkpoint core・recurrent-state証拠を満たしたbundleだけをprimary screening evidenceとする。後続runは、primary runがexecution/artifact failureになった場合だけfallback evidenceに使用し、同一条件の二runを独立な性能改善証拠として重複計上しない。新しい同一screening要求は追加しない。
+
+固定条件はentropy `0.05`、actors `2`、batch `2`、unroll `20`、frames `131072`、seeds `1/7/19`、split、matched instancesである。全seed commandの`--stateful`、checkpoint内`core.*` LSTM weights、non-zero recurrent state、matched controls、resource/provenance/checksum/leakage、official/fresh parity、qualificationをfail-closed確認する。
+
+statefulが正しく有効でもCorrect successが0、またはCorrectがRandomを上回らない場合、stateful不足単独原因を棄却し、次の単一要因は`unroll_length: 20 → 80`とする。
 
 ## Evaluation contract
 
@@ -81,11 +88,15 @@ D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示す
 
 ## Prior-art and RQ boundary
 
-既存のscore-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR等の境界を維持する。2026年のCAIRはmultimodal emotion reasoningでrationaleをcausal mediatorとして扱い、interventional utilityをreward化するため、causal-mediator rewardやinformation-bottleneck adaptive optimizationだけではRQ-001の新規性を認定しない。SILGのhidden intervention-target groundingを直接再現するbaselineではなく、公式code・exact commitの固定は未完了である。
+既存のscore-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR等の境界を維持する。
+
+CVPR 2026のProgressive Cross-Modal Causal Interventionは、optimal-transport-based intervention、action relation-aware back-door blocking、deconfounded text embeddingをmediatorとするfront-door adjustmentを組み合わせ、長期行動認識のvisual confounderを除去する。したがって、text embeddingをmediatorとして段階的back-door/front-door adjustmentを行うこと、cross-modal interventionでvisual confounderを抑えることだけではRQ-001の新規性を認定しない。CVF一次論文は確認済みだが、author-official repository、exact commit、dependency、公式数値再現は未解決である。
+
+CVPR 2026のCausalLensは、training-free・single-passでdecoder hidden stateへ介入し、visual/text/system pathwaysとsensitivityから信頼可能なattention headを選択してvisual groundingを強化する。したがって、sensitivity-guided hidden-state interventionやtraining-free visual-grounding correctionだけでもRQ-001を採用しない。これもSILGのhidden intervention-target recoveryを直接再現するbaselineではない。
 
 正式判断:
 
-> **RQ-001: FURTHER NARROWED BEYOND CAUSAL-MEDIATOR REWARD OPTIMIZATION — NOT ADOPTED**
+> **RQ-001: FURTHER NARROWED BEYOND PROGRESSIVE CROSS-MODAL DECONFOUNDING AND SENSITIVITY-GUIDED HIDDEN-STATE INTERVENTION — NOT ADOPTED**
 
 ## Stage transition
 
@@ -102,4 +113,4 @@ D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示す
 
 ## Last integration
 
-2026-07-26: **RESET-E062**。entropy低下とevaluation protocol mismatchを正式棄却した。さらに、従来runが`--stateful`を渡しておらずLSTM coreを持たないことを公式codeとartifact診断から特定した。公式stateful flagだけを変更する次screening workflowを追加し、外部baseline再現0、能力進歩未認定、高校生級未達を維持する。
+2026-07-26: **RESET-E063**。official-stateful screeningの実run `30221587227`が3-seed training中、後続`30221650935`がpendingであることをlocatorから固定した。同一条件の重複計上を禁止し、最初の有効bundleをprimary evidence、後続をexecution/artifact failure時のfallbackとした。PCMCIとCausalLensの一次文献境界を追加したが公式code再現は0件であり、外部baseline再現0、能力進歩未認定、高校生級未達を維持する。
