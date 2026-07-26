@@ -32,7 +32,7 @@ concurrency:
 jobs:
   r01-public-reproduction:
     runs-on: ubuntu-22.04
-    timeout-minutes: 300
+    timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
