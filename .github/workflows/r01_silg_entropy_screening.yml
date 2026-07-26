@@ -9,6 +9,8 @@ on:
       - '.github/workflows/r01_silg_entropy_screening.yml'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/R01_RUN_REQUEST.json'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/run_silg_matched_eval.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/run_silg_policy_diagnostics.py'
   workflow_dispatch:
 
 concurrency:
@@ -81,6 +83,15 @@ jobs:
           /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/run_silg_matched_eval.py \
             --silg-root "$RUNNER_TEMP/r0_silg/silg" --results "$results" --seeds 1 7 19 --episodes 20 \
             2>&1 | tee "$results/SILG_RTFM_MATCHED_EVAL.log"
+      - name: Diagnose official policy action and recurrent dynamics
+        if: always()
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_entropy_0005"
+          python research/intelligence_swarm/benchmarks/grounded_causal/run_silg_policy_diagnostics.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" --results "$results" --seeds 1 7 19 --episodes 20 \
+            --out "$results/SILG_RTFM_POLICY_DIAGNOSTICS_3SEED.json" \
+            2>&1 | tee "$results/SILG_RTFM_POLICY_DIAGNOSTICS.log"
       - name: Apply unchanged R0.1 qualification gate
         run: |
           set -o pipefail
