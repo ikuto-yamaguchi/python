@@ -36,28 +36,35 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 ### Invalid screening execution: run 30208660095
 
 - artifact ID `8634594371`
-- digest `sha256:aa2efd6a30d26074a4ddf39195b93f8dc046f164f87446a384e7d808bd5e5fbf`
 - intended factor: `entropy_cost=0.005`
 - actual factor in every seed command: `entropy_cost=0.05`
 - Correct `3/60`、Random `4/60`、Language-blind `3/60`、State-only `1/60`、Language-shuffle `3/60`
 - Correct return `-1.6356662`、Random return `-1.1513333`
-- qualification: `correct_not_above_random_win_rate`、`correct_not_above_random_return`
-- answer leakage `false`、same-instance成立
+- classification: `experiment-factor-routing_failure`
 
-このrunは0.005仮説の採否に使わない。0.05の追加seed反復としてnegative result archiveへ保存する。
+このrunは0.005仮説の採否に使わない。0.05の追加negative resultとして保存する。
 
-### Active corrected run: R01-SCREEN-002-E057
+### Active corrected run: R01-SCREEN-002-E058
 
 変更要因は1つだけ:
 
 - `entropy_cost: 0.05 -> 0.005`
 
-実行修正:
+実行契約:
 
-- `.github/workflows/r01_silg_entropy_screening.yml`
-- commit `54a1f1f3c09ed0a8d526ae4d877057cfa33cd3d6`
+- workflow: `.github/workflows/r01_silg_entropy_screening.yml`
+- routing fix commit: `54a1f1f3c09ed0a8d526ae4d877057cfa33cd3d6`
+- run request commit: `1a91abd9708a5c2d83fc88a9768c73e69368b4eb`
 - training summary top-level、各seed record、各seed commandの3箇所で`0.005`をfail-closed検証する。
-- 1箇所でも不一致ならmatched evaluation前に失敗させ、性能仮説の結果として扱わない。
+- 1箇所でも不一致ならmatched evaluation前に停止し、性能仮説の結果として扱わない。
+
+直前headのPR連動workflowは4件とも`action_required`、job 0件だった。これはmodel failureではない。E058 push後に以下を取得するまでactiveのままとする。
+
+1. entropy screening workflow run ID。
+2. job conclusionとstep一覧。
+3. artifact ID・digest。
+4. qualification JSON。
+5. 各seedの完全commandと実entropy値。
 
 固定:
 
@@ -126,7 +133,7 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 ## Prior-art and RQ-001
 
-score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、CmIR、ReCITE、C3 Regularization、MCDRL等の境界を維持する。今回の最新一次文献再監査でも、これらを越えるRQ-001採用根拠は得られていない。
+score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、CmIR、ReCITE、C3 Regularization、MCDRL、local-structure dynamical-system identification等の境界を維持する。今回の最新一次文献再監査でも、これらを越えるRQ-001採用根拠は得られていない。
 
 - 広義RQ-001: **棄却**
 - 狭義RQ-001: **追加狭域化・未採用**
@@ -140,7 +147,7 @@ score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、CmIR、ReCI
 ## Status
 
 - immutable R0.1 bundle: **2件・不合格**
-- valid entropy=0.005 screening: **未完了**
+- valid entropy=0.005 screening: **E058実行要求済み・結果未確認**
 - 外部baseline再現: **0件**
 - 新規機構族: **未認定**
 - 新規知能原理: **未発見**
