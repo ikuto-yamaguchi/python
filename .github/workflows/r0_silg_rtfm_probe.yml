@@ -22,6 +22,7 @@ on:
       - 'research/intelligence_swarm/benchmarks/grounded_causal/evaluate_r02_offline_policy_metrics.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/evaluate_r02_online_silg.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_r02_holdout_assignments.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/aggregate_r02_three_seed_results.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/SILG_RTFM_REPRO_001.md'
   workflow_dispatch:
@@ -182,14 +183,23 @@ jobs:
               --silg-root "$RUNNER_TEMP/r0_silg/silg" --data "$data" --comparison "$out" --seed "$seed" --episodes 20 --out "$online" \
               2>&1 | tee -a "$results/SILG_RTFM_R02_TYPED.log"
           done
+      - name: Aggregate matched R0.2 three-seed results
+        run: |
+          set -euo pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results"
+          python research/intelligence_swarm/benchmarks/grounded_causal/aggregate_r02_three_seed_results.py \
+            --results "$results" \
+            --out "$results/SILG_RTFM_R02_3SEED_SUMMARY.json" \
+            2>&1 | tee "$results/SILG_RTFM_R02_3SEED_SUMMARY.log"
       - name: Audit real RTFM S1 holdout assignments
         if: always()
         run: |
+          set -o pipefail
           results="research/intelligence_swarm/benchmarks/grounded_causal/results"
           python research/intelligence_swarm/benchmarks/grounded_causal/audit_r02_holdout_assignments.py \
             "$results/SILG_RTFM_TYPED_TRAJECTORIES_QUALIFIED_3SEED.jsonl" \
             --output "$results/SILG_RTFM_R02_HOLDOUT_AUDIT.json" \
-            2>&1 | tee "$results/SILG_RTFM_R02_HOLDOUT_AUDIT.log" || true
+            2>&1 | tee "$results/SILG_RTFM_R02_HOLDOUT_AUDIT.log"
       - name: Freeze R0.2 bundle
         if: always()
         run: |
