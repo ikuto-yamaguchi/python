@@ -46,6 +46,53 @@ jobs:
             free -h
             python --version
           } | tee "$results/SILG_OFFICIAL_CHECKPOINT_HOST.txt"
+      - name: Fail closed unless exact one-step replay harness is present
+        run: |
+          set -euo pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_resume"
+          script="research/intelligence_swarm/benchmarks/grounded_causal/qualify_silg_official_checkpoint_resume.py"
+          python - "$script" "$results/SILG_OFFICIAL_CHECKPOINT_HARNESS_AUDIT.json" <<'PY'
+          import hashlib
+          import json
+          import pathlib
+          import sys
+
+          script = pathlib.Path(sys.argv[1])
+          output = pathlib.Path(sys.argv[2])
+          text = script.read_text(encoding="utf-8")
+          required_markers = {
+              "exact_batch_capture": "exact learner batch",
+              "initial_recurrent_state_capture": "initial recurrent state",
+              "python_rng_capture": "random.getstate",
+              "numpy_rng_capture": "numpy.random.get_state",
+              "torch_rng_capture": "torch.get_rng_state",
+              "offline_one_step_replay": "one-step replay",
+              "gradient_equality": "gradient",
+              "loss_equality": "loss",
+          }
+          findings = {name: marker in text for name, marker in required_markers.items()}
+          stale_markers = {
+              "parallel_clone_resume": 'for label in ("A", "B")' in text,
+              "bitwise_only_diagnostic": "bitwise_resume_equivalence_diagnostic" in text,
+              "exact_equality_not_required": "is not an infrastructure qualification requirement" in text,
+          }
+          valid = all(findings.values()) and not any(stale_markers.values())
+          payload = {
+              "valid": valid,
+              "classification": "exact_replay_harness_ready" if valid else "resume_equivalence_instrumentation_gap",
+              "capability_claim_allowed": False,
+              "script": str(script),
+              "script_sha256": hashlib.sha256(script.read_bytes()).hexdigest(),
+              "required_marker_findings": findings,
+              "stale_harness_findings": stale_markers,
+              "failure": None if valid else "R01_RUN_REQUEST requires exact one-step replay, but the executable harness still implements the older A/B parallel resume diagnostic.",
+              "next_minimal_fix": None if valid else "Replace only the checkpoint-boundary instrumentation and offline one-update replay path; do not alter model, optimizer, sampling defaults, split, seeds, or capability evaluation.",
+          }
+          output.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+          print(json.dumps(payload, sort_keys=True))
+          if not valid:
+              raise SystemExit(1)
+          PY
       - name: Install pinned public SILG and RTFM sources
         run: |
           set -o pipefail
