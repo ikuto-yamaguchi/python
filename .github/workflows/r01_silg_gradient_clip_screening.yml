@@ -8,6 +8,7 @@ on:
     paths:
       - '.github/workflows/r01_silg_gradient_clip_screening.yml'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/patch_silg_gradient_clip_screening.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_silg_optimizer_checkpoint_integrity.py'
   workflow_dispatch:
 
 concurrency:
@@ -80,6 +81,31 @@ jobs:
             2>&1 | tee "$results/SILG_RTFM_GRADIENT_CLIP_PATCH.log"
           grep -F 'clip_grad_norm_(model.parameters(), 10.0)' "$RUNNER_TEMP/r0_silg/silg/run_exp.py"
           ! grep -F 'clip_grad_norm_(model.parameters(), 40.0)' "$RUNNER_TEMP/r0_silg/silg/run_exp.py"
+      - name: Preserve official optimizer checkpoints in artifact root
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_gradient_clip"
+          python - <<'PY' 2>&1 | tee "$results/SILG_RTFM_CHECKPOINT_PRESERVATION_PATCH.log"
+          from pathlib import Path
+          path = Path('research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py')
+          text = path.read_text(encoding='utf-8')
+          old = '''    result = {
+              "completed": True,
+              "official_checkpoint": str(checkpoint),'''
+          new = '''    preserved_checkpoint = output_dir / f"SILG_RTFM_OFFICIAL_CHECKPOINT_SEED_{seed}.job.tar"
+              shutil.copy2(checkpoint, preserved_checkpoint)
+              result = {
+              "completed": True,
+              "official_checkpoint": str(checkpoint),
+              "preserved_checkpoint": str(preserved_checkpoint),
+              "preserved_checkpoint_bytes": preserved_checkpoint.stat().st_size,
+              "preserved_checkpoint_sha256": sha256(preserved_checkpoint),'''
+          if old not in text:
+              raise SystemExit('checkpoint preservation anchor missing')
+          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          print('patched harness to preserve exact official job.tar before savedir cleanup')
+          PY
+          grep -F 'SILG_RTFM_OFFICIAL_CHECKPOINT_SEED_' research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py
       - name: Verify generator schema
         run: python research/intelligence_swarm/benchmarks/grounded_causal/test_export_rtfm_generator_signatures.py
       - name: Run canonical random control and schema probe
@@ -109,15 +135,33 @@ jobs:
           assert p['single_changed_factor'] == {'name': 'gradient_clip_norm', 'from': 40.0, 'to': 10.0}
           assert [x['seed'] for x in d['runs']] == [1, 7, 19]
           for x in d['runs']:
+              seed = x['seed']
               cmd = [str(v) for v in x['command']]
               assert '--stateful' in cmd, cmd
               assert cmd[cmd.index('--unroll_length') + 1] == '80', cmd
               assert '--learning_rate' not in cmd, cmd
               assert x['checkpoint']['frames_in_checkpoint'] >= 131072
-              sd = torch.load(r/f"SILG_RTFM_TRAINED_STATE_SEED_{x['seed']}.pt", map_location='cpu')
-              assert any(k.startswith('core.') for k in sd), f"seed {x['seed']} lacks LSTM core"
-          print('verified gradient clip 10 source patch with all other screening factors fixed')
+              cp = r/f'SILG_RTFM_OFFICIAL_CHECKPOINT_SEED_{seed}.job.tar'
+              assert cp.is_file() and cp.stat().st_size == x['checkpoint']['official_checkpoint_bytes']
+              assert x['checkpoint']['preserved_checkpoint_sha256'] == x['checkpoint']['official_checkpoint_sha256']
+              sd = torch.load(r/f'SILG_RTFM_TRAINED_STATE_SEED_{seed}.pt', map_location='cpu')
+              assert any(k.startswith('core.') for k in sd), f'seed {seed} lacks LSTM core'
+          print('verified gradient clip 10 source patch and preserved official checkpoints')
           PY
+      - name: Audit optimizer and checkpoint restore integrity
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_gradient_clip"
+          python research/intelligence_swarm/benchmarks/grounded_causal/audit_silg_optimizer_checkpoint_integrity.py \
+            --checkpoint "1=$results/SILG_RTFM_OFFICIAL_CHECKPOINT_SEED_1.job.tar" \
+            --checkpoint "7=$results/SILG_RTFM_OFFICIAL_CHECKPOINT_SEED_7.job.tar" \
+            --checkpoint "19=$results/SILG_RTFM_OFFICIAL_CHECKPOINT_SEED_19.job.tar" \
+            --model-state "1=$results/SILG_RTFM_TRAINED_STATE_SEED_1.pt" \
+            --model-state "7=$results/SILG_RTFM_TRAINED_STATE_SEED_7.pt" \
+            --model-state "19=$results/SILG_RTFM_TRAINED_STATE_SEED_19.pt" \
+            --min-frames 131072 \
+            --output "$results/SILG_RTFM_OPTIMIZER_CHECKPOINT_INTEGRITY.json" \
+            2>&1 | tee "$results/SILG_RTFM_OPTIMIZER_CHECKPOINT_INTEGRITY.log"
       - name: Evaluate matched controls on identical instances
         run: |
           set -o pipefail
