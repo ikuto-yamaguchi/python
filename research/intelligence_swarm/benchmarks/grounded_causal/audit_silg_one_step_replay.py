@@ -149,13 +149,19 @@ def main() -> None:
         eps=flags.epsilon,
         alpha=flags.alpha,
     )
-    optimizer.load_state_dict(pre["optimizer_state_dict"])
 
     def lr_lambda(epoch: int) -> float:
         return 1 - min(epoch * flags.unroll_length * flags.batch_size, flags.total_frames) / flags.total_frames
 
+    # LambdaLR performs an initial scheduler step in its constructor and may
+    # overwrite optimizer.param_groups[*]["lr"]. Construct both objects first,
+    # then restore the optimizer and scheduler states in that order so the
+    # captured effective learning rate is preserved exactly.
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
+    optimizer.load_state_dict(pre["optimizer_state_dict"])
     scheduler.load_state_dict(pre["scheduler_state_dict"])
+    assert_exact(optimizer.state_dict(), pre["optimizer_state_dict"], "restored_pre_optimizer")
+    assert_exact(scheduler.state_dict(), pre["scheduler_state_dict"], "restored_pre_scheduler")
 
     random.setstate(pre["python_random_state"])
     np.random.set_state(pre["numpy_random_state"])
