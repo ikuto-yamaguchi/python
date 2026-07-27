@@ -33,85 +33,58 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 3. official stateful core不足単独原因: **rejected**
 4. `unroll_length=20`不足単独原因: **rejected**
 5. `learning_rate=0.0001`単独原因: **rejected**
+6. gradient clip norm `40.0`不足単独原因: **rejected**
 
-### Completed learning-rate evidence
+### Completed gradient-clipping evidence
 
-- run `30235108376`, job `89881341003`
-- artifact `8642403437`
-- digest `sha256:882e92a17ba5da5836dcf78379a484cc7ed63827ed3bf0b18196c5b18c3d8917`
-- execution commit `67556f067028edac502380c6d3de15575c996ffc`
-- Correct `0/60`, Random `4/60`
-- Language-blind `0/60`, State-only `1/60`, Language-shuffle `0/60`
-- Correct return `-2.1523326`, Random return `-1.1513333`
+- run `30240410850`, job `89896249118`
+- artifact `8644560521`
+- digest `sha256:987bc842229a8a9d03dcced3387c4c8a17a2049fdc2aadfad6c7560027e11e19`
+- execution commit `3f0c62430a27116722c22f69525b54631d93032b`
+- Correct `3/60`, Random `4/60`
+- Language-blind `0/60`, State-only `0/60`, Language-shuffle `3/60`
+- Correct return `-1.7679994`, Random return `-1.1513333`
 - parameters `6,200,115`
 - model-state `24,827,943 / 24,827,943 / 24,828,026 bytes`
 - actual frames `131,200` per seed
-- peak RSS `1,470,976 / 1,269,884 / 2,414,924 KiB`
-- wall `1441.30 / 1404.99 / 1483.19 s`
-- model-audit CPU forward `7.511 ms/step`
-- stateful/unroll/lr routing、LSTM checkpoint、same-instance、parity、leakage=false: passed
+- peak RSS `1,299,228 / 1,180,104 / 1,856,556 KiB`
+- wall `1528.08 / 1559.30 / 1591.64 s`
+- model-audit CPU forward `8.565 ms/step`
+- source clip-10 routing、stateful/unroll、LSTM checkpoint、same-instance、parity、leakage=false: passed
 - qualification: rejected
 
-Decision: explicit lower learning rate reached all seeds but did not produce a competent policy or a language-dependent advantage. Reject learning-rate shortage as the sole cause.
+Decision: clip 10.0 reached all seeds and Correct success increased to 3/60, but Correct remained below Random in win rate and return and exactly matched language-shuffle. Reject gradient-clipping threshold as the sole cause.
 
-### Active single-factor screening: gradient clipping
+### Active cause: optimizer/checkpoint restore integrity
 
-Change exactly one factor in pinned official source:
+Do not start another three-seed training run before inspecting the preserved gradient-clip artifact. Use:
 
-- `clip_grad_norm_(model.parameters(), 40.0)` → `clip_grad_norm_(model.parameters(), 10.0)`
+- auditor: `audit_silg_optimizer_checkpoint_integrity.py`
+- implementation commit: `9afd2bae16aa317c63979ebc9406b86d9b4d8e70`
+- source artifact: `8644560521`
 
-Keep fixed:
+Immediate tasks:
 
-- `stateful=true`
-- `unroll_length=80`
-- learning rate: official default; no explicit override
-- entropy cost `0.05`
-- actors `2`, threads `1`, batch size `2`
-- model family `multi`
-- frames、seeds、split、instances、controls
+1. Download and verify artifact digest before extraction.
+2. Locate all seed `1/7/19` official `job.tar` files and standalone trained model-state files.
+3. Run the auditor with `--min-frames 131072`.
+4. Require non-empty optimizer `state` and `param_groups` for every seed.
+5. Require a finite frame counter at or above budget.
+6. Require checkpoint model tensors to exactly equal the standalone exported model tensors.
+7. Preserve checkpoint/model bytes, SHA-256, top-level keys, optimizer entry counts, frame-key provenance and full JSON result.
+8. If rejected, change only the missing restore component and verify resume-equivalence from the same checkpoint; do not change model, split, seeds, frames or hyperparameters.
+9. If accepted, reject optimizer/checkpoint restore integrity as the principal cause and select exactly one next cause from learner logs.
+10. Do not call an artifact-integrity pass a capability improvement.
 
-Implementation:
+Resume-equivalence acceptance, only if repair is needed:
 
-- patch: `patch_silg_gradient_clip_screening.py`
-- workflow: `.github/workflows/r01_silg_gradient_clip_screening.yml`
-- patch commit: `2c877197b275e9c11f018479909adfe8e2a82844`
-- workflow commit: `3f0c62430a27116722c22f69525b54631d93032b`
-- locator integration: `2cc76a969e5b596ea5026960984b614608c39f23`
-- run/job/artifact: locator更新時点では未確認
-
-Immediate execution tasks:
-
-1. Wait for the updated locator workflow to finish; do not redispatch gradient-clip-10 while a run is pending, queued or in progress.
-2. Read the `gradient-clip-10` locator artifact and record exact run ID, job status, execution SHA and artifact list.
-3. If no push run exists, classify `experiment_trigger_routing_failure`, repair only trigger/path routing, and preserve the declared factor unchanged.
-4. If a run exists but has no job, inspect Actions policy/concurrency/capacity without changing model or hyperparameters.
-5. If a job completes, inspect source-patch proof, all seed commands, checkpoints, matched predictions, diagnostics, resource metrics, leakage, parity and qualification.
-6. If the immutable bundle is valid and Correct remains at/below Random, reject gradient-clipping threshold as the sole cause and immediately continue to optimizer/checkpoint restore integrity.
-7. Do not close the iteration on an execution failure or negative performance result alone.
-
-Fail-closed requirements:
-
-1. The installed pinned `run_exp.py` contains clip `10.0` exactly once and clip `40.0` zero times.
-2. Every seed command includes `--stateful` and `--unroll_length 80`.
-3. Every seed command omits an explicit `--learning_rate` override.
-4. Every checkpoint contains LSTM `core.*` weights and reaches the frame budget.
-5. Correct / Random / Language-blind / State-only / Language-shuffle use identical instances.
-6. Preserve model/checkpoint bytes、RSS、training wall、CPU latency.
-7. Preserve seed、split、actual frames、logs、dependency lock、SHA-256.
-8. Preserve leakage=false and prediction provenance.
-9. Run official continuous-stream / fresh-instance parity.
-10. Apply the unchanged qualification gate.
-
-Decision rule:
-
-- Invalid source routing: repair routing only and do not interpret performance.
-- Correct success>0 and Correct beats Random in win rate and return: retain clip `10.0` as a candidate and verify three-seed minimum/resource cost.
-- Valid clip `10.0` but Correct at/below Random: reject gradient-clipping threshold as sole cause and continue to optimizer/checkpoint restore integrity as exactly one next cause.
-- Do not close with a negative result alone.
+- uninterrupted continuation and save→load→continuation begin from tensor-identical model and optimizer states;
+- one controlled learner update on identical batch/RNG yields equal parameters, optimizer slots, frame count and reported losses within preregistered numerical tolerance;
+- no high-cost end-to-end run is authorized until this local equivalence passes.
 
 ## P0 — Evaluation contract freeze
 
-D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示すまで監査項目を増やさない。毎runでcontrols、resource、seed/split、checksums、leakageを保存する。
+D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示すまで受入auditorを増やさない。optimizer/checkpoint auditorは事前指定済み原因の診断であり、能力受入条件の追加ではない。毎runでcontrols、resource、seed/split、checksums、leakageを保存する。
 
 ## P1 — External official reproductions
 
@@ -121,9 +94,9 @@ Ueda et al., LREC-COLING 2024、公式repository `riken-grp/J-CRe3`。exact comm
 
 ### Latest prior-art boundary
 
-CodeBind（Findings of ACL 2026）は、shared codebookとmodality-specific codebookによるshared/specific表現分解、compositional vector quantization、fully paired dataなしのbridging-modality alignmentを扱う。したがって、shared/specific decomposition、compositional codebook、incremental multimodal alignmentだけではRQ-001の新規性を認定しない。project pageは確認済みだが、author-official repositoryのexact commit、dependency、dataset command、immutable numerical reproductionは未完了。
+NoisyCausal（ACL 2026）は、structured noiseを加えた因果推論benchmarkと、言語文脈から変数・因果グラフを抽出してstructured promptへ変換する手法を扱う。したがって、language-to-causal-graph extraction、symbolic structuring、noise-robust causal promptingだけではRQ-001の新規性を認定しない。hidden intervention-target groundingやSILGのinteractive policy competenceとは別能力である。
 
-既存のMagicBench、CausalDisenSeg、TRACE、DCAN、PCMCI、CausalLens、CTLD、score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、ReCITE、C3、MCDRL、CmIR、CAIR、Bayesian Ablation等もnovelty matrixの別列で維持し、論文値を本研究の能力証拠へ流用しない。
+CodeBind、MagicBench、CausalDisenSeg、TRACE、DCAN、PCMCI、CausalLens、CTLD、score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、ReCITE、C3、MCDRL、CmIR、CAIR、Bayesian Ablation等もnovelty matrixの別列で維持し、論文値を本研究の能力証拠へ流用しない。
 
 ## P1 — R0.2 Environment-first
 
@@ -142,7 +115,7 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 正式境界:
 
-> **FURTHER NARROWED BEYOND SHARED/SPECIFIC COMPOSITIONAL MULTIMODAL ALIGNMENT — NOT ADOPTED**
+> **FURTHER NARROWED BEYOND LANGUAGE-TO-CAUSAL-GRAPH STRUCTURING UNDER NOISE — NOT ADOPTED**
 
 ## Stage transition
 
@@ -150,10 +123,10 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 ## Status
 
-- immutable R0.1 artifacts: **7件**
+- immutable R0.1 artifacts: **8件**
 - competent external baseline: **0件**
 - J-CRe3 numerical reproduction: **0件**
-- active screening: **gradient-clipping locator統合済み・run結果未確認**
+- active work: **optimizer/checkpoint artifact-only integrity audit**
 - new mechanism family: **未認定**
 - new intelligence principle: **未発見**
 - capability progress: **未認定**
