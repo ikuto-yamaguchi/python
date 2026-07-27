@@ -8,6 +8,8 @@ on:
     paths:
       - '.github/workflows/r01_silg_official_profile_infrastructure_qualification.yml'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_silg_optimizer_checkpoint_integrity.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/instrument_silg_one_step_replay.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_silg_one_step_replay.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh'
   workflow_dispatch:
 
@@ -47,6 +49,8 @@ jobs:
             echo 'stateful=false'
             echo 'model=multi'
             echo 'entropy_cost=0.05'
+            echo 'one_step_replay_scope=exact captured learner batch under existing learner lock'
+            echo 'asynchronous_actor_queue_continuation_claimed=false'
             echo "github_run_id=${GITHUB_RUN_ID}"
             echo "github_sha=${GITHUB_SHA}"
             git rev-parse HEAD
@@ -66,7 +70,7 @@ jobs:
           /usr/bin/time -v bash research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh "$RUNNER_TEMP/r0_silg" \
             2>&1 | tee "$results/SILG_RTFM_INSTALL.log"
 
-      - name: Apply deterministic seed patch only
+      - name: Apply deterministic actor seed patch
         run: |
           set -o pipefail
           results='research/intelligence_swarm/benchmarks/grounded_causal/results_official_profile_infra'
@@ -77,10 +81,21 @@ jobs:
           spec = importlib.util.spec_from_file_location('r01_harness', source)
           module = importlib.util.module_from_spec(spec)
           spec.loader.exec_module(module)
-          root = Path.home() / 'work'  # unused sentinel
           actual = Path(__import__('os').environ['RUNNER_TEMP']) / 'r0_silg' / 'silg'
           print(module.deterministic_patch(actual))
           PY
+
+      - name: Instrument one exact learner update for replay audit
+        run: |
+          set -o pipefail
+          results='research/intelligence_swarm/benchmarks/grounded_causal/results_official_profile_infra'
+          python research/intelligence_swarm/benchmarks/grounded_causal/instrument_silg_one_step_replay.py \
+            "$RUNNER_TEMP/r0_silg/silg" \
+            2>&1 | tee "$results/SILG_RTFM_ONE_STEP_INSTRUMENTATION.log"
+          python -m py_compile \
+            research/intelligence_swarm/benchmarks/grounded_causal/instrument_silg_one_step_replay.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_silg_one_step_replay.py \
+            "$RUNNER_TEMP/r0_silg/silg/run_exp.py"
 
       - name: Verify official launch defaults at pinned source
         run: |
@@ -119,6 +134,8 @@ jobs:
           PY
 
       - name: Stage 1 official-profile training to first checkpoint
+        env:
+          SILG_ONE_STEP_REPLAY_PREFIX: ${{ github.workspace }}/research/intelligence_swarm/benchmarks/grounded_causal/results_official_profile_infra/SILG_RTFM_ONE_STEP
         run: |
           set -o pipefail
           results="$GITHUB_WORKSPACE/research/intelligence_swarm/benchmarks/grounded_causal/results_official_profile_infra"
@@ -141,6 +158,19 @@ jobs:
             2>&1 | tee "$results/SILG_RTFM_OFFICIAL_PROFILE_STAGE1.log"
           cp "$savedir/rtfm-multi-official-profile-infra-seed-1/job.tar" \
             "$results/SILG_RTFM_OFFICIAL_PROFILE_STAGE1.job.tar"
+          test -s "$results/SILG_RTFM_ONE_STEP.pre.pt"
+          test -s "$results/SILG_RTFM_ONE_STEP.post.pt"
+
+      - name: Replay captured learner update exactly
+        run: |
+          set -o pipefail
+          results='research/intelligence_swarm/benchmarks/grounded_causal/results_official_profile_infra'
+          python research/intelligence_swarm/benchmarks/grounded_causal/audit_silg_one_step_replay.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" \
+            --pre "$results/SILG_RTFM_ONE_STEP.pre.pt" \
+            --post "$results/SILG_RTFM_ONE_STEP.post.pt" \
+            --output "$results/SILG_RTFM_ONE_STEP_REPLAY_AUDIT.json" \
+            2>&1 | tee "$results/SILG_RTFM_ONE_STEP_REPLAY_AUDIT.log"
 
       - name: Resume same run to stage 2 budget
         run: |
@@ -210,6 +240,8 @@ jobs:
               'official_profile':{'num_actors':30,'batch_size':24,'unroll_length':80,'num_threads':4,'stateful':False},
               'stage1':a1,'stage2':a2,
               'resume_frame_delta':a2['frames']-a1['frames'],
+              'exact_one_step_replay_audit':'SILG_RTFM_ONE_STEP_REPLAY_AUDIT.json',
+              'asynchronous_actor_queue_continuation_claimed':False,
           }
           (root/'SILG_RTFM_OFFICIAL_PROFILE_RESUME_AUDIT.json').write_text(json.dumps(payload,indent=2,sort_keys=True)+'\n')
           print(json.dumps(payload,indent=2,sort_keys=True))
