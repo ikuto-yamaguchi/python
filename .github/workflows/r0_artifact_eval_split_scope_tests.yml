@@ -1,0 +1,35 @@
+name: R0 artifact evaluation split scope tests
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_artifact_eval_split_scope.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/test_audit_artifact_eval_split_scope.py
+      - .github/workflows/r0_artifact_eval_split_scope_tests.yml
+  pull_request:
+    paths:
+      - research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_artifact_eval_split_scope.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/test_audit_artifact_eval_split_scope.py
+      - .github/workflows/r0_artifact_eval_split_scope_tests.yml
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile auditors
+        run: |
+          python -m py_compile \
+            research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_artifact_eval_split_scope.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/test_audit_artifact_eval_split_scope.py
+      - name: Run focused regression
+        run: python research/intelligence_swarm/benchmarks/grounded_causal/test_audit_artifact_eval_split_scope.py
