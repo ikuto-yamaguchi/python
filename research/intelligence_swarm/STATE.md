@@ -30,6 +30,8 @@
 - J-CRe3 numerical reproduction: **0件**
 - R0.2正式再現: **0件**
 - R0.3 hidden intervention-target ablation: **棄却維持**
+- novelty matrix: **未完了**
+- 中心命題の事前登録: **未完了**
 - 広義RQ-001: **棄却**
 - 狭義RQ-001: **未採用**
 - 評価分類: **`initial_reproduction_failure`**
@@ -73,20 +75,24 @@ Decision:
 
 > **gradient-clipping閾値40.0を単独主因として棄却する。CorrectはRandomを超えず、language-shuffleと同率で、言語依存能力は成立しなかった。**
 
-## Active diagnosis: checkpoint evidence preservation
+## Active diagnosis: checkpoint evidence and learner variance
 
-artifact `8644560521`を実際に展開してinventory監査した結果、seed `1/7/19`のstandalone trained model-stateは存在するが、必要な`SILG_RTFM_OFFICIAL_CHECKPOINT_SEED_<seed>.job.tar`は0件だった。
+artifact `8644560521`を実際に展開した結果、seed `1/7/19`のstandalone trained model-stateは存在するが、必要な`SILG_RTFM_OFFICIAL_CHECKPOINT_SEED_<seed>.job.tar`は0件だった。
 
 Evidence:
 
-- inventory: `results_audits/SILG_RTFM_ARTIFACT_8644560521_INVENTORY.json`
+- checkpoint inventory: `results_audits/SILG_RTFM_ARTIFACT_8644560521_INVENTORY.json`
 - inventory commit: `fd7978701408592a3e5171e29641a7b47583eb88`
 - classification: **`checkpoint_evidence_preservation_failure`**
 - optimizer/checkpoint restore integrity: **判定不能**
+- learner variance audit: `results_audits/R0_SILG_ARTIFACT_8644560521_LEARNER_VARIANCE.json`
+- learner variance audit commit: `0c09c0ff982449a9a5ca2fb49250453cc95151ad`
 
-この欠落からoptimizer stateの空/非空、parameter groups、frame counter、model tensor一致、resume-equivalenceを推測してはならない。optimizer/checkpoint restoreを採用・棄却しない。
+全seedの学習logを再集計した。total lossの標準偏差は約`27.46〜28.76`、policy-gradient lossの標準偏差は約`23.63〜24.51`で、符号反転はtotal lossで`146〜161回`、policy-gradient lossで`142〜159回`だった。一方、entropy lossは平均約`-5.52〜-5.54`で比較的安定している。この診断はoptimizer不整合の証明ではなく、単にlearner updateの高分散を固定したnegative diagnosticである。
 
-次の既に正当化されたtraining runでは、評価前に全seedのofficial `job.tar`存在・bytes・SHA-256をfail-closed確認し、artifact upload後にもinventoryを検証する。古いartifactの証拠欠落だけを直すための重複3-seed再学習は禁止する。
+この欠落からoptimizer stateの空/非空、parameter groups、frame counter、model tensor一致、resume-equivalenceを推測してはならない。optimizer/checkpoint restoreを採用・棄却しない。またloss振幅だけを理由に別optimizer factorを選ばない。
+
+次の既に正当化されたtraining runでは、評価前に全seedのofficial `job.tar`存在・bytes・SHA-256をfail-closed確認し、artifact upload後にもinventoryを検証する。古いartifactの証拠欠落だけを理由とする重複3-seed再学習は禁止する。残る最大のofficial-default差はsampling scale（actors/batch）だが、resource feasibilityを先に確認し、actorsまたはbatchの一方だけを事前登録して変更する。
 
 ## Evaluation contract
 
@@ -94,13 +100,13 @@ D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示す
 
 ## Prior-art and RQ boundary
 
-既存のscore-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg、MagicBench、CodeBind、NoisyCausal等の境界を維持する。
+既存のscore-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg、MagicBench、CodeBind、NoisyCausal、CaST-Bench等の境界を維持する。
 
-CaST-Bench（CVPR 2026）は、動画中の複数の時空間証拠をbounding-box trackとtemporal segmentでgroundしたcausal chain reasoning benchmarkを提供する。したがって、視覚証拠へgroundされた因果chainの構築・局在化・回答評価だけではRQ-001の新規性を認定しない。これはhidden intervention-target identificationやSILGのinteractive policy competenceとは別能力であり、論文値を本研究の能力証拠へ流用しない。
+CausalVerseは、静止画、動的物理、ロボット操作、交通場面の24 sub-scenesで、ground-truth causal mechanisms、variables、interventions、temporal dependenciesを構成可能にした公開CRL benchmarkと公式repositoryを提供する。したがって、設定可能な高忠実度simulation、既知の介入target、時間依存を用いたCRL stress test自体はRQ-001の新規性にならない。exact commit、dataset checksum、公式baseline数値のimmutable再現は未完了であり、SILG/J-CRe3の能力証拠を代替しない。
 
 正式判断:
 
-> **RQ-001: FURTHER NARROWED BEYOND CAUSAL-CHAIN-GROUNDED SPATIO-TEMPORAL VIDEO REASONING — NOT ADOPTED**
+> **RQ-001: FURTHER NARROWED BEYOND CONFIGURABLE GROUND-TRUTH INTERVENTION BENCHMARKING — NOT ADOPTED**
 
 ## Stage transition
 
@@ -117,4 +123,4 @@ CaST-Bench（CVPR 2026）は、動画中の複数の時空間証拠をbounding-b
 
 ## Last integration
 
-2026-07-27: **RESET-E072**。gradient-clip artifact `8644560521`を実展開し、official `job.tar`が全seedで欠落していることを確認した。optimizer/checkpoint restore failureとは認定せず、`checkpoint_evidence_preservation_failure`としてinventoryを固定した。古いartifactの欠落だけを理由とする重複学習を禁止し、次の正当化済みrunでcheckpoint存在・digest・artifact inventoryをfail-closed化する。CaST-Benchをnovelty境界へ追加したが、外部baseline再現0、能力進歩未認定、高校生級未達を維持する。
+2026-07-27: **RESET-E073**。artifact `8644560521`の全seed learner logを再集計し、total/PG lossの大きな分散と多数の符号反転をimmutable diagnosticとして固定した。ただしcheckpoint欠落のためoptimizer/restore原因は未判定のまま維持し、loss振幅だけから次のoptimizer factorを選ぶことを禁止した。残る最大のofficial-default差をsampling scaleとして明示し、次の正当化済みrunではcheckpoint保存とresource feasibilityを満たしたうえでactorsまたはbatchの一方だけを変更する。CausalVerseをnovelty境界へ追加したが、外部baseline再現0、能力進歩未認定、高校生級未達を維持する。
