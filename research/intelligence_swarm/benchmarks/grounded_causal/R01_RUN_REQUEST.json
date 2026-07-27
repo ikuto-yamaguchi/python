@@ -1,27 +1,27 @@
 {
-  "requested_at_utc": "2026-07-26T23:30:00Z",
-  "integration": "R01-SCREEN-004-E064",
+  "requested_at_utc": "2026-07-27T04:05:00Z",
+  "integration": "R01-SCREEN-005-E068",
   "track": "R0.1",
   "benchmark": "SILG RTFM S1",
-  "workflow": ".github/workflows/r01_silg_unroll80_screening.yml",
+  "workflow": ".github/workflows/r01_silg_learning_rate_screening.yml",
   "canonical_branch": "research/intelligence-swarm-reconstruction-001",
-  "reference_stateful_result": {
-    "run_id": 30221587227,
-    "job_id": 89844840438,
-    "artifact_id": 8638198496,
-    "artifact_digest": "sha256:ae28542e4bda4ca968de9d7ffc42b5ab4b4dadb518a26636a41d63b92131aa31",
+  "reference_unroll80_result": {
+    "run_id": 30226976064,
+    "job_id": 89867137085,
+    "artifact_id": 8640762353,
+    "artifact_digest": "sha256:4e7fbacc077121d3fd09db1f6b7ec19a00942f8dc4cbf29b6cb9fd6eb18c9f4c",
     "correct_wins": 2,
     "random_wins": 4,
-    "correct_return_mean": -1.8273327469825744,
-    "random_return_mean": -1.151333263516426,
-    "closed_cause": "missing official stateful core as the sole explanation"
+    "correct_return_mean": -1.8059994379679363,
+    "random_return_mean": -1.1513332635164262,
+    "closed_cause": "unroll_length=20 shortage as the sole explanation"
   },
-  "screening_run_index": 4,
+  "screening_run_index": 5,
   "one_changed_factor": {
-    "name": "unroll_length",
-    "from": 20,
-    "to": 80,
-    "rationale": "The official stateful core was proven active but remained below Random. The constrained harness still used unroll 20 while the official SILG default is 80. Increase only the learner trajectory horizon while preserving the verified stateful path and all other resource constraints."
+    "name": "learning_rate",
+    "from": 0.0005,
+    "to": 0.0001,
+    "rationale": "The verified stateful unroll-80 run preserved large sign-changing policy-gradient and total-loss oscillations through late training, including seed-dependent recurrent-state growth. Reduce only the optimizer step size to test learner instability while keeping the public model and evaluation contract unchanged."
   },
   "fixed_contract": {
     "frames_per_seed": 131072,
@@ -30,6 +30,7 @@
     "test_env": "silg:rtfm_test_s1-v0",
     "model_family": "official SILG multi",
     "stateful": true,
+    "unroll_length": 80,
     "entropy_cost": 0.05,
     "pretrained_language_model": false,
     "num_actors": 2,
@@ -45,6 +46,7 @@
   "factor_routing_proof": [
     "--stateful appears in every seed training command",
     "--unroll_length 80 appears in every seed training command",
+    "--learning_rate 0.0001 appears in every seed training command",
     "every checkpoint contains core.* LSTM weights",
     "every seed diagnostic has recurrent_state_l2_after_mean greater than zero"
   ],
@@ -62,16 +64,16 @@
     "leakage result"
   ],
   "qualification": [
-    "all three stateful unroll-80 checkpoints complete",
+    "all three stateful unroll-80 learning-rate-0.0001 checkpoints complete",
     "single-factor routing proven",
     "answer leakage false",
     "correct win rate greater than random",
     "correct return greater than random",
     "correct success greater than zero",
     "three-seed mean improves and minimum seed does not regress unacceptably",
-    "resource increase is recorded and interpreted"
+    "resource change is recorded and interpreted"
   ],
-  "failure_policy": "If factor routing fails, repair only routing and repeat. If stateful unroll=80 is valid but Correct remains at or below Random, reject unroll shortage as the sole cause and choose exactly one next learner-optimization factor from learning rate, gradient clipping, or optimizer/checkpoint restore using preserved code and log evidence. Do not end with a negative result alone.",
+  "failure_policy": "If factor routing fails, repair only routing and repeat. If learning_rate=0.0001 is valid but Correct remains at or below Random, reject learning-rate excess as the sole cause and inspect preserved pre/post-update evidence before selecting exactly one next factor from gradient clipping parity or optimizer/checkpoint restore. Do not end with a negative result alone.",
   "claims_blocked_until_completion": [
     "public baseline reproduced",
     "capability progress",
