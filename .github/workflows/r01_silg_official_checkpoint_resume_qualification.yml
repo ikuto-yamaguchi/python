@@ -1,0 +1,78 @@
+name: R0.1 SILG official checkpoint resume qualification
+run-name: R0.1 SILG official checkpoint resume qualification @ ${{ github.sha }}
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - '.github/workflows/r01_silg_official_checkpoint_resume_qualification.yml'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/qualify_silg_official_checkpoint_resume.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/R01_RUN_REQUEST.json'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh'
+  workflow_dispatch:
+
+concurrency:
+  group: r01-silg-official-checkpoint-resume-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  checkpoint-resume-qualification:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+          cache: pip
+      - name: Record immutable host provenance
+        run: |
+          set -euo pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_resume"
+          mkdir -p "$results"
+          {
+            echo "github_repository=${GITHUB_REPOSITORY}"
+            echo "github_workflow=${GITHUB_WORKFLOW}"
+            echo "github_run_id=${GITHUB_RUN_ID}"
+            echo "github_run_attempt=${GITHUB_RUN_ATTEMPT}"
+            echo "github_ref=${GITHUB_REF}"
+            echo "github_sha=${GITHUB_SHA}"
+            git rev-parse HEAD
+            git status --short
+            date -u
+            uname -a
+            lscpu
+            free -h
+            python --version
+          } | tee "$results/SILG_OFFICIAL_CHECKPOINT_HOST.txt"
+      - name: Install pinned public SILG and RTFM sources
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_resume"
+          /usr/bin/time -v bash research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh "$RUNNER_TEMP/r01_official_resume" \
+            2>&1 | tee "$results/SILG_OFFICIAL_CHECKPOINT_INSTALL.log"
+      - name: Verify official checkpoint schema and deterministic resume equivalence
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_resume"
+          /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/qualify_silg_official_checkpoint_resume.py \
+            --silg-root "$RUNNER_TEMP/r01_official_resume/silg" \
+            --output "$results" --seed 1 --timeout-seconds 3600 \
+            2>&1 | tee "$results/SILG_OFFICIAL_CHECKPOINT_QUALIFICATION.log"
+      - name: Freeze reproducibility bundle
+        if: always()
+        run: |
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_resume"
+          python -m pip freeze | sort > "$results/SILG_OFFICIAL_CHECKPOINT_PIP_FREEZE.txt"
+          find "$results" -type f -printf '%P\t%s bytes\n' | sort > "$results/SILG_OFFICIAL_CHECKPOINT_FILE_SIZES.txt"
+          find "$results" -type f ! -name 'SILG_OFFICIAL_CHECKPOINT_SHA256SUMS.txt' -print0 \
+            | sort -z | xargs -0 sha256sum > "$results/SILG_OFFICIAL_CHECKPOINT_SHA256SUMS.txt" || true
+      - name: Upload immutable checkpoint qualification bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r01-silg-official-checkpoint-resume-${{ github.run_id }}
+          path: research/intelligence_swarm/benchmarks/grounded_causal/results_official_resume/
+          if-no-files-found: error
+          retention-days: 30
