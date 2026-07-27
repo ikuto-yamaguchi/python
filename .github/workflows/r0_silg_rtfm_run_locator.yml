@@ -11,6 +11,7 @@ on:
       - '.github/workflows/r01_silg_entropy_screening.yml'
       - '.github/workflows/r01_silg_entropy_requalify.yml'
       - '.github/workflows/r01_silg_stateful_screening.yml'
+      - '.github/workflows/r01_silg_unroll80_screening.yml'
   workflow_dispatch:
 
 permissions:
@@ -33,6 +34,8 @@ jobs:
             workflow: r01_silg_entropy_requalify.yml
           - label: stateful
             workflow: r01_silg_stateful_screening.yml
+          - label: unroll80
+            workflow: r01_silg_unroll80_screening.yml
     steps:
       - name: Query latest ${{ matrix.label }} push run, jobs, and artifacts
         env:
