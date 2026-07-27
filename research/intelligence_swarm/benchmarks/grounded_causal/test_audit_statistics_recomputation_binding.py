@@ -14,6 +14,22 @@ def _bundle() -> tuple[list[dict], list[dict]]:
     predictions: list[dict] = []
     methods = sorted(evaluation_contract.REQUIRED_METHODS)
     for seed in sorted(evaluation_contract.CANONICAL_SEEDS):
+        train_id = f"train-{seed}-a"
+        data.append(
+            {
+                "instance_id": train_id,
+                "domain": "messenger",
+                "seed": seed,
+                "split": "train",
+                "condition": "in_distribution",
+                "utterance": f"training instruction {seed}",
+                "state_before": [seed, -1],
+                "gold_action": 0,
+                "gold_state_after": [seed, 0],
+                "valid_action_mask": [True, True],
+            }
+        )
+
         ids = [f"test-{seed}-a", f"test-{seed}-b"]
         for offset, iid in enumerate(ids):
             row = {
@@ -22,7 +38,7 @@ def _bundle() -> tuple[list[dict], list[dict]]:
                 "seed": seed,
                 "split": "test",
                 "condition": "in_distribution",
-                "utterance": f"instruction {seed} {offset}",
+                "utterance": f"evaluation instruction {seed} {offset}",
                 "state_before": [offset],
                 "gold_action": offset,
                 "gold_state_after": [offset + 1],
