@@ -57,6 +57,23 @@ def assert_exact(actual: Any, expected: Any, path: str = "root") -> None:
                 delta = float((actual.detach().cpu() - expected.detach().cpu()).abs().max())
             raise AssertionError(f"{path}: tensor values differ; max_abs_delta={delta}")
         return
+    if isinstance(expected, np.ndarray):
+        if not isinstance(actual, np.ndarray):
+            raise AssertionError(f"{path}: expected numpy.ndarray, got {type(actual).__name__}")
+        if actual.dtype != expected.dtype or actual.shape != expected.shape:
+            raise AssertionError(
+                f"{path}: numpy metadata mismatch "
+                f"{actual.dtype}/{actual.shape} != {expected.dtype}/{expected.shape}"
+            )
+        if not np.array_equal(actual, expected, equal_nan=True):
+            raise AssertionError(f"{path}: numpy array values differ")
+        return
+    if isinstance(expected, np.generic):
+        if not isinstance(actual, np.generic):
+            raise AssertionError(f"{path}: expected numpy scalar, got {type(actual).__name__}")
+        if actual.dtype != expected.dtype or not np.array_equal(actual, expected, equal_nan=True):
+            raise AssertionError(f"{path}: numpy scalar values differ")
+        return
     if isinstance(expected, dict):
         if not isinstance(actual, dict) or set(actual) != set(expected):
             raise AssertionError(f"{path}: mapping keys differ")
