@@ -2,11 +2,11 @@
 
 ## Mission
 
-長期目標は、1GB未満で弱いスマートフォンCPU上でも高速に動作し、日本語コミュニケーション・知識・推論を備える知能モデルである。R0では新規toy仮説や新機構族を作らず、公開baselineを固定資源制約下で再現し、失敗原因を一つずつ除去して性能を最大化する。
+長期目標は、1GB未満で弱いスマートフォンCPU上でも高速に動作し、日本語コミュニケーション・知識・推論を備える知能モデルである。R0では新規toy仮説や新機構族を作らず、公開baselineを固定契約で再現し、失敗原因を一つずつ除去する。
 
 ## Current stage
 
-- Stage: **R0 Research Reconstruction — official-contract infrastructure qualification**
+- Stage: **R0 Research Reconstruction — resume-equivalence instrumentation**
 - Canonical branch: `research/intelligence-swarm-reconstruction-001`
 - A〜Dの新規toy仮説・別branch・新規機構族: **禁止**
 - 既存stacked draft PR: **negative-results archive。新作業のbaseにしない**
@@ -21,13 +21,13 @@
 
 ## Non-termination rule
 
-「検証したが駄目だった」で終了しない。ただし、短期screeningを公式baseline再現と誤認して追加hyperparameter探索を続けることも禁止する。高コスト学習済みartifactが有効なら、監査・qualification障害だけのために再学習しない。
+「検証したが駄目だった」で終了しない。ただし、短期screeningを公式baseline再現と誤認して追加hyperparameter探索を続けることも禁止する。能力と無関係な監査障害だけのために高コスト学習を重複しない。
 
 ## R0 status ledger
 
-- immutable R0.1 screening artifacts: **8件**
+- immutable R0.1 short-horizon screening artifacts: **8件**
+- official-contract infrastructure artifacts: **1件・resume evidence不足で不合格**
 - official SILG RTFM 100M-frame reproduction: **0件**
-- official-contract infrastructure qualification: **workflow発行済み・結果未認定**
 - 学習済み公開能力baseline再現: **0件**
 - J-CRe3 numerical reproduction: **0件**
 - R0.2正式再現: **0件**
@@ -36,22 +36,17 @@
 - 中心命題の事前登録: **未完了**
 - 広義RQ-001: **棄却**
 - 狭義RQ-001: **未採用**
-- 主分類: **`public_reproduction_contract_mismatch`**
+- 主分類: **`resume_equivalence_instrumentation_gap`**
 
 ## Official SILG reproduction contract
 
 Pinned official SILG `launch.py --envs rtfm`は、`model=multi`、`stateful=false`、entropy grid `0.05/0.005`、train `silg:rtfm_train_s1-v0`、validation `silg:rtfm_test_s1-v0`を指定する。parser defaultsはtotal frames `100,000,000`、actors `30`、batch `24`、unroll `80`、threads `4`、learning rate `0.0005`、RMSprop、global gradient clip `40`である。
 
-既存の`131,072`-frame runsは公式frame horizonの`0.131072%`、推定learner update数でも公式契約の約`1/63.58`にすぎない。したがって、すべて**短期screening evidence**としてのみ保持し、公式public baseline reproductionや公式baseline failureとは呼ばない。
-
-Immutable audit:
-
-- `benchmarks/grounded_causal/R01_OFFICIAL_TRAINING_HORIZON_AUDIT.json`
-- audit commit `4ccb3963a35d76cc8b28234f1280e7164e94df5e`
+既存の`131,072`-frame runsは公式frame horizonの`0.131072%`にすぎない。すべて短期screening evidenceとして保持し、公式public baseline reproductionや公式baseline failureとは呼ばない。
 
 ## Closed short-horizon screening causes
 
-以下は各縮小契約内の単独原因としてのみ棄却した。公式100M-frame baselineの原因判定へ外挿しない。
+以下は縮小契約内の単独原因としてのみ棄却した。公式100M-frame baselineへ外挿しない。
 
 - `entropy_cost=0.005`
 - evaluation protocol mismatch
@@ -79,47 +74,59 @@ Gradient-clipping screening run `30240410850`, artifact `8644560521`:
 - answer leakage `false`
 - qualification **rejected**
 
-この結果は縮小契約で言語依存能力が成立しなかったnegative evidenceであり、公式baseline失敗の証拠ではない。
+これは縮小契約で言語依存能力が成立しなかったnegative evidenceであり、公式baseline失敗の証拠ではない。
 
-## Active execution: official-contract infrastructure qualification
+## Official-contract infrastructure result
 
-以下をcanonical branchへ追加した。
+Run `30258965674`, job `89954109262`, artifact `8650362356`:
 
-- `patch_silg_official_infrastructure_qualification.py`
-- `audit_silg_infrastructure_qualification.py`
-- `.github/workflows/r01_silg_official_infrastructure_qualification.yml`
+- artifact digest `sha256:975d5c6223637f48c3e358d51ead0470e3f97b01826e2cd6e216fd484b8f8750`
+- artifact size `61,174,640 bytes`
+- official command parity: **pass**
+- exact `job.tar` preservation: **pass**
+- checkpoint/model tensor equality: **pass**
+- optimizer state: **73 entries / 1 parameter group**
+- scheduler and frame counter: **present**
+- checkpoint frames: `40,320`
+- checkpoint bytes: `39,266,613`
+- checkpoint SHA-256: `1ce3a0590611d8d26ef06330e7f5eca43e9c13deafb8d41bf3570eadaa754675`
+- peak RSS: `9,305,052 KiB`
+- wall: `631.66 s`
+- throughput: `63.83 frames/s`
+- projected 100M-frame wall: `18.13 runner-days` per entropy/seed run
 
-workflowはseed `1`、短区間`32,768` framesで、official `model=multi`、`stateful=false`、actors `30`、batch `24`、unroll `80`、threads `4`、learning rate default `0.0005`、RMSprop、clip `40`を保持する。これは能力screeningではなくrunner/checkpoint/resource qualificationである。
+不合格理由は次の2件だけである。
 
-Fail-closed証拠:
+- `missing_rng_state_for_one_step_resume_equivalence`
+- `missing_batch_state_for_one_step_resume_equivalence`
 
-- official command parity
-- exact official `job.tar`保存
-- model stateとexported stateのtensor完全一致
-- optimizer stateとparameter groups
-- frame counter
-- checkpoint/model bytesとSHA-256
-- peak RSS、runtime、throughput、100M-frame projected wall
-- scheduler/RNG/learner-batch state
-- one-step resume-equivalence prerequisites
+よってoptimizer failure、public-baseline failure、能力failureとは認定しない。immutable resultは`benchmarks/grounded_causal/results_audits/SILG_RTFM_OFFICIAL_INFRA_RUN_30258965674.json`へ保存した。
 
-RNGまたはlearner batchがcheckpointに存在しない場合、one-step resume equivalenceを推測で通さず明示的にrejectする。不足したresume instrumentationだけを次の単一修正候補とし、モデル機構や能力進歩は認定しない。
+## Active execution
 
-random controlは保存する。language-blind/state-only/language-shuffleはinfrastructure-only segmentでは能力評価を行わないためnot-applicableとして明示し、100M-frame正式能力再現では再び必須とする。
+次の単一修正対象はresume instrumentationのみ。
+
+1. checkpoint境界のPython/NumPy/Torch RNG stateを保存する。
+2. 次のlearner updateで消費するexact batchを保存または決定的fingerprint化する。
+3. model、optimizer、scheduler、frame、RNGをrestoreする。
+4. 同一batchでone-step updateを再実行する。
+5. model tensors、optimizer slots、scheduler/frame、scalar lossesの完全一致を要求する。
+
+model、source pins、optimizer、sampling defaults、split、能力評価は変更しない。この監査が通るまで100M-frame capability reproductionを開始しない。
 
 ## Evaluation contract
 
-D015〜D035を凍結する。能力runではrandom/language-blind/state-only/shuffle、model/checkpoint bytes、RSS、runtime、CPU latency、seed、split、actual frames、raw logs、checksums、leakageを保存する。公式再現ではさらにofficial command parity、100M frame horizon、checkpoint/resume integrityを必須とする。infrastructure-only runを能力証拠に数えない。
+D015〜D035を凍結する。能力runではrandom/language-blind/state-only/shuffle、model/checkpoint bytes、RSS、runtime、CPU latency、seed、split、actual frames、raw logs、checksums、leakageを保存する。infrastructure-only runではrandomをplumbing probeとして保存し、他の能力対照はN/Aと明示する。
 
 ## Prior-art and RQ boundary
 
-既存のscore-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg、MagicBench、CodeBind、NoisyCausal、CaST-Bench、CausalVerse等の境界を維持する。
+既存のscore-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg、MagicBench、CodeBind、NoisyCausal、CaST-Bench、CausalVerse、MTG-Causal-RL等の境界を維持する。
 
-MTG-Causal-RLは、部分観測・巨大masked action space・明示SCMを持つ複雑なカードゲーム環境で、intervention effect、factor-wise credit trace、paired seeds、補正済み統計比較を含むcausal-RL benchmarkを提示する。したがって、masked sequential decision making、明示SCMによるcausal credit assignment、intervention calibrationだけではRQ-001の新規性にならない。author-official code、exact commit、immutable reproductionは未解決であり、SILG/J-CRe3の能力証拠を代替しない。
+Mind Dreamer (ICML 2026)はlatent world-model manifoldへのactive causal intervention、adversarially generated intervention anchors、relay value/uncertainty propagationを扱う。これらだけではRQ-001の新規性にならず、SILG/J-CRe3の再現証拠も代替しない。
 
 正式判断:
 
-> **RQ-001: FURTHER NARROWED BEYOND EXPLICIT-SCM CAUSAL CREDIT ASSIGNMENT IN MASKED PARTIALLY OBSERVED RL — NOT ADOPTED**
+> **RQ-001: FURTHER NARROWED BEYOND ACTIVE CAUSAL INTERVENTION ON LATENT WORLD-MODEL MANIFOLDS — NOT ADOPTED**
 
 ## Stage transition
 
@@ -136,4 +143,4 @@ MTG-Causal-RLは、部分観測・巨大masked action space・明示SCMを持つ
 
 ## Last integration
 
-2026-07-27: **RESET-E075**。短期screeningの追加hyperparameter探索を行わず、公式sampling defaultsを保持した32,768-frame infrastructure qualification workflowを実装・発行した。checkpoint/model/optimizer/frame/resourceとresume prerequisitesをfail-closed保存し、能力証拠とは分離する。MTG-Causal-RLをnovelty境界へ追加したが、外部baseline再現0、能力進歩未認定、高校生級未達を維持する。
+2026-07-27: **RESET-E076**。official-contract infrastructure runを回収し、command/checkpoint/model/optimizer/frame/resource保存の成功と、RNG・learner-batch state不足によるresume-equivalence未達を分離した。次の単一修正をresume instrumentationだけに固定し、能力進歩未認定・高校生級未達を維持する。
