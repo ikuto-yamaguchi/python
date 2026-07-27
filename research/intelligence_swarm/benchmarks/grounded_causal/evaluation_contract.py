@@ -538,10 +538,20 @@ def audit_artifacts(manifest: dict[str, Any], base_dir: Path) -> dict[str, Any]:
         if not isinstance(run, dict): errors.append(f"run {index}: must be an object"); continue
         missing = RESOURCE_FIELDS - run.keys()
         if missing: errors.append(f"run {index}: missing resource/provenance fields {sorted(missing)}")
-        try: method, seed, domain, split, condition = str(run["method"]), int(run["seed"]), str(run["domain"]), str(run["split"]), str(run["condition"])
-        except (KeyError, TypeError, ValueError) as exc: errors.append(f"run {index}: invalid indexing field {exc}"); continue
+        try:
+            method = str(run["method"])
+            seed = int(run["seed"])
+            domain = str(run["domain"])
+            split = unicodedata.normalize("NFKC", str(run["split"])).casefold()
+            condition = str(run["condition"])
+        except (KeyError, TypeError, ValueError) as exc:
+            errors.append(f"run {index}: invalid indexing field {exc}")
+            continue
         if not domain: errors.append(f"run {index}: domain must be non-empty")
-        if not split: errors.append(f"run {index}: split must be non-empty")
+        if not split:
+            errors.append(f"run {index}: split must be non-empty")
+        elif split not in EVAL_SPLITS:
+            errors.append(f"run {index}: artifact split={split!r} is not a registered evaluation split; allowed={sorted(EVAL_SPLITS)}")
         if not condition: errors.append(f"run {index}: condition must be non-empty")
         cell = (method, seed, domain, split, condition)
         if cell in cells: errors.append(f"run {index}: duplicate run cell {cell}")
@@ -570,7 +580,7 @@ def audit_artifacts(manifest: dict[str, Any], base_dir: Path) -> dict[str, Any]:
     if seeds != CANONICAL_SEEDS: errors.append(f"manifest seeds must be exactly {sorted(CANONICAL_SEEDS)}, found {sorted(seeds)}")
     expected = {(m, s, d, sp, c) for m in required for s in CANONICAL_SEEDS for d, sp, c in topology}; missing_cells = expected - cells
     if missing_cells: errors.append(f"manifest incomplete observed-topology coverage: {len(missing_cells)} missing cells")
-    return {"valid": not errors, "errors": errors, "warnings": [], "checks": checks, "methods": sorted(methods), "seeds": sorted(seeds), "domains": sorted(domains), "observed_topology": [list(v) for v in sorted(topology)], "runs": len(runs), "missing_run_cells": len(missing_cells), "missing_run_cell_examples": [list(v) for v in sorted(missing_cells)[:10]], "independent_artifacts_required": True, "positive_resource_measurements_required": True, "artifact_path_containment_required": True, "nonempty_artifacts_required": True, "condition_index_required": True, "exact_method_topology_required": True, "single_commit_required": True, "same_dataset_per_cell_required": True, "canonical_seeds": sorted(CANONICAL_SEEDS), "classification": "reproduced" if not errors else "initial_reproduction_failure"}
+    return {"valid": not errors, "errors": errors, "warnings": [], "checks": checks, "methods": sorted(methods), "seeds": sorted(seeds), "domains": sorted(domains), "observed_topology": [list(v) for v in sorted(topology)], "runs": len(runs), "missing_run_cells": len(missing_cells), "missing_run_cell_examples": [list(v) for v in sorted(missing_cells)[:10]], "independent_artifacts_required": True, "positive_resource_measurements_required": True, "artifact_path_containment_required": True, "nonempty_artifacts_required": True, "condition_index_required": True, "exact_method_topology_required": True, "single_commit_required": True, "same_dataset_per_cell_required": True, "canonical_seeds": sorted(CANONICAL_SEEDS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "artifact_split_scope_fail_closed": True, "classification": "reproduced" if not errors else "initial_reproduction_failure"}
 
 
 def main(argv: list[str] | None = None) -> int:
