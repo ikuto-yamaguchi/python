@@ -5,11 +5,12 @@ This module does not add a model or research mechanism. It prevents a bundle fro
 being accepted by running only a convenient subset of the existing contracts.
 Dataset/schema leakage, alias-normalized leakage, explicit holdout-condition
 integrity, registered train/evaluation split scope, paired statistics, complete
-same-instance metric coverage, resource artifacts, strictly-positive measured
-resources, bundle-contained artifact paths, prediction-payload leakage,
-prediction-cell binding, prediction/statistics checksums, deterministic
-statistics recomputation, public-baseline provenance/reproduction, and exact
-binding of baseline observations to saved statistics fields must all pass together.
+same-instance metric coverage, resource artifacts, resource-cell evaluation split
+scope, strictly-positive measured resources, bundle-contained artifact paths,
+prediction-payload leakage, prediction-cell binding, prediction/statistics
+checksums, deterministic statistics recomputation, public-baseline
+provenance/reproduction, and exact binding of baseline observations to saved
+statistics fields must all pass together.
 """
 from __future__ import annotations
 
@@ -18,6 +19,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+import audit_artifact_eval_split_scope as artifact_eval_split_scope
 import audit_artifact_path_containment as artifact_path_containment
 import audit_explicit_holdout_condition as explicit_holdout_condition
 import audit_nonzero_measurements as nonzero_measurements
@@ -59,6 +61,7 @@ def audit_acceptance(
     checks["prediction_metric_coverage_contract"] = prediction_metric_coverage.audit(data, predictions)
     checks["paired_statistics_contract"] = evaluation_contract.score(data, predictions)
     checks["resource_artifact_contract"] = evaluation_contract.audit_artifacts(manifest, base_dir)
+    checks["artifact_eval_split_scope_contract"] = artifact_eval_split_scope.audit(manifest)
     checks["nonzero_measurement_contract"] = nonzero_measurements.audit(manifest, base_dir)
     checks["artifact_path_containment_contract"] = artifact_path_containment.audit(manifest, base_dir)
     checks["prediction_cell_binding_contract"] = prediction_cell_binding.audit(manifest, base_dir)
@@ -93,6 +96,9 @@ def audit_acceptance(
         "allowed_train_split": "train",
         "allowed_evaluation_splits": ["eval", "test", "valid", "validation"],
         "nonregistered_debug_calibration_posthoc_splits_forbidden": True,
+        "resource_runs_must_use_registered_evaluation_splits": True,
+        "train_resource_cells_forbidden": True,
+        "unregistered_resource_cells_forbidden": True,
         "same_instance_metric_coverage_required": True,
         "selective_metric_reporting_forbidden": True,
         "optional_gold_metrics_must_be_all_or_none": True,
