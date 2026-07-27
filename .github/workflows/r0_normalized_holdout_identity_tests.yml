@@ -1,0 +1,38 @@
+name: R0 normalized holdout identity tests
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
+      - research/intelligence_swarm/governance/audit_normalized_holdout_identity.py
+      - research/intelligence_swarm/governance/test_audit_normalized_holdout_identity.py
+      - .github/workflows/r0_normalized_holdout_identity_tests.yml
+  pull_request:
+    paths:
+      - research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
+      - research/intelligence_swarm/governance/audit_normalized_holdout_identity.py
+      - research/intelligence_swarm/governance/test_audit_normalized_holdout_identity.py
+      - .github/workflows/r0_normalized_holdout_identity_tests.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  normalized-holdout-identity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile audit and regression
+        run: |
+          python -m py_compile \
+            research/intelligence_swarm/governance/audit_normalized_holdout_identity.py \
+            research/intelligence_swarm/governance/test_audit_normalized_holdout_identity.py
+      - name: Run focused regressions
+        run: python -m unittest research.intelligence_swarm.governance.test_audit_normalized_holdout_identity -v
