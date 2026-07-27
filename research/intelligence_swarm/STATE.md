@@ -6,7 +6,7 @@
 
 ## Current stage
 
-- Stage: **R0 Research Reconstruction — one-step resume-equivalence execution**
+- Stage: **R0 Research Reconstruction — resume-equivalence execution blocked before job creation**
 - Canonical branch: `research/intelligence-swarm-reconstruction-001`
 - A〜Dの新規toy仮説・別branch・新規機構族: **禁止**
 - 既存stacked draft PR: **negative-results archive。新作業のbaseにしない**
@@ -27,7 +27,8 @@
 
 - immutable R0.1 short-horizon screening artifacts: **8件**
 - official-contract infrastructure artifacts: **1件・resume evidence不足で不合格**
-- one-step resume-equivalence artifact: **0件・workflow発行済み、結果未認定**
+- one-step resume-equivalence artifact: **0件**
+- one-step resume-equivalence execution: **PR headのActionsが`action_required`でjob未生成**
 - official SILG RTFM 100M-frame reproduction: **0件**
 - 学習済み公開能力baseline再現: **0件**
 - J-CRe3 numerical reproduction: **0件**
@@ -37,7 +38,7 @@
 - 中心命題の事前登録: **未完了**
 - 広義RQ-001: **棄却**
 - 狭義RQ-001: **未採用**
-- 主分類: **`resume_equivalence_instrumentation_gap`**
+- 主分類: **`workflow_execution_approval_blocker`**
 
 ## Official SILG reproduction contract
 
@@ -105,17 +106,11 @@ Run `30258965674`, job `89954109262`, artifact `8650362356`:
 
 ## Active execution
 
-resume instrumentationだけを追加した。pinned SILGのlearner updateを一度だけ包み、次をdiskへ保存して同一process内でreloadする。
-
-1. Python/NumPy/Torch CPU RNG state。CUDA使用時は全CUDA RNG state。
-2. 次のlearner updateで消費するexact batchとinitial agent state。
-3. update直前のmodel、actor model、optimizer、scheduler state。
-4. uninterrupted one-step後とreload-resumed one-step後のmodel、optimizer、scheduler。
-5. policy/value/entropy/total loss、gradient norm、決定的frame increment。
+resume instrumentationだけを追加した。pinned SILGのlearner updateを一度だけ包み、Python/NumPy/Torch RNG、exact learner batch、initial agent state、model、actor model、optimizer、schedulerを保存し、uninterrupted one-stepとreload-resumed one-stepを比較する契約は維持する。
 
 受理条件はmodel/optimizer/schedulerのbitwise equality、lossesとgradient normのexact equality、exact batch payloadのbytes・SHA-256保存である。model、source pins、optimizer、sampling defaults、split、能力評価は変更していない。
 
-workflow `.github/workflows/r01_silg_resume_equivalence.yml`はcanonical pushで発行済み。ただしrun ID、job、artifact、合否は未確認であり、resume integrityやresource feasibilityはまだ認定しない。この監査が通るまで100M-frame capability reproductionを開始しない。
+ただし、PR head `4376e9ab931fb663214404b2b4ef0c4ec84432a1`に紐づく確認可能な11件のPR workflowはすべて`completed/action_required`で、jobが生成されていない。resume-equivalenceのrun ID、job ID、artifact ID、qualificationは0件である。これはモデル・optimizer・resume-equivalenceの失敗ではなく、実行前のapproval/policy blockerとして扱う。同条件を重複dispatchせず、Actions承認またはpolicy解除後に同じworkflowを実行する。
 
 ## Evaluation contract
 
@@ -123,13 +118,13 @@ D015〜D035を凍結する。能力runではrandom/language-blind/state-only/shu
 
 ## Prior-art and RQ boundary
 
-既存のscore-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg、MagicBench、CodeBind、NoisyCausal、CaST-Bench、CausalVerse、MTG-Causal-RL、Mind Dreamer等の境界を維持する。
+既存のscore-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg、MagicBench、CodeBind、NoisyCausal、CaST-Bench、CausalVerse、MTG-Causal-RL、Mind Dreamer、AER等の境界を維持する。
 
-SemEval-2026 Task 12 AERは、複数文書の支持証拠からtarget eventの最も妥当な直接原因を選ぶevidence-grounded abductive causal reasoning benchmarkであり、公式dataset repositoryも公開されている。したがって、language-onlyの証拠統合、direct-cause選択、非因果distractor識別だけではRQ-001の新規性にならず、hidden intervention-target groundingやSILG/J-CRe3能力の代替証拠にもならない。
+AAAI 2026のCOGSは、構造事前分布を用いたlatent causal graph学習、causal/non-causal変数の分離、domain-invariant time-series representation、domain label不在時のprototype-based unsupervised domain discoveryを既存化している。したがって、時系列でのlatent causal/non-causal disentanglement、unsupervised environment discovery、因果表現によるOOD generalizationだけではRQ-001の新規性を認定しない。一次論文は確認済みだが、author-official repository、exact commit、公式commandを固定できていないため再現済みbaselineには数えない。
 
 正式判断:
 
-> **RQ-001: FURTHER NARROWED BEYOND EVIDENCE-GROUNDED ABDUCTIVE EVENT-CAUSE INFERENCE — NOT ADOPTED**
+> **RQ-001: FURTHER NARROWED BEYOND UNSUPERVISED-DOMAIN CAUSAL REPRESENTATION LEARNING FOR TIME-SERIES OOD GENERALIZATION — NOT ADOPTED**
 
 ## Stage transition
 
@@ -146,4 +141,4 @@ SemEval-2026 Task 12 AERは、複数文書の支持証拠からtarget eventの�
 
 ## Last integration
 
-2026-07-28: **RESET-E077**。official sampling契約を固定したまま、RNG・exact learner batch・one-step updateのdisk reload再実行とbitwise比較を行うresume-equivalence instrumentationを実装・発行した。AERをlanguage-only causal reasoningの既存境界へ追加し、外部baseline再現0件、能力進歩未認定、高校生級未達を維持する。
+2026-07-28: **RESET-E078**。resume-equivalence workflowのコード契約は維持したまま、確認可能なPR Actionsが全件`action_required`でjob未生成であることをexecution blockerとして固定した。COGSをtime-series OOD causal representationの既存境界へ追加し、外部baseline再現0件、能力進歩未認定、高校生級未達を維持する。
