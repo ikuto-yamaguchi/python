@@ -75,8 +75,8 @@ jobs:
           set -euo pipefail
           results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_resume"
           silg="$RUNNER_TEMP/r01_official_resume/silg"
-          savedir="$results/official_one_step_savedir"
-          prefix="$results/SILG_RTFM_OFFICIAL_ONE_STEP"
+          savedir="$GITHUB_WORKSPACE/$results/official_one_step_savedir"
+          prefix="$GITHUB_WORKSPACE/$results/SILG_RTFM_OFFICIAL_ONE_STEP"
           export SILG_ONE_STEP_REPLAY_PREFIX="$prefix"
           cd "$silg"
           /usr/bin/time -v python run_exp.py \
@@ -84,7 +84,7 @@ jobs:
             --val_env silg:rtfm_test_s1-v0 \
             --model multi \
             --xpid rtfm-official-one-step-replay \
-            --savedir "$GITHUB_WORKSPACE/$savedir" \
+            --savedir "$savedir" \
             --total_frames 5760 \
             --num_actors 30 \
             --num_threads 4 \
@@ -94,9 +94,9 @@ jobs:
             --entropy_cost 0.05 \
             --disable_cuda \
             2>&1 | tee "$GITHUB_WORKSPACE/$results/SILG_OFFICIAL_ONE_STEP_TRAIN.log"
-          test -s "$GITHUB_WORKSPACE/${prefix}.pre.pt"
-          test -s "$GITHUB_WORKSPACE/${prefix}.post.pt"
-          job=$(find "$GITHUB_WORKSPACE/$savedir" -name job.tar -type f -print -quit)
+          test -s "${prefix}.pre.pt"
+          test -s "${prefix}.post.pt"
+          job=$(find "$savedir" -name job.tar -type f -print -quit)
           test -n "$job"
           cp "$job" "$GITHUB_WORKSPACE/$results/SILG_RTFM_OFFICIAL_JOB.tar"
 
@@ -124,7 +124,7 @@ jobs:
           import torch
 
           results = pathlib.Path(sys.argv[1])
-          request = json.loads((pathlib.Path('research/intelligence_swarm/benchmarks/grounded_causal/R01_RUN_REQUEST.json')).read_text())
+          request = json.loads(pathlib.Path('research/intelligence_swarm/benchmarks/grounded_causal/R01_RUN_REQUEST.json').read_text())
           audit = json.loads((results / 'SILG_RTFM_OFFICIAL_ONE_STEP_REPLAY_AUDIT.json').read_text())
           checkpoint = torch.load(results / 'SILG_RTFM_OFFICIAL_JOB.tar', map_location='cpu')
           required = {'model_state_dict', 'optimizer_state_dict', 'scheduler_state_dict', 'frames'}
