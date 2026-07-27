@@ -50,7 +50,7 @@ Official contract:
 5. `learning_rate=0.0001`
 6. gradient clip norm `40→10`
 
-## Latest short-horizon negative evidence
+Latest short-horizon negative evidence:
 
 - run `30240410850`, artifact `8644560521`
 - Correct `3/60`, Random `4/60`
@@ -92,23 +92,13 @@ Canonical immutable evidence:
 - artifact SHA-256 `34f02c802f6db15b55336a0547e3914846aad6d74783ebfc371d12ca6ac08115`
 - frames `3840 -> 5760`
 
-Accepted:
+Accepted: exact learner batch and initial recurrent state、learner/actor model synchronization、optimizer/scheduler state、Python/NumPy/Torch RNG、losses/gradient/stats/frame increment、uninterrupted and reload-resumed one-step equivalence。
 
-- exact learner batch and initial recurrent state
-- learner model / actor model synchronization within each execution
-- optimizer / scheduler state
-- Python / NumPy / Torch RNG
-- losses / gradient / stats / frame increment
-- uninterrupted and reload-resumed one-step equivalence
-
-This proves one captured official learner update can be replayed exactly. It does not prove asynchronous queue continuation, 100M horizon completion or benchmark competence.
+これはcaptured official learner updateのexact replayだけを証明し、asynchronous continuation、100M horizon、benchmark competenceは証明しない。
 
 ## Active P0 — official seed-1 first checkpoint
 
-Workflow:
-
-- `.github/workflows/r01_silg_official_100m_chunk.yml`
-- implementation commit `72f24cb5f94b23f31b31a27d3a0cceb18165ec2f`
+Workflow: `.github/workflows/r01_silg_official_100m_chunk.yml`
 
 Fixed first chunk:
 
@@ -127,11 +117,11 @@ Required artifact:
 - peak RSS / wall / throughput
 - qualification JSON with `checkpoint_frames >= 1,000,000`
 
-Current state: **submitted / push-run result unconfirmed**. Connectorからrun ID、job ID、artifact ID、checkpoint qualificationを独立確認するまで、開始・完了・public reproduction・capability progressを認定しない。同じchunkを重複dispatchしない。
+Current state: **submitted / push-run result unconfirmed**。run ID、job ID、artifact ID、checkpoint qualificationを独立確認するまで、開始・完了・public reproduction・capability progressを認定しない。同じchunkを重複dispatchしない。
 
-### Continuation after first checkpoint
+Continuation after first checkpoint:
 
-1. first artifactのcheckpoint frames、optimizer/scheduler state、command parity、bytes、SHA-256、RSS、runtimeを検査する。
+1. checkpoint frames、optimizer/scheduler state、command parity、bytes、SHA-256、RSS、runtimeを検査する。
 2. execution failureならmodel条件を変えず、最初のinfrastructure root causeだけを修正する。
 3. durable checkpointがqualifiedなら同じseed/entropy/contractでcontinuation cadenceとartifact retentionを固定する。
 4. trained checkpoint評価時にCorrect/random/language-blind/state-only/shuffleをsame-instanceで実行する。
@@ -142,21 +132,18 @@ Current state: **submitted / push-run result unconfirmed**. Connectorからrun I
 
 D015〜D035を凍結する。能力runではrandom/language-blind/state-only/shuffle、model/checkpoint bytes、RSS、runtime、CPU latency、seed、split、actual frames、raw logs、checksums、leakageを保存する。公式再現ではofficial command parity、100M horizon、checkpoint/resume integrityも必須。
 
-PR head `041e3579baaf5dbc35d533b3cf64143ce6515483`の確認可能なPR checks:
+RESET-E081で`.github/workflows/r0d_cycle_072_core_normalized_cell_identity.yml`をread-only CIへ変更した。
 
-- unified acceptance gate: pass
-- canonical instance identity: pass
-- artifact containment: pass
-- raw-log measurement binding: pass
-- prediction method topology: pass
-- score dataset-contract binding: pass
-- normalized holdout identity: pass
-- normalized cell identity tests: pass
-- R0D core normalized cell identity: **fail**
+- `contents: write`を`contents: read`へ縮小
+- PR job内のreport生成、commit、pushを削除
+- patch applicatorが既に統合済みで無差分であることを`git diff --exit-code`で検証
+- production core、patch helper、focused regressionをcompile・実行
 
-Next single evaluation action: `R0D core normalized cell identity`の最小root causeを修正する。model、benchmark、split、controlsを変更しない。
+これはbranch競合と自己書換えを除去するevaluation-infrastructure修正であり、model、benchmark、split、controls、metric定義は変更しない。
 
-Standalone `audit_canonical_instance_identity.py`はpassしているが、direct integration into `validate_dataset()` and `score()` remains incomplete. 統合完了までclaimed bundleからstandalone auditを省略しない。
+Next single evaluation action: 新しい`R0D core normalized cell identity` checkの結果を確認する。失敗ならjob logから最初の一原因だけを修正する。成功ならこのisolated evaluation blockerをclosedとし、追加のevaluation項目を増やさない。
+
+Standalone `audit_canonical_instance_identity.py`はpassしているが、direct integration into `validate_dataset()` and `score()` remains incomplete。統合完了までclaimed bundleからstandalone auditを省略しない。
 
 ## P1 — External official reproductions
 
@@ -180,7 +167,9 @@ Ueda et al., LREC-COLING 2024、公式repository `riken-grp/J-CRe3`。exact comm
 
 score-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg、MagicBench、CodeBind、NoisyCausal、CaST-Bench、CausalVerse、MTG-Causal-RL、Mind Dreamer、AER、COGS等をnovelty matrixの既存境界として維持する。
 
-新しい文献名だけを毎回追加しない。「一次文献 + author-official code + exact commit + public numerical contract」が固定でき、RQ-001境界を実質変更する場合だけ追加する。
+2026年一次文献の再監査では、unknown intervention targetを含むcausal DAG coarsening、RL policyのnonlinear causal reduction、少数environment・有限標本でのunknown target回復を確認した。いずれもRQ-001の広義主張をさらに狭めるが、このrepositoryでのofficial executable baseline reproductionではない。
+
+新しい文献名だけを毎回追加しない。「一次文献 + author-official code + exact commit + public numerical contract」が固定でき、RQ-001境界を実質変更する場合だけnovelty matrixへ昇格する。
 
 ## P1 — R0.2 Environment-first
 
