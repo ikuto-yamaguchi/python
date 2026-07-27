@@ -1,0 +1,129 @@
+{
+  "schema_version": "r01_public_reproduction_result_v1",
+  "status": "rejected",
+  "classification": "initial_reproduction_failure",
+  "screening": {
+    "factor": "gradient_clipping",
+    "reference_value": 40.0,
+    "screened_value": 10.0,
+    "single_factor_only": true,
+    "conclusion": "gradient clipping 40.0 is not the sole cause of the public-baseline reproduction failure"
+  },
+  "github": {
+    "repository": "ikuto-yamaguchi/python",
+    "branch": "research/intelligence-swarm-reconstruction-001",
+    "run_id": 30240410850,
+    "head_sha": "3f0c62430a27116722c22f69525b54631d93032b",
+    "artifact": {
+      "id": 8644560521,
+      "name": "r01-silg-rtfm-gradient-clip-30240410850",
+      "size_bytes": 91617320,
+      "sha256": "987bc842229a8a9d03dcced3387c4c8a17a2049fdc2aadfad6c7560027e11e19",
+      "expires_at": "2026-08-26T07:03:48Z"
+    }
+  },
+  "source_pins": {
+    "silg": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
+    "rtfm": "58f17955595b5a127c96d045d896fcbcc7d4b570"
+  },
+  "environment": {
+    "train": "silg:rtfm_train_s1-v0",
+    "test": "silg:rtfm_test_s1-v0",
+    "model": "official SILG multi recurrent",
+    "pretrained_language_model": false,
+    "stateful": true,
+    "unroll_length": 80,
+    "entropy_cost": 0.05,
+    "num_actors": 2,
+    "batch_size": 2,
+    "seeds": [1, 7, 19],
+    "frames_requested_per_seed": 131072,
+    "actual_checkpoint_frames": [131200, 131200, 131200]
+  },
+  "model_audit": {
+    "parameters": 6200115,
+    "trainable_parameters": 6200115,
+    "state_dict_bytes": 24828505,
+    "cpu_forward_latency_ms_per_step": 8.56544512,
+    "completed": true,
+    "state_dict_sha256": "497458a7f23a9a72c05bc7eb24603fc8a8b526b7f7ad3ce4ec79cc50f215dbba"
+  },
+  "resource_audit": {
+    "training_wall_seconds_by_seed": {
+      "1": 1528.076986866,
+      "7": 1559.295696382,
+      "19": 1591.6351276459995
+    },
+    "training_wall_seconds_total": 4679.007810894,
+    "peak_rss_kib_by_seed": {
+      "1": 1299228,
+      "7": 1180104,
+      "19": 1856556
+    }
+  },
+  "matched_controls": {
+    "episodes_per_condition": 60,
+    "aggregate": {
+      "correct": {
+        "win_rate": 0.05000000000000001,
+        "return_mean": -1.7679994354645412,
+        "episode_length_mean": 44.4,
+        "cpu_inference_ms_per_step": 8.814401280123972
+      },
+      "random": {
+        "win_rate": 0.06666666666666667,
+        "return_mean": -1.151333263516426,
+        "episode_length_mean": 15.233333333333334,
+        "cpu_inference_ms_per_step": 0.010484681087709627
+      },
+      "language_blind": {
+        "win_rate": 0.0,
+        "return_mean": -1.9673327028751373,
+        "episode_length_mean": 49.36666666666667,
+        "cpu_inference_ms_per_step": 5.417567154673036
+      },
+      "state_only": {
+        "win_rate": 0.0,
+        "return_mean": -2.0439993143081665,
+        "episode_length_mean": 53.199999999999996,
+        "cpu_inference_ms_per_step": 5.207241335086347
+      },
+      "language_shuffle": {
+        "win_rate": 0.05000000000000001,
+        "return_mean": -1.6943328191836675,
+        "episode_length_mean": 40.71666666666667,
+        "cpu_inference_ms_per_step": 8.62084673942237
+      }
+    },
+    "correct_minus_random": {
+      "win_rate": -0.016666666666666656,
+      "return_mean": -0.6166661719481152
+    }
+  },
+  "official_evaluation_parity": {
+    "aggregate_protocol_gap": {
+      "win_rate": -0.03333333333333333,
+      "return_mean": -0.14566661417484292,
+      "episode_length_mean": 3.9500000000000006
+    }
+  },
+  "qualification": {
+    "qualified_for_r02": false,
+    "failures": [
+      "correct_not_above_random_win_rate",
+      "correct_not_above_random_return"
+    ],
+    "r02_started": false
+  },
+  "interpretation": {
+    "observed": "Correct reached 3/60 successes, but Random reached 4/60; language-shuffle also reached 3/60.",
+    "decision": "Reject gradient clipping as a sole explanation. Do not claim benchmark reproduction or capability progress.",
+    "next_minimal_action": "Audit the official SILG/RTFM training horizon and effective learner-update budget against the 131072-frame screening before changing another optimizer hyperparameter. The current run metadata itself labels this as a screening rather than a full public-baseline reproduction."
+  },
+  "claims": {
+    "public_baseline_reproduced": false,
+    "new_intelligence_principle": false,
+    "capability_progress": false,
+    "new_toy_hypothesis": false
+  }
+}
