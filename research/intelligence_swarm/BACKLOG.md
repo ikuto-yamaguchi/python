@@ -37,9 +37,6 @@ Stateful primary evidence:
 - run `30221587227`, job `89844840438`
 - artifact `8638198496`
 - digest `sha256:ae28542e4bda4ca968de9d7ffc42b5ab4b4dadb518a26636a41d63b92131aa31`
-- all seed commands contained `--stateful`
-- all checkpoints contained `core.*` LSTM weights
-- recurrent state active on all seeds
 - Correct `2/60`, Random `4/60`
 - Language-blind `2/60`, State-only `1/60`, Language-shuffle `2/60`
 - Correct return `-1.8273327`, Random return `-1.1513333`
@@ -48,11 +45,8 @@ Stateful primary evidence:
 - actual frames `131,080` per seed
 - peak RSS `1,069,864 / 1,334,592 / 1,274,272 KiB`
 - wall `1691.39 / 1569.14 / 1686.73 s`
-- same-instance and parity passed
-- answer leakage false
-- qualification rejected: `correct_not_above_random_win_rate`, `correct_not_above_random_return`
-
-Conclusion: stateful activation is real but insufficient. It does not establish language use because Correct and language-blind/shuffle have the same aggregate win rate.
+- stateful routing、LSTM checkpoint、recurrent state、same-instance、parity、leakage: passed
+- qualification rejected
 
 ### Active single-factor screening: official unroll length
 
@@ -75,6 +69,18 @@ Execution:
 - patch: `patch_silg_unroll80_screening.py`
 - workflow: `.github/workflows/r01_silg_unroll80_screening.yml`
 - request: `R01_RUN_REQUEST.json`
+- active run: `30226976064`
+- execution head: `344002bc8e5130cbb9a302fda1a2115baa8edb1c`
+- current status: **pending**
+- jobs: **0**
+- artifacts: **0**
+
+Monitoring repair:
+
+- existing locator omitted `r01_silg_unroll80_screening.yml`
+- locator matrix/path trigger fixed in commit `746d527a0d760cc4e910e13d8913c040ee8afd5f`
+- locator run `30228319127` succeeded and found run `30226976064`
+- do not issue a duplicate unroll-80 run while this run is pending/queued/in-progress
 
 Fail-closed requirements:
 
@@ -91,8 +97,9 @@ Fail-closed requirements:
 
 Decision rule:
 
-- If Correct success>0 and Correct beats Random in both win rate and return, promote unroll=80 to a candidate and verify the three-seed minimum and resource cost.
+- If run remains jobless because of Actions capacity/policy, classify as execution blocker and repair only dispatch/concurrency/permission; do not alter model factors.
 - If factor routing is invalid, repair routing only; do not interpret performance.
+- If Correct success>0 and Correct beats Random in both win rate and return, promote unroll=80 to a candidate and verify the three-seed minimum and resource cost.
 - If routing is valid but Correct remains at/below Random, reject unroll shortage as the sole cause and continue to one evidence-selected learner-optimization factor.
 - Do not close with a negative result alone.
 
@@ -112,9 +119,9 @@ Ueda et al., LREC-COLING 2024、公式repository `riken-grp/J-CRe3`。exact comm
 
 ### Latest prior-art boundary
 
-AAAI 2026のCTLDは、hidden confounding下のlearning-to-deferについて、potential-outcome boundsからaction/deferral確率のcausal targetを構成する。hidden confounding下のcausal decision-target constructionとdefer policy学習はRQ-001の新規性から除外する。ただしlatent intervention-target recovery、interactive grounding、SILG/J-CRe3の代替baselineではない。一次論文は確認済み、author-official code・exact commitは未解決。
+2026年のDCANは、multimodal personality understandingで、prototype demographic-confounder dictionaryによるback-door adjustmentと、learned mediator dictionaryによるfront-door adjustmentを組み合わせる。official repository `Sabrina-han/DCAN`とDMSP dataset公開を確認した。dual causal adjustment、latent/unobserved biasへのmediator intervention、公平性改善だけではRQ-001の新規性を認定しない。exact commit、dependency、dataset checksum、公式数値のimmutable再現は未完了であり、SILG/J-CRe3の代替baselineではない。
 
-PCMCI、CausalLens、score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、ReCITE、C3、MCDRL、CmIR、CAIR等もnovelty matrixの別列で維持し、論文値を本研究の能力証拠へ流用しない。
+PCMCI、CausalLens、CTLD、score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、ReCITE、C3、MCDRL、CmIR、CAIR等もnovelty matrixの別列で維持し、論文値を本研究の能力証拠へ流用しない。
 
 ## P1 — R0.2 Environment-first
 
@@ -133,7 +140,7 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 正式境界:
 
-> **FURTHER NARROWED BEYOND CAUSAL TARGET CONSTRUCTION FOR LEARNING-TO-DEFER UNDER HIDDEN CONFOUNDING — NOT ADOPTED**
+> **FURTHER NARROWED BEYOND DUAL BACK-DOOR/FRONT-DOOR MULTIMODAL DECONFOUNDING — NOT ADOPTED**
 
 ## Stage transition
 
@@ -144,7 +151,7 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 - immutable R0.1 artifacts: **5件**
 - competent external baseline: **0件**
 - J-CRe3 numerical reproduction: **0件**
-- active screening: **unroll length 20→80 request issued**
+- active screening: **unroll-80 run 30226976064 pending**
 - 新規機構族: **未認定**
 - 新規知能原理: **未発見**
 - 能力進歩: **未認定**
