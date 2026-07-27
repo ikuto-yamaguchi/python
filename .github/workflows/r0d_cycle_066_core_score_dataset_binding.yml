@@ -1,0 +1,53 @@
+name: R0D Cycle 066 core score dataset binding
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - research/intelligence_swarm/benchmarks/grounded_causal/apply_r0d_cycle_066_core_score_dataset_binding.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_score_dataset_binding_core.py
+      - .github/workflows/r0d_cycle_066_core_score_dataset_binding.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  harden-core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/intelligence-swarm-reconstruction-001
+          fetch-depth: 0
+      - name: Apply fail-closed score binding
+        working-directory: research/intelligence_swarm/benchmarks/grounded_causal
+        run: python apply_r0d_cycle_066_core_score_dataset_binding.py
+      - name: Compile
+        run: python -m py_compile research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py research/intelligence_swarm/benchmarks/grounded_causal/audit_score_dataset_contract_binding.py
+      - name: Run focused regressions
+        working-directory: research/intelligence_swarm/benchmarks/grounded_causal
+        run: |
+          python -m unittest -v test_evaluation_contract_score_dataset_binding_core.py
+          python -m unittest -v test_audit_score_dataset_contract_binding.py
+      - name: Save cycle report
+        run: |
+          cat > research/intelligence_swarm/governance/REPORT_R0D_CYCLE_066.md <<'EOF'
+          # R0-D Cycle 066 — score/dataset contract core binding
+
+          `evaluation_contract.score()` now executes `validate_dataset()` on the same submitted dataset, records the dataset audit in the score artifact, propagates dataset-contract errors, and emits no `cells`, `summary`, or `paired_gaps_vs_correct` when the dataset contract is invalid.
+
+          Acceptance remains fail-closed as `initial_reproduction_failure`. No memory, replay, fast-weights, sleep, or forgetting mechanism was added.
+          EOF
+      - name: Commit to canonical branch
+        run: |
+          if git diff --quiet; then
+            echo "No core changes required"
+            exit 0
+          fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py research/intelligence_swarm/governance/REPORT_R0D_CYCLE_066.md
+          git commit -m "r0d: bind score output to dataset contract"
+          git push origin HEAD:research/intelligence-swarm-reconstruction-001
