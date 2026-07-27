@@ -89,20 +89,22 @@ jobs:
           from pathlib import Path
           path = Path('research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py')
           text = path.read_text(encoding='utf-8')
-          old = '''    result = {
-              "completed": True,
-              "official_checkpoint": str(checkpoint),'''
-          new = '''    preserved_checkpoint = output_dir / f"SILG_RTFM_OFFICIAL_CHECKPOINT_SEED_{seed}.job.tar"
-              shutil.copy2(checkpoint, preserved_checkpoint)
-              result = {
-              "completed": True,
-              "official_checkpoint": str(checkpoint),
-              "preserved_checkpoint": str(preserved_checkpoint),
-              "preserved_checkpoint_bytes": preserved_checkpoint.stat().st_size,
-              "preserved_checkpoint_sha256": sha256(preserved_checkpoint),'''
+          old = "    result = {\n        \"completed\": True,\n        \"official_checkpoint\": str(checkpoint),"
+          new = (
+              "    preserved_checkpoint = output_dir / f\"SILG_RTFM_OFFICIAL_CHECKPOINT_SEED_{seed}.job.tar\"\n"
+              "    shutil.copy2(checkpoint, preserved_checkpoint)\n"
+              "    result = {\n"
+              "        \"completed\": True,\n"
+              "        \"official_checkpoint\": str(checkpoint),\n"
+              "        \"preserved_checkpoint\": str(preserved_checkpoint),\n"
+              "        \"preserved_checkpoint_bytes\": preserved_checkpoint.stat().st_size,\n"
+              "        \"preserved_checkpoint_sha256\": sha256(preserved_checkpoint),"
+          )
           if old not in text:
               raise SystemExit('checkpoint preservation anchor missing')
-          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          patched = text.replace(old, new, 1)
+          compile(patched, str(path), 'exec')
+          path.write_text(patched, encoding='utf-8')
           print('patched harness to preserve exact official job.tar before savedir cleanup')
           PY
           grep -F 'SILG_RTFM_OFFICIAL_CHECKPOINT_SEED_' research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py
