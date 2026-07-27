@@ -1,5 +1,5 @@
 name: R0.1 SILG official checkpoint resume qualification
-run-name: R0.1 SILG official checkpoint resume qualification @ ${{ github.sha }}
+run-name: R0.1 SILG exact learner-step replay qualification @ ${{ github.sha }}
 
 on:
   push:
@@ -7,7 +7,8 @@ on:
       - research/intelligence-swarm-reconstruction-001
     paths:
       - '.github/workflows/r01_silg_official_checkpoint_resume_qualification.yml'
-      - 'research/intelligence_swarm/benchmarks/grounded_causal/qualify_silg_official_checkpoint_resume.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/instrument_silg_one_step_replay.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_silg_one_step_replay.py'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/R01_RUN_REQUEST.json'
       - 'research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh'
   workflow_dispatch:
@@ -26,6 +27,7 @@ jobs:
         with:
           python-version: '3.8'
           cache: pip
+
       - name: Record immutable host provenance
         run: |
           set -euo pipefail
@@ -44,69 +46,126 @@ jobs:
             uname -a
             lscpu
             free -h
+            df -h
             python --version
           } | tee "$results/SILG_OFFICIAL_CHECKPOINT_HOST.txt"
-      - name: Fail closed unless exact one-step replay harness is present
+
+      - name: Install pinned public SILG and RTFM sources
         run: |
           set -euo pipefail
           results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_resume"
-          script="research/intelligence_swarm/benchmarks/grounded_causal/qualify_silg_official_checkpoint_resume.py"
-          python - "$script" "$results/SILG_OFFICIAL_CHECKPOINT_HARNESS_AUDIT.json" <<'PY'
+          /usr/bin/time -v bash research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh "$RUNNER_TEMP/r01_official_resume" \
+            2>&1 | tee "$results/SILG_OFFICIAL_CHECKPOINT_INSTALL.log"
+
+      - name: Instrument exactly one real learner update
+        run: |
+          set -euo pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_resume"
+          silg="$RUNNER_TEMP/r01_official_resume/silg"
+          cp "$silg/run_exp.py" "$results/SILG_PINNED_RUN_EXP_BEFORE_INSTRUMENTATION.py"
+          python research/intelligence_swarm/benchmarks/grounded_causal/instrument_silg_one_step_replay.py "$silg" \
+            2>&1 | tee "$results/SILG_ONE_STEP_INSTRUMENTATION.log"
+          cp "$silg/run_exp.py" "$results/SILG_PINNED_RUN_EXP_AFTER_INSTRUMENTATION.py"
+          python -m py_compile "$silg/run_exp.py"
+
+      - name: Run official profile and capture exact consumed learner batch
+        env:
+          OMP_NUM_THREADS: '1'
+        run: |
+          set -euo pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_resume"
+          silg="$RUNNER_TEMP/r01_official_resume/silg"
+          savedir="$results/official_one_step_savedir"
+          prefix="$results/SILG_RTFM_OFFICIAL_ONE_STEP"
+          export SILG_ONE_STEP_REPLAY_PREFIX="$prefix"
+          cd "$silg"
+          /usr/bin/time -v python run_exp.py \
+            --env silg:rtfm_train_s1-v0 \
+            --val_env silg:rtfm_test_s1-v0 \
+            --model multi \
+            --xpid rtfm-official-one-step-replay \
+            --savedir "$GITHUB_WORKSPACE/$savedir" \
+            --total_frames 5760 \
+            --num_actors 30 \
+            --num_threads 4 \
+            --batch_size 24 \
+            --unroll_length 80 \
+            --learning_rate 0.0005 \
+            --entropy_cost 0.05 \
+            --disable_cuda \
+            2>&1 | tee "$GITHUB_WORKSPACE/$results/SILG_OFFICIAL_ONE_STEP_TRAIN.log"
+          test -s "$GITHUB_WORKSPACE/${prefix}.pre.pt"
+          test -s "$GITHUB_WORKSPACE/${prefix}.post.pt"
+          job=$(find "$GITHUB_WORKSPACE/$savedir" -name job.tar -type f -print -quit)
+          test -n "$job"
+          cp "$job" "$GITHUB_WORKSPACE/$results/SILG_RTFM_OFFICIAL_JOB.tar"
+
+      - name: Replay captured update and require exact equality
+        run: |
+          set -euo pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_resume"
+          silg="$RUNNER_TEMP/r01_official_resume/silg"
+          python research/intelligence_swarm/benchmarks/grounded_causal/audit_silg_one_step_replay.py \
+            --silg-root "$silg" \
+            --pre "$results/SILG_RTFM_OFFICIAL_ONE_STEP.pre.pt" \
+            --post "$results/SILG_RTFM_OFFICIAL_ONE_STEP.post.pt" \
+            --output "$results/SILG_RTFM_OFFICIAL_ONE_STEP_REPLAY_AUDIT.json" \
+            2>&1 | tee "$results/SILG_RTFM_OFFICIAL_ONE_STEP_REPLAY_AUDIT.log"
+
+      - name: Verify fixed public contract and checkpoint schema
+        run: |
+          set -euo pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_resume"
+          python - "$results" <<'PY'
           import hashlib
           import json
           import pathlib
           import sys
+          import torch
 
-          script = pathlib.Path(sys.argv[1])
-          output = pathlib.Path(sys.argv[2])
-          text = script.read_text(encoding="utf-8")
-          required_markers = {
-              "exact_batch_capture": "exact learner batch",
-              "initial_recurrent_state_capture": "initial recurrent state",
-              "python_rng_capture": "random.getstate",
-              "numpy_rng_capture": "numpy.random.get_state",
-              "torch_rng_capture": "torch.get_rng_state",
-              "offline_one_step_replay": "one-step replay",
-              "gradient_equality": "gradient",
-              "loss_equality": "loss",
+          results = pathlib.Path(sys.argv[1])
+          request = json.loads((pathlib.Path('research/intelligence_swarm/benchmarks/grounded_causal/R01_RUN_REQUEST.json')).read_text())
+          audit = json.loads((results / 'SILG_RTFM_OFFICIAL_ONE_STEP_REPLAY_AUDIT.json').read_text())
+          checkpoint = torch.load(results / 'SILG_RTFM_OFFICIAL_JOB.tar', map_location='cpu')
+          required = {'model_state_dict', 'optimizer_state_dict', 'scheduler_state_dict', 'frames'}
+          missing = sorted(required - set(checkpoint))
+          target = request['official_reproduction_target']
+          fixed = {
+              'model': target['model'] == 'multi',
+              'stateful': target['stateful'] is False,
+              'num_actors': target['num_actors'] == 30,
+              'num_threads': target['num_threads'] == 4,
+              'batch_size': target['batch_size'] == 24,
+              'unroll_length': target['unroll_length'] == 80,
+              'learning_rate': target['learning_rate'] == 0.0005,
+              'global_gradient_clip_norm': target['global_gradient_clip_norm'] == 40.0,
           }
-          findings = {name: marker in text for name, marker in required_markers.items()}
-          stale_markers = {
-              "parallel_clone_resume": 'for label in ("A", "B")' in text,
-              "bitwise_only_diagnostic": "bitwise_resume_equivalence_diagnostic" in text,
-              "exact_equality_not_required": "is not an infrastructure qualification requirement" in text,
-          }
-          valid = all(findings.values()) and not any(stale_markers.values())
+          def digest(path):
+              return hashlib.sha256(path.read_bytes()).hexdigest()
           payload = {
-              "valid": valid,
-              "classification": "exact_replay_harness_ready" if valid else "resume_equivalence_instrumentation_gap",
-              "capability_claim_allowed": False,
-              "script": str(script),
-              "script_sha256": hashlib.sha256(script.read_bytes()).hexdigest(),
-              "required_marker_findings": findings,
-              "stale_harness_findings": stale_markers,
-              "failure": None if valid else "R01_RUN_REQUEST requires exact one-step replay, but the executable harness still implements the older A/B parallel resume diagnostic.",
-              "next_minimal_fix": None if valid else "Replace only the checkpoint-boundary instrumentation and offline one-update replay path; do not alter model, optimizer, sampling defaults, split, seeds, or capability evaluation.",
+              'qualified': audit.get('status') == 'accepted' and not missing and all(fixed.values()),
+              'classification': 'exact_one_step_resume_equivalence',
+              'capability_progress_claimed': False,
+              'public_baseline_reproduced': False,
+              'asynchronous_actor_queue_continuation_claimed': False,
+              'official_contract_checks': fixed,
+              'checkpoint_missing_keys': missing,
+              'checkpoint_frames': int(checkpoint.get('frames', -1)),
+              'checkpoint_bytes': (results / 'SILG_RTFM_OFFICIAL_JOB.tar').stat().st_size,
+              'checkpoint_sha256': digest(results / 'SILG_RTFM_OFFICIAL_JOB.tar'),
+              'pre_payload_bytes': (results / 'SILG_RTFM_OFFICIAL_ONE_STEP.pre.pt').stat().st_size,
+              'pre_payload_sha256': digest(results / 'SILG_RTFM_OFFICIAL_ONE_STEP.pre.pt'),
+              'post_payload_bytes': (results / 'SILG_RTFM_OFFICIAL_ONE_STEP.post.pt').stat().st_size,
+              'post_payload_sha256': digest(results / 'SILG_RTFM_OFFICIAL_ONE_STEP.post.pt'),
+              'next_gate': 'official 100M-frame three-seed R0.1 reproduction; this qualification alone is not capability evidence',
           }
-          output.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
-          print(json.dumps(payload, sort_keys=True))
-          if not valid:
+          out = results / 'SILG_OFFICIAL_CHECKPOINT_RESUME_QUALIFICATION.json'
+          out.write_text(json.dumps(payload, indent=2, sort_keys=True) + '\n')
+          print(out.read_text())
+          if not payload['qualified']:
               raise SystemExit(1)
           PY
-      - name: Install pinned public SILG and RTFM sources
-        run: |
-          set -o pipefail
-          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_resume"
-          /usr/bin/time -v bash research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh "$RUNNER_TEMP/r01_official_resume" \
-            2>&1 | tee "$results/SILG_OFFICIAL_CHECKPOINT_INSTALL.log"
-      - name: Verify official checkpoint schema and deterministic resume equivalence
-        run: |
-          set -o pipefail
-          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_resume"
-          /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/qualify_silg_official_checkpoint_resume.py \
-            --silg-root "$RUNNER_TEMP/r01_official_resume/silg" \
-            --output "$results" --seed 1 --timeout-seconds 3600 \
-            2>&1 | tee "$results/SILG_OFFICIAL_CHECKPOINT_QUALIFICATION.log"
+
       - name: Freeze reproducibility bundle
         if: always()
         run: |
@@ -115,6 +174,7 @@ jobs:
           find "$results" -type f -printf '%P\t%s bytes\n' | sort > "$results/SILG_OFFICIAL_CHECKPOINT_FILE_SIZES.txt"
           find "$results" -type f ! -name 'SILG_OFFICIAL_CHECKPOINT_SHA256SUMS.txt' -print0 \
             | sort -z | xargs -0 sha256sum > "$results/SILG_OFFICIAL_CHECKPOINT_SHA256SUMS.txt" || true
+
       - name: Upload immutable checkpoint qualification bundle
         if: always()
         uses: actions/upload-artifact@v4
