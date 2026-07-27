@@ -101,7 +101,10 @@ Implementation:
 - workflow: `.github/workflows/r01_silg_gradient_clip_screening.yml`
 - source-patch commit: `2c877197b275e9c11f018479909adfe8e2a82844`
 - workflow commit: `3f0c62430a27116722c22f69525b54631d93032b`
-- run / job / artifact / performance: **未確認・未認定**
+- push-run locator integration commit: `2cc76a969e5b596ea5026960984b614608c39f23`
+- run / job / artifact / performance: **locator更新時点では未確認・未認定**
+
+The locator now queries `r01_silg_gradient_clip_screening.yml` directly and preserves latest push-run, job and artifact JSON. Do not redispatch the same expensive condition while its status is pending, queued or in progress. First classify execution routing, then inspect the immutable bundle.
 
 Fail-closed evidence requires the pinned source to contain clip `10.0` and not `40.0`, all commands to keep stateful/unroll=80 without an explicit learning-rate override, complete LSTM checkpoints, matched controls, resource provenance, checksums, leakage=false, parity and unchanged qualification.
 
@@ -113,13 +116,13 @@ D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示す
 
 ## Prior-art and RQ boundary
 
-既存のscore-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg等の境界を維持する。
+既存のscore-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg、MagicBench等の境界を維持する。
 
-MagicBench（ACL 2026）は、対称prompt下でも視覚探索が言語triggerへ依存するvisual-agency lossを診断し、spatial promptingとsignal magnificationによる因果介入で内部推論が残ることを示す。したがって、language dominance、perceptual-access bottleneck、prompt介入によるvisual grounding回復だけではRQ-001の新規性を認定しない。公式code/dataset `Ink-Dawn/MagicBench`は公開されているが、exact commit、dependency、immutable numerical reproductionは未完了であり、SILG/J-CRe3の代替baselineにも数えない。
+CodeBind（Findings of ACL 2026）は、shared codebookとmodality-specific codebookを用いて最大9 modalityのshared/specific表現を分解し、fully paired dataなしの段階的alignmentを扱う。したがって、shared/specific multimodal decomposition、compositional codebook、bridging modalityによるincremental alignmentだけではRQ-001の新規性を認定しない。project pageは確認済みだが、author-official repositoryのexact commit、dependency、immutable numerical reproductionは未完了であり、SILG/J-CRe3の代替baselineにも数えない。
 
 正式判断:
 
-> **RQ-001: FURTHER NARROWED BEYOND CAUSAL DIAGNOSIS OF LANGUAGE-TRIGGERED VISUAL AGENCY LOSS — NOT ADOPTED**
+> **RQ-001: FURTHER NARROWED BEYOND SHARED/SPECIFIC COMPOSITIONAL MULTIMODAL ALIGNMENT — NOT ADOPTED**
 
 ## Stage transition
 
@@ -136,4 +139,4 @@ MagicBench（ACL 2026）は、対称prompt下でも視覚探索が言語trigger�
 
 ## Last integration
 
-2026-07-27: **RESET-E069**。learning-rate `0.0001` run `30235108376`をartifactまで精査し、Correct `0/60`、Random `4/60`、qualification rejectedを確認してlearning-rate単独原因を棄却した。次の一要因としてofficial hard-coded gradient clipを`40.0→10.0`に変更するsource patchとworkflowを同じcanonical branchへ追加した。MagicBenchをnovelty境界へ追加したが、外部baseline再現0、能力進歩未認定、高校生級未達を維持する。
+2026-07-27: **RESET-E070**。gradient-clipping screeningは実装済みだったがpush-run locatorの対象外で、run/job/artifactの実状態を確認できない追跡欠陥があった。locatorへgradient-clip-10を追加し、同一条件を重複投入せず実runを捕捉する経路を統合した。CodeBindをnovelty境界へ追加したが、外部baseline再現0、能力進歩未認定、高校生級未達を維持する。
