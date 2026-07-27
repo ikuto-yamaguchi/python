@@ -1,0 +1,135 @@
+{
+  "schema_version": "r01_public_reproduction_failure_v1",
+  "status": "rejected",
+  "classification": "initial_reproduction_failure",
+  "failure_class": "optimization_or_policy_competence_failure",
+  "capability_progress_claimed": false,
+  "new_intelligence_principle_claimed": false,
+  "toy_hypothesis_added": false,
+  "workflow_run": {
+    "run_id": 30235108376,
+    "job_id": 89881341003,
+    "head_sha": "67556f067028edac502380c6d3de15575c996ffc",
+    "artifact_id": 8642403437,
+    "artifact_name": "r01-silg-rtfm-learning-rate-30235108376",
+    "artifact_size_bytes": 91609969,
+    "artifact_sha256": "882e92a17ba5da5836dcf78379a484cc7ed63827ed3bf0b18196c5b18c3d8917",
+    "artifact_expires_at": "2026-08-26T04:57:16Z"
+  },
+  "source_pins": {
+    "silg": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
+    "rtfm": "58f17955595b5a127c96d045d896fcbcc7d4b570"
+  },
+  "environment": {
+    "train": "silg:rtfm_train_s1-v0",
+    "test": "silg:rtfm_test_s1-v0",
+    "model": "official SILG multi recurrent",
+    "pretrained_language_model": false
+  },
+  "single_factor_screening": {
+    "factor": "learning_rate",
+    "previous_value": 0.0005,
+    "screened_value": 0.0001,
+    "fixed_conditions": {
+      "stateful": true,
+      "entropy_cost": 0.05,
+      "num_actors": 2,
+      "batch_size": 2,
+      "unroll_length": 80,
+      "frames_requested_per_seed": 131072,
+      "seeds": [1, 7, 19]
+    },
+    "conclusion": "Lowering learning_rate to 0.0001 did not recover source-policy competence and is rejected as a sufficient single-factor repair."
+  },
+  "model_audit": {
+    "parameters": 6200115,
+    "trainable_parameters": 6200115,
+    "state_dict_bytes": 24828505,
+    "cpu_forward_latency_ms_per_step": 7.51134561
+  },
+  "training": {
+    "total_wall_seconds": 4332.938065842,
+    "runs": [
+      {
+        "seed": 1,
+        "frames_in_checkpoint": 131200,
+        "wall_seconds": 1441.297622614,
+        "peak_rss_kib": 1470976,
+        "model_state_bytes": 24827943,
+        "model_state_sha256": "3dd05a23caa0ab691c0c3a2db4afeaee4f0f784a7cdc2d66bf45a9a79bd87196"
+      },
+      {
+        "seed": 7,
+        "frames_in_checkpoint": 131200,
+        "wall_seconds": 1404.985216278,
+        "peak_rss_kib": 1269884,
+        "model_state_bytes": 24827943,
+        "model_state_sha256": "b64b01510e146456e92487484e5a19a312ce5cc7cd932aac13913e2bbc8b4555"
+      },
+      {
+        "seed": 19,
+        "frames_in_checkpoint": 131200,
+        "wall_seconds": 1483.191107725,
+        "peak_rss_kib": 2414924,
+        "model_state_bytes": 24828026,
+        "model_state_sha256": "54237d5f73501427efd6903f85a8b85b60c27a8a1617b88d1c91ec728aef0a74"
+      }
+    ]
+  },
+  "matched_controls": {
+    "same_initial_instance_stream": true,
+    "episodes_per_method_seed": 20,
+    "aggregate_episodes_per_method": 60,
+    "results": {
+      "correct": {
+        "win_rate": 0.0,
+        "return_mean": -2.1523325781027474,
+        "episode_length_mean": 58.61666666666667,
+        "cpu_inference_ms_per_step": 8.310474716827601
+      },
+      "random": {
+        "win_rate": 0.06666666666666667,
+        "return_mean": -1.151333263516426,
+        "episode_length_mean": 15.233333333333334
+      },
+      "language_blind": {
+        "win_rate": 0.0,
+        "return_mean": -2.045999312400818
+      },
+      "state_only": {
+        "win_rate": 0.016666666666666666,
+        "return_mean": -1.8089994470278423
+      },
+      "language_shuffle": {
+        "win_rate": 0.0,
+        "return_mean": -2.1516659120718638
+      }
+    },
+    "correct_minus_random": {
+      "win_rate": -0.06666666666666667,
+      "return_mean": -1.0009993145863214
+    }
+  },
+  "policy_diagnostics": {
+    "chosen_action_valid_fraction": 1.0,
+    "recurrent_state_nonzero": true,
+    "observed_failure_pattern": "The trained policies remained high-entropy, used a narrow action subset, and produced no successful correct-policy episodes across 60 matched episodes."
+  },
+  "qualification": {
+    "qualified_for_r02": false,
+    "failures": [
+      "zero_source_policy_success",
+      "correct_not_above_random_win_rate",
+      "correct_not_above_random_return"
+    ]
+  },
+  "next_minimal_action": {
+    "status": "diagnosis_required_before_next_rerun",
+    "allowed_scope": "Change one diagnosed official-training mismatch only; keep source pins, model family, stateful mode, unroll_length=80, frame budget, seeds, split and matched instances fixed.",
+    "priority_checks": [
+      "compare optimizer and gradient-clipping behavior with the pinned official implementation",
+      "compare remaining official throughput defaults, especially batch_size and num_actors, without changing them together",
+      "verify checkpoint restore and learner update counters from raw logs"
+    ]
+  }
+}
