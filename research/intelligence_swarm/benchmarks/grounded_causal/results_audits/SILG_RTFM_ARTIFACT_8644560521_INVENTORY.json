@@ -1,0 +1,21 @@
+{
+  "artifact_id": 8644560521,
+  "artifact_digest": "sha256:987bc842229a8a9d03dcced3387c4c8a17a2049fdc2aadfad6c7560027e11e19",
+  "audit_date": "2026-07-27",
+  "classification": "checkpoint_evidence_preservation_failure",
+  "artifact_only": true,
+  "expected_seeds": [1, 7, 19],
+  "required_checkpoint_pattern": "SILG_RTFM_OFFICIAL_CHECKPOINT_SEED_<seed>.job.tar",
+  "checkpoint_files_found": [],
+  "trained_model_state_files_found": [
+    "SILG_RTFM_TRAINED_STATE_SEED_1.pt",
+    "SILG_RTFM_TRAINED_STATE_SEED_7.pt",
+    "SILG_RTFM_TRAINED_STATE_SEED_19.pt"
+  ],
+  "optimizer_checkpoint_integrity_auditable": false,
+  "optimizer_restore_failure_claimed": false,
+  "reason": "The immutable gradient-clipping artifact contains standalone trained model-state exports but no preserved official job.tar for any seed. Optimizer state, parameter groups, frame-counter provenance, and save/load equivalence therefore cannot be inferred from this artifact.",
+  "decision": "Do not reject or accept optimizer/checkpoint restore integrity from artifact 8644560521. Classify the current blocker as evidence preservation failure. Require checkpoint preservation and fail-closed inventory verification in the next already-justified training run; do not launch a duplicate run solely to repair an old artifact.",
+  "capability_progress_claimed": false,
+  "new_intelligence_principle_claimed": false
+}
