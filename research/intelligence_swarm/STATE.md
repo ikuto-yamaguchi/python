@@ -25,7 +25,7 @@
 
 ## R0 status ledger
 
-- immutable R0.1 artifacts: **7件**
+- immutable R0.1 artifacts: **8件**
 - 学習済み公開能力baseline再現: **0件**
 - J-CRe3 numerical reproduction: **0件**
 - R0.2正式再現: **0件**
@@ -41,88 +41,79 @@
 - official stateful core不足単独原因: **棄却**
 - `unroll_length=20`不足単独原因: **棄却**
 - `learning_rate=0.0001`単独原因: **棄却**
+- gradient clip norm `40.0`不足単独原因: **棄却**
 
-## Completed learning-rate screening
+## Completed gradient-clipping screening
 
 Primary evidence:
 
-- run `30235108376`
-- job `89881341003`
-- artifact `8642403437`
-- digest `sha256:882e92a17ba5da5836dcf78379a484cc7ed63827ed3bf0b18196c5b18c3d8917`
-- execution commit `67556f067028edac502380c6d3de15575c996ffc`
-- `--stateful`、`--unroll_length 80`、`--learning_rate 0.0001`、LSTM `core.*`: **passed**
-- same-instance controls、official/fresh parity、artifact upload: **passed**
+- run `30240410850`
+- job `89896249118`
+- artifact `8644560521`
+- digest `sha256:987bc842229a8a9d03dcced3387c4c8a17a2049fdc2aadfad6c7560027e11e19`
+- execution commit `3f0c62430a27116722c22f69525b54631d93032b`
+- single source change: `clip_grad_norm_(..., 40.0) → 10.0`
+- source routing、`--stateful`、`--unroll_length 80`、LSTM checkpoint、same-instance、official/fresh parity、artifact upload: **passed**
 - answer leakage: **false**
 - qualification: **rejected**
 
 Matched aggregate:
 
-- Correct `0/60`
+- Correct `3/60`
 - Random `4/60`
 - Language-blind `0/60`
-- State-only `1/60`
-- Language-shuffle `0/60`
-- Correct mean return `-2.1523326`
+- State-only `0/60`
+- Language-shuffle `3/60`
+- Correct mean return `-1.7679994`
 - Random mean return `-1.1513333`
-- Correct−Random return `-1.0009993`
+- Correct−Random return `-0.6166662`
 
 Resources:
 
 - parameters `6,200,115`
 - trained model-state `24,827,943 / 24,827,943 / 24,828,026 bytes`
 - actual frames `131,200` per seed
-- peak RSS `1,470,976 / 1,269,884 / 2,414,924 KiB`
-- wall `1441.30 / 1404.99 / 1483.19 s`
-- CPU forward `7.511 ms/step` model audit; matched inference approximately `8.5–8.7 ms/step`
-- chosen-action valid fraction `1.0` for all seeds
+- peak RSS `1,299,228 / 1,180,104 / 1,856,556 KiB`
+- wall `1528.08 / 1559.30 / 1591.64 s`
+- CPU forward `8.565 ms/step` model audit; matched Correct approximately `8.814 ms/step`
+- chosen-action valid fraction: **1.0 for all seeds**
 
 Decision:
 
-> **learning-rate不足を単独主因として棄却する。`0.0001`は全seedへ正しく到達したが、Correct successは0でRandomを下回り、language-blind/shuffleとの差も成立しなかった。**
+> **gradient-clipping閾値40.0を単独主因として棄却する。clip 10.0は全seedへ正しく到達しCorrect successは3/60まで増えたが、Random 4/60とreturnを超えず、language-shuffleも3/60で言語依存差が成立しなかった。**
 
-## Active single-factor screening: gradient clipping
+## Active single-cause audit: optimizer/checkpoint restore integrity
 
-Official pinned SILG `run_exp.py`は`clip_grad_norm_(model.parameters(), 40.0)`をhard-codeしている。次はその閾値だけを`40.0 → 10.0`へ変更する。
-
-Fixed:
-
-- `stateful=true`
-- `unroll_length=80`
-- learning rate: **official default**
-- entropy `0.05`
-- actors `2`、threads `1`、batch `2`
-- frames `131072`、seeds `1/7/19`
-- model family、split、matched instances、全controls
+次は新しい高コストtrainingを直ちに発行せず、保存済みartifact `8644560521`へartifact-only監査を適用する。
 
 Implementation:
 
-- source patch: `patch_silg_gradient_clip_screening.py`
-- workflow: `.github/workflows/r01_silg_gradient_clip_screening.yml`
-- source-patch commit: `2c877197b275e9c11f018479909adfe8e2a82844`
-- workflow commit: `3f0c62430a27116722c22f69525b54631d93032b`
-- push-run locator integration commit: `2cc76a969e5b596ea5026960984b614608c39f23`
-- run / job / artifact / performance: **locator更新時点では未確認・未認定**
+- auditor: `audit_silg_optimizer_checkpoint_integrity.py`
+- commit: `9afd2bae16aa317c63979ebc9406b86d9b4d8e70`
 
-The locator now queries `r01_silg_gradient_clip_screening.yml` directly and preserves latest push-run, job and artifact JSON. Do not redispatch the same expensive condition while its status is pending, queued or in progress. First classify execution routing, then inspect the immutable bundle.
+Fail-closed checks per seed `1/7/19`:
 
-Fail-closed evidence requires the pinned source to contain clip `10.0` and not `40.0`, all commands to keep stateful/unroll=80 without an explicit learning-rate override, complete LSTM checkpoints, matched controls, resource provenance, checksums, leakage=false, parity and unchanged qualification.
+- official `job.tar`にmodel stateが存在する
+- optimizer stateとparam groupsが空でない
+- finite frame counterが`131072`以上
+- standalone trained model-stateとcheckpoint model stateがtensor単位で完全一致
+- checkpoint/model bytesとSHA-256を保存
 
-If valid gradient clip `10.0` remains at/below Random, reject clipping threshold as the sole cause and continue to optimizer/checkpoint restore integrity as the next single cause. Do not close on the negative result alone.
+監査が失敗した場合は、欠落したrestore成分だけを修正して同一checkpointからresume-equivalenceを検証する。監査が通過した場合はoptimizer/checkpoint restoreを主因から棄却し、learner logに基づく次の単一原因へ進む。監査結果だけを能力進歩に数えない。
 
 ## Evaluation contract
 
-D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示すまで新規auditorを追加しない。毎runでrandom/language-blind/state-only/shuffle、model/checkpoint bytes、RSS、runtime、CPU latency、seed、split、actual frames、raw logs、checksums、leakageを保存する。
+D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示すまで新規auditorを追加しない。今回のoptimizer auditorは性能受入監査の追加ではなく、既に事前指定された失敗原因を切り分けるartifact-only診断である。毎runでrandom/language-blind/state-only/shuffle、model/checkpoint bytes、RSS、runtime、CPU latency、seed、split、actual frames、raw logs、checksums、leakageを保存する。
 
 ## Prior-art and RQ boundary
 
-既存のscore-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg、MagicBench等の境界を維持する。
+既存のscore-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg、MagicBench、CodeBind等の境界を維持する。
 
-CodeBind（Findings of ACL 2026）は、shared codebookとmodality-specific codebookを用いて最大9 modalityのshared/specific表現を分解し、fully paired dataなしの段階的alignmentを扱う。したがって、shared/specific multimodal decomposition、compositional codebook、bridging modalityによるincremental alignmentだけではRQ-001の新規性を認定しない。project pageは確認済みだが、author-official repositoryのexact commit、dependency、immutable numerical reproductionは未完了であり、SILG/J-CRe3の代替baselineにも数えない。
+NoisyCausal（ACL 2026）は、structured noise下の因果推論benchmarkと、文脈から変数・因果グラフを抽出してsymbolic structureへ接続するpromptingを扱う。したがって、言語から因果グラフを抽出しstructured promptで推論を頑健化することだけではRQ-001の新規性を認定しない。これはhidden intervention-target groundingやinteractive policy competenceの再現とは別能力であり、論文値を本研究の能力証拠へ流用しない。
 
 正式判断:
 
-> **RQ-001: FURTHER NARROWED BEYOND SHARED/SPECIFIC COMPOSITIONAL MULTIMODAL ALIGNMENT — NOT ADOPTED**
+> **RQ-001: FURTHER NARROWED BEYOND LANGUAGE-TO-CAUSAL-GRAPH STRUCTURING UNDER NOISE — NOT ADOPTED**
 
 ## Stage transition
 
@@ -139,4 +130,4 @@ CodeBind（Findings of ACL 2026）は、shared codebookとmodality-specific code
 
 ## Last integration
 
-2026-07-27: **RESET-E070**。gradient-clipping screeningは実装済みだったがpush-run locatorの対象外で、run/job/artifactの実状態を確認できない追跡欠陥があった。locatorへgradient-clip-10を追加し、同一条件を重複投入せず実runを捕捉する経路を統合した。CodeBindをnovelty境界へ追加したが、外部baseline再現0、能力進歩未認定、高校生級未達を維持する。
+2026-07-27: **RESET-E071**。gradient-clip-10 run `30240410850`のimmutable artifactを精査し、Correct `3/60`、Random `4/60`、language-shuffle `3/60`、qualification rejectedを統合した。gradient clipping閾値を単独主因として棄却し、保存済みcheckpointへoptimizer/checkpoint restore integrityのartifact-only auditorを追加した。NoisyCausalをnovelty境界へ追加したが、外部baseline再現0、能力進歩未認定、高校生級未達を維持する。
