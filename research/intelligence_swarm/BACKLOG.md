@@ -148,12 +148,20 @@ Fixed contract:
 - policy/value/entropy/aux/total lossとgradient normがexact equal。
 - raw logs、dependency lock、host provenance、artifact checksumを保存する。
 
+### Current execution blocker
+
+- PR head `4376e9ab931fb663214404b2b4ef0c4ec84432a1`に紐づく確認可能な11 workflow runsは全件`completed/action_required`。
+- job IDは生成されておらず、resume-equivalence run ID、artifact ID、qualificationは0件。
+- 分類は**`workflow_execution_approval_blocker`**。model、optimizer、resume instrumentationの失敗とは扱わない。
+- Actions承認またはrepository policy解除前に、同条件のworkflowを再dispatchしない。
+- 承認後は同じcanonical workflowを変更なしで実行し、最初の実jobとartifactだけをprimary evidenceにする。
+- blocker解消のためにmodel、sampling defaults、split、評価contractを変更しない。
+
 ### Rejection and continuation
 
-- 最初の不一致componentだけを次の単一修正対象にする。
+- 実jobが開始した後は、最初の不一致componentだけを次の単一修正対象にする。
 - mismatchを理由にmodel、optimizer、sampling defaults、splitを変更しない。
 - workflow execution failureとresume-equivalence failureを混同しない。
-- workflowは発行済みだが、run ID、artifact、合否は未確認。結果取得前に同条件を重複dispatchしない。
 - resume equivalence通過後にresource feasibilityを正式判定する。
 - 一つの100M entropy/seed runは現runner外挿で約18.13日。entropy 2条件だけでも約36.3 runner-days、three-seed化は約108.8 runner-days。無料runner制約、checkpoint cadence、artifact retention、停止・再開条件を事前固定する。
 - infrastructure qualificationを能力進歩へ数えない。
@@ -176,11 +184,15 @@ Ueda et al., LREC-COLING 2024、公式repository `riken-grp/J-CRe3`。exact comm
 
 公式dataset repository `sooo66/semeval2026-task12-dataset`。evidence-rich multiple-choice direct-cause inferenceを測るlanguage-only benchmarkとしてnovelty matrixの別列へ追加する。exact commit、dataset checksum、official split/evaluatorを固定するまで数値を能力証拠へ流用しない。SILG interactive competence、J-CRe3 multimodal reference resolution、hidden intervention-target groundingの代替にはしない。
 
+### COGS (AAAI 2026)
+
+一次論文は確認済み。構造事前分布、latent causal graph、causal/non-causal variable disentanglement、prototype-based unsupervised domain discovery、time-series OOD generalizationをnovelty matrixの別列へ追加する。author-official repository、exact commit、dependency、dataset、公式commandを固定できていないため再現対象への昇格は保留し、数値再現は0件とする。
+
 ### Latest prior-art boundary
 
-AERは複数文書の支持証拠からtarget eventの最も妥当な直接原因を選び、distributed evidence、間接背景要因、意味的に近い非因果distractorを扱う。したがって、language-only evidence integration、direct-cause selection、abductive causal reasoningだけではRQ-001の新規性を認定しない。
+COGSにより、時系列でのlatent causal/non-causal disentanglement、domain labelなしのenvironment discovery、因果表現を用いたOOD generalizationは既存化している。これらだけではRQ-001の新規性を認定しない。
 
-score-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg、MagicBench、CodeBind、NoisyCausal、CaST-Bench、CausalVerse、MTG-Causal-RL、Mind Dreamer等もnovelty matrixの別列で維持する。
+score-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg、MagicBench、CodeBind、NoisyCausal、CaST-Bench、CausalVerse、MTG-Causal-RL、Mind Dreamer、AER等もnovelty matrixの別列で維持する。
 
 ## P1 — R0.2 Environment-first
 
@@ -199,7 +211,7 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 正式境界:
 
-> **FURTHER NARROWED BEYOND EVIDENCE-GROUNDED ABDUCTIVE EVENT-CAUSE INFERENCE — NOT ADOPTED**
+> **FURTHER NARROWED BEYOND UNSUPERVISED-DOMAIN CAUSAL REPRESENTATION LEARNING FOR TIME-SERIES OOD GENERALIZATION — NOT ADOPTED**
 
 ## Stage transition
 
@@ -209,13 +221,14 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 - immutable R0.1 short-horizon screening artifacts: **8件**
 - official-contract infrastructure artifacts: **1件・resume evidence不足で不合格**
-- one-step resume-equivalence artifact: **0件・workflow発行済み**
+- one-step resume-equivalence artifact: **0件**
+- active work: **Actions approval/policy blockerの解消待ち**
 - official SILG 100M-frame reproduction: **0件**
 - competent external baseline: **0件**
 - J-CRe3 numerical reproduction: **0件**
 - CausalVerse numerical reproduction: **0件**
 - AER numerical reproduction: **0件**
-- active work: **one-step resume-equivalence execution**
+- COGS numerical reproduction: **0件**
 - new mechanism family: **未認定**
 - new intelligence principle: **未発見**
 - capability progress: **未認定**
