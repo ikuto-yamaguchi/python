@@ -83,6 +83,8 @@ def main() -> None:
     parser.add_argument("--pre", type=Path, required=True)
     parser.add_argument("--post", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--expected-pre-frames", type=int, required=True)
+    parser.add_argument("--expected-post-frames", type=int, required=True)
     args = parser.parse_args()
 
     pre = torch.load(args.pre, map_location="cpu")
@@ -90,17 +92,32 @@ def main() -> None:
     required_pre = {
         "batch", "initial_agent_state", "model_state_dict",
         "optimizer_state_dict", "scheduler_state_dict", "python_random_state",
-        "numpy_random_state", "torch_rng_state", "flags",
+        "numpy_random_state", "torch_rng_state", "flags", "frames_per_update",
+        "derived_frames", "scheduler_last_epoch",
     }
     required_post = {
         "model_state_dict", "actor_model_state_dict", "optimizer_state_dict",
-        "scheduler_state_dict", "python_random_state", "numpy_random_state",
-        "torch_rng_state", "stats",
+        "scheduler_state_dict", "gradient_state_dict", "python_random_state",
+        "numpy_random_state", "torch_rng_state", "stats", "frames_per_update",
+        "derived_frames", "scheduler_last_epoch",
     }
     if missing := sorted(required_pre - set(pre)):
         raise SystemExit(f"pre bundle missing: {missing}")
     if missing := sorted(required_post - set(expected_post)):
         raise SystemExit(f"post bundle missing: {missing}")
+
+    if int(pre["derived_frames"]) != args.expected_pre_frames:
+        raise SystemExit(
+            f"captured wrong pre-update boundary: {pre['derived_frames']} != {args.expected_pre_frames}"
+        )
+    if int(expected_post["derived_frames"]) != args.expected_post_frames:
+        raise SystemExit(
+            f"captured wrong post-update boundary: {expected_post['derived_frames']} != {args.expected_post_frames}"
+        )
+    if int(expected_post["derived_frames"]) - int(pre["derived_frames"]) != int(pre["frames_per_update"]):
+        raise SystemExit("captured frame delta is not exactly one learner update")
+    if int(pre["frames_per_update"]) != int(expected_post["frames_per_update"]):
+        raise SystemExit("frames_per_update changed across captured learner update")
 
     sys.path.insert(0, str(args.silg_root))
     run_exp = importlib.import_module("run_exp")
@@ -134,6 +151,7 @@ def main() -> None:
     np.random.set_state(pre["numpy_random_state"])
     torch.set_rng_state(pre["torch_rng_state"])
     os.environ.pop("SILG_ONE_STEP_REPLAY_PREFIX", None)
+    os.environ.pop("SILG_ONE_STEP_CAPTURE_PRE_FRAMES", None)
 
     batch = {key: value.detach().cpu().clone() for key, value in pre["batch"].items()}
     initial_agent_state = tuple(value.detach().cpu().clone() for value in pre["initial_agent_state"])
@@ -147,15 +165,25 @@ def main() -> None:
         flags,
     )
 
+    observed_gradients = {
+        name: (None if parameter.grad is None else parameter.grad.detach().cpu().clone())
+        for name, parameter in learner_model.named_parameters()
+    }
+    observed_scheduler_last_epoch = int(scheduler.state_dict().get("last_epoch", 0))
+    observed_frames = observed_scheduler_last_epoch * int(pre["frames_per_update"])
     observed = {
         "model_state_dict": learner_model.state_dict(),
         "actor_model_state_dict": actor_model.state_dict(),
         "optimizer_state_dict": optimizer.state_dict(),
         "scheduler_state_dict": scheduler.state_dict(),
+        "gradient_state_dict": observed_gradients,
         "python_random_state": random.getstate(),
         "numpy_random_state": np.random.get_state(),
         "torch_rng_state": torch.get_rng_state(),
         "stats": observed_stats,
+        "frames_per_update": int(pre["frames_per_update"]),
+        "derived_frames": observed_frames,
+        "scheduler_last_epoch": observed_scheduler_last_epoch,
     }
     assert_exact(observed, {key: expected_post[key] for key in observed})
 
@@ -168,10 +196,16 @@ def main() -> None:
         "exact_initial_agent_state_sha256": tensor_stream_hash(pre["initial_agent_state"]),
         "pre_model_sha256": tensor_stream_hash(pre["model_state_dict"]),
         "post_model_sha256": tensor_stream_hash(expected_post["model_state_dict"]),
+        "post_gradient_sha256": tensor_stream_hash(expected_post["gradient_state_dict"]),
+        "pre_frames": int(pre["derived_frames"]),
+        "post_frames": int(expected_post["derived_frames"]),
+        "frames_per_update": int(pre["frames_per_update"]),
         "model_exact": True,
         "actor_model_exact": True,
         "optimizer_exact": True,
         "scheduler_exact": True,
+        "gradient_exact": True,
+        "frame_exact": True,
         "rng_exact": True,
         "stats_exact": True,
         "scope": "one captured real learner update; asynchronous actor queue continuation is not claimed",
