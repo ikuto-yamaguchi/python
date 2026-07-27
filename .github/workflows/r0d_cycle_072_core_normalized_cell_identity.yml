@@ -12,62 +12,28 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  apply-and-test:
+  test-normalized-cell-identity:
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
-          fetch-depth: 0
+          fetch-depth: 1
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Apply fail-closed core patch
-        run: python research/intelligence_swarm/benchmarks/grounded_causal/apply_r0d_cycle_073_core_normalized_cell_identity.py
-      - name: Compile core and patch
+      - name: Verify core patch is already integrated
+        run: |
+          python research/intelligence_swarm/benchmarks/grounded_causal/apply_r0d_cycle_073_core_normalized_cell_identity.py
+          git diff --exit-code -- research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
+      - name: Compile core, patch and regression
         run: |
           python -m py_compile research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
           python -m py_compile research/intelligence_swarm/benchmarks/grounded_causal/apply_r0d_cycle_073_core_normalized_cell_identity.py
           python -m py_compile research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_normalized_cell_identity_core.py
-      - name: Run focused regressions
+      - name: Run focused fail-closed regressions
         run: python research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_normalized_cell_identity_core.py
-      - name: Preserve normalized-cell report
-        run: |
-          cat > research/intelligence_swarm/governance/REPORT_R0D_CYCLE_073.md <<'EOF'
-          # R0-D Cycle 073 — normalized domain/condition cell identity
-
-          `evaluation_contract.py` canonicalizes `domain` and `condition` before
-          dataset topology, control-donor cells, statistics cells, instance
-          fingerprints, artifact cells, and raw-log measurement cells are built.
-
-          Fail-closed requirements:
-
-          - domain: Unicode NFKC, case-fold, remove whitespace/control/format chars;
-          - condition: the same scalar normalization plus sorted unique token set;
-          - raw labels that collapse to one canonical label are rejected;
-          - empty canonical labels are rejected;
-          - audit artifacts preserve raw-to-canonical label maps.
-
-          Representation-only splitting cannot alter domain×seed×condition coverage,
-          shuffle provenance, minimum-cell gaps, confidence intervals, paired tests,
-          resource evidence, or raw-log binding. Violations are classified as
-          `initial_reproduction_failure`.
-
-          No memory, replay, fast weights, sleep, or forgetting mechanism was added.
-          EOF
-      - name: Commit to the same canonical branch
-        run: |
-          if git diff --quiet; then
-            echo "No generated core/report changes"
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py \
-                  research/intelligence_swarm/governance/REPORT_R0D_CYCLE_073.md
-          git commit -m "research(r0d): integrate normalized cell identity"
-          git push origin HEAD:${{ github.event.pull_request.head.ref || github.ref_name }}
