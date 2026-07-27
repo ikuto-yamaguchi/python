@@ -59,7 +59,10 @@ class ScoreDatasetContractBindingTests(unittest.TestCase):
         ):
             report = audit.audit_score_dataset_contract_binding([], [])
         self.assertFalse(report["valid"])
-        self.assertIn("dataset_contract_binding=true", report["errors"])
+        self.assertIn(
+            "score artifact does not declare dataset_contract_binding=true",
+            report["errors"],
+        )
 
     def test_binding_validity_mismatch_fails(self) -> None:
         dataset_report = {"valid": False, "errors": ["seed topology invalid"]}
