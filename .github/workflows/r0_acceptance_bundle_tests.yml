@@ -7,9 +7,11 @@ on:
     paths:
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_r0_acceptance_bundle.py
       - research/intelligence_swarm/benchmarks/grounded_causal/test_audit_r0_acceptance_bundle.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/test_acceptance_raw_log_measurement_binding.py
       - research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_artifact_path_containment.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_nonzero_measurements.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_raw_log_measurement_binding.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_cell_binding.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_eval_split_scope.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_metric_coverage.py
@@ -25,9 +27,11 @@ on:
     paths:
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_r0_acceptance_bundle.py
       - research/intelligence_swarm/benchmarks/grounded_causal/test_audit_r0_acceptance_bundle.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/test_acceptance_raw_log_measurement_binding.py
       - research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_artifact_path_containment.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_nonzero_measurements.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_raw_log_measurement_binding.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_cell_binding.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_eval_split_scope.py
       - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_metric_coverage.py
@@ -56,6 +60,7 @@ jobs:
             research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py \
             research/intelligence_swarm/benchmarks/grounded_causal/audit_artifact_path_containment.py \
             research/intelligence_swarm/benchmarks/grounded_causal/audit_nonzero_measurements.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_raw_log_measurement_binding.py \
             research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_cell_binding.py \
             research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_eval_split_scope.py \
             research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_metric_coverage.py \
@@ -69,5 +74,6 @@ jobs:
         working-directory: research/intelligence_swarm/benchmarks/grounded_causal
         run: |
           python -m unittest -v test_audit_r0_acceptance_bundle.py
+          python -m unittest -v test_acceptance_raw_log_measurement_binding.py
           python -m unittest -v test_audit_public_baseline_statistics_binding.py
           python test_audit_statistics_recomputation_binding.py
