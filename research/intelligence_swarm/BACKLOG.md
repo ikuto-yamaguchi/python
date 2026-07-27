@@ -28,82 +28,81 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 
 ### Closed causes
 
-Valid entropy source run `30215555334` and artifact-only requalification run `30219453396` established:
+1. `entropy_cost=0.005`単独原因: **rejected**
+2. evaluation protocol mismatch主因: **rejected**
+3. official stateful core不足単独原因: **rejected**
 
-- `entropy_cost=0.005` reached every seed command
-- Correct `0/60`
-- Random `4/60`
-- Language-blind `2/60`
-- State-only `0/60`
-- Language-shuffle `0/60`
-- corrected official continuous-stream parity audit passed
-- qualification rejected with `zero_source_policy_success`, `correct_not_above_random_win_rate`, `correct_not_above_random_return`
+Stateful primary evidence:
 
-Decision:
+- run `30221587227`, job `89844840438`
+- artifact `8638198496`
+- digest `sha256:ae28542e4bda4ca968de9d7ffc42b5ab4b4dadb518a26636a41d63b92131aa31`
+- all seed commands contained `--stateful`
+- all checkpoints contained `core.*` LSTM weights
+- recurrent state active on all seeds
+- Correct `2/60`, Random `4/60`
+- Language-blind `2/60`, State-only `1/60`, Language-shuffle `2/60`
+- Correct return `-1.8273327`, Random return `-1.1513333`
+- parameters `6,200,115`
+- CPU forward `8.162 ms/step`
+- actual frames `131,080` per seed
+- peak RSS `1,069,864 / 1,334,592 / 1,274,272 KiB`
+- wall `1691.39 / 1569.14 / 1686.73 s`
+- same-instance and parity passed
+- answer leakage false
+- qualification rejected: `correct_not_above_random_win_rate`, `correct_not_above_random_return`
 
-- entropy reduction as sufficient single cause: **rejected**
-- evaluation protocol mismatch as main cause: **rejected**
+Conclusion: stateful activation is real but insufficient. It does not establish language use because Correct and language-blind/shuffle have the same aggregate win rate.
 
-### Active single-factor screening: official stateful flag
+### Active single-factor screening: official unroll length
 
-公式`vzhong/silg`の`model.multi.Model`は`flags.stateful=true`の場合だけ`nn.LSTM` coreを生成する。parser defaultはfalseである。従来training commandは`--stateful`を含まず、全seedのdiagnostic recurrent-state normは常に0だった。
+Change exactly one factor:
 
-変更要因は一つだけ:
+- `unroll_length: 20 → 80`
 
-- `stateful: false → true`
+Keep fixed:
 
-固定するもの:
-
+- `stateful=true`
 - entropy cost `0.05`
 - actors `2`
 - threads `1`
 - batch size `2`
-- unroll length `20`
 - model family `multi`
-- frame budget、seeds、split、instances、controls
+- frames、seeds、split、instances、controls
 
-実行経路:
+Execution:
 
-- patch contract: `patch_silg_stateful_screening.py`
-- workflow: `.github/workflows/r01_silg_stateful_screening.yml`
+- patch: `patch_silg_unroll80_screening.py`
+- workflow: `.github/workflows/r01_silg_unroll80_screening.yml`
+- request: `R01_RUN_REQUEST.json`
 
-最新実行状態:
+Fail-closed requirements:
 
-- run `30221587227` / job `89844840438`: 3-seed training中
-- run `30221650935`: pending
+1. Every seed command includes `--stateful`.
+2. Every seed command has `--unroll_length 80`.
+3. Every checkpoint contains LSTM `core.*` weights.
+4. Every seed has non-zero recurrent-state diagnostics.
+5. Correct / Random / Language-blind / State-only / Language-shuffle use identical instances.
+6. Preserve model/checkpoint bytes、RSS、training wall、CPU latency.
+7. Preserve seed、split、actual frames、logs、dependency lock、SHA-256.
+8. Preserve leakage=false and prediction provenance.
+9. Run official continuous-stream / fresh-instance parity.
+10. Apply the unchanged qualification gate.
 
-重複処理契約:
+Decision rule:
 
-1. 最初に完了し、factor routing・checkpoint LSTM core・non-zero recurrent state・artifact integrityを満たしたbundleをprimary evidenceとする。
-2. 後続runはprimary runがexecution failure、artifact loss、factor-routing failureになった場合だけfallbackとする。
-3. 同じ条件の二runを独立な能力改善証拠や追加seedとして重複計上しない。
-4. 既存二runの状態が確定するまで同一screening requestを追加発行しない。
+- If Correct success>0 and Correct beats Random in both win rate and return, promote unroll=80 to a candidate and verify the three-seed minimum and resource cost.
+- If factor routing is invalid, repair routing only; do not interpret performance.
+- If routing is valid but Correct remains at/below Random, reject unroll shortage as the sole cause and continue to one evidence-selected learner-optimization factor.
+- Do not close with a negative result alone.
 
-必須fail-closed証拠:
+Next-cause selection after a valid unroll rejection:
 
-1. 全seed commandに`--stateful`
-2. 全checkpointに`core.*` LSTM weight
-3. 全seedのdiagnostic `recurrent_state_l2_after_mean > 0`
-4. Correct / Random / Language-blind / State-only / Language-shuffle
-5. same-instance topology
-6. model/checkpoint bytes、RSS、training wall、CPU latency
-7. seed、split、actual frames、raw logs、dependency lock、SHA-256
-8. leakage false
-9. official continuous-stream / fresh-instance parity
-10. unchanged qualification gate
-
-判定:
-
-- CorrectがRandomを上回りCorrect success>0ならstateful factorを採用候補とし、three-seed最低値と資源制約を確認する。
-- recurrent stateが有効でもcompetenceがない場合、stateful不足単独原因を棄却し、次は`unroll_length: 20 → 80`を単一要因として検証する。
-- factor routingやcheckpoint core証明が失敗した場合は性能結果として扱わず、配線だけを修復して保存済み有効artifactを最大限再利用する。
-- 「駄目だった」で終了しない。
+Choose exactly one of learning rate、gradient clipping、optimizer/checkpoint restore based on preserved learner logs and code/default comparison. Do not sweep all three simultaneously.
 
 ## P0 — Evaluation contract freeze
 
 D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示すまで監査項目を増やさない。毎runでcontrols、resource、seed/split、checksums、leakageを保存する。
-
-現在のPR headでは、prediction method topologyとartifact path containmentは成功した一方、unified acceptance gateとR0D core metric coverageは失敗している。これらの失敗はstateful model performanceと混同せず、該当jobの最小root causeだけを切り分ける。実bundleに関係しない新規auditor追加は禁止する。
 
 ## P1 — External official reproductions
 
@@ -113,11 +112,9 @@ Ueda et al., LREC-COLING 2024、公式repository `riken-grp/J-CRe3`。exact comm
 
 ### Latest prior-art boundary
 
-CVPR 2026 PCMCIは、optimal-transport-based cross-modal intervention、action-relation-aware back-door blocking、deconfounded text embeddingをmediatorとするfront-door adjustmentで長期行動認識のconfounderを抑える。これら単独はRQ-001新規性から除外する。CVF一次論文は確認済み、author-official code・exact commit・公式数値再現は未解決。
+AAAI 2026のCTLDは、hidden confounding下のlearning-to-deferについて、potential-outcome boundsからaction/deferral確率のcausal targetを構成する。hidden confounding下のcausal decision-target constructionとdefer policy学習はRQ-001の新規性から除外する。ただしlatent intervention-target recovery、interactive grounding、SILG/J-CRe3の代替baselineではない。一次論文は確認済み、author-official code・exact commitは未解決。
 
-CVPR 2026 CausalLensは、training-free・single-passでLVLM decoder hidden stateへ介入し、sensitivityで選択したvisual-reliable attention headを補正する。sensitivity-guided hidden-state interventionや低遅延visual-grounding correctionだけではRQ-001を採用しない。SILG/J-CRe3代替baselineではない。
-
-score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、ReCITE、C3、MCDRL、CmIR、CAIR等もnovelty matrixの別列で維持し、論文値を本研究の能力証拠へ流用しない。
+PCMCI、CausalLens、score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、ReCITE、C3、MCDRL、CmIR、CAIR等もnovelty matrixの別列で維持し、論文値を本研究の能力証拠へ流用しない。
 
 ## P1 — R0.2 Environment-first
 
@@ -136,7 +133,7 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 正式境界:
 
-> **FURTHER NARROWED BEYOND PROGRESSIVE CROSS-MODAL DECONFOUNDING AND SENSITIVITY-GUIDED HIDDEN-STATE INTERVENTION — NOT ADOPTED**
+> **FURTHER NARROWED BEYOND CAUSAL TARGET CONSTRUCTION FOR LEARNING-TO-DEFER UNDER HIDDEN CONFOUNDING — NOT ADOPTED**
 
 ## Stage transition
 
@@ -144,10 +141,10 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 ## Status
 
-- immutable R0.1 artifacts: **4件**
+- immutable R0.1 artifacts: **5件**
 - competent external baseline: **0件**
 - J-CRe3 numerical reproduction: **0件**
-- active stateful screening: **1 run training中、1 run pending**
+- active screening: **unroll length 20→80 request issued**
 - 新規機構族: **未認定**
 - 新規知能原理: **未発見**
 - 能力進歩: **未認定**
