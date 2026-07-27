@@ -68,9 +68,10 @@ jobs:
           cp "$silg/run_exp.py" "$results/SILG_PINNED_RUN_EXP_AFTER_INSTRUMENTATION.py"
           python -m py_compile "$silg/run_exp.py"
 
-      - name: Run official profile and capture exact consumed learner batch
+      - name: Run official profile and capture registered third learner update
         env:
           OMP_NUM_THREADS: '1'
+          SILG_ONE_STEP_CAPTURE_PRE_FRAMES: '3840'
         run: |
           set -euo pipefail
           results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_resume"
@@ -109,6 +110,8 @@ jobs:
             --silg-root "$silg" \
             --pre "$results/SILG_RTFM_OFFICIAL_ONE_STEP.pre.pt" \
             --post "$results/SILG_RTFM_OFFICIAL_ONE_STEP.post.pt" \
+            --expected-pre-frames 3840 \
+            --expected-post-frames 5760 \
             --output "$results/SILG_RTFM_OFFICIAL_ONE_STEP_REPLAY_AUDIT.json" \
             2>&1 | tee "$results/SILG_RTFM_OFFICIAL_ONE_STEP_REPLAY_AUDIT.log"
 
@@ -130,6 +133,7 @@ jobs:
           required = {'model_state_dict', 'optimizer_state_dict', 'scheduler_state_dict', 'frames'}
           missing = sorted(required - set(checkpoint))
           target = request['official_reproduction_target']
+          qualification = request['qualification_run']
           fixed = {
               'model': target['model'] == 'multi',
               'stateful': target['stateful'] is False,
@@ -139,6 +143,10 @@ jobs:
               'unroll_length': target['unroll_length'] == 80,
               'learning_rate': target['learning_rate'] == 0.0005,
               'global_gradient_clip_norm': target['global_gradient_clip_norm'] == 40.0,
+              'pre_frames': audit.get('pre_frames') == qualification['initial_frames'],
+              'post_frames': audit.get('post_frames') == qualification['expected_post_frames'],
+              'gradient_exact': audit.get('gradient_exact') is True,
+              'frame_exact': audit.get('frame_exact') is True,
           }
           def digest(path):
               return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -157,6 +165,7 @@ jobs:
               'pre_payload_sha256': digest(results / 'SILG_RTFM_OFFICIAL_ONE_STEP.pre.pt'),
               'post_payload_bytes': (results / 'SILG_RTFM_OFFICIAL_ONE_STEP.post.pt').stat().st_size,
               'post_payload_sha256': digest(results / 'SILG_RTFM_OFFICIAL_ONE_STEP.post.pt'),
+              'post_gradient_sha256': audit.get('post_gradient_sha256'),
               'next_gate': 'official 100M-frame three-seed R0.1 reproduction; this qualification alone is not capability evidence',
           }
           out = results / 'SILG_OFFICIAL_CHECKPOINT_RESUME_QUALIFICATION.json'
