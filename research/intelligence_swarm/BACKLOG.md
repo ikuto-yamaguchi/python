@@ -63,21 +63,44 @@ artifact `8644560521`を展開した結果:
 - classification: **`checkpoint_evidence_preservation_failure`**
 - immutable inventory: `results_audits/SILG_RTFM_ARTIFACT_8644560521_INVENTORY.json`
 
+### Learner-variance diagnostic
+
+全seedのlearner logを再集計し、`results_audits/R0_SILG_ARTIFACT_8644560521_LEARNER_VARIANCE.json`へ固定した。
+
+- total-loss standard deviation: `27.46〜28.76`
+- policy-gradient-loss standard deviation: `23.63〜24.51`
+- total-loss sign changes: `146〜161`
+- policy-gradient-loss sign changes: `142〜159`
+- entropy-loss mean: 約`-5.52〜-5.54`
+
+Interpretation:
+
+- high-variance learner updateは確認したが、optimizer/restore failureの証明ではない。
+- loss振幅だけを根拠にlearning rate、clip、optimizer種別を追加変更しない。
+- checkpointが保存された次の正当化済みrunでoptimizer state、parameter groups、frame counter、model tensor equality、resume-equivalenceを監査する。
+
 Immediate tasks:
 
 1. optimizer/restore失敗を推測で採用・棄却しない。
 2. 古いartifactの欠落だけを修復するための同条件3-seed再学習を発行しない。
-3. gradient-clipping workflowのtriggerからartifact-only auditor変更を外し、診断コード編集だけで高コストtrainingが再起動しないようにする。
-4. 次の既に正当化されたtraining runで、学習直後に全seedのofficial `job.tar`存在、bytes、SHA-256、checkpoint frame counterをfail-closed確認する。
+3. 高コストworkflowのtriggerからartifact-only auditor変更を外し、診断コード編集だけでtrainingが再起動しないよう維持する。
+4. 次の正当化済みtraining runで、学習直後に全seedのofficial `job.tar`存在、bytes、SHA-256、checkpoint frame counterをfail-closed確認する。
 5. artifact upload対象へ全checkpointを含め、upload後inventoryでseed集合とdigestを再確認する。
 6. checkpointが保存された場合だけ`audit_silg_optimizer_checkpoint_integrity.py`を適用する。
 7. optimizer state/param groups/model equalityが不合格なら、その欠落成分だけを修正し、同一checkpoint・RNG・batchのone-step resume-equivalenceを先に通す。
-8. integrityが合格ならoptimizer/restoreを主因から棄却し、learner logsから次の単一原因を選ぶ。
+8. integrityが合格ならoptimizer/restoreを主因から棄却する。
 9. provenance修復や監査合格を能力進歩に数えない。
 
-### Next single-cause selection rule
+### Next single-cause contract
 
-checkpoint provenanceが確保されるまでoptimizer/restore原因はopenのまま保持する。ただし証拠保存だけを目的とする重複学習は禁止する。次の性能runは、既存learner logとofficial defaultsとの差分から事前登録した単一要因だけを変更し、そのrunをcheckpoint integrity判定にも利用する。
+残る最大のofficial-default差はsampling scaleである。現在はactors `2`、batch `2`に対し、公式defaultはactors `30`、batch `24`。二要因同時変更は禁止する。
+
+次run発行前に行うこと:
+
+1. 既存peak RSSと公式model bytesからbatch `2→8`またはactors `2→4`のresource feasibilityを見積もる。
+2. actorsとbatchのうち一方だけを選択し、変更理由、固定条件、反証条件、停止条件をR01_RUN_REQUESTへ事前登録する。
+3. checkpoint preservation、optimizer integrity、controls、resource、leakageを同じartifactへ必須保存する。
+4. CorrectがRandom以下、またはlanguage-shuffleと同等なら、そのsampling-scale要因を単独原因として棄却する。
 
 ## P0 — Evaluation contract freeze
 
@@ -89,11 +112,25 @@ D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示す
 
 Ueda et al., LREC-COLING 2024、公式repository `riken-grp/J-CRe3`。exact commit、dataset、license、checksum、official commandを固定し、random、text-only、vision-only、mention-shuffle、frame/object-shuffleをmatched評価する。数値再現は0件。
 
+### CausalVerse
+
+公式repository `CausalVerse/CausalVerseBenchmark`。静止画、動的物理、ロボット操作、交通場面の24 sub-scenesと、ground-truth causal mechanisms、variables、interventions、temporal dependenciesを提供する。
+
+再現契約:
+
+- exact commit、license、dataset/config checksumを固定する。
+- 公式baselineを無改変で1 scene以上再現する。
+- intervention target既知/hidden、temporal shuffle、variable shuffle、random representationをmatched比較する。
+- model bytes、RSS、runtime、seed、split/config、raw output、checksums、leakageを保存する。
+- SILG interactive policy competenceやJ-CRe3日本語参照解決の代替証拠にはしない。
+
+数値再現は0件。
+
 ### Latest prior-art boundary
 
-CaST-Bench（CVPR 2026）は、2,066 questions / 1,015 videosについて、因果chainをtemporal segmentとbounding-box trackへgroundし、回答だけでなく時空間証拠の局在化を評価する。したがって、causal-chain-grounded video reasoning、visual evidence localization、grounded explanationだけではRQ-001の新規性を認定しない。hidden intervention-target identificationやSILG interactive policy competenceとは別能力である。
+CausalVerseにより、設定可能な高忠実度simulation、ground-truth causal mechanism、既知の介入target、temporal dependencyを用いたCRL stress test自体は既存化されている。したがって、それだけではRQ-001の新規性を認定しない。
 
-NoisyCausal、CodeBind、MagicBench、CausalDisenSeg、TRACE、DCAN、PCMCI、CausalLens、CTLD、score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、ReCITE、C3、MCDRL、CmIR、CAIR、Bayesian Ablation等もnovelty matrixの別列で維持し、論文値を本研究の能力証拠へ流用しない。
+CaST-Bench、NoisyCausal、CodeBind、MagicBench、CausalDisenSeg、TRACE、DCAN、PCMCI、CausalLens、CTLD、score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、ReCITE、C3、MCDRL、CmIR、CAIR、Bayesian Ablation等もnovelty matrixの別列で維持し、論文値を本研究の能力証拠へ流用しない。
 
 ## P1 — R0.2 Environment-first
 
@@ -112,7 +149,7 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 正式境界:
 
-> **FURTHER NARROWED BEYOND CAUSAL-CHAIN-GROUNDED SPATIO-TEMPORAL VIDEO REASONING — NOT ADOPTED**
+> **FURTHER NARROWED BEYOND CONFIGURABLE GROUND-TRUTH INTERVENTION BENCHMARKING — NOT ADOPTED**
 
 ## Stage transition
 
@@ -123,7 +160,8 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 - immutable R0.1 artifacts: **8件**
 - competent external baseline: **0件**
 - J-CRe3 numerical reproduction: **0件**
-- active work: **checkpoint evidence-preservation repair and next single-cause contract**
+- CausalVerse numerical reproduction: **0件**
+- active work: **sampling-scale single-factor preregistration with checkpoint preservation**
 - new mechanism family: **未認定**
 - new intelligence principle: **未発見**
 - capability progress: **未認定**
