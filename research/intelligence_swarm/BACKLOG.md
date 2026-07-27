@@ -99,18 +99,28 @@ Immutable ledger:
 - `benchmarks/grounded_causal/results_audits/SILG_RTFM_OFFICIAL_INFRA_RUN_30258965674.json`
 - artifact digest `sha256:975d5c6223637f48c3e358d51ead0470e3f97b01826e2cd6e216fd484b8f8750`
 
-## Active P0 — Resume-equivalence instrumentation
+## Active P0 — One-step resume-equivalence execution
 
-次の一要因だけを変更する。
+追加済み:
 
-1. Python `random`、NumPy、Torch CPU RNG stateをcheckpoint境界で保存する。
-2. CUDAを使用する場合だけ全CUDA RNG stateも保存する。
-3. 次のlearner updateで消費するexact batchのtensor内容、dtype、shape、SHA-256を保存する。
-4. model、optimizer、scheduler、frame counter、RNGをrestoreする。
-5. 保存されたexact batchでone-step updateを実行する。
-6. uninterrupted pathとresumed pathについて、model tensors、optimizer slots、scheduler/frame、losses、gradient normを完全一致比較する。
+- `benchmarks/grounded_causal/patch_silg_resume_equivalence.py`
+- `.github/workflows/r01_silg_resume_equivalence.yml`
 
-固定するもの:
+変更対象は証拠instrumentationだけである。model、objective、optimizer、source pins、official sampling defaults、splitは変更しない。
+
+Probe procedure:
+
+1. learner update直前にPython `random`、NumPy、Torch CPU RNG stateを保存する。
+2. CUDA使用時だけ全CUDA RNG stateも保存する。
+3. exact learner batchとinitial agent stateをtensor内容込みでdiskへ保存する。
+4. model、actor model、optimizer、schedulerを保存する。
+5. uninterrupted one-step updateを実行し、post-state、losses、gradient normを取得する。
+6. disk payloadをreloadし、model/optimizer/scheduler/RNGをrestoreする。
+7. 同一batchでresumed one-step updateを実行する。
+8. model/optimizer/schedulerをbitwise比較し、losses・gradient normをexact比較する。
+9. exact batch payloadのbytes、SHA-256、全tensorのdtype・shape・numelを保存する。
+
+Fixed contract:
 
 - SILG/RTFM commit
 - model `multi`
@@ -124,25 +134,28 @@ Immutable ledger:
 - gradient clip `40`
 - seed `1`
 - train/validation split
+- short infrastructure segment `32,768` requested frames
 
-この監査では能力対照を実行しない。Randomはplumbing probe、language-blind/state-only/language-shuffleはN/A。100M-frame正式能力再現で全対照を必須復帰させる。
+この監査では能力対照を実行しない。random/language-blind/state-only/language-shuffleは能力判定上N/Aと明示し、100M-frame正式能力再現で全対照を必須復帰させる。
 
 ### Acceptance
 
-- RNG stateが全て保存・restoreされる。
-- exact learner batch fingerprintが一致する。
+- Python/NumPy/Torch RNG stateが保存・restoreされる。
+- exact learner batch payloadがdisk reloadされ、bytes・SHA-256が保存される。
 - one-step後の全model tensorがbitwise equal。
-- optimizer state、scheduler state、frame counterがequal。
-- policy/value/entropy/total lossとgradient normがequal。
-- raw logs、bytes、SHA-256、dependency lock、host provenanceを保存する。
+- optimizer stateとscheduler stateがbitwise equal。
+- frame incrementが同一である。
+- policy/value/entropy/aux/total lossとgradient normがexact equal。
+- raw logs、dependency lock、host provenance、artifact checksumを保存する。
 
 ### Rejection and continuation
 
-- mismatch時は最初の不一致componentだけを修正する。
+- 最初の不一致componentだけを次の単一修正対象にする。
 - mismatchを理由にmodel、optimizer、sampling defaults、splitを変更しない。
-- save/load equalityだけでresume equivalenceを認定しない。
+- workflow execution failureとresume-equivalence failureを混同しない。
+- workflowは発行済みだが、run ID、artifact、合否は未確認。結果取得前に同条件を重複dispatchしない。
 - resume equivalence通過後にresource feasibilityを正式判定する。
-- 一つの100M entropy/seed runは現runner外挿で約18.13日。entropy 2条件だけでも約36.3 runner-daysであり、three-seed化は約108.8 runner-days。無料runner制約と停止・artifact保持条件を先に固定する。
+- 一つの100M entropy/seed runは現runner外挿で約18.13日。entropy 2条件だけでも約36.3 runner-days、three-seed化は約108.8 runner-days。無料runner制約、checkpoint cadence、artifact retention、停止・再開条件を事前固定する。
 - infrastructure qualificationを能力進歩へ数えない。
 
 ## P0 — Evaluation contract freeze
@@ -159,11 +172,15 @@ Ueda et al., LREC-COLING 2024、公式repository `riken-grp/J-CRe3`。exact comm
 
 公式repository `CausalVerse/CausalVerseBenchmark`。exact commit、license、dataset/config checksumを固定し、公式baselineを無改変で1 scene以上再現する。known/hidden intervention target、temporal shuffle、variable shuffle、random representationをmatched比較する。数値再現は0件。
 
+### SemEval-2026 Task 12 AER
+
+公式dataset repository `sooo66/semeval2026-task12-dataset`。evidence-rich multiple-choice direct-cause inferenceを測るlanguage-only benchmarkとしてnovelty matrixの別列へ追加する。exact commit、dataset checksum、official split/evaluatorを固定するまで数値を能力証拠へ流用しない。SILG interactive competence、J-CRe3 multimodal reference resolution、hidden intervention-target groundingの代替にはしない。
+
 ### Latest prior-art boundary
 
-Mind Dreamer (ICML 2026)は、latent world-model manifoldへのactive causal intervention、adversarial intervention anchors、relay expected free energy、relay value/uncertainty propagationを扱う。したがって、active latent interventionや非連続latent jumpだけではRQ-001の新規性を認定しない。公式codeとexact immutable reproductionが未解決の間は論文値を能力証拠へ流用しない。
+AERは複数文書の支持証拠からtarget eventの最も妥当な直接原因を選び、distributed evidence、間接背景要因、意味的に近い非因果distractorを扱う。したがって、language-only evidence integration、direct-cause selection、abductive causal reasoningだけではRQ-001の新規性を認定しない。
 
-score-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg、MagicBench、CodeBind、NoisyCausal、CaST-Bench、CausalVerse、MTG-Causal-RL等もnovelty matrixの別列で維持する。
+score-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg、MagicBench、CodeBind、NoisyCausal、CaST-Bench、CausalVerse、MTG-Causal-RL、Mind Dreamer等もnovelty matrixの別列で維持する。
 
 ## P1 — R0.2 Environment-first
 
@@ -182,7 +199,7 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 正式境界:
 
-> **FURTHER NARROWED BEYOND ACTIVE CAUSAL INTERVENTION ON LATENT WORLD-MODEL MANIFOLDS — NOT ADOPTED**
+> **FURTHER NARROWED BEYOND EVIDENCE-GROUNDED ABDUCTIVE EVENT-CAUSE INFERENCE — NOT ADOPTED**
 
 ## Stage transition
 
@@ -192,11 +209,13 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 - immutable R0.1 short-horizon screening artifacts: **8件**
 - official-contract infrastructure artifacts: **1件・resume evidence不足で不合格**
+- one-step resume-equivalence artifact: **0件・workflow発行済み**
 - official SILG 100M-frame reproduction: **0件**
 - competent external baseline: **0件**
 - J-CRe3 numerical reproduction: **0件**
 - CausalVerse numerical reproduction: **0件**
-- active work: **resume-equivalence instrumentation**
+- AER numerical reproduction: **0件**
+- active work: **one-step resume-equivalence execution**
 - new mechanism family: **未認定**
 - new intelligence principle: **未発見**
 - capability progress: **未認定**
