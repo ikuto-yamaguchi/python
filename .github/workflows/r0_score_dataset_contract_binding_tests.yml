@@ -1,0 +1,37 @@
+name: R0 score dataset-contract binding tests
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_score_dataset_contract_binding.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/test_audit_score_dataset_contract_binding.py
+      - .github/workflows/r0_score_dataset_contract_binding_tests.yml
+  pull_request:
+    paths:
+      - research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_score_dataset_contract_binding.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/test_audit_score_dataset_contract_binding.py
+      - .github/workflows/r0_score_dataset_contract_binding_tests.yml
+
+permissions:
+  contents: read
+
+jobs:
+  focused-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: research/intelligence_swarm/benchmarks/grounded_causal
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile audit and core
+        run: python -m py_compile evaluation_contract.py audit_score_dataset_contract_binding.py test_audit_score_dataset_contract_binding.py
+      - name: Run focused regression
+        run: python -m unittest -v test_audit_score_dataset_contract_binding.py
