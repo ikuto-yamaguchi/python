@@ -31,32 +31,36 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 1. `entropy_cost=0.005`単独原因: **rejected**
 2. evaluation protocol mismatch主因: **rejected**
 3. official stateful core不足単独原因: **rejected**
+4. `unroll_length=20`不足単独原因: **rejected**
 
-Stateful primary evidence:
+### Completed unroll-80 evidence
 
-- run `30221587227`, job `89844840438`
-- artifact `8638198496`
-- digest `sha256:ae28542e4bda4ca968de9d7ffc42b5ab4b4dadb518a26636a41d63b92131aa31`
+- run `30226976064`, job `89867137085`
+- artifact `8640762353`
+- digest `sha256:4e7fbacc077121d3fd09db1f6b7ec19a00942f8dc4cbf29b6cb9fd6eb18c9f4c`
 - Correct `2/60`, Random `4/60`
-- Language-blind `2/60`, State-only `1/60`, Language-shuffle `2/60`
-- Correct return `-1.8273327`, Random return `-1.1513333`
+- Language-blind `2/60`, State-only `0/60`, Language-shuffle `2/60`
+- Correct return `-1.8059994`, Random return `-1.1513333`
 - parameters `6,200,115`
-- CPU forward `8.162 ms/step`
-- actual frames `131,080` per seed
-- peak RSS `1,069,864 / 1,334,592 / 1,274,272 KiB`
-- wall `1691.39 / 1569.14 / 1686.73 s`
-- stateful routing、LSTM checkpoint、recurrent state、same-instance、parity、leakage: passed
-- qualification rejected
+- actual frames `131,200` per seed
+- peak RSS `1,699,780 / 1,467,976 / 2,498,024 KiB`
+- wall `1479.48 / 1479.02 / 1560.07 s`
+- CPU forward approximately `7.86–8.00 ms/step`
+- stateful routing、unroll-80 routing、LSTM checkpoint、recurrent state、same-instance、parity、leakage: passed
+- qualification: rejected
 
-### Active single-factor screening: official unroll length
+Learner logs show large sign-changing policy-gradient and total-loss oscillations through the final updates. Because unroll=80 was correctly routed yet competence remained below Random, unroll shortage is rejected as the sole cause.
+
+### Active single-factor screening: learning rate
 
 Change exactly one factor:
 
-- `unroll_length: 20 → 80`
+- add explicit `learning_rate=0.0001`
 
 Keep fixed:
 
 - `stateful=true`
+- `unroll_length=80`
 - entropy cost `0.05`
 - actors `2`
 - threads `1`
@@ -64,32 +68,19 @@ Keep fixed:
 - model family `multi`
 - frames、seeds、split、instances、controls
 
-Execution:
+Implementation:
 
-- patch: `patch_silg_unroll80_screening.py`
-- workflow: `.github/workflows/r01_silg_unroll80_screening.yml`
-- request: `R01_RUN_REQUEST.json`
-- active run: `30226976064`
-- active job: `89867137085`
-- execution head: `344002bc8e5130cbb9a302fda1a2115baa8edb1c`
-- current status: **in_progress**
-- completed steps: checkout、Python setup、provenance、pinned install、stateful patch、unroll-80 patch、schema、random control
-- active step: **Train official stateful multi with unroll 80**
-- artifacts: **0（学習中）**
-
-Monitoring repair:
-
-- existing locator omitted `r01_silg_unroll80_screening.yml`
-- locator matrix/path trigger fixed in commit `746d527a0d760cc4e910e13d8913c040ee8afd5f`
-- locator run `30228319127` succeeded
-- run `30226976064` has now created job `89867137085`; do not issue a duplicate while it is queued/in-progress
+- patch: `patch_silg_learning_rate_screening.py`
+- workflow: `.github/workflows/r01_silg_learning_rate_screening.yml`
+- reference run: `30226976064`
+- reference artifact: `8640762353`
 
 Fail-closed requirements:
 
 1. Every seed command includes `--stateful`.
-2. Every seed command has `--unroll_length 80`.
-3. Every checkpoint contains LSTM `core.*` weights.
-4. Every seed has non-zero recurrent-state diagnostics.
+2. Every seed command includes `--unroll_length 80`.
+3. Every seed command includes `--learning_rate 0.0001`.
+4. Every checkpoint contains LSTM `core.*` weights and reaches the frame budget.
 5. Correct / Random / Language-blind / State-only / Language-shuffle use identical instances.
 6. Preserve model/checkpoint bytes、RSS、training wall、CPU latency.
 7. Preserve seed、split、actual frames、logs、dependency lock、SHA-256.
@@ -99,15 +90,10 @@ Fail-closed requirements:
 
 Decision rule:
 
-- While training is active, only monitor the existing run; do not mutate model factors or dispatch duplicates.
-- If factor routing is invalid, repair routing only; do not interpret performance.
-- If Correct success>0 and Correct beats Random in both win rate and return, promote unroll=80 to a candidate and verify the three-seed minimum and resource cost.
-- If routing is valid but Correct remains at/below Random, reject unroll shortage as the sole cause and continue to one evidence-selected learner-optimization factor.
+- If routing is invalid, repair routing only; do not interpret performance.
+- If Correct success>0 and Correct beats Random in both win rate and return, retain learning-rate reduction as a candidate and verify three-seed minimum/resource cost.
+- If routing is valid but Correct remains at/below Random, reject learning rate as the sole cause and continue to exactly one of gradient clipping or optimizer/checkpoint restore based on the saved logs and official-code comparison.
 - Do not close with a negative result alone.
-
-Next-cause selection after a valid unroll rejection:
-
-Choose exactly one of learning rate、gradient clipping、optimizer/checkpoint restore based on preserved learner logs and code/default comparison. Do not sweep all three simultaneously.
 
 ## P0 — Evaluation contract freeze
 
@@ -121,9 +107,9 @@ Ueda et al., LREC-COLING 2024、公式repository `riken-grp/J-CRe3`。exact comm
 
 ### Latest prior-art boundary
 
-ACL Findings 2026のTRACEは、multi-turn dialogueを通じたunderlying causal graphのonline reconstructionを定式化し、探索段階のcausal-graph reconstruction rewardと、介入段階のtargeted belief restructuring rewardを用いる。dialogue-driven causal-graph exploration、causal-graph reward、二段階のexploration/intervention RLだけではRQ-001の新規性を認定しない。ACL一次論文は確認済みだが、author-official repository、exact commit、dependency、dataset、公式commandは未確認であり、immutable reproductionは0件。SILG/J-CRe3の代替baselineではない。
+CLeaR 2026のBayesian Ablationは、neural network内のtask representation単位の因果寄与を確率的に推定し、distributedness、manifold complexity、polysemanticityを測る。unit-level probabilistic ablationや表現寄与診断だけではRQ-001の新規性を認定しない。一次論文は確認済みだが、author-official repository、exact commit、immutable numerical reproductionは未確認。
 
-DCAN、PCMCI、CausalLens、CTLD、score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、ReCITE、C3、MCDRL、CmIR、CAIR等もnovelty matrixの別列で維持し、論文値を本研究の能力証拠へ流用しない。
+既存のTRACE、DCAN、PCMCI、CausalLens、CTLD、score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、ReCITE、C3、MCDRL、CmIR、CAIR等もnovelty matrixの別列で維持し、論文値を本研究の能力証拠へ流用しない。
 
 ## P1 — R0.2 Environment-first
 
@@ -142,7 +128,7 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 正式境界:
 
-> **FURTHER NARROWED BEYOND DIALOGUE-DRIVEN CAUSAL-GRAPH EXPLORATION AND TARGETED INTERVENTION — NOT ADOPTED**
+> **FURTHER NARROWED BEYOND PROBABILISTIC CAUSAL ABLATION OF TASK REPRESENTATIONS — NOT ADOPTED**
 
 ## Stage transition
 
@@ -150,10 +136,10 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 ## Status
 
-- immutable R0.1 artifacts: **5件**
+- immutable R0.1 artifacts: **6件**
 - competent external baseline: **0件**
 - J-CRe3 numerical reproduction: **0件**
-- active screening: **unroll-80 run 30226976064 / job 89867137085 training中**
+- active screening: **learning-rate workflow実装済み・結果未認定**
 - 新規機構族: **未認定**
 - 新規知能原理: **未発見**
 - 能力進歩: **未認定**
