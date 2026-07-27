@@ -71,6 +71,7 @@ jobs:
       - name: Run official profile and capture registered third learner update
         env:
           OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
           SILG_ONE_STEP_CAPTURE_PRE_FRAMES: '3840'
         run: |
           set -euo pipefail
@@ -102,6 +103,9 @@ jobs:
           cp "$job" "$GITHUB_WORKSPACE/$results/SILG_RTFM_OFFICIAL_JOB.tar"
 
       - name: Replay captured update and require exact equality
+        env:
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
         run: |
           set -euo pipefail
           results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_resume"
