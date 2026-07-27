@@ -304,6 +304,7 @@ def validate_dataset(rows: list[dict[str, Any]]) -> dict[str, Any]:
     alias_findings = []
     explicit_holdout_findings = []
     topology, per_seed_splits = defaultdict(set), defaultdict(set)
+    per_domain_seed_splits = defaultdict(set)
     for index, row in enumerate(adapted, 1):
         missing = CANONICAL_REQUIRED - row.keys()
         if missing:
@@ -326,7 +327,7 @@ def validate_dataset(rows: list[dict[str, Any]]) -> dict[str, Any]:
         domains.add(domain); conditions.add(condition); splits[split] += 1
         try:
             seed = int(row["seed"])
-            seeds.add(seed); topology[(domain, split, condition)].add(seed); per_seed_splits[seed].add(split)
+            seeds.add(seed); topology[(domain, split, condition)].add(seed); per_seed_splits[seed].add(split); per_domain_seed_splits[(domain, seed)].add(split)
         except (TypeError, ValueError):
             errors.append(f"row {index}: seed must be integer-like")
         if "text_tokens" in row:
@@ -404,10 +405,17 @@ def validate_dataset(rows: list[dict[str, Any]]) -> dict[str, Any]:
     for seed in sorted(CANONICAL_SEEDS):
         if "train" not in per_seed_splits.get(seed, set()): errors.append(f"seed {seed}: train split is missing")
         if not (EVAL_SPLITS & per_seed_splits.get(seed, set())): errors.append(f"seed {seed}: evaluation split is missing")
+    for domain in sorted(domains):
+        for seed in sorted(CANONICAL_SEEDS):
+            domain_seed_splits = per_domain_seed_splits.get((domain, seed), set())
+            if "train" not in domain_seed_splits:
+                errors.append(f"domain {domain!r} seed {seed}: train split is missing")
+            if not (EVAL_SPLITS & domain_seed_splits):
+                errors.append(f"domain {domain!r} seed {seed}: evaluation split is missing")
     if not domains: errors.append("need >=1 domain")
     missing_holdouts = HELD_OUT_CONDITIONS - {name for c in conditions for name in HELD_OUT_CONDITIONS if name in c}
     if missing_holdouts: warnings.append(f"missing held-out conditions: {sorted(missing_holdouts)}")
-    return {"valid": not errors, "errors": errors, "warnings": sorted(set(warnings)), "instances": len(adapted), "domains": sorted(domains), "seeds": sorted(seeds), "conditions": sorted(conditions), "split_counts": dict(sorted(splits.items())), "utterance_overlap": overlap, "utterance_normalization": "NFKC + casefold + remove whitespace/control-format characters", "holdout_integrity": holdout, "explicit_holdout_findings": explicit_holdout_findings, "explicit_condition_holdout_required": True, "split_identity_leakage": split_leakage, "leakage_rows": leakage, "schema_alias_findings": alias_findings, "schema_alias_normalization": "NFKC + casefold + remove non-ASCII-alphanumeric", "silg_rows_adapted": silg_rows, "dataset_sha256": stable_hash(adapted), "instance_fingerprints_sha256": stable_hash(fingerprints), "seed_domain_split_condition_topology": {str(k): sorted(v) for k, v in sorted(topology.items())}, "canonical_seed_topology_required": True, "adapted_schema": True, "silg_text_tokens_supported": True, "episode_split_isolation_required": True, "unicode_utterance_overlap_required": True, "holdout_identity_normalization": "recursive NFKC + casefold + remove whitespace/control-format + numeric scalar alias collapse", "normalized_holdout_identity_required": True, "alias_normalized_leakage_required": True, "allowed_train_splits": sorted(TRAIN_SPLITS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "split_scope_fail_closed": True}
+    return {"valid": not errors, "errors": errors, "warnings": sorted(set(warnings)), "instances": len(adapted), "domains": sorted(domains), "seeds": sorted(seeds), "conditions": sorted(conditions), "split_counts": dict(sorted(splits.items())), "utterance_overlap": overlap, "utterance_normalization": "NFKC + casefold + remove whitespace/control-format characters", "holdout_integrity": holdout, "explicit_holdout_findings": explicit_holdout_findings, "explicit_condition_holdout_required": True, "split_identity_leakage": split_leakage, "leakage_rows": leakage, "schema_alias_findings": alias_findings, "schema_alias_normalization": "NFKC + casefold + remove non-ASCII-alphanumeric", "silg_rows_adapted": silg_rows, "dataset_sha256": stable_hash(adapted), "instance_fingerprints_sha256": stable_hash(fingerprints), "seed_domain_split_condition_topology": {str(k): sorted(v) for k, v in sorted(topology.items())}, "canonical_seed_topology_required": True, "domain_local_train_eval_coverage_required": True, "domain_seed_split_coverage": {str(k): sorted(v) for k, v in sorted(per_domain_seed_splits.items())}, "adapted_schema": True, "silg_text_tokens_supported": True, "episode_split_isolation_required": True, "unicode_utterance_overlap_required": True, "holdout_identity_normalization": "recursive NFKC + casefold + remove whitespace/control-format + numeric scalar alias collapse", "normalized_holdout_identity_required": True, "alias_normalized_leakage_required": True, "allowed_train_splits": sorted(TRAIN_SPLITS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "split_scope_fail_closed": True}
 
 
 def _mean_ci(values: list[float]) -> tuple[float, float, float]:
