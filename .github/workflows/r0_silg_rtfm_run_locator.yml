@@ -16,6 +16,7 @@ on:
       - '.github/workflows/r01_silg_gradient_clip_screening.yml'
       - '.github/workflows/r01_silg_official_infrastructure_qualification.yml'
       - '.github/workflows/r01_silg_official_checkpoint_resume_qualification.yml'
+      - '.github/workflows/r01_silg_official_100m_chunk.yml'
   workflow_dispatch:
 
 permissions:
@@ -48,6 +49,8 @@ jobs:
             workflow: r01_silg_official_infrastructure_qualification.yml
           - label: checkpoint-resume
             workflow: r01_silg_official_checkpoint_resume_qualification.yml
+          - label: official-100m-seed1
+            workflow: r01_silg_official_100m_chunk.yml
     steps:
       - name: Query latest ${{ matrix.label }} push run, jobs, and artifacts
         env:
