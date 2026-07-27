@@ -30,7 +30,9 @@ class R0AcceptanceBundleTests(unittest.TestCase):
         stats_valid=True,
         recomputation_valid=True,
         measurements_valid=True,
+        artifact_split_valid=True,
         paths_valid=True,
+        raw_log_valid=True,
         cell_binding_valid=True,
         baseline_valid=True,
         baseline_binding_valid=True,
@@ -44,8 +46,10 @@ class R0AcceptanceBundleTests(unittest.TestCase):
             mock.patch.object(AUDIT.prediction_metric_coverage, "audit", return_value={"valid": metric_coverage_valid, "errors": [] if metric_coverage_valid else ["selective metric omission"]}),
             mock.patch.object(AUDIT.evaluation_contract, "score", return_value={"valid": True, "errors": []}),
             mock.patch.object(AUDIT.evaluation_contract, "audit_artifacts", return_value={"valid": True, "errors": []}),
+            mock.patch.object(AUDIT.artifact_eval_split_scope, "audit", return_value={"valid": artifact_split_valid, "errors": [] if artifact_split_valid else ["run 1: split must be non-empty"]}),
             mock.patch.object(AUDIT.nonzero_measurements, "audit", return_value={"valid": measurements_valid, "errors": [] if measurements_valid else ["zero placeholder measurement"]}),
             mock.patch.object(AUDIT.artifact_path_containment, "audit", return_value={"valid": paths_valid, "errors": [] if paths_valid else ["artifact path escapes bundle root"]}),
+            mock.patch.object(AUDIT.raw_log_measurement_binding, "audit", return_value={"valid": raw_log_valid, "errors": [] if raw_log_valid else ["raw log measurement mismatch"]}),
             mock.patch.object(AUDIT.prediction_cell_binding, "audit", return_value={"valid": cell_binding_valid, "errors": [] if cell_binding_valid else ["prediction row cell does not match declared cell"]}),
             mock.patch.object(AUDIT.prediction_statistics, "audit", return_value={"valid": stats_valid, "errors": [] if stats_valid else ["checksum mismatch"]}),
             mock.patch.object(AUDIT.statistics_recomputation, "audit", return_value={"valid": recomputation_valid, "errors": [] if recomputation_valid else ["saved statistics differ from recomputation"]}),
@@ -55,7 +59,7 @@ class R0AcceptanceBundleTests(unittest.TestCase):
 
     def run_with(self, **kwargs):
         patches = self.patches(**kwargs)
-        with patches[0], patches[1], patches[2], patches[3], patches[4], patches[5], patches[6], patches[7], patches[8], patches[9], patches[10], patches[11], patches[12], patches[13], patches[14]:
+        with patches[0], patches[1], patches[2], patches[3], patches[4], patches[5], patches[6], patches[7], patches[8], patches[9], patches[10], patches[11], patches[12], patches[13], patches[14], patches[15], patches[16]:
             return AUDIT.audit_acceptance(self.data, self.predictions, self.manifest, self.base_dir)
 
     def test_all_contracts_must_pass(self):
@@ -148,10 +152,11 @@ class R0AcceptanceBundleTests(unittest.TestCase):
         self.assertTrue(result["checks"]["statistics_recomputation_binding_contract"]["valid"])
 
     def test_multiple_failures_are_preserved(self):
-        result = self.run_with(alias_valid=False, split_scope_valid=False, payload_valid=False, metric_coverage_valid=False, stats_valid=False, recomputation_valid=False, measurements_valid=False, paths_valid=False, cell_binding_valid=False, baseline_valid=False, baseline_binding_valid=False)
+        result = self.run_with(alias_valid=False, split_scope_valid=False, payload_valid=False, metric_coverage_valid=False, stats_valid=False, recomputation_valid=False, measurements_valid=False, artifact_split_valid=False, paths_valid=False, raw_log_valid=False, cell_binding_valid=False, baseline_valid=False, baseline_binding_valid=False)
         self.assertEqual(
             result["failed_contracts"],
             [
+                "artifact_eval_split_scope_contract",
                 "artifact_path_containment_contract",
                 "nonzero_measurement_contract",
                 "prediction_cell_binding_contract",
@@ -161,11 +166,12 @@ class R0AcceptanceBundleTests(unittest.TestCase):
                 "prediction_statistics_evidence_contract",
                 "public_baseline_reproduction_contract",
                 "public_baseline_statistics_binding_contract",
+                "raw_log_measurement_binding_contract",
                 "schema_alias_leakage_contract",
                 "statistics_recomputation_binding_contract",
             ],
         )
-        self.assertEqual(len(result["errors"]), 11)
+        self.assertEqual(len(result["errors"]), 13)
 
 
 if __name__ == "__main__":
