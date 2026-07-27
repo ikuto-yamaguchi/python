@@ -6,8 +6,9 @@
 
 ## Current stage
 
-- Stage: **R0 Research Reconstruction — resume-equivalence execution blocked before job creation**
+- Stage: **R0 Research Reconstruction — official SILG continuation submitted; first checkpoint result unconfirmed**
 - Canonical branch: `research/intelligence-swarm-reconstruction-001`
+- Canonical PR: **#409 open / draft / mergeable**
 - A〜Dの新規toy仮説・別branch・新規機構族: **禁止**
 - 既存stacked draft PR: **negative-results archive。新作業のbaseにしない**
 - 外部baseline再現前の新規知能原理・能力進歩認定: **禁止**
@@ -26,11 +27,11 @@
 ## R0 status ledger
 
 - immutable R0.1 short-horizon screening artifacts: **8件**
-- official-contract infrastructure artifacts: **1件・resume evidence不足で不合格**
-- one-step resume-equivalence artifact: **0件**
-- one-step resume-equivalence execution: **PR headのActionsが`action_required`でjob未生成**
-- official SILG RTFM 100M-frame reproduction: **0件**
+- official-contract infrastructure artifact: **1件**
+- accepted exact one-step resume-equivalence artifact: **1件**
+- official SILG RTFM 100M-frame reproduction: **seed-1 first 1M checkpoint submitted; run/job/artifact result unconfirmed**
 - 学習済み公開能力baseline再現: **0件**
+- official-horizon matched controls: **0件**
 - J-CRe3 numerical reproduction: **0件**
 - R0.2正式再現: **0件**
 - R0.3 hidden intervention-target ablation: **棄却維持**
@@ -38,28 +39,35 @@
 - 中心命題の事前登録: **未完了**
 - 広義RQ-001: **棄却**
 - 狭義RQ-001: **未採用**
-- 主分類: **`workflow_execution_approval_blocker`**
+- 主分類: **`official_100m_reproduction_in_progress_result_unconfirmed`**
 
 ## Official SILG reproduction contract
 
 Pinned official SILG `launch.py --envs rtfm`は、`model=multi`、`stateful=false`、entropy grid `0.05/0.005`、train `silg:rtfm_train_s1-v0`、validation `silg:rtfm_test_s1-v0`を指定する。parser defaultsはtotal frames `100,000,000`、actors `30`、batch `24`、unroll `80`、threads `4`、learning rate `0.0005`、RMSprop、global gradient clip `40`である。
 
-既存の`131,072`-frame runsは公式frame horizonの`0.131072%`にすぎない。すべて短期screening evidenceとして保持し、公式public baseline reproductionや公式baseline failureとは呼ばない。
+既存の`131,072`-frame runsは公式frame horizonの`0.131072%`にすぎない。すべてshort-horizon screening evidenceとして保持し、公式public baseline reproductionや公式baseline failureとは呼ばない。
 
-## Closed short-horizon screening causes
+## Accepted resume-equivalence evidence
 
-以下は縮小契約内の単独原因としてのみ棄却した。公式100M-frame baselineへ外挿しない。
+Canonical ledger:
 
-- `entropy_cost=0.005`
-- evaluation protocol mismatch
-- `stateful=true`追加
-- `unroll_length=20→80`
-- `learning_rate=0.0001`
-- gradient clip norm `40→10`
+- run `30300067389`
+- job `90090542489`
+- artifact `8666312079`
+- artifact SHA-256 `34f02c802f6db15b55336a0547e3914846aad6d74783ebfc371d12ca6ac08115`
+- frames `3840 -> 5760`
+
+Exact consumed learner batch、initial recurrent state、learner model、optimizer、scheduler、gradient、Python/NumPy/Torch RNG、stats、frame incrementは一致した。これはcaptured official learner updateのexact replayだけを証明し、asynchronous queue continuation、100M horizon、benchmark competenceは証明しない。
+
+## Active official continuation
+
+`.github/workflows/r01_silg_official_100m_chunk.yml`はseed 1、entropy `0.05`、official sampling defaultsを保持し、最初のdurable checkpointとして`1,000,000` framesをtargetにする。complete `job.tar`、optimizer/scheduler/frame、exact command、host provenance、RSS/wall、dependency、bytes、SHA-256を保存する。
+
+この統合時点ではconnectorからpush-run本体のrun ID、job ID、artifact ID、checkpoint qualificationを独立確認できていない。よって状態は**submitted / result unconfirmed**であり、開始・完了・能力進歩を認定しない。
 
 ## Latest short-horizon negative evidence
 
-Gradient-clipping screening run `30240410850`, artifact `8644560521`:
+Run `30240410850`, artifact `8644560521`:
 
 - Correct `3/60`
 - Random `4/60`
@@ -78,53 +86,33 @@ Gradient-clipping screening run `30240410850`, artifact `8644560521`:
 
 これは縮小契約で言語依存能力が成立しなかったnegative evidenceであり、公式baseline失敗の証拠ではない。
 
-## Official-contract infrastructure result
+## Official-contract resource anchor
 
-Run `30258965674`, job `89954109262`, artifact `8650362356`:
+Run `30258965674`, artifact `8650362356`:
 
-- artifact digest `sha256:975d5c6223637f48c3e358d51ead0470e3f97b01826e2cd6e216fd484b8f8750`
-- artifact size `61,174,640 bytes`
-- official command parity: **pass**
-- exact `job.tar` preservation: **pass**
-- checkpoint/model tensor equality: **pass**
-- optimizer state: **73 entries / 1 parameter group**
-- scheduler and frame counter: **present**
-- checkpoint frames: `40,320`
-- checkpoint bytes: `39,266,613`
-- checkpoint SHA-256: `1ce3a0590611d8d26ef06330e7f5eca43e9c13deafb8d41bf3570eadaa754675`
-- peak RSS: `9,305,052 KiB`
-- wall: `631.66 s`
-- throughput: `63.83 frames/s`
-- projected 100M-frame wall: `18.13 runner-days` per entropy/seed run
-
-不合格理由は次の2件だけである。
-
-- `missing_rng_state_for_one_step_resume_equivalence`
-- `missing_batch_state_for_one_step_resume_equivalence`
-
-よってoptimizer failure、public-baseline failure、能力failureとは認定しない。immutable resultは`benchmarks/grounded_causal/results_audits/SILG_RTFM_OFFICIAL_INFRA_RUN_30258965674.json`へ保存した。
-
-## Active execution
-
-resume instrumentationだけを追加した。pinned SILGのlearner updateを一度だけ包み、Python/NumPy/Torch RNG、exact learner batch、initial agent state、model、actor model、optimizer、schedulerを保存し、uninterrupted one-stepとreload-resumed one-stepを比較する契約は維持する。
-
-受理条件はmodel/optimizer/schedulerのbitwise equality、lossesとgradient normのexact equality、exact batch payloadのbytes・SHA-256保存である。model、source pins、optimizer、sampling defaults、split、能力評価は変更していない。
-
-ただし、PR head `4376e9ab931fb663214404b2b4ef0c4ec84432a1`に紐づく確認可能な11件のPR workflowはすべて`completed/action_required`で、jobが生成されていない。resume-equivalenceのrun ID、job ID、artifact ID、qualificationは0件である。これはモデル・optimizer・resume-equivalenceの失敗ではなく、実行前のapproval/policy blockerとして扱う。同条件を重複dispatchせず、Actions承認またはpolicy解除後に同じworkflowを実行する。
+- peak RSS `9,305,052 KiB`
+- wall `631.66 s`
+- throughput `63.83 frames/s`
+- checkpoint frames `40,320`
+- projected 100M wall `18.13 runner-days` per entropy/seed run
 
 ## Evaluation contract
 
 D015〜D035を凍結する。能力runではrandom/language-blind/state-only/shuffle、model/checkpoint bytes、RSS、runtime、CPU latency、seed、split、actual frames、raw logs、checksums、leakageを保存する。infrastructure-only runでは能力対照をN/Aと明示し、能力進歩へ数えない。
 
+PR head `041e3579baaf5dbc35d533b3cf64143ce6515483`の確認可能なPR workflowsでは、canonical instance identity、unified acceptance gate、artifact containment、raw-log binding、prediction topology、score dataset-contract binding、normalized holdout/cell identity等は成功した。`R0D core normalized cell identity`だけが失敗しており、model failureとは分離して最小root causeを修正する。
+
+Standalone canonical-instance-identity auditはpassしているが、`validate_dataset()`と`score()`へのdirect fail-closed integrationは未完了である。統合完了まではclaimed bundleからstandalone auditを省略しない。
+
 ## Prior-art and RQ boundary
 
-既存のscore-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg、MagicBench、CodeBind、NoisyCausal、CaST-Bench、CausalVerse、MTG-Causal-RL、Mind Dreamer、AER等の境界を維持する。
+既存のscore-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg、MagicBench、CodeBind、NoisyCausal、CaST-Bench、CausalVerse、MTG-Causal-RL、Mind Dreamer、AER、COGS等の境界を維持する。
 
-AAAI 2026のCOGSは、構造事前分布を用いたlatent causal graph学習、causal/non-causal変数の分離、domain-invariant time-series representation、domain label不在時のprototype-based unsupervised domain discoveryを既存化している。したがって、時系列でのlatent causal/non-causal disentanglement、unsupervised environment discovery、因果表現によるOOD generalizationだけではRQ-001の新規性を認定しない。一次論文は確認済みだが、author-official repository、exact commit、公式commandを固定できていないため再現済みbaselineには数えない。
+今回、RQ-001を採用へ反転できる「一次文献 + author-official code + exact commit + public numerical contract」の新しい組は確認していない。文献名だけを追加してnovelty matrixを水増ししない。
 
 正式判断:
 
-> **RQ-001: FURTHER NARROWED BEYOND UNSUPERVISED-DOMAIN CAUSAL REPRESENTATION LEARNING FOR TIME-SERIES OOD GENERALIZATION — NOT ADOPTED**
+> **RQ-001: FURTHER NARROWED — NOT ADOPTED**
 
 ## Stage transition
 
@@ -141,4 +129,4 @@ AAAI 2026のCOGSは、構造事前分布を用いたlatent causal graph学習、
 
 ## Last integration
 
-2026-07-28: **RESET-E078**。resume-equivalence workflowのコード契約は維持したまま、確認可能なPR Actionsが全件`action_required`でjob未生成であることをexecution blockerとして固定した。COGSをtime-series OOD causal representationの既存境界へ追加し、外部baseline再現0件、能力進歩未認定、高校生級未達を維持する。
+2026-07-28: **RESET-E080**。accepted one-step resume-equivalenceを正式台帳へ反映し、official seed-1 first 1M checkpoint workflowをsubmitted / result unconfirmedとして追跡した。PR-head evaluation checksではcore normalized-cell identityの単独失敗を分離し、外部baseline再現0件、能力進歩未認定、高校生級未達を維持する。
