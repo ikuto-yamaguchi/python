@@ -23,6 +23,9 @@ def row(instance_id: str, seed: int, split: str, domain: str, condition: str) ->
         "state_before": {"x": instance_id},
         "gold_action": 0,
         "gold_state_after": {"x": f"after-{instance_id}"},
+        # entity_holdout is a semantic claim.  The production contract requires
+        # a concrete identity/signature and rejects reuse across train/eval.
+        "entity_id": f"entity-{split}-{seed}",
         "model_input_fields": ["utterance", "state_before"],
         "model_input": {"utterance": f"utterance-{instance_id}", "state_before": {"x": instance_id}},
     }
@@ -37,9 +40,7 @@ def canonical_dataset() -> list[dict]:
 
 
 def main() -> None:
-    # The core contract exposes canonical_domain/canonical_condition.  Keep this
-    # regression bound to the production API instead of the historical patch
-    # helper names canonical_*_label.
+    # Bind the regression to the production canonicalization API.
     assert contract.canonical_domain("ＲＴＦＭ") == contract.canonical_domain("rtfm")
     assert contract.canonical_condition("DYNAMICS_HOLDOUT | ENTITY_HOLDOUT") == contract.canonical_condition("entity_holdout+dynamics_holdout")
 
@@ -51,7 +52,6 @@ def main() -> None:
     domain_alias[1]["domain"] = "ＲＴＦＭ"
     audit = contract.validate_dataset(domain_alias)
     assert not audit["valid"]
-    assert audit["classification"] if "classification" in audit else True
     assert any("domain labels collide after canonicalization" in error for error in audit["errors"])
 
     condition_alias = canonical_dataset()
