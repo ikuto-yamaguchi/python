@@ -7,7 +7,6 @@ Canonical branch `research/intelligence-swarm-reconstruction-001` only. A〜Dは
 ## Verified repository state
 
 - PR #409 is open, draft and mergeable.
-- PR head before this integration: `fdcf349199fc79a9dd6697fecc6f8244a8831f88`.
 - Exact one-step resume-equivalence evidence remains accepted: run `30300067389`, job `90090542489`, artifact `8666312079`.
 - Official SILG 100M-frame reproduction remains **0 completed**.
 - Seed-1 / entropy-0.05 first 1M checkpoint remains **submitted / result unconfirmed** because the push-run job, artifact and checkpoint qualification were not independently observable in this integration.
@@ -15,9 +14,9 @@ Canonical branch `research/intelligence-swarm-reconstruction-001` only. A〜Dは
 
 ## Evaluation-contract correction
 
-The only visible failing PR workflow was `R0D core normalized cell identity`. The workflow mixed verification with repository mutation: it generated a report, committed, and pushed from a pull-request-triggered job. That design can fail through concurrent branch movement even when the normalized-cell regression itself passes.
+The only visible failing PR workflow was `R0D core normalized cell identity`.
 
-The workflow was changed to a read-only, fail-closed CI check:
+First, the workflow was converted from a pull-request-triggered self-mutating commit/push job into read-only fail-closed CI:
 
 - permissions reduced from `contents: write` to `contents: read`;
 - automatic report generation, commit and push removed;
@@ -25,7 +24,9 @@ The workflow was changed to a read-only, fail-closed CI check:
 - any unexpected diff in `evaluation_contract.py` fails the job;
 - production core, patch helper and focused regression are compiled and executed.
 
-This is an evaluation-infrastructure correction, not a model, benchmark, split, control or capability change.
+The replacement run `30314975578`, job `90138521234`, proved that checkout, patch idempotence and compilation all passed; only the focused regression failed. The regression fixture declared `entity_holdout` without an `entity_id` or `entity_signature`. The production contract correctly rejected that nominally “valid” fixture. The fixture now provides split-specific entity identities so train/eval holdout identity remains disjoint.
+
+This is an evaluation-test correction, not a model, benchmark, split, control, metric or capability change. The blocker is not closed until the next replacement check succeeds.
 
 ## Controls and evidence
 
