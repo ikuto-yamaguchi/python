@@ -34,71 +34,65 @@
 - 狭義RQ-001: **未採用**
 - 評価分類: **`initial_reproduction_failure`**
 
-## Closed entropy and protocol causes
+## Closed causes
 
-Valid entropy source run `30215555334`とartifact-only requalification run `30219453396`により、`entropy_cost=0.005`単独原因とevaluation protocol mismatch主因は棄却済みである。
+- `entropy_cost=0.005`単独原因: **棄却**
+- evaluation protocol mismatch主因: **棄却**
+- official stateful core不足単独原因: **棄却**
 
 ## Completed official-stateful screening
 
-Primary run:
+Primary evidence:
 
 - run `30221587227`
 - job `89844840438`
 - artifact `8638198496`
 - digest `sha256:ae28542e4bda4ca968de9d7ffc42b5ab4b4dadb518a26636a41d63b92131aa31`
-- artifact size `91,615,915 bytes`
 - execution commit `4b1dff1cd6cd3f6a2dc360d5689cb9968c6a4998`
-
-Factor-routingと再現証拠:
-
-- 全seed commandに`--stateful`: **passed**
-- 全checkpointに`core.*` LSTM weights: **passed**
-- 全seedのrecurrent-state norm > 0: **passed**
-- same-instance controls: **passed**
-- official/fresh evaluation parity: **passed**
-- immutable artifact upload: **passed**
+- `--stateful`, LSTM `core.*`, non-zero recurrent state: **passed**
+- same-instance controls、official/fresh parity、artifact upload: **passed**
+- answer leakage: **false**
 - qualification: **rejected**
 
 Matched aggregate:
 
-- Correct `2/60 = 0.0333`
-- Random `4/60 = 0.0667`
-- Language-blind `2/60 = 0.0333`
-- State-only `1/60 = 0.0167`
-- Language-shuffle `2/60 = 0.0333`
+- Correct `2/60`
+- Random `4/60`
+- Language-blind `2/60`
+- State-only `1/60`
+- Language-shuffle `2/60`
 - Correct mean return `-1.8273327`
 - Random mean return `-1.1513333`
-- Correct−Random return `-0.6759995`
 
-Resource/provenance:
+Resources:
 
 - parameters `6,200,115`
-- untrained state-dict bytes `24,828,505`
-- trained model-state bytes `24,827,943` per seed
+- trained model-state `24,827,943 bytes` per seed
 - actual frames `131,080` per seed
-- seed 1: wall `1691.39 s`, peak RSS `1,069,864 KiB`
-- seed 7: wall `1569.14 s`, peak RSS `1,334,592 KiB`
-- seed 19: wall `1686.73 s`, peak RSS `1,274,272 KiB`
-- CPU forward audit `8.162 ms/step`
-- chosen-action valid fraction `1.0` for all seeds
-- answer leakage: **false**
+- peak RSS `1,069,864 / 1,334,592 / 1,274,272 KiB`
+- wall `1691.39 / 1569.14 / 1686.73 s`
+- CPU forward `8.162 ms/step`
 
 Decision:
 
 > **official stateful core不足を単独主因として棄却する。statefulは正しく作動したが、CorrectはRandomを下回り、language-blind/shuffleと同率で、言語利用能力も成立していない。**
 
-後続run `30221650935`はjob未生成であり、primary artifactが完全に保存されたためfallback evidenceとしても不要である。独立な性能証拠には数えない。
-
 ## Active single-factor screening: unroll length 20 → 80
 
-次の単一変更要因は公式defaultとの主要差である`unroll_length: 20 → 80`。stateful=true、entropy `0.05`、actors `2`、threads `1`、batch `2`、frames `131072`、seeds `1/7/19`、split、matched instances、controlsを固定する。
+変更要因は`unroll_length: 20 → 80`のみ。`stateful=true`、entropy `0.05`、actors `2`、threads `1`、batch `2`、frames `131072`、seeds `1/7/19`、split、matched instances、controlsを固定する。
 
-追加済み:
+Execution status:
 
-- `patch_silg_unroll80_screening.py`
-- `.github/workflows/r01_silg_unroll80_screening.yml`
+- workflow: `.github/workflows/r01_silg_unroll80_screening.yml`
+- request integration: `R01-SCREEN-004-E064`
+- run `30226976064`
+- workflow head `344002bc8e5130cbb9a302fda1a2115baa8edb1c`
+- status: **pending**
+- jobs: **0件**
+- artifacts: **0件**
+- performance result: **未認定**
 
-全seedで`--stateful`、`--unroll_length 80`、LSTM checkpoint、non-zero recurrent stateをfail-closed確認し、random/language-blind/state-only/language-shuffle、model/RSS/runtime/CPU latency/seed/split/frames/checksums/leakage、official/fresh parity、qualificationを保存する。
+既存push-run locatorがunroll-80を監視していなかったため、commit `746d527a0d760cc4e910e13d8913c040ee8afd5f`でmatrixとpath triggerへ追加した。locator run `30228319127`は成功し、上記pending runを確認した。同一screeningを重複dispatchしない。
 
 有効なunroll=80 runでもCorrectがRandomを上回らない場合、unroll不足単独原因を棄却する。ただしiterationは閉じず、次の単一原因をlearner optimization parity（learning rate、gradient clipping、optimizer/checkpoint restoreのうち証拠が最も強い一件）から選ぶ。
 
@@ -108,13 +102,13 @@ D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示す
 
 ## Prior-art and RQ boundary
 
-既存のscore-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens等の境界を維持する。
+既存のscore-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD等の境界を維持する。
 
-AAAI 2026のCTLDは、hidden confounding下のlearning-to-deferでpotential-outcome boundsからaction/deferralのcausal targetを構成する。したがって、hidden confounding下でcausal decision targetを定義し、人間へのdefer確率を学習することだけではRQ-001の新規性を認定しない。一方、これはlatent intervention-target groundingやSILG/J-CRe3能力の再現baselineではない。一次論文は確認済みだが、author-official codeとexact commitは未解決である。
+2026年のDCANは、multimodal personality understandingで、観測可能なdemographic confounderへのback-door adjustmentと、潜在biasへのlearned mediatorを用いたfront-door adjustmentを組み合わせ、公式code/dataを公開している。したがって、dual back-door/front-door multimodal deconfounding、prototype confounder dictionary、learned mediator intervention、fairness改善だけではRQ-001の新規性を認定しない。これはlatent intervention-target groundingやSILG/J-CRe3能力の再現baselineではない。official repositoryは確認済みだが、exact commit・dependency・dataset checksum・公式数値のimmutable再現は未完了である。
 
 正式判断:
 
-> **RQ-001: FURTHER NARROWED BEYOND CAUSAL TARGET CONSTRUCTION FOR LEARNING-TO-DEFER UNDER HIDDEN CONFOUNDING — NOT ADOPTED**
+> **RQ-001: FURTHER NARROWED BEYOND DUAL BACK-DOOR/FRONT-DOOR MULTIMODAL DECONFOUNDING — NOT ADOPTED**
 
 ## Stage transition
 
@@ -131,4 +125,4 @@ AAAI 2026のCTLDは、hidden confounding下のlearning-to-deferでpotential-outc
 
 ## Last integration
 
-2026-07-26: **RESET-E064**。official-stateful primary runをartifactまで監査し、stateful factor-routingは成功したがCorrect `2/60`対Random `4/60`でqualification rejectedとなったため、stateful不足単独原因を棄却した。次の単一要因`unroll_length 20→80`のfail-closed workflowを追加した。CTLDをprior-art境界へ追加したが、外部baseline再現0、能力進歩未認定、高校生級未達を維持する。
+2026-07-27: **RESET-E065**。unroll-80 push runを監視対象へ追加し、run `30226976064`がpending・job 0・artifact 0であることを確認した。重複dispatchせず同runを追跡する。DCANのdual causal interventionとofficial codeをprior-art境界へ追加したが、外部baseline再現0、能力進歩未認定、高校生級未達を維持する。
