@@ -75,6 +75,26 @@ Implementation:
 - reference run: `30226976064`
 - reference artifact: `8640762353`
 
+Primary execution:
+
+- run `30235108376`
+- job `89881341003`
+- execution commit `67556f067028edac502380c6d3de15575c996ffc`
+- install、stateful/unroll/lr patch、schema、random control: passed
+- active step: three-seed training
+- artifact / qualification / performance: not yet available
+
+Duplicate/fallback execution:
+
+- run `30236217754`
+- execution commit `b3f1c6775fb6be5376ff53359b6732dfb100f313`
+- status: pending
+- jobs: 0
+- artifacts: 0
+- primary runが有効artifactを保存した場合は重複証拠に数えない。
+- primary runがexecution failureまたはartifact lossの場合だけfallbackとして使用する。
+- 同条件を追加dispatchしない。
+
 Fail-closed requirements:
 
 1. Every seed command includes `--stateful`.
@@ -107,9 +127,9 @@ Ueda et al., LREC-COLING 2024、公式repository `riken-grp/J-CRe3`。exact comm
 
 ### Latest prior-art boundary
 
-CLeaR 2026のBayesian Ablationは、neural network内のtask representation単位の因果寄与を確率的に推定し、distributedness、manifold complexity、polysemanticityを測る。unit-level probabilistic ablationや表現寄与診断だけではRQ-001の新規性を認定しない。一次論文は確認済みだが、author-official repository、exact commit、immutable numerical reproductionは未確認。
+CausalDisenSeg（arXiv 2026）は、missing-modality brain-tumor segmentationに対して、CVAE+HSICによるcausal/style factor分離、region causality module、counterfactual dual-adversarial抑制でbiasのNatural Direct Effectを抑える。missing-modality下のcausal disentanglement、region-grounded causal representation、counterfactual NDE suppressionだけではRQ-001の新規性を認定しない。一次preprintは確認済みだが、author-official repository、exact commit、immutable numerical reproductionは未確認。
 
-既存のTRACE、DCAN、PCMCI、CausalLens、CTLD、score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、ReCITE、C3、MCDRL、CmIR、CAIR等もnovelty matrixの別列で維持し、論文値を本研究の能力証拠へ流用しない。
+既存のTRACE、DCAN、PCMCI、CausalLens、CTLD、score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、ReCITE、C3、MCDRL、CmIR、CAIR、Bayesian Ablation等もnovelty matrixの別列で維持し、論文値を本研究の能力証拠へ流用しない。
 
 ## P1 — R0.2 Environment-first
 
@@ -128,7 +148,7 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 正式境界:
 
-> **FURTHER NARROWED BEYOND PROBABILISTIC CAUSAL ABLATION OF TASK REPRESENTATIONS — NOT ADOPTED**
+> **FURTHER NARROWED BEYOND COUNTERFACTUAL CAUSAL DISENTANGLEMENT UNDER MISSING MODALITIES — NOT ADOPTED**
 
 ## Stage transition
 
@@ -139,9 +159,9 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 - immutable R0.1 artifacts: **6件**
 - competent external baseline: **0件**
 - J-CRe3 numerical reproduction: **0件**
-- active screening: **learning-rate workflow実装済み・結果未認定**
-- 新規機構族: **未認定**
-- 新規知能原理: **未発見**
-- 能力進歩: **未認定**
+- active screening: **learning-rate primary run training中**
+- new mechanism family: **未認定**
+- new intelligence principle: **未発見**
+- capability progress: **未認定**
 - 高校生級知能: **未達**
 - 完成: **false**
