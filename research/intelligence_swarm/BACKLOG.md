@@ -4,7 +4,7 @@
 
 R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで進める。A〜Dは新しいtoy仮説、別branch、新規機構族を作らない。既存stacked draft PRはnegative-results archiveとして保持し、新作業のbaseにしない。
 
-外部baselineを再現するまで、新規機構族、新しい知能原理、能力進歩、高校生級到達を認定しない。単発失敗で終了せず、失敗分類、根拠、原因だけを変える最小修正、同一budget再run、採用・棄却・停止判定までを1サイクルとする。
+外部baselineを再現するまで、新規機構族、新しい知能原理、能力進歩、高校生級到達を認定しない。短期screeningを公式baseline再現と誤認してhyperparameter探索を続けることも禁止する。
 
 ## A–D allocation
 
@@ -13,33 +13,50 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 - **C**: 最新一次文献・公式codeとの重複監査、novelty matrix更新。
 - **D**: D015〜D035、matched controls、resource provenance、leakage、RQ-001判定。
 
-## P0 — SILG/RTFM R0.1 screening cycle
+## P0 — SILG/RTFM public reproduction contract
 
-固定条件:
+Pinned sources:
 
 - SILG `2af07578e1264029a240fcfb78d4ac0aea16f5de`
 - RTFM `58f17955595b5a127c96d045d896fcbcc7d4b570`
-- seeds `1,7,19`
-- `131,072 requested frames`
+
+Official RTFM launch contract:
+
+- model `multi`
+- stateful `false`
+- entropy grid `0.05 / 0.005`
 - train `silg:rtfm_train_s1-v0`
-- test `silg:rtfm_test_s1-v0`
-- random / language-blind / state-only / language-shuffle
-- same-instance matched evaluation
+- validation `silg:rtfm_test_s1-v0`
+- total frames `100,000,000`
+- actors `30`
+- batch `24`
+- unroll `80`
+- learner threads `4`
+- learning rate `0.0005`
+- RMSprop alpha `0.99`, momentum `0`, epsilon `0.01`
+- global gradient clip norm `40`
 
-### Closed causes
+Immutable contract audit:
 
-1. `entropy_cost=0.005`単独原因: **rejected**
-2. evaluation protocol mismatch主因: **rejected**
-3. official stateful core不足単独原因: **rejected**
-4. `unroll_length=20`不足単独原因: **rejected**
-5. `learning_rate=0.0001`単独原因: **rejected**
-6. gradient clip norm `40.0`不足単独原因: **rejected**
+- `R01_OFFICIAL_TRAINING_HORIZON_AUDIT.json`
+- classification: **`public_reproduction_contract_mismatch`**
 
-### Latest immutable negative evidence
+既存の`131,072`-frame runsは公式frame horizonの`0.131072%`であり、すべてshort-horizon screening evidenceへ再分類する。公式baseline再現、公式baseline failure、能力進歩には数えない。
 
-- run `30240410850`, job `89896249118`
-- artifact `8644560521`
-- digest `sha256:987bc842229a8a9d03dcced3387c4c8a17a2049fdc2aadfad6c7560027e11e19`
+## Closed short-horizon screenings
+
+以下は各縮小契約内の単独原因としてのみrejected。公式100M-frame baselineへ外挿しない。
+
+1. `entropy_cost=0.005`
+2. evaluation protocol mismatch
+3. `stateful=true`
+4. `unroll_length=20→80`
+5. `learning_rate=0.0001`
+6. gradient clip norm `40→10`
+
+## Latest short-horizon negative evidence
+
+- run `30240410850`, artifact `8644560521`
 - Correct `3/60`, Random `4/60`
 - Language-blind `0/60`, State-only `0/60`, Language-shuffle `3/60`
 - Correct return `-1.7679994`, Random return `-1.1513333`
@@ -49,62 +66,39 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 - wall `1528.08 / 1559.30 / 1591.64 s`
 - CPU forward `8.565 ms/step`
 - leakage `false`
-- qualification **rejected**
+- qualification rejected
 
-Decision: clip 10.0 reached all seeds, but Correct remained below Random and exactly matched language-shuffle. Gradient clipping threshold is rejected as the sole cause.
+この結果は縮小契約で言語依存能力が成立しなかったnegative evidenceであり、公式baseline失敗の証拠ではない。
 
-### Active blocker: checkpoint evidence preservation
+## Active blocker — infrastructure qualification
 
-artifact `8644560521`を展開した結果:
+artifact `8644560521`ではofficial `job.tar`が全seedで欠落しているため、optimizer state、scheduler、frame counter、model equality、resume equivalenceは判定不能。
 
-- standalone trained model-state: seeds `1/7/19`すべて存在
-- `SILG_RTFM_OFFICIAL_CHECKPOINT_SEED_<seed>.job.tar`: **0件**
-- optimizer/checkpoint restore integrity: **判定不能**
-- classification: **`checkpoint_evidence_preservation_failure`**
-- immutable inventory: `results_audits/SILG_RTFM_ARTIFACT_8644560521_INVENTORY.json`
+Evidence:
 
-### Learner-variance diagnostic
+- checkpoint inventory: `results_audits/SILG_RTFM_ARTIFACT_8644560521_INVENTORY.json`
+- learner variance audit: `results_audits/R0_SILG_ARTIFACT_8644560521_LEARNER_VARIANCE.json`
 
-全seedのlearner logを再集計し、`results_audits/R0_SILG_ARTIFACT_8644560521_LEARNER_VARIANCE.json`へ固定した。
+learner logのtotal/PG lossは高分散だが、optimizer/restore failureとは認定しない。
 
-- total-loss standard deviation: `27.46〜28.76`
-- policy-gradient-loss standard deviation: `23.63〜24.51`
-- total-loss sign changes: `146〜161`
-- policy-gradient-loss sign changes: `142〜159`
-- entropy-loss mean: 約`-5.52〜-5.54`
+### Next execution contract
 
-Interpretation:
+次の実行は能力screeningではなく、公式契約の**infrastructure qualification**とする。
 
-- high-variance learner updateは確認したが、optimizer/restore failureの証明ではない。
-- loss振幅だけを根拠にlearning rate、clip、optimizer種別を追加変更しない。
-- checkpointが保存された次の正当化済みrunでoptimizer state、parameter groups、frame counter、model tensor equality、resume-equivalenceを監査する。
+1. official `model=multi`, `stateful=false`, actors `30`, batch `24`, unroll `80`, threads `4`を変更しない。
+2. 本番100M frames前の短いsegmentでrunner resource feasibilityだけを確認する。
+3. 全seed checkpointのmodel、optimizer、scheduler、frame counter、bytes、SHA-256をfail-closed保存する。
+4. 同一checkpoint、RNG、batchからのone-step resume equivalenceを確認する。
+5. peak RSS、runtime、throughputから100M-frame wall/costを外挿し、resource blockerをimmutable保存する。
+6. qualificationを能力証拠へ数えない。
+7. runnerがofficial sampling contractを実行できない場合、縮小contractへ置換して「再現」と呼ばない。
+8. actors/batchの追加単一要因screeningは停止する。
 
-Immediate tasks:
-
-1. optimizer/restore失敗を推測で採用・棄却しない。
-2. 古いartifactの欠落だけを修復するための同条件3-seed再学習を発行しない。
-3. 高コストworkflowのtriggerからartifact-only auditor変更を外し、診断コード編集だけでtrainingが再起動しないよう維持する。
-4. 次の正当化済みtraining runで、学習直後に全seedのofficial `job.tar`存在、bytes、SHA-256、checkpoint frame counterをfail-closed確認する。
-5. artifact upload対象へ全checkpointを含め、upload後inventoryでseed集合とdigestを再確認する。
-6. checkpointが保存された場合だけ`audit_silg_optimizer_checkpoint_integrity.py`を適用する。
-7. optimizer state/param groups/model equalityが不合格なら、その欠落成分だけを修正し、同一checkpoint・RNG・batchのone-step resume-equivalenceを先に通す。
-8. integrityが合格ならoptimizer/restoreを主因から棄却する。
-9. provenance修復や監査合格を能力進歩に数えない。
-
-### Next single-cause contract
-
-残る最大のofficial-default差はsampling scaleである。現在はactors `2`、batch `2`に対し、公式defaultはactors `30`、batch `24`。二要因同時変更は禁止する。
-
-次run発行前に行うこと:
-
-1. 既存peak RSSと公式model bytesからbatch `2→8`またはactors `2→4`のresource feasibilityを見積もる。
-2. actorsとbatchのうち一方だけを選択し、変更理由、固定条件、反証条件、停止条件をR01_RUN_REQUESTへ事前登録する。
-3. checkpoint preservation、optimizer integrity、controls、resource、leakageを同じartifactへ必須保存する。
-4. CorrectがRandom以下、またはlanguage-shuffleと同等なら、そのsampling-scale要因を単独原因として棄却する。
+infrastructure qualificationが通過しresource feasibleな場合のみ、entropy `0.05`と`0.005`のofficial 100M-frame reproductionをseeds固定で提案する。
 
 ## P0 — Evaluation contract freeze
 
-D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示すまで受入auditorを増やさない。checkpoint inventoryは能力受入条件の追加ではなく、既存原因を検証可能にするresource/provenance要件である。毎runでcontrols、resource、seed/split、checksums、leakageを保存する。
+D015〜D035を凍結する。毎runでrandom/language-blind/state-only/shuffle、model/checkpoint bytes、RSS、runtime、CPU latency、seed、split、actual frames、raw logs、checksums、leakageを保存する。公式再現ではofficial command parity、100M horizon、checkpoint/resume integrityも必須。
 
 ## P1 — External official reproductions
 
@@ -157,11 +151,12 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 ## Status
 
-- immutable R0.1 artifacts: **8件**
+- immutable R0.1 screening artifacts: **8件**
+- official SILG 100M-frame reproduction: **0件**
 - competent external baseline: **0件**
 - J-CRe3 numerical reproduction: **0件**
 - CausalVerse numerical reproduction: **0件**
-- active work: **sampling-scale single-factor preregistration with checkpoint preservation**
+- active work: **official-contract infrastructure qualification**
 - new mechanism family: **未認定**
 - new intelligence principle: **未発見**
 - capability progress: **未認定**
