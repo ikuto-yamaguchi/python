@@ -1,0 +1,97 @@
+{
+  "schema_version": "r01_silg_official_one_step_replay_audit_v1",
+  "recorded_at_utc": "2026-07-27T20:50:00Z",
+  "repository": "ikuto-yamaguchi/python",
+  "canonical_branch": "research/intelligence-swarm-reconstruction-001",
+  "source_run": {
+    "run_id": 30300067389,
+    "run_number": 17,
+    "job_id": 90090542489,
+    "head_sha": "4f2329b21c3308434f6a5ef51789a915250658d3",
+    "workflow": "R0.1 SILG official checkpoint resume qualification",
+    "status": "completed",
+    "conclusion": "success"
+  },
+  "artifact": {
+    "artifact_id": 8666312079,
+    "name": "r01-silg-official-checkpoint-resume-30300067389",
+    "size_bytes": 157643235,
+    "sha256": "34f02c802f6db15b55336a0547e3914846aad6d74783ebfc371d12ca6ac08115",
+    "expires_at": "2026-08-26T19:56:14Z"
+  },
+  "public_sources": {
+    "silg_commit": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
+    "rtfm_commit": "58f17955595b5a127c96d045d896fcbcc7d4b570"
+  },
+  "fixed_contract": {
+    "train_env": "silg:rtfm_train_s1-v0",
+    "validation_env": "silg:rtfm_test_s1-v0",
+    "model": "multi",
+    "stateful": false,
+    "pretrained_language_model": false,
+    "num_actors": 30,
+    "num_threads": 4,
+    "batch_size": 24,
+    "unroll_length": 80,
+    "learning_rate": 0.0005,
+    "entropy_cost": 0.05,
+    "optimizer": "RMSprop",
+    "global_gradient_clip_norm": 40.0,
+    "disable_cuda": true,
+    "seed": 1
+  },
+  "exact_one_step_replay": {
+    "classification": "exact_one_step_resume_equivalence",
+    "qualified": true,
+    "status": "accepted",
+    "pre_frames": 3840,
+    "post_frames": 5760,
+    "frames_per_update": 1920,
+    "model_exact": true,
+    "actor_model_exact_with_learner_model_within_each_execution": true,
+    "optimizer_exact": true,
+    "scheduler_exact": true,
+    "gradient_exact": true,
+    "rng_exact": true,
+    "stats_exact": true,
+    "frame_exact": true,
+    "exact_batch_sha256": "8c11d4ec88163723b6aabd4324e9f0c1c85b0ccb2bd4af0bd53a5292caa52e59",
+    "exact_initial_agent_state_sha256": "4813494d137e1631bba301d5acab6e7bb7aa74ce1185d456565ef51d737677b2",
+    "pre_model_sha256": "b6f353b435879bec94fdd461fb59015cbc4890cf4f1418efcdd1768d11ea809a",
+    "post_model_sha256": "0cdc13d43980c351707febf069fcc40a9fce0aa0c1a986b66de21576bf5a4e88",
+    "post_gradient_sha256": "61ef4f89d7dd3a2903419f692904d88de3baafa69d59c64ed2d2209dbbdaea71",
+    "scope_limit": "One captured real learner update only; asynchronous actor-queue continuation is not claimed."
+  },
+  "checkpoint": {
+    "checkpoint_frames": 11520,
+    "checkpoint_bytes": 39266613,
+    "checkpoint_sha256": "ac74816ee6ea2ca14893fb6f22b9b7fe97c3b83b17938dd1b11d2a446b76eab6",
+    "missing_keys": [],
+    "pre_payload_bytes": 61183781,
+    "pre_payload_sha256": "84275dd4bc6ffb38164b4519e6846fd509be15b50e6f5d7f05a29726ccb20474",
+    "post_payload_bytes": 102988204,
+    "post_payload_sha256": "8f888dc5186b3e50de2d732f82410ce9a94a3c90677f9d9dd4a083002da774bd"
+  },
+  "resource_measurements": {
+    "runner_cpu": "AMD EPYC 7763, 4 logical CPUs",
+    "runner_memory": "15 GiB",
+    "python": "3.8.18",
+    "training_wall_seconds": 205.66,
+    "training_user_cpu_seconds": 464.80,
+    "training_system_cpu_seconds": 29.22,
+    "peak_rss_kib": 8187952,
+    "training_target_frames": 5760,
+    "note": "This qualification run is infrastructure evidence, not a performance or capability measurement."
+  },
+  "claims": {
+    "public_baseline_reproduced": false,
+    "capability_progress_claimed": false,
+    "new_intelligence_principle_claimed": false,
+    "new_toy_hypothesis_introduced": false
+  },
+  "decision": {
+    "official_checkpoint_resume_infrastructure": "qualified_for_exact_one_step_replay",
+    "next_gate": "official 100M-frame, three-seed R0.1 reproduction with matched random, language-blind, and state-only controls",
+    "r02_started": false
+  }
+}
