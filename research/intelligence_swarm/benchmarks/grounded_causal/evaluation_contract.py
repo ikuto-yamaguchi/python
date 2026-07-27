@@ -14,6 +14,7 @@ import random
 import re
 import statistics
 import unicodedata
+from decimal import Decimal, InvalidOperation
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Iterable
@@ -216,10 +217,68 @@ def _find_forbidden_nested(value: Any, prefix: str = "") -> list[dict[str, str]]
     return found
 
 
+def _canonical_identity_number(value: Any) -> str | None:
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        if isinstance(value, float) and not math.isfinite(value):
+            return None
+        raw = str(value)
+    elif isinstance(value, str):
+        raw = canonical_text(value)
+        if not re.fullmatch(r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?", raw):
+            return None
+    else:
+        return None
+    try:
+        number = Decimal(raw)
+    except InvalidOperation:
+        return None
+    if not number.is_finite():
+        return None
+    number = number.normalize()
+    if number == 0:
+        number = Decimal(0)
+    return format(number, "f")
+
+
+def canonical_holdout_identity(value: Any) -> Any:
+    """Canonicalize semantic split identities before hashing.
+
+    This intentionally collapses Unicode width/case, whitespace and control/format
+    differences, numeric-vs-string scalar aliases, and recursively normalizes
+    mappings and sequences. Mapping keys are represented as sorted pairs so that
+    normalization collisions remain visible and deterministic.
+    """
+    if value is None:
+        return {"type": "null", "value": None}
+    if isinstance(value, bool):
+        return {"type": "bool", "value": value}
+    number = _canonical_identity_number(value)
+    if number is not None:
+        return {"type": "number", "value": number}
+    if isinstance(value, str):
+        return {"type": "text", "value": canonical_text(value)}
+    if isinstance(value, dict):
+        pairs = [
+            [canonical_holdout_identity(key), canonical_holdout_identity(item)]
+            for key, item in value.items()
+        ]
+        pairs.sort(key=lambda pair: json.dumps(pair[0], ensure_ascii=False, sort_keys=True, separators=(",", ":")))
+        return {"type": "mapping", "value": pairs}
+    if isinstance(value, (list, tuple)):
+        return {"type": "sequence", "value": [canonical_holdout_identity(item) for item in value]}
+    if isinstance(value, (set, frozenset)):
+        items = [canonical_holdout_identity(item) for item in value]
+        items.sort(key=lambda item: json.dumps(item, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
+        return {"type": "set", "value": items}
+    return {"type": "text", "value": canonical_text(value)}
+
+
 def _split_sig(row: dict[str, Any], *keys: str) -> str | None:
     for key in keys:
         if row.get(key) is not None:
-            return stable_hash(row[key])
+            return stable_hash(canonical_holdout_identity(row[key]))
     return None
 
 
@@ -348,7 +407,7 @@ def validate_dataset(rows: list[dict[str, Any]]) -> dict[str, Any]:
     if not domains: errors.append("need >=1 domain")
     missing_holdouts = HELD_OUT_CONDITIONS - {name for c in conditions for name in HELD_OUT_CONDITIONS if name in c}
     if missing_holdouts: warnings.append(f"missing held-out conditions: {sorted(missing_holdouts)}")
-    return {"valid": not errors, "errors": errors, "warnings": sorted(set(warnings)), "instances": len(adapted), "domains": sorted(domains), "seeds": sorted(seeds), "conditions": sorted(conditions), "split_counts": dict(sorted(splits.items())), "utterance_overlap": overlap, "utterance_normalization": "NFKC + casefold + remove whitespace/control-format characters", "holdout_integrity": holdout, "explicit_holdout_findings": explicit_holdout_findings, "explicit_condition_holdout_required": True, "split_identity_leakage": split_leakage, "leakage_rows": leakage, "schema_alias_findings": alias_findings, "schema_alias_normalization": "NFKC + casefold + remove non-ASCII-alphanumeric", "silg_rows_adapted": silg_rows, "dataset_sha256": stable_hash(adapted), "instance_fingerprints_sha256": stable_hash(fingerprints), "seed_domain_split_condition_topology": {str(k): sorted(v) for k, v in sorted(topology.items())}, "canonical_seed_topology_required": True, "adapted_schema": True, "silg_text_tokens_supported": True, "episode_split_isolation_required": True, "unicode_utterance_overlap_required": True, "alias_normalized_leakage_required": True, "allowed_train_splits": sorted(TRAIN_SPLITS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "split_scope_fail_closed": True}
+    return {"valid": not errors, "errors": errors, "warnings": sorted(set(warnings)), "instances": len(adapted), "domains": sorted(domains), "seeds": sorted(seeds), "conditions": sorted(conditions), "split_counts": dict(sorted(splits.items())), "utterance_overlap": overlap, "utterance_normalization": "NFKC + casefold + remove whitespace/control-format characters", "holdout_integrity": holdout, "explicit_holdout_findings": explicit_holdout_findings, "explicit_condition_holdout_required": True, "split_identity_leakage": split_leakage, "leakage_rows": leakage, "schema_alias_findings": alias_findings, "schema_alias_normalization": "NFKC + casefold + remove non-ASCII-alphanumeric", "silg_rows_adapted": silg_rows, "dataset_sha256": stable_hash(adapted), "instance_fingerprints_sha256": stable_hash(fingerprints), "seed_domain_split_condition_topology": {str(k): sorted(v) for k, v in sorted(topology.items())}, "canonical_seed_topology_required": True, "adapted_schema": True, "silg_text_tokens_supported": True, "episode_split_isolation_required": True, "unicode_utterance_overlap_required": True, "holdout_identity_normalization": "recursive NFKC + casefold + remove whitespace/control-format + numeric scalar alias collapse", "normalized_holdout_identity_required": True, "alias_normalized_leakage_required": True, "allowed_train_splits": sorted(TRAIN_SPLITS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "split_scope_fail_closed": True}
 
 
 def _mean_ci(values: list[float]) -> tuple[float, float, float]:
