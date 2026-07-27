@@ -32,6 +32,8 @@ class R0AcceptanceBundleTests(unittest.TestCase):
         measurements_valid=True,
         paths_valid=True,
         cell_binding_valid=True,
+        baseline_valid=True,
+        baseline_binding_valid=True,
     ):
         return (
             mock.patch.object(AUDIT.evaluation_contract, "validate_dataset", return_value={"valid": True, "errors": []}),
@@ -47,11 +49,13 @@ class R0AcceptanceBundleTests(unittest.TestCase):
             mock.patch.object(AUDIT.prediction_cell_binding, "audit", return_value={"valid": cell_binding_valid, "errors": [] if cell_binding_valid else ["prediction row cell does not match declared cell"]}),
             mock.patch.object(AUDIT.prediction_statistics, "audit", return_value={"valid": stats_valid, "errors": [] if stats_valid else ["checksum mismatch"]}),
             mock.patch.object(AUDIT.statistics_recomputation, "audit", return_value={"valid": recomputation_valid, "errors": [] if recomputation_valid else ["saved statistics differ from recomputation"]}),
+            mock.patch.object(AUDIT.public_baseline_reproduction, "audit", return_value={"valid": baseline_valid, "errors": [] if baseline_valid else ["public baseline provenance invalid"]}),
+            mock.patch.object(AUDIT.public_baseline_statistics_binding, "audit", return_value={"valid": baseline_binding_valid, "errors": [] if baseline_binding_valid else ["observed baseline value does not match statistics field"]}),
         )
 
     def run_with(self, **kwargs):
         patches = self.patches(**kwargs)
-        with patches[0], patches[1], patches[2], patches[3], patches[4], patches[5], patches[6], patches[7], patches[8], patches[9], patches[10], patches[11], patches[12]:
+        with patches[0], patches[1], patches[2], patches[3], patches[4], patches[5], patches[6], patches[7], patches[8], patches[9], patches[10], patches[11], patches[12], patches[13], patches[14]:
             return AUDIT.audit_acceptance(self.data, self.predictions, self.manifest, self.base_dir)
 
     def test_all_contracts_must_pass(self):
@@ -76,6 +80,8 @@ class R0AcceptanceBundleTests(unittest.TestCase):
         self.assertTrue(result["pooled_or_reused_prediction_artifacts_forbidden"])
         self.assertTrue(result["saved_statistics_must_equal_fresh_recomputation"])
         self.assertTrue(result["statistics_checksum_alone_is_not_acceptance"])
+        self.assertTrue(result["public_baseline_metric_paths_required"])
+        self.assertTrue(result["public_baseline_observed_values_must_equal_saved_statistics_fields"])
 
     def test_alias_failure_cannot_be_hidden_by_valid_score(self):
         result = self.run_with(alias_valid=False)
@@ -128,8 +134,21 @@ class R0AcceptanceBundleTests(unittest.TestCase):
         self.assertTrue(result["checks"]["prediction_statistics_evidence_contract"]["valid"])
         self.assertTrue(result["checks"]["paired_statistics_contract"]["valid"])
 
+    def test_baseline_provenance_failure_rejects_otherwise_valid_bundle(self):
+        result = self.run_with(baseline_valid=False)
+        self.assertFalse(result["valid"])
+        self.assertIn("public_baseline_reproduction_contract", result["failed_contracts"])
+
+    def test_baseline_observed_value_not_in_statistics_rejects_bundle(self):
+        result = self.run_with(baseline_binding_valid=False)
+        self.assertFalse(result["valid"])
+        self.assertEqual(result["classification"], "initial_reproduction_failure")
+        self.assertIn("public_baseline_statistics_binding_contract", result["failed_contracts"])
+        self.assertTrue(result["checks"]["public_baseline_reproduction_contract"]["valid"])
+        self.assertTrue(result["checks"]["statistics_recomputation_binding_contract"]["valid"])
+
     def test_multiple_failures_are_preserved(self):
-        result = self.run_with(alias_valid=False, split_scope_valid=False, payload_valid=False, metric_coverage_valid=False, stats_valid=False, recomputation_valid=False, measurements_valid=False, paths_valid=False, cell_binding_valid=False)
+        result = self.run_with(alias_valid=False, split_scope_valid=False, payload_valid=False, metric_coverage_valid=False, stats_valid=False, recomputation_valid=False, measurements_valid=False, paths_valid=False, cell_binding_valid=False, baseline_valid=False, baseline_binding_valid=False)
         self.assertEqual(
             result["failed_contracts"],
             [
@@ -140,11 +159,13 @@ class R0AcceptanceBundleTests(unittest.TestCase):
                 "prediction_metric_coverage_contract",
                 "prediction_payload_contract",
                 "prediction_statistics_evidence_contract",
+                "public_baseline_reproduction_contract",
+                "public_baseline_statistics_binding_contract",
                 "schema_alias_leakage_contract",
                 "statistics_recomputation_binding_contract",
             ],
         )
-        self.assertEqual(len(result["errors"]), 9)
+        self.assertEqual(len(result["errors"]), 11)
 
 
 if __name__ == "__main__":
