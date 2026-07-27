@@ -37,5 +37,6 @@ def main() -> int:
     return 0
 
 
+# Cycle 067 retrigger: apply the pending core score/dataset binding on the canonical branch.
 if __name__ == "__main__":
     raise SystemExit(main())
