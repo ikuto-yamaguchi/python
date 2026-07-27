@@ -32,74 +32,57 @@ R0はcanonical branch `research/intelligence-swarm-reconstruction-001`だけで�
 2. evaluation protocol mismatch主因: **rejected**
 3. official stateful core不足単独原因: **rejected**
 4. `unroll_length=20`不足単独原因: **rejected**
+5. `learning_rate=0.0001`単独原因: **rejected**
 
-### Completed unroll-80 evidence
+### Completed learning-rate evidence
 
-- run `30226976064`, job `89867137085`
-- artifact `8640762353`
-- digest `sha256:4e7fbacc077121d3fd09db1f6b7ec19a00942f8dc4cbf29b6cb9fd6eb18c9f4c`
-- Correct `2/60`, Random `4/60`
-- Language-blind `2/60`, State-only `0/60`, Language-shuffle `2/60`
-- Correct return `-1.8059994`, Random return `-1.1513333`
+- run `30235108376`, job `89881341003`
+- artifact `8642403437`
+- digest `sha256:882e92a17ba5da5836dcf78379a484cc7ed63827ed3bf0b18196c5b18c3d8917`
+- execution commit `67556f067028edac502380c6d3de15575c996ffc`
+- Correct `0/60`, Random `4/60`
+- Language-blind `0/60`, State-only `1/60`, Language-shuffle `0/60`
+- Correct return `-2.1523326`, Random return `-1.1513333`
 - parameters `6,200,115`
+- model-state `24,827,943 / 24,827,943 / 24,828,026 bytes`
 - actual frames `131,200` per seed
-- peak RSS `1,699,780 / 1,467,976 / 2,498,024 KiB`
-- wall `1479.48 / 1479.02 / 1560.07 s`
-- CPU forward approximately `7.86–8.00 ms/step`
-- stateful routing、unroll-80 routing、LSTM checkpoint、recurrent state、same-instance、parity、leakage: passed
+- peak RSS `1,470,976 / 1,269,884 / 2,414,924 KiB`
+- wall `1441.30 / 1404.99 / 1483.19 s`
+- model-audit CPU forward `7.511 ms/step`
+- stateful/unroll/lr routing、LSTM checkpoint、same-instance、parity、leakage=false: passed
 - qualification: rejected
 
-Learner logs show large sign-changing policy-gradient and total-loss oscillations through the final updates. Because unroll=80 was correctly routed yet competence remained below Random, unroll shortage is rejected as the sole cause.
+Decision: explicit lower learning rate reached all seeds but did not produce a competent policy or a language-dependent advantage. Reject learning-rate shortage as the sole cause.
 
-### Active single-factor screening: learning rate
+### Active single-factor screening: gradient clipping
 
-Change exactly one factor:
+Change exactly one factor in pinned official source:
 
-- add explicit `learning_rate=0.0001`
+- `clip_grad_norm_(model.parameters(), 40.0)` → `clip_grad_norm_(model.parameters(), 10.0)`
 
 Keep fixed:
 
 - `stateful=true`
 - `unroll_length=80`
+- learning rate: official default; no explicit override
 - entropy cost `0.05`
-- actors `2`
-- threads `1`
-- batch size `2`
+- actors `2`, threads `1`, batch size `2`
 - model family `multi`
 - frames、seeds、split、instances、controls
 
 Implementation:
 
-- patch: `patch_silg_learning_rate_screening.py`
-- workflow: `.github/workflows/r01_silg_learning_rate_screening.yml`
-- reference run: `30226976064`
-- reference artifact: `8640762353`
-
-Primary execution:
-
-- run `30235108376`
-- job `89881341003`
-- execution commit `67556f067028edac502380c6d3de15575c996ffc`
-- install、stateful/unroll/lr patch、schema、random control: passed
-- active step: three-seed training
-- artifact / qualification / performance: not yet available
-
-Duplicate/fallback execution:
-
-- run `30236217754`
-- execution commit `b3f1c6775fb6be5376ff53359b6732dfb100f313`
-- status: pending
-- jobs: 0
-- artifacts: 0
-- primary runが有効artifactを保存した場合は重複証拠に数えない。
-- primary runがexecution failureまたはartifact lossの場合だけfallbackとして使用する。
-- 同条件を追加dispatchしない。
+- patch: `patch_silg_gradient_clip_screening.py`
+- workflow: `.github/workflows/r01_silg_gradient_clip_screening.yml`
+- patch commit: `2c877197b275e9c11f018479909adfe8e2a82844`
+- workflow commit: `3f0c62430a27116722c22f69525b54631d93032b`
+- run/job/artifact: not yet verified
 
 Fail-closed requirements:
 
-1. Every seed command includes `--stateful`.
-2. Every seed command includes `--unroll_length 80`.
-3. Every seed command includes `--learning_rate 0.0001`.
+1. The installed pinned `run_exp.py` contains clip `10.0` exactly once and clip `40.0` zero times.
+2. Every seed command includes `--stateful` and `--unroll_length 80`.
+3. Every seed command omits an explicit `--learning_rate` override.
 4. Every checkpoint contains LSTM `core.*` weights and reaches the frame budget.
 5. Correct / Random / Language-blind / State-only / Language-shuffle use identical instances.
 6. Preserve model/checkpoint bytes、RSS、training wall、CPU latency.
@@ -110,9 +93,9 @@ Fail-closed requirements:
 
 Decision rule:
 
-- If routing is invalid, repair routing only; do not interpret performance.
-- If Correct success>0 and Correct beats Random in both win rate and return, retain learning-rate reduction as a candidate and verify three-seed minimum/resource cost.
-- If routing is valid but Correct remains at/below Random, reject learning rate as the sole cause and continue to exactly one of gradient clipping or optimizer/checkpoint restore based on the saved logs and official-code comparison.
+- Invalid source routing: repair routing only and do not interpret performance.
+- Correct success>0 and Correct beats Random in win rate and return: retain clip `10.0` as a candidate and verify three-seed minimum/resource cost.
+- Valid clip `10.0` but Correct at/below Random: reject gradient-clipping threshold as sole cause and continue to optimizer/checkpoint restore integrity as exactly one next cause.
 - Do not close with a negative result alone.
 
 ## P0 — Evaluation contract freeze
@@ -127,9 +110,9 @@ Ueda et al., LREC-COLING 2024、公式repository `riken-grp/J-CRe3`。exact comm
 
 ### Latest prior-art boundary
 
-CausalDisenSeg（arXiv 2026）は、missing-modality brain-tumor segmentationに対して、CVAE+HSICによるcausal/style factor分離、region causality module、counterfactual dual-adversarial抑制でbiasのNatural Direct Effectを抑える。missing-modality下のcausal disentanglement、region-grounded causal representation、counterfactual NDE suppressionだけではRQ-001の新規性を認定しない。一次preprintは確認済みだが、author-official repository、exact commit、immutable numerical reproductionは未確認。
+MagicBench（ACL 2026）は、対称promptでも視覚探索が言語triggerへ依存するvisual-agency lossを診断し、spatial promptingとsignal magnificationの因果介入で内部推論が残ることを示す。language dominance、perceptual-access bottleneck、prompt介入によるvisual grounding回復だけではRQ-001の新規性を認定しない。公式code/dataset `Ink-Dawn/MagicBench`は公開済みだが、exact commit、dependency、immutable numerical reproductionは未完了。
 
-既存のTRACE、DCAN、PCMCI、CausalLens、CTLD、score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、ReCITE、C3、MCDRL、CmIR、CAIR、Bayesian Ablation等もnovelty matrixの別列で維持し、論文値を本研究の能力証拠へ流用しない。
+既存のCausalDisenSeg、TRACE、DCAN、PCMCI、CausalLens、CTLD、score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、ReCITE、C3、MCDRL、CmIR、CAIR、Bayesian Ablation等もnovelty matrixの別列で維持し、論文値を本研究の能力証拠へ流用しない。
 
 ## P1 — R0.2 Environment-first
 
@@ -148,7 +131,7 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 正式境界:
 
-> **FURTHER NARROWED BEYOND COUNTERFACTUAL CAUSAL DISENTANGLEMENT UNDER MISSING MODALITIES — NOT ADOPTED**
+> **FURTHER NARROWED BEYOND CAUSAL DIAGNOSIS OF LANGUAGE-TRIGGERED VISUAL AGENCY LOSS — NOT ADOPTED**
 
 ## Stage transition
 
@@ -156,10 +139,10 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 ## Status
 
-- immutable R0.1 artifacts: **6件**
+- immutable R0.1 artifacts: **7件**
 - competent external baseline: **0件**
 - J-CRe3 numerical reproduction: **0件**
-- active screening: **learning-rate primary run training中**
+- active screening: **gradient-clipping workflow実装済み・結果未確認**
 - new mechanism family: **未認定**
 - new intelligence principle: **未発見**
 - capability progress: **未認定**
