@@ -15,8 +15,13 @@ from pathlib import Path
 from typing import Any
 
 CANONICAL_SEEDS = {1, 7, 19}
-REQUIRED_HOLDOUTS = ("entity_holdout", "dynamics_holdout", "language_holdout")
+HOLDOUT_POLICY = {
+    "entity_holdout": "conditional",
+    "dynamics_holdout": "required",
+    "language_holdout": "conditional",
+}
 ALLOWED_TYPES = {"continuous", "binary", "categorical"}
+ALLOWED_SUPPORT_STATUS = {"supported", "unsupported"}
 
 
 def load_rows(path: Path) -> list[dict[str, Any]]:
@@ -25,6 +30,23 @@ def load_rows(path: Path) -> list[dict[str, Any]]:
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _declared_support(metadata: dict[str, Any] | None, key: str) -> str | None:
+    """Read an optional fail-closed transfer-support declaration.
+
+    The declaration may be either ``"supported"``/``"unsupported"`` or an
+    object with a ``status`` field. Conditional holdouts may be absent and are
+    then inferred as supported only when real test rows are present. Dynamics
+    remains mandatory regardless of this declaration.
+    """
+    transfer_support = (metadata or {}).get("transfer_support", {})
+    if not isinstance(transfer_support, dict):
+        return None
+    value = transfer_support.get(key)
+    if isinstance(value, dict):
+        value = value.get("status")
+    return str(value) if value in ALLOWED_SUPPORT_STATUS else None
 
 
 def audit(rows: list[dict[str, Any]], metadata: dict[str, Any] | None) -> dict[str, Any]:
@@ -80,17 +102,38 @@ def audit(rows: list[dict[str, Any]], metadata: dict[str, Any] | None) -> dict[s
         if covered != set(range(state_dim)):
             errors.append("typed state_schema does not exactly cover the flattened state vector")
 
-    holdout_counts = {}
-    for key in REQUIRED_HOLDOUTS:
+    holdout_counts: dict[str, int] = {}
+    transfer_support: dict[str, dict[str, Any]] = {}
+    for key, policy in HOLDOUT_POLICY.items():
         count = sum(bool(row.get(key, False)) for row in rows if row.get("split") == "test")
         holdout_counts[key] = count
-        if count == 0:
-            errors.append(f"real test examples for {key} are absent")
+        declared = _declared_support(metadata, key)
+        inferred = "supported" if count > 0 else "unsupported"
+        effective = declared or inferred
+
+        if policy == "required" and count == 0:
+            errors.append(f"real test examples for required {key} are absent")
+        elif policy == "conditional" and count == 0:
+            if declared == "supported":
+                errors.append(f"{key} is declared supported but has no real test examples")
+            else:
+                warnings.append(f"{key} transfer is unsupported; no generator-backed test examples")
+
+        if count > 0 and declared == "unsupported":
+            errors.append(f"{key} has test examples but metadata declares it unsupported")
+
+        transfer_support[key] = {
+            "policy": policy,
+            "declared_status": declared,
+            "effective_status": effective,
+            "test_examples": count,
+        }
 
     train_forms = {tuple(row.get("text_tokens", [])) for row in rows if row.get("split") == "train"}
     test_forms = {tuple(row.get("text_tokens", [])) for row in rows if row.get("split") == "test"}
     form_overlap = len(train_forms & test_forms)
-    if test_forms and form_overlap == len(test_forms):
+    language_supported = transfer_support["language_holdout"]["effective_status"] == "supported"
+    if language_supported and test_forms and form_overlap == len(test_forms):
         errors.append("language-form holdout is not demonstrated; every test token sequence occurs in train")
 
     action_counts = Counter(int(row.get("action", -1)) for row in rows if row.get("split") == "train")
@@ -127,6 +170,7 @@ def audit(rows: list[dict[str, Any]], metadata: dict[str, Any] | None) -> dict[s
             "test_language_forms": len(test_forms),
             "overlapping_language_forms": form_overlap,
         },
+        "transfer_support": transfer_support,
         "required_method_properties": {
             "discrete_message_default": True,
             "message_alignment_loss": True,
