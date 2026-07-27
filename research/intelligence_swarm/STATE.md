@@ -63,7 +63,7 @@ Exact consumed learner batch、initial recurrent state、learner model、optimiz
 
 `.github/workflows/r01_silg_official_100m_chunk.yml`はseed 1、entropy `0.05`、official sampling defaultsを保持し、最初のdurable checkpointとして`1,000,000` framesをtargetにする。complete `job.tar`、optimizer/scheduler/frame、exact command、host provenance、RSS/wall、dependency、bytes、SHA-256を保存する。
 
-この統合時点ではconnectorからpush-run本体のrun ID、job ID、artifact ID、checkpoint qualificationを独立確認できていない。よって状態は**submitted / result unconfirmed**であり、開始・完了・能力進歩を認定しない。
+この統合時点でもpush-run本体のrun ID、job ID、artifact ID、checkpoint qualificationを独立確認できていない。よって状態は**submitted / result unconfirmed**であり、開始・完了・能力進歩を認定しない。同一chunkを重複dispatchしない。
 
 ## Latest short-horizon negative evidence
 
@@ -100,7 +100,9 @@ Run `30258965674`, artifact `8650362356`:
 
 D015〜D035を凍結する。能力runではrandom/language-blind/state-only/shuffle、model/checkpoint bytes、RSS、runtime、CPU latency、seed、split、actual frames、raw logs、checksums、leakageを保存する。infrastructure-only runでは能力対照をN/Aと明示し、能力進歩へ数えない。
 
-PR head `041e3579baaf5dbc35d533b3cf64143ce6515483`の確認可能なPR workflowsでは、canonical instance identity、unified acceptance gate、artifact containment、raw-log binding、prediction topology、score dataset-contract binding、normalized holdout/cell identity等は成功した。`R0D core normalized cell identity`だけが失敗しており、model failureとは分離して最小root causeを修正する。
+RESET-E081では、唯一失敗していた`R0D core normalized cell identity` workflowを、PRからcommit/pushする自己書換えjobからread-only fail-closed CIへ変更した。patch applicatorのidempotence、production coreの無差分、compile、focused regressionだけを検証する。model、benchmark、split、controls、評価定義は変更していない。
+
+PR head更新前に確認したworkflow群では、canonical instance identity、unified acceptance gate、artifact containment、raw-log binding、prediction topology、score dataset-contract binding、normalized holdout/cell identity等は成功し、`R0D core normalized cell identity`だけが失敗していた。新workflow結果が成功するまではevaluation-contract correctionを完了扱いにしない。
 
 Standalone canonical-instance-identity auditはpassしているが、`validate_dataset()`と`score()`へのdirect fail-closed integrationは未完了である。統合完了まではclaimed bundleからstandalone auditを省略しない。
 
@@ -108,7 +110,7 @@ Standalone canonical-instance-identity auditはpassしているが、`validate_d
 
 既存のscore-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg、MagicBench、CodeBind、NoisyCausal、CaST-Bench、CausalVerse、MTG-Causal-RL、Mind Dreamer、AER、COGS等の境界を維持する。
 
-今回、RQ-001を採用へ反転できる「一次文献 + author-official code + exact commit + public numerical contract」の新しい組は確認していない。文献名だけを追加してnovelty matrixを水増ししない。
+2026年一次文献の再監査では、unknown intervention targetを含むcausal DAG coarsening、RL policyのnonlinear causal reduction、少数environment・有限標本でのunknown target回復が既に扱われていることを確認した。RQ-001を採用へ反転できる「一次文献 + author-official code + exact commit + public numerical contract」の新しい組は確認していない。文献名だけを追加してnovelty matrixを水増ししない。
 
 正式判断:
 
@@ -129,4 +131,4 @@ Standalone canonical-instance-identity auditはpassしているが、`validate_d
 
 ## Last integration
 
-2026-07-28: **RESET-E080**。accepted one-step resume-equivalenceを正式台帳へ反映し、official seed-1 first 1M checkpoint workflowをsubmitted / result unconfirmedとして追跡した。PR-head evaluation checksではcore normalized-cell identityの単独失敗を分離し、外部baseline再現0件、能力進歩未認定、高校生級未達を維持する。
+2026-07-28: **RESET-E081**。PRから自己書換えする`R0D core normalized cell identity` workflowをread-only fail-closed CIへ修正した。official seed-1 first 1M checkpointはresult unconfirmed、外部baseline再現0件、能力進歩未認定、高校生級未達を維持する。
