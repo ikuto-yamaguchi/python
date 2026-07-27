@@ -13,6 +13,7 @@ on:
       - '.github/workflows/r01_silg_stateful_screening.yml'
       - '.github/workflows/r01_silg_unroll80_screening.yml'
       - '.github/workflows/r01_silg_learning_rate_screening.yml'
+      - '.github/workflows/r01_silg_gradient_clip_screening.yml'
   workflow_dispatch:
 
 permissions:
@@ -39,6 +40,8 @@ jobs:
             workflow: r01_silg_unroll80_screening.yml
           - label: learning-rate-0001
             workflow: r01_silg_learning_rate_screening.yml
+          - label: gradient-clip-10
+            workflow: r01_silg_gradient_clip_screening.yml
     steps:
       - name: Query latest ${{ matrix.label }} push run, jobs, and artifacts
         env:
