@@ -8,8 +8,8 @@ integrity, registered train/evaluation split scope, paired statistics, complete
 same-instance metric coverage, resource artifacts, strictly-positive measured
 resources, bundle-contained artifact paths, prediction-payload leakage,
 prediction-cell binding, prediction/statistics checksums, deterministic
-statistics recomputation, and public-baseline provenance/reproduction must all
-pass together.
+statistics recomputation, public-baseline provenance/reproduction, and exact
+binding of baseline observations to saved statistics fields must all pass together.
 """
 from __future__ import annotations
 
@@ -27,6 +27,7 @@ import audit_prediction_metric_coverage as prediction_metric_coverage
 import audit_prediction_payload_leakage as prediction_payload
 import audit_prediction_statistics_artifacts as prediction_statistics
 import audit_public_baseline_reproduction as public_baseline_reproduction
+import audit_public_baseline_statistics_binding as public_baseline_statistics_binding
 import audit_schema_alias_leakage as schema_alias
 import audit_statistics_recomputation_binding as statistics_recomputation
 import evaluation_contract
@@ -66,6 +67,9 @@ def audit_acceptance(
         data, predictions, manifest, base_dir
     )
     checks["public_baseline_reproduction_contract"] = public_baseline_reproduction.audit(manifest)
+    checks["public_baseline_statistics_binding_contract"] = public_baseline_statistics_binding.audit(
+        manifest, base_dir
+    )
 
     failed = sorted(name for name, result in checks.items() if result.get("valid") is not True)
     errors = [
@@ -105,6 +109,8 @@ def audit_acceptance(
         "public_baseline_expected_observed_values_required": True,
         "public_baseline_tolerances_preregistered": True,
         "public_baseline_observations_bound_to_statistics_checksum": True,
+        "public_baseline_metric_paths_required": True,
+        "public_baseline_observed_values_must_equal_saved_statistics_fields": True,
         "partial_contract_success_is_not_acceptance": True,
         "new_mechanism_introduced": False,
     }
