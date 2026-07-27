@@ -7,6 +7,8 @@ RTFM_SHA=58f17955595b5a127c96d045d896fcbcc7d4b570
 EXPMAN_VERSION=0.0.7
 EXPMAN_SHA256=5b778d23d9efdb541d72783d1ecf1482451cc1a476eb7e16fb52d6b2ce1445c6
 EXPMAN_URL=https://files.pythonhosted.org/packages/ac/f7/1963bb15460bf03dc8df94c6d1e9f296eab9e1fe316387b5d3c4c532dee1/expman-0.0.7.tar.gz
+BERT_TOKENIZER_REVISION=972c172d40c812cedc3fd3a53aa914cb41f55b3e
+BERT_TOKENIZER_BASE=https://huggingface.co/google-bert/bert-base-uncased/resolve/${BERT_TOKENIZER_REVISION}
 
 mkdir -p "$ROOT"
 python -m pip install --upgrade \
@@ -64,15 +66,25 @@ print('expman_api', Experiment.__name__, JSONLogger.__name__, SlurmJob.__name__)
 PY
 
 # SILG's base environment imports a local BERT tokenizer unconditionally, but
-# transformers and these assets are omitted from requirements.txt.
+# transformers and these assets are omitted from requirements.txt. Pin the
+# immutable Hugging Face repository revision and use the supported resolve URL;
+# the former raw/main endpoint began returning HTTP errors on hosted runners.
 TOKENIZER_DIR="$ROOT/silg/cache/tokenizer"
 mkdir -p "$TOKENIZER_DIR"
-wget -q https://huggingface.co/bert-base-uncased/raw/main/vocab.txt \
-  -O "$TOKENIZER_DIR/vocab.txt"
-wget -q https://huggingface.co/bert-base-uncased/raw/main/tokenizer_config.json \
-  -O "$TOKENIZER_DIR/config.json"
-wget -q https://huggingface.co/bert-base-uncased/raw/main/tokenizer.json \
-  -O "$TOKENIZER_DIR/tokenizer.json"
+for asset in vocab.txt tokenizer_config.json tokenizer.json; do
+  wget -q \
+    --tries=5 --timeout=30 --waitretry=2 \
+    --retry-on-http-error=429,500,502,503,504 \
+    "$BERT_TOKENIZER_BASE/$asset" \
+    -O "$TOKENIZER_DIR/$asset"
+  test -s "$TOKENIZER_DIR/$asset"
+done
+cp "$TOKENIZER_DIR/tokenizer_config.json" "$TOKENIZER_DIR/config.json"
+sha256sum \
+  "$TOKENIZER_DIR/vocab.txt" \
+  "$TOKENIZER_DIR/config.json" \
+  "$TOKENIZER_DIR/tokenizer.json" \
+  > "$TOKENIZER_DIR/SHA256SUMS.txt"
 
 python - <<'PY'
 import gym, torch, transformers, silg, rtfm
