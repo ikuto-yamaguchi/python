@@ -6,7 +6,7 @@
 
 ## Current stage
 
-- Stage: **R0 Research Reconstruction — resume-equivalence instrumentation**
+- Stage: **R0 Research Reconstruction — one-step resume-equivalence execution**
 - Canonical branch: `research/intelligence-swarm-reconstruction-001`
 - A〜Dの新規toy仮説・別branch・新規機構族: **禁止**
 - 既存stacked draft PR: **negative-results archive。新作業のbaseにしない**
@@ -27,6 +27,7 @@
 
 - immutable R0.1 short-horizon screening artifacts: **8件**
 - official-contract infrastructure artifacts: **1件・resume evidence不足で不合格**
+- one-step resume-equivalence artifact: **0件・workflow発行済み、結果未認定**
 - official SILG RTFM 100M-frame reproduction: **0件**
 - 学習済み公開能力baseline再現: **0件**
 - J-CRe3 numerical reproduction: **0件**
@@ -104,29 +105,31 @@ Run `30258965674`, job `89954109262`, artifact `8650362356`:
 
 ## Active execution
 
-次の単一修正対象はresume instrumentationのみ。
+resume instrumentationだけを追加した。pinned SILGのlearner updateを一度だけ包み、次をdiskへ保存して同一process内でreloadする。
 
-1. checkpoint境界のPython/NumPy/Torch RNG stateを保存する。
-2. 次のlearner updateで消費するexact batchを保存または決定的fingerprint化する。
-3. model、optimizer、scheduler、frame、RNGをrestoreする。
-4. 同一batchでone-step updateを再実行する。
-5. model tensors、optimizer slots、scheduler/frame、scalar lossesの完全一致を要求する。
+1. Python/NumPy/Torch CPU RNG state。CUDA使用時は全CUDA RNG state。
+2. 次のlearner updateで消費するexact batchとinitial agent state。
+3. update直前のmodel、actor model、optimizer、scheduler state。
+4. uninterrupted one-step後とreload-resumed one-step後のmodel、optimizer、scheduler。
+5. policy/value/entropy/total loss、gradient norm、決定的frame increment。
 
-model、source pins、optimizer、sampling defaults、split、能力評価は変更しない。この監査が通るまで100M-frame capability reproductionを開始しない。
+受理条件はmodel/optimizer/schedulerのbitwise equality、lossesとgradient normのexact equality、exact batch payloadのbytes・SHA-256保存である。model、source pins、optimizer、sampling defaults、split、能力評価は変更していない。
+
+workflow `.github/workflows/r01_silg_resume_equivalence.yml`はcanonical pushで発行済み。ただしrun ID、job、artifact、合否は未確認であり、resume integrityやresource feasibilityはまだ認定しない。この監査が通るまで100M-frame capability reproductionを開始しない。
 
 ## Evaluation contract
 
-D015〜D035を凍結する。能力runではrandom/language-blind/state-only/shuffle、model/checkpoint bytes、RSS、runtime、CPU latency、seed、split、actual frames、raw logs、checksums、leakageを保存する。infrastructure-only runではrandomをplumbing probeとして保存し、他の能力対照はN/Aと明示する。
+D015〜D035を凍結する。能力runではrandom/language-blind/state-only/shuffle、model/checkpoint bytes、RSS、runtime、CPU latency、seed、split、actual frames、raw logs、checksums、leakageを保存する。infrastructure-only runでは能力対照をN/Aと明示し、能力進歩へ数えない。
 
 ## Prior-art and RQ boundary
 
-既存のscore-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg、MagicBench、CodeBind、NoisyCausal、CaST-Bench、CausalVerse、MTG-Causal-RL等の境界を維持する。
+既存のscore-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg、MagicBench、CodeBind、NoisyCausal、CaST-Bench、CausalVerse、MTG-Causal-RL、Mind Dreamer等の境界を維持する。
 
-Mind Dreamer (ICML 2026)はlatent world-model manifoldへのactive causal intervention、adversarially generated intervention anchors、relay value/uncertainty propagationを扱う。これらだけではRQ-001の新規性にならず、SILG/J-CRe3の再現証拠も代替しない。
+SemEval-2026 Task 12 AERは、複数文書の支持証拠からtarget eventの最も妥当な直接原因を選ぶevidence-grounded abductive causal reasoning benchmarkであり、公式dataset repositoryも公開されている。したがって、language-onlyの証拠統合、direct-cause選択、非因果distractor識別だけではRQ-001の新規性にならず、hidden intervention-target groundingやSILG/J-CRe3能力の代替証拠にもならない。
 
 正式判断:
 
-> **RQ-001: FURTHER NARROWED BEYOND ACTIVE CAUSAL INTERVENTION ON LATENT WORLD-MODEL MANIFOLDS — NOT ADOPTED**
+> **RQ-001: FURTHER NARROWED BEYOND EVIDENCE-GROUNDED ABDUCTIVE EVENT-CAUSE INFERENCE — NOT ADOPTED**
 
 ## Stage transition
 
@@ -143,4 +146,4 @@ Mind Dreamer (ICML 2026)はlatent world-model manifoldへのactive causal interv
 
 ## Last integration
 
-2026-07-27: **RESET-E076**。official-contract infrastructure runを回収し、command/checkpoint/model/optimizer/frame/resource保存の成功と、RNG・learner-batch state不足によるresume-equivalence未達を分離した。次の単一修正をresume instrumentationだけに固定し、能力進歩未認定・高校生級未達を維持する。
+2026-07-28: **RESET-E077**。official sampling契約を固定したまま、RNG・exact learner batch・one-step updateのdisk reload再実行とbitwise比較を行うresume-equivalence instrumentationを実装・発行した。AERをlanguage-only causal reasoningの既存境界へ追加し、外部baseline再現0件、能力進歩未認定、高校生級未達を維持する。
