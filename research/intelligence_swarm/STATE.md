@@ -74,14 +74,6 @@ Resources:
 - wall `1479.48 / 1479.02 / 1560.07 s`
 - CPU forward approximately `7.86–8.00 ms/step`
 
-Diagnostics:
-
-- chosen-action valid fraction: `1.0` for every seed
-- masked policy entropy mean: `1.3611 / 1.2464 / 1.2459`
-- recurrent state remained active
-- Correct、language-blind、language-shuffleは同率
-- learner logのpolicy-gradient lossとtotal lossは終盤まで大きく正負反転し、optimizer-step instabilityを疑う根拠が残る
-
 Decision:
 
 > **unroll不足を単独主因として棄却する。unroll=80は正しく到達したが、CorrectはRandomを下回り、language-blind/shuffleと同率で、言語利用能力も成立しなかった。**
@@ -90,11 +82,22 @@ Decision:
 
 変更要因はlearning rateのみ。`stateful=true`、`unroll_length=80`、entropy `0.05`、actors `2`、threads `1`、batch `2`、frames `131072`、seeds `1/7/19`、split、matched instances、controlsを固定する。
 
-- patch: `patch_silg_learning_rate_screening.py`
-- workflow: `.github/workflows/r01_silg_learning_rate_screening.yml`
+Primary run:
+
+- run `30235108376`
+- job `89881341003`
+- execution commit `67556f067028edac502380c6d3de15575c996ffc`
 - requested value: `0.0001`
-- routing proof: 全seed commandの`--learning_rate 0.0001`、`--stateful`、`--unroll_length 80`、LSTM checkpoint、actual frames
-- status: **workflow実装済み。結果未認定**
+- install、stateful patch、unroll-80 patch、learning-rate patch、schema、random control: **passed**
+- current step: **three-seed training in progress**
+- artifact / qualification / performance: **未生成・未認定**
+
+Duplicate handling:
+
+- later run `30236217754`、execution commit `b3f1c6775fb6be5376ff53359b6732dfb100f313`: **pending / jobs 0 / artifacts 0**
+- primary runが有効artifactを保存する限り、後続runを追加seed・独立改善証拠として数えない。
+- primary runがexecution failureまたはartifact lossの場合だけfallback候補とする。
+- 同条件を追加dispatchしない。
 
 有効なrunでもCorrectがRandomを上回らない場合、learning-rate単独原因を棄却する。ただしiterationは閉じず、保存logと公式code差分からgradient clippingまたはoptimizer/checkpoint restoreの一方だけを次に選ぶ。
 
@@ -104,13 +107,13 @@ D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示す
 
 ## Prior-art and RQ boundary
 
-既存のscore-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE等の境界を維持する。
+既存のscore-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation等の境界を維持する。
 
-CLeaR 2026のBayesian Ablationは、neural network内の表現単位がtask performanceへ与える因果的寄与を確率分布として推定し、distributedness、manifold complexity、polysemanticityを測る。したがって、unit-level probabilistic ablation、表現の因果寄与推定、distributedness/polysemanticity診断だけではRQ-001の新規性を認定しない。一次論文は確認済みだが、author-official code、exact commit、immutable numerical reproductionは未確認であり、SILG/J-CRe3の代替baselineにも数えない。
+CausalDisenSeg（arXiv 2026）は、missing-modality脳腫瘍segmentationで、CVAE+HSICによるanatomical causal factor / style bias factor分離、region causality module、counterfactual dual-adversarial抑制によりbiasのNatural Direct Effectを抑える。したがって、missing-modality下のcausal/style disentanglement、region-grounded causal representation、counterfactual NDE suppressionだけではRQ-001の新規性を認定しない。一次preprintは確認済みだが、author-official repository、exact commit、immutable numerical reproductionは未確認であり、SILG/J-CRe3の代替baselineにも数えない。
 
 正式判断:
 
-> **RQ-001: FURTHER NARROWED BEYOND PROBABILISTIC CAUSAL ABLATION OF TASK REPRESENTATIONS — NOT ADOPTED**
+> **RQ-001: FURTHER NARROWED BEYOND COUNTERFACTUAL CAUSAL DISENTANGLEMENT UNDER MISSING MODALITIES — NOT ADOPTED**
 
 ## Stage transition
 
@@ -127,4 +130,4 @@ CLeaR 2026のBayesian Ablationは、neural network内の表現単位がtask perf
 
 ## Last integration
 
-2026-07-27: **RESET-E067**。unroll-80 run `30226976064`のimmutable artifactを取得し、配線・対照・resource・leakageを確認した。Correct `2/60`、Random `4/60`、language-blind/shuffle `2/60`でqualificationは不合格となり、unroll不足単独原因を棄却した。終盤までの大きなpolicy-gradient loss反転を根拠に、learning rateだけを`0.0001`へ変更する次screeningを実装した。外部baseline再現0、能力進歩未認定、高校生級未達を維持する。
+2026-07-27: **RESET-E068**。learning-rate `0.0001` primary run `30235108376` / job `89881341003`が、配線・schema・random controlを通過してthree-seed学習中であることを確認した。後続run `30236217754`はpendingであり、primary bundleが有効なら重複証拠に数えない。CausalDisenSegをnovelty境界へ追加したが、外部baseline再現0、能力進歩未認定、高校生級未達を維持する。
