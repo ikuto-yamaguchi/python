@@ -37,8 +37,11 @@ def canonical_dataset() -> list[dict]:
 
 
 def main() -> None:
-    assert contract.canonical_domain_label("ＲＴＦＭ") == contract.canonical_domain_label("rtfm")
-    assert contract.canonical_condition_label("DYNAMICS_HOLDOUT | ENTITY_HOLDOUT") == contract.canonical_condition_label("entity_holdout+dynamics_holdout")
+    # The core contract exposes canonical_domain/canonical_condition.  Keep this
+    # regression bound to the production API instead of the historical patch
+    # helper names canonical_*_label.
+    assert contract.canonical_domain("ＲＴＦＭ") == contract.canonical_domain("rtfm")
+    assert contract.canonical_condition("DYNAMICS_HOLDOUT | ENTITY_HOLDOUT") == contract.canonical_condition("entity_holdout+dynamics_holdout")
 
     audit = contract.validate_dataset(canonical_dataset())
     assert audit["valid"], audit["errors"]
