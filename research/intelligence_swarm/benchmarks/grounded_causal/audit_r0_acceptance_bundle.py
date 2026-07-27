@@ -7,10 +7,10 @@ Dataset/schema leakage, alias-normalized leakage, explicit holdout-condition
 integrity, registered train/evaluation split scope, paired statistics, complete
 same-instance metric coverage, resource artifacts, resource-cell evaluation split
 scope, strictly-positive measured resources, bundle-contained artifact paths,
-prediction-payload leakage, prediction-cell binding, prediction/statistics
-checksums, deterministic statistics recomputation, public-baseline
-provenance/reproduction, and exact binding of baseline observations to saved
-statistics fields must all pass together.
+raw-log measurement binding, prediction-payload leakage, prediction-cell binding,
+prediction/statistics checksums, deterministic statistics recomputation,
+public-baseline provenance/reproduction, and exact binding of baseline observations
+to saved statistics fields must all pass together.
 """
 from __future__ import annotations
 
@@ -30,6 +30,7 @@ import audit_prediction_payload_leakage as prediction_payload
 import audit_prediction_statistics_artifacts as prediction_statistics
 import audit_public_baseline_reproduction as public_baseline_reproduction
 import audit_public_baseline_statistics_binding as public_baseline_statistics_binding
+import audit_raw_log_measurement_binding as raw_log_measurement_binding
 import audit_schema_alias_leakage as schema_alias
 import audit_statistics_recomputation_binding as statistics_recomputation
 import evaluation_contract
@@ -64,6 +65,7 @@ def audit_acceptance(
     checks["artifact_eval_split_scope_contract"] = artifact_eval_split_scope.audit(manifest)
     checks["nonzero_measurement_contract"] = nonzero_measurements.audit(manifest, base_dir)
     checks["artifact_path_containment_contract"] = artifact_path_containment.audit(manifest, base_dir)
+    checks["raw_log_measurement_binding_contract"] = raw_log_measurement_binding.audit(manifest, base_dir)
     checks["prediction_cell_binding_contract"] = prediction_cell_binding.audit(manifest, base_dir)
     checks["prediction_statistics_evidence_contract"] = prediction_statistics.audit(manifest, base_dir)
     checks["statistics_recomputation_binding_contract"] = statistics_recomputation.audit(
@@ -107,6 +109,9 @@ def audit_acceptance(
         "nonempty_resource_artifacts_required": True,
         "artifact_paths_must_be_bundle_contained": True,
         "absolute_parent_escape_and_symlink_paths_forbidden": True,
+        "raw_logs_must_contain_exactly_one_matching_measurement_record": True,
+        "raw_log_measurements_must_equal_manifest_claims": True,
+        "plain_text_or_unbound_resource_logs_forbidden": True,
         "prediction_rows_must_match_declared_run_cell": True,
         "pooled_or_reused_prediction_artifacts_forbidden": True,
         "saved_statistics_must_equal_fresh_recomputation": True,
