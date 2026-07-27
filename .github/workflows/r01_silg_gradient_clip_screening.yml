@@ -1,0 +1,170 @@
+name: R0.1 SILG learner gradient-clipping screening
+run-name: R0.1 SILG stateful=true unroll=80 grad_clip=10 @ ${{ github.sha }}
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - '.github/workflows/r01_silg_gradient_clip_screening.yml'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/patch_silg_gradient_clip_screening.py'
+  workflow_dispatch:
+
+concurrency:
+  group: r01-silg-gradient-clip-screening-${{ github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  gradient-clip-screening:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+          cache: pip
+      - name: Record immutable provenance
+        run: |
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_gradient_clip"
+          mkdir -p "$results"
+          {
+            echo "screening_factor=gradient_clip_norm"
+            echo "screening_value=10.0"
+            echo "reference_value=40.0"
+            echo "stateful=true"
+            echo "unroll_length=80"
+            echo "learning_rate=official_default"
+            echo "reference_run_id=30226976064"
+            echo "reference_artifact_id=8640762353"
+            echo "github_run_id=${GITHUB_RUN_ID}"
+            echo "github_sha=${GITHUB_SHA}"
+            git rev-parse HEAD
+            git status --short
+            date -u
+            uname -a
+            lscpu
+            free -h
+            python --version
+          } | tee "$results/SILG_RTFM_HOST.txt"
+      - name: Install pinned SILG and RTFM
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_gradient_clip"
+          /usr/bin/time -v bash research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh "$RUNNER_TEMP/r0_silg" \
+            2>&1 | tee "$results/SILG_RTFM_INSTALL.log"
+      - name: Apply verified stateful patch
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_gradient_clip"
+          python research/intelligence_swarm/benchmarks/grounded_causal/patch_silg_stateful_screening.py \
+            2>&1 | tee "$results/SILG_RTFM_STATEFUL_PATCH.log"
+          cp research/intelligence_swarm/benchmarks/grounded_causal/SILG_STATEFUL_HARNESS_PATCH.json "$results/"
+      - name: Apply verified unroll-80 patch
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_gradient_clip"
+          python research/intelligence_swarm/benchmarks/grounded_causal/patch_silg_unroll80_screening.py \
+            2>&1 | tee "$results/SILG_RTFM_UNROLL80_PATCH.log"
+          cp research/intelligence_swarm/benchmarks/grounded_causal/SILG_UNROLL80_HARNESS_PATCH.json "$results/"
+      - name: Apply gradient-clipping single-factor patch
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_gradient_clip"
+          python research/intelligence_swarm/benchmarks/grounded_causal/patch_silg_gradient_clip_screening.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" \
+            --output "$results/SILG_GRADIENT_CLIP_SOURCE_PATCH.json" \
+            2>&1 | tee "$results/SILG_RTFM_GRADIENT_CLIP_PATCH.log"
+          grep -F 'clip_grad_norm_(model.parameters(), 10.0)' "$RUNNER_TEMP/r0_silg/silg/run_exp.py"
+          ! grep -F 'clip_grad_norm_(model.parameters(), 40.0)' "$RUNNER_TEMP/r0_silg/silg/run_exp.py"
+      - name: Verify generator schema
+        run: python research/intelligence_swarm/benchmarks/grounded_causal/test_export_rtfm_generator_signatures.py
+      - name: Run canonical random control and schema probe
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_gradient_clip"
+          /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/silg_rtfm_probe.py \
+            --env silg:rtfm_train_s1-v0 --seeds 1 7 19 --episodes 20 --max-steps 80 \
+            --output "$results/SILG_RTFM_RANDOM_CANONICAL_3SEED.json" \
+            2>&1 | tee "$results/SILG_RTFM_RANDOM_CANONICAL.log"
+      - name: Train stateful unroll-80 multi with gradient clip 10
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_gradient_clip"
+          /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" --seeds 1 7 19 --frames 131072 \
+            --entropy-cost 0.05 --output "$results" \
+            2>&1 | tee "$results/SILG_RTFM_RECURRENT_SMOKE.log"
+      - name: Verify single factor reached source and checkpoints
+        run: |
+          python - <<'PY'
+          import json, torch
+          from pathlib import Path
+          r = Path('research/intelligence_swarm/benchmarks/grounded_causal/results_gradient_clip')
+          d = json.loads((r/'SILG_RTFM_RECURRENT_SMOKE_3SEED.json').read_text())
+          p = json.loads((r/'SILG_GRADIENT_CLIP_SOURCE_PATCH.json').read_text())
+          assert p['single_changed_factor'] == {'name': 'gradient_clip_norm', 'from': 40.0, 'to': 10.0}
+          assert [x['seed'] for x in d['runs']] == [1, 7, 19]
+          for x in d['runs']:
+              cmd = [str(v) for v in x['command']]
+              assert '--stateful' in cmd, cmd
+              assert cmd[cmd.index('--unroll_length') + 1] == '80', cmd
+              assert '--learning_rate' not in cmd, cmd
+              assert x['checkpoint']['frames_in_checkpoint'] >= 131072
+              sd = torch.load(r/f"SILG_RTFM_TRAINED_STATE_SEED_{x['seed']}.pt", map_location='cpu')
+              assert any(k.startswith('core.') for k in sd), f"seed {x['seed']} lacks LSTM core"
+          print('verified gradient clip 10 source patch with all other screening factors fixed')
+          PY
+      - name: Evaluate matched controls on identical instances
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_gradient_clip"
+          /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/run_silg_matched_eval.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" --results "$results" --seeds 1 7 19 --episodes 20 \
+            2>&1 | tee "$results/SILG_RTFM_MATCHED_EVAL.log"
+      - name: Diagnose policy and recurrent dynamics
+        if: always()
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_gradient_clip"
+          python research/intelligence_swarm/benchmarks/grounded_causal/run_silg_policy_diagnostics.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" --results "$results" --seeds 1 7 19 --episodes 20 \
+            --out "$results/SILG_RTFM_POLICY_DIAGNOSTICS_3SEED.json" \
+            2>&1 | tee "$results/SILG_RTFM_POLICY_DIAGNOSTICS.log"
+      - name: Compare official and matched evaluation semantics
+        if: always()
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_gradient_clip"
+          python research/intelligence_swarm/benchmarks/grounded_causal/audit_silg_official_eval_parity.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" --results "$results" --seeds 1 7 19 --episodes 20 \
+            --out "$results/SILG_RTFM_OFFICIAL_EVAL_PARITY_3SEED.json" \
+            2>&1 | tee "$results/SILG_RTFM_OFFICIAL_EVAL_PARITY.log"
+      - name: Apply unchanged R0.1 qualification gate
+        if: always()
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_gradient_clip"
+          python research/intelligence_swarm/benchmarks/grounded_causal/qualify_r01_source_policy.py \
+            --training "$results/SILG_RTFM_RECURRENT_SMOKE_3SEED.json" \
+            --matched "$results/SILG_RTFM_MATCHED_EVAL_3SEED.json" \
+            --output "$results/SILG_RTFM_R01_QUALIFICATION.json" \
+            2>&1 | tee "$results/SILG_RTFM_R01_QUALIFICATION.log"
+      - name: Freeze logs dependencies sizes and checksums
+        if: always()
+        run: |
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_gradient_clip"
+          python -m pip freeze | sort > "$results/SILG_RTFM_R01_PIP_FREEZE.txt"
+          find "$results" -maxdepth 1 -type f -printf '%f %s bytes\n' | sort > "$results/SILG_RTFM_R01_FILE_SIZES.txt"
+          sha256sum "$results"/* > "$results/SILG_RTFM_R01_SHA256SUMS.txt" || true
+      - name: Upload immutable gradient-clipping screening bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r01-silg-rtfm-gradient-clip-${{ github.run_id }}
+          path: research/intelligence_swarm/benchmarks/grounded_causal/results_gradient_clip/
+          if-no-files-found: error
+          retention-days: 30
