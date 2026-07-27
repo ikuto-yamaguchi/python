@@ -1,0 +1,146 @@
+name: R0.1 SILG one-step resume equivalence
+run-name: R0.1 SILG resume equivalence instrumentation @ ${{ github.sha }}
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - '.github/workflows/r01_silg_resume_equivalence.yml'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/patch_silg_resume_equivalence.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/patch_silg_official_infrastructure_qualification.py'
+  workflow_dispatch:
+
+concurrency:
+  group: r01-silg-resume-equivalence-${{ github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  resume-equivalence:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+          cache: pip
+      - name: Record immutable provenance and frozen scope
+        run: |
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_resume_equivalence"
+          mkdir -p "$results"
+          {
+            echo "classification=resume_equivalence_instrumentation"
+            echo "capability_evidence=false"
+            echo "model=multi"
+            echo "stateful=false"
+            echo "num_actors=30"
+            echo "batch_size=24"
+            echo "unroll_length=80"
+            echo "num_threads=4"
+            echo "learning_rate=0.0005"
+            echo "optimizer=RMSprop"
+            echo "gradient_clip_norm=40"
+            echo "segment_frames=32768"
+            echo "seed=1"
+            echo "train_split=silg:rtfm_train_s1-v0"
+            echo "validation_split=silg:rtfm_test_s1-v0"
+            echo "github_run_id=${GITHUB_RUN_ID}"
+            echo "github_sha=${GITHUB_SHA}"
+            git rev-parse HEAD
+            git status --short
+            date -u
+            uname -a
+            lscpu
+            free -h
+            python --version
+          } | tee "$results/SILG_RTFM_RESUME_HOST.txt"
+      - name: Install pinned SILG and RTFM
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_resume_equivalence"
+          /usr/bin/time -v bash research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh "$RUNNER_TEMP/r0_silg" \
+            2>&1 | tee "$results/SILG_RTFM_RESUME_INSTALL.log"
+      - name: Apply official sampling and resume-only instrumentation
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_resume_equivalence"
+          python research/intelligence_swarm/benchmarks/grounded_causal/patch_silg_official_infrastructure_qualification.py \
+            --output "$results/SILG_RTFM_RESUME_OFFICIAL_PATCH.json" \
+            2>&1 | tee "$results/SILG_RTFM_RESUME_OFFICIAL_PATCH.log"
+          python research/intelligence_swarm/benchmarks/grounded_causal/patch_silg_resume_equivalence.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" \
+            --output "$results/SILG_RTFM_RESUME_INSTRUMENTATION_PATCH.json" \
+            2>&1 | tee "$results/SILG_RTFM_RESUME_INSTRUMENTATION_PATCH.log"
+          grep -F 'def _learn_impl(actor_model,' "$RUNNER_TEMP/r0_silg/silg/run_exp.py"
+          grep -F 'SILG_RESUME_PROBE_OUTPUT' "$RUNNER_TEMP/r0_silg/silg/run_exp.py"
+          grep -F '"--num_actors", "30"' research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py
+          grep -F '"--batch_size", "24"' research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py
+          grep -F '"--unroll_length", "80"' research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py
+      - name: Verify generator schema
+        run: python research/intelligence_swarm/benchmarks/grounded_causal/test_export_rtfm_generator_signatures.py
+      - name: Run official-contract segment with one-step replay
+        env:
+          SILG_RESUME_PROBE_OUTPUT: ${{ github.workspace }}/research/intelligence_swarm/benchmarks/grounded_causal/results_resume_equivalence/SILG_RTFM_ONE_STEP_RESUME_EQUIVALENCE.json
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_resume_equivalence"
+          /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" --seeds 1 --frames 32768 \
+            --entropy-cost 0.05 --output "$results" \
+            2>&1 | tee "$results/SILG_RTFM_RESUME_TRAIN.log"
+      - name: Fail closed on resume-equivalence report
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r = Path('research/intelligence_swarm/benchmarks/grounded_causal/results_resume_equivalence')
+          p = r / 'SILG_RTFM_ONE_STEP_RESUME_EQUIVALENCE.json'
+          assert p.is_file(), p
+          d = json.loads(p.read_text())
+          assert d['status'] == 'accepted', d.get('failures')
+          assert d['model_bitwise_equal'] is True
+          assert d['optimizer_bitwise_equal'] is True
+          assert d['scheduler_bitwise_equal'] is True
+          assert d['frame_increment_equal'] is True
+          assert d['scalar_stats_uninterrupted'] == d['scalar_stats_resumed']
+          assert d['gradient_norm_uninterrupted'] == d['gradient_norm_resumed']
+          assert set(d['rng_state_saved']) >= {'python', 'numpy', 'torch_cpu'}
+          payload = Path(d['exact_batch_payload'])
+          assert payload.is_file() and payload.stat().st_size == d['exact_batch_payload_bytes']
+          print(json.dumps(d, indent=2, sort_keys=True))
+          PY
+      - name: Record evaluation-control applicability
+        if: always()
+        run: |
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_resume_equivalence"
+          cat > "$results/SILG_RTFM_RESUME_CONTROL_APPLICABILITY.json" <<'JSON'
+          {
+            "capability_evaluation_performed": false,
+            "random": "plumbing_probe_not_repeated; inherited applicability only",
+            "language_blind": "not_applicable_to_resume_instrumentation",
+            "state_only": "not_applicable_to_resume_instrumentation",
+            "language_shuffle": "not_applicable_to_resume_instrumentation",
+            "leakage": "no capability predictions produced",
+            "reason": "This run changes only evidence instrumentation and cannot be counted as policy competence, a new mechanism family, or capability progress."
+          }
+          JSON
+      - name: Freeze dependencies sizes and checksums
+        if: always()
+        run: |
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_resume_equivalence"
+          python -m pip freeze | sort > "$results/SILG_RTFM_RESUME_PIP_FREEZE.txt"
+          find "$results" -maxdepth 1 -type f -printf '%f %s bytes\n' | sort > "$results/SILG_RTFM_RESUME_FILE_SIZES.txt"
+          sha256sum "$results"/* > "$results/SILG_RTFM_RESUME_SHA256SUMS.txt" || true
+      - name: Upload immutable resume-equivalence bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r01-silg-resume-equivalence-${{ github.run_id }}
+          path: research/intelligence_swarm/benchmarks/grounded_causal/results_resume_equivalence/
+          if-no-files-found: error
+          retention-days: 30
