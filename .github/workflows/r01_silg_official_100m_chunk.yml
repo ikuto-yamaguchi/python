@@ -1,0 +1,139 @@
+name: R0.1 SILG official 100M continuation chunk
+run-name: R0.1 SILG official seed 1 checkpoint chunk @ ${{ github.sha }}
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - '.github/workflows/r01_silg_official_100m_chunk.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: r01-silg-official-100m-seed1
+  cancel-in-progress: false
+
+jobs:
+  official-seed1-first-chunk:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+          cache: pip
+
+      - name: Record immutable host provenance
+        run: |
+          set -euo pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_100m_seed1"
+          mkdir -p "$results"
+          {
+            echo "github_repository=${GITHUB_REPOSITORY}"
+            echo "github_workflow=${GITHUB_WORKFLOW}"
+            echo "github_run_id=${GITHUB_RUN_ID}"
+            echo "github_run_attempt=${GITHUB_RUN_ATTEMPT}"
+            echo "github_ref=${GITHUB_REF}"
+            echo "github_sha=${GITHUB_SHA}"
+            git rev-parse HEAD
+            git status --short
+            date -u
+            uname -a
+            lscpu
+            free -h
+            df -h
+            python --version
+          } | tee "$results/HOST.txt"
+
+      - name: Install pinned public SILG and RTFM sources
+        run: |
+          set -euo pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_100m_seed1"
+          /usr/bin/time -v bash research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh "$RUNNER_TEMP/r01_official_100m" \
+            2>&1 | tee "$results/INSTALL.log"
+
+      - name: Train official recurrent baseline to first durable checkpoint
+        env:
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+        run: |
+          set -euo pipefail
+          results="$GITHUB_WORKSPACE/research/intelligence_swarm/benchmarks/grounded_causal/results_official_100m_seed1"
+          silg="$RUNNER_TEMP/r01_official_100m/silg"
+          savedir="$results/savedir"
+          cd "$silg"
+          /usr/bin/time -v -o "$results/TRAIN_TIME.txt" python run_exp.py \
+            --env silg:rtfm_train_s1-v0 \
+            --val_env silg:rtfm_test_s1-v0 \
+            --model multi \
+            --xpid rtfm-official-100m-seed1 \
+            --savedir "$savedir" \
+            --total_frames 1000000 \
+            --num_actors 30 \
+            --num_threads 4 \
+            --batch_size 24 \
+            --unroll_length 80 \
+            --learning_rate 0.0005 \
+            --entropy_cost 0.05 \
+            --seed 1 \
+            --disable_cuda \
+            2>&1 | tee "$results/TRAIN.log"
+          job=$(find "$savedir" -name job.tar -type f -print -quit)
+          test -n "$job"
+          cp "$job" "$results/SILG_RTFM_OFFICIAL_SEED1_JOB.tar"
+
+      - name: Verify official checkpoint and record resource contract
+        run: |
+          set -euo pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_100m_seed1"
+          python - "$results" <<'PY'
+          import hashlib, json, pathlib, sys, torch
+          root = pathlib.Path(sys.argv[1])
+          job = root / 'SILG_RTFM_OFFICIAL_SEED1_JOB.tar'
+          ckpt = torch.load(job, map_location='cpu')
+          required = {'model_state_dict','optimizer_state_dict','scheduler_state_dict','frames'}
+          missing = sorted(required - set(ckpt))
+          frames = int(ckpt.get('frames', -1))
+          model = ckpt['model_state_dict']
+          params = sum(v.numel() for v in model.values() if hasattr(v, 'numel'))
+          payload = {
+            'classification': 'official_100m_reproduction_in_progress',
+            'public_baseline_reproduced': False,
+            'capability_progress_claimed': False,
+            'seed': 1,
+            'entropy_cost': 0.05,
+            'target_frames': 100000000,
+            'chunk_target_frames': 1000000,
+            'checkpoint_frames': frames,
+            'checkpoint_bytes': job.stat().st_size,
+            'checkpoint_sha256': hashlib.sha256(job.read_bytes()).hexdigest(),
+            'model_state_parameters': params,
+            'checkpoint_missing_keys': missing,
+            'qualified_for_continuation': not missing and frames >= 1000000,
+            'controls_status': 'not_run_until_trained_checkpoint_evaluation',
+            'claims_blocked': ['public baseline reproduced','capability progress','new intelligence principle'],
+          }
+          out = root / 'OFFICIAL_100M_SEED1_CHUNK.json'
+          out.write_text(json.dumps(payload, indent=2, sort_keys=True) + '\n')
+          print(out.read_text())
+          if not payload['qualified_for_continuation']:
+              raise SystemExit(1)
+          PY
+
+      - name: Freeze reproducibility bundle
+        if: always()
+        run: |
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_100m_seed1"
+          python -m pip freeze | sort > "$results/PIP_FREEZE.txt"
+          find "$results" -type f -printf '%P\t%s bytes\n' | sort > "$results/FILE_SIZES.txt"
+          find "$results" -type f ! -name 'SHA256SUMS.txt' -print0 | sort -z | xargs -0 sha256sum > "$results/SHA256SUMS.txt" || true
+
+      - name: Upload immutable first-chunk bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r01-silg-official-100m-seed1-chunk-${{ github.run_id }}
+          path: research/intelligence_swarm/benchmarks/grounded_causal/results_official_100m_seed1/
+          if-no-files-found: error
+          retention-days: 30
