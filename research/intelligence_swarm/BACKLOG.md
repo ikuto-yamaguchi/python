@@ -76,7 +76,18 @@ Implementation:
 - workflow: `.github/workflows/r01_silg_gradient_clip_screening.yml`
 - patch commit: `2c877197b275e9c11f018479909adfe8e2a82844`
 - workflow commit: `3f0c62430a27116722c22f69525b54631d93032b`
-- run/job/artifact: not yet verified
+- locator integration: `2cc76a969e5b596ea5026960984b614608c39f23`
+- run/job/artifact: locator更新時点では未確認
+
+Immediate execution tasks:
+
+1. Wait for the updated locator workflow to finish; do not redispatch gradient-clip-10 while a run is pending, queued or in progress.
+2. Read the `gradient-clip-10` locator artifact and record exact run ID, job status, execution SHA and artifact list.
+3. If no push run exists, classify `experiment_trigger_routing_failure`, repair only trigger/path routing, and preserve the declared factor unchanged.
+4. If a run exists but has no job, inspect Actions policy/concurrency/capacity without changing model or hyperparameters.
+5. If a job completes, inspect source-patch proof, all seed commands, checkpoints, matched predictions, diagnostics, resource metrics, leakage, parity and qualification.
+6. If the immutable bundle is valid and Correct remains at/below Random, reject gradient-clipping threshold as the sole cause and immediately continue to optimizer/checkpoint restore integrity.
+7. Do not close the iteration on an execution failure or negative performance result alone.
 
 Fail-closed requirements:
 
@@ -110,9 +121,9 @@ Ueda et al., LREC-COLING 2024、公式repository `riken-grp/J-CRe3`。exact comm
 
 ### Latest prior-art boundary
 
-MagicBench（ACL 2026）は、対称promptでも視覚探索が言語triggerへ依存するvisual-agency lossを診断し、spatial promptingとsignal magnificationの因果介入で内部推論が残ることを示す。language dominance、perceptual-access bottleneck、prompt介入によるvisual grounding回復だけではRQ-001の新規性を認定しない。公式code/dataset `Ink-Dawn/MagicBench`は公開済みだが、exact commit、dependency、immutable numerical reproductionは未完了。
+CodeBind（Findings of ACL 2026）は、shared codebookとmodality-specific codebookによるshared/specific表現分解、compositional vector quantization、fully paired dataなしのbridging-modality alignmentを扱う。したがって、shared/specific decomposition、compositional codebook、incremental multimodal alignmentだけではRQ-001の新規性を認定しない。project pageは確認済みだが、author-official repositoryのexact commit、dependency、dataset command、immutable numerical reproductionは未完了。
 
-既存のCausalDisenSeg、TRACE、DCAN、PCMCI、CausalLens、CTLD、score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、ReCITE、C3、MCDRL、CmIR、CAIR、Bayesian Ablation等もnovelty matrixの別列で維持し、論文値を本研究の能力証拠へ流用しない。
+既存のMagicBench、CausalDisenSeg、TRACE、DCAN、PCMCI、CausalLens、CTLD、score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、ReCITE、C3、MCDRL、CmIR、CAIR、Bayesian Ablation等もnovelty matrixの別列で維持し、論文値を本研究の能力証拠へ流用しない。
 
 ## P1 — R0.2 Environment-first
 
@@ -131,7 +142,7 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 正式境界:
 
-> **FURTHER NARROWED BEYOND CAUSAL DIAGNOSIS OF LANGUAGE-TRIGGERED VISUAL AGENCY LOSS — NOT ADOPTED**
+> **FURTHER NARROWED BEYOND SHARED/SPECIFIC COMPOSITIONAL MULTIMODAL ALIGNMENT — NOT ADOPTED**
 
 ## Stage transition
 
@@ -142,7 +153,7 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 - immutable R0.1 artifacts: **7件**
 - competent external baseline: **0件**
 - J-CRe3 numerical reproduction: **0件**
-- active screening: **gradient-clipping workflow実装済み・結果未確認**
+- active screening: **gradient-clipping locator統合済み・run結果未確認**
 - new mechanism family: **未認定**
 - new intelligence principle: **未発見**
 - capability progress: **未認定**
