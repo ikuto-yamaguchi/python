@@ -1,27 +1,27 @@
 {
-  "requested_at_utc": "2026-07-26T21:35:00Z",
-  "integration": "R01-SCREEN-003-E062",
+  "requested_at_utc": "2026-07-26T23:30:00Z",
+  "integration": "R01-SCREEN-004-E064",
   "track": "R0.1",
   "benchmark": "SILG RTFM S1",
-  "workflow": ".github/workflows/r01_silg_stateful_screening.yml",
+  "workflow": ".github/workflows/r01_silg_unroll80_screening.yml",
   "canonical_branch": "research/intelligence-swarm-reconstruction-001",
-  "reference_failures": {
-    "baseline_run_id": 30203026269,
-    "entropy_run_id": 30215555334,
-    "requalification_run_id": 30219453396,
-    "requalification_artifact_id": 8636783476,
-    "requalification_artifact_digest": "sha256:f752a62497362a38aeda76e3917210d1eb6eb31903743f7ee08232fc75104f12",
-    "closed_causes": [
-      "entropy_cost reduction alone",
-      "evaluation protocol mismatch as the main explanation"
-    ]
+  "reference_stateful_result": {
+    "run_id": 30221587227,
+    "job_id": 89844840438,
+    "artifact_id": 8638198496,
+    "artifact_digest": "sha256:ae28542e4bda4ca968de9d7ffc42b5ab4b4dadb518a26636a41d63b92131aa31",
+    "correct_wins": 2,
+    "random_wins": 4,
+    "correct_return_mean": -1.8273327469825744,
+    "random_return_mean": -1.151333263516426,
+    "closed_cause": "missing official stateful core as the sole explanation"
   },
-  "screening_run_index": 3,
+  "screening_run_index": 4,
   "one_changed_factor": {
-    "name": "stateful",
-    "from": false,
-    "to": true,
-    "rationale": "Official SILG model.multi creates its LSTM core only when --stateful is set. Every prior R0.1 command omitted the flag and every preserved recurrent-state norm was zero. Activate the official recurrent path without introducing a new architecture."
+    "name": "unroll_length",
+    "from": 20,
+    "to": 80,
+    "rationale": "The official stateful core was proven active but remained below Random. The constrained harness still used unroll 20 while the official SILG default is 80. Increase only the learner trajectory horizon while preserving the verified stateful path and all other resource constraints."
   },
   "fixed_contract": {
     "frames_per_seed": 131072,
@@ -29,12 +29,12 @@
     "train_env": "silg:rtfm_train_s1-v0",
     "test_env": "silg:rtfm_test_s1-v0",
     "model_family": "official SILG multi",
+    "stateful": true,
     "entropy_cost": 0.05,
     "pretrained_language_model": false,
     "num_actors": 2,
     "num_threads": 1,
     "batch_size": 2,
-    "unroll_length": 20,
     "controls": ["random", "language-blind", "state-only", "language-shuffle"],
     "same_initial_instance_stream": true
   },
@@ -44,6 +44,7 @@
   },
   "factor_routing_proof": [
     "--stateful appears in every seed training command",
+    "--unroll_length 80 appears in every seed training command",
     "every checkpoint contains core.* LSTM weights",
     "every seed diagnostic has recurrent_state_l2_after_mean greater than zero"
   ],
@@ -61,15 +62,16 @@
     "leakage result"
   ],
   "qualification": [
-    "all three stateful checkpoints complete",
-    "stateful factor routing proven",
+    "all three stateful unroll-80 checkpoints complete",
+    "single-factor routing proven",
     "answer leakage false",
     "correct win rate greater than random",
     "correct return greater than random",
     "correct success greater than zero",
-    "three-seed mean improves and minimum seed does not regress"
+    "three-seed mean improves and minimum seed does not regress unacceptably",
+    "resource increase is recorded and interpreted"
   ],
-  "failure_policy": "If factor routing fails, repair only the routing and repeat this screening. If recurrent state is active but Correct remains incompetent, reject missing stateful core as the sole cause and issue the next single-factor contract unroll_length 20 to 80. Do not end with a negative result alone.",
+  "failure_policy": "If factor routing fails, repair only routing and repeat. If stateful unroll=80 is valid but Correct remains at or below Random, reject unroll shortage as the sole cause and choose exactly one next learner-optimization factor from learning rate, gradient clipping, or optimizer/checkpoint restore using preserved code and log evidence. Do not end with a negative result alone.",
   "claims_blocked_until_completion": [
     "public baseline reproduced",
     "capability progress",
