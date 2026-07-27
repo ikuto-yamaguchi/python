@@ -119,6 +119,16 @@ def main() -> None:
     if int(pre["frames_per_update"]) != int(expected_post["frames_per_update"]):
         raise SystemExit("frames_per_update changed across captured learner update")
 
+    # actor_model is a synchronized serving copy, not an independent learner
+    # state. Verify synchronization inside each run, then compare the learner
+    # state across runs. Cross-run comparison of actor_model can observe a
+    # transient shared-memory copy while asynchronous actors are active.
+    assert_exact(
+        expected_post["actor_model_state_dict"],
+        expected_post["model_state_dict"],
+        "captured_post_actor_sync",
+    )
+
     sys.path.insert(0, str(args.silg_root))
     run_exp = importlib.import_module("run_exp")
     flags_dict = dict(pre["flags"])
@@ -171,9 +181,13 @@ def main() -> None:
     }
     observed_scheduler_last_epoch = int(scheduler.state_dict().get("last_epoch", 0))
     observed_frames = observed_scheduler_last_epoch * int(pre["frames_per_update"])
+    assert_exact(
+        actor_model.state_dict(),
+        learner_model.state_dict(),
+        "replayed_post_actor_sync",
+    )
     observed = {
         "model_state_dict": learner_model.state_dict(),
-        "actor_model_state_dict": actor_model.state_dict(),
         "optimizer_state_dict": optimizer.state_dict(),
         "scheduler_state_dict": scheduler.state_dict(),
         "gradient_state_dict": observed_gradients,
