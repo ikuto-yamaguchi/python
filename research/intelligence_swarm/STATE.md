@@ -25,7 +25,7 @@
 
 ## R0 status ledger
 
-- immutable R0.1 artifacts: **6件**
+- immutable R0.1 artifacts: **7件**
 - 学習済み公開能力baseline再現: **0件**
 - J-CRe3 numerical reproduction: **0件**
 - R0.2正式再現: **0件**
@@ -40,66 +40,72 @@
 - evaluation protocol mismatch主因: **棄却**
 - official stateful core不足単独原因: **棄却**
 - `unroll_length=20`不足単独原因: **棄却**
+- `learning_rate=0.0001`単独原因: **棄却**
 
-## Completed unroll-80 screening
+## Completed learning-rate screening
 
 Primary evidence:
 
-- run `30226976064`
-- job `89867137085`
-- artifact `8640762353`
-- digest `sha256:4e7fbacc077121d3fd09db1f6b7ec19a00942f8dc4cbf29b6cb9fd6eb18c9f4c`
-- execution commit `344002bc8e5130cbb9a302fda1a2115baa8edb1c`
-- `--stateful`、`--unroll_length 80`、LSTM `core.*`、non-zero recurrent state: **passed**
+- run `30235108376`
+- job `89881341003`
+- artifact `8642403437`
+- digest `sha256:882e92a17ba5da5836dcf78379a484cc7ed63827ed3bf0b18196c5b18c3d8917`
+- execution commit `67556f067028edac502380c6d3de15575c996ffc`
+- `--stateful`、`--unroll_length 80`、`--learning_rate 0.0001`、LSTM `core.*`: **passed**
 - same-instance controls、official/fresh parity、artifact upload: **passed**
 - answer leakage: **false**
 - qualification: **rejected**
 
 Matched aggregate:
 
-- Correct `2/60`
+- Correct `0/60`
 - Random `4/60`
-- Language-blind `2/60`
-- State-only `0/60`
-- Language-shuffle `2/60`
-- Correct mean return `-1.8059994`
+- Language-blind `0/60`
+- State-only `1/60`
+- Language-shuffle `0/60`
+- Correct mean return `-2.1523326`
 - Random mean return `-1.1513333`
+- Correct−Random return `-1.0009993`
 
 Resources:
 
 - parameters `6,200,115`
 - trained model-state `24,827,943 / 24,827,943 / 24,828,026 bytes`
 - actual frames `131,200` per seed
-- peak RSS `1,699,780 / 1,467,976 / 2,498,024 KiB`
-- wall `1479.48 / 1479.02 / 1560.07 s`
-- CPU forward approximately `7.86–8.00 ms/step`
+- peak RSS `1,470,976 / 1,269,884 / 2,414,924 KiB`
+- wall `1441.30 / 1404.99 / 1483.19 s`
+- CPU forward `7.511 ms/step` model audit; matched inference approximately `8.5–8.7 ms/step`
+- chosen-action valid fraction `1.0` for all seeds
 
 Decision:
 
-> **unroll不足を単独主因として棄却する。unroll=80は正しく到達したが、CorrectはRandomを下回り、language-blind/shuffleと同率で、言語利用能力も成立しなかった。**
+> **learning-rate不足を単独主因として棄却する。`0.0001`は全seedへ正しく到達したが、Correct successは0でRandomを下回り、language-blind/shuffleとの差も成立しなかった。**
 
-## Active single-factor screening: learning rate
+## Active single-factor screening: gradient clipping
 
-変更要因はlearning rateのみ。`stateful=true`、`unroll_length=80`、entropy `0.05`、actors `2`、threads `1`、batch `2`、frames `131072`、seeds `1/7/19`、split、matched instances、controlsを固定する。
+Official pinned SILG `run_exp.py`は`clip_grad_norm_(model.parameters(), 40.0)`をhard-codeしている。次はその閾値だけを`40.0 → 10.0`へ変更する。
 
-Primary run:
+Fixed:
 
-- run `30235108376`
-- job `89881341003`
-- execution commit `67556f067028edac502380c6d3de15575c996ffc`
-- requested value: `0.0001`
-- install、stateful patch、unroll-80 patch、learning-rate patch、schema、random control: **passed**
-- current step: **three-seed training in progress**
-- artifact / qualification / performance: **未生成・未認定**
+- `stateful=true`
+- `unroll_length=80`
+- learning rate: **official default**
+- entropy `0.05`
+- actors `2`、threads `1`、batch `2`
+- frames `131072`、seeds `1/7/19`
+- model family、split、matched instances、全controls
 
-Duplicate handling:
+Implementation:
 
-- later run `30236217754`、execution commit `b3f1c6775fb6be5376ff53359b6732dfb100f313`: **pending / jobs 0 / artifacts 0**
-- primary runが有効artifactを保存する限り、後続runを追加seed・独立改善証拠として数えない。
-- primary runがexecution failureまたはartifact lossの場合だけfallback候補とする。
-- 同条件を追加dispatchしない。
+- source patch: `patch_silg_gradient_clip_screening.py`
+- workflow: `.github/workflows/r01_silg_gradient_clip_screening.yml`
+- source-patch commit: `2c877197b275e9c11f018479909adfe8e2a82844`
+- workflow commit: `3f0c62430a27116722c22f69525b54631d93032b`
+- run / job / artifact / performance: **未確認・未認定**
 
-有効なrunでもCorrectがRandomを上回らない場合、learning-rate単独原因を棄却する。ただしiterationは閉じず、保存logと公式code差分からgradient clippingまたはoptimizer/checkpoint restoreの一方だけを次に選ぶ。
+Fail-closed evidence requires the pinned source to contain clip `10.0` and not `40.0`, all commands to keep stateful/unroll=80 without an explicit learning-rate override, complete LSTM checkpoints, matched controls, resource provenance, checksums, leakage=false, parity and unchanged qualification.
+
+If valid gradient clip `10.0` remains at/below Random, reject clipping threshold as the sole cause and continue to optimizer/checkpoint restore integrity as the next single cause. Do not close on the negative result alone.
 
 ## Evaluation contract
 
@@ -107,13 +113,13 @@ D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示す
 
 ## Prior-art and RQ boundary
 
-既存のscore-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation等の境界を維持する。
+既存のscore-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg等の境界を維持する。
 
-CausalDisenSeg（arXiv 2026）は、missing-modality脳腫瘍segmentationで、CVAE+HSICによるanatomical causal factor / style bias factor分離、region causality module、counterfactual dual-adversarial抑制によりbiasのNatural Direct Effectを抑える。したがって、missing-modality下のcausal/style disentanglement、region-grounded causal representation、counterfactual NDE suppressionだけではRQ-001の新規性を認定しない。一次preprintは確認済みだが、author-official repository、exact commit、immutable numerical reproductionは未確認であり、SILG/J-CRe3の代替baselineにも数えない。
+MagicBench（ACL 2026）は、対称prompt下でも視覚探索が言語triggerへ依存するvisual-agency lossを診断し、spatial promptingとsignal magnificationによる因果介入で内部推論が残ることを示す。したがって、language dominance、perceptual-access bottleneck、prompt介入によるvisual grounding回復だけではRQ-001の新規性を認定しない。公式code/dataset `Ink-Dawn/MagicBench`は公開されているが、exact commit、dependency、immutable numerical reproductionは未完了であり、SILG/J-CRe3の代替baselineにも数えない。
 
 正式判断:
 
-> **RQ-001: FURTHER NARROWED BEYOND COUNTERFACTUAL CAUSAL DISENTANGLEMENT UNDER MISSING MODALITIES — NOT ADOPTED**
+> **RQ-001: FURTHER NARROWED BEYOND CAUSAL DIAGNOSIS OF LANGUAGE-TRIGGERED VISUAL AGENCY LOSS — NOT ADOPTED**
 
 ## Stage transition
 
@@ -130,4 +136,4 @@ CausalDisenSeg（arXiv 2026）は、missing-modality脳腫瘍segmentationで、C
 
 ## Last integration
 
-2026-07-27: **RESET-E068**。learning-rate `0.0001` primary run `30235108376` / job `89881341003`が、配線・schema・random controlを通過してthree-seed学習中であることを確認した。後続run `30236217754`はpendingであり、primary bundleが有効なら重複証拠に数えない。CausalDisenSegをnovelty境界へ追加したが、外部baseline再現0、能力進歩未認定、高校生級未達を維持する。
+2026-07-27: **RESET-E069**。learning-rate `0.0001` run `30235108376`をartifactまで精査し、Correct `0/60`、Random `4/60`、qualification rejectedを確認してlearning-rate単独原因を棄却した。次の一要因としてofficial hard-coded gradient clipを`40.0→10.0`に変更するsource patchとworkflowを同じcanonical branchへ追加した。MagicBenchをnovelty境界へ追加したが、外部baseline再現0、能力進歩未認定、高校生級未達を維持する。
