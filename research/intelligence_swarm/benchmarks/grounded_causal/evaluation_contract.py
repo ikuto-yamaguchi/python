@@ -287,13 +287,38 @@ def _split_sig(row: dict[str, Any], *keys: str) -> str | None:
     return None
 
 
+def canonical_domain(value: Any) -> str:
+    """Canonical domain label used by every dataset/statistics/resource cell."""
+    return canonical_text(value)
+
+
+def canonical_condition(value: Any) -> str:
+    """Canonical order-independent condition token set."""
+    raw = unicodedata.normalize("NFKC", str(value)).casefold()
+    parts = {
+        canonical_text(part)
+        for part in re.split(r"[+,|\s]+", raw)
+        if canonical_text(part)
+    }
+    return "+".join(sorted(parts))
+
+
 def _cell_key(row: dict[str, Any]) -> tuple[int, str, str, str]:
-    return (int(row["seed"]), str(row["domain"]), str(row["split"]).lower(), str(row["condition"]))
+    return (
+        int(row["seed"]),
+        canonical_domain(row["domain"]),
+        str(row["split"]).lower(),
+        canonical_condition(row["condition"]),
+    )
 
 
 def instance_fingerprint(row: dict[str, Any]) -> str:
     keys = ("domain", "seed", "split", "condition", "utterance", "state_before", "history", "valid_action_mask", "entity_id", "entity_signature", "dynamics_id", "dynamics_signature", "episode_id", "episode_seed", "observation_fingerprint")
-    return stable_hash({k: row.get(k) for k in keys})
+    payload = {k: row.get(k) for k in keys}
+    payload["domain"] = canonical_domain(row.get("domain", ""))
+    payload["condition"] = canonical_condition(row.get("condition", ""))
+    payload["split"] = str(row.get("split", "")).lower()
+    return stable_hash(payload)
 
 
 def validate_dataset(rows: list[dict[str, Any]]) -> dict[str, Any]:
@@ -310,6 +335,7 @@ def validate_dataset(rows: list[dict[str, Any]]) -> dict[str, Any]:
     explicit_holdout_findings = []
     topology, per_seed_splits = defaultdict(set), defaultdict(set)
     per_domain_seed_splits = defaultdict(set)
+    raw_domains_by_canonical, raw_conditions_by_canonical = defaultdict(set), defaultdict(set)
     for index, row in enumerate(adapted, 1):
         missing = CANONICAL_REQUIRED - row.keys()
         if missing:
@@ -320,9 +346,12 @@ def validate_dataset(rows: list[dict[str, Any]]) -> dict[str, Any]:
             errors.append(f"row {index}: duplicate instance_id={iid}")
         seen.add(iid)
         fingerprints[iid] = instance_fingerprint(row)
-        domain, condition, split = str(row["domain"]), str(row["condition"]), str(row["split"]).lower()
+        raw_domain, raw_condition = str(row["domain"]), str(row["condition"])
+        domain, condition, split = canonical_domain(raw_domain), canonical_condition(raw_condition), str(row["split"]).lower()
+        raw_domains_by_canonical[domain].add(raw_domain)
+        raw_conditions_by_canonical[condition].add(raw_condition)
         if not domain:
-            errors.append(f"row {index}: domain must be non-empty")
+            errors.append(f"row {index}: domain must be non-empty after canonicalization")
         if not split:
             errors.append(f"row {index}: split must be non-empty")
         elif split not in ALLOWED_SPLITS:
@@ -376,6 +405,12 @@ def validate_dataset(rows: list[dict[str, Any]]) -> dict[str, Any]:
         if row.get("episode_id") is not None: episode_splits[_trajectory_split_identity(row["episode_id"])].add(split)
         if row.get("episode_seed") is not None: episode_seed_splits[_trajectory_split_identity(row["episode_seed"])].add(split)
         if row.get("observation_fingerprint") is not None: observation_splits[_trajectory_split_identity(row["observation_fingerprint"])].add(split)
+    domain_collisions = {key: sorted(values) for key, values in raw_domains_by_canonical.items() if len(values) > 1}
+    condition_collisions = {key: sorted(values) for key, values in raw_conditions_by_canonical.items() if len(values) > 1}
+    if domain_collisions:
+        errors.append(f"domain labels collide after canonicalization: {domain_collisions}")
+    if condition_collisions:
+        errors.append(f"condition labels collide after canonicalization: {condition_collisions}")
     overlap = {}; train_text = set(texts.get("train", {}))
     for split, values in texts.items():
         if split == "train": continue
@@ -420,7 +455,7 @@ def validate_dataset(rows: list[dict[str, Any]]) -> dict[str, Any]:
     if not domains: errors.append("need >=1 domain")
     missing_holdouts = HELD_OUT_CONDITIONS - {name for c in conditions for name in HELD_OUT_CONDITIONS if name in c}
     if missing_holdouts: warnings.append(f"missing held-out conditions: {sorted(missing_holdouts)}")
-    return {"valid": not errors, "errors": errors, "warnings": sorted(set(warnings)), "instances": len(adapted), "domains": sorted(domains), "seeds": sorted(seeds), "conditions": sorted(conditions), "split_counts": dict(sorted(splits.items())), "utterance_overlap": overlap, "utterance_normalization": "NFKC + casefold + remove whitespace/control-format characters", "holdout_integrity": holdout, "explicit_holdout_findings": explicit_holdout_findings, "explicit_condition_holdout_required": True, "split_identity_leakage": split_leakage, "leakage_rows": leakage, "schema_alias_findings": alias_findings, "schema_alias_normalization": "NFKC + casefold + remove non-ASCII-alphanumeric", "silg_rows_adapted": silg_rows, "dataset_sha256": stable_hash(adapted), "instance_fingerprints_sha256": stable_hash(fingerprints), "seed_domain_split_condition_topology": {str(k): sorted(v) for k, v in sorted(topology.items())}, "canonical_seed_topology_required": True, "domain_local_train_eval_coverage_required": True, "domain_seed_split_coverage": {str(k): sorted(v) for k, v in sorted(per_domain_seed_splits.items())}, "adapted_schema": True, "silg_text_tokens_supported": True, "episode_split_isolation_required": True, "normalized_trajectory_identity_required": True, "trajectory_identity_normalization": "recursive NFKC + casefold + remove whitespace/control-format + numeric scalar alias collapse", "unicode_utterance_overlap_required": True, "holdout_identity_normalization": "recursive NFKC + casefold + remove whitespace/control-format + numeric scalar alias collapse", "normalized_holdout_identity_required": True, "alias_normalized_leakage_required": True, "allowed_train_splits": sorted(TRAIN_SPLITS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "split_scope_fail_closed": True}
+    return {"valid": not errors, "errors": errors, "warnings": sorted(set(warnings)), "instances": len(adapted), "domains": sorted(domains), "seeds": sorted(seeds), "conditions": sorted(conditions), "split_counts": dict(sorted(splits.items())), "utterance_overlap": overlap, "utterance_normalization": "NFKC + casefold + remove whitespace/control-format characters", "holdout_integrity": holdout, "explicit_holdout_findings": explicit_holdout_findings, "explicit_condition_holdout_required": True, "split_identity_leakage": split_leakage, "leakage_rows": leakage, "schema_alias_findings": alias_findings, "schema_alias_normalization": "NFKC + casefold + remove non-ASCII-alphanumeric", "silg_rows_adapted": silg_rows, "dataset_sha256": stable_hash(adapted), "instance_fingerprints_sha256": stable_hash(fingerprints), "seed_domain_split_condition_topology": {str(k): sorted(v) for k, v in sorted(topology.items())}, "canonical_seed_topology_required": True, "domain_local_train_eval_coverage_required": True, "domain_seed_split_coverage": {str(k): sorted(v) for k, v in sorted(per_domain_seed_splits.items())}, "adapted_schema": True, "silg_text_tokens_supported": True, "episode_split_isolation_required": True, "normalized_trajectory_identity_required": True, "trajectory_identity_normalization": "recursive NFKC + casefold + remove whitespace/control-format + numeric scalar alias collapse", "unicode_utterance_overlap_required": True, "holdout_identity_normalization": "recursive NFKC + casefold + remove whitespace/control-format + numeric scalar alias collapse", "normalized_holdout_identity_required": True, "alias_normalized_leakage_required": True, "allowed_train_splits": sorted(TRAIN_SPLITS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "split_scope_fail_closed": True, "normalized_cell_identity_required": True, "cell_identity_normalization": "domain=NFKC+casefold+remove whitespace/control-format; condition=canonical sorted token set", "domain_label_collisions": domain_collisions, "condition_label_collisions": condition_collisions}
 
 
 def _mean_ci(values: list[float]) -> tuple[float, float, float]:
@@ -538,7 +573,8 @@ def score(data: list[dict[str, Any]], preds: list[dict[str, Any]]) -> dict[str, 
             pred_inverse_ids[method].add(iid)
         if "gold_inverse" in gold and "pred_inverse" in pred:
             item["inverse"] = float(pred["pred_inverse"] == gold["gold_inverse"])
-        grouped[(method, int(gold["seed"]), str(gold["domain"]), str(gold["split"]).lower(), str(gold["condition"]))].append(item); outcomes[method][iid] = item
+        cell = _cell_key(gold)
+        grouped[(method, *cell)].append(item); outcomes[method][iid] = item
     for iid, fps in snapshots.items():
         if len(fps) != 1: errors.append(f"instance {iid}: methods used different input snapshots")
     required, coverage = REQUIRED_METHODS, {}
