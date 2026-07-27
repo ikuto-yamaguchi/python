@@ -14,6 +14,7 @@ on:
       - '.github/workflows/r01_silg_unroll80_screening.yml'
       - '.github/workflows/r01_silg_learning_rate_screening.yml'
       - '.github/workflows/r01_silg_gradient_clip_screening.yml'
+      - '.github/workflows/r01_silg_official_infrastructure_qualification.yml'
   workflow_dispatch:
 
 permissions:
@@ -42,6 +43,8 @@ jobs:
             workflow: r01_silg_learning_rate_screening.yml
           - label: gradient-clip-10
             workflow: r01_silg_gradient_clip_screening.yml
+          - label: official-infrastructure
+            workflow: r01_silg_official_infrastructure_qualification.yml
     steps:
       - name: Query latest ${{ matrix.label }} push run, jobs, and artifacts
         env:
