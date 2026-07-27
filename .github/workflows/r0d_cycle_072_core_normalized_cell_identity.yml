@@ -1,4 +1,4 @@
-name: R0D Cycle 072 core normalized cell identity
+name: R0D core normalized cell identity
 
 on:
   pull_request:
@@ -6,8 +6,8 @@ on:
       - research/intelligence-swarm-governance-014
     paths:
       - "research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py"
-      - "research/intelligence_swarm/governance/apply_r0d_cycle_072_core_normalized_cell_identity.py"
-      - "research/intelligence_swarm/governance/test_evaluation_contract_normalized_cell_identity_core.py"
+      - "research/intelligence_swarm/benchmarks/grounded_causal/apply_r0d_cycle_073_core_normalized_cell_identity.py"
+      - "research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_normalized_cell_identity_core.py"
       - ".github/workflows/r0d_cycle_072_core_normalized_cell_identity.yml"
   workflow_dispatch:
 
@@ -27,21 +27,22 @@ jobs:
         with:
           python-version: "3.12"
       - name: Apply fail-closed core patch
-        run: python research/intelligence_swarm/governance/apply_r0d_cycle_072_core_normalized_cell_identity.py
+        run: python research/intelligence_swarm/benchmarks/grounded_causal/apply_r0d_cycle_073_core_normalized_cell_identity.py
       - name: Compile core and patch
         run: |
           python -m py_compile research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
-          python -m py_compile research/intelligence_swarm/governance/apply_r0d_cycle_072_core_normalized_cell_identity.py
+          python -m py_compile research/intelligence_swarm/benchmarks/grounded_causal/apply_r0d_cycle_073_core_normalized_cell_identity.py
+          python -m py_compile research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_normalized_cell_identity_core.py
       - name: Run focused regressions
-        run: python research/intelligence_swarm/governance/test_evaluation_contract_normalized_cell_identity_core.py
-      - name: Preserve Cycle 072 report
+        run: python research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_normalized_cell_identity_core.py
+      - name: Preserve normalized-cell report
         run: |
-          cat > research/intelligence_swarm/governance/REPORT_R0D_CYCLE_072.md <<'EOF'
-          # R0-D Cycle 072 — normalized domain/condition cell identity
+          cat > research/intelligence_swarm/governance/REPORT_R0D_CYCLE_073.md <<'EOF'
+          # R0-D Cycle 073 — normalized domain/condition cell identity
 
-          `evaluation_contract.py` now canonicalizes `domain` and `condition` before
-          dataset topology, control-donor cells, statistics cells and instance
-          fingerprints are constructed.
+          `evaluation_contract.py` canonicalizes `domain` and `condition` before
+          dataset topology, control-donor cells, statistics cells, instance
+          fingerprints, artifact cells, and raw-log measurement cells are built.
 
           Fail-closed requirements:
 
@@ -49,14 +50,14 @@ jobs:
           - condition: the same scalar normalization plus sorted unique token set;
           - raw labels that collapse to one canonical label are rejected;
           - empty canonical labels are rejected;
-          - `_cell_key()` uses only canonical labels;
           - audit artifacts preserve raw-to-canonical label maps.
 
-          Representation-only splitting can no longer alter domain×seed×condition
-          coverage, shuffle provenance, minimum-cell gaps, confidence intervals or
-          paired tests. Any violation is classified as `initial_reproduction_failure`.
+          Representation-only splitting cannot alter domain×seed×condition coverage,
+          shuffle provenance, minimum-cell gaps, confidence intervals, paired tests,
+          resource evidence, or raw-log binding. Violations are classified as
+          `initial_reproduction_failure`.
 
-          No memory, replay, fast weights, sleep or forgetting mechanism was added.
+          No memory, replay, fast weights, sleep, or forgetting mechanism was added.
           EOF
       - name: Commit to the same canonical branch
         run: |
@@ -67,6 +68,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py \
-                  research/intelligence_swarm/governance/REPORT_R0D_CYCLE_072.md
-          git commit -m "research(r0d): integrate Cycle 072 normalized cell identity"
+                  research/intelligence_swarm/governance/REPORT_R0D_CYCLE_073.md
+          git commit -m "research(r0d): integrate normalized cell identity"
           git push origin HEAD:${{ github.event.pull_request.head.ref || github.ref_name }}
