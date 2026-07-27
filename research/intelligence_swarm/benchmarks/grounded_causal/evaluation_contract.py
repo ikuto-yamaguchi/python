@@ -530,8 +530,117 @@ def score(data: list[dict[str, Any]], preds: list[dict[str, Any]]) -> dict[str, 
     return {"valid": not errors, "errors": errors, "classification": "qualified" if not errors else "initial_reproduction_failure", "prediction_rows": len(preds), "expected_eval_instances": len(eval_ids), "coverage": coverage, "same_instance_snapshot": not any("snapshot" in e for e in errors), "fingerprints_required": True, "prediction_payload_findings": payload_findings, "prediction_schema_alias_findings": alias_findings, "strict_prediction_schema": True, "forbidden_prediction_fields": sorted(FORBIDDEN_PREDICTION_FIELDS), "alias_normalized_prediction_leakage_required": True, "finite_prediction_values_checked": True, "valid_action_schema_checked": True, "optional_metric_coverage_required": True, "inverse_metric_complete": inverse_metric_complete, "gold_inverse_coverage": {"expected": len(eval_ids), "present": len(gold_inverse_ids)}, "pred_inverse_coverage": {method: {"expected": len(eval_ids), "present": len(pred_inverse_ids.get(method, set()))} for method in sorted(REQUIRED_METHODS)}, "shuffle_assignment_audit": shuffle_audit, "cells": cells, "summary": dict(summary), "paired_gaps_vs_correct": gaps, "progress_contract": {"required_mean_gap": .10, "requires_all_three_seeds": True, "requires_same_instance_snapshot": True, "requires_explicit_instance_fingerprint": True, "requires_complete_prediction_coverage": True, "requires_shuffle_provenance": True, "requires_within_cell_derangement": True, "requires_split_condition_cells": True, "requires_ci_excludes_zero": True, "requires_instance_cluster_ci_excludes_zero": True, "internal_metrics_do_not_count": True}, "allowed_train_splits": sorted(TRAIN_SPLITS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "split_scope_fail_closed": True}
 
 
+RAW_LOG_MEASUREMENT_FIELDS = (
+    "method", "seed", "domain", "split", "condition", "code_commit",
+    "model_bytes", "peak_rss_bytes", "training_wall_seconds",
+    "cpu_inference_ms_per_item", "model_sha256", "data_sha256",
+)
+
+
+def _iter_raw_log_objects(value: Any):
+    if isinstance(value, dict):
+        yield value
+        for nested in value.values():
+            yield from _iter_raw_log_objects(nested)
+    elif isinstance(value, list):
+        for nested in value:
+            yield from _iter_raw_log_objects(nested)
+
+
+def _read_raw_log_objects(path: Path) -> list[dict[str, Any]]:
+    text = path.read_text(encoding="utf-8")
+    objects: list[dict[str, Any]] = []
+    try:
+        parsed = json.loads(text)
+    except json.JSONDecodeError:
+        for line_number, line in enumerate(text.splitlines(), 1):
+            if not line.strip():
+                continue
+            try:
+                parsed_line = json.loads(line)
+            except json.JSONDecodeError as exc:
+                raise ValueError(
+                    f"{path}:{line_number}: raw log must be JSON, JSONL, or nested JSON: {exc}"
+                ) from exc
+            objects.extend(obj for obj in _iter_raw_log_objects(parsed_line) if isinstance(obj, dict))
+    else:
+        objects.extend(obj for obj in _iter_raw_log_objects(parsed) if isinstance(obj, dict))
+    return objects
+
+
+def _raw_log_cell(row: dict[str, Any]) -> tuple[str, int, str, str, str]:
+    return (
+        str(row["method"]),
+        int(row["seed"]),
+        str(row["domain"]),
+        unicodedata.normalize("NFKC", str(row["split"])).casefold(),
+        str(row["condition"]),
+    )
+
+
+def _is_raw_log_measurement(row: dict[str, Any]) -> bool:
+    kind = str(row.get("record_type", row.get("event", row.get("type", "")))).casefold()
+    return kind in {"r0_measurement", "resource_measurement", "measurement"} and all(
+        field in row for field in RAW_LOG_MEASUREMENT_FIELDS
+    )
+
+
+def _audit_run_raw_log_binding(
+    run: dict[str, Any], index: int, base_dir: Path, cache: dict[Path, list[dict[str, Any]]]
+) -> tuple[list[str], dict[str, Any]]:
+    errors: list[str] = []
+    finding: dict[str, Any] = {"run": index, "matching_measurement_records": 0}
+    raw_path, path_error = _resolve_contained_artifact(base_dir, run.get("raw_log_path", ""))
+    if path_error is not None:
+        errors.append(f"run {index}: raw_log_path {path_error}")
+        return errors, finding
+    assert raw_path is not None
+    finding["raw_log_path"] = str(raw_path.relative_to(base_dir.resolve()))
+    try:
+        records = cache.setdefault(raw_path, _read_raw_log_objects(raw_path))
+        cell = _raw_log_cell(run)
+    except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
+        errors.append(f"run {index}: invalid raw-log measurement schema: {exc}")
+        return errors, finding
+    finding["cell"] = list(cell)
+    matches: list[dict[str, Any]] = []
+    for record in records:
+        if not _is_raw_log_measurement(record):
+            continue
+        try:
+            if _raw_log_cell(record) == cell:
+                matches.append(record)
+        except (KeyError, TypeError, ValueError):
+            continue
+    finding["matching_measurement_records"] = len(matches)
+    if len(matches) != 1:
+        errors.append(
+            f"run {index}: expected exactly one raw-log measurement record for cell {cell}, found {len(matches)}"
+        )
+        return errors, finding
+    record = matches[0]
+    for field in RAW_LOG_MEASUREMENT_FIELDS:
+        expected, observed = run.get(field), record.get(field)
+        if field == "split":
+            expected = unicodedata.normalize("NFKC", str(expected)).casefold()
+            observed = unicodedata.normalize("NFKC", str(observed)).casefold()
+        elif field == "seed":
+            try:
+                expected, observed = int(expected), int(observed)
+            except (TypeError, ValueError):
+                errors.append(f"run {index}: seed is not integer-like in manifest or raw log")
+                continue
+        elif field in {"model_bytes", "peak_rss_bytes", "training_wall_seconds", "cpu_inference_ms_per_item"}:
+            if not _finite_positive(expected) or not _finite_positive(observed):
+                errors.append(f"run {index}: raw-log {field} must be finite and positive")
+                continue
+            expected, observed = float(expected), float(observed)
+        if observed != expected:
+            errors.append(f"run {index}: raw-log {field} mismatch: manifest={expected!r}, log={observed!r}")
+    return errors, finding
+
 def audit_artifacts(manifest: dict[str, Any], base_dir: Path) -> dict[str, Any]:
-    errors, checks = [], []; runs = manifest.get("runs")
+    errors, checks, raw_log_findings = [], [], []; raw_log_cache: dict[Path, list[dict[str, Any]]] = {}; runs = manifest.get("runs")
     if not isinstance(runs, list) or not runs: return {"valid": False, "errors": ["manifest.runs must be a non-empty list"], "checks": [], "classification": "initial_reproduction_failure"}
     methods, cells, seeds, domains, topology, commits = set(), set(), set(), set(), set(), set(); identity = defaultdict(set)
     for index, run in enumerate(runs, 1):
@@ -571,6 +680,8 @@ def audit_artifacts(manifest: dict[str, Any], base_dir: Path) -> dict[str, Any]:
             actual = file_sha256(path); ok = actual == str(expected).lower(); checks.append({"run": index, "path": str(path.relative_to(base_dir.resolve())), "expected": expected, "actual": actual, "ok": ok, "size_bytes": path.stat().st_size, "contained": True})
             if not ok: errors.append(f"run {index}: checksum mismatch for {path_key}")
             if path_key == "model_path" and _finite_positive(run.get("model_bytes")) and int(run["model_bytes"]) != path.stat().st_size: errors.append(f"run {index}: model_bytes does not match model artifact size")
+        binding_errors, binding_finding = _audit_run_raw_log_binding(run, index, base_dir, raw_log_cache)
+        errors.extend(binding_errors); raw_log_findings.append(binding_finding)
     required = REQUIRED_METHODS; missing_methods, unexpected_methods = required - methods, methods - required
     if missing_methods: errors.append(f"manifest missing required methods {sorted(missing_methods)}")
     if unexpected_methods: errors.append(f"manifest contains unexpected methods {sorted(unexpected_methods)}")
@@ -580,7 +691,7 @@ def audit_artifacts(manifest: dict[str, Any], base_dir: Path) -> dict[str, Any]:
     if seeds != CANONICAL_SEEDS: errors.append(f"manifest seeds must be exactly {sorted(CANONICAL_SEEDS)}, found {sorted(seeds)}")
     expected = {(m, s, d, sp, c) for m in required for s in CANONICAL_SEEDS for d, sp, c in topology}; missing_cells = expected - cells
     if missing_cells: errors.append(f"manifest incomplete observed-topology coverage: {len(missing_cells)} missing cells")
-    return {"valid": not errors, "errors": errors, "warnings": [], "checks": checks, "methods": sorted(methods), "seeds": sorted(seeds), "domains": sorted(domains), "observed_topology": [list(v) for v in sorted(topology)], "runs": len(runs), "missing_run_cells": len(missing_cells), "missing_run_cell_examples": [list(v) for v in sorted(missing_cells)[:10]], "independent_artifacts_required": True, "positive_resource_measurements_required": True, "artifact_path_containment_required": True, "nonempty_artifacts_required": True, "condition_index_required": True, "exact_method_topology_required": True, "single_commit_required": True, "same_dataset_per_cell_required": True, "canonical_seeds": sorted(CANONICAL_SEEDS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "artifact_split_scope_fail_closed": True, "classification": "reproduced" if not errors else "initial_reproduction_failure"}
+    return {"valid": not errors, "errors": errors, "warnings": [], "checks": checks, "methods": sorted(methods), "seeds": sorted(seeds), "domains": sorted(domains), "observed_topology": [list(v) for v in sorted(topology)], "runs": len(runs), "missing_run_cells": len(missing_cells), "missing_run_cell_examples": [list(v) for v in sorted(missing_cells)[:10]], "independent_artifacts_required": True, "positive_resource_measurements_required": True, "artifact_path_containment_required": True, "nonempty_artifacts_required": True, "condition_index_required": True, "exact_method_topology_required": True, "single_commit_required": True, "same_dataset_per_cell_required": True, "canonical_seeds": sorted(CANONICAL_SEEDS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "artifact_split_scope_fail_closed": True, "raw_log_measurement_findings": raw_log_findings, "raw_log_measurement_binding_required": True, "exactly_one_measurement_record_per_run_required": True, "raw_log_bound_fields": list(RAW_LOG_MEASUREMENT_FIELDS), "classification": "reproduced" if not errors else "initial_reproduction_failure"}
 
 
 def main(argv: list[str] | None = None) -> int:
