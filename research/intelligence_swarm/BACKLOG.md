@@ -70,17 +70,19 @@ Execution:
 - workflow: `.github/workflows/r01_silg_unroll80_screening.yml`
 - request: `R01_RUN_REQUEST.json`
 - active run: `30226976064`
+- active job: `89867137085`
 - execution head: `344002bc8e5130cbb9a302fda1a2115baa8edb1c`
-- current status: **pending**
-- jobs: **0**
-- artifacts: **0**
+- current status: **in_progress**
+- completed steps: checkout、Python setup、provenance、pinned install、stateful patch、unroll-80 patch、schema、random control
+- active step: **Train official stateful multi with unroll 80**
+- artifacts: **0（学習中）**
 
 Monitoring repair:
 
 - existing locator omitted `r01_silg_unroll80_screening.yml`
 - locator matrix/path trigger fixed in commit `746d527a0d760cc4e910e13d8913c040ee8afd5f`
-- locator run `30228319127` succeeded and found run `30226976064`
-- do not issue a duplicate unroll-80 run while this run is pending/queued/in-progress
+- locator run `30228319127` succeeded
+- run `30226976064` has now created job `89867137085`; do not issue a duplicate while it is queued/in-progress
 
 Fail-closed requirements:
 
@@ -97,7 +99,7 @@ Fail-closed requirements:
 
 Decision rule:
 
-- If run remains jobless because of Actions capacity/policy, classify as execution blocker and repair only dispatch/concurrency/permission; do not alter model factors.
+- While training is active, only monitor the existing run; do not mutate model factors or dispatch duplicates.
 - If factor routing is invalid, repair routing only; do not interpret performance.
 - If Correct success>0 and Correct beats Random in both win rate and return, promote unroll=80 to a candidate and verify the three-seed minimum and resource cost.
 - If routing is valid but Correct remains at/below Random, reject unroll shortage as the sole cause and continue to one evidence-selected learner-optimization factor.
@@ -119,9 +121,9 @@ Ueda et al., LREC-COLING 2024、公式repository `riken-grp/J-CRe3`。exact comm
 
 ### Latest prior-art boundary
 
-2026年のDCANは、multimodal personality understandingで、prototype demographic-confounder dictionaryによるback-door adjustmentと、learned mediator dictionaryによるfront-door adjustmentを組み合わせる。official repository `Sabrina-han/DCAN`とDMSP dataset公開を確認した。dual causal adjustment、latent/unobserved biasへのmediator intervention、公平性改善だけではRQ-001の新規性を認定しない。exact commit、dependency、dataset checksum、公式数値のimmutable再現は未完了であり、SILG/J-CRe3の代替baselineではない。
+ACL Findings 2026のTRACEは、multi-turn dialogueを通じたunderlying causal graphのonline reconstructionを定式化し、探索段階のcausal-graph reconstruction rewardと、介入段階のtargeted belief restructuring rewardを用いる。dialogue-driven causal-graph exploration、causal-graph reward、二段階のexploration/intervention RLだけではRQ-001の新規性を認定しない。ACL一次論文は確認済みだが、author-official repository、exact commit、dependency、dataset、公式commandは未確認であり、immutable reproductionは0件。SILG/J-CRe3の代替baselineではない。
 
-PCMCI、CausalLens、CTLD、score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、ReCITE、C3、MCDRL、CmIR、CAIR等もnovelty matrixの別列で維持し、論文値を本研究の能力証拠へ流用しない。
+DCAN、PCMCI、CausalLens、CTLD、score-based CRL、finite-sample CRL、LeGIT、GPI、Multi-View CRL、ReCITE、C3、MCDRL、CmIR、CAIR等もnovelty matrixの別列で維持し、論文値を本研究の能力証拠へ流用しない。
 
 ## P1 — R0.2 Environment-first
 
@@ -140,7 +142,7 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 
 正式境界:
 
-> **FURTHER NARROWED BEYOND DUAL BACK-DOOR/FRONT-DOOR MULTIMODAL DECONFOUNDING — NOT ADOPTED**
+> **FURTHER NARROWED BEYOND DIALOGUE-DRIVEN CAUSAL-GRAPH EXPLORATION AND TARGETED INTERVENTION — NOT ADOPTED**
 
 ## Stage transition
 
@@ -151,7 +153,7 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 - immutable R0.1 artifacts: **5件**
 - competent external baseline: **0件**
 - J-CRe3 numerical reproduction: **0件**
-- active screening: **unroll-80 run 30226976064 pending**
+- active screening: **unroll-80 run 30226976064 / job 89867137085 training中**
 - 新規機構族: **未認定**
 - 新規知能原理: **未発見**
 - 能力進歩: **未認定**
