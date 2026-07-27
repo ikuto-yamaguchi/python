@@ -5,6 +5,7 @@ from pathlib import Path
 PATH = Path(__file__).with_name("evaluation_contract.py")
 text = PATH.read_text(encoding="utf-8")
 
+# Cycle 055 rerun marker: the focused regression fixture now exists on the canonical branch.
 replacements = [
     (
         '''    errors, seen = [], set(); method_ids, grouped, snapshots, outcomes = defaultdict(set), defaultdict(list), defaultdict(set), defaultdict(dict)
