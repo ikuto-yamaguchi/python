@@ -25,7 +25,7 @@
 
 ## R0 status ledger
 
-- immutable R0.1 artifacts: **5件**
+- immutable R0.1 artifacts: **6件**
 - 学習済み公開能力baseline再現: **0件**
 - J-CRe3 numerical reproduction: **0件**
 - R0.2正式再現: **0件**
@@ -39,17 +39,18 @@
 - `entropy_cost=0.005`単独原因: **棄却**
 - evaluation protocol mismatch主因: **棄却**
 - official stateful core不足単独原因: **棄却**
+- `unroll_length=20`不足単独原因: **棄却**
 
-## Completed official-stateful screening
+## Completed unroll-80 screening
 
 Primary evidence:
 
-- run `30221587227`
-- job `89844840438`
-- artifact `8638198496`
-- digest `sha256:ae28542e4bda4ca968de9d7ffc42b5ab4b4dadb518a26636a41d63b92131aa31`
-- execution commit `4b1dff1cd6cd3f6a2dc360d5689cb9968c6a4998`
-- `--stateful`, LSTM `core.*`, non-zero recurrent state: **passed**
+- run `30226976064`
+- job `89867137085`
+- artifact `8640762353`
+- digest `sha256:4e7fbacc077121d3fd09db1f6b7ec19a00942f8dc4cbf29b6cb9fd6eb18c9f4c`
+- execution commit `344002bc8e5130cbb9a302fda1a2115baa8edb1c`
+- `--stateful`、`--unroll_length 80`、LSTM `core.*`、non-zero recurrent state: **passed**
 - same-instance controls、official/fresh parity、artifact upload: **passed**
 - answer leakage: **false**
 - qualification: **rejected**
@@ -59,44 +60,43 @@ Matched aggregate:
 - Correct `2/60`
 - Random `4/60`
 - Language-blind `2/60`
-- State-only `1/60`
+- State-only `0/60`
 - Language-shuffle `2/60`
-- Correct mean return `-1.8273327`
+- Correct mean return `-1.8059994`
 - Random mean return `-1.1513333`
 
 Resources:
 
 - parameters `6,200,115`
-- trained model-state `24,827,943 bytes` per seed
-- actual frames `131,080` per seed
-- peak RSS `1,069,864 / 1,334,592 / 1,274,272 KiB`
-- wall `1691.39 / 1569.14 / 1686.73 s`
-- CPU forward `8.162 ms/step`
+- trained model-state `24,827,943 / 24,827,943 / 24,828,026 bytes`
+- actual frames `131,200` per seed
+- peak RSS `1,699,780 / 1,467,976 / 2,498,024 KiB`
+- wall `1479.48 / 1479.02 / 1560.07 s`
+- CPU forward approximately `7.86–8.00 ms/step`
+
+Diagnostics:
+
+- chosen-action valid fraction: `1.0` for every seed
+- masked policy entropy mean: `1.3611 / 1.2464 / 1.2459`
+- recurrent state remained active
+- Correct、language-blind、language-shuffleは同率
+- learner logのpolicy-gradient lossとtotal lossは終盤まで大きく正負反転し、optimizer-step instabilityを疑う根拠が残る
 
 Decision:
 
-> **official stateful core不足を単独主因として棄却する。statefulは正しく作動したが、CorrectはRandomを下回り、language-blind/shuffleと同率で、言語利用能力も成立していない。**
+> **unroll不足を単独主因として棄却する。unroll=80は正しく到達したが、CorrectはRandomを下回り、language-blind/shuffleと同率で、言語利用能力も成立しなかった。**
 
-## Active single-factor screening: unroll length 20 → 80
+## Active single-factor screening: learning rate
 
-変更要因は`unroll_length: 20 → 80`のみ。`stateful=true`、entropy `0.05`、actors `2`、threads `1`、batch `2`、frames `131072`、seeds `1/7/19`、split、matched instances、controlsを固定する。
+変更要因はlearning rateのみ。`stateful=true`、`unroll_length=80`、entropy `0.05`、actors `2`、threads `1`、batch `2`、frames `131072`、seeds `1/7/19`、split、matched instances、controlsを固定する。
 
-Execution status:
+- patch: `patch_silg_learning_rate_screening.py`
+- workflow: `.github/workflows/r01_silg_learning_rate_screening.yml`
+- requested value: `0.0001`
+- routing proof: 全seed commandの`--learning_rate 0.0001`、`--stateful`、`--unroll_length 80`、LSTM checkpoint、actual frames
+- status: **workflow実装済み。結果未認定**
 
-- workflow: `.github/workflows/r01_silg_unroll80_screening.yml`
-- request integration: `R01-SCREEN-004-E064`
-- run `30226976064`
-- job `89867137085`
-- workflow head `344002bc8e5130cbb9a302fda1a2115baa8edb1c`
-- status: **in_progress**
-- completed: checkout、Python setup、provenance、pinned SILG/RTFM install、stateful patch、unroll-80 patch、generator schema、random/schema probe
-- active step: **Train official stateful multi with unroll 80**
-- artifacts: **0件（学習中）**
-- performance result: **未認定**
-
-既存push-run locatorがunroll-80を監視していなかったため、commit `746d527a0d760cc4e910e13d8913c040ee8afd5f`でmatrixとpath triggerへ追加した。locator run `30228319127`は成功した。run `30226976064`はjob生成済み・学習中へ進んだため、同一screeningを重複dispatchしない。
-
-有効なunroll=80 runでもCorrectがRandomを上回らない場合、unroll不足単独原因を棄却する。ただしiterationは閉じず、次の単一原因をlearner optimization parity（learning rate、gradient clipping、optimizer/checkpoint restoreのうち証拠が最も強い一件）から選ぶ。
+有効なrunでもCorrectがRandomを上回らない場合、learning-rate単独原因を棄却する。ただしiterationは閉じず、保存logと公式code差分からgradient clippingまたはoptimizer/checkpoint restoreの一方だけを次に選ぶ。
 
 ## Evaluation contract
 
@@ -104,13 +104,13 @@ D015〜D035を凍結する。実bundleが具体的なfalse pass/failureを示す
 
 ## Prior-art and RQ boundary
 
-既存のscore-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN等の境界を維持する。
+既存のscore-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE等の境界を維持する。
 
-ACL Findings 2026のTRACEは、multi-turn dialogueを通じたunderlying causal graphのonline reconstructionを定式化し、探索段階のcausal-graph reconstruction rewardと、介入段階のtargeted belief restructuring rewardを組み合わせる。したがって、言語対話から因果グラフを逐次探索すること、causal-graph-driven rewardで介入対象を深掘ること、探索と介入を二段階RLで接続することだけではRQ-001の新規性を認定しない。一次論文は確認済みだが、author-official repository、exact commit、dependency、dataset、公式commandのimmutable再現は未確認であり、SILG/J-CRe3の代替baselineにも数えない。
+CLeaR 2026のBayesian Ablationは、neural network内の表現単位がtask performanceへ与える因果的寄与を確率分布として推定し、distributedness、manifold complexity、polysemanticityを測る。したがって、unit-level probabilistic ablation、表現の因果寄与推定、distributedness/polysemanticity診断だけではRQ-001の新規性を認定しない。一次論文は確認済みだが、author-official code、exact commit、immutable numerical reproductionは未確認であり、SILG/J-CRe3の代替baselineにも数えない。
 
 正式判断:
 
-> **RQ-001: FURTHER NARROWED BEYOND DIALOGUE-DRIVEN CAUSAL-GRAPH EXPLORATION AND TARGETED INTERVENTION — NOT ADOPTED**
+> **RQ-001: FURTHER NARROWED BEYOND PROBABILISTIC CAUSAL ABLATION OF TASK REPRESENTATIONS — NOT ADOPTED**
 
 ## Stage transition
 
@@ -127,4 +127,4 @@ ACL Findings 2026のTRACEは、multi-turn dialogueを通じたunderlying causal 
 
 ## Last integration
 
-2026-07-27: **RESET-E066**。unroll-80 run `30226976064`はjob `89867137085`を生成し、固定条件の配線・schema/random probeを通過して3-seed学習中へ進んだ。重複dispatchせず完了artifactを待つ。TRACEのdialogue-driven causal-graph explorationとtargeted interventionをprior-art境界へ追加したが、official codeと数値再現は未確認であり、外部baseline再現0、能力進歩未認定、高校生級未達を維持する。
+2026-07-27: **RESET-E067**。unroll-80 run `30226976064`のimmutable artifactを取得し、配線・対照・resource・leakageを確認した。Correct `2/60`、Random `4/60`、language-blind/shuffle `2/60`でqualificationは不合格となり、unroll不足単独原因を棄却した。終盤までの大きなpolicy-gradient loss反転を根拠に、learning rateだけを`0.0001`へ変更する次screeningを実装した。外部baseline再現0、能力進歩未認定、高校生級未達を維持する。
