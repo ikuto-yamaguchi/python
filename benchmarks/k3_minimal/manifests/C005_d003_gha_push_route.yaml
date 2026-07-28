@@ -1,0 +1,294 @@
+schema_version: 1
+id: C005-D003-GHA-PUSH-ROUTE
+role: K3-C
+date: 2026-07-29
+canonical_branch: research/intelligence-swarm-reconstruction-001
+status: preregistered_environment_route_only
+
+hypothesis: >-
+  A canonical-branch and environment-file restricted one-shot push route can
+  start the C003 exact dependency/import environment gate without copying the
+  workflow to the default branch and without authorizing model execution.
+
+inherits:
+  - research/intelligence_swarm/k3_loop/prereg/C003_D003_GHA_ENVIRONMENT_GATE_AMENDMENT.md
+  - research/intelligence_swarm/k3_loop/prereg/C004_PAPER_BLOCK_VS_CANDIDATE_RAW_SEMANTIC_TRACE_PREREG.md
+  - research/intelligence_swarm/k3_loop/theory/B006_PB1_FALSIFIABILITY_AND_ESCALATION_BOUNDARY.md
+
+workflow:
+  path: .github/workflows/d003-k3-environment-gate.yml
+  preserve_workflow_dispatch: true
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - .github/workflows/d003-k3-environment-gate.yml
+      - benchmarks/k3_minimal/preflight/d003_gha_environment.sh
+      - benchmarks/k3_minimal/preflight/d003_environment_probe.py
+      - benchmarks/k3_minimal/manifests/C003_d003_gha_environment_gate.yaml
+      - benchmarks/k3_minimal/manifests/C005_d003_gha_push_route.yaml
+      - research/intelligence_swarm/k3_loop/prereg/C003_D003_GHA_ENVIRONMENT_GATE_AMENDMENT.md
+      - research/intelligence_swarm/k3_loop/prereg/C005_D003_GHA_PUSH_ROUTE_AMENDMENT.md
+      - research/intelligence_swarm/k3_loop/execution/C005_D003_GHA_PUSH_NONCE.txt
+  prohibited_triggers:
+    - pull_request
+    - schedule
+    - broad_push
+  default_branch_copy_authorized: false
+  permissions:
+    contents: read
+  runner: ubuntu-24.04
+  timeout_minutes: 30
+  concurrency:
+    group: d003-k3-environment-${{ github.ref }}
+    cancel_in_progress: false
+    max_active_runs: 1
+
+nonce:
+  path: research/intelligence_swarm/k3_loop/execution/C005_D003_GHA_PUSH_NONCE.txt
+  route_id: C005-D003-GHA-ENV-001
+  initial_attempt: 1
+  required_fields:
+    - route_id
+    - attempt
+    - canonical_branch_head_before_amendment
+    - c005_prose_blob_sha
+    - c005_manifest_blob_sha
+    - utc_timestamp
+    - training_authorized
+    - model_execution_authorized
+  retry:
+    max_unchanged_retries: 1
+    allowed_only_after_run_started: true
+    allowed_causes:
+      - github_actions_service
+      - runner_transient
+      - github_network
+      - package_index_network
+      - dns_transient
+    mutable_field:
+      - attempt
+    immutable_fields:
+      - workflow
+      - runner_script
+      - manifests
+      - source_commits
+      - dependency_targets
+      - thresholds
+      - authorization_flags
+
+source_targets:
+  candidate:
+    repository: wdlctc/open-attention-residuals
+    commit: 83d2b8de82c2fbb981c7decca67d13d9db348da6
+  official_reference:
+    repository: MoonshotAI/Attention-Residuals
+    commit: 85e22310fe5ee860b4a023de312d791de8a5a5e6
+  transformers:
+    repository: huggingface/transformers
+    commit: 42791a34fdeae197f60f11ace3807c81f44b0729
+  python: 3.11.x
+  pytorch:
+    policy: resolve_one_exact_cpu_build_and_record
+    minimum: '2.4'
+
+execution_authorization:
+  environment_import_stage: true
+  training_authorized: false
+  model_execution_authorized: false
+  dataset_download_authorized: false
+  tokenizer_download_authorized: false
+  checkpoint_download_authorized: false
+  quantization_authorized: false
+  automatic_model_stage_transition: false
+
+branch_identity_gate:
+  push_ref_name: research/intelligence-swarm-reconstruction-001
+  checkout_sha_must_equal_trigger_sha: true
+  clean_worktree_required: true
+  merge_commit_substitution_allowed: false
+  default_branch_substitution_allowed: false
+  save_blob_sha_for:
+    - .github/workflows/d003-k3-environment-gate.yml
+    - benchmarks/k3_minimal/preflight/d003_gha_environment.sh
+    - benchmarks/k3_minimal/preflight/d003_environment_probe.py
+    - benchmarks/k3_minimal/manifests/C003_d003_gha_environment_gate.yaml
+    - benchmarks/k3_minimal/manifests/C005_d003_gha_push_route.yaml
+    - research/intelligence_swarm/k3_loop/prereg/C003_D003_GHA_ENVIRONMENT_GATE_AMENDMENT.md
+    - research/intelligence_swarm/k3_loop/prereg/C005_D003_GHA_PUSH_ROUTE_AMENDMENT.md
+    - research/intelligence_swarm/k3_loop/execution/C005_D003_GHA_PUSH_NONCE.txt
+
+required_imports:
+  - transformers.masking_utils.create_causal_mask
+  - transformers.modeling_layers.GradientCheckpointingLayer
+  - transformers.modeling_utils.merge_with_config_defaults
+  - transformers.modeling_utils.capture_outputs
+  - candidate_qwen3_config
+  - candidate_qwen3_model
+  - candidate_qwen3_attention
+  - candidate_qwen3_mlp
+  - candidate_qwen3_rmsnorm
+  - candidate_modeling_module
+
+compatibility_patch:
+  max_count: 1
+  allowed_scope:
+    - import_path
+    - api_wiring
+  prohibited_scope:
+    - model_equation
+    - tensor_shape
+    - initialization
+    - source_construction
+    - block_transition
+    - routing_prior
+    - partial_block_reset
+    - recency_bias
+    - optional_gate
+    - forward_equation
+  required_evidence:
+    - unpatched_failure_log
+    - unified_diff
+    - patch_sha256
+    - before_sha256
+    - after_sha256
+    - semantic_no_change_explanation
+
+artifact:
+  name_template: d003-gha-environment-${run_id}-${run_attempt}
+  retention_days_minimum: 30
+  required_files:
+    - run-context.json
+    - runner-provenance.json
+    - repository-provenance.json
+    - python-environment.json
+    - resolver-report.json
+    - pip-freeze.txt
+    - pip-check.txt
+    - dependency-checksums.sha256
+    - required-imports.json
+    - source-and-patch.json
+    - install.log
+    - import-probe.log
+    - D003_GHA_environment_summary.json
+    - checksums.sha256
+  run_context_required_fields:
+    - repository
+    - canonical_branch
+    - event_name
+    - ref
+    - ref_name
+    - trigger_sha
+    - checkout_sha
+    - workflow_path
+    - workflow_blob_sha
+    - run_id
+    - run_attempt
+    - job_id
+    - nonce_route_id
+    - nonce_attempt
+    - nonce_blob_sha
+    - actor
+    - started_at_utc
+    - finished_at_utc
+  runner_required_fields:
+    - runner_os
+    - runner_arch
+    - runner_image_label
+    - runner_image_version
+    - cpu_model
+    - visible_cores
+    - python_executable
+    - python_full_version
+    - authorization_flags
+  post_run_fixation:
+    - artifact_id
+    - artifact_name
+    - artifact_zip_sha256
+    - summary_sha256
+
+classifications:
+  ENV_PASS:
+    requires:
+      - exactly_one_registered_run_generated
+      - branch_path_concurrency_authorization_guards_pass
+      - exact_source_dependency_provenance_saved
+      - all_required_imports_pass
+      - candidate_module_import_pass
+      - clean_worktree
+      - all_required_artifacts_present
+      - artifact_id_and_sha_fixable
+    authorizes_model_execution: false
+  ENV_RETRY:
+    requires:
+      - run_started
+      - transient_service_or_network_failure_only
+      - unchanged_protocol_and_scientific_conditions
+    max_occurrences: 1
+    authorizes_model_execution: false
+  ROUTE_STOP:
+    requires:
+      - registered_push_performed
+      - no_run_generated_or_persistent_route_rejection
+      - broad_trigger_and_default_branch_copy_not_used
+    rejects_block_attnres: false
+  ENV_PATH_STOP:
+    requires:
+      - run_started
+      - at_most_one_allowed_patch_attempted
+      - fixed_dependencies_or_imports_require_semantic_change_or_provenance_cannot_be_saved
+    rejects_block_attnres: false
+  ENV_PROTOCOL_FAIL:
+    requires_any:
+      - branch_guard_violation
+      - path_guard_violation
+      - authorization_violation
+      - checksum_or_artifact_violation
+      - prohibited_download_or_execution
+    result_valid: false
+    retry_without_amendment_authorized: false
+
+pb1_trace_metadata_only:
+  authorizes_model_execution: false
+  semantic_sublayer_indexing: one_based
+  l_transformer: 12
+  l_sub: 24
+  n_completed_blocks: 4
+  s_sublayers_per_block: 6
+  ordered_transformer_boundaries: [3, 6, 9, 12]
+  reject_odd_s: true
+  require_l_sub_divisible_by_s: true
+  source_slots:
+    sublayer: 84
+    final_router: 5
+    total: 89
+  primary_evidence_geometry_matched: false
+  interpretation:
+    pb1_null_rejects_mechanism: false
+    pb1_positive_authorizes_adoption: false
+    higher_n_requires_separate_preregistration: true
+    higher_n_requires_separate_resource_budget: true
+
+prohibitions:
+  - no_model_instantiation
+  - no_forward_backward_save_load
+  - no_dataset_tokenizer_checkpoint_download
+  - no_optimizer_step
+  - no_s1_s2_s3
+  - no_model_cpu_timing_or_rss
+  - no_generation
+  - no_quantization
+  - no_new_architecture
+  - no_new_k3_component
+  - no_automatic_stage_m
+
+next_d_handoff:
+  single_allowed_action: apply_registered_workflow_amendment_and_start_one_environment_only_run
+  ordered_steps:
+    - apply_exact_push_concurrency_authorization_diff
+    - verify_no_allowlist_external_changes
+    - create_nonce_attempt_1
+    - commit_and_push_canonical_branch
+    - observe_exactly_one_environment_run
+    - collect_run_and_artifact_provenance
+    - classify_environment_or_route_outcome
