@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Shared State
 
-Last updated: 2026-07-28 by K3-A
+Last updated: 2026-07-28 by K3-B
 Canonical branch: `research/intelligence-swarm-reconstruction-001`
 
 ## Objective
@@ -9,11 +9,11 @@ Kimi K3 と関連一次研究から、1GB以下・弱いCPU/スマホで高速�
 
 ## Current phase
 
-**Phase 0.7: A001 evidence delta complete / D002 executable preflight remains the sole cycle target**
+**Phase 0.8: B002 CPU roofline/trace contract complete / D002 executable preflight remains the sole cycle target**
 
 - A evidence: A001完了。著者実行コード/重みは未発見、一次スケール条件を固定
-- B theory: B001完了。D002 traceまで追加architecture監査を停止
-- C preregistration: C001完了。実験対象を変えず、実行契約の修正だけが必要
+- B theory: B001/B002完了。CPU trace契約を固定し、実測crossover判断はD002待ち
+- C preregistration: C001完了。D002 invocation、save-load tolerance、operator attribution schemaの修正が必要
 - D reproduction: D001 static preflight完了。D002未完了、S0/S1未許可
 - E integration decision: E001完了
 - New architecture permission: **禁止継続**
@@ -24,7 +24,7 @@ Block Attention Residuals can improve training quality/compute efficiency in an 
 
 Status: **追加検証・未採用**
 
-The next cycle does not test quality improvement. It tests whether B0/A1 can be instantiated and measured under a reproducible residual-only contract.
+The next cycle does not test quality improvement. It tests whether B0/A1 can be instantiated and measured under a reproducible residual-only contract, including operator-level CPU attribution.
 
 ## E001 decision
 
@@ -34,7 +34,7 @@ D001 found candidate-entry-point defects, not evidence against Block AttnRes. Th
 - do not authorize S1/S2/S3;
 - do not open KDA, Stable LatentMoE or another architecture candidate;
 - complete D002 as the single bottleneck;
-- amend C001 only where the command/batch contract is non-executable;
+- amend C001 only where the command/batch/trace contract is non-executable;
 - keep all performance and intelligence claims prohibited.
 
 ## A001 evidence delta
@@ -48,6 +48,16 @@ D001 found candidate-entry-point defects, not evidence against Block AttnRes. Th
 - C001 is below and outside the primary evidence regime: approximately 115.6M dense, width 512, `N=4`, context 2048 and an eager unofficial implementation.
 - Classification remains **小型化で要再設計**; this does not alter E001 or authorize training.
 
+## B002 theory delta
+
+- Added `theory/B002_BLOCK_ATTNRES_CPU_ROOFLINE_TRACE_CONTRACT.md`.
+- Decomposed A1 CPU overhead into layout/stack, norm+score, softmax, weighted mix and framework/dispatch terms.
+- For `d=512`, BF16 and `S=5`, theoretical routing traffic is at least `6,144 bytes/event` without materialized stack and approximately `16,384 bytes/event` with a stack buffer, before extra normalization/autograd temporaries.
+- A 24-sublayer upper-style estimate is `147,456–393,216 additional bytes/token`; this is traffic, not peak RSS.
+- Approximate routing arithmetic intensity is only about `1.67 FLOPs/byte` in the ideal path and at most about `0.625 FLOPs/byte` for the stack lower-bound path.
+- These are diagnostic bounds, not measured crossover claims. Exact source counts, strides, dtype conversions, operator times and temporary allocations must come from D002.
+- D002 must classify the implementation path as Path-PASS, Path-WARN or Path-STOP; it must not adopt the architecture.
+
 ## Evidence boundary
 
 - Kimi K3 aggregate gains cannot be attributed to AttnRes alone.
@@ -59,11 +69,13 @@ D001 found candidate-entry-point defects, not evidence against Block AttnRes. Th
 - D001 is a reproduction-contract audit, not evidence for or against AttnRes quality.
 - Source-derived parameter overhead is only `24,600` parameters (`~0.0213%`), but this does not establish CPU latency, RSS, training stability or quality Pareto.
 - The paper's under-2% inference claim depends on two-phase batching, caching, online softmax, fusion and large-model system conditions; it is not evidence for eager small-CPU latency.
+- B002 traffic estimates are lower-bound/upper-style accounting aids and cannot replace measured operator traces.
 
 ## Completed artifacts
 
 - `evidence/A001_BLOCK_ATTNRES_AUTHOR_ARTIFACT_AND_SCALE_AUDIT.md`
 - `theory/B001_BLOCK_ATTNRES_SMALL_SCALE_AUDIT.md`
+- `theory/B002_BLOCK_ATTNRES_CPU_ROOFLINE_TRACE_CONTRACT.md`
 - `prereg/C001_BLOCK_ATTNRES_100M_PREREG.md`
 - `benchmarks/k3_minimal/manifests/C001_block_attnres_100m.yaml`
 - `reproduction/D001_C001_PREFLIGHT_CONTRACT_AUDIT.md`
@@ -93,9 +105,9 @@ These values remain source-derived until D002 verifies them by model instantiati
 
 ## Current single bottleneck
 
-**D002 executable non-training preflight.**
+**D002 executable non-training preflight with B002 operator attribution.**
 
-D must create and run a standalone harness that does not access FineWeb-Edu and does not depend on the candidate's unconditional NCCL/DDP training entry point. It must instantiate B0/A1 from one resolved configuration, prove the residual-only diff, execute a fixed-input forward/backward/save-load check, verify routing gradients, and record resource evidence.
+D must create and run a standalone harness that does not access FineWeb-Edu and does not depend on the candidate's unconditional NCCL/DDP training entry point. It must instantiate B0/A1 from one resolved configuration, prove the residual-only diff, execute a fixed-input forward/backward/save-load check, verify routing gradients, record resource evidence, and attribute CPU routing cost to layout, norm+score, softmax, mix and framework controls.
 
 No other hypothesis may replace this bottleneck during the next cycle unless D002 proves the candidate cannot be instantiated without changing more than the residual path.
 
@@ -111,14 +123,16 @@ D002 must complete all of the following:
 6. finite nonzero gradients for every Block AttnRes routing parameter;
 7. save-load and post-load logits equivalence check under a declared tolerance;
 8. peak RSS/VRAM and wall-time logging;
-9. raw logs, source/config/input/result checksums;
-10. machine-readable PASS/FAIL record in `benchmarks/k3_minimal/preflight/`.
+9. shape/stride/contiguity/dtype/source-count trace for routing events;
+10. operator timing for stack/layout, norm+score, softmax, mix and full routing plus no-op controls;
+11. raw logs, source/config/input/result checksums;
+12. machine-readable PASS/WARN/STOP record in `benchmarks/k3_minimal/preflight/`.
 
 Separately, before S1:
 
-11. amend C001's batch/command contract;
-12. resolve tokenizer revision and hashes;
-13. freeze validation and training token manifests.
+13. amend C001's batch/command contract;
+14. resolve tokenizer revision and hashes;
+15. freeze validation and training token manifests.
 
 S1/S2/S3 remain prohibited until their gates pass.
 
@@ -130,7 +144,7 @@ Stop D002 and classify the current implementation path as **棄却（implementat
 - B0/A1 differ outside declared AttnRes config or parameter names;
 - any routing parameter has absent, non-finite or structurally zero gradient;
 - save-load equivalence fails beyond declared tolerance;
-- resource metrics or raw checksums cannot be persisted;
+- resource metrics, operator traces or raw checksums cannot be persisted;
 - making D002 executable requires an unregistered architecture or model-semantic change;
 - candidate defects are patched without an explicit diff and checksum.
 
@@ -138,7 +152,7 @@ Do not reject the AttnRes research hypothesis solely because this unofficial imp
 
 ## Pareto gate after D002
 
-D002 is an executability gate, not an adoption gate. If it passes, C must amend the executable contract and D may prepare immutable-data S1. Adoption still requires later preregistered evidence across:
+D002 is an executability and implementation-path gate, not an adoption gate. If it passes, C must amend the executable contract and D may prepare immutable-data S1. Adoption still requires later preregistered evidence across:
 
 - held-out quality;
 - model bytes and active compute;
@@ -147,6 +161,8 @@ D002 is an executability gate, not an adoption gate. If it passes, C must amend 
 - CPU prefill/decode latency and generation speed;
 - quantization tolerance;
 - three-seed stability.
+
+If D002 is Path-WARN because layout/framework dominates or overhead is high, E may narrow Block AttnRes to a training-only or fusion-dependent candidate without claiming quality failure.
 
 ## Next handoffs
 
@@ -158,25 +174,28 @@ D002 is an executability gate, not an adoption gate. If it passes, C must amend 
 
 ### B
 
-- Keep B001 unchanged until D002 produces dtype/layout/timing traces.
-- Prepare the equations/fields needed for an eager-memory-traffic and CPU roofline calculation, but do not claim a crossover point without traces.
-- On D002 output, check whether the 24,600-parameter overhead is dominated by activation reads, stack/einsum/softmax, or framework launch overhead.
+- B002 trace/equation contract is complete.
+- Do not claim a CPU crossover point until D002 provides exact dtype/layout/timing traces.
+- After D002, calculate effective traffic, operator shares, forward/backward overhead and RSS amplification using B002.
 
 ### C
 
-- Amend C001 only for: (1) standalone D002/S0 invocation, and (2) explicit realization of global batch 64 for later S1.
+- Amend C001 only for: standalone D002/S0 invocation, explicit global batch 64 for later S1, save-load tolerance, and B002 operator-attribution schema.
 - Preserve model, optimizer, sequence length, token budgets, seeds and single-change ablation.
-- Add declared save-load tolerance and D002 PASS/FAIL schema; do not authorize training.
+- Do not authorize training.
 
 ### D
 
 - Implement and execute D002 standalone preflight now.
 - Do not download FineWeb-Edu and do not start S1.
 - Persist code/config/input/output/environment checksums and raw logs.
+- Add fixed CPU cases `(1,1)`, `(1,128)`, `(1,512)`, `(1,2048)` where executable, with warmup/repeats/thread settings recorded.
+- Record source tensor shapes, strides, contiguity, dtypes, source counts and operator attribution.
 - If a minimal compatibility patch is necessary, save the exact diff and resulting source checksum before execution.
 
 ### E
 
-- Next review is binary: D002 gate PASS or implementation-path STOP.
+- Next review classifies D002 as Path-PASS, Path-WARN or Path-STOP.
 - If PASS, keep status `追加検証` and authorize only immutable-data preparation plus corrected S1 manifest.
+- If WARN, consider `狭義化` to training-only/fusion-dependent use; do not infer quality failure.
 - If STOP, reject this unofficial implementation path and return A/C to find an author-controlled or independently auditable faithful baseline without opening a new K3 component.
