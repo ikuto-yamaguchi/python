@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Backlog
 
-Last updated: 2026-07-29 by K3-E
+Last updated: 2026-07-29 by K3-A
 
 ## P0 — Block AttnRes minimum reproduction
 
@@ -18,6 +18,9 @@ Current bottleneck:
 - [x] Dependency lower bound fixed
 - [x] A003 paper-to-candidate deviation matrix
 - [x] Missing partial reset, duplicate source, recency bias identified
+- [x] A004 paper layer-index origin and `L_sub/N/S` block-geometry audit
+- [x] PB1 requires `L_sub=24`, `N=4`, `S=6`, ordered boundaries after Transformer blocks `[3,6,9,12]`
+- [x] Zero-based initial false-boundary and odd-`S` truncation counterexamples fixed
 - [ ] Resolver/import failureが出た場合のみprovenance追補
 - [x] P0中は他K3 componentを凍結
 
@@ -50,6 +53,7 @@ Current bottleneck:
 - [ ] C005 restrict paths to environment workflow/script/manifest/amendment or dedicated non-semantic nonce
 - [ ] C005 pin concurrency, authorization flags, artifact schema, and one-retry policy
 - [ ] C005 prohibit automatic transition from ENV_PASS to model stage
+- [ ] Next PB1 amendment must register 1-based semantic sublayer indexing, `L_sub/N/S`, exact ordered boundaries, odd/nondivisible rejection
 - [ ] PB1 semantic PASS後にのみfull-model resource protocolをamend
 - [ ] S1検討前に実コード上のglobal batch 64を保証
 
@@ -75,6 +79,8 @@ Current bottleneck:
 - [ ] Run PB1 tiny semantic trace after CR1
 - [ ] Record source roles/checksums, duplicate groups, reset state and recency bias
 - [ ] Record raw-index and checksum-collapsed probability, entropy and effective source count
+- [ ] Record runtime index origin, canonical Attention/MLP sublayer indices, exact ordered boundary sequence and per-block sublayer counts
+- [ ] Reject boundary before first transformed sublayer, odd/truncated `S`, missing final completed block, or final-router-as-block miscount
 - [ ] Verify PB1 delta `25,600` from exact state dict
 - [ ] PB1 only: semantic PASS/WARN/STOP evidence
 - [ ] CR1 only: `RAW_DIAGNOSTIC_COMPLETE` or failure; no paper attribution
@@ -89,6 +95,7 @@ Current bottleneck:
 - [x] Classify D003-GHA manual dispatch as protocol amendment required
 - [ ] Classify C005/D005 push route as ENV_PASS / ENV_RETRY / ROUTE_STOP / ENV_PATH_STOP
 - [ ] Classify PB1 semantic stage PASS/WARN/STOP
+- [ ] Require exact ordered boundary-position PASS in addition to reset/duplicate checks
 - [ ] Record CR1 as artifact diagnostic only
 - [ ] Keep Block AttnRes unadopted until quality/resource/3-seed evidence
 
@@ -100,6 +107,11 @@ Current bottleneck:
 - [ ] No optional mixing-gate parameter
 - [ ] Source identities match preregistration
 - [ ] Routing probabilities are finite and sum to one
+- [ ] Semantic layer index is 1-based over Attention/MLP sublayers
+- [ ] `L_sub=24`, `N=4`, `S=6` and boundaries after Transformer blocks `[3,6,9,12]`
+- [ ] No boundary before the first transformed sublayer
+- [ ] Every completed block contains exactly six sublayers
+- [ ] Final router does not increment completed-block count
 - [ ] Exact parameter delta is explained
 - [ ] Save/load event structure and output match
 
