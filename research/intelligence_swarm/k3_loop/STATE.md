@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Shared State
 
-Last updated: 2026-07-29 by K3-A
+Last updated: 2026-07-29 by K3-B
 Canonical branch: `research/intelligence-swarm-reconstruction-001`
 
 ## Objective
@@ -11,7 +11,7 @@ Kimi K3由来の効率化原理を、1GB以下・弱いCPU/スマホ向けモデ
 
 **Phase 1.5: D003-GHA manual dispatch is orchestration-blocked; C005/D005 one-shot canonical-branch push environment gate authorized → variant-separated deterministic semantic trace。**
 
-Completed: A001–A004, B001–B004, C001–C004, D001–D002, D003 local environment probe, D004 workflow staging, E001–E004.
+Completed: A001–A004, B001–B005, C001–C004, D001–D002, D003 local environment probe, D004 workflow staging, E001–E004.
 
 Current classifications:
 
@@ -71,6 +71,35 @@ Evidence record:
 - `research/intelligence_swarm/k3_loop/evidence/A004_BLOCK_ATTNRES_INDEXING_AND_BLOCK_GEOMETRY_AUDIT.md`
 - audit commit: `cb2a35f81f559dc20f01f1a533e79d46b66a4c30`
 
+## B005 block-count cost / resolution result
+
+PB1の`L=24,N=4,S=6`について、重複sourceのないcanonical routingのsource-slot上限を固定した。
+
+- sublayer routing source slots: `84`
+- final router source count: `5`
+- total source slots: `89`
+- width `d=512`でscore＋weighted-value passのgeometry indicator: `91,136 scalar contributions/token`
+
+一般に固定depth `L=N*S`では、source-slot上限は
+
+`C_slots(L,N) = L*(N+3)/2 + N + 1`
+
+となり、parameter数がほぼ不変でもactivation read、temporary、softmax幅、dispatchは`N`とともに増える。`L=24`で`N=4→12`にするとslot indicatorは`89→193`、約`2.169x`。
+
+一方、一次報告は概ね`N≈8–9`で、PB1の`N=4`はprimary-evidence geometryより粗い。PB1はefficacy reproductionではなくminimum semantic / effect-direction pilotとして扱う。
+
+Interpretation boundary:
+
+- `N=4` quality nullからmechanism全体を棄却しない
+- `N=4` quality gainからhigher-`N` CPU Paretoを推定しない
+- semantic PASSはminimum effective scaleを示さない
+- higher-`N` quality gainがresource Paretoを超える場合はtraining-onlyまたはfused-kernel依存へ狭義化
+
+Theory record:
+
+- `research/intelligence_swarm/k3_loop/theory/B005_BLOCK_ATTNRES_BLOCK_COUNT_COST_RESOLUTION_AUDIT.md`
+- audit commit: `dbbe5c0304b4f377b557a2fac7426fa88c8b5a93`
+
 ## D004 result
 
 C003 environment stageの実行定義をcanonical branchへ追加した。
@@ -129,6 +158,7 @@ PB1 PASS requires:
 - final router does not increment completed-block count
 - explained exact parameter delta
 - save/load event/output consistency
+- source-slot accounting consistent with B005 or explicitly explained by the exact routing event definition
 
 CR1にはpaper適合PASSを付けず、`RAW_DIAGNOSTIC_COMPLETE`または`RAW_DIAGNOSTIC_FAILED`のみを付ける。
 
@@ -151,7 +181,7 @@ D002 standalone routing median:
 4. branch SHA、runner provenance、resolver report、freeze、dependency/source hashesを保存
 5. required internal importsを全件PASS
 6. `ENV_PASS` artifact ID/SHAを固定
-7. CがPB1の1-based sublayer index、`L_sub/N/S`、ordered boundariesをamendmentへ固定
+7. CがPB1の1-based sublayer index、`L_sub/N/S`、ordered boundaries、B005 source-slot contractをamendmentへ固定
 8. CR1/PB1 tiny deterministic semantic traceをvariant別に実行
 9. EがPB1 semantic PASS/WARN/STOPを判断
 
@@ -168,4 +198,4 @@ Dが次に実行可能なのはC005に従うenvironment workflow amendment・起
 
 ## Evidence boundary
 
-Kimi K3全体の利得をAttnRes単独へ帰属しない。著者一次証拠は約194M active未満で未確立。environment workflowの静的成立やsemantic PASSは品質、CPU Pareto、量子化、3-seed安定性、知能原理、高校生級、能力進歩、1GB目標達成を示さない。
+Kimi K3全体の利得をAttnRes単独へ帰属しない。著者一次証拠は約194M active未満で未確立。PB1の`N=4`は一次報告の`N≈8–9` geometryと一致しない。environment workflowの静的成立、semantic PASS、source-slot式はいずれも品質、CPU Pareto、量子化、3-seed安定性、知能原理、高校生級、能力進歩、1GB目標達成を示さない。
