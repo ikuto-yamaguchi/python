@@ -1,0 +1,95 @@
+{
+  "cycle": "R01-007",
+  "benchmark": "SILG/RTFM",
+  "official_repository": "https://github.com/vzhong/silg",
+  "official_branch": "main",
+  "target_commit": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
+  "package": {
+    "name": "silg",
+    "version": "0.0.1",
+    "python_requires": ">=3.7.10",
+    "license": "MIT"
+  },
+  "reference_container": "pytorch/pytorch:1.9.0-cuda10.2-cudnn7-runtime",
+  "official_requirements": [
+    "gym>=0.15.4",
+    "py-getch==1.0.1",
+    "pyyaml",
+    "torch",
+    "torchvision",
+    "expman",
+    "submitit"
+  ],
+  "environment_repository": "https://github.com/facebookresearch/RTFM",
+  "install_sequence": [
+    "bash install_envs.sh",
+    "pip install -r requirements.txt",
+    "pip install -e .",
+    "bash download_env_data.sh"
+  ],
+  "launch": {
+    "entrypoint": "run_exp.py",
+    "launcher": "python launch.py --local --envs rtfm",
+    "required_environment": {
+      "OMP_NUM_THREADS": "1"
+    }
+  },
+  "splits": {
+    "train": [
+      "silg:rtfm_train_s1-v0",
+      "silg:rtfm_train_s2-v0",
+      "silg:rtfm_train_s3-v0",
+      "silg:rtfm_train_s4-v0"
+    ],
+    "test": [
+      "silg:rtfm_test_s1-v0",
+      "silg:rtfm_test_s2-v0",
+      "silg:rtfm_test_s3-v0",
+      "silg:rtfm_test_s4-v0"
+    ],
+    "first_reproduction_target": "s1"
+  },
+  "observation_schema": {
+    "text_fields": ["wiki", "task", "inv"],
+    "name": [6, 6, 1, 8],
+    "name_len": [6, 6, 1],
+    "text": [80],
+    "text_len": [1],
+    "wiki": [80],
+    "wiki_len": [1],
+    "task": [40],
+    "task_len": [1],
+    "inv": [8],
+    "inv_len": [1],
+    "valid": [5],
+    "rel_pos": [6, 6, 2],
+    "pos": [2]
+  },
+  "action_schema": {
+    "count": 5,
+    "index_to_action": {
+      "0": "stay",
+      "1": "up",
+      "2": "down",
+      "3": "left",
+      "4": "right"
+    }
+  },
+  "episode": {
+    "max_steps": 80,
+    "wrapper_time_penalty": -0.02,
+    "win_in_rtfm_wrapper": "reward > 0.5",
+    "torchbeast_global_win_note": "reward > 0.8"
+  },
+  "required_controls": [
+    "official_recurrent",
+    "random_valid_action",
+    "language_blind",
+    "state_only",
+    "language_shuffle"
+  ],
+  "seeds": [1, 7, 19],
+  "status": "installation_blocked_before_public_execution",
+  "capability_claim": false,
+  "novelty_claim": false
+}

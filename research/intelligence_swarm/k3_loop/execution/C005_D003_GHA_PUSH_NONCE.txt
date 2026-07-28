@@ -1,0 +1,8 @@
+route_id: C005-D003-GHA-ENV-001
+attempt: 1
+canonical_branch_head_before_amendment: 33cf07496b12ee01bed90249453e791efb6ba71c
+c005_prose_blob_sha: 5d8bd162e0a6cf4f07c8d47c24c3acd6186b995f
+c005_manifest_blob_sha: 2297cec93ca0c61e7ee329350819b851101b11a2
+utc_timestamp: 2026-07-28T18:24:29Z
+"training_authorized": false
+"model_execution_authorized": false

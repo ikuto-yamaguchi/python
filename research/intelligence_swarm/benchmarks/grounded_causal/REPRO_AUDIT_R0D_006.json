@@ -1,0 +1,53 @@
+{
+  "cycle": "R0D-006",
+  "benchmark": "SILG/RTFM S1",
+  "canonical_branch": "research/intelligence-swarm-reconstruction-001",
+  "public_baseline_status": "not_executed",
+  "classification": "initial_reproduction_failure",
+  "failure_stage": "source_acquisition",
+  "failure_reason": "runtime DNS could not resolve github.com before dependency installation or benchmark execution",
+  "installation_log": {
+    "path": "SILG_INSTALL_ATTEMPT_R01_007.log",
+    "sha256": "ff8f9543963f5c79b58676526a5f7e9011a68f1de81b38774bdea9ab8b8984eb",
+    "bytes": 1500
+  },
+  "target": {
+    "silg_commit": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
+    "package_version": "0.0.1",
+    "environment": "silg:rtfm_train_s1-v0 / silg:rtfm_test_s1-v0",
+    "seeds": [1, 7, 19]
+  },
+  "required_methods": [
+    "correct",
+    "random",
+    "language_blind",
+    "state_only",
+    "target_label_shuffle",
+    "outcome_shuffle"
+  ],
+  "missing_public_measurements": [
+    "task_success",
+    "next_state_prediction",
+    "action_accuracy",
+    "model_bytes",
+    "peak_rss_bytes",
+    "training_wall_seconds",
+    "cpu_inference_ms_per_item",
+    "three_seed_results"
+  ],
+  "evaluation_contract_regression_tests": {
+    "tests": 5,
+    "passed": 5,
+    "runtime_seconds": 0.057,
+    "covers": [
+      "SILG exporter schema adaptation",
+      "gold action/state and completed trajectory leakage",
+      "train/test utterance overlap",
+      "prediction coverage",
+      "artifact checksum and resource manifest"
+    ]
+  },
+  "capability_progress": false,
+  "novelty_claim": false,
+  "highschool_level_passed": false
+}

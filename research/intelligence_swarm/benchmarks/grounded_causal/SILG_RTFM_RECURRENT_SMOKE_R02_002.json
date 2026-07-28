@@ -1,0 +1,60 @@
+{
+  "status": "success",
+  "classification": "official_recurrent_training_smoke_not_full_baseline_reproduction",
+  "workflow_run_id": 30104299406,
+  "artifact_id": 8600982296,
+  "artifact_digest": "sha256:51d8bfb3fe31f4a00d9b5f86f1bc2761da5f91c70067d222e8f376f334418070",
+  "source_pins": {
+    "silg": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
+    "rtfm": "58f17955595b5a127c96d045d896fcbcc7d4b570",
+    "expman": "0.0.7",
+    "expman_sdist_sha256": "5b778d23d9efdb541d72783d1ecf1482451cc1a476eb7e16fb52d6b2ce1445c6",
+    "ujson": "5.10.0"
+  },
+  "environment": "silg:rtfm_train_s1-v0",
+  "validation_environment": "silg:rtfm_test_s1-v0",
+  "model": "official SILG multi recurrent",
+  "pretrained_language_model": false,
+  "seeds": [1, 7, 19],
+  "frames_per_seed": 2048,
+  "model_audit": {
+    "completed": true,
+    "parameters": 4916915,
+    "trainable_parameters": 4916915,
+    "state_dict_bytes": 19694385,
+    "state_dict_sha256": "29b6865d2366e30a59ee82b8e098f806b7b26b2b2d67231e18fca2a167540b62",
+    "cpu_forward_latency_ms_per_step": 7.49024244
+  },
+  "runs": [
+    {
+      "seed": 1,
+      "completed": true,
+      "wall_seconds": 26.547,
+      "peak_rss_kib": 462752,
+      "log_sha256": "bf456b"
+    },
+    {
+      "seed": 7,
+      "completed": true,
+      "wall_seconds": 26.531,
+      "peak_rss_kib": 516792,
+      "log_sha256": "52b34d"
+    },
+    {
+      "seed": 19,
+      "completed": true,
+      "wall_seconds": 31.536,
+      "peak_rss_kib": 481432,
+      "log_sha256": "14009f"
+    }
+  ],
+  "mean_wall_seconds": 28.204666666666668,
+  "max_peak_rss_kib": 516792,
+  "total_wall_seconds": 86.862,
+  "determinism_patch": "actor_seed = experiment_seed * 1000003 + actor_index",
+  "official_full_baseline_completed": false,
+  "matched_controls_completed": false,
+  "environment_first_public_comparison_completed": false,
+  "capability_progress_claimed": false,
+  "novelty_claimed": false
+}

@@ -1,0 +1,265 @@
+name: R0.1 SILG official-profile infrastructure qualification
+run-name: R0.1 official profile checkpoint-resume qualification @ ${{ github.sha }}
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - '.github/workflows/r01_silg_official_profile_infrastructure_qualification.yml'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_silg_optimizer_checkpoint_integrity.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/instrument_silg_one_step_replay.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_silg_one_step_replay.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh'
+  workflow_dispatch:
+
+concurrency:
+  group: r01-silg-official-profile-infra-${{ github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  official-profile-infrastructure:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+          cache: pip
+
+      - name: Record immutable provenance and host capacity
+        run: |
+          set -o pipefail
+          results='research/intelligence_swarm/benchmarks/grounded_causal/results_official_profile_infra'
+          mkdir -p "$results"
+          {
+            echo 'classification=infrastructure_qualification_only'
+            echo 'capability_progress_claimed=false'
+            echo 'official_total_frames=100000000'
+            echo 'qualification_stage1_frames=3840'
+            echo 'qualification_stage2_frames=7680'
+            echo 'num_actors=30'
+            echo 'batch_size=24'
+            echo 'unroll_length=80'
+            echo 'num_threads=4'
+            echo 'stateful=false'
+            echo 'model=multi'
+            echo 'entropy_cost=0.05'
+            echo 'one_step_replay_scope=exact captured learner batch under existing learner lock'
+            echo 'asynchronous_actor_queue_continuation_claimed=false'
+            echo "github_run_id=${GITHUB_RUN_ID}"
+            echo "github_sha=${GITHUB_SHA}"
+            git rev-parse HEAD
+            git status --short
+            date -u
+            uname -a
+            lscpu
+            free -h
+            df -h
+            python --version
+          } | tee "$results/SILG_RTFM_OFFICIAL_PROFILE_HOST.txt"
+
+      - name: Install pinned SILG and RTFM
+        run: |
+          set -o pipefail
+          results='research/intelligence_swarm/benchmarks/grounded_causal/results_official_profile_infra'
+          /usr/bin/time -v bash research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh "$RUNNER_TEMP/r0_silg" \
+            2>&1 | tee "$results/SILG_RTFM_INSTALL.log"
+
+      - name: Apply deterministic actor seed patch
+        run: |
+          set -o pipefail
+          results='research/intelligence_swarm/benchmarks/grounded_causal/results_official_profile_infra'
+          python - <<'PY' 2>&1 | tee "$results/SILG_RTFM_DETERMINISTIC_PATCH.log"
+          import importlib.util
+          from pathlib import Path
+          source = Path('research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py')
+          spec = importlib.util.spec_from_file_location('r01_harness', source)
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+          actual = Path(__import__('os').environ['RUNNER_TEMP']) / 'r0_silg' / 'silg'
+          print(module.deterministic_patch(actual))
+          PY
+
+      - name: Instrument one exact learner update for replay audit
+        run: |
+          set -o pipefail
+          results='research/intelligence_swarm/benchmarks/grounded_causal/results_official_profile_infra'
+          python research/intelligence_swarm/benchmarks/grounded_causal/instrument_silg_one_step_replay.py \
+            "$RUNNER_TEMP/r0_silg/silg" \
+            2>&1 | tee "$results/SILG_RTFM_ONE_STEP_INSTRUMENTATION.log"
+          python -m py_compile \
+            research/intelligence_swarm/benchmarks/grounded_causal/instrument_silg_one_step_replay.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_silg_one_step_replay.py \
+            "$RUNNER_TEMP/r0_silg/silg/run_exp.py"
+
+      - name: Verify official launch defaults at pinned source
+        run: |
+          set -o pipefail
+          results='research/intelligence_swarm/benchmarks/grounded_causal/results_official_profile_infra'
+          python - <<'PY' 2>&1 | tee "$results/SILG_RTFM_OFFICIAL_DEFAULTS_AUDIT.log"
+          import json, sys
+          from pathlib import Path
+          root = Path(__import__('os').environ['RUNNER_TEMP']) / 'r0_silg' / 'silg'
+          sys.path.insert(0, str(root))
+          import exp_utils
+          flags = exp_utils.get_parser().parse_args([])
+          observed = {
+              'total_frames': flags.total_frames,
+              'num_actors': flags.num_actors,
+              'batch_size': flags.batch_size,
+              'unroll_length': flags.unroll_length,
+              'num_threads': flags.num_threads,
+              'learning_rate': flags.learning_rate,
+              'entropy_cost': flags.entropy_cost,
+          }
+          expected = {
+              'total_frames': 100000000,
+              'num_actors': 30,
+              'batch_size': 24,
+              'unroll_length': 80,
+              'num_threads': 4,
+              'learning_rate': 0.0005,
+              'entropy_cost': 0.05,
+          }
+          if observed != expected:
+              raise SystemExit(f'official defaults mismatch: {observed!r}')
+          out = Path('research/intelligence_swarm/benchmarks/grounded_causal/results_official_profile_infra/SILG_RTFM_OFFICIAL_DEFAULTS.json')
+          out.write_text(json.dumps({'status':'accepted','observed':observed,'expected':expected}, indent=2, sort_keys=True)+'\n')
+          print(out.read_text())
+          PY
+
+      - name: Stage 1 official-profile training to first checkpoint
+        env:
+          SILG_ONE_STEP_REPLAY_PREFIX: ${{ github.workspace }}/research/intelligence_swarm/benchmarks/grounded_causal/results_official_profile_infra/SILG_RTFM_ONE_STEP
+        run: |
+          set -o pipefail
+          results="$GITHUB_WORKSPACE/research/intelligence_swarm/benchmarks/grounded_causal/results_official_profile_infra"
+          savedir="$RUNNER_TEMP/r01_official_profile"
+          cd "$RUNNER_TEMP/r0_silg/silg"
+          /usr/bin/time -v python run_exp.py \
+            --env silg:rtfm_train_s1-v0 \
+            --val_env silg:rtfm_test_s1-v0 \
+            --model multi \
+            --xpid rtfm-multi-official-profile-infra-seed-1 \
+            --savedir "$savedir" \
+            --seed 1 \
+            --total_frames 3840 \
+            --num_actors 30 \
+            --num_threads 4 \
+            --batch_size 24 \
+            --unroll_length 80 \
+            --disable_cuda \
+            --entropy_cost 0.05 \
+            2>&1 | tee "$results/SILG_RTFM_OFFICIAL_PROFILE_STAGE1.log"
+          cp "$savedir/rtfm-multi-official-profile-infra-seed-1/job.tar" \
+            "$results/SILG_RTFM_OFFICIAL_PROFILE_STAGE1.job.tar"
+          test -s "$results/SILG_RTFM_ONE_STEP.pre.pt"
+          test -s "$results/SILG_RTFM_ONE_STEP.post.pt"
+
+      - name: Replay captured learner update exactly
+        run: |
+          set -o pipefail
+          results='research/intelligence_swarm/benchmarks/grounded_causal/results_official_profile_infra'
+          python research/intelligence_swarm/benchmarks/grounded_causal/audit_silg_one_step_replay.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" \
+            --pre "$results/SILG_RTFM_ONE_STEP.pre.pt" \
+            --post "$results/SILG_RTFM_ONE_STEP.post.pt" \
+            --output "$results/SILG_RTFM_ONE_STEP_REPLAY_AUDIT.json" \
+            2>&1 | tee "$results/SILG_RTFM_ONE_STEP_REPLAY_AUDIT.log"
+
+      - name: Resume same run to stage 2 budget
+        run: |
+          set -o pipefail
+          results="$GITHUB_WORKSPACE/research/intelligence_swarm/benchmarks/grounded_causal/results_official_profile_infra"
+          savedir="$RUNNER_TEMP/r01_official_profile"
+          cd "$RUNNER_TEMP/r0_silg/silg"
+          /usr/bin/time -v python run_exp.py \
+            --env silg:rtfm_train_s1-v0 \
+            --val_env silg:rtfm_test_s1-v0 \
+            --model multi \
+            --xpid rtfm-multi-official-profile-infra-seed-1 \
+            --savedir "$savedir" \
+            --seed 1 \
+            --total_frames 7680 \
+            --num_actors 30 \
+            --num_threads 4 \
+            --batch_size 24 \
+            --unroll_length 80 \
+            --disable_cuda \
+            --entropy_cost 0.05 \
+            2>&1 | tee "$results/SILG_RTFM_OFFICIAL_PROFILE_STAGE2_RESUME.log"
+          cp "$savedir/rtfm-multi-official-profile-infra-seed-1/job.tar" \
+            "$results/SILG_RTFM_OFFICIAL_PROFILE_STAGE2.job.tar"
+
+      - name: Fail-closed checkpoint and resume audit
+        run: |
+          set -o pipefail
+          results='research/intelligence_swarm/benchmarks/grounded_causal/results_official_profile_infra'
+          python - <<'PY' 2>&1 | tee "$results/SILG_RTFM_OFFICIAL_PROFILE_RESUME_AUDIT.log"
+          import hashlib, json, math
+          from pathlib import Path
+          import torch
+          root = Path('research/intelligence_swarm/benchmarks/grounded_causal/results_official_profile_infra')
+          p1 = root/'SILG_RTFM_OFFICIAL_PROFILE_STAGE1.job.tar'
+          p2 = root/'SILG_RTFM_OFFICIAL_PROFILE_STAGE2.job.tar'
+          def sha(path):
+              h=hashlib.sha256(); h.update(path.read_bytes()); return h.hexdigest()
+          def inspect(path):
+              d=torch.load(path, map_location='cpu')
+              required={'model_state_dict','optimizer_state_dict','scheduler_state_dict','frames'}
+              missing=sorted(required-set(d))
+              if missing: raise SystemExit(f'{path.name}: missing {missing}')
+              opt=d['optimizer_state_dict']; sched=d['scheduler_state_dict']
+              if not opt.get('state') or not opt.get('param_groups'):
+                  raise SystemExit(f'{path.name}: empty optimizer state')
+              if not isinstance(sched, dict) or not sched:
+                  raise SystemExit(f'{path.name}: empty scheduler state')
+              frames=int(d['frames'])
+              if not math.isfinite(frames): raise SystemExit(f'{path.name}: nonfinite frames')
+              return d, {'bytes':path.stat().st_size,'sha256':sha(path),'frames':frames,
+                         'optimizer_state_entries':len(opt['state']),
+                         'optimizer_param_groups':len(opt['param_groups']),
+                         'scheduler_keys':sorted(sched)}
+          d1,a1=inspect(p1); d2,a2=inspect(p2)
+          if a1['frames'] < 3840: raise SystemExit(f'stage1 frame shortfall: {a1}')
+          if a2['frames'] < 7680: raise SystemExit(f'stage2 frame shortfall: {a2}')
+          if a2['frames'] <= a1['frames']: raise SystemExit('resume did not advance frame counter')
+          if a1['sha256'] == a2['sha256']: raise SystemExit('checkpoint unchanged after resume')
+          if set(d1['model_state_dict']) != set(d2['model_state_dict']):
+              raise SystemExit('model topology changed across resume')
+          payload={
+              'status':'accepted',
+              'classification':'official_profile_infrastructure_qualification',
+              'capability_progress_claimed':False,
+              'public_baseline_reproduced':False,
+              'official_profile':{'num_actors':30,'batch_size':24,'unroll_length':80,'num_threads':4,'stateful':False},
+              'stage1':a1,'stage2':a2,
+              'resume_frame_delta':a2['frames']-a1['frames'],
+              'exact_one_step_replay_audit':'SILG_RTFM_ONE_STEP_REPLAY_AUDIT.json',
+              'asynchronous_actor_queue_continuation_claimed':False,
+          }
+          (root/'SILG_RTFM_OFFICIAL_PROFILE_RESUME_AUDIT.json').write_text(json.dumps(payload,indent=2,sort_keys=True)+'\n')
+          print(json.dumps(payload,indent=2,sort_keys=True))
+          PY
+
+      - name: Freeze dependencies sizes checksums and measured resources
+        if: always()
+        run: |
+          results='research/intelligence_swarm/benchmarks/grounded_causal/results_official_profile_infra'
+          python -m pip freeze | sort > "$results/SILG_RTFM_PIP_FREEZE.txt"
+          find "$results" -maxdepth 1 -type f -printf '%f %s bytes\n' | sort > "$results/SILG_RTFM_FILE_SIZES.txt"
+          sha256sum "$results"/* > "$results/SILG_RTFM_SHA256SUMS.txt" || true
+
+      - name: Upload immutable official-profile infrastructure bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r01-silg-official-profile-infra-${{ github.run_id }}
+          path: research/intelligence_swarm/benchmarks/grounded_causal/results_official_profile_infra/
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "id": "D001_candidate_contract_audit",
+  "date": "2026-07-28",
+  "branch": "research/intelligence-swarm-reconstruction-001",
+  "candidate": {
+    "repository": "wdlctc/open-attention-residuals",
+    "commit": "83d2b8de82c2fbb981c7decca67d13d9db348da6",
+    "official": false,
+    "files_audited": {
+      "train_scratch.py": {
+        "blob_sha": "b077ee2e2bdfa93f67e98a30bbf971e016726cf6"
+      },
+      "Attention-Residuals/modeling_qwen3_attnres.py": {
+        "blob_sha": "649aa0067e5b9d0fc2a3cc68784a6794090a26a4"
+      },
+      "requirements.txt": {
+        "blob_sha": "f53a7aa56250d3eadc0a04313c0fe43514d96cd6"
+      }
+    }
+  },
+  "stage": "static_preflight",
+  "result": "blocked_pending_contract_patch",
+  "completed_work": [
+    "pinned candidate source blobs",
+    "derived exact B0 and A1 parameter counts",
+    "audited CLI against C001 manifest",
+    "audited distributed token-stream construction",
+    "identified reproducibility and resource-logging blockers"
+  ],
+  "parameter_counts": {
+    "assumptions": {
+      "vocab_size": 151936,
+      "hidden_size": 512,
+      "layers": 12,
+      "attention_heads": 8,
+      "kv_heads": 4,
+      "head_dim": 64,
+      "intermediate_size": 1536,
+      "tied_embeddings": true,
+      "biases": false,
+      "qk_norm_parameters_per_layer": 128
+    },
+    "B0_baseline": {
+      "total_parameters": 115554304,
+      "active_parameters": 115554304,
+      "fp32_bytes": 462217216,
+      "bf16_bytes": 231108608
+    },
+    "A1_block_attnres": {
+      "total_parameters": 115578904,
+      "active_parameters": 115578904,
+      "attnres_added_parameters": 24600,
+      "relative_parameter_overhead": 0.000212887,
+      "fp32_bytes": 462315616,
+      "bf16_bytes": 231157808
+    }
+  },
+  "blocking_findings": [
+    {
+      "id": "D001-F1",
+      "severity": "critical",
+      "finding": "C001 preregisters 64 global sequences per optimizer step, but train_scratch.py ignores --batch_size and yields one sequence per rank per microstep. With the README-like 8-rank command and grad_accum=2, the realized global batch is 16 sequences, not 64.",
+      "consequence": "nominal token budgets, warmup fraction, optimizer-step comparison and throughput accounting are wrong unless the loop is patched or grad_accum/world size is changed explicitly."
+    },
+    {
+      "id": "D001-F2",
+      "severity": "critical",
+      "finding": "The candidate initializes torch.distributed with NCCL unconditionally and forces CUDA. The preregistered one-process Python preflight command cannot run as written, and CPU save/load or CPU latency validation cannot use this entry point.",
+      "consequence": "S0 is not executable from the manifest command and requires a faithful preflight harness or a narrowly scoped runtime patch."
+    },
+    {
+      "id": "D001-F3",
+      "severity": "critical",
+      "finding": "FineWeb-Edu is loaded with streaming=True without a dataset revision. Each rank shuffles independently with seed+rank, calls skip(rank), and then advances its local token buffer by world_size*seq_len. This does not prove a fixed, disjoint, identical B0/A1 token stream.",
+      "consequence": "The primary fairness requirement same_token_stream is unmet; training must not begin."
+    },
+    {
+      "id": "D001-F4",
+      "severity": "high",
+      "finding": "requirements.txt contains only lower bounds or unpinned packages. The model imports Qwen3 internals and newer Transformers symbols, so environment behavior is version-sensitive.",
+      "consequence": "A lockfile and tested version matrix are mandatory before S0."
+    },
+    {
+      "id": "D001-F5",
+      "severity": "high",
+      "finding": "The training script logs only aggregate tokens/sec and does not record peak RSS, peak VRAM, model bytes, environment versions, checksums, CPU latency, routing gradients or routing-collapse diagnostics required by C001.",
+      "consequence": "The existing script cannot satisfy the preregistered evidence contract without an external measurement harness."
+    },
+    {
+      "id": "D001-F6",
+      "severity": "medium",
+      "finding": "The code exposes extra modes and gate variants, but C001 A1 uses mode=block, gate_type=bias, recency_bias_init=0 and no null source. These must be emitted in the resolved config and diff-checked rather than inferred from defaults.",
+      "consequence": "Configuration provenance is otherwise ambiguous."
+    }
+  ],
+  "verified_single_change_boundary": {
+    "status": "static_only",
+    "baseline_class": "transformers.Qwen3ForCausalLM",
+    "ablation_class": "Qwen3AttnResForCausalLM",
+    "intended_difference": "decoder residual path plus 24600 routing parameters",
+    "not_yet_proven": [
+      "serialized config equality outside attnres fields",
+      "identical kernel backend",
+      "identical token tensors",
+      "runtime graph contains no unintended differences"
+    ]
+  },
+  "next_minimum_action": {
+    "id": "D002",
+    "description": "Add a non-training preflight harness that instantiates B0/A1 from one resolved config, records exact parameter names/counts/config diff/model bytes, runs one finite forward-backward step on a fixed synthetic token tensor, verifies AttnRes gradients, performs save-load equality, and records RSS/VRAM. It must not download or train on FineWeb-Edu.",
+    "constraints": [
+      "no architecture change",
+      "no S1 training",
+      "fixed synthetic token checksum",
+      "same input tensor for B0 and A1",
+      "record package and hardware versions"
+    ]
+  },
+  "gate_decision": {
+    "S0": "not_passed",
+    "S1_B0": "prohibited",
+    "S1_A1": "prohibited",
+    "S2": "prohibited",
+    "S3": "prohibited"
+  }
+}

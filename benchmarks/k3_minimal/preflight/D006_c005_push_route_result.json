@@ -1,0 +1,26 @@
+{
+  "schema": "D006-C005-push-route-result-v1",
+  "date_utc": "2026-07-28T18:24:29Z",
+  "canonical_branch": "research/intelligence-swarm-reconstruction-001",
+  "classification": "ROUTE_STOP",
+  "block_attnres_rejected": false,
+  "model_execution_performed": false,
+  "training_performed": false,
+  "workflow_path": ".github/workflows/d003-k3-environment-gate.yml",
+  "workflow_amendment_commit": "03857c75f1d08a1baf7ef2a334f51a3eed84f62d",
+  "nonce_stage_commit": "7814802601bd08eb8cd9613ec59c1985b91d8444",
+  "nonce_provenance_commit": "5f3281cb83c4881dc2f5deb745d4fea31ec0f1ca",
+  "nonce_finalization_commit": "3152dd41005e47aad30c681ff0160e8b9185b7a6",
+  "registered_d003_runs_for_amendment_commit": 0,
+  "registered_d003_runs_for_nonce_finalization_commit": 0,
+  "observed_other_push_workflows": true,
+  "route_interpretation": "The canonical branch push was accepted and unrelated existing push workflows ran, but the newly introduced non-default-branch workflow did not generate a D003 run. This is consistent with a GitHub workflow-registration route limitation, not a model or dependency failure.",
+  "next_action_requires_e_authorization": true,
+  "prohibited_next_actions": [
+    "copy workflow to default branch",
+    "add broad push trigger",
+    "start model stage",
+    "download dataset/tokenizer/checkpoint",
+    "train or quantize"
+  ]
+}

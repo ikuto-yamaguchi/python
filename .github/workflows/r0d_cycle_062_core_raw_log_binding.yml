@@ -1,0 +1,56 @@
+name: R0D Cycle 062 core raw-log binding
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - research/intelligence_swarm/benchmarks/grounded_causal/apply_r0d_cycle_062_core_raw_log_binding.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_raw_log_binding_core.py
+      - .github/workflows/r0d_cycle_062_core_raw_log_binding.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply-test-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/intelligence-swarm-reconstruction-001
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Apply core patch
+        run: python research/intelligence_swarm/benchmarks/grounded_causal/apply_r0d_cycle_062_core_raw_log_binding.py
+      - name: Run focused regressions
+        run: |
+          python -m py_compile \
+            research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_raw_log_binding_core.py
+          python research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_raw_log_binding_core.py
+      - name: Write audit report
+        run: |
+          cat > research/intelligence_swarm/governance/REPORT_R0D_CYCLE_062.md <<'EOF'
+          # R0-D Cycle 062 — core raw-log measurement binding
+
+          `evaluation_contract.audit_artifacts()` now requires every resource-manifest run to be backed by exactly one machine-readable raw-log measurement record for the same method, seed, domain, split, and condition.
+
+          The raw record must exactly match the manifest's immutable code commit, model/data SHA-256 values, model bytes, peak RSS, training wall time, and CPU inference latency. Missing, duplicate, wrong-cell, non-finite, or altered records fail closed as `initial_reproduction_failure`.
+
+          This closes the direct-core bypass that remained after the focused auditor and unified acceptance gate had already required raw-log binding. No memory, replay, fast weights, sleep, or forgetting mechanism was added.
+          EOF
+      - name: Commit to canonical branch
+        run: |
+          if git diff --quiet -- research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py research/intelligence_swarm/governance/REPORT_R0D_CYCLE_062.md; then
+            echo 'No generated changes to commit.'
+            exit 0
+          fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py research/intelligence_swarm/governance/REPORT_R0D_CYCLE_062.md
+          git commit -m 'R0-D Cycle 062: bind core artifact claims to raw logs'
+          git push origin HEAD:research/intelligence-swarm-reconstruction-001

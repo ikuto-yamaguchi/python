@@ -1,0 +1,58 @@
+name: R0D Cycle 059 core artifact split scope
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - research/intelligence_swarm/benchmarks/grounded_causal/apply_r0d_cycle_059_core_artifact_split_scope.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_artifact_split_scope_core.py
+      - .github/workflows/r0d_cycle_059_core_artifact_split_scope.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply-test-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/intelligence-swarm-reconstruction-001
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply core patch
+        working-directory: research/intelligence_swarm/benchmarks/grounded_causal
+        run: python apply_r0d_cycle_059_core_artifact_split_scope.py
+      - name: Compile and run focused regressions
+        working-directory: research/intelligence_swarm/benchmarks/grounded_causal
+        run: |
+          python -m py_compile evaluation_contract.py test_evaluation_contract_artifact_split_scope_core.py
+          python test_evaluation_contract_artifact_split_scope_core.py
+      - name: Write governance report
+        run: |
+          cat > research/intelligence_swarm/governance/REPORT_R0D_CYCLE_059.md <<'EOF'
+          # R0-D Cycle 059 — Core artifact evaluation split scope
+
+          `evaluation_contract.audit_artifacts()` now rejects resource runs outside the registered evaluation split vocabulary.
+
+          Accepted splits: `test`, `eval`, `validation`, `valid` after Unicode NFKC and case-fold normalization.
+
+          Rejected examples include `train`, `debug`, `calibration`, `analysis`, and `posthoc`. A self-consistent resource topology on an unregistered split is classified as `initial_reproduction_failure` and cannot contribute model bytes, peak RSS, training wall time, CPU inference latency, raw-log, or checksum evidence.
+
+          No memory, replay, fast weights, sleep, or forgetting mechanism was introduced.
+          EOF
+      - name: Commit to canonical branch
+        run: |
+          if git diff --quiet; then
+            echo "No generated changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py research/intelligence_swarm/governance/REPORT_R0D_CYCLE_059.md
+          git commit -m "R0-D Cycle 059: enforce core artifact evaluation split scope"
+          git push origin HEAD:research/intelligence-swarm-reconstruction-001

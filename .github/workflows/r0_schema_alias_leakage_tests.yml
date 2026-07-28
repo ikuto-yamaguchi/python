@@ -1,0 +1,35 @@
+name: R0 schema alias leakage tests
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - '.github/workflows/r0_schema_alias_leakage_tests.yml'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_schema_alias_leakage.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_audit_schema_alias_leakage.py'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  alias-leakage-contract:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile alias leakage auditor and tests
+        run: |
+          python -m py_compile \
+            research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_schema_alias_leakage.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/test_audit_schema_alias_leakage.py
+      - name: Run alias leakage regression tests
+        working-directory: research/intelligence_swarm/benchmarks/grounded_causal
+        run: python -m unittest -v test_audit_schema_alias_leakage.py

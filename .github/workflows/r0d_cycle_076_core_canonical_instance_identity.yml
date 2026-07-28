@@ -1,0 +1,67 @@
+name: R0D Cycle 076 core canonical instance identity
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - research/intelligence_swarm/benchmarks/grounded_causal/apply_r0d_cycle_076_core_canonical_instance_identity.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_canonical_instance_identity_core.py
+      - .github/workflows/r0d_cycle_076_core_canonical_instance_identity.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: r0d-cycle-076-core-canonical-instance-identity
+  cancel-in-progress: false
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/intelligence-swarm-reconstruction-001
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Apply fail-closed core patch
+        run: python research/intelligence_swarm/benchmarks/grounded_causal/apply_r0d_cycle_076_core_canonical_instance_identity.py
+      - name: Compile core and regressions
+        run: |
+          python -m py_compile \
+            research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_canonical_instance_identity_core.py
+      - name: Run focused regressions
+        working-directory: research/intelligence_swarm/benchmarks/grounded_causal
+        run: python -m unittest -v test_evaluation_contract_canonical_instance_identity_core.py
+      - name: Save audit report
+        run: |
+          cat > research/intelligence_swarm/governance/REPORT_R0D_CYCLE_076.md <<'EOF'
+          # R0-D Cycle 076: canonical instance identity core integration
+
+          `evaluation_contract.py` now canonicalizes `instance_id` with Unicode NFKC,
+          case folding, and whitespace/control/format removal for collision detection.
+          Dataset aliases, empty canonical IDs, and prediction-side non-exact aliases are
+          fail-closed. Invalid bundles are classified as `initial_reproduction_failure`,
+          and no statistics are emitted.
+
+          This cycle changes only R0 reproducibility/leakage evaluation. It introduces no
+          memory, replay, fast weights, sleep, or forgetting mechanism.
+          EOF
+      - name: Commit to canonical branch
+        run: |
+          if git diff --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add \
+            research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py \
+            research/intelligence_swarm/governance/REPORT_R0D_CYCLE_076.md
+          git commit -m 'r0d: integrate canonical instance identity into core'
+          git push origin HEAD:research/intelligence-swarm-reconstruction-001

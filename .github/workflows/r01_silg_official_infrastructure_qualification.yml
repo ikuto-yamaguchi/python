@@ -1,0 +1,155 @@
+name: R0.1 SILG official-contract infrastructure qualification
+run-name: R0.1 SILG official sampling infrastructure qualification @ ${{ github.sha }}
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - '.github/workflows/r01_silg_official_infrastructure_qualification.yml'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/patch_silg_official_infrastructure_qualification.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_silg_infrastructure_qualification.py'
+  workflow_dispatch:
+
+concurrency:
+  group: r01-silg-official-infrastructure-${{ github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  official-infrastructure-qualification:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+          cache: pip
+      - name: Record immutable provenance and scope
+        run: |
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_infrastructure"
+          mkdir -p "$results"
+          {
+            echo "classification=official_contract_infrastructure_qualification"
+            echo "capability_evidence=false"
+            echo "model=multi"
+            echo "stateful=false"
+            echo "num_actors=30"
+            echo "batch_size=24"
+            echo "unroll_length=80"
+            echo "num_threads=4"
+            echo "learning_rate=0.0005"
+            echo "optimizer=RMSprop"
+            echo "gradient_clip_norm=40"
+            echo "segment_frames=32768"
+            echo "official_total_frames=100000000"
+            echo "seed=1"
+            echo "train_split=silg:rtfm_train_s1-v0"
+            echo "validation_split=silg:rtfm_test_s1-v0"
+            echo "github_run_id=${GITHUB_RUN_ID}"
+            echo "github_sha=${GITHUB_SHA}"
+            git rev-parse HEAD
+            git status --short
+            date -u
+            uname -a
+            lscpu
+            free -h
+            python --version
+          } | tee "$results/SILG_RTFM_INFRA_HOST.txt"
+      - name: Install pinned SILG and RTFM
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_infrastructure"
+          /usr/bin/time -v bash research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh "$RUNNER_TEMP/r0_silg" \
+            2>&1 | tee "$results/SILG_RTFM_INFRA_INSTALL.log"
+      - name: Patch harness to official sampling defaults and preserve checkpoint
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_infrastructure"
+          python research/intelligence_swarm/benchmarks/grounded_causal/patch_silg_official_infrastructure_qualification.py \
+            --output "$results/SILG_RTFM_INFRA_HARNESS_PATCH.json" \
+            2>&1 | tee "$results/SILG_RTFM_INFRA_HARNESS_PATCH.log"
+          grep -F '"--num_actors", "30"' research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py
+          grep -F '"--num_threads", "4"' research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py
+          grep -F '"--batch_size", "24"' research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py
+          grep -F '"--unroll_length", "80"' research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py
+          grep -F 'SILG_RTFM_OFFICIAL_CHECKPOINT_SEED_' research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py
+      - name: Verify generator schema
+        run: python research/intelligence_swarm/benchmarks/grounded_causal/test_export_rtfm_generator_signatures.py
+      - name: Record canonical random control and evaluation applicability
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_infrastructure"
+          /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/silg_rtfm_probe.py \
+            --env silg:rtfm_train_s1-v0 --seeds 1 --episodes 20 --max-steps 80 \
+            --output "$results/SILG_RTFM_INFRA_RANDOM_CONTROL.json" \
+            2>&1 | tee "$results/SILG_RTFM_INFRA_RANDOM_CONTROL.log"
+          cat > "$results/SILG_RTFM_INFRA_CONTROL_APPLICABILITY.json" <<'JSON'
+          {
+            "capability_evaluation_performed": false,
+            "random_control_recorded": true,
+            "language_blind": "not_applicable_to_infrastructure_only_segment",
+            "state_only": "not_applicable_to_infrastructure_only_segment",
+            "language_shuffle": "not_applicable_to_infrastructure_only_segment",
+            "reason": "This run qualifies checkpoint, resume, resource and official-command infrastructure only; it is forbidden to count it as policy competence evidence."
+          }
+          JSON
+      - name: Run short segment with official sampling contract
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_infrastructure"
+          /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" --seeds 1 --frames 32768 \
+            --entropy-cost 0.05 --output "$results" \
+            2>&1 | tee "$results/SILG_RTFM_INFRA_TRAIN.log"
+      - name: Verify official command and preserved checkpoint
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r = Path('research/intelligence_swarm/benchmarks/grounded_causal/results_official_infrastructure')
+          d = json.loads((r/'SILG_RTFM_RECURRENT_SMOKE_3SEED.json').read_text())
+          assert [x['seed'] for x in d['runs']] == [1]
+          x = d['runs'][0]
+          cmd = [str(v) for v in x['command']]
+          expected = {'--model':'multi','--num_actors':'30','--num_threads':'4','--batch_size':'24','--unroll_length':'80'}
+          for flag, value in expected.items():
+              assert flag in cmd and cmd[cmd.index(flag)+1] == value, (flag, cmd)
+          assert '--stateful' not in cmd
+          assert '--learning_rate' not in cmd
+          cp = r/'SILG_RTFM_OFFICIAL_CHECKPOINT_SEED_1.job.tar'
+          assert cp.is_file() and cp.stat().st_size > 0
+          assert x['checkpoint']['frames_in_checkpoint'] >= 32768
+          assert x['checkpoint']['preserved_checkpoint_sha256'] == x['checkpoint']['official_checkpoint_sha256']
+          print('official sampling command and checkpoint preservation verified')
+          PY
+      - name: Audit checkpoint optimizer resource and resume prerequisites
+        if: always()
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_infrastructure"
+          python research/intelligence_swarm/benchmarks/grounded_causal/audit_silg_infrastructure_qualification.py \
+            --checkpoint "$results/SILG_RTFM_OFFICIAL_CHECKPOINT_SEED_1.job.tar" \
+            --model-state "$results/SILG_RTFM_TRAINED_STATE_SEED_1.pt" \
+            --training-summary "$results/SILG_RTFM_RECURRENT_SMOKE_3SEED.json" \
+            --minimum-frames 32768 --official-total-frames 100000000 \
+            --output "$results/SILG_RTFM_INFRA_QUALIFICATION.json" \
+            2>&1 | tee "$results/SILG_RTFM_INFRA_QUALIFICATION.log"
+      - name: Freeze dependencies sizes and checksums
+        if: always()
+        run: |
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_infrastructure"
+          python -m pip freeze | sort > "$results/SILG_RTFM_INFRA_PIP_FREEZE.txt"
+          find "$results" -maxdepth 1 -type f -printf '%f %s bytes\n' | sort > "$results/SILG_RTFM_INFRA_FILE_SIZES.txt"
+          sha256sum "$results"/* > "$results/SILG_RTFM_INFRA_SHA256SUMS.txt" || true
+      - name: Upload immutable infrastructure qualification bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r01-silg-official-infrastructure-${{ github.run_id }}
+          path: research/intelligence_swarm/benchmarks/grounded_causal/results_official_infrastructure/
+          if-no-files-found: error
+          retention-days: 30

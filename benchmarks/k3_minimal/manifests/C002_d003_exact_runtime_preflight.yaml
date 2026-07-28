@@ -1,0 +1,133 @@
+schema_version: 1
+id: C002_d003_exact_runtime_preflight
+status: authorized_d003_only
+branch: research/intelligence-swarm-reconstruction-001
+source:
+  repository: wdlctc/open-attention-residuals
+  commit: 83d2b8de82c2fbb981c7decca67d13d9db348da6
+  official: false
+  transformers_commit: 42791a34fdeae197f60f11ace3807c81f44b0729
+  compatibility_patch:
+    max_count: 1
+    scope: import_api_wiring_only
+    semantic_change_forbidden: true
+    diff_and_sha256_required: true
+authorization:
+  allowed: [dependency_lock, import_probe, instantiate, synthetic_forward_backward, save_load, cpu_resource_measurement, operator_profile]
+  forbidden: [dataset_download, tokenizer_download, training_step, optimizer, s1, s2, s3, quantization, new_architecture, kda, moe]
+environment:
+  python: "3.11.x exact patch required"
+  pytorch: ">=2.4 exact build resolved and hashed by D"
+  tokenizers: "exact compatible version resolved and hashed by D"
+  require_resolver_report: true
+  require_pip_freeze: true
+  require_dependency_hashes: true
+  require_cpu_os_thread_provenance: true
+conditions:
+  B0:
+    mode: baseline
+    expected_total_parameters: 115554304
+    expected_active_parameters: 115554304
+  A1:
+    mode: block
+    num_blocks: 4
+    allowed_difference: residual_path_only
+    expected_total_parameters: 115579929
+    expected_active_parameters: 115579929
+    expected_parameter_delta: 25625
+model:
+  hidden_size: 512
+  num_hidden_layers: 12
+  num_attention_heads: 8
+  num_key_value_heads: 4
+  intermediate_size: 1536
+  head_dim: 64
+  vocab_size: 151936
+  tie_word_embeddings: true
+input:
+  seed: 17
+  source: local_synthetic_only
+  batch_size: 1
+  sequence_lengths: [1, 128, 512, 2048]
+  same_bitwise_tensor_across_conditions: true
+  sha256_required: true
+semantic_checks:
+  config_diff: registered_attnres_only
+  parameter_name_diff: routing_only
+  finite_forward: required
+  finite_backward: required
+  all_routing_gradients_finite_nonzero: required
+  save_load_max_abs_tolerance_fp32_cpu: 1.0e-6
+execution:
+  fresh_process_per_cell: true
+  order_blocks: [AB, BA, AB, BA]
+  warmup_repetitions: 10
+  measured_repetitions: 30
+  cpu_affinity_fixed: true
+  torch_threads_fixed: true
+  interop_threads_fixed: true
+  gc_protocol_identical: true
+statistics: [median, p95, mad, min, max]
+operator_controls:
+  - noop_harness
+  - python_list_traversal
+  - source_collection
+  - stack_layout_contiguous
+  - rmsnorm_routing_score
+  - softmax
+  - weighted_source_mix
+  - complete_routing_event
+  - full_model_forward
+measurements:
+  - tensor_shape_stride_contiguity_dtype
+  - source_count
+  - temporary_logical_bytes
+  - profiler_operator_names
+  - profiler_call_counts
+  - profiler_self_cpu_time
+  - isolated_peak_rss
+  - user_system_cpu_time
+  - wall_time
+  - allocation_evidence_or_explicit_unavailable_reason
+breakpoint_analysis:
+  fit_sequence_lengths: [1, 128, 512]
+  prediction_sequence_length: 2048
+  fields: [fit_intercept_ms, fit_slope_ms_per_token, predicted_2048_ms, actual_2048_ms, residual_2048_ms, actual_over_predicted_2048]
+classification:
+  pass:
+    requires_semantic_checks: true
+    full_model_time_overhead_lt_percent: 10
+    peak_rss_overhead_lt_percent: 10
+    breakpoint_disappears_or_is_explained: true
+    reproducible_across_order_blocks: true
+  warn_any:
+    - full_model_time_overhead_gte_percent: 10
+    - peak_rss_overhead_gte_percent: 10
+    - stack_layout_framework_share_gte_percent: 50
+    - actual_over_predicted_2048_gte: 2.0
+    - unstable_effect_direction_across_order_blocks: true
+  stop_any:
+    - import_or_instantiate_failure_after_one_patch
+    - semantic_diff_beyond_residual_path
+    - unexplained_parameter_count_mismatch
+    - routing_gradient_failure
+    - save_load_tolerance_failure
+    - isolated_measurement_unavailable
+    - unregistered_architecture_change_required
+artifacts_required:
+  - environment.json
+  - resolver-report.json
+  - pip-freeze.txt
+  - dependency-checksums.sha256
+  - source-and-patch.json
+  - model-config-diff.json
+  - parameter-and-state-dict-diff.json
+  - inputs.json
+  - raw-logs
+  - resource-json
+  - profiler-traces
+  - D003_result_summary.json
+  - checksums.sha256
+next_gate:
+  owner: E
+  note: PASS does not authorize S1; a separate C amendment must prove exact global batch 64 in executable training code.

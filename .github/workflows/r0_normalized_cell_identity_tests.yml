@@ -1,0 +1,27 @@
+name: R0 normalized cell identity tests
+
+on:
+  pull_request:
+    paths:
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_normalized_cell_identity.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_audit_normalized_cell_identity.py'
+      - '.github/workflows/r0_normalized_cell_identity_tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile auditor
+        run: python -m py_compile research/intelligence_swarm/benchmarks/grounded_causal/audit_normalized_cell_identity.py
+      - name: Run focused regressions
+        working-directory: research/intelligence_swarm/benchmarks/grounded_causal
+        run: python test_audit_normalized_cell_identity.py

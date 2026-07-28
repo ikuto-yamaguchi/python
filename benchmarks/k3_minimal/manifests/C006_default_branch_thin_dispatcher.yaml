@@ -1,0 +1,260 @@
+schema_version: 1
+id: C006_default_branch_thin_dispatcher
+status: preregistered_environment_only
+repository: ikuto-yamaguchi/python
+default_branch: main
+canonical_branch: research/intelligence-swarm-reconstruction-001
+purpose: default_branch_workflow_dispatch_launcher_for_exact_environment_gate
+scientific_intervention_changed: false
+execution_substrate_only: true
+
+fixed_references:
+  c003_manifest_path: benchmarks/k3_minimal/manifests/C003_d003_gha_environment_gate.yaml
+  c004_manifest_path: benchmarks/k3_minimal/manifests/C004_d003_variant_semantic_trace.yaml
+  c006_manifest_path: benchmarks/k3_minimal/manifests/C006_default_branch_thin_dispatcher.yaml
+  environment_script_path: benchmarks/k3_minimal/preflight/d003_gha_environment.sh
+  environment_probe_path: benchmarks/k3_minimal/preflight/d003_environment_probe.py
+  candidate_repository: wdlctc/open-attention-residuals
+  candidate_commit: 83d2b8de82c2fbb981c7decca67d13d9db348da6
+  official_repository: MoonshotAI/Attention-Residuals
+  official_commit: 85e22310fe5ee860b4a023de312d791de8a5a5e6
+  transformers_commit: 42791a34fdeae197f60f11ace3807c81f44b0729
+
+launcher:
+  location: default_branch_only
+  trigger: workflow_dispatch
+  runner_provider: github_hosted
+  runner_os: linux
+  runner_architecture: x86_64
+  timeout_minutes: 30
+  model_code_allowed: false
+  semantic_patch_allowed: false
+  architecture_logic_allowed: false
+  automatic_next_workflow: false
+  allowed_steps:
+    - validate_dispatch_inputs
+    - checkout_exact_canonical_sha_detached
+    - verify_branch_ancestry
+    - verify_clean_tree
+    - verify_registered_blob_shas
+    - record_sha256
+    - setup_python_3_11
+    - run_exact_environment_script
+    - capture_provenance_and_logs
+    - upload_environment_artifact
+    - emit_machine_readable_classification
+  forbidden_steps:
+    - model_implementation
+    - model_instantiation
+    - forward
+    - backward
+    - semantic_trace
+    - dataset_access
+    - tokenizer_access
+    - checkpoint_access
+    - optimizer
+    - training
+    - evaluation
+    - benchmark
+    - quantization
+    - automatic_model_continuation
+
+required_dispatch_inputs:
+  canonical_branch:
+    type: string
+    exact: research/intelligence-swarm-reconstruction-001
+  canonical_commit_sha:
+    type: full_git_sha_40_hex
+    required: true
+  c003_manifest_blob_sha:
+    type: git_blob_sha
+    required: true
+  c004_manifest_blob_sha:
+    type: git_blob_sha
+    required: true
+  c006_manifest_blob_sha:
+    type: git_blob_sha
+    required: true
+  environment_script_blob_sha:
+    type: git_blob_sha
+    required: true
+  environment_probe_blob_sha:
+    type: git_blob_sha
+    required: true
+  attempt:
+    type: integer
+    allowed: [1, 2]
+    default: 1
+
+identity_gates:
+  canonical_sha_resolves: required
+  canonical_sha_reachable_from_canonical_branch: required
+  checkout_exact_input_sha: required
+  detached_head: required
+  head_equals_requested_sha: required
+  clean_tree_before_probe: required
+  clean_source_tree_after_probe: required
+  output_outside_source_or_path_scoped_cleanliness: required
+  registered_blob_shas_match_inputs: required
+  registered_file_sha256_recorded: required
+  unregistered_patch_count: 0
+  failure_class: ENV_PROTOCOL_FAIL
+
+authorization:
+  training_authorized: false
+  model_execution_authorized: false
+  dataset_download_authorized: false
+  tokenizer_download_authorized: false
+  checkpoint_download_authorized: false
+  quantization_authorized: false
+  semantic_trace_authorized: false
+  automatic_next_stage: false
+  allowed:
+    - checkout
+    - provenance_verification
+    - dependency_resolution
+    - import_probe
+    - raw_log_capture
+    - checksum_generation
+    - artifact_upload
+
+runtime:
+  python: 3.11.x
+  dependency_cache_initially_enabled: false
+  exact_pytorch_cpu_build: resolved_and_recorded_by_c003_script
+  exact_transformers_commit: 42791a34fdeae197f60f11ace3807c81f44b0729
+  candidate_detached_commit: 83d2b8de82c2fbb981c7decca67d13d9db348da6
+  first_attempt_compatibility_patch_count: 0
+  silent_api_substitution: forbidden
+
+required_imports:
+  - create_causal_mask
+  - GradientCheckpointingLayer
+  - merge_with_config_defaults
+  - capture_outputs
+  - qwen3_internal_classes
+  - candidate_modeling_attnres
+
+artifacts_required:
+  - dispatch-inputs.json
+  - run-context.json
+  - repository-provenance.json
+  - canonical-file-identities.json
+  - authorization.json
+  - python-environment.json
+  - resolver-report.json
+  - pip-freeze.txt
+  - pip-check.txt
+  - dependency-checksums.sha256
+  - required-imports.json
+  - source-and-patch.json
+  - raw-logs
+  - D003_GHA_environment_summary.json
+  - route-environment-classification.json
+  - checksums.sha256
+
+post_upload_evidence_required:
+  - workflow_run_id
+  - workflow_run_attempt
+  - artifact_id
+  - artifact_name
+  - artifact_archive_size
+  - downloaded_artifact_zip_sha256
+  - canonical_commit_sha
+  - dispatcher_commit_sha
+  - dispatcher_workflow_blob_sha
+
+classification:
+  ENV_PASS:
+    requires:
+      - route_gates_pass
+      - identity_gates_pass
+      - authorization_gates_pass
+      - exact_dependencies_pass
+      - required_imports_pass
+      - artifact_schema_complete
+      - artifact_id_recorded
+      - downloaded_zip_sha256_recorded
+    authorizes_automatic_model_stage: false
+    scientific_evidence_scope: environment_provenance_only
+  ENV_RETRY:
+    requires:
+      - workflow_started
+      - pre_network_identity_and_authorization_gates_passed
+      - clearly_transient_actions_runner_dns_index_git_or_network_failure
+    max_unchanged_retry_count: 1
+    retry_attempt: 2
+    immutable_between_attempts:
+      - dispatcher_commit
+      - canonical_commit_sha
+      - all_manifest_and_script_blob_shas
+      - dependency_commands
+      - authorization
+  ROUTE_STOP_DEFAULT_BRANCH:
+    conditions:
+      - minimal_dispatcher_cannot_be_introduced_due_to_permission_or_policy
+      - correctly_registered_default_branch_dispatcher_cannot_be_dispatched
+    rejects_block_attnres: false
+  ENV_PATH_STOP_PENDING_AMENDMENT:
+    conditions:
+      - route_and_provenance_valid
+      - fixed_dependency_or_import_failure_non_transient
+      - no_compatibility_patch_preregistered
+    retry_allowed: false
+  ENV_PATH_STOP:
+    conditions:
+      - separately_preregistered_single_api_wiring_patch_failed
+      - semantic_change_required
+      - complete_provenance_impossible
+    rejects_block_attnres: false
+    stops_current_third_party_path: true
+  ENV_PROTOCOL_FAIL:
+    conditions:
+      - branch_mismatch
+      - sha_mismatch
+      - not_detached
+      - dirty_tree
+      - registered_blob_mismatch
+      - allowlist_violation
+      - authorization_violation
+      - artifact_or_checksum_missing
+      - prohibited_action_executed
+    result_admissible: false
+    retry_without_amendment: false
+
+next_owner: D
+next_step:
+  id: D007
+  action: introduce_auditable_thin_dispatcher_on_main_then_dispatch_one_environment_only_run
+  model_execution: forbidden
+  success_requires: machine_readable_classification_and_raw_evidence
+
+carry_forward:
+  later_training_seeds: [17, 29, 43]
+  baseline_id: B0
+  baseline_expected_parameters: 115554304
+  pb1_expected_parameters: 115579904
+  pb1_expected_delta: 25600
+  pb1_geometry:
+    transformer_layers: 12
+    sublayers: 24
+    num_blocks: 4
+    sublayers_per_block: 6
+    ordered_transformer_boundaries: [3, 6, 9, 12]
+    source_slots_sublayer: 84
+    source_slots_final: 5
+    source_slots_total: 89
+    primary_evidence_geometry_matched: false
+  pb1_null_rejects_mechanism: false
+  pb1_positive_authorizes_adoption: false
+
+prohibitions:
+  - no_c005_route_variants
+  - no_broad_push_trigger
+  - no_pull_request_trigger
+  - no_model_code_on_default_branch
+  - no_mutable_branch_tip_checkout
+  - no_silent_compatibility_patch
+  - no_model_or_semantic_execution
+  - no_automatic_transition_after_env_pass
+  - no_quality_efficiency_pareto_capability_or_1gb_claim_from_environment_evidence

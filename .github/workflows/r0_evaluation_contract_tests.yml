@@ -1,0 +1,77 @@
+name: R0 evaluation contract tests
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - '.github/workflows/r0_evaluation_contract_tests.yml'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_dataset_cell_coverage.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_dataset_seed_domain_topology.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_evaluation_bundle.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_shuffle_payloads.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_holdout_condition_integrity.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_episode_cluster_statistics.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_model_input_semantic_leakage.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/qualify_r01_source_policy.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/aggregate_r02_three_seed_results.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_method_identity.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_silg_schema.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_audit_dataset_cell_coverage.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_audit_dataset_seed_domain_topology.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_audit_evaluation_bundle.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_audit_shuffle_payloads.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_audit_holdout_condition_integrity.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_audit_episode_cluster_statistics.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_audit_model_input_semantic_leakage.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_qualify_r01_source_policy.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_aggregate_r02_three_seed_results.py'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  evaluation-contract:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile audit modules
+        run: |
+          python -m py_compile \
+            research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_dataset_cell_coverage.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_dataset_seed_domain_topology.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_evaluation_bundle.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_shuffle_payloads.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_holdout_condition_integrity.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_episode_cluster_statistics.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_model_input_semantic_leakage.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/qualify_r01_source_policy.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/aggregate_r02_three_seed_results.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_method_identity.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/test_qualify_r01_source_policy.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/test_aggregate_r02_three_seed_results.py
+      - name: Run evaluation contract regression tests
+        working-directory: research/intelligence_swarm/benchmarks/grounded_causal
+        run: |
+          python -m unittest -v \
+            test_evaluation_contract.py \
+            test_evaluation_contract_method_identity.py \
+            test_evaluation_contract_silg_schema.py \
+            test_audit_dataset_cell_coverage.py \
+            test_audit_dataset_seed_domain_topology.py \
+            test_audit_evaluation_bundle.py \
+            test_audit_shuffle_payloads.py \
+            test_audit_holdout_condition_integrity.py \
+            test_audit_episode_cluster_statistics.py \
+            test_audit_model_input_semantic_leakage.py \
+            test_qualify_r01_source_policy.py \
+            test_aggregate_r02_three_seed_results.py

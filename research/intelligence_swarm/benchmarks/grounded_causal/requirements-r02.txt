@@ -1,0 +1,9 @@
+# Official SILG declared dependencies (partly unpinned upstream)
+gym>=0.15.4
+py-getch==1.0.1
+pyyaml
+expman
+submitit
+# Pinned public package artifact
+silg==0.0.1 --hash=sha256:cfcd15d4978ca753bd906f2066a2d30b2b0b63388c9347a495f0abaa4c2e6a45
+# torch/torchvision must be pinned after Python 3.7/3.8 compatibility test in official Docker.

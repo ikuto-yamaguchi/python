@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "run_id": "D005",
+  "candidate": "Block AttnRes",
+  "canonical_branch": "research/intelligence-swarm-reconstruction-001",
+  "observed_branch_head_before_write": "9f86f5153e883648b6ad2f0f16e11883c5ea7a9b",
+  "workflow_path": ".github/workflows/d003-k3-environment-gate.yml",
+  "workflow_blob_sha": "db97faa9adbd7d8725456e60308b5f1a6144e90f",
+  "workflow_trigger_observed": ["workflow_dispatch"],
+  "required_preregistration": "C005 canonical-branch/path-restricted one-shot push route amendment",
+  "c005_found": false,
+  "push_route_authorized": false,
+  "workflow_mutated": false,
+  "nonce_created": false,
+  "environment_run_started": false,
+  "training_authorized": false,
+  "model_execution_authorized": false,
+  "dataset_access_authorized": false,
+  "quantization_authorized": false,
+  "classification": "PREREG_BLOCKED",
+  "scientific_interpretation": "No evidence for or against Block AttnRes quality, resource efficiency, quantization robustness, or capability.",
+  "blocking_condition": "C005 does not exist on the canonical branch; D cannot introduce the push trigger before C preregisters its exact branch/path/concurrency/retry/artifact contract.",
+  "next_minimum_step": "C creates C005 and its manifest; D then applies only that registered workflow diff and lets the amendment push initiate one environment-only run.",
+  "invariants_preserved": [
+    "No new architecture",
+    "No semantic patch",
+    "No model execution",
+    "No dataset or tokenizer download",
+    "No optimizer step",
+    "No broad push or pull_request trigger",
+    "No workflow copy to default branch"
+  ]
+}

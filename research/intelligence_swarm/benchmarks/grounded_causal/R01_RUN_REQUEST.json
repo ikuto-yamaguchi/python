@@ -1,0 +1,75 @@
+{
+  "requested_at_utc": "2026-07-27T15:53:14Z",
+  "integration": "R01-OFFICIAL-INFRA-004",
+  "track": "R0.1",
+  "benchmark": "SILG RTFM S1",
+  "workflow": ".github/workflows/r01_silg_official_checkpoint_resume_qualification.yml",
+  "canonical_branch": "research/intelligence-swarm-reconstruction-001",
+  "classification": "exact_one_step_resume_qualification_requested",
+  "scope": "Execute the implemented exact one-step checkpoint/resume qualification before the official 100M-frame public reproduction; no capability claim",
+  "source_pins": {
+    "silg": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
+    "rtfm": "58f17955595b5a127c96d045d896fcbcc7d4b570"
+  },
+  "official_reproduction_target": {
+    "command": "python launch.py --local --envs rtfm",
+    "train_env": "silg:rtfm_train_s1-v0",
+    "test_env": "silg:rtfm_test_s1-v0",
+    "model": "multi",
+    "stateful": false,
+    "pretrained_language_model": false,
+    "total_frames_per_seed": 100000000,
+    "num_actors": 30,
+    "num_threads": 4,
+    "batch_size": 24,
+    "unroll_length": 80,
+    "learning_rate": 0.0005,
+    "optimizer": "RMSprop",
+    "entropy_cost_grid": [0.05, 0.005],
+    "global_gradient_clip_norm": 40.0,
+    "required_seeds": [1, 7, 19]
+  },
+  "qualification_run": {
+    "capability_evidence": false,
+    "seed": 1,
+    "frames_per_learner_update": 1920,
+    "initial_updates": 2,
+    "initial_frames": 3840,
+    "replayed_updates": 1,
+    "expected_post_frames": 5760,
+    "only_nonofficial_change": "checkpoint-boundary instrumentation that captures RNG state, exact consumed learner batch and initial recurrent state",
+    "implementation_files": [
+      "research/intelligence_swarm/benchmarks/grounded_causal/instrument_silg_one_step_replay.py",
+      "research/intelligence_swarm/benchmarks/grounded_causal/audit_silg_one_step_replay.py"
+    ],
+    "procedure": [
+      "run the official multi/stateful=false contract to an instrumented learner-update boundary",
+      "preserve the complete official job.tar and pre-update model, actor-model, optimizer, scheduler, frame and RNG state",
+      "preserve the exact learner batch and initial recurrent state consumed by that update",
+      "replay one update offline from the same pre-update state and exact batch",
+      "require exact equality for model, actor model, optimizer, scheduler, frame, loss, gradients, stats and RNG state",
+      "preserve all partial evidence and the exact failed comparison if any equality check fails"
+    ]
+  },
+  "required_artifacts": [
+    "complete official job.tar checkpoint",
+    "pre-update and post-update replay snapshots",
+    "exact learner batch and initial recurrent state",
+    "Python, NumPy and Torch RNG states",
+    "model, actor-model, optimizer, scheduler, frame, loss, gradient and stats equality report",
+    "checkpoint and payload bytes and SHA-256",
+    "exact commands and instrumentation patch hashes",
+    "peak RSS, wall time and CPU timing",
+    "host provenance, raw install/training/replay logs and pip freeze",
+    "file-size and SHA-256 manifests"
+  ],
+  "failure_policy": "If exact replay fails, preserve the first unequal field, tensor key, digest, command, logs and all pre/post payloads, then repair only that instrumentation or restore defect. Do not alter the official model, optimizer, sampling defaults, split, seed contract or capability evaluation. Do not substitute a reduced training contract and call it public reproduction.",
+  "next_gate": "Only after exact checkpoint/resume qualification succeeds may the canonical branch schedule the 100M-frame, three-seed official baseline and matched random/language-blind/state-only controls.",
+  "claims_blocked_until_completion": [
+    "public baseline reproduced",
+    "official baseline failure",
+    "capability progress",
+    "new intelligence principle",
+    "high-school-level intelligence"
+  ]
+}

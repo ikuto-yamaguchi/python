@@ -1,0 +1,71 @@
+{
+  "schema": "D002-summary-v1",
+  "date": "2026-07-28",
+  "branch": "research/intelligence-swarm-reconstruction-001",
+  "candidate": {
+    "repository": "wdlctc/open-attention-residuals",
+    "commit": "83d2b8de82c2fbb981c7decca67d13d9db348da6",
+    "source_blob_sha": "649aa0067e5b9d0fc2a3cc68784a6794090a26a4"
+  },
+  "environment": {
+    "python": "3.13.5",
+    "torch": "2.10.0+cpu",
+    "cuda_available": false,
+    "cpu_threads": 1,
+    "platform": "Linux x86_64"
+  },
+  "checksums": {
+    "executed_harness_sha256": "5cff2119df1e57faf8e529631a02f2a19f602ef7ad939994df2d35cbc91e24f7",
+    "full_result_json_sha256": "a80f622028a9643ad3bbec06a04c8e3e4be905a5817dbcfbce3b9c48d91d0bd6",
+    "stdout_sha256": "f020661a165ebb284a83fdd6051a33bd7a114e6e22244da8084cc47631db4cd5",
+    "stderr_sha256": "024d6af6b8aef8859311c7568487280396ea8058ab9526ab07839036b4d161ae"
+  },
+  "input": {
+    "seed": 17,
+    "shape": [1, 4]
+  },
+  "conditions": {
+    "B0": {
+      "parameters": 115554304,
+      "fp32_parameter_bytes": 462217216,
+      "save_load_max_abs_diff": 0.0
+    },
+    "A1": {
+      "parameters": 115579929,
+      "fp32_parameter_bytes": 462319716,
+      "save_load_max_abs_diff": 0.0,
+      "routing_parameter_tensors": 75,
+      "all_routing_gradients_finite_nonzero": true,
+      "routing_events_traced": 25
+    }
+  },
+  "parameter_delta": {
+    "previous_D001": 24600,
+    "corrected": 25625,
+    "omitted_final_router": 1025,
+    "relative_percent": 0.02218
+  },
+  "resource": {
+    "process_max_rss_kib": 2203936,
+    "wall_elapsed_seconds": 29.62,
+    "note": "Process-level high-water mark across sequential runs and serialization; not isolated per condition."
+  },
+  "routing_microbenchmark": [
+    {"batch": 1, "seq": 1, "sources": 5, "median_ms": 0.112487},
+    {"batch": 1, "seq": 128, "sources": 5, "median_ms": 0.627961},
+    {"batch": 1, "seq": 512, "sources": 5, "median_ms": 2.252197},
+    {"batch": 1, "seq": 2048, "sources": 5, "median_ms": 35.944465}
+  ],
+  "decision": {
+    "path_status": "WARN",
+    "executability_gate": "PASS",
+    "adoption": "NOT_ADOPTED",
+    "training_authorized": false,
+    "reasons": [
+      "Exact third-party Transformers implementation was not executable in the pinned runtime.",
+      "Full-model timing was order-contaminated by first-use warm-up.",
+      "RSS was not isolated per condition.",
+      "No quality, generation, training-throughput, or quantization evidence exists."
+    ]
+  }
+}

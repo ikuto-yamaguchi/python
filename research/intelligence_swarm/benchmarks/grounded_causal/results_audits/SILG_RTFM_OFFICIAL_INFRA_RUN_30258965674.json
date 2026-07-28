@@ -1,0 +1,83 @@
+{
+  "schema_version": "r0-official-infrastructure-result-v1",
+  "classification": "resume_equivalence_instrumentation_gap",
+  "capability_evidence": false,
+  "capability_progress_claimed": false,
+  "run": {
+    "id": 30258965674,
+    "job_id": 89954109262,
+    "execution_commit": "3810f3c82edb335655756aed290f598201b2da06",
+    "status": "completed",
+    "conclusion": "failure"
+  },
+  "artifact": {
+    "id": 8650362356,
+    "name": "r01-silg-official-infrastructure-30258965674",
+    "size_bytes": 61174640,
+    "digest": "sha256:975d5c6223637f48c3e358d51ead0470e3f97b01826e2cd6e216fd484b8f8750"
+  },
+  "source_pins": {
+    "silg": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
+    "rtfm": "58f17955595b5a127c96d045d896fcbcc7d4b570"
+  },
+  "official_sampling_contract": {
+    "model": "multi",
+    "stateful": false,
+    "entropy_cost": 0.05,
+    "num_actors": 30,
+    "batch_size": 24,
+    "unroll_length": 80,
+    "num_threads": 4,
+    "learning_rate": 0.0005,
+    "optimizer": "RMSprop",
+    "gradient_clip_norm": 40.0,
+    "seed": 1,
+    "requested_segment_frames": 32768,
+    "official_total_frames": 100000000,
+    "train_split": "silg:rtfm_train_s1-v0",
+    "validation_split": "silg:rtfm_test_s1-v0"
+  },
+  "verified": {
+    "official_command_parity": true,
+    "checkpoint_preserved": true,
+    "checkpoint_model_matches_exported_model": true,
+    "optimizer_state_present": true,
+    "optimizer_param_groups": 1,
+    "optimizer_state_entries": 73,
+    "scheduler_state_present": true,
+    "frame_counter_present": true,
+    "frames_in_checkpoint": 40320,
+    "checkpoint_bytes": 39266613,
+    "checkpoint_sha256": "1ce3a0590611d8d26ef06330e7f5eca43e9c13deafb8d41bf3570eadaa754675",
+    "answer_leakage": false
+  },
+  "resource": {
+    "peak_rss_kib": 9305052,
+    "wall_seconds": 631.6608327629999,
+    "frames_per_second": 63.83172409730227,
+    "projected_100m_seconds": 1566619.1288764877,
+    "projected_100m_days": 18.132165843477868
+  },
+  "failed_requirements": [
+    "missing_rng_state_for_one_step_resume_equivalence",
+    "missing_batch_state_for_one_step_resume_equivalence"
+  ],
+  "one_step_resume_equivalence_verified": false,
+  "decision": {
+    "official_contract_can_execute_short_segment": true,
+    "checkpoint_optimizer_frame_preservation": "passed",
+    "resume_integrity": "not_qualified",
+    "resource_feasibility_for_two_100m_entropy_runs": "approximately_36.3_runner_days_before_retries_or_three_seed_expansion",
+    "next_single_fix": "instrument RNG state and the exact consumed learner batch at a checkpoint boundary, then verify one-step resume equivalence without changing model, optimizer, sampling contract, split, or capability evaluation"
+  },
+  "controls": {
+    "random": "recorded_for_infrastructure_probe_only",
+    "language_blind": "not_applicable",
+    "state_only": "not_applicable",
+    "language_shuffle": "not_applicable"
+  },
+  "rq_001": "not_adopted",
+  "new_mechanism_family_recognized": false,
+  "new_intelligence_principle_recognized": false,
+  "high_school_level_intelligence": "not_achieved"
+}

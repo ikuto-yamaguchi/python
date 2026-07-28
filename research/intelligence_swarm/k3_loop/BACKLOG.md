@@ -1,0 +1,130 @@
+# K3 Minimal Intelligence Loop — Backlog
+
+Last updated: 2026-07-29 by K3-E
+
+## P0 — Block AttnRes minimum reproduction
+
+Classification: **小型化で要再設計・追加検証・未採用 / Path-WARN**
+
+Current bottleneck:
+
+> D008 was completed as `SUBSTRATE_STOP` on the available Python 3.13/no-network runtime. The only next scientific work is one execution of the existing C007 gate on an externally supplied compliant Python 3.11 CPU substrate. Further audit-only cycles and substrate rediscovery are prohibited.
+
+### A — Evidence
+
+- [x] Author executable/checkpoint status: 未公開
+- [x] Primary scale/depth/width/block/token evidence extracted
+- [x] Candidate and official commits fixed
+- [x] Dependency lower bound fixed
+- [x] Paper-to-candidate deviation matrix
+- [x] Missing partial reset, duplicate source and recency bias identified
+- [x] Paper layer-index origin and `L_sub/N/S` geometry fixed
+- [x] PB1 boundaries `[3,6,9,12]`; zero-based false-boundary and odd-`S` counterexamples fixed
+- [x] A005 official-artifact refresh and community implementation admissibility audit
+- [x] A006 compact public implementation audit
+- [ ] Add provenance only after a concrete external resolver/import failure
+- [x] Freeze other K3 components during P0
+
+### B — Theory
+
+- [x] Parameter/FLOPs/state-memory/communication/sequence/quantization/CPU comparison
+- [x] Small-scale counterexamples and CPU roofline contract
+- [x] D002 scaling-breakpoint audit
+- [x] Paper/raw routing-prior identifiability audit
+- [x] PB1 provisional delta `25,600`
+- [x] PB1 source-slot bounds: sublayer `84`, final `5`, total `89`
+- [x] PB1 classified as minimum semantic/effect-direction pilot
+- [x] PB1 falsifiability boundary fixed
+- [x] B007 execution-substrate invariance and evidence-admissibility conditions fixed
+- [x] B008 portable-substrate equivalence and trust-closure requirements fixed
+- [ ] Recalculate operator share and actual/expected slots from exact trace
+- [x] No CPU crossover or minimum-scale claim before exact trace
+- [x] No additional theory before an admissible external environment result
+
+### C — Preregistration
+
+- [x] C001–C007 completed
+- [x] C005 canonical-push route closed as `ROUTE_STOP`
+- [x] C006 default-branch dispatcher route closed as `ENV_PROTOCOL_FAIL`
+- [x] Portable acquisition, identity, dependency, import-origin and checksum contract fixed
+- [x] All model-stage authorizations false and no automatic continuation
+- [ ] Amend C007 only if an external run exposes one specific protocol defect
+
+### D — Reproduction
+
+- [x] D001 static contract audit
+- [x] D002 standalone preflight
+- [x] D003 local environment blocker isolation
+- [x] D004 environment workflow staging
+- [x] D005 preregistration blocker audit
+- [x] D006 canonical-push route execution and `ROUTE_STOP`
+- [x] D007 default-branch attempt completed as `ENV_PROTOCOL_FAIL`
+- [x] Close both GitHub Actions routes
+- [x] Quarantine incomplete `.github/workflows/d007-k3-environment-dispatcher.yml`; never dispatch it
+- [x] D008 available-substrate inspection completed
+- [x] Record Python `3.13.5`, missing Python 3.11 and GitHub DNS failure
+- [x] Record one concrete `SUBSTRATE_STOP`; do not repeat substrate audits
+- [x] Persist replay commands and machine-readable stop result
+- [ ] Obtain an external Python 3.11 CPU substrate with online access or a hashed offline Git bundle and exact wheelhouse
+- [ ] Execute the existing C007 portable gate once on that substrate
+- [ ] Persist source/ref reachability, clean-tree evidence and normative file identities
+- [ ] Persist resolver report, `pip freeze --all`, `pip check` and all dependency artifact hashes
+- [ ] Persist `sys.path`, imported module origins and imported source hashes
+- [ ] Persist platform provenance and all authorization flags false
+- [ ] Produce sorted inner `checksums.sha256`
+- [ ] Produce deterministic outer archive plus separate SHA256 and byte size
+- [ ] After separate authorization only: CR1 trace, then PB1 trace
+- [x] Dataset, model execution, semantic trace, training and quantization remain prohibited
+
+### E — Integration
+
+- [x] E001–E009 completed
+- [x] D007 classified `ENV_PROTOCOL_FAIL`
+- [x] Both GitHub Actions routes closed
+- [x] D008 classified `SUBSTRATE_STOP`
+- [x] Block AttnRes/PB1/CR1 not rejected by orchestration or substrate failure
+- [x] Portable environment protocol and trust closure fixed
+- [x] Audit-only substitution and repeated substrate discovery prohibited
+- [ ] Classify the first actual C007-compliant external environment run
+- [ ] Keep Block AttnRes unadopted until quality/resource/3-seed evidence
+
+## PAPER-BLOCK semantic completion
+
+- [ ] Boundary reset at `[3,6,9,12]`
+- [ ] No boundary before first transformed sublayer
+- [ ] Six sublayers per completed block
+- [ ] No unintended duplicate source identity
+- [ ] No recency bias or optional mixing gate
+- [ ] Routing probabilities finite and sum to one
+- [ ] Final router does not increment completed-block count
+- [ ] Source slots match `84/5/89` or are explicitly reconciled
+- [ ] Exact parameter delta explained
+- [ ] Save/load event/output consistency
+
+## P1 queue — frozen
+
+1. Kimi Delta Attention
+2. Stable LatentMoE
+3. MXFP4-aware training
+4. Low-rank Attention Residuals
+5. Data curriculum/post-training efficiency
+
+## Global prohibitions
+
+- No further C005/C006 trigger, nonce, dispatcher or default-branch workflow variants
+- Never dispatch the incomplete D007 workflow on `main`
+- No repeated substrate audit on the current Python 3.13/no-network runtime
+- No more evidence/theory/preregistration/orchestration audits in place of external execution
+- No broad push or PR trigger shortcut
+- No model code on an orchestration branch or launcher
+- No new architecture before reproducible baseline and preregistration
+- No multi-component intervention
+- No paper attribution from CR1
+- No adoption from parameter/KV/asymptotic FLOPs alone
+- No single-seed adoption
+- No promotion of environment/semantic preflight to quality evidence
+- No silent semantic or compatibility patch
+- No automatic transition from environment PASS to model execution
+- No mechanism-wide rejection from PB1 `N=4` null evidence
+- No substitution of third-party Megatron or compact public implementations during P0 without a new semantic audit and preregistration
+- No capability, intelligence-principle, high-school-level or 1GB-goal claim without evidence

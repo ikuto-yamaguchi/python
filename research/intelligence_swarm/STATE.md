@@ -2,56 +2,144 @@
 
 ## Mission
 
-1GB未満・弱いスマートフォンCPUで高速に動作し、生の自由な日本語から手書きslotなしで対象・変数・操作・目的・制約・因果構造を獲得する汎用知能原理を発見・反証する。
+長期目標は、1GB未満で弱いスマートフォンCPU上でも高速に動作し、日本語コミュニケーション・知識・推論を備える知能モデルである。R0では新規toy仮説や新機構族を作らず、公開baselineを固定契約で再現し、失敗原因を一つずつ除去する。
 
 ## Current stage
 
-- Stage: **S1 Semantic Identity Birth — transformation-indexed causal equivariance substage**
-- Semantic Identity Gate G1: **未達**
-- Operation/Goal Gate G2: **未達**
-- Formal memory eligibility: **未達**
-- Mainline: **AF-014 Transformation-Indexed Cross-Expression Causal Equivariance**
-- AF-011 episode-local nuisance orbit: **上位構造原理として維持**
-- AF-013 paired intervention basis: **反例・取得設計へ縮小**
-- Memory/consolidation: **G1待ち。保存最適化は凍結継続**
+- Stage: **R0 Research Reconstruction — official SILG continuation blocked before replacement execution**
+- Canonical branch: `research/intelligence-swarm-reconstruction-001`
+- Canonical PR: **#409 open / draft / mergeable**
+- Verified PR head before this integration: `f83a72610d37a5dc8d43a9c053b02b5134c082fd`
+- A〜Dの新規toy仮説・別branch・新規機構族: **禁止**
+- 既存stacked draft PR: **negative-results archive。新作業のbaseにしない**
+- 外部baseline再現前の新規知能原理・能力進歩認定: **禁止**
 
-## Integrated external evidence
+## A–D responsibilities
 
-1. PR402 / A: 同じ表面commandのpaired difference quotientはprospective 0.1746、Random 0.2202、free 0.3929、Random 0.4881。Rename・未知語順・省略は全方式0。surface-shared pairはidentityを生まない。
-2. PR403 / B: factor別paired lesionからrole候補は平均0.333形成されたが、prospective/inverse/goal/repairは全方式0。paired response差だけではtarget/source/goal/operationを一意化できない。
-3. PR404 / C: 表面非共有pairのsame-delta mutual repairはprospective 0.2500、Random 0.1953だが、Pair shuffle 0.2240。inverse差+0.0078、object permanence差+0.0208、strict 0/3。単一delta一致は因果identityではない。
-4. PR405 / D: 状態条件付き完全応答関数でPaired prospective 0.7721、Random 0.3003まで上がったが、Pair shuffleが全指標でPairedと完全同率。平均10 unitがtensor-equivalenceへ衝突し、same-unique reconvergenceは0、formal memory eligible unit 0。
+- **A**: SILG/RTFM、J-CRe3等の公式再現とimmutable artifact保存。
+- **B**: 実装・最適化・表現・探索/信号の失敗診断と、原因だけを変える最小run。
+- **C**: 最新一次文献・公式codeとの重複監査とnovelty matrix。
+- **D**: D015〜D035、matched controls、resource、leakage、RQ-001判定。
 
-## Governance decision
+## Non-termination rule
 
-- **HF-015を凍結**: `Paired Difference or Response-Function Equality Defines Semantic/Episode Identity`。
-- 根本前提は、paired intervention差、same-delta、または状態条件付き応答関数の値が一致すれば、異なる表現・対象・操作を同一semantic/causal/episode unitへ束ねられる、というもの。
-- A〜Dの4系列でCorrectとpair-shuffle/randomの能力差または取得時same-unique再同定を生まなかったため、本線から排除する。
-- paired interventionは反例生成・介入軸設計に限って継続し、response equality自体をidentity証拠へ使わない。
+「検証したが駄目だった」で終了しない。ただし、短期screeningを公式baseline再現と誤認して追加hyperparameter探索を続けることも禁止する。能力と無関係な監査・実行障害だけのために高コスト学習を重複しない。
 
-## Maximum upstream bottleneck
+## R0 status ledger
 
-**固定role/program/state/scope/arityを列挙せず、raw自由日本語の異なる表現が、target-state交換、target-identity交換、non-target交換、argument-order交換、intervention-order交換、causal-direction反転、goal変更に対して同じ選択的共変・不変則を示す変換-indexed unitへ、各独立取得集合単独で一意再収束し、pair/state-axis/target-link/argument-link/direction/goal shuffleで外部能力が選択的に崩れること。**
+- immutable R0.1 short-horizon screening artifacts: **8件**
+- official-contract infrastructure artifact: **1件**
+- accepted exact one-step resume-equivalence artifact: **1件**
+- official SILG RTFM 100M-frame reproduction: **0件**
+- official seed-1 / entropy-0.05 first 1M chunk: **initial run failed before training; replacement result unconfirmed**
+- 学習済み公開能力baseline再現: **0件**
+- official-horizon matched controls: **0件**
+- J-CRe3 numerical reproduction: **0件**
+- CausalVerse numerical reproduction: **0件**
+- R0.2正式再現: **0件**
+- R0.3 hidden intervention-target ablation: **棄却維持**
+- novelty matrix: **未完了**
+- 中心命題の事前登録: **未完了**
+- 広義RQ-001: **棄却**
+- 狭義RQ-001: **未採用**
+- 主分類: **`workflow_execution_approval_or_policy_blocker`**
 
-## Active assignments
+## Official SILG reproduction contract
 
-- A: surface共通性やresponse equalityを使わず、表現変換とtarget/state交換に対して同じ共変則を持つ対象・変数候補を生成する。
-- B: target/source/goal/argumentの各交換で対応成分だけが変化し、他成分が保存されるoperation transformation signatureをbirthする。
-- C: state/target/non-target/argument/order/direction/goal各軸の選択的共変・不変性を監査し、単なるtensor equalityと区別する。
-- D: 各独立取得集合単独で同じtransformation-indexed unitへsame-unique再収束した場合だけ資格候補化し、pair shuffle不変なunitを拒否する。
-- E: response equality、tensor collision、paired-difference言い換え、oracle intervention axis、best-seed、domain bridge、calibration-after漏洩を監査する。
+Pinned official SILG `launch.py --envs rtfm`は、`model=multi`、`stateful=false`、entropy grid `0.05/0.005`、train `silg:rtfm_train_s1-v0`、validation `silg:rtfm_test_s1-v0`を指定する。parser defaultsはtotal frames `100,000,000`、actors `30`、batch `24`、unroll `80`、threads `4`、learning rate `0.0005`、RMSprop、global gradient clip `40`である。
 
-## Progress rule
+既存の`131,072`-frame runsは公式frame horizonの`0.131072%`にすぎない。すべてshort-horizon screening evidenceとして保持し、公式public baseline reproductionや公式baseline failureとは呼ばない。
 
-2以上のopaque domain × 3 seedすべてで、非oracle最小介入後に、接地未使用token、Rename、未知語順、主語省略、複数段落、自由日本語、未観測state×target×operation/relation組合せのprospective、inverse、object permanence、causal direction、goal change、counterfactual repairがCorrect条件でRandom、State-static、Global-template、Boundary/Factor/Family/Arity/Pair/State-axis/Target-link/Argument-link/Direction/Goal/Outcome shuffleを各+0.10以上上回ること。各独立取得集合が単独で同じtransformation-indexed raw unitへ一意再収束し、response/tensor equalityやintersection rescueだけでは通過させない。
+## Accepted resume-equivalence evidence
+
+- run `30300067389`
+- job `90090542489`
+- artifact `8666312079`
+- artifact SHA-256 `34f02c802f6db15b55336a0547e3914846aad6d74783ebfc371d12ca6ac08115`
+- frames `3840 -> 5760`
+
+Exact consumed learner batch、initial recurrent state、learner model、optimizer、scheduler、gradient、Python/NumPy/Torch RNG、stats、frame incrementは一致した。これはcaptured official learner updateのexact replayだけを証明し、asynchronous queue continuation、100M horizon、benchmark competenceは証明しない。
+
+## Active official continuation
+
+最初のseed-1 / entropy-0.05 chunk run `30308447687`は、pinned SILGが`--seed` CLI argumentを持たないためtraining開始前に失敗した。
+
+Immutable failure evidence:
+
+- artifact `8669383695`
+- SHA-256 `9a5518b1a5e5338886ed2d3f2429d0e0246f0ba9cd919de7627e6f01c74dccd4`
+
+Commit `ce6909baf0e0879d1547c34beb457d59d2027b9e`はunsupported `--seed`を削除し、pinned `run_exp.py`へseedだけを固定する監査済みpatchを適用した。
+
+- global Python / NumPy / Torch seed: `SILG_EXPERIMENT_SEED=1`
+- actor seed: `experiment_seed * 1000003 + actor_index`
+- patch前後sourceとSHA-256をartifact保存
+- model、loss、optimizer、environment、action schema、sampling defaults、frame budgetは不変
+
+確認したPR head `f83a72610d37a5dc8d43a9c053b02b5134c082fd`に関連付くPR-triggered workflow 12件はすべて`completed / action_required`でjob未生成だった。対象にはSILG push-run locator、unified acceptance gate、artifact containment、raw-log binding、normalized cell/holdout/canonical identity、score dataset-contract binding、prediction topologyを含む。
+
+これはmodel failure、optimizer failure、SILG baseline failure、evaluation logic regression、能力failureではなくworkflow execution approval/policy blockerである。replacement chunkのrun/job/artifact/qualificationを独立確認するまで開始・完了・能力進歩を認定せず、同一chunkを重複dispatchしない。
+
+## Latest short-horizon negative evidence
+
+Run `30240410850`, artifact `8644560521`:
+
+- Correct `3/60`
+- Random `4/60`
+- Language-blind `0/60`
+- State-only `0/60`
+- Language-shuffle `3/60`
+- Correct mean return `-1.7679994`
+- Random mean return `-1.1513333`
+- parameters `6,200,115`
+- actual frames `131,200` per seed
+- peak RSS `1,299,228 / 1,180,104 / 1,856,556 KiB`
+- wall `1528.08 / 1559.30 / 1591.64 s`
+- CPU forward `8.565 ms/step`
+- answer leakage `false`
+- qualification **rejected**
+
+これは縮小契約で言語依存能力が成立しなかったnegative evidenceであり、公式baseline失敗の証拠ではない。
+
+## Official-contract resource anchor
+
+Run `30258965674`, artifact `8650362356`:
+
+- peak RSS `9,305,052 KiB`
+- wall `631.66 s`
+- throughput `63.83 frames/s`
+- checkpoint frames `40,320`
+- projected 100M wall `18.13 runner-days` per entropy/seed run
+
+## Evaluation contract
+
+D015〜D035を凍結する。能力runではrandom/language-blind/state-only/shuffle、model/checkpoint bytes、RSS、runtime、CPU latency、seed、split、actual frames、raw logs、checksums、leakageを保存する。infrastructure-only runでは能力対照をN/Aと明示し、能力進歩へ数えない。
+
+Normalized-cell workflowはread-only fail-closed CIへ変更済みで、fixtureも明示holdout契約に合わせて修正済みである。今回の`action_required`は承認/policy層の実行ブロッカーであり、評価ロジックの回帰とは認定しない。Standalone canonical-instance-identity auditは、`validate_dataset()`と`score()`へのdirect fail-closed integration完了まで省略しない。
+
+## Prior-art and RQ boundary
+
+既存のscore-based CRL、finite-sample CRL、unknown multi-node intervention CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg、MagicBench、CodeBind、NoisyCausal、CaST-Bench、CausalVerse、MTG-Causal-RL、Mind Dreamer、AER、COGS等の境界を維持する。
+
+2026-07-28の再監査でも、既存境界を越えてRQ-001を採用できる新しい「一次文献 + author-official code + exact commit + public numerical contract」の組は確認できなかった。文献名だけを追加してnovelty matrixを水増ししない。
+
+正式判断:
+
+> **RQ-001: FURTHER NARROWED — NOT ADOPTED**
+
+## Stage transition
+
+次stageは、competent external baseline、immutable matched controls、canonical three-seed qualification、qualified R0.2、R0.3棄却維持、novelty matrix、中心命題の事前登録がすべて完了した場合だけ提案する。
 
 ## Current status
 
-- 高校生級: 未達
-- ネイティブ日本語コミュニケーション: 未達
-- 弱いスマートフォン実機検証: 未達
-- 完成: false
+- 高校生級知能: **未達**
+- ネイティブ日本語コミュニケーション: **未達**
+- 弱いスマートフォン実機検証: **未達**
+- 新規知能原理: **未発見**
+- 能力進歩: **未認定**
+- 完成: **false**
 
 ## Last integration
 
-2026-07-24: GOV-013。PR402〜405を統合し、HF-015を凍結。S1内をtransformation-indexed causal equivarianceへ遷移し、AF-014を優先。
+2026-07-28: **RESET-E083**。PR head `f83a7261...`に関連付く12 workflowがすべて`action_required`・job未生成であることを再確認し、replacement 1M chunkの未実行状態とapproval/policy blockerを統合した。新しい能力artifact、matched controls、resource、leakage結果はなく、外部baseline再現0件、能力進歩未認定、高校生級未達を維持する。

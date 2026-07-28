@@ -1,0 +1,46 @@
+{
+  "cycle": "R0D-015",
+  "classification": "initial_reproduction_failure",
+  "scope": "evaluation reproducibility, statistics, leakage, and concrete SILG/RTFM trajectory-schema adaptation",
+  "new_architecture": false,
+  "new_memory_mechanism": false,
+  "canonical_branch": "research/intelligence-swarm-reconstruction-001",
+  "completed": {
+    "silg_text_tokens_to_utterance_adapter": true,
+    "action_to_gold_action_adapter": true,
+    "state_after_to_gold_state_after_adapter": true,
+    "outcome_labels_excluded_from_default_model_input": true,
+    "episode_id_train_eval_isolation": true,
+    "episode_seed_train_eval_isolation": true,
+    "observation_fingerprint_train_eval_isolation": true,
+    "instance_fingerprint_includes_episode_and_observation_identity": true,
+    "required_method_coverage_reports_absent_methods": true,
+    "local_regression_tests_passed": 18
+  },
+  "preserved": {
+    "utterance_overlap_audit": true,
+    "entity_dynamics_holdout_audit": true,
+    "gold_action_after_state_leakage_audit": true,
+    "completed_trajectory_leakage_audit": true,
+    "seed_domain_split_condition_cells": true,
+    "paired_randomization": true,
+    "mcnemar_exact": true,
+    "cluster_bootstrap_ci": true,
+    "shuffle_donor_provenance": true,
+    "artifact_checksum_and_resource_audit": true
+  },
+  "missing_for_reproduction": [
+    "real target-label-shuffle predictions or a formal non-applicability record for SILG",
+    "real outcome-shuffle predictions with donor provenance",
+    "complete method x seed x domain x split x condition artifact manifest",
+    "immutable serialized evaluation dataset joined to predictions and raw logs",
+    "competent public learned baseline at the preregistered scale"
+  ],
+  "research_claims": {
+    "public_baseline_reproduced": false,
+    "capability_progress_recognized": false,
+    "novelty_established": false,
+    "intelligence_principle_established": false,
+    "high_school_level_intelligence": false
+  }
+}

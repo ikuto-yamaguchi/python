@@ -1,0 +1,56 @@
+{
+  "run_id": 30330569178,
+  "job_id": 90184615376,
+  "artifact_id": 8682637337,
+  "artifact_name": "r01-silg-official-100m-seed1-2m-30330569178",
+  "artifact_size_bytes": 75100768,
+  "artifact_digest": "sha256:617fc6669fcd4db0771e634153627ba3d70d414e3579c1e5191c4c62991b91a2",
+  "head_sha": "35e6173880947889c4ceadb003f097a891e2e172",
+  "classification": "official_100m_reproduction_in_progress",
+  "workflow_conclusion": "failure",
+  "training_conclusion": "success",
+  "failure_stage": "post_training_resource_parser",
+  "failure_reason": "GNU time -v prefixes resource lines with whitespace, but the verifier anchored labels at column zero",
+  "checkpoint": {
+    "frames": 2006400,
+    "bytes": 39266677,
+    "sha256": "be4ca5f149558558f3828b72729bb5180f1023756f7f623f1b2d6230e7117b18",
+    "model_state_parameters": 7969115,
+    "required_keys_present": [
+      "model_state_dict",
+      "optimizer_state_dict",
+      "scheduler_state_dict",
+      "frames"
+    ],
+    "qualified_for_continuation": true
+  },
+  "resources": {
+    "wall_time": "4:02:13",
+    "user_cpu_seconds": 28472.23,
+    "system_cpu_seconds": 2378.58,
+    "maximum_rss_kib": 10938660
+  },
+  "fixed_contract": {
+    "silg_commit": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
+    "rtfm_commit": "58f17955595b5a127c96d045d896fcbcc7d4b570",
+    "train_env": "silg:rtfm_train_s1-v0",
+    "test_env": "silg:rtfm_test_s1-v0",
+    "model": "multi",
+    "stateful": false,
+    "pretrained_language_model": false,
+    "actors": 30,
+    "learner_threads": 4,
+    "batch_size": 24,
+    "unroll_length": 80,
+    "optimizer": "RMSprop",
+    "learning_rate": 0.0005,
+    "entropy_cost": 0.05,
+    "gradient_clip": 40,
+    "seed": 1,
+    "target_frames": 100000000
+  },
+  "controls_status": "not_run_until_trained_checkpoint_evaluation",
+  "public_baseline_reproduced": false,
+  "capability_progress_claimed": false,
+  "new_intelligence_principle_claimed": false
+}

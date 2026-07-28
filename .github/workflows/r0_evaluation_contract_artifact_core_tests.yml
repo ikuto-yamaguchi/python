@@ -1,0 +1,28 @@
+name: R0 evaluation contract artifact core tests
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_artifact_core.py
+      - .github/workflows/r0_evaluation_contract_artifact_core_tests.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile core contract
+        run: python -m py_compile research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
+      - name: Run artifact core regressions
+        run: python research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_artifact_core.py

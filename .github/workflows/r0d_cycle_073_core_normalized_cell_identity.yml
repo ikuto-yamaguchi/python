@@ -1,0 +1,53 @@
+name: R0D Cycle 073 core normalized cell identity
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/apply_r0d_cycle_073_core_normalized_cell_identity.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_normalized_cell_identity_core.py
+      - .github/workflows/r0d_cycle_073_core_normalized_cell_identity.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: r0d-cycle-073-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  apply-and-test:
+    if: github.ref_name == 'research/intelligence-swarm-reconstruction-001'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/intelligence-swarm-reconstruction-001
+          fetch-depth: 0
+
+      - name: Apply core patch
+        run: python research/intelligence_swarm/benchmarks/grounded_causal/apply_r0d_cycle_073_core_normalized_cell_identity.py
+
+      - name: Compile core and regressions
+        run: |
+          python -m py_compile \
+            research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_normalized_cell_identity_core.py
+
+      - name: Run focused regression
+        run: python research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_normalized_cell_identity_core.py
+
+      - name: Commit core integration to canonical branch
+        run: |
+          if git diff --quiet; then
+            echo "No core diff to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
+          git commit -m "R0-D cycle 073 integrate normalized cell identity"
+          git push origin HEAD:research/intelligence-swarm-reconstruction-001

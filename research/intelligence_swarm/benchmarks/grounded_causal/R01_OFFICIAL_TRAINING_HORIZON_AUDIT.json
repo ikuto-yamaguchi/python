@@ -1,0 +1,78 @@
+{
+  "audit_id": "R01-OFFICIAL-HORIZON-001",
+  "date_utc": "2026-07-27",
+  "benchmark": "SILG RTFM S1",
+  "canonical_branch": "research/intelligence-swarm-reconstruction-001",
+  "scope": "Public baseline reproduction contract audit; no new toy hypothesis or architecture",
+  "source_pins": {
+    "silg": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
+    "rtfm": "58f17955595b5a127c96d045d896fcbcc7d4b570"
+  },
+  "official_entrypoint": {
+    "repository": "vzhong/silg",
+    "file": "launch.py",
+    "command": "python launch.py --local --envs rtfm",
+    "rtfm_contract": {
+      "model": "multi",
+      "entropy_cost_grid": [0.05, 0.005],
+      "stateful": false,
+      "use_local_conv": false,
+      "field_attn": false,
+      "train_env": "silg:rtfm_train_s1-v0",
+      "val_env": "silg:rtfm_test_s1-v0",
+      "seed_count_default": 4
+    }
+  },
+  "official_parser_defaults": {
+    "total_frames": 100000000,
+    "num_actors": 30,
+    "batch_size": 24,
+    "unroll_length": 80,
+    "num_threads": 4,
+    "learning_rate": 0.0005,
+    "entropy_cost": 0.05,
+    "optimizer": "RMSprop",
+    "optimizer_alpha": 0.99,
+    "optimizer_momentum": 0.0,
+    "optimizer_epsilon": 0.01,
+    "global_gradient_clip_norm": 40.0
+  },
+  "current_screening_contract": {
+    "frames_per_seed": 131072,
+    "observed_checkpoint_frames_with_unroll80_batch2": 131200,
+    "num_actors": 2,
+    "batch_size": 2,
+    "unroll_length": 80,
+    "num_threads": 1,
+    "seed_count": 3
+  },
+  "derived_comparison": {
+    "requested_screening_fraction_of_official": 0.00131072,
+    "requested_screening_percent_of_official": 0.131072,
+    "official_to_screening_frame_ratio": 762.939453125,
+    "official_learner_updates_at_batch24_unroll80": 52083.333333333336,
+    "screening_learner_updates_at_batch2_unroll80": 819.2,
+    "official_to_screening_update_ratio": 63.57828776041667
+  },
+  "formal_findings": [
+    "The 131072-frame experiments are short-horizon screening runs, not a numerical reproduction of the official public SILG RTFM baseline.",
+    "Stateful=true is not the official RTFM launch setting; the official launcher fixes stateful=false.",
+    "Actors=2, batch_size=2 and num_threads=1 differ from the official parser defaults 30, 24 and 4.",
+    "No prior 131072-frame negative result may be used to conclude that the official recurrent baseline itself fails to reproduce.",
+    "The prior results remain valid only as negative evidence for the explicitly recorded short-horizon screening contracts."
+  ],
+  "classification": "public_reproduction_contract_mismatch",
+  "minimum_next_actions": [
+    "Relabel all existing 131072-frame runs as screening evidence, not public reproduction attempts.",
+    "Preserve official job.tar checkpoints fail-closed in the next training run, including model, optimizer, scheduler, frame counter, bytes and SHA-256.",
+    "Use the official launch contract as the reproduction target: model=multi, stateful=false, unroll=80, batch=24, actors=30, threads=4, total_frames=100000000, with entropy 0.05 and 0.005 and fixed seeds.",
+    "Before consuming the full horizon, perform only an infrastructure qualification run that proves checkpoint/resume equivalence and resource feasibility; do not treat that qualification as capability evidence.",
+    "If the available runner cannot execute the official contract, preserve a reproducible resource-blocker log and do not substitute a reduced contract while calling it reproduction."
+  ],
+  "claims_blocked": [
+    "public baseline reproduced",
+    "official baseline failure",
+    "capability progress",
+    "new intelligence principle"
+  ]
+}

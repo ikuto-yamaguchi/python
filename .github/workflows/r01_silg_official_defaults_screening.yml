@@ -1,0 +1,147 @@
+name: R0.1 SILG official-default execution profile screening
+run-name: R0.1 SILG official actor-batch-unroll defaults @ ${{ github.sha }}
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - '.github/workflows/r01_silg_official_defaults_screening.yml'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/run_silg_official_defaults_screen.py'
+  workflow_dispatch:
+
+concurrency:
+  group: r01-silg-official-defaults-${{ github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  official-default-profile-screening:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+          cache: pip
+      - name: Record immutable provenance and single-factor contract
+        run: |
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_defaults"
+          mkdir -p "$results"
+          {
+            echo "screening_factor=official_actor_batch_unroll_thread_profile"
+            echo "screening_value=num_actors=30,batch_size=24,unroll_length=80,num_threads=4"
+            echo "reference_value=num_actors=2,batch_size=2,unroll_length=20,num_threads=1"
+            echo "fixed_entropy_cost=0.005"
+            echo "fixed_frames=131072"
+            echo "fixed_seeds=1,7,19"
+            echo "github_run_id=${GITHUB_RUN_ID}"
+            echo "github_run_attempt=${GITHUB_RUN_ATTEMPT}"
+            echo "github_sha=${GITHUB_SHA}"
+            git rev-parse HEAD
+            git status --short
+            date -u
+            uname -a
+            lscpu
+            free -h
+            python --version
+          } | tee "$results/SILG_RTFM_HOST.txt"
+      - name: Install pinned SILG and RTFM
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_defaults"
+          /usr/bin/time -v bash research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh "$RUNNER_TEMP/r0_silg" \
+            2>&1 | tee "$results/SILG_RTFM_INSTALL.log"
+      - name: Verify generator schema
+        run: python research/intelligence_swarm/benchmarks/grounded_causal/test_export_rtfm_generator_signatures.py
+      - name: Run canonical random control and schema probe
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_defaults"
+          /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/silg_rtfm_probe.py \
+            --env silg:rtfm_train_s1-v0 --seeds 1 7 19 --episodes 20 --max-steps 80 \
+            --output "$results/SILG_RTFM_RANDOM_CANONICAL_3SEED.json" \
+            2>&1 | tee "$results/SILG_RTFM_RANDOM_CANONICAL.log"
+      - name: Train pinned official multi recurrent with official execution defaults
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_defaults"
+          /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/run_silg_official_defaults_screen.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" --seeds 1 7 19 --frames 131072 \
+            --entropy-cost 0.005 --output "$results" \
+            2>&1 | tee "$results/SILG_RTFM_RECURRENT_SMOKE.log"
+      - name: Verify exact official execution profile reached every seed command
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('research/intelligence_swarm/benchmarks/grounded_causal/results_official_defaults/SILG_RTFM_RECURRENT_SMOKE_3SEED.json')
+          d = json.loads(p.read_text(encoding='utf-8'))
+          expected = {'num_actors': 30, 'batch_size': 24, 'unroll_length': 80, 'num_threads': 4}
+          if d.get('execution_profile') != expected:
+              raise SystemExit(f"top-level execution profile mismatch: {d.get('execution_profile')!r}")
+          if d.get('screening_change') != 'official_actor_batch_unroll_thread_profile_only':
+              raise SystemExit('single-factor declaration mismatch')
+          for run in d.get('runs', []):
+              if run.get('execution_profile') != expected:
+                  raise SystemExit(f"seed {run.get('seed')} profile mismatch")
+              cmd = [str(x) for x in run.get('command', [])]
+              for flag, value in [('--num_actors','30'),('--batch_size','24'),('--unroll_length','80'),('--num_threads','4')]:
+                  i = cmd.index(flag)
+                  if cmd[i + 1] != value:
+                      raise SystemExit(f"seed {run.get('seed')} {flag} mismatch: {cmd}")
+          print('verified official execution profile for all seeds')
+          PY
+      - name: Evaluate matched controls on identical instances
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_defaults"
+          /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/run_silg_matched_eval.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" --results "$results" --seeds 1 7 19 --episodes 20 \
+            2>&1 | tee "$results/SILG_RTFM_MATCHED_EVAL.log"
+      - name: Diagnose official policy action and recurrent dynamics
+        if: always()
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_defaults"
+          python research/intelligence_swarm/benchmarks/grounded_causal/run_silg_policy_diagnostics.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" --results "$results" --seeds 1 7 19 --episodes 20 \
+            --out "$results/SILG_RTFM_POLICY_DIAGNOSTICS_3SEED.json" \
+            2>&1 | tee "$results/SILG_RTFM_POLICY_DIAGNOSTICS.log"
+      - name: Compare official and matched evaluation semantics
+        if: always()
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_defaults"
+          python research/intelligence_swarm/benchmarks/grounded_causal/audit_silg_official_eval_parity.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" --results "$results" --seeds 1 7 19 --episodes 20 \
+            --out "$results/SILG_RTFM_OFFICIAL_EVAL_PARITY_3SEED.json" \
+            2>&1 | tee "$results/SILG_RTFM_OFFICIAL_EVAL_PARITY.log"
+      - name: Apply unchanged R0.1 qualification gate
+        if: always()
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_defaults"
+          python research/intelligence_swarm/benchmarks/grounded_causal/qualify_r01_source_policy.py \
+            --training "$results/SILG_RTFM_RECURRENT_SMOKE_3SEED.json" \
+            --matched "$results/SILG_RTFM_MATCHED_EVAL_3SEED.json" \
+            --output "$results/SILG_RTFM_R01_QUALIFICATION.json" \
+            2>&1 | tee "$results/SILG_RTFM_R01_QUALIFICATION.log"
+      - name: Freeze logs, dependencies, sizes, and checksums
+        if: always()
+        run: |
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_defaults"
+          python -m pip freeze | sort > "$results/SILG_RTFM_R01_PIP_FREEZE.txt"
+          find "$results" -maxdepth 1 -type f -printf '%f %s bytes\n' | sort > "$results/SILG_RTFM_R01_FILE_SIZES.txt"
+          sha256sum "$results"/* > "$results/SILG_RTFM_R01_SHA256SUMS.txt" || true
+      - name: Upload immutable official-default profile screening bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r01-silg-rtfm-official-defaults-${{ github.run_id }}
+          path: research/intelligence_swarm/benchmarks/grounded_causal/results_official_defaults/
+          if-no-files-found: error
+          retention-days: 30

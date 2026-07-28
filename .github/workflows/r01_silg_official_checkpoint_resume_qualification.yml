@@ -1,0 +1,198 @@
+name: R0.1 SILG official checkpoint resume qualification
+run-name: R0.1 SILG exact learner-step replay qualification @ ${{ github.sha }}
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - '.github/workflows/r01_silg_official_checkpoint_resume_qualification.yml'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/instrument_silg_one_step_replay.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_silg_one_step_replay.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/R01_RUN_REQUEST.json'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh'
+  workflow_dispatch:
+
+concurrency:
+  group: r01-silg-official-checkpoint-resume-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  checkpoint-resume-qualification:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+          cache: pip
+
+      - name: Record immutable host provenance
+        run: |
+          set -euo pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_resume"
+          mkdir -p "$results"
+          {
+            echo "github_repository=${GITHUB_REPOSITORY}"
+            echo "github_workflow=${GITHUB_WORKFLOW}"
+            echo "github_run_id=${GITHUB_RUN_ID}"
+            echo "github_run_attempt=${GITHUB_RUN_ATTEMPT}"
+            echo "github_ref=${GITHUB_REF}"
+            echo "github_sha=${GITHUB_SHA}"
+            git rev-parse HEAD
+            git status --short
+            date -u
+            uname -a
+            lscpu
+            free -h
+            df -h
+            python --version
+          } | tee "$results/SILG_OFFICIAL_CHECKPOINT_HOST.txt"
+
+      - name: Install pinned public SILG and RTFM sources
+        run: |
+          set -euo pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_resume"
+          /usr/bin/time -v bash research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh "$RUNNER_TEMP/r01_official_resume" \
+            2>&1 | tee "$results/SILG_OFFICIAL_CHECKPOINT_INSTALL.log"
+
+      - name: Instrument exactly one real learner update
+        run: |
+          set -euo pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_resume"
+          silg="$RUNNER_TEMP/r01_official_resume/silg"
+          cp "$silg/run_exp.py" "$results/SILG_PINNED_RUN_EXP_BEFORE_INSTRUMENTATION.py"
+          python research/intelligence_swarm/benchmarks/grounded_causal/instrument_silg_one_step_replay.py "$silg" \
+            2>&1 | tee "$results/SILG_ONE_STEP_INSTRUMENTATION.log"
+          cp "$silg/run_exp.py" "$results/SILG_PINNED_RUN_EXP_AFTER_INSTRUMENTATION.py"
+          python -m py_compile "$silg/run_exp.py"
+
+      - name: Run official profile and capture registered third learner update
+        env:
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+          SILG_ONE_STEP_CAPTURE_PRE_FRAMES: '3840'
+        run: |
+          set -euo pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_resume"
+          silg="$RUNNER_TEMP/r01_official_resume/silg"
+          savedir="$GITHUB_WORKSPACE/$results/official_one_step_savedir"
+          prefix="$GITHUB_WORKSPACE/$results/SILG_RTFM_OFFICIAL_ONE_STEP"
+          export SILG_ONE_STEP_REPLAY_PREFIX="$prefix"
+          cd "$silg"
+          /usr/bin/time -v python run_exp.py \
+            --env silg:rtfm_train_s1-v0 \
+            --val_env silg:rtfm_test_s1-v0 \
+            --model multi \
+            --xpid rtfm-official-one-step-replay \
+            --savedir "$savedir" \
+            --total_frames 5760 \
+            --num_actors 30 \
+            --num_threads 4 \
+            --batch_size 24 \
+            --unroll_length 80 \
+            --learning_rate 0.0005 \
+            --entropy_cost 0.05 \
+            --disable_cuda \
+            2>&1 | tee "$GITHUB_WORKSPACE/$results/SILG_OFFICIAL_ONE_STEP_TRAIN.log"
+          test -s "${prefix}.pre.pt"
+          test -s "${prefix}.post.pt"
+          job=$(find "$savedir" -name job.tar -type f -print -quit)
+          test -n "$job"
+          cp "$job" "$GITHUB_WORKSPACE/$results/SILG_RTFM_OFFICIAL_JOB.tar"
+
+      - name: Replay captured update and require exact equality
+        env:
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+        run: |
+          set -euo pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_resume"
+          silg="$RUNNER_TEMP/r01_official_resume/silg"
+          python research/intelligence_swarm/benchmarks/grounded_causal/audit_silg_one_step_replay.py \
+            --silg-root "$silg" \
+            --pre "$results/SILG_RTFM_OFFICIAL_ONE_STEP.pre.pt" \
+            --post "$results/SILG_RTFM_OFFICIAL_ONE_STEP.post.pt" \
+            --expected-pre-frames 3840 \
+            --expected-post-frames 5760 \
+            --output "$results/SILG_RTFM_OFFICIAL_ONE_STEP_REPLAY_AUDIT.json" \
+            2>&1 | tee "$results/SILG_RTFM_OFFICIAL_ONE_STEP_REPLAY_AUDIT.log"
+
+      - name: Verify fixed public contract and checkpoint schema
+        run: |
+          set -euo pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_resume"
+          python - "$results" <<'PY'
+          import hashlib
+          import json
+          import pathlib
+          import sys
+          import torch
+
+          results = pathlib.Path(sys.argv[1])
+          request = json.loads(pathlib.Path('research/intelligence_swarm/benchmarks/grounded_causal/R01_RUN_REQUEST.json').read_text())
+          audit = json.loads((results / 'SILG_RTFM_OFFICIAL_ONE_STEP_REPLAY_AUDIT.json').read_text())
+          checkpoint = torch.load(results / 'SILG_RTFM_OFFICIAL_JOB.tar', map_location='cpu')
+          required = {'model_state_dict', 'optimizer_state_dict', 'scheduler_state_dict', 'frames'}
+          missing = sorted(required - set(checkpoint))
+          target = request['official_reproduction_target']
+          qualification = request['qualification_run']
+          fixed = {
+              'model': target['model'] == 'multi',
+              'stateful': target['stateful'] is False,
+              'num_actors': target['num_actors'] == 30,
+              'num_threads': target['num_threads'] == 4,
+              'batch_size': target['batch_size'] == 24,
+              'unroll_length': target['unroll_length'] == 80,
+              'learning_rate': target['learning_rate'] == 0.0005,
+              'global_gradient_clip_norm': target['global_gradient_clip_norm'] == 40.0,
+              'pre_frames': audit.get('pre_frames') == qualification['initial_frames'],
+              'post_frames': audit.get('post_frames') == qualification['expected_post_frames'],
+              'gradient_exact': audit.get('gradient_exact') is True,
+              'frame_exact': audit.get('frame_exact') is True,
+          }
+          def digest(path):
+              return hashlib.sha256(path.read_bytes()).hexdigest()
+          payload = {
+              'qualified': audit.get('status') == 'accepted' and not missing and all(fixed.values()),
+              'classification': 'exact_one_step_resume_equivalence',
+              'capability_progress_claimed': False,
+              'public_baseline_reproduced': False,
+              'asynchronous_actor_queue_continuation_claimed': False,
+              'official_contract_checks': fixed,
+              'checkpoint_missing_keys': missing,
+              'checkpoint_frames': int(checkpoint.get('frames', -1)),
+              'checkpoint_bytes': (results / 'SILG_RTFM_OFFICIAL_JOB.tar').stat().st_size,
+              'checkpoint_sha256': digest(results / 'SILG_RTFM_OFFICIAL_JOB.tar'),
+              'pre_payload_bytes': (results / 'SILG_RTFM_OFFICIAL_ONE_STEP.pre.pt').stat().st_size,
+              'pre_payload_sha256': digest(results / 'SILG_RTFM_OFFICIAL_ONE_STEP.pre.pt'),
+              'post_payload_bytes': (results / 'SILG_RTFM_OFFICIAL_ONE_STEP.post.pt').stat().st_size,
+              'post_payload_sha256': digest(results / 'SILG_RTFM_OFFICIAL_ONE_STEP.post.pt'),
+              'post_gradient_sha256': audit.get('post_gradient_sha256'),
+              'next_gate': 'official 100M-frame three-seed R0.1 reproduction; this qualification alone is not capability evidence',
+          }
+          out = results / 'SILG_OFFICIAL_CHECKPOINT_RESUME_QUALIFICATION.json'
+          out.write_text(json.dumps(payload, indent=2, sort_keys=True) + '\n')
+          print(out.read_text())
+          if not payload['qualified']:
+              raise SystemExit(1)
+          PY
+
+      - name: Freeze reproducibility bundle
+        if: always()
+        run: |
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_resume"
+          python -m pip freeze | sort > "$results/SILG_OFFICIAL_CHECKPOINT_PIP_FREEZE.txt"
+          find "$results" -type f -printf '%P\t%s bytes\n' | sort > "$results/SILG_OFFICIAL_CHECKPOINT_FILE_SIZES.txt"
+          find "$results" -type f ! -name 'SILG_OFFICIAL_CHECKPOINT_SHA256SUMS.txt' -print0 \
+            | sort -z | xargs -0 sha256sum > "$results/SILG_OFFICIAL_CHECKPOINT_SHA256SUMS.txt" || true
+
+      - name: Upload immutable checkpoint qualification bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r01-silg-official-checkpoint-resume-${{ github.run_id }}
+          path: research/intelligence_swarm/benchmarks/grounded_causal/results_official_resume/
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,152 @@
+{
+  "status": "rejected",
+  "classification": "initial_reproduction_failure",
+  "failure_subclass": "optimization_or_policy_competence_failure",
+  "screening_factor": {
+    "name": "stateful",
+    "from": false,
+    "to": true,
+    "single_factor_screening": true,
+    "new_architecture": false,
+    "toy_hypothesis_added": false
+  },
+  "source_pins": {
+    "silg": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
+    "rtfm": "58f17955595b5a127c96d045d896fcbcc7d4b570"
+  },
+  "run": {
+    "github_actions_run_id": 30224057467,
+    "head_sha": "08a97304c85a94cf1b6193cf91ed8db84f8696be",
+    "artifact_id": 8638979275,
+    "artifact_name": "r01-silg-rtfm-stateful-30224057467",
+    "artifact_size_bytes": 91608547,
+    "artifact_sha256": "bcf559419475d86055d52169be01e36c8f0f052cc757a2efce66adce75ca0e96"
+  },
+  "fixed_conditions": {
+    "train_environment": "silg:rtfm_train_s1-v0",
+    "test_environment": "silg:rtfm_test_s1-v0",
+    "model": "official SILG multi recurrent",
+    "pretrained_language_model": false,
+    "seeds": [1, 7, 19],
+    "frames_requested_per_seed": 131072,
+    "frames_observed_per_seed": 131080,
+    "entropy_cost": 0.05,
+    "num_actors": 2,
+    "batch_size": 2,
+    "unroll_length": 20,
+    "same_instance_controls": [
+      "correct",
+      "random",
+      "language_blind",
+      "state_only",
+      "language_shuffle"
+    ]
+  },
+  "model_audit": {
+    "parameters": 6200115,
+    "trainable_parameters": 6200115,
+    "state_dict_bytes": 24828505,
+    "untrained_state_dict_sha256": "c8fc21780cd66a476a80829adf12f202123c3d1dbfaf4d9ec29aca662a5b0cc9",
+    "cpu_forward_latency_ms_per_step": 7.38107405
+  },
+  "training_resources": [
+    {
+      "seed": 1,
+      "wall_seconds": 1540.939252789,
+      "peak_rss_kib": 1037208,
+      "checkpoint_state_bytes": 24827943,
+      "checkpoint_state_sha256": "de6efada1f9638dfdff0fbde96fbc3675f0584c047ebac20b8d292885834ce28"
+    },
+    {
+      "seed": 7,
+      "wall_seconds": 1468.2759065660002,
+      "peak_rss_kib": 1168436,
+      "checkpoint_state_bytes": 24827943,
+      "checkpoint_state_sha256": "cf3278efc39567c7b7ff36bd57b00f06ab2d2388d7a775ca180b0794328d8f01"
+    },
+    {
+      "seed": 19,
+      "wall_seconds": 1481.6065715150003,
+      "peak_rss_kib": 879804,
+      "checkpoint_state_bytes": 24827943,
+      "checkpoint_state_sha256": "f4d73e5a76713d05424a2d1954f0e6454df769bbf9823677f711d6ee12f768e8"
+    }
+  ],
+  "matched_evaluation_60_episodes": {
+    "correct": {
+      "win_rate": 0.0,
+      "return_mean": -1.8936660865942636,
+      "episode_length_mean": 45.68333333333334,
+      "cpu_inference_ms_per_step": 7.766980860160057
+    },
+    "random": {
+      "win_rate": 0.06666666666666667,
+      "return_mean": -1.151333263516426,
+      "episode_length_mean": 15.233333333333334
+    },
+    "language_blind": {
+      "win_rate": 0.03333333333333333,
+      "return_mean": -1.8856660495201745
+    },
+    "state_only": {
+      "win_rate": 0.016666666666666666,
+      "return_mean": -1.9413326988617579
+    },
+    "language_shuffle": {
+      "win_rate": 0.0,
+      "return_mean": -1.842666119337082
+    },
+    "correct_minus_random_win_rate": -0.06666666666666667,
+    "correct_minus_random_return": -0.7423328230778377
+  },
+  "recurrent_diagnostics": {
+    "state_is_active": true,
+    "chosen_action_valid_fraction_all_seeds": 1.0,
+    "per_seed": [
+      {
+        "seed": 1,
+        "unique_actions_used": 4,
+        "masked_policy_entropy_mean": 1.23439365134017,
+        "recurrent_state_l2_before_mean": 1.5748945608174947,
+        "recurrent_state_l2_after_mean": 1.609023594709041
+      },
+      {
+        "seed": 7,
+        "unique_actions_used": 4,
+        "masked_policy_entropy_mean": 1.2439884468913078,
+        "recurrent_state_l2_before_mean": 1.4796255404047955,
+        "recurrent_state_l2_after_mean": 1.5212336272973292
+      },
+      {
+        "seed": 19,
+        "unique_actions_used": 2,
+        "masked_policy_entropy_mean": 1.3297321103728728,
+        "recurrent_state_l2_before_mean": 1.4252003636547688,
+        "recurrent_state_l2_after_mean": 1.4475339147237438
+      }
+    ]
+  },
+  "official_evaluation_parity": {
+    "official_continuous_stream_successes": 3,
+    "official_continuous_stream_episodes": 60,
+    "fresh_seeded_instance_successes": 0,
+    "fresh_seeded_instance_episodes": 60,
+    "interpretation": "stateful recurrent state is active and official continuous-stream evaluation yields isolated seed-1 successes, but the preregistered same-instance qualification remains below random"
+  },
+  "qualification": {
+    "qualified_for_r02": false,
+    "failures": [
+      "zero_source_policy_success",
+      "correct_not_above_random_win_rate",
+      "correct_not_above_random_return"
+    ]
+  },
+  "decision": {
+    "stateful_as_single_primary_cause": "rejected",
+    "reason": "enabling the official stateful flag activated nonzero recurrent dynamics but did not produce any correct-policy success in the matched evaluation and did not exceed random in win rate or return",
+    "next_minimal_diagnosis": "audit optimizer/checkpoint equivalence and official actor-batch-unroll training topology before changing any model or adding any mechanism",
+    "r02_started": false,
+    "capability_progress_claimed": false,
+    "new_intelligence_principle_claimed": false
+  }
+}

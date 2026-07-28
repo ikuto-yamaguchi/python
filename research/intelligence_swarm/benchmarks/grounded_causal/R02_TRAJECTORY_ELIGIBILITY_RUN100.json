@@ -1,0 +1,89 @@
+{
+  "status": "ineligible_public_trajectory_for_r02_capability_comparison",
+  "source_workflow_run": 30109823906,
+  "purpose": "guard environment-first comparison against failed or collapsed behavior-policy data",
+  "thresholds": {
+    "max_majority_action_share": 0.9,
+    "min_successful_train_episodes_per_seed": 5,
+    "min_actions_with_at_least_5pct_share": 2
+  },
+  "datasets": [
+    {
+      "seed": 1,
+      "sha256": "038d32fc6a74c7b550395e2a3780e7a8025e5cc11d96d51f8b9c4cf90f81e9c9",
+      "train": {
+        "rows": 2840,
+        "episodes": 40,
+        "successful_episodes": 0,
+        "success_rate": 0.0,
+        "action_counts": {"3": 1405, "4": 1435},
+        "action_entropy_bits": 0.9999195069,
+        "majority_action_share": 0.5052816901,
+        "active_actions_5pct": 2,
+        "unique_language_observations": 37
+      },
+      "test": {
+        "rows": 1380,
+        "episodes": 20,
+        "successful_episodes": 0,
+        "success_rate": 0.0,
+        "action_counts": {"3": 684, "4": 696},
+        "majority_action_share": 0.5043478261
+      }
+    },
+    {
+      "seed": 7,
+      "sha256": "ed84f4a59211ec42b1c34d248c843d8808b10a196aaf7e774f29969adfb225a6",
+      "train": {
+        "rows": 2368,
+        "episodes": 40,
+        "successful_episodes": 0,
+        "success_rate": 0.0,
+        "action_counts": {"0": 2307, "4": 61},
+        "action_entropy_bits": 0.1726616183,
+        "majority_action_share": 0.9742398649,
+        "active_actions_5pct": 1,
+        "unique_language_observations": 38
+      },
+      "test": {
+        "rows": 1303,
+        "episodes": 20,
+        "successful_episodes": 0,
+        "success_rate": 0.0,
+        "action_counts": {"0": 1274, "4": 29},
+        "majority_action_share": 0.9777436685
+      }
+    },
+    {
+      "seed": 19,
+      "sha256": "1e856b95b06fedf081b53b880b463da1613af6cda2bc32a78b81aca88096771b",
+      "train": {
+        "rows": 2378,
+        "episodes": 40,
+        "successful_episodes": 1,
+        "success_rate": 0.025,
+        "action_counts": {"1": 35, "3": 1157, "4": 1186},
+        "action_entropy_bits": 1.0958287287,
+        "majority_action_share": 0.4987384357,
+        "active_actions_5pct": 2,
+        "unique_language_observations": 37
+      },
+      "test": {
+        "rows": 1147,
+        "episodes": 20,
+        "successful_episodes": 0,
+        "success_rate": 0.0,
+        "action_counts": {"1": 18, "3": 556, "4": 573},
+        "majority_action_share": 0.4995640802
+      }
+    }
+  ],
+  "failures": [
+    {"seed": 1, "check": "insufficient_successful_train_episodes", "observed": 0, "required": 5},
+    {"seed": 7, "check": "behavior_policy_action_collapse", "observed": 0.9742398649, "limit": 0.9},
+    {"seed": 7, "check": "insufficient_successful_train_episodes", "observed": 0, "required": 5},
+    {"seed": 7, "check": "insufficient_action_support", "observed": 1, "required": 2},
+    {"seed": 19, "check": "insufficient_successful_train_episodes", "observed": 1, "required": 5}
+  ],
+  "r02_capability_claim_allowed": false
+}

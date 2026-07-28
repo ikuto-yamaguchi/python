@@ -1,0 +1,116 @@
+{
+  "schema_version": "r01_requalification_v1",
+  "benchmark": "SILG RTFM recurrent baseline",
+  "status": "rejected",
+  "classification": "optimization_or_policy_competence_failure",
+  "decision": "entropy_cost_0.005_as_single_cause_rejected",
+  "source_run": {
+    "run_id": 30215555334,
+    "artifact_id": 8636643017,
+    "artifact_name": "r01-silg-rtfm-entropy-0005-30215555334",
+    "artifact_digest": "sha256:094ba8d6fba428c15e1dfa43298f3af9943d9fae840a072a691d3f420c5bcec2"
+  },
+  "requalification_run": {
+    "run_id": 30219453396,
+    "job_id": 89839257839,
+    "head_sha": "74990d588208ee95d712326de8f061035a64a643",
+    "artifact_id": 8636783476,
+    "artifact_name": "r01-silg-rtfm-entropy-0005-requalification-30219453396",
+    "artifact_bytes": 72703849,
+    "artifact_digest": "sha256:f752a62497362a38aeda76e3917210d1eb6eb31903743f7ee08232fc75104f12"
+  },
+  "fixed_conditions": {
+    "silg_commit": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
+    "rtfm_commit": "58f17955595b5a127c96d045d896fcbcc7d4b570",
+    "train_environment": "silg:rtfm_train_s1-v0",
+    "test_environment": "silg:rtfm_test_s1-v0",
+    "model": "official SILG multi recurrent",
+    "pretrained_language_model": false,
+    "entropy_cost": 0.005,
+    "requested_frames": 131072,
+    "actual_frames_per_seed": 131080,
+    "seeds": [1, 7, 19],
+    "same_instance_controls": [
+      "correct",
+      "random",
+      "language_blind",
+      "state_only",
+      "language_shuffle"
+    ]
+  },
+  "matched_evaluation": {
+    "episodes_total_per_condition": 60,
+    "correct_win_rate": 0.0,
+    "random_win_rate": 0.06666666666666667,
+    "language_blind_win_rate": 0.03333333333333333,
+    "state_only_win_rate": 0.0,
+    "language_shuffle_win_rate": 0.0,
+    "correct_return_mean": -2.152332578102748,
+    "random_return_mean": -1.151333263516426,
+    "correct_minus_random_win_rate": -0.06666666666666667,
+    "correct_minus_random_return": -1.0009993145863219
+  },
+  "official_eval_parity": {
+    "status": "success",
+    "official_reference": "run_exp.py:test",
+    "episodes_per_protocol_seed": 20,
+    "aggregate_protocol_gap": {
+      "win_rate": 0.016666666666666666,
+      "return_mean": 0.08466662863890344,
+      "episode_length_mean": -2.5666666666666678
+    },
+    "per_seed": [
+      {
+        "seed": 1,
+        "official_win_rate": 0.0,
+        "official_return_mean": -2.0459993183612823,
+        "fresh_instance_win_rate": 0.0,
+        "fresh_instance_return_mean": -2.1219992637634277
+      },
+      {
+        "seed": 7,
+        "official_win_rate": 0.0,
+        "official_return_mean": -2.359999108314514,
+        "fresh_instance_win_rate": 0.0,
+        "fresh_instance_return_mean": -2.2059992074966432
+      },
+      {
+        "seed": 19,
+        "official_win_rate": 0.05,
+        "official_return_mean": -1.8729993671178817,
+        "fresh_instance_win_rate": 0.0,
+        "fresh_instance_return_mean": -2.2049992084503174
+      }
+    ],
+    "interpretation": "The corrected official continuous-stream protocol does not recover a competent policy. The evaluation protocol gap is too small and inconsistent across seeds to explain the reproduction failure."
+  },
+  "qualification": {
+    "qualified_for_r02": false,
+    "failures": [
+      "zero_source_policy_success",
+      "correct_not_above_random_win_rate",
+      "correct_not_above_random_return"
+    ]
+  },
+  "cause_disposition": {
+    "candidate": "entropy_cost_0.05_to_0.005",
+    "result": "rejected_as_sufficient_single_cause",
+    "basis": "The factor reached all three training commands, the corrected official evaluation completed, and Correct remained below Random in both win rate and mean return."
+  },
+  "next_minimal_diagnosis": {
+    "scope": "official recurrent training fidelity only",
+    "allowed_candidates": [
+      "recurrent_state_reset_or_detach_mismatch",
+      "optimizer_or_checkpoint_restore_mismatch",
+      "official_actor_batch_unroll_default_mismatch"
+    ],
+    "constraint": "Change and retest one diagnosed cause only; keep source pins, model family, seeds, split, frame budget and matched instances fixed."
+  },
+  "claims": {
+    "public_baseline_reproduced": false,
+    "new_architecture": false,
+    "new_toy_hypothesis": false,
+    "new_intelligence_principle": false,
+    "capability_progress": false
+  }
+}

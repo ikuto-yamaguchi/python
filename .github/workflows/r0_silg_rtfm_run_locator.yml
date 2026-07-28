@@ -1,0 +1,125 @@
+name: R0 SILG push-run locator
+
+on:
+  pull_request:
+    branches:
+      - research/intelligence-swarm-governance-014
+    paths:
+      - '.github/workflows/r0_silg_rtfm_run_locator.yml'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/R01_RUN_REQUEST.json'
+      - '.github/workflows/r0_silg_rtfm_probe.yml'
+      - '.github/workflows/r01_silg_entropy_screening.yml'
+      - '.github/workflows/r01_silg_entropy_requalify.yml'
+      - '.github/workflows/r01_silg_stateful_screening.yml'
+      - '.github/workflows/r01_silg_unroll80_screening.yml'
+      - '.github/workflows/r01_silg_learning_rate_screening.yml'
+      - '.github/workflows/r01_silg_gradient_clip_screening.yml'
+      - '.github/workflows/r01_silg_official_infrastructure_qualification.yml'
+      - '.github/workflows/r01_silg_official_checkpoint_resume_qualification.yml'
+      - '.github/workflows/r01_silg_official_100m_chunk.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  locate-latest-push-runs:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: canonical
+            workflow: r0_silg_rtfm_probe.yml
+          - label: entropy-0005
+            workflow: r01_silg_entropy_screening.yml
+          - label: entropy-0005-requalification
+            workflow: r01_silg_entropy_requalify.yml
+          - label: stateful
+            workflow: r01_silg_stateful_screening.yml
+          - label: unroll80
+            workflow: r01_silg_unroll80_screening.yml
+          - label: learning-rate-0001
+            workflow: r01_silg_learning_rate_screening.yml
+          - label: gradient-clip-10
+            workflow: r01_silg_gradient_clip_screening.yml
+          - label: official-infrastructure
+            workflow: r01_silg_official_infrastructure_qualification.yml
+          - label: checkpoint-resume
+            workflow: r01_silg_official_checkpoint_resume_qualification.yml
+          - label: official-100m-seed1
+            workflow: r01_silg_official_100m_chunk.yml
+    steps:
+      - name: Query latest ${{ matrix.label }} push run, jobs, and artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BRANCH: research/intelligence-swarm-reconstruction-001
+          WORKFLOW: ${{ matrix.workflow }}
+          LABEL: ${{ matrix.label }}
+        run: |
+          set -euo pipefail
+          prefix="r0_silg_${LABEL}"
+          gh api --method GET \
+            -H 'Accept: application/vnd.github+json' \
+            "/repos/${REPO}/actions/workflows/${WORKFLOW}/runs" \
+            -f branch="${BRANCH}" -f event=push -f per_page=10 \
+            > "${prefix}_push_runs.json"
+          PREFIX="${prefix}" python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          prefix = os.environ['PREFIX']
+          payload = json.loads(Path(f'{prefix}_push_runs.json').read_text(encoding='utf-8'))
+          runs = payload.get('workflow_runs', [])
+          summary = [
+              {
+                  'id': run.get('id'),
+                  'run_number': run.get('run_number'),
+                  'status': run.get('status'),
+                  'conclusion': run.get('conclusion'),
+                  'event': run.get('event'),
+                  'head_sha': run.get('head_sha'),
+                  'created_at': run.get('created_at'),
+                  'updated_at': run.get('updated_at'),
+                  'html_url': run.get('html_url'),
+              }
+              for run in runs
+          ]
+          Path(f'{prefix}_push_run_summary.json').write_text(
+              json.dumps(summary, ensure_ascii=False, indent=2) + '\n',
+              encoding='utf-8',
+          )
+          print(json.dumps(summary, ensure_ascii=False, indent=2))
+          if not summary:
+              raise SystemExit(f'No push-triggered run was found for {prefix}')
+          print(f'LATEST_PUSH_RUN_ID={summary[0]["id"]}')
+          PY
+          latest_id=$(PREFIX="${prefix}" python -c "import json, os; print(json.load(open(os.environ['PREFIX'] + '_push_run_summary.json'))[0]['id'])")
+          gh api --method GET \
+            -H 'Accept: application/vnd.github+json' \
+            "/repos/${REPO}/actions/runs/${latest_id}/jobs" \
+            > "${prefix}_latest_jobs.json"
+          gh api --method GET \
+            -H 'Accept: application/vnd.github+json' \
+            "/repos/${REPO}/actions/runs/${latest_id}/artifacts" \
+            > "${prefix}_latest_artifacts.json"
+          PREFIX="${prefix}" python - <<'PY'
+          import json
+          import os
+          prefix = os.environ['PREFIX']
+          for path in (f'{prefix}_latest_jobs.json', f'{prefix}_latest_artifacts.json'):
+              print(f'--- {path} ---')
+              print(json.dumps(json.load(open(path)), ensure_ascii=False, indent=2))
+          PY
+      - name: Upload locator evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r0-silg-${{ matrix.label }}-run-locator-${{ github.run_id }}
+          path: r0_silg_${{ matrix.label }}_*.json
+          if-no-files-found: warn
+          retention-days: 30

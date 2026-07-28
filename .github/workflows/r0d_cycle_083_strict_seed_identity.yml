@@ -1,0 +1,66 @@
+name: R0-D Cycle 083 strict seed identity
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/apply_r0d_cycle_083_strict_seed_identity.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_strict_seed_identity_cycle_083.py'
+      - '.github/workflows/r0d_cycle_083_strict_seed_identity.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: r0d-cycle-083-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  patch-test-commit:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/intelligence-swarm-reconstruction-001
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Apply strict seed identity patch
+        run: python research/intelligence_swarm/benchmarks/grounded_causal/apply_r0d_cycle_083_strict_seed_identity.py
+      - name: Compile core and regression
+        run: |
+          python -m py_compile \
+            research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_strict_seed_identity_cycle_083.py
+      - name: Run focused regression
+        run: python research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_strict_seed_identity_cycle_083.py
+      - name: Write immutable audit report
+        run: |
+          cat > research/intelligence_swarm/governance/REPORT_R0D_CYCLE_083.md <<'EOF'
+          # R0-D Cycle 083 — strict seed identity
+
+          `evaluation_contract.py` previously used `int(seed)`, which silently accepted
+          booleans, integral/non-integral floats, and numeric strings as canonical seeds.
+          This allowed malformed dataset, statistics, resource-manifest, and raw-log cells
+          to alias canonical seeds 1/7/19.
+
+          Cycle 083 requires an actual JSON integer (`int`, excluding `bool`) everywhere:
+          dataset topology, scoring cells, fingerprints, artifact cells, and raw-log binding.
+          Float/string/Unicode-width aliases are rejected fail-closed. Invalid bundles remain
+          `initial_reproduction_failure`; no memory, replay, fast-weight, sleep, or forgetting
+          mechanism was introduced.
+          EOF
+      - name: Commit to the canonical branch only
+        run: |
+          if git diff --quiet -- research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py research/intelligence_swarm/governance/REPORT_R0D_CYCLE_083.md; then
+            echo 'No core change to commit.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py research/intelligence_swarm/governance/REPORT_R0D_CYCLE_083.md
+          git commit -m 'research: enforce strict R0 seed identity (Cycle 083)'
+          git push origin HEAD:research/intelligence-swarm-reconstruction-001

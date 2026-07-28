@@ -1,0 +1,39 @@
+name: R0D core normalized cell identity
+
+on:
+  pull_request:
+    branches:
+      - research/intelligence-swarm-governance-014
+    paths:
+      - "research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py"
+      - "research/intelligence_swarm/benchmarks/grounded_causal/apply_r0d_cycle_073_core_normalized_cell_identity.py"
+      - "research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_normalized_cell_identity_core.py"
+      - ".github/workflows/r0d_cycle_072_core_normalized_cell_identity.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-normalized-cell-identity:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify core patch is already integrated
+        run: |
+          python research/intelligence_swarm/benchmarks/grounded_causal/apply_r0d_cycle_073_core_normalized_cell_identity.py
+          git diff --exit-code -- research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
+      - name: Compile core, patch and regression
+        run: |
+          python -m py_compile research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
+          python -m py_compile research/intelligence_swarm/benchmarks/grounded_causal/apply_r0d_cycle_073_core_normalized_cell_identity.py
+          python -m py_compile research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_normalized_cell_identity_core.py
+      - name: Run focused fail-closed regressions
+        run: python research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_normalized_cell_identity_core.py

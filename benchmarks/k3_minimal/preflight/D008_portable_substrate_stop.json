@@ -1,0 +1,62 @@
+{
+  "run_id": "D008",
+  "date": "2026-07-29",
+  "classification": "SUBSTRATE_STOP",
+  "candidate": "Block Attention Residuals PB1 minimum semantic/effect-direction pilot",
+  "scientific_source_commit": "9edf4c7143ff1d62685ed893352df7a32090fe1e",
+  "canonical_branch": "research/intelligence-swarm-reconstruction-001",
+  "environment_only": true,
+  "authorizations": {
+    "model_execution": false,
+    "semantic_trace": false,
+    "training": false,
+    "dataset_download": false,
+    "tokenizer_download": false,
+    "checkpoint_download": false,
+    "quantization": false,
+    "automatic_next_stage": false
+  },
+  "observed_substrate": {
+    "python_version": "3.13.5",
+    "python_3_11_available": false,
+    "os": "Linux x86_64",
+    "cpu": "AMD EPYC 9V74 virtualized CPU",
+    "visible_cpus": 5,
+    "git_version": "2.47.3",
+    "github_dns_resolution": "failed",
+    "git_clone_result": "fatal: unable to access https://github.com/ikuto-yamaguchi/python.git/: Could not resolve host: github.com",
+    "artifact_persistence": "repository writes available through connector, but no compliant execution substrate with source and dependency network access"
+  },
+  "missing_requirements": [
+    "Python 3.11.x executable",
+    "network or offline Git bundle containing canonical ref and scientific source commit",
+    "network package-index access or a complete hashed offline wheelhouse for exact CPU dependencies",
+    "ability to execute the C007 portable gate on the same substrate that owns the immutable source and dependency artifacts"
+  ],
+  "checks_performed": [
+    "python3 --version",
+    "command -v python3.11",
+    "git --version",
+    "uname -a",
+    "lscpu",
+    "git clone --filter=blob:none --no-checkout https://github.com/ikuto-yamaguchi/python.git"
+  ],
+  "replay_commands": [
+    "python3 --version; command -v python3.11 || true; git --version; uname -a; lscpu",
+    "git clone --filter=blob:none --no-checkout https://github.com/ikuto-yamaguchi/python.git /tmp/k3repo"
+  ],
+  "scientific_interpretation": {
+    "block_attnres_rejected": false,
+    "pb1_rejected": false,
+    "quality_evidence": false,
+    "resource_evidence": false,
+    "dependency_path_evidence": false,
+    "reason": "The stop is caused by unavailable execution substrate capabilities before exact source/dependency/import evaluation."
+  },
+  "next_identifiable_experiment": {
+    "required": "Run the already-preregistered C007 command once on an externally supplied Python 3.11 CPU substrate with either online Git/package access or a complete hashed offline Git bundle and wheelhouse.",
+    "new_architecture_allowed": false,
+    "new_preregistration_required": false,
+    "repeat_substrate_audit_allowed": false
+  }
+}

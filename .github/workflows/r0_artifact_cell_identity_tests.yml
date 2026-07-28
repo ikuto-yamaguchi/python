@@ -1,0 +1,29 @@
+name: R0 artifact cell identity tests
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - '.github/workflows/r0_artifact_cell_identity_tests.yml'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_artifact_cell_identity.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_audit_artifact_cell_identity.py'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile auditor
+        run: |
+          python -m py_compile \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_artifact_cell_identity.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/test_audit_artifact_cell_identity.py
+      - name: Run matched-cell provenance tests
+        run: |
+          python research/intelligence_swarm/benchmarks/grounded_causal/test_audit_artifact_cell_identity.py

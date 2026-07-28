@@ -1,0 +1,64 @@
+schema_version: 1
+id: C003_d003_gha_environment_gate
+status: authorized_environment_only
+branch: research/intelligence-swarm-reconstruction-001
+trigger: workflow_dispatch
+runner:
+  provider: github_hosted
+  os: linux
+  architecture: x86_64
+  timeout_minutes: 30
+python:
+  version: "3.11.x"
+source:
+  candidate_repository: wdlctc/open-attention-residuals
+  candidate_commit: 83d2b8de82c2fbb981c7decca67d13d9db348da6
+  official_repository: MoonshotAI/Attention-Residuals
+  official_commit: 85e22310fe5ee860b4a023de312d791de8a5a5e6
+  transformers_commit: 42791a34fdeae197f60f11ace3807c81f44b0729
+  require_clean_tree: true
+  require_sha256: true
+dependency_lock:
+  exact_pytorch_cpu_build: required
+  exact_tokenizers_build: required
+  resolver_report: required
+  pip_freeze_all: required
+  dependency_hashes: required
+  initial_cache_disabled: true
+required_imports:
+  - create_causal_mask
+  - GradientCheckpointingLayer
+  - merge_with_config_defaults
+  - capture_outputs
+  - qwen3_internal_classes
+  - candidate_modeling_module
+compatibility_patch:
+  max_count: 1
+  import_wiring_only: true
+  semantic_change_forbidden: true
+authorization:
+  allowed: [checkout, dependency_resolution, import_probe, provenance_capture, artifact_hashing]
+  forbidden: [model_execution, data_acquisition, optimization, training, benchmarking, quantization, architecture_change]
+stages:
+  environment:
+    pass_label: ENV_PASS
+  model:
+    automatic: false
+    requires_environment_artifact_sha: true
+    requires_manifest: C004_d003_variant_semantic_trace
+classification:
+  retry: transient_network_or_runner_failure
+  path_stop: fixed_runtime_unavailable_after_one_allowed_patch
+  protocol_fail: branch_hash_or_authorization_violation
+artifacts_required:
+  - run-context.json
+  - repository-provenance.json
+  - python-environment.json
+  - resolver-report.json
+  - pip-freeze.txt
+  - dependency-checksums.sha256
+  - required-imports.json
+  - source-and-patch.json
+  - raw-logs
+  - D003_GHA_environment_summary.json
+  - checksums.sha256

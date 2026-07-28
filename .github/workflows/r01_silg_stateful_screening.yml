@@ -1,0 +1,161 @@
+name: R0.1 SILG official stateful screening
+# R01-SCREEN-003-E062 explicit push activation; no experimental setting changed.
+run-name: R0.1 SILG stateful=true @ ${{ github.sha }}
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - '.github/workflows/r01_silg_stateful_screening.yml'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/R01_RUN_REQUEST.json'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/patch_silg_stateful_screening.py'
+  workflow_dispatch:
+
+concurrency:
+  group: r01-silg-stateful-screening-${{ github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  stateful-screening:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+          cache: pip
+      - name: Record immutable provenance
+        run: |
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_stateful"
+          mkdir -p "$results"
+          {
+            echo "screening_factor=stateful"
+            echo "screening_value=true"
+            echo "fixed_reference_value=false"
+            echo "reference_run_id=30203026269"
+            echo "reference_artifact_id=8633105142"
+            echo "github_run_id=${GITHUB_RUN_ID}"
+            echo "github_sha=${GITHUB_SHA}"
+            git rev-parse HEAD
+            git status --short
+            date -u
+            uname -a
+            lscpu
+            free -h
+            python --version
+          } | tee "$results/SILG_RTFM_HOST.txt"
+      - name: Install pinned SILG and RTFM
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_stateful"
+          /usr/bin/time -v bash research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh "$RUNNER_TEMP/r0_silg" \
+            2>&1 | tee "$results/SILG_RTFM_INSTALL.log"
+      - name: Apply and freeze official stateful harness patch
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_stateful"
+          python research/intelligence_swarm/benchmarks/grounded_causal/patch_silg_stateful_screening.py \
+            2>&1 | tee "$results/SILG_RTFM_STATEFUL_PATCH.log"
+          cp research/intelligence_swarm/benchmarks/grounded_causal/SILG_STATEFUL_HARNESS_PATCH.json "$results/"
+      - name: Verify generator schema
+        run: python research/intelligence_swarm/benchmarks/grounded_causal/test_export_rtfm_generator_signatures.py
+      - name: Run canonical random control and schema probe
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_stateful"
+          /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/silg_rtfm_probe.py \
+            --env silg:rtfm_train_s1-v0 --seeds 1 7 19 --episodes 20 --max-steps 80 \
+            --output "$results/SILG_RTFM_RANDOM_CANONICAL_3SEED.json" \
+            2>&1 | tee "$results/SILG_RTFM_RANDOM_CANONICAL.log"
+      - name: Train official multi with stateful LSTM core
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_stateful"
+          /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" --seeds 1 7 19 --frames 131072 \
+            --entropy-cost 0.05 --output "$results" \
+            2>&1 | tee "$results/SILG_RTFM_RECURRENT_SMOKE.log"
+      - name: Verify stateful factor reached commands and checkpoints
+        run: |
+          python - <<'PY'
+          import json, torch
+          from pathlib import Path
+          r = Path('research/intelligence_swarm/benchmarks/grounded_causal/results_stateful')
+          d = json.loads((r/'SILG_RTFM_RECURRENT_SMOKE_3SEED.json').read_text())
+          assert [x['seed'] for x in d['runs']] == [1, 7, 19]
+          for x in d['runs']:
+              cmd = [str(v) for v in x['command']]
+              assert '--stateful' in cmd, cmd
+              assert x['checkpoint']['frames_in_checkpoint'] >= 131072
+              sd = torch.load(r/f"SILG_RTFM_TRAINED_STATE_SEED_{x['seed']}.pt", map_location='cpu')
+              core = sorted(k for k in sd if k.startswith('core.'))
+              assert core, f"seed {x['seed']} checkpoint lacks LSTM core weights"
+          print('verified stateful=true and recurrent core weights for all seeds')
+          PY
+      - name: Evaluate matched controls on identical instances
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_stateful"
+          /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/run_silg_matched_eval.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" --results "$results" --seeds 1 7 19 --episodes 20 \
+            2>&1 | tee "$results/SILG_RTFM_MATCHED_EVAL.log"
+      - name: Diagnose policy and recurrent dynamics
+        if: always()
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_stateful"
+          python research/intelligence_swarm/benchmarks/grounded_causal/run_silg_policy_diagnostics.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" --results "$results" --seeds 1 7 19 --episodes 20 \
+            --out "$results/SILG_RTFM_POLICY_DIAGNOSTICS_3SEED.json" \
+            2>&1 | tee "$results/SILG_RTFM_POLICY_DIAGNOSTICS.log"
+      - name: Verify recurrent state is active
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('research/intelligence_swarm/benchmarks/grounded_causal/results_stateful/SILG_RTFM_POLICY_DIAGNOSTICS_3SEED.json')
+          d=json.loads(p.read_text())
+          for run in d['runs']:
+              assert run['recurrent_state_l2_after_mean'] > 0.0, run
+          print('verified non-zero recurrent state for all seeds')
+          PY
+      - name: Compare official and matched evaluation semantics
+        if: always()
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_stateful"
+          python research/intelligence_swarm/benchmarks/grounded_causal/audit_silg_official_eval_parity.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" --results "$results" --seeds 1 7 19 --episodes 20 \
+            --out "$results/SILG_RTFM_OFFICIAL_EVAL_PARITY_3SEED.json" \
+            2>&1 | tee "$results/SILG_RTFM_OFFICIAL_EVAL_PARITY.log"
+      - name: Apply unchanged R0.1 qualification gate
+        if: always()
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_stateful"
+          python research/intelligence_swarm/benchmarks/grounded_causal/qualify_r01_source_policy.py \
+            --training "$results/SILG_RTFM_RECURRENT_SMOKE_3SEED.json" \
+            --matched "$results/SILG_RTFM_MATCHED_EVAL_3SEED.json" \
+            --output "$results/SILG_RTFM_R01_QUALIFICATION.json" \
+            2>&1 | tee "$results/SILG_RTFM_R01_QUALIFICATION.log"
+      - name: Freeze logs dependencies sizes and checksums
+        if: always()
+        run: |
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_stateful"
+          python -m pip freeze | sort > "$results/SILG_RTFM_R01_PIP_FREEZE.txt"
+          find "$results" -maxdepth 1 -type f -printf '%f %s bytes\n' | sort > "$results/SILG_RTFM_R01_FILE_SIZES.txt"
+          sha256sum "$results"/* > "$results/SILG_RTFM_R01_SHA256SUMS.txt" || true
+      - name: Upload immutable stateful screening bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r01-silg-rtfm-stateful-${{ github.run_id }}
+          path: research/intelligence_swarm/benchmarks/grounded_causal/results_stateful/
+          if-no-files-found: error
+          retention-days: 30

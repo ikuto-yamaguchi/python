@@ -1,0 +1,35 @@
+{
+  "source_artifact_id": 8644560521,
+  "source_run_id": 30240410850,
+  "classification": "learner_variance_diagnostic_only",
+  "seeds": {
+    "1": {
+      "total_loss": {"n": 291, "mean": 5.887884911802626, "stdev": 28.226018312771274, "min": -40.33382034301758, "max": 110.44703674316406, "sign_changes": 161},
+      "pg_loss": {"n": 291, "mean": 5.42006925183678, "stdev": 23.82688625770354, "min": -36.94667434692383, "max": 92.81654357910156, "sign_changes": 159},
+      "baseline_loss": {"n": 291, "mean": 5.991277781587184, "stdev": 4.8404735962158165, "min": 0.04317423328757286, "max": 25.966598510742188, "sign_changes": 0},
+      "entropy_loss": {"n": 291, "mean": -5.523462025160642, "stdev": 0.14609115305450068, "min": -5.809131145477295, "max": -4.355216979980469, "sign_changes": 0},
+      "last_frame": 131200
+    },
+    "7": {
+      "total_loss": {"n": 299, "mean": 3.552486768135658, "stdev": 27.45649741574211, "min": -62.343544006347656, "max": 93.09799194335938, "sign_changes": 146},
+      "pg_loss": {"n": 299, "mean": 2.941900192295827, "stdev": 23.627521821642777, "min": -67.14603424072266, "max": 77.5759048461914, "sign_changes": 142},
+      "baseline_loss": {"n": 299, "mean": 6.146483034792553, "stdev": 4.367528823789276, "min": 0.10572578012943268, "max": 23.579952239990234, "sign_changes": 0},
+      "entropy_loss": {"n": 299, "mean": -5.535896577165278, "stdev": 0.14868717904625336, "min": -5.825983047485352, "max": -4.189667701721191, "sign_changes": 0},
+      "last_frame": 131200
+    },
+    "19": {
+      "total_loss": {"n": 305, "mean": 4.277284658150594, "stdev": 28.756424576023022, "min": -49.630775451660156, "max": 93.18916320800781, "sign_changes": 160},
+      "pg_loss": {"n": 305, "mean": 3.751783777553527, "stdev": 24.509035864380156, "min": -49.8758544921875, "max": 77.24891662597656, "sign_changes": 156},
+      "baseline_loss": {"n": 305, "mean": 6.061618145420903, "stdev": 4.67732788188517, "min": 0.16288602352142334, "max": 23.184738159179688, "sign_changes": 0},
+      "entropy_loss": {"n": 305, "mean": -5.536117325454462, "stdev": 0.08722856366176146, "min": -5.80659818649292, "max": -5.290811061859131, "sign_changes": 0},
+      "last_frame": 131200
+    }
+  },
+  "interpretation": [
+    "All three seeds show large policy-gradient and total-loss oscillations with repeated sign changes.",
+    "Clip 10.0 did not establish competence; Correct remained below Random and matched language-shuffle.",
+    "The existing artifact cannot adjudicate optimizer restore because official job.tar files were not preserved.",
+    "Do not select another optimizer factor from loss magnitude alone; preserve and audit checkpoint/optimizer state in the next independently justified performance run.",
+    "The largest remaining official-default mismatch is sampling scale (actors/batch), but it must be preregistered as one factor and resource-feasibility checked before dispatch."
+  ]
+}

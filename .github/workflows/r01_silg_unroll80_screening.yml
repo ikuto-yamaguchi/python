@@ -1,0 +1,170 @@
+name: R0.1 SILG official unroll-80 screening
+run-name: R0.1 SILG stateful=true unroll=80 @ ${{ github.sha }}
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - '.github/workflows/r01_silg_unroll80_screening.yml'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/R01_RUN_REQUEST.json'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/patch_silg_stateful_screening.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/patch_silg_unroll80_screening.py'
+  workflow_dispatch:
+
+concurrency:
+  group: r01-silg-unroll80-screening-${{ github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  unroll80-screening:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+          cache: pip
+      - name: Record immutable provenance
+        run: |
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_unroll80"
+          mkdir -p "$results"
+          {
+            echo "screening_factor=unroll_length"
+            echo "screening_value=80"
+            echo "fixed_reference_value=20"
+            echo "stateful=true"
+            echo "reference_run_id=30221587227"
+            echo "reference_artifact_id=8638198496"
+            echo "github_run_id=${GITHUB_RUN_ID}"
+            echo "github_sha=${GITHUB_SHA}"
+            git rev-parse HEAD
+            git status --short
+            date -u
+            uname -a
+            lscpu
+            free -h
+            python --version
+          } | tee "$results/SILG_RTFM_HOST.txt"
+      - name: Install pinned SILG and RTFM
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_unroll80"
+          /usr/bin/time -v bash research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh "$RUNNER_TEMP/r0_silg" \
+            2>&1 | tee "$results/SILG_RTFM_INSTALL.log"
+      - name: Apply and freeze official stateful harness patch
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_unroll80"
+          python research/intelligence_swarm/benchmarks/grounded_causal/patch_silg_stateful_screening.py \
+            2>&1 | tee "$results/SILG_RTFM_STATEFUL_PATCH.log"
+          cp research/intelligence_swarm/benchmarks/grounded_causal/SILG_STATEFUL_HARNESS_PATCH.json "$results/"
+      - name: Apply and freeze official unroll-80 patch
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_unroll80"
+          python research/intelligence_swarm/benchmarks/grounded_causal/patch_silg_unroll80_screening.py \
+            2>&1 | tee "$results/SILG_RTFM_UNROLL80_PATCH.log"
+          cp research/intelligence_swarm/benchmarks/grounded_causal/SILG_UNROLL80_HARNESS_PATCH.json "$results/"
+      - name: Verify generator schema
+        run: python research/intelligence_swarm/benchmarks/grounded_causal/test_export_rtfm_generator_signatures.py
+      - name: Run canonical random control and schema probe
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_unroll80"
+          /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/silg_rtfm_probe.py \
+            --env silg:rtfm_train_s1-v0 --seeds 1 7 19 --episodes 20 --max-steps 80 \
+            --output "$results/SILG_RTFM_RANDOM_CANONICAL_3SEED.json" \
+            2>&1 | tee "$results/SILG_RTFM_RANDOM_CANONICAL.log"
+      - name: Train official stateful multi with unroll 80
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_unroll80"
+          /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/run_silg_recurrent_smoke.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" --seeds 1 7 19 --frames 131072 \
+            --entropy-cost 0.05 --output "$results" \
+            2>&1 | tee "$results/SILG_RTFM_RECURRENT_SMOKE.log"
+      - name: Verify single factor reached commands and checkpoints
+        run: |
+          python - <<'PY'
+          import json, torch
+          from pathlib import Path
+          r = Path('research/intelligence_swarm/benchmarks/grounded_causal/results_unroll80')
+          d = json.loads((r/'SILG_RTFM_RECURRENT_SMOKE_3SEED.json').read_text())
+          assert [x['seed'] for x in d['runs']] == [1, 7, 19]
+          for x in d['runs']:
+              cmd = [str(v) for v in x['command']]
+              assert '--stateful' in cmd, cmd
+              i = cmd.index('--unroll_length')
+              assert cmd[i+1] == '80', cmd
+              assert x['checkpoint']['frames_in_checkpoint'] >= 131072
+              sd = torch.load(r/f"SILG_RTFM_TRAINED_STATE_SEED_{x['seed']}.pt", map_location='cpu')
+              assert any(k.startswith('core.') for k in sd), f"seed {x['seed']} lacks LSTM core"
+          print('verified stateful=true and unroll_length=80 for all seeds')
+          PY
+      - name: Evaluate matched controls on identical instances
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_unroll80"
+          /usr/bin/time -v python research/intelligence_swarm/benchmarks/grounded_causal/run_silg_matched_eval.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" --results "$results" --seeds 1 7 19 --episodes 20 \
+            2>&1 | tee "$results/SILG_RTFM_MATCHED_EVAL.log"
+      - name: Diagnose policy and recurrent dynamics
+        if: always()
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_unroll80"
+          python research/intelligence_swarm/benchmarks/grounded_causal/run_silg_policy_diagnostics.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" --results "$results" --seeds 1 7 19 --episodes 20 \
+            --out "$results/SILG_RTFM_POLICY_DIAGNOSTICS_3SEED.json" \
+            2>&1 | tee "$results/SILG_RTFM_POLICY_DIAGNOSTICS.log"
+      - name: Verify recurrent state is active
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('research/intelligence_swarm/benchmarks/grounded_causal/results_unroll80/SILG_RTFM_POLICY_DIAGNOSTICS_3SEED.json')
+          d=json.loads(p.read_text())
+          for run in d['runs']:
+              assert run['recurrent_state_l2_after_mean'] > 0.0, run
+          print('verified non-zero recurrent state for all seeds')
+          PY
+      - name: Compare official and matched evaluation semantics
+        if: always()
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_unroll80"
+          python research/intelligence_swarm/benchmarks/grounded_causal/audit_silg_official_eval_parity.py \
+            --silg-root "$RUNNER_TEMP/r0_silg/silg" --results "$results" --seeds 1 7 19 --episodes 20 \
+            --out "$results/SILG_RTFM_OFFICIAL_EVAL_PARITY_3SEED.json" \
+            2>&1 | tee "$results/SILG_RTFM_OFFICIAL_EVAL_PARITY.log"
+      - name: Apply unchanged R0.1 qualification gate
+        if: always()
+        run: |
+          set -o pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_unroll80"
+          python research/intelligence_swarm/benchmarks/grounded_causal/qualify_r01_source_policy.py \
+            --training "$results/SILG_RTFM_RECURRENT_SMOKE_3SEED.json" \
+            --matched "$results/SILG_RTFM_MATCHED_EVAL_3SEED.json" \
+            --output "$results/SILG_RTFM_R01_QUALIFICATION.json" \
+            2>&1 | tee "$results/SILG_RTFM_R01_QUALIFICATION.log"
+      - name: Freeze logs dependencies sizes and checksums
+        if: always()
+        run: |
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_unroll80"
+          python -m pip freeze | sort > "$results/SILG_RTFM_R01_PIP_FREEZE.txt"
+          find "$results" -maxdepth 1 -type f -printf '%f %s bytes\n' | sort > "$results/SILG_RTFM_R01_FILE_SIZES.txt"
+          sha256sum "$results"/* > "$results/SILG_RTFM_R01_SHA256SUMS.txt" || true
+      - name: Upload immutable unroll-80 screening bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r01-silg-rtfm-unroll80-${{ github.run_id }}
+          path: research/intelligence_swarm/benchmarks/grounded_causal/results_unroll80/
+          if-no-files-found: error
+          retention-days: 30

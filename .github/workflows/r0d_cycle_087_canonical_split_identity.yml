@@ -1,0 +1,42 @@
+name: R0-D Cycle 087 canonical split identity
+
+on:
+  pull_request:
+    paths:
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py'
+      - 'research/intelligence_swarm/governance/apply_r0d_cycle_087_core_canonical_split_identity.py'
+      - 'research/intelligence_swarm/governance/test_evaluation_contract_canonical_split_identity_cycle_087.py'
+      - '.github/workflows/r0d_cycle_087_canonical_split_identity.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  canonical-split-identity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/intelligence-swarm-reconstruction-001
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Apply core hardening
+        run: python3 research/intelligence_swarm/governance/apply_r0d_cycle_087_core_canonical_split_identity.py
+      - name: Compile
+        run: python3 -m py_compile research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py research/intelligence_swarm/governance/test_evaluation_contract_canonical_split_identity_cycle_087.py
+      - name: Focused regression
+        run: python3 research/intelligence_swarm/governance/test_evaluation_contract_canonical_split_identity_cycle_087.py
+      - name: Commit core update to canonical branch
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
+          if git diff --cached --quiet; then
+            echo 'Canonical split hardening already integrated.'
+          else
+            git commit -m 'R0-D cycle 089: integrate canonical split identity'
+            git push origin HEAD:research/intelligence-swarm-reconstruction-001
+          fi

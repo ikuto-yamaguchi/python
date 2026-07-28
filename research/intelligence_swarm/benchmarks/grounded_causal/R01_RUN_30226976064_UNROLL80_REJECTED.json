@@ -1,0 +1,125 @@
+{
+  "integration": "R01-SCREEN-004-E064-RESULT",
+  "track": "R0.1",
+  "benchmark": "SILG RTFM S1",
+  "canonical_branch": "research/intelligence-swarm-reconstruction-001",
+  "run": {
+    "run_id": 30226976064,
+    "job_id": 89867137085,
+    "head_sha": "344002bc8e5130cbb9a302fda1a2115baa8edb1c",
+    "artifact_id": 8640762353,
+    "artifact_name": "r01-silg-rtfm-unroll80-30226976064",
+    "artifact_size_bytes": 91615226,
+    "artifact_digest": "sha256:4e7fbacc077121d3fd09db1f6b7ec19a00942f8dc4cbf29b6cb9fd6eb18c9f4c",
+    "artifact_expires_at": "2026-08-26T02:53:47Z"
+  },
+  "source_pins": {
+    "silg": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
+    "rtfm": "58f17955595b5a127c96d045d896fcbcc7d4b570"
+  },
+  "environment": {
+    "train": "silg:rtfm_train_s1-v0",
+    "test": "silg:rtfm_test_s1-v0",
+    "model": "official SILG multi recurrent",
+    "pretrained_language_model": false
+  },
+  "single_changed_factor": {
+    "name": "unroll_length",
+    "from": 20,
+    "to": 80,
+    "stateful_fixed": true,
+    "entropy_cost_fixed": 0.05,
+    "num_actors_fixed": 2,
+    "batch_size_fixed": 2,
+    "frames_per_seed_requested": 131072,
+    "seeds": [1, 7, 19]
+  },
+  "training": {
+    "actual_checkpoint_frames_per_seed": {
+      "1": 131200,
+      "7": 131200,
+      "19": 131200
+    },
+    "wall_seconds_per_seed": {
+      "1": 1479.478225993,
+      "7": 1479.0202334719997,
+      "19": 1560.0667517649995
+    },
+    "total_wall_seconds": 4522.118594840999,
+    "peak_rss_kib_per_seed": {
+      "1": 1699780,
+      "7": 1467976,
+      "19": 2498024
+    }
+  },
+  "model_audit": {
+    "parameters": 6200115,
+    "trainable_parameters": 6200115,
+    "state_dict_bytes": 24828505,
+    "cpu_forward_latency_ms_per_step": 8.24688742,
+    "state_dict_sha256": "c3c4261d158a19c2aeca6bdbf991fa7d47ff387ed3faf615e27ba0cc1f5b8d1b"
+  },
+  "matched_controls": {
+    "episodes_per_method": 60,
+    "same_initial_instance_stream": true,
+    "answer_leakage": false,
+    "correct": {
+      "wins": 2,
+      "win_rate": 0.03333333333333333,
+      "return_mean": -1.8059994379679363,
+      "episode_length_mean": 44.63333333333333
+    },
+    "random": {
+      "wins": 4,
+      "win_rate": 0.06666666666666667,
+      "return_mean": -1.1513332635164262,
+      "episode_length_mean": 15.233333333333333
+    },
+    "language_blind": {
+      "wins": 2,
+      "win_rate": 0.03333333333333333,
+      "return_mean": -1.8073327720165253,
+      "episode_length_mean": 44.7
+    },
+    "state_only": {
+      "wins": 0,
+      "win_rate": 0.0,
+      "return_mean": -1.9429993828137715,
+      "episode_length_mean": 48.15
+    },
+    "language_shuffle": {
+      "wins": 2,
+      "win_rate": 0.03333333333333333,
+      "return_mean": -1.8066661039988199,
+      "episode_length_mean": 44.666666666666664
+    },
+    "correct_minus_random_win_rate": -0.03333333333333333,
+    "correct_minus_random_return": -0.6546661744515103
+  },
+  "official_eval_parity": {
+    "reference": "run_exp.py:test",
+    "aggregate_protocol_gap_official_minus_fresh": {
+      "win_rate": -0.016666666666666666,
+      "return_mean": -0.08633329570293428,
+      "episode_length_mean": 2.650000000000002
+    }
+  },
+  "qualification": {
+    "status": "rejected",
+    "qualified_for_r02": false,
+    "classification": "optimization_or_policy_competence_failure",
+    "failures": [
+      "correct_not_above_random_win_rate",
+      "correct_not_above_random_return"
+    ]
+  },
+  "conclusion": {
+    "closed_cause": "unroll_length=20 shortage as the sole explanation",
+    "interpretation": "The official stateful recurrent path was active and unroll_length=80 reached every command and checkpoint, but Correct remained below Random on the identical instance stream. Unroll length alone does not repair the public baseline reproduction.",
+    "next_allowed_action": "Use preserved code and logs to select exactly one learner-optimization factor from learning rate, gradient clipping, or optimizer/checkpoint restore. Keep model family, source pins, stateful=true, unroll_length=80, frames, seeds, split, and matched instances fixed.",
+    "new_toy_hypothesis": false,
+    "new_architecture": false,
+    "capability_progress_claimed": false,
+    "new_intelligence_principle_claimed": false
+  }
+}

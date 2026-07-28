@@ -1,0 +1,13 @@
+{
+  "distinct_observable_tables_after_joint_relabeling": 1,
+  "exact_latent_names_identifiable": false,
+  "exact_utterance_target_names_identifiable": false,
+  "identifiable_up_to_joint_permutation": true,
+  "joint_permutations": 6,
+  "latent_variables": 3,
+  "model_bytes": 0,
+  "peak_rss_kib_local_notebook": 161676,
+  "runtime_seconds_local_notebook": 0.0,
+  "seeds_required": false,
+  "reason_seeds_not_applicable": "exact finite enumeration, no stochastic estimator"
+}

@@ -1,0 +1,43 @@
+name: R0.2 typed comparison tests
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - '.github/workflows/r02_typed_comparison_tests.yml'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/gaddy_klein_typed_baseline.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/r02_typed_comparison.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_r02_typed_comparison.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/audit_r02_matched_budget.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_audit_r02_matched_budget.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/attach_r02_holdout_manifest.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_attach_r02_holdout_manifest.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/build_r02_preregistered_holdout_manifest.py'
+      - 'research/intelligence_swarm/benchmarks/grounded_causal/test_build_r02_preregistered_holdout_manifest.py'
+  workflow_dispatch:
+
+concurrency:
+  group: r02-typed-comparison-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: pip
+      - name: Install CPU PyTorch
+        run: python -m pip install --disable-pip-version-check torch==2.3.1 --index-url https://download.pytorch.org/whl/cpu
+      - name: Run R0.2 typed comparison, budget, and holdout-manifest regression tests
+        working-directory: research/intelligence_swarm/benchmarks/grounded_causal
+        run: |
+          python -m unittest -v \
+            test_r02_typed_comparison.py \
+            test_audit_r02_matched_budget.py \
+            test_attach_r02_holdout_manifest.py \
+            test_build_r02_preregistered_holdout_manifest.py

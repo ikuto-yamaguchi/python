@@ -1,0 +1,120 @@
+{
+  "run_id": 30197201735,
+  "run_head_sha": "f6a200f80d1f11c5f72b010f0f6a154d5ffe0190",
+  "recorded_on": "2026-07-26",
+  "status": "initial_reproduction_failure",
+  "artifact": {
+    "id": 8631188542,
+    "name": "r01-silg-rtfm-matched-30197201735",
+    "bytes": 72683813,
+    "digest": "sha256:a7ab001058c1ca0e75282012fec33c84d536adf958075b32e2519399484993f8",
+    "expires_at": "2026-08-25T11:06:46Z"
+  },
+  "fixed_sources": {
+    "silg_commit": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
+    "rtfm_commit": "58f17955595b5a127c96d045d896fcbcc7d4b570",
+    "train_env": "silg:rtfm_train_s1-v0",
+    "test_env": "silg:rtfm_test_s1-v0",
+    "model": "official SILG multi recurrent",
+    "pretrained_language_model": false,
+    "python": "3.8.18"
+  },
+  "training_contract": {
+    "requested_frames_per_seed": 131072,
+    "official_completed_boundary_frames": 131080,
+    "boundary_reason": "batch_size 2 * unroll_length 20 = 40 frames per learner update; SILG stops at the first complete update boundary",
+    "seeds": [1, 7, 19],
+    "num_actors": 2,
+    "num_threads": 1,
+    "batch_size": 2,
+    "unroll_length": 20,
+    "entropy_cost": 0.05,
+    "cuda": false
+  },
+  "model_audit": {
+    "parameters": 4916915,
+    "trainable_parameters": 4916915,
+    "untrained_state_dict_bytes": 19694385,
+    "cpu_forward_latency_ms_per_step": 7.7492315,
+    "untrained_state_dict_sha256": "d86944c5657363baeadb66df31a6c6b98e7a22bf26a6fa25a26957119e9ee548"
+  },
+  "training_runs": {
+    "1": {
+      "wall_seconds": 1392.9644071550001,
+      "peak_rss_kib": 1193976,
+      "model_state_bytes": 19693911,
+      "model_state_sha256": "3f529a8e295d854573ca7283f1e8bcd1cdefff53cd68282d9a2278be541ba48c"
+    },
+    "7": {
+      "wall_seconds": 1421.4604038820003,
+      "peak_rss_kib": 688104,
+      "model_state_bytes": 19693911,
+      "model_state_sha256": "91e28bad78adebff76b7c47ffffc17da196caa8cb4bba53731ff35745f71f640"
+    },
+    "19": {
+      "wall_seconds": 1446.9238944729996,
+      "peak_rss_kib": 1270148,
+      "model_state_bytes": 19693990,
+      "model_state_sha256": "3396f77c5babd40d8d328339e822bdc5671769f07ab72ade03263acf626ea472"
+    }
+  },
+  "matched_evaluation": {
+    "episodes_per_method_seed": 20,
+    "same_initial_instance_stream": true,
+    "answer_leakage": false,
+    "aggregate": {
+      "correct": {
+        "win_rate": 0.016666666666666666,
+        "return_mean": -2.039999294281006
+      },
+      "random": {
+        "win_rate": 0.06666666666666667,
+        "return_mean": -1.151333263516426
+      },
+      "language_blind": {
+        "win_rate": 0.0
+      },
+      "state_only": {
+        "win_rate": 0.0
+      },
+      "language_shuffle": {
+        "win_rate": 0.016666666666666666
+      }
+    },
+    "correct_minus_random_win_rate": -0.05,
+    "correct_minus_random_return": -0.8886660307645802,
+    "evaluation_peak_rss_kib": 302372,
+    "evaluation_wall_seconds": 152.0752567469999
+  },
+  "qualification": {
+    "qualified_for_r02": false,
+    "substantive_classification": "optimization_or_policy_competence_failure",
+    "substantive_failures": [
+      "correct_not_above_random_win_rate",
+      "correct_not_above_random_return"
+    ],
+    "historical_gate_artifact_note": "The run-head gate additionally rejected 131080 as a frame mismatch. The canonical branch now audits the exact first complete learner-update boundary, under which 131080 is the expected boundary for a 131072 request.",
+    "r02_started": false
+  },
+  "next_minimum_action": {
+    "change_budget": "one diagnosed cause only",
+    "keep_fixed": [
+      "model family",
+      "requested frame budget",
+      "seeds",
+      "train/test environments",
+      "matched initial instance streams"
+    ],
+    "diagnose": [
+      "official command and defaults versus deterministic harness patch",
+      "valid-action distribution, action entropy and episode termination",
+      "recurrent state reset/detach, optimizer update and checkpoint restore"
+    ],
+    "required_retest": "correct, random, language-blind, state-only and language-shuffle on the same instances"
+  },
+  "claims": {
+    "public_baseline_reproduced": false,
+    "capability_progress": false,
+    "new_intelligence_principle": false
+  }
+}

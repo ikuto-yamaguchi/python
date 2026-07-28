@@ -1,0 +1,26 @@
+name: R0 Unicode utterance overlap audit
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_unicode_utterance_overlap.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/test_audit_unicode_utterance_overlap.py
+      - .github/workflows/r0_unicode_utterance_overlap_tests.yml
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile auditor
+        run: python -m py_compile research/intelligence_swarm/benchmarks/grounded_causal/audit_unicode_utterance_overlap.py
+      - name: Run regression tests
+        working-directory: research/intelligence_swarm/benchmarks/grounded_causal
+        run: python -m unittest -v test_audit_unicode_utterance_overlap.py

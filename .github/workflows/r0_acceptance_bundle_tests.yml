@@ -1,0 +1,79 @@
+name: R0 unified acceptance gate tests
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_r0_acceptance_bundle.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/test_audit_r0_acceptance_bundle.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/test_acceptance_raw_log_measurement_binding.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_artifact_path_containment.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_nonzero_measurements.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_raw_log_measurement_binding.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_cell_binding.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_eval_split_scope.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_metric_coverage.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_payload_leakage.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_statistics_artifacts.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_public_baseline_reproduction.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_public_baseline_statistics_binding.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/test_audit_public_baseline_statistics_binding.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_statistics_recomputation_binding.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/test_audit_statistics_recomputation_binding.py
+      - .github/workflows/r0_acceptance_bundle_tests.yml
+  pull_request:
+    paths:
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_r0_acceptance_bundle.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/test_audit_r0_acceptance_bundle.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/test_acceptance_raw_log_measurement_binding.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_artifact_path_containment.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_nonzero_measurements.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_raw_log_measurement_binding.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_cell_binding.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_eval_split_scope.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_metric_coverage.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_payload_leakage.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_statistics_artifacts.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_public_baseline_reproduction.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_public_baseline_statistics_binding.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/test_audit_public_baseline_statistics_binding.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/audit_statistics_recomputation_binding.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/test_audit_statistics_recomputation_binding.py
+      - .github/workflows/r0_acceptance_bundle_tests.yml
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile unified gate and dependencies
+        run: |
+          python -m py_compile \
+            research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_artifact_path_containment.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_nonzero_measurements.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_raw_log_measurement_binding.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_cell_binding.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_eval_split_scope.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_metric_coverage.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_payload_leakage.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_prediction_statistics_artifacts.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_public_baseline_reproduction.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_public_baseline_statistics_binding.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_statistics_recomputation_binding.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/audit_r0_acceptance_bundle.py
+      - name: Run unified acceptance and evidence-binding regression tests
+        working-directory: research/intelligence_swarm/benchmarks/grounded_causal
+        run: |
+          python -m unittest -v test_audit_r0_acceptance_bundle.py
+          python -m unittest -v test_acceptance_raw_log_measurement_binding.py
+          python -m unittest -v test_audit_public_baseline_statistics_binding.py
+          python test_audit_statistics_recomputation_binding.py

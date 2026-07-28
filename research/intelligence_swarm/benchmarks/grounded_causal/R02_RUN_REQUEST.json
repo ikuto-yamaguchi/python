@@ -1,0 +1,143 @@
+{
+  "schema_version": "r02_environment_first_run_request_v1",
+  "requested_at_utc": "2026-07-27T21:04:00Z",
+  "repository": "ikuto-yamaguchi/python",
+  "canonical_branch": "research/intelligence-swarm-reconstruction-001",
+  "track": "R0.2",
+  "classification": "faithful_environment_first_method_transfer_requested",
+  "claims": {
+    "new_operation_goal_hypothesis": false,
+    "new_architecture": false,
+    "novelty_claimed": false,
+    "intelligence_principle_claimed": false,
+    "capability_progress_claimed": false
+  },
+  "primary_reference": {
+    "paper": "David Gaddy and Dan Klein. Pre-Learning Environment Representations for Data-Efficient Neural Instruction Following. ACL 2019, P19-1188.",
+    "paper_url": "https://aclanthology.org/P19-1188/",
+    "public_repository": "kristyelee/environment-learning",
+    "public_commit": "98c0dc68926ee9535f15019922d2ca871b0ac0b5",
+    "local_reference_manifest": "GADDY_KLEIN_PUBLIC_REFERENCE_MANIFEST.json",
+    "local_component_mapping": "GADDY_KLEIN_SILG_COMPONENT_MAPPING.json"
+  },
+  "source_environment": {
+    "benchmark": "SILG RTFM S1",
+    "silg_commit": "2af07578e1264029a240fcfb78d4ac0aea16f5de",
+    "rtfm_commit": "58f17955595b5a127c96d045d896fcbcc7d4b570",
+    "train_env": "silg:rtfm_train_s1-v0",
+    "test_env": "silg:rtfm_test_s1-v0",
+    "source_policy_contract": {
+      "model": "multi",
+      "stateful": false,
+      "pretrained_language_model": false,
+      "num_actors": 30,
+      "num_threads": 4,
+      "batch_size": 24,
+      "unroll_length": 80,
+      "learning_rate": 0.0005,
+      "optimizer": "RMSprop",
+      "global_gradient_clip_norm": 40.0,
+      "total_frames_per_seed": 100000000,
+      "seeds": [1, 7, 19]
+    }
+  },
+  "methods": [
+    {
+      "name": "Environment-first",
+      "procedure": [
+        "pretrain the transition encoder and action-conditioned decoder only from language-free (state_t, action_t, state_t_plus_1) rows",
+        "freeze the pretrained transition encoder and decoder",
+        "train the instruction encoder to match the pretrained discrete environment-message space",
+        "evaluate instruction following with the frozen environment representation path"
+      ]
+    },
+    {
+      "name": "End-to-end",
+      "procedure": [
+        "initialize the same inference topology without environment pretraining",
+        "train from the same instruction-following rows and labels",
+        "match the Environment-first inference parameter budget exactly"
+      ]
+    },
+    {
+      "name": "State-only",
+      "procedure": [
+        "remove instruction input while retaining the same state/action schema",
+        "use only as a diagnostic control and never as the primary baseline"
+      ]
+    }
+  ],
+  "matched_contract": {
+    "required_seeds": [1, 7, 19],
+    "same_source_policy_checkpoints": true,
+    "same_environment_transition_rows": true,
+    "same_instruction_rows": true,
+    "same_train_validation_test_split": true,
+    "same_optimizer_and_update_budget": true,
+    "same_inference_parameter_budget_environment_first_vs_end_to_end": true,
+    "same_online_evaluation_instances": true,
+    "same_cpu_runtime_measurement_protocol": true,
+    "forbid_parameter_budget_matching_by_unused_parameters": true,
+    "forbid_test_or_holdout_rows_in_training": true
+  },
+  "transfer_conditions": {
+    "in_distribution": true,
+    "held_out_dynamics": "required and generator-backed",
+    "held_out_entity": "measure only if an explicit generator-backed entity split is constructed and audited; otherwise report unsupported",
+    "held_out_language_form": "measure only if an explicit utterance-form split is constructed and audited; otherwise report unsupported",
+    "fabricated_holdouts_forbidden": true
+  },
+  "required_metrics": [
+    "online task success",
+    "typed next-state prediction accuracy",
+    "action accuracy",
+    "held-out dynamics transfer",
+    "held-out entity transfer when supported",
+    "held-out language-form transfer when supported",
+    "paired Environment-first minus End-to-end gaps on identical instances"
+  ],
+  "resource_measurements": [
+    "trainable and inference parameter counts",
+    "serialized model bytes",
+    "peak RSS",
+    "training wall time",
+    "user and system CPU time",
+    "CPU inference latency per environment step",
+    "dependency versions",
+    "raw commands and logs",
+    "file bytes and SHA-256 manifests"
+  ],
+  "artifact_root": "research/intelligence_swarm/benchmarks/grounded_causal/",
+  "existing_implementation": [
+    "environment_first_baseline.py",
+    "gaddy_klein_typed_baseline.py",
+    "r02_typed_comparison.py",
+    "run_r02_typed_comparison.py",
+    "evaluate_r02_offline_policy_metrics.py",
+    "evaluate_r02_online_silg.py",
+    "aggregate_r02_three_seed_results.py",
+    "audit_r02_matched_budget.py",
+    "audit_r02_gaddy_klein_fidelity.py",
+    "build_r02_preregistered_holdout_manifest.py"
+  ],
+  "execution_gate": {
+    "exact_one_step_resume_qualification": "accepted in workflow run 30300067389",
+    "official_r01_100m_three_seed_reproduction": "required before R0.2 capability comparison is accepted",
+    "source_trajectory_eligibility": "must be recomputed from the official 100M checkpoints; reduced-contract RUN100 trajectories remain ineligible",
+    "allowed_before_gate": [
+      "component-mapping regression tests",
+      "dataset and split construction",
+      "parameter-budget audits",
+      "non-capability smoke execution that is explicitly labeled as such"
+    ]
+  },
+  "failure_policy": "Preserve the first reproducible failure with raw logs and immutable inputs. Change only the minimum fidelity or execution defect. Do not replace the public method with a new toy objective, do not count latent-space appearance or compression as progress, and do not claim novelty or an intelligence principle before the full reproduction is accepted.",
+  "acceptance": {
+    "three_seed_bundle_required": true,
+    "all_required_metrics_nonzero_and_bound_to_raw_predictions": true,
+    "matched_budget_audit_required": true,
+    "holdout_manifest_audit_required": true,
+    "online_same_instance_evaluation_required": true,
+    "public_source_and_local_component_mapping_audit_required": true
+  }
+}

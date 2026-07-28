@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "id": "D007_default_branch_thin_dispatcher",
+  "date": "2026-07-29",
+  "canonical_branch": "research/intelligence-swarm-reconstruction-001",
+  "canonical_commit_sha": "d7ad9e5efece7929987b53c15d0079d6d4c875c7",
+  "model_execution_authorized": false,
+  "training_authorized": false,
+  "semantic_trace_authorized": false,
+  "dataset_download_authorized": false,
+  "tokenizer_download_authorized": false,
+  "checkpoint_download_authorized": false,
+  "quantization_authorized": false,
+  "fixed_blob_shas": {
+    "c003_manifest": "5677b3ec00d7e5d8f56fce1fb96248d6bf680dd9",
+    "c004_manifest": "3814f9ef98ec10b83a4bf387302d1246cd8803d6",
+    "c006_manifest": "880e977f67ae093305ff517716aaa86389db17b3",
+    "environment_script": "f48040ba5cdbf0bf71343391ab132d8adbbe96c0",
+    "environment_probe": "e85ca24025ef0921d34851dd62f9740a6a1447da"
+  },
+  "default_branch_attempt": {
+    "path": ".github/workflows/d007-k3-environment-dispatcher.yml",
+    "minimal_creation_commit": "0091e002dfb965e59adda99d7319ceba03e565e6",
+    "full_c006_replacement_committed": false,
+    "cleanup_delete_committed": false,
+    "workflow_dispatched": false
+  },
+  "classification": "ENV_PROTOCOL_FAIL_ROUTE_STOP_DEFAULT_BRANCH_PENDING_CLEANUP",
+  "failure_causes": [
+    "committed minimal dispatcher does not satisfy complete C006 immutable-input and identity-gate contract",
+    "available GitHub write interface rejected compliant replacement",
+    "available GitHub write interface rejected cleanup deletion",
+    "dispatching incomplete workflow would violate preregistration"
+  ],
+  "scientific_evidence_generated": false,
+  "rejects_block_attnres": false,
+  "rejects_pb1": false,
+  "rejects_cr1": false,
+  "required_next_action": "atomically replace or remove the incomplete main-branch dispatcher through an auditable interface before any dispatch",
+  "prohibited_next_actions": [
+    "dispatch current incomplete workflow",
+    "instantiate B0 PB1 or CR1",
+    "download dataset tokenizer or checkpoint",
+    "train",
+    "quantize",
+    "claim quality efficiency or capability evidence"
+  ]
+}

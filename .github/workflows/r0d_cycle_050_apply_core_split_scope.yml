@@ -1,0 +1,213 @@
+name: R0D Cycle 050 apply core split scope
+
+on:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - .github/workflows/r0d_cycle_050_apply_core_split_scope.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/intelligence-swarm-reconstruction-001
+          fetch-depth: 0
+
+      - name: Apply fail-closed split scope to core contract
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py')
+          text = path.read_text(encoding='utf-8')
+
+          old = 'CANONICAL_SEEDS = {1, 7, 19}\nEVAL_SPLITS = {"test", "eval", "validation", "valid"}\n'
+          new = 'CANONICAL_SEEDS = {1, 7, 19}\nTRAIN_SPLITS = {"train"}\nEVAL_SPLITS = {"test", "eval", "validation", "valid"}\nALLOWED_SPLITS = TRAIN_SPLITS | EVAL_SPLITS\n'
+          if old not in text and 'ALLOWED_SPLITS = TRAIN_SPLITS | EVAL_SPLITS' not in text:
+              raise SystemExit('split constants anchor not found')
+          text = text.replace(old, new, 1)
+
+          old = '''        if not split:\n            errors.append(f"row {index}: split must be non-empty")\n        if not condition:\n'''
+          new = '''        if not split:\n            errors.append(f"row {index}: split must be non-empty")\n        elif split not in ALLOWED_SPLITS:\n            errors.append(f"row {index}: unregistered split={split!r}; allowed={sorted(ALLOWED_SPLITS)}")\n        if not condition:\n'''
+          if old not in text and 'unregistered split=' not in text:
+              raise SystemExit('validate split anchor not found')
+          text = text.replace(old, new, 1)
+
+          old = 'def score(data: list[dict[str, Any]], preds: list[dict[str, Any]]) -> dict[str, Any]:\n    adapted = adapt_dataset(data); by_id = {str(r["instance_id"]): r for r in adapted}; eval_ids = {i for i, r in by_id.items() if str(r["split"]).lower() != "train"}\n'
+          new = '''def score(data: list[dict[str, Any]], preds: list[dict[str, Any]]) -> dict[str, Any]:\n    adapted = adapt_dataset(data)\n    by_id = {str(r["instance_id"]): r for r in adapted}\n    dataset_splits = {str(r.get("split", "")).lower() for r in adapted}\n    invalid_dataset_splits = sorted(dataset_splits - ALLOWED_SPLITS)\n    eval_ids = {i for i, r in by_id.items() if str(r["split"]).lower() in EVAL_SPLITS}\n'''
+          if old not in text and 'invalid_dataset_splits = sorted(dataset_splits - ALLOWED_SPLITS)' not in text:
+              raise SystemExit('score eval_ids anchor not found')
+          text = text.replace(old, new, 1)
+
+          old = '    errors, seen = [], set(); method_ids, grouped, snapshots, outcomes = defaultdict(set), defaultdict(list), defaultdict(set), defaultdict(dict)\n'
+          new = '''    errors, seen = [], set(); method_ids, grouped, snapshots, outcomes = defaultdict(set), defaultdict(list), defaultdict(set), defaultdict(dict)\n    if invalid_dataset_splits:\n        errors.append(f"dataset contains unregistered splits: {invalid_dataset_splits}; allowed={sorted(ALLOWED_SPLITS)}")\n'''
+          if old not in text and 'dataset contains unregistered splits:' not in text:
+              raise SystemExit('score errors anchor not found')
+          text = text.replace(old, new, 1)
+
+          old = '        if str(gold["split"]).lower() == "train": errors.append(f"prediction row {index}: prediction supplied for train instance={iid}"); continue\n'
+          new = '''        gold_split = str(gold["split"]).lower()\n        if gold_split not in EVAL_SPLITS:\n            errors.append(f"prediction row {index}: prediction supplied for non-evaluation split={gold_split!r} instance={iid}")\n            continue\n'''
+          if old not in text and 'prediction supplied for non-evaluation split=' not in text:
+              raise SystemExit('prediction split anchor not found')
+          text = text.replace(old, new, 1)
+
+          old = '"alias_normalized_leakage_required": True}\n'
+          new = '"alias_normalized_leakage_required": True, "allowed_train_splits": sorted(TRAIN_SPLITS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "split_scope_fail_closed": True}\n'
+          if old not in text and '"split_scope_fail_closed": True' not in text:
+              raise SystemExit('validate result anchor not found')
+          text = text.replace(old, new, 1)
+
+          old = '"internal_metrics_do_not_count": True}}\n'
+          new = '"internal_metrics_do_not_count": True}, "allowed_train_splits": sorted(TRAIN_SPLITS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "split_scope_fail_closed": True}\n'
+          if old not in text and text.count('"split_scope_fail_closed": True') < 2:
+              raise SystemExit('score result anchor not found')
+          text = text.replace(old, new, 1)
+
+          path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Add core split scope regression test
+        run: |
+          cat > research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_split_scope_core.py <<'PY'
+          #!/usr/bin/env python3
+          from __future__ import annotations
+
+          import importlib.util
+          from pathlib import Path
+
+          HERE = Path(__file__).resolve().parent
+          SPEC = importlib.util.spec_from_file_location('evaluation_contract', HERE / 'evaluation_contract.py')
+          assert SPEC and SPEC.loader
+          contract = importlib.util.module_from_spec(SPEC)
+          SPEC.loader.exec_module(contract)
+
+          METHODS = sorted(contract.REQUIRED_METHODS)
+          SEEDS = sorted(contract.CANONICAL_SEEDS)
+
+
+          def dataset(extra_split: str | None = None):
+              rows = []
+              for seed in SEEDS:
+                  rows.append({
+                      'instance_id': f'train-{seed}', 'domain': 'rtfm', 'seed': seed,
+                      'split': 'train', 'condition': 'in_distribution',
+                      'utterance': f'train utterance {seed}', 'state_before': {'x': 0},
+                      'gold_action': 0, 'gold_state_after': {'x': 1},
+                  })
+                  rows.append({
+                      'instance_id': f'test-{seed}', 'domain': 'rtfm', 'seed': seed,
+                      'split': 'test', 'condition': 'in_distribution',
+                      'utterance': f'test utterance {seed}', 'state_before': {'x': 2},
+                      'gold_action': 1, 'gold_state_after': {'x': 3},
+                  })
+              if extra_split:
+                  rows.append({
+                      'instance_id': f'{extra_split}-1', 'domain': 'rtfm', 'seed': 1,
+                      'split': extra_split, 'condition': 'in_distribution',
+                      'utterance': f'{extra_split} utterance', 'state_before': {'x': 4},
+                      'gold_action': 1, 'gold_state_after': {'x': 5},
+                  })
+              return rows
+
+
+          def predictions(rows, include_extra=False):
+              out = []
+              for row in rows:
+                  if row['split'] not in contract.EVAL_SPLITS and not include_extra:
+                      continue
+                  if row['split'] == 'train':
+                      continue
+                  for method in METHODS:
+                      pred = {
+                          'instance_id': row['instance_id'], 'method': method,
+                          'instance_fingerprint': contract.instance_fingerprint(contract.adapt_row(row)),
+                          'pred_action': row['gold_action'], 'pred_state_after': row['gold_state_after'],
+                      }
+                      if method in contract.SHUFFLE_METHODS:
+                          pred['control_source_instance_id'] = row['instance_id']
+                          pred['control_source_fingerprint'] = pred['instance_fingerprint']
+                      out.append(pred)
+              return out
+
+
+          clean = dataset()
+          assert contract.validate_dataset(clean)['valid']
+          assert contract.score(clean, predictions(clean))['valid'] is False  # self-shuffle is independently fail-closed
+          assert contract.score(clean, predictions(clean))['expected_eval_instances'] == 3
+
+          for invalid in ('debug', 'calibration', 'analysis', 'posthoc'):
+              rows = dataset(invalid)
+              validation = contract.validate_dataset(rows)
+              assert not validation['valid'], (invalid, validation)
+              assert any('unregistered split' in error for error in validation['errors'])
+
+              scored = contract.score(rows, predictions(rows, include_extra=True))
+              assert not scored['valid'], (invalid, scored)
+              assert scored['classification'] == 'initial_reproduction_failure'
+              assert scored['expected_eval_instances'] == 3
+              assert any('unregistered splits' in error for error in scored['errors'])
+              assert any('non-evaluation split' in error for error in scored['errors'])
+
+          print('R0 core split-scope regression: PASS')
+          PY
+
+      - name: Run focused regression
+        run: |
+          python -m py_compile \
+            research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_split_scope_core.py
+          python research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_split_scope_core.py
+
+      - name: Record governance result
+        run: |
+          cat > research/intelligence_swarm/governance/REPORT_R0D_CYCLE_050.md <<'MD'
+          # R0-D Cycle 050 — core evaluation split scope
+
+          ## Scope
+
+          R0 benchmark reproducibility, statistics, and leakage auditing only. No memory, replay, fast weights, sleep, forgetting, architecture, or mechanism work was added.
+
+          ## Defect closed
+
+          `evaluation_contract.score()` previously treated every dataset row whose split was not exactly `train` as an evaluation instance. Unregistered post-hoc splits such as `debug`, `calibration`, `analysis`, or `posthoc` could therefore enter prediction coverage, domain×seed×condition cells, confidence intervals, and paired tests.
+
+          ## Fail-closed contract
+
+          - training split: exactly `train`
+          - evaluation splits: exactly `test`, `eval`, `validation`, or `valid`
+          - all other split labels are rejected by `validate_dataset()`
+          - `score()` constructs evaluation IDs only from the registered evaluation vocabulary
+          - predictions for train or unregistered splits are rejected
+          - the accepted split vocabulary is written into validation and scoring evidence
+          - failure classification remains `initial_reproduction_failure`
+
+          ## Verification
+
+          Focused regression covers clean train/test data and explicit rejection of `debug`, `calibration`, `analysis`, and `posthoc`. The scorer keeps those rows outside the evaluation denominator even while reporting their presence as a fatal contract violation.
+
+          ## Research status
+
+          No real R0 artifact bundle is accepted by this change. No public baseline reproduction, capability progress, novelty, or intelligence principle is claimed.
+          MD
+
+      - name: Commit cumulative result
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add \
+            research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_split_scope_core.py \
+            research/intelligence_swarm/governance/REPORT_R0D_CYCLE_050.md
+          if git diff --cached --quiet; then
+            echo 'No changes to commit'
+          else
+            git commit -m 'r0d: enforce core evaluation split scope'
+            git push origin HEAD:research/intelligence-swarm-reconstruction-001
+          fi
