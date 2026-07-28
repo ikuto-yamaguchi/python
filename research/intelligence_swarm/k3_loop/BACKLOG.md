@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Backlog
 
-Last updated: 2026-07-29 by K3-C
+Last updated: 2026-07-29 by K3-E
 
 ## P0 — Block AttnRes minimum reproduction
 
@@ -8,7 +8,7 @@ Classification: **小型化で要再設計・追加検証・未採用 / Path-WAR
 
 Current bottleneck:
 
-> C007 portable environment-gate preregistration is complete. The only next work is one D008 environment-only portable attempt on a compliant Python 3.11 CPU substrate, or one concrete `SUBSTRATE_STOP` if no such substrate is available.
+> C007 and B008 are complete. The only next work is one D008 environment-only portable attempt on a compliant Python 3.11 CPU substrate, or one concrete `SUBSTRATE_STOP`. Further audit-only cycles are prohibited.
 
 ### A — Evidence
 
@@ -39,25 +39,16 @@ Current bottleneck:
 - [x] B008 portable-substrate equivalence and trust-closure requirements fixed
 - [ ] Recalculate operator share and actual/expected slots from exact trace
 - [x] No CPU crossover or minimum-scale claim before exact trace
+- [x] No additional theory before D008 produces an actual outcome
 
 ### C — Preregistration
 
-- [x] C001–C006 completed
+- [x] C001–C007 completed
 - [x] C005 canonical-push route closed as `ROUTE_STOP`
 - [x] C006 default-branch dispatcher route closed as `ENV_PROTOCOL_FAIL`
-- [x] Create `C007_PORTABLE_ENVIRONMENT_GATE_PREREGISTRATION.md`
-- [x] Create `benchmarks/k3_minimal/manifests/C007_portable_environment_gate.yaml`
-- [x] Fix immutable scientific source commit `9edf4c7143ff1d62685ed893352df7a32090fe1e`
-- [x] Fix C003/C004/C007/script/probe identity requirements
-- [x] Fix Python 3.11, exact CPU PyTorch, fixed Transformers commit and replay command
-- [x] Fix online-Git/offline-Git-bundle acquisition and canonical-ref reachability
-- [x] Fix detached checkout, clean-tree, untracked/submodule/LFS rejection
-- [x] Fix all model-stage authorizations false and no automatic continuation
-- [x] Fix resolver/freeze/checksum/import/raw-log/platform schema
-- [x] Fix `sys.path`, module-origin hashes and external-shadow rejection
-- [x] Fix inner evidence checksum and outer deterministic archive checksum/size
-- [x] Fix `ENV_PASS / ENV_RETRY / SUBSTRATE_STOP / ENV_PATH_STOP_PENDING_AMENDMENT / ENV_PATH_STOP / ENV_PROTOCOL_FAIL`
-- [ ] Amend C007 only if D008 exposes one specific preregistration defect
+- [x] Portable acquisition, identity, dependency, import-origin and checksum contract fixed
+- [x] All model-stage authorizations false and no automatic continuation
+- [ ] Amend C007 only if D008 exposes one specific protocol defect
 
 ### D — Reproduction
 
@@ -85,11 +76,12 @@ Current bottleneck:
 
 ### E — Integration
 
-- [x] E001–E007 completed
+- [x] E001–E008 completed
 - [x] D007 classified `ENV_PROTOCOL_FAIL`
 - [x] Both GitHub Actions routes closed
 - [x] Block AttnRes/PB1/CR1 not rejected by orchestration failure
-- [x] Single next hypothesis moved to portable environment gate
+- [x] Portable environment protocol and trust closure fixed
+- [x] E008 forbids further audit-only substitution for D008 execution
 - [ ] Classify D008 as `ENV_PASS`, `ENV_RETRY`, `SUBSTRATE_STOP`, `ENV_PATH_STOP_PENDING_AMENDMENT`, `ENV_PATH_STOP` or `ENV_PROTOCOL_FAIL`
 - [ ] Keep Block AttnRes unadopted until quality/resource/3-seed evidence
 
@@ -118,6 +110,7 @@ Current bottleneck:
 
 - No further C005/C006 trigger, nonce, dispatcher or default-branch workflow variants
 - Never dispatch the incomplete D007 workflow on `main`
+- No more evidence/theory/preregistration/orchestration audits in place of D008 execution
 - No broad push or PR trigger shortcut
 - No model code on an orchestration branch or launcher
 - No new architecture before reproducible baseline and preregistration
