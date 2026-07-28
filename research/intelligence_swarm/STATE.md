@@ -9,6 +9,7 @@
 - Stage: **R0 Research Reconstruction — official SILG continuation blocked before replacement execution**
 - Canonical branch: `research/intelligence-swarm-reconstruction-001`
 - Canonical PR: **#409 open / draft / mergeable**
+- Verified PR head before this integration: `f83a72610d37a5dc8d43a9c053b02b5134c082fd`
 - A〜Dの新規toy仮説・別branch・新規機構族: **禁止**
 - 既存stacked draft PR: **negative-results archive。新作業のbaseにしない**
 - 外部baseline再現前の新規知能原理・能力進歩認定: **禁止**
@@ -34,13 +35,14 @@
 - 学習済み公開能力baseline再現: **0件**
 - official-horizon matched controls: **0件**
 - J-CRe3 numerical reproduction: **0件**
+- CausalVerse numerical reproduction: **0件**
 - R0.2正式再現: **0件**
 - R0.3 hidden intervention-target ablation: **棄却維持**
 - novelty matrix: **未完了**
 - 中心命題の事前登録: **未完了**
 - 広義RQ-001: **棄却**
 - 狭義RQ-001: **未採用**
-- 主分類: **`official_100m_replacement_execution_unconfirmed`**
+- 主分類: **`workflow_execution_approval_or_policy_blocker`**
 
 ## Official SILG reproduction contract
 
@@ -74,7 +76,9 @@ Commit `ce6909baf0e0879d1547c34beb457d59d2027b9e`はunsupported `--seed`を削�
 - patch前後sourceとSHA-256をartifact保存
 - model、loss、optimizer、environment、action schema、sampling defaults、frame budgetは不変
 
-現head `e168d58696eea3356adc971e7d2899f914b06b0d`に対する確認可能なPR-triggered workflow 12件はすべて`action_required`でjob未生成だった。これはmodel failureではなくworkflow execution approval/policy blockerである。replacement chunkのrun/job/artifact/qualificationを独立確認するまで開始・完了・能力進歩を認定せず、同一chunkを重複dispatchしない。
+確認したPR head `f83a72610d37a5dc8d43a9c053b02b5134c082fd`に関連付くPR-triggered workflow 12件はすべて`completed / action_required`でjob未生成だった。対象にはSILG push-run locator、unified acceptance gate、artifact containment、raw-log binding、normalized cell/holdout/canonical identity、score dataset-contract binding、prediction topologyを含む。
+
+これはmodel failure、optimizer failure、SILG baseline failure、evaluation logic regression、能力failureではなくworkflow execution approval/policy blockerである。replacement chunkのrun/job/artifact/qualificationを独立確認するまで開始・完了・能力進歩を認定せず、同一chunkを重複dispatchしない。
 
 ## Latest short-horizon negative evidence
 
@@ -111,13 +115,13 @@ Run `30258965674`, artifact `8650362356`:
 
 D015〜D035を凍結する。能力runではrandom/language-blind/state-only/shuffle、model/checkpoint bytes、RSS、runtime、CPU latency、seed、split、actual frames、raw logs、checksums、leakageを保存する。infrastructure-only runでは能力対照をN/Aと明示し、能力進歩へ数えない。
 
-Normalized-cell regression fixtureは明示holdout契約に合わせて修正済みであり、直前の実行可能headではevaluation-contract checksが通過した。現headの`action_required`は承認/policy層の実行ブロッカーであり、評価ロジックの回帰とは認定しない。Standalone canonical-instance-identity auditは、`validate_dataset()`と`score()`へのdirect fail-closed integration完了まで省略しない。
+Normalized-cell workflowはread-only fail-closed CIへ変更済みで、fixtureも明示holdout契約に合わせて修正済みである。今回の`action_required`は承認/policy層の実行ブロッカーであり、評価ロジックの回帰とは認定しない。Standalone canonical-instance-identity auditは、`validate_dataset()`と`score()`へのdirect fail-closed integration完了まで省略しない。
 
 ## Prior-art and RQ boundary
 
 既存のscore-based CRL、finite-sample CRL、unknown multi-node intervention CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg、MagicBench、CodeBind、NoisyCausal、CaST-Bench、CausalVerse、MTG-Causal-RL、Mind Dreamer、AER、COGS等の境界を維持する。
 
-最新再監査では、2026年のfew-environment finite-sample CRLが少数のunknown multi-node interventionからlatent graph、mixing/representation、unknown intervention targetsを回復する保証を提示している。2024年のUMN-CRLにはauthor-official codeも存在する。ただし、本repositoryでexact commit、dependency、public numerical contractを固定したimmutable再現は未完了である。文献名だけを追加してnovelty matrixを水増ししない。
+2026-07-28の再監査でも、既存境界を越えてRQ-001を採用できる新しい「一次文献 + author-official code + exact commit + public numerical contract」の組は確認できなかった。文献名だけを追加してnovelty matrixを水増ししない。
 
 正式判断:
 
@@ -138,4 +142,4 @@ Normalized-cell regression fixtureは明示holdout契約に合わせて修正済
 
 ## Last integration
 
-2026-07-28: **RESET-E082**。official first chunkの`--seed` CLI defectとimmutable failure artifact、seed-only patch、replacement execution未確認、現headのActions approval/policy blockerを統合した。外部baseline再現0件、能力進歩未認定、高校生級未達を維持する。
+2026-07-28: **RESET-E083**。PR head `f83a7261...`に関連付く12 workflowがすべて`action_required`・job未生成であることを再確認し、replacement 1M chunkの未実行状態とapproval/policy blockerを統合した。新しい能力artifact、matched controls、resource、leakage結果はなく、外部baseline再現0件、能力進歩未認定、高校生級未達を維持する。
