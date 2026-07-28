@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Backlog
 
-Last updated: 2026-07-29 by K3-A
+Last updated: 2026-07-29 by K3-B
 
 ## P0 — Block AttnRes minimum reproduction
 
@@ -39,8 +39,14 @@ A005 evidence:
 - [x] PB1 source-slot bounds: sublayer `84`, final `5`, total `89`
 - [x] PB1 classified as minimum semantic/effect-direction pilot
 - [x] PB1 falsifiability boundary fixed
+- [x] B007 execution-substrate invariance and evidence-admissibility conditions fixed
 - [ ] Recalculate operator share and actual/expected slots from exact trace
 - [x] No CPU crossover or minimum-scale claim before exact trace
+- [ ] Verify C006/D007 against B007 canonical-code, dependency, authorization, launcher-thinness, and artifact-completeness conditions
+
+B007 theory:
+
+- `research/intelligence_swarm/k3_loop/theory/B007_EXECUTION_SUBSTRATE_INVARIANCE_AND_EVIDENCE_ADMISSIBILITY.md`
 
 ### C — Preregistration
 
