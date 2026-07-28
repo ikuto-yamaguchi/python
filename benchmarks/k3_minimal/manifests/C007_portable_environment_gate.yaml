@@ -1,0 +1,200 @@
+schema_version: 1
+id: C007_portable_environment_gate
+status: preregistered
+date: 2026-07-29
+role: environment_only
+scientific_source:
+  repository: ikuto-yamaguchi/python
+  repository_url: https://github.com/ikuto-yamaguchi/python.git
+  canonical_branch: research/intelligence-swarm-reconstruction-001
+  canonical_commit: 9edf4c7143ff1d62685ed893352df7a32090fe1e
+  candidate_repository: wdlctc/open-attention-residuals
+  candidate_commit: 83d2b8de82c2fbb981c7decca67d13d9db348da6
+  official_repository: MoonshotAI/Attention-Residuals
+  official_commit: 85e22310fe5ee860b4a023de312d791de8a5a5e6
+  transformers_commit: 42791a34fdeae197f60f11ace3807c81f44b0729
+normative_files:
+  c003_manifest:
+    path: benchmarks/k3_minimal/manifests/C003_d003_gha_environment_gate.yaml
+    git_blob_sha: 5677b3ec00d7e5d8f56fce1fb96248d6bf680dd9
+  c004_manifest:
+    path: benchmarks/k3_minimal/manifests/C004_d003_variant_semantic_trace.yaml
+    git_blob_sha: 3814f9ef98ec10b83a4bf387302d1246cd8803d6
+  c006_manifest_historical_context_only:
+    path: benchmarks/k3_minimal/manifests/C006_default_branch_thin_dispatcher.yaml
+    git_blob_sha: 880e977f67ae093305ff517716aaa86389db17b3
+    normative: false
+  c007_preregistration:
+    path: research/intelligence_swarm/k3_loop/prereg/C007_PORTABLE_ENVIRONMENT_GATE_PREREGISTRATION.md
+    git_blob_sha: 42ca0249037caecf855de98c978f4a50373d2e94
+  c007_manifest:
+    path: benchmarks/k3_minimal/manifests/C007_portable_environment_gate.yaml
+    git_blob_sha_resolution: record_from_final_manifest_commit_before_execution
+  environment_runner:
+    path: benchmarks/k3_minimal/preflight/d003_gha_environment.sh
+    git_blob_sha: f48040ba5cdbf0bf71343391ab132d8adbbe96c0
+  environment_probe:
+    path: benchmarks/k3_minimal/preflight/d003_environment_probe.py
+    git_blob_sha: e85ca24025ef0921d34851dd62f9740a6a1447da
+  portable_launcher:
+    path: benchmarks/k3_minimal/preflight/d008_portable_environment.sh
+    status: may_be_created_by_D_after_preregistration
+    constraints:
+      - thin_cli_mapping_only
+      - no_dependency_substitution
+      - no_model_code
+      - no_semantic_patch
+      - no_automatic_next_stage
+acquisition:
+  allowed_modes:
+    - online_git
+    - offline_git_bundle
+  reject_plain_workspace_copy: true
+  require_canonical_ref_reachability: true
+  require_detached_checkout: true
+  require_clean_tree: true
+  reject_untracked_files: true
+  reject_unresolved_submodules: true
+  reject_unresolved_lfs_pointers: true
+dependencies:
+  python: 3.11.x
+  pytorch:
+    exact_build_required: true
+    cpu_only: true
+    artifact_hash_required: true
+  transformers:
+    source_commit: 42791a34fdeae197f60f11ace3807c81f44b0729
+    silent_substitution_forbidden: true
+  tokenizers:
+    exact_resolved_version_required: true
+  transitive_dependencies:
+    exact_versions_required: true
+    artifact_hashes_required: true
+  editable_install:
+    allowed_only_if_clean_commit_bound_archived: true
+  required_records:
+    - installer_version
+    - resolver_command
+    - resolver_report
+    - pip_freeze_all
+    - pip_check
+    - package_index_or_offline_origin
+import_gate:
+  instantiate_models: false
+  record_sys_path: true
+  record_pythonpath: true
+  record_module_origin_paths: true
+  hash_imported_python_sources: true
+  reject_external_shadow_modules: true
+authorization:
+  model_execution_authorized: false
+  semantic_trace_authorized: false
+  training_authorized: false
+  dataset_download_authorized: false
+  tokenizer_download_authorized: false
+  checkpoint_download_authorized: false
+  quantization_authorized: false
+  automatic_next_stage: false
+platform_provenance:
+  required:
+    - os_release
+    - kernel
+    - architecture
+    - endianness
+    - cpu_model
+    - logical_cpus
+    - isa_flags
+    - total_ram
+    - cgroup_or_container_memory_limit
+    - virtualization_or_container
+    - libc_version
+    - locale
+    - timezone
+    - thread_environment
+    - network_mode
+evidence_layout:
+  required_files:
+    - classification.json
+    - inputs.json
+    - authorization.json
+    - source_identity.json
+    - file_identity.json
+    - platform.json
+    - python_environment.json
+    - resolver_report.json
+    - pip_freeze.txt
+    - pip_check.txt
+    - dependency_checksums.json
+    - import_matrix.json
+    - module_origins.json
+    - replay_command.txt
+    - command_transcript.log
+    - stdout.log
+    - stderr.log
+    - checksums.sha256
+  inner_checksum:
+    algorithm: sha256
+    sorted_relative_paths: true
+  outer_archive:
+    deterministic: true
+    sha256_required: true
+    byte_size_required: true
+    sibling_record_outside_archive: true
+replay:
+  command: >-
+    bash benchmarks/k3_minimal/preflight/d008_portable_environment.sh
+    --repository-url https://github.com/ikuto-yamaguchi/python.git
+    --canonical-branch research/intelligence-swarm-reconstruction-001
+    --canonical-commit 9edf4c7143ff1d62685ed893352df7a32090fe1e
+    --manifest benchmarks/k3_minimal/manifests/C007_portable_environment_gate.yaml
+    --attempt 1
+    --output benchmarks/k3_minimal/preflight/d008_artifacts/attempt-1
+retry:
+  max_unchanged_retries: 1
+  allowed_only_after_identity_gate: true
+  transient_causes:
+    - dns
+    - package_index
+    - source_host
+    - artifact_write_service
+  forbidden_causes:
+    - identity_mismatch
+    - dirty_tree
+    - shadow_import
+    - missing_checksum
+    - authorization_violation
+    - unsupported_python
+    - dependency_conflict
+    - semantic_or_api_mismatch
+result_classes:
+  - ENV_PASS
+  - ENV_RETRY
+  - SUBSTRATE_STOP
+  - ENV_PATH_STOP_PENDING_AMENDMENT
+  - ENV_PATH_STOP
+  - ENV_PROTOCOL_FAIL
+not_applicable_environment_only:
+  seeds: [17, 29, 43]
+  model_bytes: true
+  total_parameters: true
+  active_parameters: true
+  peak_rss_vram_comparison: true
+  training_wall_time: true
+  training_tokens_per_second: true
+  cpu_inference_latency: true
+  generation_tokens_per_second: true
+  quantized_size: true
+  quality_axes: [language_modeling, knowledge, reasoning, long_context, instruction_following]
+next_authorized_work:
+  actor: D
+  id: D008
+  action: one_portable_environment_only_attempt_or_one_substrate_stop
+  automatic_semantic_or_model_continuation: false
+prohibitions:
+  - do_not_touch_or_dispatch_quarantined_default_branch_workflow
+  - no_B0_PB1_CR1_instantiation
+  - no_dataset_tokenizer_checkpoint_download
+  - no_training
+  - no_quantization
+  - no_quality_or_resource_claim
+  - no_silent_patch
