@@ -1,0 +1,2 @@
+cycle=078
+purpose=shuffle donor value binding
