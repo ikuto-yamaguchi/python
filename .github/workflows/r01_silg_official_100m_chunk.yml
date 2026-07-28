@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  official-seed1-second-chunk:
+  official-seed1-third-chunk:
     runs-on: ubuntu-22.04
     timeout-minutes: 360
     steps:
@@ -36,9 +36,9 @@ jobs:
             echo "github_run_attempt=${GITHUB_RUN_ATTEMPT}"
             echo "github_ref=${GITHUB_REF}"
             echo "github_sha=${GITHUB_SHA}"
-            echo "resume_source_run_id=30316319311"
-            echo "resume_source_artifact_id=8676275327"
-            echo "resume_source_artifact_digest=sha256:d42f9f9ac38b90fdaa344de7cd624d0dd059b300a84a0ea427f75d892b7cbeb9"
+            echo "resume_source_run_id=30330569178"
+            echo "resume_source_artifact_id=8682637337"
+            echo "resume_source_artifact_digest=sha256:617fc6669fcd4db0771e634153627ba3d70d414e3579c1e5191c4c62991b91a2"
             git rev-parse HEAD
             git status --short
             date -u
@@ -47,18 +47,18 @@ jobs:
             free -h
             df -h
             python --version
-          } | tee "$results/HOST.txt"
+          } | tee "$results/HOST_3M.txt"
 
-      - name: Download qualified 1M checkpoint bundle
+      - name: Download qualified 2M checkpoint bundle
         uses: actions/download-artifact@v4
         with:
-          name: r01-silg-official-100m-seed1-chunk-30316319311
+          name: r01-silg-official-100m-seed1-2m-30330569178
           path: research/intelligence_swarm/benchmarks/grounded_causal/results_official_100m_seed1
           github-token: ${{ github.token }}
           repository: ikuto-yamaguchi/python
-          run-id: 30316319311
+          run-id: 30330569178
 
-      - name: Verify immutable resume source envelope
+      - name: Verify immutable 2M resume source digest
         run: |
           set -euo pipefail
           results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_100m_seed1"
@@ -66,32 +66,18 @@ jobs:
           import hashlib, json, pathlib, sys
           root = pathlib.Path(sys.argv[1])
           job = root / 'savedir' / 'rtfm-official-100m-seed1' / 'job.tar'
-          summary = root / 'OFFICIAL_100M_SEED1_CHUNK.json'
           if not job.is_file():
               raise SystemExit(f'missing resume checkpoint: {job}')
-          if not summary.is_file():
-              raise SystemExit(f'missing source qualification summary: {summary}')
-          source = json.loads(summary.read_text(encoding='utf-8'))
           digest = hashlib.sha256(job.read_bytes()).hexdigest()
-          expected_digest = 'fae5a2f8515ccb8a6b018349c0f09a38cb656a862e78803765ba87b396caca86'
-          frames = int(source.get('checkpoint_frames', -1))
-          missing = list(source.get('checkpoint_missing_keys', ['summary field absent']))
+          expected = 'be4ca5f149558558f3828b72729bb5180f1023756f7f623f1b2d6230e7117b18'
           payload = {
-              'source_run_id': 30316319311,
-              'source_artifact_id': 8676275327,
-              'checkpoint_frames': frames,
+              'source_run_id': 30330569178,
+              'source_artifact_id': 8682637337,
               'checkpoint_sha256': digest,
-              'checkpoint_missing_keys': missing,
-              'expected_checkpoint_sha256': expected_digest,
-              'source_qualified_for_continuation': source.get('qualified_for_continuation') is True,
-              'qualified': (
-                  not missing
-                  and frames == 1006080
-                  and digest == expected_digest
-                  and source.get('qualified_for_continuation') is True
-              ),
+              'expected_checkpoint_sha256': expected,
+              'qualified': digest == expected,
           }
-          (root / 'RESUME_SOURCE_ENVELOPE_CHECK.json').write_text(
+          (root / 'RESUME_SOURCE_ENVELOPE_CHECK_3M.json').write_text(
               json.dumps(payload, indent=2, sort_keys=True) + '\n', encoding='utf-8'
           )
           print(json.dumps(payload, indent=2, sort_keys=True))
@@ -104,9 +90,9 @@ jobs:
           set -euo pipefail
           results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_100m_seed1"
           /usr/bin/time -v bash research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh "$RUNNER_TEMP/r01_official_100m" \
-            2>&1 | tee "$results/INSTALL_CONTINUATION.log"
+            2>&1 | tee "$results/INSTALL_3M.log"
 
-      - name: Verify resume checkpoint schema with pinned torch environment
+      - name: Verify 2M checkpoint schema with pinned torch environment
         run: |
           set -euo pipefail
           results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_100m_seed1"
@@ -119,14 +105,14 @@ jobs:
           missing = sorted(required - set(ckpt))
           frames = int(ckpt.get('frames', -1))
           digest = hashlib.sha256(job.read_bytes()).hexdigest()
-          expected_digest = 'fae5a2f8515ccb8a6b018349c0f09a38cb656a862e78803765ba87b396caca86'
+          expected = 'be4ca5f149558558f3828b72729bb5180f1023756f7f623f1b2d6230e7117b18'
           payload = {
               'checkpoint_frames': frames,
               'checkpoint_sha256': digest,
               'checkpoint_missing_keys': missing,
-              'qualified': not missing and frames == 1006080 and digest == expected_digest,
+              'qualified': not missing and frames == 2006400 and digest == expected,
           }
-          (root / 'RESUME_SOURCE_CHECK.json').write_text(
+          (root / 'RESUME_SOURCE_CHECK_3M.json').write_text(
               json.dumps(payload, indent=2, sort_keys=True) + '\n', encoding='utf-8'
           )
           print(json.dumps(payload, indent=2, sort_keys=True))
@@ -139,8 +125,8 @@ jobs:
           set -euo pipefail
           results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_100m_seed1"
           silg="$RUNNER_TEMP/r01_official_100m/silg"
-          cp "$silg/run_exp.py" "$results/SILG_PINNED_RUN_EXP_BEFORE_SEED_PATCH_CONTINUATION.py"
-          python - "$silg/run_exp.py" <<'PY' 2>&1 | tee "$results/SEED_PATCH_CONTINUATION.log"
+          cp "$silg/run_exp.py" "$results/SILG_PINNED_RUN_EXP_BEFORE_SEED_PATCH_3M.py"
+          python - "$silg/run_exp.py" <<'PY' 2>&1 | tee "$results/SEED_PATCH_3M.log"
           import pathlib, sys
           path = pathlib.Path(sys.argv[1])
           text = path.read_text()
@@ -152,16 +138,15 @@ jobs:
               raise SystemExit(f'expected one actor seed site, found {text.count(actor_old)}')
           if text.count(main_old) != 1:
               raise SystemExit(f'expected one main seed site, found {text.count(main_old)}')
-          text = text.replace(actor_old, actor_new).replace(main_old, main_new)
-          path.write_text(text)
+          path.write_text(text.replace(actor_old, actor_new).replace(main_old, main_new))
           print('seed_patch=applied')
           print('seed_source=SILG_EXPERIMENT_SEED')
           print('actor_seed_formula=experiment_seed*1000003+actor_index')
           PY
-          cp "$silg/run_exp.py" "$results/SILG_PINNED_RUN_EXP_AFTER_SEED_PATCH_CONTINUATION.py"
+          cp "$silg/run_exp.py" "$results/SILG_PINNED_RUN_EXP_AFTER_SEED_PATCH_3M.py"
           python -m py_compile "$silg/run_exp.py"
 
-      - name: Resume official multi baseline to second durable checkpoint
+      - name: Resume official multi baseline to third durable checkpoint
         env:
           OMP_NUM_THREADS: '1'
           MKL_NUM_THREADS: '1'
@@ -173,13 +158,13 @@ jobs:
           silg="$RUNNER_TEMP/r01_official_100m/silg"
           savedir="$results/savedir"
           cd "$silg"
-          /usr/bin/time -v -o "$results/TRAIN_CONTINUATION_TIME.txt" python run_exp.py \
+          /usr/bin/time -v -o "$results/TRAIN_3M_TIME.txt" python run_exp.py \
             --env silg:rtfm_train_s1-v0 \
             --val_env silg:rtfm_test_s1-v0 \
             --model multi \
             --xpid rtfm-official-100m-seed1 \
             --savedir "$savedir" \
-            --total_frames 2000000 \
+            --total_frames 3000000 \
             --num_actors 30 \
             --num_threads 4 \
             --batch_size 24 \
@@ -187,10 +172,10 @@ jobs:
             --learning_rate 0.0005 \
             --entropy_cost 0.05 \
             --disable_cuda \
-            2>&1 | tee "$results/TRAIN_CONTINUATION.log"
+            2>&1 | tee "$results/TRAIN_3M.log"
           job=$(find "$savedir" -name job.tar -type f -print -quit)
           test -n "$job"
-          cp "$job" "$results/SILG_RTFM_OFFICIAL_SEED1_JOB_2M.tar"
+          cp "$job" "$results/SILG_RTFM_OFFICIAL_SEED1_JOB_3M.tar"
 
       - name: Verify continued checkpoint and record resource contract
         run: |
@@ -199,16 +184,15 @@ jobs:
           python - "$results" <<'PY'
           import hashlib, json, pathlib, re, sys, torch
           root = pathlib.Path(sys.argv[1])
-          job = root / 'SILG_RTFM_OFFICIAL_SEED1_JOB_2M.tar'
+          job = root / 'SILG_RTFM_OFFICIAL_SEED1_JOB_3M.tar'
           ckpt = torch.load(job, map_location='cpu')
           required = {'model_state_dict','optimizer_state_dict','scheduler_state_dict','frames'}
           missing = sorted(required - set(ckpt))
           frames = int(ckpt.get('frames', -1))
-          model = ckpt['model_state_dict']
-          params = sum(v.numel() for v in model.values() if hasattr(v, 'numel'))
-          time_text = (root / 'TRAIN_CONTINUATION_TIME.txt').read_text(encoding='utf-8')
+          params = sum(v.numel() for v in ckpt['model_state_dict'].values() if hasattr(v, 'numel'))
+          time_text = (root / 'TRAIN_3M_TIME.txt').read_text(encoding='utf-8')
           def number(label, cast=float):
-              match = re.search(rf'^{re.escape(label)}:\s*(.+)$', time_text, re.MULTILINE)
+              match = re.search(rf'^\s*{re.escape(label)}:\s*(.+)$', time_text, re.MULTILINE)
               if not match:
                   raise SystemExit(f'missing resource field: {label}')
               return cast(match.group(1).strip())
@@ -217,18 +201,18 @@ jobs:
             'public_baseline_reproduced': False,
             'capability_progress_claimed': False,
             'seed': 1,
-            'resume_source_run_id': 30316319311,
-            'resume_source_artifact_id': 8676275327,
-            'resume_source_frames': 1006080,
+            'resume_source_run_id': 30330569178,
+            'resume_source_artifact_id': 8682637337,
+            'resume_source_frames': 2006400,
             'entropy_cost': 0.05,
             'target_frames': 100000000,
-            'chunk_target_frames': 2000000,
+            'chunk_target_frames': 3000000,
             'checkpoint_frames': frames,
             'checkpoint_bytes': job.stat().st_size,
             'checkpoint_sha256': hashlib.sha256(job.read_bytes()).hexdigest(),
             'model_state_parameters': params,
             'checkpoint_missing_keys': missing,
-            'qualified_for_continuation': not missing and frames >= 2000000,
+            'qualified_for_continuation': not missing and frames >= 3000000,
             'controls_status': 'not_run_until_trained_checkpoint_evaluation',
             'resources': {
               'user_cpu_seconds': number('User time (seconds)'),
@@ -237,7 +221,7 @@ jobs:
             },
             'claims_blocked': ['public baseline reproduced','capability progress','new intelligence principle'],
           }
-          out = root / 'OFFICIAL_100M_SEED1_CHUNK_2M.json'
+          out = root / 'OFFICIAL_100M_SEED1_CHUNK_3M.json'
           out.write_text(json.dumps(payload, indent=2, sort_keys=True) + '\n')
           print(out.read_text())
           if not payload['qualified_for_continuation']:
@@ -248,15 +232,15 @@ jobs:
         if: always()
         run: |
           results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_100m_seed1"
-          python -m pip freeze | sort > "$results/PIP_FREEZE_CONTINUATION.txt"
-          find "$results" -type f -printf '%P\t%s bytes\n' | sort > "$results/FILE_SIZES.txt"
-          find "$results" -type f ! -name 'SHA256SUMS.txt' -print0 | sort -z | xargs -0 sha256sum > "$results/SHA256SUMS.txt" || true
+          python -m pip freeze | sort > "$results/PIP_FREEZE_3M.txt"
+          find "$results" -type f -printf '%P\t%s bytes\n' | sort > "$results/FILE_SIZES_3M.txt"
+          find "$results" -type f ! -name 'SHA256SUMS_3M.txt' -print0 | sort -z | xargs -0 sha256sum > "$results/SHA256SUMS_3M.txt" || true
 
-      - name: Upload immutable second-chunk bundle
+      - name: Upload immutable third-chunk bundle
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: r01-silg-official-100m-seed1-2m-${{ github.run_id }}
+          name: r01-silg-official-100m-seed1-3m-${{ github.run_id }}
           path: research/intelligence_swarm/benchmarks/grounded_causal/results_official_100m_seed1/
           if-no-files-found: error
           retention-days: 30
