@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Backlog
 
-Last updated: 2026-07-29 by K3-C
+Last updated: 2026-07-29 by K3-D
 
 ## P0 — Block AttnRes minimum reproduction
 
@@ -8,7 +8,7 @@ Classification: **小型化で要再設計・追加検証・未採用 / Path-WAR
 
 Current bottleneck:
 
-> D003-GHA environment/import workflowを実行して`ENV_PASS` artifact SHAを固定し、その後にCR1/PB1を分離したtiny deterministic semantic traceを通す。
+> D003-GHA environment workflowはcanonical branchへ実装済み。正規dispatcherから起動して`ENV_PASS` artifact ID/SHAを固定する。default branch登録要件で拒否された場合は、trigger/branchを黙って変えずC/Eへexecution-route amendmentを返す。
 
 ### A — Evidence
 
@@ -45,6 +45,7 @@ Current bottleneck:
 - [x] C004 register PAPER-BLOCK provisional total `115,579,904`
 - [x] Register checksum-collapsed semantic probability/entropy/effective source metrics
 - [x] S1 remains unauthorized
+- [ ] GitHubがcanonical-only workflowのmanual dispatchを拒否した場合のexecution-route amendment
 - [ ] PB1 semantic PASS後にのみfull-model resource protocolをamend
 - [ ] S1検討前に実コード上のglobal batch 64を保証
 
@@ -54,10 +55,15 @@ Current bottleneck:
 - [x] D002 standalone preflight
 - [x] D003 environment probe
 - [x] Local `BLOCKED_ENV` isolated
-- [ ] Add and run D003 GitHub Actions environment workflow from C003 manifest
+- [x] D004 add C003 environment runner script
+- [x] D004 add manual GitHub Actions environment workflow on canonical branch
+- [x] D004 static authorization/branch/evidence contract audit
+- [x] Confirm no workflow run existed at inspection time
+- [ ] Dispatch D003 GitHub Actions environment workflow
+- [ ] If dispatch is rejected due default-branch registration, record protocol blocker without adding push/PR trigger
 - [ ] Save branch SHA, runner provenance, exact dependencies, resolver report, freeze and hashes
 - [ ] Pass all required internal imports
-- [ ] Save `ENV_PASS` artifact SHA
+- [ ] Save `ENV_PASS` artifact ID and artifact SHA
 - [ ] Run CR1 tiny semantic trace without semantic modification
 - [ ] Run PB1 tiny semantic trace after CR1
 - [ ] Record source roles/checksums, duplicate groups, reset state and recency bias
@@ -73,6 +79,7 @@ Current bottleneck:
 
 - [x] E001–E003 completed
 - [x] Mark unchanged candidate inadmissible as canonical paper reproduction
+- [ ] Classify D003-GHA dispatch as PASS / protocol amendment required / transient retry
 - [ ] Classify D003-GHA environment stage PASS/RETRY/path failure
 - [ ] Classify PB1 semantic stage PASS/WARN/STOP
 - [ ] Record CR1 as artifact diagnostic only
@@ -107,4 +114,5 @@ Current bottleneck:
 - No promotion of environment/semantic preflight to quality evidence
 - No silent semantic patch
 - No automatic transition from ENV_PASS to model execution
+- No unregistered push/PR trigger or default-branch copy to bypass dispatch restrictions
 - No capability, intelligence-principle, high-school-level, or 1GB-goal claims without evidence
