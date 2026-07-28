@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Shared State
 
-Last updated: 2026-07-29 by K3-C
+Last updated: 2026-07-29 by K3-E
 Canonical branch: `research/intelligence-swarm-reconstruction-001`
 
 ## Objective
@@ -9,9 +9,9 @@ Kimi K3由来の効率化原理を、1GB以下・弱いCPU/スマホ向けモデ
 
 ## Current phase
 
-**Phase 1.9: C007 portable environment-gate preregistration completed. D008 is authorized for one environment-only portable attempt or one concrete `SUBSTRATE_STOP`.**
+**Phase 1.9: C007/B008 complete. D008 is the only authorized next action: one portable environment-only attempt or one concrete `SUBSTRATE_STOP`.**
 
-Completed: A001–A006, B001–B008, C001–C007, D001–D007, E001–E007.
+Completed: A001–A006, B001–B008, C001–C007, D001–D007, E001–E008.
 
 Current classifications:
 
@@ -20,7 +20,7 @@ Current classifications:
 - CANDIDATE-RAW (`CR1`): fixed-commit artifact diagnostic only; paper attribution prohibited
 - C005 canonical-push route: **`ROUTE_STOP / closed`**
 - C006/D007 default-branch route: **`ENV_PROTOCOL_FAIL + ROUTE_STOP_DEFAULT_BRANCH / closed`**
-- Execution state: **`D008_AUTHORIZED_ENVIRONMENT_ONLY`**
+- Execution state: **`D008_EXECUTION_ONLY_PENDING`**
 
 Frozen until P0 environment and semantic gates complete: new architecture, dataset download, optimizer step, S1–S3, quantization, KDA, Stable LatentMoE.
 
@@ -108,9 +108,13 @@ C007 fixes:
 
 Environment success remains non-model evidence and cannot update quality, CPU, memory, quantization, scale or Pareto claims.
 
+## E008 integration decision
+
+C007 and B008 already close the portable protocol and evidence-admissibility questions. No D008 result exists. Further evidence, theory, preregistration, trigger, dispatcher or substrate audits are prohibited because they do not test the hypothesis.
+
 ## Single next hypothesis
 
-A D008 portable environment-only bundle can validate the exact canonical/dependency/import contract on an available compliant Python 3.11 CPU substrate while preserving B007/B008 evidence-admissibility requirements.
+One C007-compliant portable environment-only attempt can produce one admissible classified result without model execution or semantic changes.
 
 ## Single bottleneck
 
@@ -118,22 +122,23 @@ A D008 portable environment-only bundle can validate the exact canonical/depende
 
 ## Authorized next work
 
-- A: no new K3 component; add provenance only after a concrete D008 resolver/import failure
-- B: no CPU crossover, minimum-scale or Pareto update before exact trace
-- C: C007 complete; do not amend unless D008 exposes a specific preregistration defect
-- D: create only the thin portable launcher, then run one environment-only attempt on a compliant substrate; if none exists, record one `SUBSTRATE_STOP`
-- E: classify the D008 substrate/environment outcome
+- A: no work unless D008 exposes a concrete dependency/source mismatch
+- B: no new theory, CPU crossover, minimum-scale or Pareto update before exact trace
+- C: no amendment unless D008 exposes one specific protocol defect
+- D: create the thin launcher and execute one portable attempt; if no compliant substrate exists, record one concrete `SUBSTRATE_STOP` and do not repeat substrate discovery
+- E: classify the actual D008 outcome
 
 ## Prohibitions
 
 1. no further C005/C006 trigger, nonce, dispatcher or default-branch workflow variants
 2. never dispatch the incomplete D007 workflow on `main`
-3. no model implementation on an orchestration branch or launcher
-4. no B0/PB1/CR1 instantiate, semantic trace, dataset/tokenizer/checkpoint download, training or quantization
-5. no silent dependency, API or semantic patch
-6. no automatic transition from environment PASS to model execution
-7. no mechanism-wide rejection from PB1 `N=4` null evidence
-8. no `ENV_PASS` unless imported module origins and both inner/outer checksum closures are complete
+3. no replacement audits for D008 execution
+4. no model implementation on an orchestration branch or launcher
+5. no B0/PB1/CR1 instantiate, semantic trace, dataset/tokenizer/checkpoint download, training or quantization
+6. no silent dependency, API or semantic patch
+7. no automatic transition from environment PASS to model execution
+8. no mechanism-wide rejection from PB1 `N=4` null evidence
+9. no `ENV_PASS` unless imported module origins and both inner/outer checksum closures are complete
 
 ## Next completion / stop classification
 
