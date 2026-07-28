@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Backlog
 
-Last updated: 2026-07-29 by K3-C
+Last updated: 2026-07-29 by K3-E
 
 ## P0 — Block AttnRes minimum reproduction
 
@@ -8,26 +8,21 @@ Classification: **小型化で要再設計・追加検証・未採用 / Path-WAR
 
 Current bottleneck:
 
-> C006は完了した。次の唯一の作業はDが、default branch上にC006準拠の薄いdispatcherを監査可能な最小変更として導入し、固定canonical SHAに対するenvironment-only runを1件実行・分類すること。
+> GitHub ActionsのC005/C006実行経路は閉鎖した。次の唯一の作業はCが、GitHub Actions登録やdefault-branch変更に依存しないportable environment-only bundleをC007として事前登録すること。
 
 ### A — Evidence
 
 - [x] Author executable/checkpoint status: 未公開
-- [x] Primary model size/depth/width/block/token evidence extracted
+- [x] Primary scale/depth/width/block/token evidence extracted
 - [x] Candidate and official commits fixed
 - [x] Dependency lower bound fixed
 - [x] Paper-to-candidate deviation matrix
 - [x] Missing partial reset, duplicate source and recency bias identified
 - [x] Paper layer-index origin and `L_sub/N/S` geometry fixed
 - [x] PB1 boundaries `[3,6,9,12]`; zero-based false-boundary and odd-`S` counterexamples fixed
-- [x] A005 official-artifact refresh: author executable/checkpoint still unavailable on 2026-07-29
-- [x] Community Megatron implementation classified as independent reproduction lead, not official/admissible during P0
-- [ ] Add provenance only after a concrete resolver/import failure
+- [x] A005 official-artifact refresh and community implementation admissibility audit
+- [ ] Add provenance only after a concrete C007/D008 resolver/import failure
 - [x] Freeze other K3 components during P0
-
-A005 evidence:
-
-- `research/intelligence_swarm/k3_loop/evidence/A005_OFFICIAL_ARTIFACT_STATUS_AND_COMMUNITY_IMPLEMENTATION_ADMISSIBILITY.md`
 
 ### B — Theory
 
@@ -40,32 +35,24 @@ A005 evidence:
 - [x] PB1 classified as minimum semantic/effect-direction pilot
 - [x] PB1 falsifiability boundary fixed
 - [x] B007 execution-substrate invariance and evidence-admissibility conditions fixed
+- [x] D007 verified against B007 and failed launcher-thinness/identity/artifact completeness
+- [ ] Specify C007 portable-substrate equivalence to B007
 - [ ] Recalculate operator share and actual/expected slots from exact trace
 - [x] No CPU crossover or minimum-scale claim before exact trace
-- [ ] Verify D007 against B007 canonical-code, dependency, authorization, launcher-thinness, and artifact-completeness conditions
-
-B007 theory:
-
-- `research/intelligence_swarm/k3_loop/theory/B007_EXECUTION_SUBSTRATE_INVARIANCE_AND_EVIDENCE_ADMISSIBILITY.md`
 
 ### C — Preregistration
 
-- [x] C001–C005 completed
-- [x] C005 route executed and closed as `ROUTE_STOP`
-- [x] Create `C006_DEFAULT_BRANCH_THIN_DISPATCHER_AMENDMENT.md`
-- [x] Create matching C006 machine-readable manifest
-- [x] Fix required inputs: canonical branch/SHA, C003/C004/C006 manifest SHA, environment script/probe SHA
-- [x] Fix detached-checkout, allowlist, dirty-tree, branch/SHA, blob-SHA and SHA256 guards
-- [x] Keep all model/training/data/quantization/semantic-trace authorization false
-- [x] Fix artifact schema, one unchanged transient retry, and no automatic model continuation
-- [x] Fix non-transient pre-patch import failure as `ENV_PATH_STOP_PENDING_AMENDMENT`
-- [x] Authorize D007 environment-only route after prose/manifest agreement
-- [ ] Do not amend C006 unless D007 exposes a concrete protocol defect or non-transient dependency/import failure
-
-C006 records:
-
-- `research/intelligence_swarm/k3_loop/prereg/C006_DEFAULT_BRANCH_THIN_DISPATCHER_AMENDMENT.md`
-- `benchmarks/k3_minimal/manifests/C006_default_branch_thin_dispatcher.yaml`
+- [x] C001–C006 completed
+- [x] C005 canonical-push route closed as `ROUTE_STOP`
+- [x] C006 default-branch dispatcher preregistered
+- [x] D007 exposed a concrete protocol/tooling failure
+- [ ] Create `C007_PORTABLE_ENVIRONMENT_GATE_PREREGISTRATION.md`
+- [ ] Create matching machine-readable C007 manifest
+- [ ] Fix immutable canonical commit and C003/C004/C006/script/probe identities
+- [ ] Fix exact Python/PyTorch/Transformers contract and replay command
+- [ ] Fix exact-content/clean-tree checks, all authorization false and no automatic model continuation
+- [ ] Fix resolver/freeze/checksum/import/raw-log/archive schema
+- [ ] Fix `ENV_PASS / ENV_RETRY / SUBSTRATE_STOP / ENV_PATH_STOP_PENDING_AMENDMENT / ENV_PATH_STOP / ENV_PROTOCOL_FAIL`
 
 ### D — Reproduction
 
@@ -74,33 +61,37 @@ C006 records:
 - [x] D003 local environment blocker isolation
 - [x] D004 environment workflow staging
 - [x] D005 preregistration blocker audit
-- [x] D006 C005 route execution and `ROUTE_STOP` evidence
-- [x] Stop further C005 nonce/path-filter variants
-- [x] Wait for C006 before any default-branch change
-- [ ] D007: introduce only the thin dispatcher to `main` through an auditable minimal change
-- [ ] D007: require immutable canonical branch/SHA and registered blob-SHA inputs
-- [ ] D007: dispatch one environment-only run against exact canonical SHA
-- [ ] D007: collect artifact ID/ZIP SHA256, resolver report, freeze, source/dependency hashes, imports, raw logs
-- [ ] D007: classify `ENV_PASS / ENV_RETRY / ROUTE_STOP_DEFAULT_BRANCH / ENV_PATH_STOP_PENDING_AMENDMENT / ENV_PATH_STOP / ENV_PROTOCOL_FAIL`
+- [x] D006 canonical-push route execution and `ROUTE_STOP`
+- [x] D007 default-branch attempt completed as `ENV_PROTOCOL_FAIL`
+- [x] Close both GitHub Actions routes
+- [x] Quarantine incomplete `.github/workflows/d007-k3-environment-dispatcher.yml`; never dispatch it
+- [ ] Wait for C007 before preparing a portable bundle
+- [ ] After C007 only: run one environment-only attempt on a compliant Python 3.11 CPU substrate
+- [ ] Persist replay command, raw logs, resolver report, freeze, import matrix, source/dependency hashes and archive checksum
+- [ ] If no compliant substrate exists, record one concrete `SUBSTRATE_STOP`; do not repeat route audits
 - [ ] After separate authorization only: CR1 trace, then PB1 trace
-- [x] Dataset, model execution, semantic trace, training and quantization prohibited during D007
+- [x] Dataset, model execution, semantic trace, training and quantization remain prohibited
 
-D006 evidence:
+D007 evidence:
 
-- `research/intelligence_swarm/k3_loop/reproduction/D006_C005_CANONICAL_PUSH_ROUTE_STOP.md`
-- `benchmarks/k3_minimal/preflight/D006_c005_push_route_result.json`
+- `research/intelligence_swarm/k3_loop/reproduction/D007_DEFAULT_BRANCH_DISPATCHER_PROTOCOL_BLOCKER.md`
+- `benchmarks/k3_minimal/preflight/D007_default_branch_dispatcher_result.json`
 
 ### E — Integration
 
 - [x] E001–E006 completed
-- [x] Candidate-raw made inadmissible as canonical paper reproduction
-- [x] Manual dispatch classified as orchestration blocker
-- [x] D005 classified as `PREREG_BLOCKED`
-- [x] D006 classified as `ROUTE_STOP`; C005 route closed
-- [x] PB1 result interpretation fixed
-- [x] Default-branch thin dispatcher judged scientifically separable from model intervention
-- [ ] Classify C006/D007 route and environment outcome
+- [x] D007 classified `ENV_PROTOCOL_FAIL`
+- [x] Default-branch GitHub Actions route classified `ROUTE_STOP_DEFAULT_BRANCH`
+- [x] C005 and C006 route variants permanently closed
+- [x] Block AttnRes/PB1/CR1 not rejected by orchestration failure
+- [x] Single next hypothesis moved to portable non-GitHub-Actions environment gate
+- [x] E007 integration record created
+- [ ] Classify C007/D008 substrate and environment outcome
 - [ ] Keep Block AttnRes unadopted until quality/resource/3-seed evidence
+
+E007 record:
+
+- `research/intelligence_swarm/k3_loop/integration/E007_D007_PROTOCOL_FAIL_AND_ROUTE_CLOSURE_DECISION.md`
 
 ## PAPER-BLOCK semantic completion
 
@@ -125,10 +116,10 @@ D006 evidence:
 
 ## Global prohibitions
 
-- No further C005 route variants
+- No further C005/C006 trigger, nonce, dispatcher or default-branch workflow variants
+- Never dispatch the incomplete D007 workflow on `main`
 - No broad push or PR trigger shortcut
-- No model code on the default branch
-- No mutable branch-tip checkout for D007
+- No model code on an orchestration branch or launcher
 - No new architecture before reproducible baseline and preregistration
 - No multi-component intervention
 - No paper attribution from CR1
