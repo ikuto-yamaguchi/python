@@ -308,9 +308,16 @@ def canonical_instance_id(value: Any) -> str:
     return canonical_text(value)
 
 
+def strict_seed(value: Any) -> int:
+    """Accept only a real JSON integer, never bool/float/string aliases."""
+    if type(value) is not int:
+        raise ValueError("seed must be a JSON integer (bool/float/string aliases are forbidden)")
+    return value
+
+
 def _cell_key(row: dict[str, Any]) -> tuple[int, str, str, str]:
     return (
-        int(row["seed"]),
+        strict_seed(row["seed"]),
         canonical_domain(row["domain"]),
         str(row["split"]).lower(),
         canonical_condition(row["condition"]),
@@ -369,10 +376,10 @@ def validate_dataset(rows: list[dict[str, Any]]) -> dict[str, Any]:
             errors.append(f"row {index}: condition must be non-empty")
         domains.add(domain); conditions.add(condition); splits[split] += 1
         try:
-            seed = int(row["seed"])
+            seed = strict_seed(row["seed"])
             seeds.add(seed); topology[(domain, split, condition)].add(seed); per_seed_splits[seed].add(split); per_domain_seed_splits[(domain, seed)].add(split)
         except (TypeError, ValueError):
-            errors.append(f"row {index}: seed must be integer-like")
+            errors.append(f"row {index}: seed must be a JSON integer; bool/float/string aliases are forbidden")
         if "text_tokens" in row:
             silg_rows += 1
             if row.get("utterance_source") != "text_tokens" and "utterance" not in rows[index - 1]:
@@ -467,7 +474,9 @@ def validate_dataset(rows: list[dict[str, Any]]) -> dict[str, Any]:
     if not domains: errors.append("need >=1 domain")
     missing_holdouts = HELD_OUT_CONDITIONS - {name for c in conditions for name in HELD_OUT_CONDITIONS if name in c}
     if missing_holdouts: warnings.append(f"missing held-out conditions: {sorted(missing_holdouts)}")
-    return {"valid": not errors, "errors": errors, "warnings": sorted(set(warnings)), "instances": len(adapted), "domains": sorted(domains), "seeds": sorted(seeds), "conditions": sorted(conditions), "split_counts": dict(sorted(splits.items())), "utterance_overlap": overlap, "utterance_normalization": "NFKC + casefold + remove whitespace/control-format characters", "holdout_integrity": holdout, "explicit_holdout_findings": explicit_holdout_findings, "explicit_condition_holdout_required": True, "split_identity_leakage": split_leakage, "leakage_rows": leakage, "schema_alias_findings": alias_findings, "schema_alias_normalization": "NFKC + casefold + remove non-ASCII-alphanumeric", "silg_rows_adapted": silg_rows, "dataset_sha256": stable_hash(adapted), "instance_fingerprints_sha256": stable_hash(fingerprints), "seed_domain_split_condition_topology": {str(k): sorted(v) for k, v in sorted(topology.items())}, "canonical_seed_topology_required": True, "domain_local_train_eval_coverage_required": True, "domain_seed_split_coverage": {str(k): sorted(v) for k, v in sorted(per_domain_seed_splits.items())}, "adapted_schema": True, "silg_text_tokens_supported": True, "episode_split_isolation_required": True, "normalized_trajectory_identity_required": True, "trajectory_identity_normalization": "recursive NFKC + casefold + remove whitespace/control-format + numeric scalar alias collapse", "unicode_utterance_overlap_required": True, "holdout_identity_normalization": "recursive NFKC + casefold + remove whitespace/control-format + numeric scalar alias collapse", "normalized_holdout_identity_required": True, "alias_normalized_leakage_required": True, "allowed_train_splits": sorted(TRAIN_SPLITS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "split_scope_fail_closed": True, "normalized_cell_identity_required": True, "cell_identity_normalization": "domain=NFKC+casefold+remove whitespace/control-format; condition=canonical sorted token set", "domain_label_collisions": domain_collisions, "condition_label_collisions": condition_collisions, "canonical_instance_identity_required": True, "exact_prediction_instance_id_required": True, "instance_identity_normalization": "NFKC + casefold + remove whitespace/control-format characters", "instance_id_collisions": instance_id_collisions}
+    return {"valid": not errors, "errors": errors, "warnings": sorted(set(warnings)), "instances": len(adapted), "domains": sorted(domains), "seeds": sorted(seeds), "conditions": sorted(conditions), "split_counts": dict(sorted(splits.items())), "utterance_overlap": overlap, "utterance_normalization": "NFKC + casefold + remove whitespace/control-format characters", "holdout_integrity": holdout, "explicit_holdout_findings": explicit_holdout_findings, "explicit_condition_holdout_required": True, "split_identity_leakage": split_leakage, "leakage_rows": leakage, "schema_alias_findings": alias_findings, "schema_alias_normalization": "NFKC + casefold + remove non-ASCII-alphanumeric", "silg_rows_adapted": silg_rows, "dataset_sha256": stable_hash(adapted), "instance_fingerprints_sha256": stable_hash(fingerprints), "seed_domain_split_condition_topology": {str(k): sorted(v) for k, v in sorted(topology.items())}, "canonical_seed_topology_required": True, "domain_local_train_eval_coverage_required": True, "domain_seed_split_coverage": {str(k): sorted(v) for k, v in sorted(per_domain_seed_splits.items())}, "adapted_schema": True, "silg_text_tokens_supported": True, "episode_split_isolation_required": True, "normalized_trajectory_identity_required": True, "trajectory_identity_normalization": "recursive NFKC + casefold + remove whitespace/control-format + numeric scalar alias collapse", "unicode_utterance_overlap_required": True, "holdout_identity_normalization": "recursive NFKC + casefold + remove whitespace/control-format + numeric scalar alias collapse", "normalized_holdout_identity_required": True, "alias_normalized_leakage_required": True, "allowed_train_splits": sorted(TRAIN_SPLITS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "split_scope_fail_closed": True, "normalized_cell_identity_required": True, "cell_identity_normalization": "domain=NFKC+casefold+remove whitespace/control-format; condition=canonical sorted token set", "domain_label_collisions": domain_collisions, "condition_label_collisions": condition_collisions, "canonical_instance_identity_required": True,
+        "strict_seed_identity_required": True,
+        "seed_identity_rule": "type(seed) is int; bool, float and string aliases forbidden", "exact_prediction_instance_id_required": True, "instance_identity_normalization": "NFKC + casefold + remove whitespace/control-format characters", "instance_id_collisions": instance_id_collisions}
 
 
 def _mean_ci(values: list[float]) -> tuple[float, float, float]:
@@ -727,7 +736,7 @@ def _raw_log_cell(row: dict[str, Any]) -> tuple[str, int, str, str, str]:
     """Use the same canonical cell identity as dataset scoring and artifact topology."""
     return (
         str(row["method"]),
-        int(row["seed"]),
+        strict_seed(row["seed"]),
         canonical_domain(row["domain"]),
         unicodedata.normalize("NFKC", str(row["split"])).casefold(),
         canonical_condition(row["condition"]),
