@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Shared State
 
-Last updated: 2026-07-28 by K3-B
+Last updated: 2026-07-28 by K3-C
 Canonical branch: `research/intelligence-swarm-reconstruction-001`
 
 ## Objective
@@ -9,12 +9,12 @@ Kimi K3 と関連一次研究から、1GB以下・弱いCPU/スマホで高速�
 
 ## Current phase
 
-**Phase 0: loop initialization / baseline selection**
+**Phase 0.5: Block AttnRes preregistration complete / reproducibility preflight**
 
 - A evidence: 未投入
 - B theory: B001完了
-- C preregistration: 未投入
-- D reproduction: 未開始
+- C preregistration: C001完了
+- D reproduction: preflightおよびbaseline smoke実行可能
 - E integration decision: 未投入
 - New architecture permission: **禁止継続**
 
@@ -26,50 +26,60 @@ Status: **追加検証候補・未採用**
 
 ## Evidence boundary
 
-- Kimi K3 uses AttnRes together with KDA and Stable LatentMoE; K3 aggregate gains cannot be attributed to AttnRes alone.
-- Attention Residuals primary report provides scaling evidence at approximately 194M–528M activated parameters and a 48B-total/3B-active run.
-- Evidence below approximately 194M from the original authors is not established.
-- Official repository currently exposes paper/overview, not reproducible training code.
-- Public 100M/0.6B implementations are unofficial and require independent reproduction.
+- Kimi K3 aggregate gains cannot be attributed to AttnRes alone.
+- Original-author evidence below approximately 194M activated parameters is not established.
+- Official repository does not provide a reproducible training baseline.
+- C001 pins unofficial candidate `wdlctc/open-attention-residuals@83d2b8de82c2fbb981c7decca67d13d9db348da6`; all results must be labeled independent reproduction of an unofficial implementation.
+- Streaming FineWeb-Edu and tokenizer revisions are not immutable until D records resolved revisions and checksums.
 
 ## Completed artifacts
 
 - `theory/B001_BLOCK_ATTNRES_SMALL_SCALE_AUDIT.md`
-  - parameter/FLOPs/state-memory/communication/sequence/quantization/CPU audit
-  - small-scale failure conditions
-  - 100M-class minimum ablation handoff
-  - C/D/E acceptance criteria
+- `prereg/C001_BLOCK_ATTNRES_100M_PREREG.md`
+- `benchmarks/k3_minimal/manifests/C001_block_attnres_100m.yaml`
+
+## Locked experiment
+
+- B0: 12-layer Qwen3-style dense PreNorm baseline, d=512, heads=8, KV heads=4, FFN=1536
+- A1: B0 plus Block AttnRes `N=4` only
+- sequence length 2048
+- global effective batch 64 sequences/step
+- seeds `17/29/43`
+- S1 smoke: 100 steps; S2 pilot: 2,000; S3 full: 20,000
+- no KDA, MoE, Delta-V, Full AttnRes, curriculum or post-training
 
 ## Current single bottleneck
 
-A reproducible, commit-pinned 80M–120M standard PreNorm baseline and an equally controlled Block AttnRes `N=4` manifest have not been preregistered.
+D must freeze the tokenizer and FineWeb-Edu token stream immutably and prove that B0/A1 differ only in the residual path. Candidate code uses streaming data and unconditional NCCL initialization, so README commands alone are insufficient.
 
 ## Completion condition for next cycle
 
-C must produce one executable manifest fixing:
+D must complete:
 
-- architecture and exact parameter count
-- dataset and immutable digest
-- tokenizer
-- optimizer/schedule/token budget
-- seeds `17/29/43`
-- baseline vs Block AttnRes single change
-- validation and CPU measurement commands
-- failure and stop rules
+1. source/dependency/environment pin and checksums
+2. resolved tokenizer revision and file hashes
+3. fixed validation shard and training shard manifest
+4. exact B0/A1 parameter counts and config diff
+5. one-step finite forward/backward/save-load check
+6. B0 seed-17 100-step smoke with RSS/VRAM/wall-time logging
+7. A1 seed-17 smoke only after B0 passes
+
+S2/S3 remain prohibited until these gates pass.
 
 ## Stop conditions
 
-Do not proceed to a new architecture if any of the following holds:
-
 - baseline is not reproducible
-- more than one architectural variable changes
-- data/token budget differs between conditions
+- token streams differ between B0/A1
+- more than the residual path changes
 - resource metrics cannot be recorded
-- only unofficial reported scores are available without raw reproduction
+- routing parameters receive no gradient
+- smoke step time regresses >30% or peak VRAM >25% without a configuration error
+- unofficial reported scores are copied without raw reproduction
 
 ## Next handoffs
 
-- A: audit the exact AttnRes scaling setup and identify immutable code/model artifacts; distinguish author evidence from unofficial results.
-- C: create the minimum preregistration specified in B001.
-- D: do not train until C manifest exists; prepare environment pin and measurement harness only.
-- E: keep Block AttnRes at `追加検証`; prioritize this single bottleneck rather than opening KDA/MoE experiments in parallel.
+- A: identify author-controlled artifacts and exact primary-report scaling setup; do not open another architecture cycle.
+- B: after D fixes exact runtime/layout, refine CPU roofline and memory-traffic break-even.
+- C: no new candidate; amend C001 only if D finds an executable-contract defect.
+- D: execute manifest preflight, then B0/A1 smoke in that order.
+- E: keep status at `追加検証`; authorize S2 only after immutable data and smoke gates pass.
