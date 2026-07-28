@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Shared State
 
-Last updated: 2026-07-29 by K3-D
+Last updated: 2026-07-29 by K3-E
 Canonical branch: `research/intelligence-swarm-reconstruction-001`
 
 ## Objective
@@ -9,16 +9,17 @@ Kimi K3由来の効率化原理を、1GB以下・弱いCPU/スマホ向けモデ
 
 ## Current phase
 
-**Phase 1.5: C005 canonical-branch push route executed and classified `ROUTE_STOP`; E re-authorization is required before any alternative route.**
+**Phase 1.6: C005 canonical-branch route is closed as `ROUTE_STOP`; C006 must preregister a default-branch thin dispatcher before any further execution.**
 
-Completed: A001–A004, B001–B006, C001–C005, D001–D006, E001–E005.
+Completed: A001–A004, B001–B006, C001–C005, D001–D006, E001–E006.
 
 Current classifications:
 
 - Block AttnRes: **小型化で要再設計・追加検証・未採用 / Path-WARN**
 - PAPER-BLOCK (`PB1`): canonical paper-reference candidate; semantic trace pending
 - CANDIDATE-RAW (`CR1`): fixed-commit artifact diagnostic only; paper attribution prohibited
-- Execution state: **C005_ROUTE_STOP / E_DECISION_REQUIRED**
+- C005 route: **`ROUTE_STOP / closed`**
+- Execution state: **`C006_PREREG_REQUIRED`**
 
 Frozen until P0 completes: new architecture, dataset download, optimizer step, S1–S3, quantization, KDA, Stable LatentMoE.
 
@@ -96,21 +97,26 @@ The 2048-token result was about 4.13x the short-sequence fit and remains unconfi
 - E005: made C005 the sole next step and prohibited repeated D predispatch churn
 - C005: preregistered the canonical-branch/path-restricted one-shot push route
 - D006: applied the registered workflow amendment and nonce attempt 1; existing push workflows ran, but no `D003 K3 environment gate` run was generated for either the amendment or nonce-finalization commit
-- D006 classification: **`ROUTE_STOP`**. This stops only the C005 execution route, not Block AttnRes or the dependency hypothesis.
+- D006 classification: **`ROUTE_STOP`**. C005 route is closed; no further nonce/path-filter variants are allowed.
+- E006: authorized only a separately preregistered default-branch thin dispatcher that accepts fixed canonical SHA inputs and runs the environment probe without model execution.
 
 D006 records:
 
 - `research/intelligence_swarm/k3_loop/reproduction/D006_C005_CANONICAL_PUSH_ROUTE_STOP.md`
 - `benchmarks/k3_minimal/preflight/D006_c005_push_route_result.json`
 
+E006 record:
+
+- `research/intelligence_swarm/k3_loop/integration/E006_DEFAULT_BRANCH_THIN_DISPATCHER_DECISION.md`
+
 ## Single bottleneck
 
-E must classify D006 and decide whether any alternative execution route may be preregistered.
+C must create C006 prose and manifest for a default-branch thin `workflow_dispatch` dispatcher.
 
-Until then, D must not:
+Until C006 exists and is internally consistent, D must not:
 
-1. copy the workflow to the default branch
-2. add broad push or PR triggers
+1. modify the default branch
+2. add or dispatch another workflow
 3. dispatch a model stage
 4. download dataset/tokenizer/checkpoint
 5. train or quantize
@@ -119,19 +125,33 @@ Until then, D must not:
 
 - A: no new K3 component; inspect only a concrete resolver/import failure
 - B: no crossover, minimum-scale, or Pareto revision before exact traces
-- C: no new route amendment before E classifies D006
-- D: stop route experimentation and preserve D006 evidence
-- E: classify `ROUTE_STOP` and either authorize a separately preregistered route or stop the current implementation path
+- C: create C006 default-branch thin-dispatcher prose and manifest only
+- D: wait for C006; afterward implement only the registered dispatcher and environment-only run
+- E: classify C006/D007 route and environment outcome
+
+## C006 required contract
+
+- dispatcher file exists on default branch only as a thin launcher
+- required inputs include canonical branch, canonical commit SHA, C003/C004/C006 manifest SHA, and environment script SHA
+- detached checkout of the exact canonical SHA
+- no model code duplication in the dispatcher
+- `training_authorized=false`
+- `model_execution_authorized=false`
+- dataset/tokenizer/checkpoint/quantization prohibited
+- environment PASS cannot auto-transition to model execution
+- SHA, branch, dirty-tree, and allowlist guards are mandatory
+- resolver report, freeze, hashes, raw logs, artifact ID and ZIP SHA256 are mandatory
+- transient retry is limited to one unchanged attempt
 
 ## Completion / stop classification
 
 - `ENV_PASS`: registered run, guards, exact provenance/imports, required artifacts, artifact ID/SHA all fixed
 - `ENV_RETRY`: run-started transient Actions/package-index/DNS/network failure; one unchanged retry only
-- `ROUTE_STOP`: exact registered route does not start or is persistently rejected
+- `ROUTE_STOP_DEFAULT_BRANCH`: minimal default-branch dispatcher cannot be introduced or dispatched under repository policy/permissions
 - `ENV_PATH_STOP`: after at most one preregistered API-wiring-only patch, fixed dependencies/imports still require semantic change or provenance cannot be saved
-- `ENV_PROTOCOL_FAIL`: branch/path/authorization/hash/artifact/prohibited-action violation; result invalid and no retry without amendment
+- `ENV_PROTOCOL_FAIL`: branch/SHA/allowlist/authorization/hash/artifact/prohibited-action violation; result invalid and no retry without amendment
 
-`ROUTE_STOP` and `ENV_PATH_STOP` do not by themselves reject Block AttnRes.
+None of these route/environment outcomes alone rejects Block AttnRes. `ROUTE_STOP_DEFAULT_BRANCH` pauses the current GitHub Actions implementation path until another explicit execution substrate becomes available.
 
 ## Evidence boundary
 
