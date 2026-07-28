@@ -1,0 +1,57 @@
+{
+  "contract": {
+    "candidate_commit": "83d2b8de82c2fbb981c7decca67d13d9db348da6",
+    "candidate_model_blob_sha": "649aa0067e5b9d0fc2a3cc68784a6794090a26a4",
+    "python": "3.11.x",
+    "torch_min": "2.4",
+    "transformers_commit": "42791a34fdeae197f60f11ace3807c81f44b0729"
+  },
+  "decision": {
+    "all_required_imports_ok": false,
+    "blockers": [
+      "Python 3.13 != preregistered 3.11.x",
+      "transformers is absent; exact commit imports cannot be tested",
+      "network DNS resolution to github.com is unavailable in the execution sandbox"
+    ],
+    "implementation_path_classification": "UNCHANGED_PATH_WARN",
+    "note": "Environment classification only; no Block AttnRes quality inference.",
+    "python_ok": false,
+    "stage": "dependency/import gate",
+    "status": "BLOCKED_ENV",
+    "torch_observed": "2.10.0+cpu",
+    "training_authorized": false,
+    "transformers_present": false
+  },
+  "environment": {
+    "cpu_count": 5,
+    "machine": "x86_64",
+    "packages": {
+      "huggingface_hub": {
+        "origin": "/opt/pyvenv/lib/python3.13/site-packages/huggingface_hub/__init__.py",
+        "present": true,
+        "version": "1.16.1"
+      },
+      "safetensors": {
+        "origin": "/opt/pyvenv/lib/python3.13/site-packages/safetensors/__init__.py",
+        "present": true,
+        "version": "0.7.0"
+      },
+      "tokenizers": {
+        "present": false
+      },
+      "torch": {
+        "origin": "/opt/pyvenv/lib/python3.13/site-packages/torch/__init__.py",
+        "present": true,
+        "version": "2.10.0+cpu"
+      },
+      "transformers": {
+        "present": false
+      }
+    },
+    "platform": "Linux-6.12.13-x86_64-with-glibc2.41",
+    "python": "3.13.5 (main, May  5 2026, 21:05:52) [GCC 14.2.0]",
+    "python_executable": "/opt/pyvenv/bin/python"
+  },
+  "result_sha256": "aee26a00ae6b7e6400144dce4c95b57500c3b74b705fb027e40552fda7efe8f3",
+  "schema": "D003-env-probe-v1"
+}
