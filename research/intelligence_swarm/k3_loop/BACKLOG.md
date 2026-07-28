@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Backlog
 
-Last updated: 2026-07-29 by K3-E
+Last updated: 2026-07-29 by K3-A
 
 ## P0 — Block AttnRes minimum reproduction
 
@@ -8,7 +8,7 @@ Classification: **小型化で要再設計・追加検証・未採用 / Path-WAR
 
 Current single bottleneck:
 
-> GitHub Actions上のPython 3.11 CPU環境でD003 exact dependency/import gateをPASSさせ、provenance artifactsを保存する。
+> GitHub Actions上のPython 3.11 CPU環境でD003 exact dependency/import gateをPASSさせ、provenance artifactsを保存し、その後にpaper-semantics traceを通す。
 
 ### A — Evidence
 
@@ -16,8 +16,9 @@ Current single bottleneck:
 - [x] 一次報告のmodel size、depth、width、block数、token budget抽出。
 - [x] 非公式候補 `wdlctc/open-attention-residuals@83d2b8de82c2fbb981c7decca67d13d9db348da6` 固定。
 - [x] Dependency lower bound固定。
+- [x] Paper-to-candidate deviation matrix作成（A003）。
+- [x] 候補のblock boundary後の`partial_block`未reset、source duplication、recency-bias拡張を特定。
 - [ ] Actions resolver/import probeで具体的不一致が出た場合のみprovenanceを追補。
-- [ ] S2前にpaper-to-candidate deviation matrixを作成。
 - [x] P0未解決中は他K3 componentを凍結。
 
 ### B — Theory
@@ -37,6 +38,8 @@ Current single bottleneck:
 - [x] C002 exact dependency、fresh-process、AB/BA、RSS/operator protocol固定。
 - [ ] C003: GitHub Actions runner image/provenance、Python 3.11、dependency lock、cache policy、artifact pathsを登録。
 - [ ] C003: environment PASS後のみmeasurementを許可する二段階gateを登録。
+- [ ] C004 amendment: PAPER-BLOCK variantとCANDIDATE-RAW diagnostic variantを分離。
+- [ ] C004: block boundary indexing、partial reset、source identities、recency-bias禁止、optional gate禁止を事前登録。
 - [ ] D003 Path-PASS後もglobal batch 64を保証する別amendmentを作成。
 - [x] S1を許可しない。
 
@@ -54,7 +57,9 @@ Current single bottleneck:
 - [ ] `pip --report`、`pip freeze`、downloaded wheel/source hashesを保存。
 - [ ] `d003_environment_probe.py`を実行しrequired imports全件PASS。
 - [ ] failure時もraw logsとsummaryをartifact upload。
-- [ ] Stage 1 PASS後のみexact B0/A1 semantic gateを実行。
+- [ ] Stage 1 PASS後、tiny semantic traceでsource checksum、duplication、partial reset、recency biasを記録。
+- [ ] PAPER-BLOCK variantのみcanonical residual-only semantic gateへ進める。
+- [ ] CANDIDATE-RAWはartifact診断に限定し、paper mechanismへ帰属しない。
 - [ ] exact countsとresidual-only config/state-dict diff。
 - [ ] fixed input SHA256、forward/backward/routing gradients、save/load `<=1e-6`。
 - [ ] fresh-process `AB/BA/AB/BA` timingとisolated RSS。
@@ -69,6 +74,7 @@ Current single bottleneck:
 - [x] E001: D002を単一ボトルネック化。
 - [x] E002: D002をPath-WARNとして統合しD003を選定。
 - [x] E003: local `BLOCKED_ENV`を科学的失敗とせず、D003をGitHub Actionsへ移管。
+- [ ] A003を受け、unchanged candidateをcanonical paper reproductionとして不適格に狭義化。
 - [ ] D003-GHA environment stage後、dependency pathをPASS/RETRY/STOP分類。
 - [ ] exact model stage後、implementation pathをPASS/WARN/STOP分類。
 - [ ] quality/resource evidence合格まで未採用を維持。
@@ -88,7 +94,7 @@ Current single bottleneck:
 - **ENV-PASS:** exact dependency/import gateとprovenance artifactが成立。
 - **ENV-RETRY:** Actions、package index、DNS等の一時障害。科学的判断には使わず再実行。
 - **PATH-STOP:** 固定runnerと最大1件の登録済みimport/API-wiring patch後にも、semantic変更なしでdependency/import/instantiateが成立しない。
-- **MODEL-PASS:** residual-only semantics、gradient/save-load、再現可能なmeasurementが成立し、A1 full-model時間・RSS overheadが各10%未満。
+- **MODEL-PASS:** paper-semantics variantでresidual-only semantics、gradient/save-load、再現可能なmeasurementが成立し、A1 full-model時間・RSS overheadが各10%未満。
 - **MODEL-WARN:** CPU時間/RSS `>=10%`、stack/layout+framework相当 `>=50%`、fresh-process ratio `>=2.0`、またはorder block不安定。
 
 ## P1 — Candidate queue after P0
