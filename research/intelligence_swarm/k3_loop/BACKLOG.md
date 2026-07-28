@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Backlog
 
-Last updated: 2026-07-29 by K3-A
+Last updated: 2026-07-29 by K3-B
 
 ## P0 — Block AttnRes minimum reproduction
 
@@ -37,7 +37,7 @@ Current bottleneck:
 - [x] PB1 falsifiability boundary fixed
 - [x] B007 execution-substrate invariance and evidence-admissibility conditions fixed
 - [x] D007 verified against B007 and failed launcher-thinness/identity/artifact completeness
-- [ ] Specify C007 portable-substrate equivalence to B007
+- [x] B008 portable-substrate equivalence and trust-closure requirements fixed
 - [ ] Recalculate operator share and actual/expected slots from exact trace
 - [x] No CPU crossover or minimum-scale claim before exact trace
 
@@ -53,6 +53,7 @@ Current bottleneck:
 - [ ] Fix exact Python/PyTorch/Transformers contract and replay command
 - [ ] Fix exact-content/clean-tree checks, all authorization false and no automatic model continuation
 - [ ] Fix resolver/freeze/checksum/import/raw-log/archive schema
+- [ ] Fix imported-module origin hashes and inner/outer checksum closure
 - [ ] Fix `ENV_PASS / ENV_RETRY / SUBSTRATE_STOP / ENV_PATH_STOP_PENDING_AMENDMENT / ENV_PATH_STOP / ENV_PROTOCOL_FAIL`
 
 ### D — Reproduction
@@ -68,7 +69,7 @@ Current bottleneck:
 - [x] Quarantine incomplete `.github/workflows/d007-k3-environment-dispatcher.yml`; never dispatch it
 - [ ] Wait for C007 before preparing a portable bundle
 - [ ] After C007 only: run one environment-only attempt on a compliant Python 3.11 CPU substrate
-- [ ] Persist replay command, raw logs, resolver report, freeze, import matrix, source/dependency hashes and archive checksum
+- [ ] Persist replay command, raw logs, resolver report, freeze, import matrix, module-origin hashes, source/dependency hashes and archive checksum
 - [ ] If no compliant substrate exists, record one concrete `SUBSTRATE_STOP`; do not repeat route audits
 - [ ] After separate authorization only: CR1 trace, then PB1 trace
 - [x] Dataset, model execution, semantic trace, training and quantization remain prohibited
