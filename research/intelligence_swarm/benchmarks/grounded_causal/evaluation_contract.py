@@ -724,12 +724,13 @@ def _read_raw_log_objects(path: Path) -> list[dict[str, Any]]:
 
 
 def _raw_log_cell(row: dict[str, Any]) -> tuple[str, int, str, str, str]:
+    """Use the same canonical cell identity as dataset scoring and artifact topology."""
     return (
         str(row["method"]),
         int(row["seed"]),
-        str(row["domain"]),
+        canonical_domain(row["domain"]),
         unicodedata.normalize("NFKC", str(row["split"])).casefold(),
-        str(row["condition"]),
+        canonical_condition(row["condition"]),
     )
 
 
@@ -779,6 +780,10 @@ def _audit_run_raw_log_binding(
         if field == "split":
             expected = unicodedata.normalize("NFKC", str(expected)).casefold()
             observed = unicodedata.normalize("NFKC", str(observed)).casefold()
+        elif field == "domain":
+            expected, observed = canonical_domain(expected), canonical_domain(observed)
+        elif field == "condition":
+            expected, observed = canonical_condition(expected), canonical_condition(observed)
         elif field == "seed":
             try:
                 expected, observed = int(expected), int(observed)
@@ -798,6 +803,7 @@ def audit_artifacts(manifest: dict[str, Any], base_dir: Path) -> dict[str, Any]:
     errors, checks, raw_log_findings = [], [], []; raw_log_cache: dict[Path, list[dict[str, Any]]] = {}; runs = manifest.get("runs")
     if not isinstance(runs, list) or not runs: return {"valid": False, "errors": ["manifest.runs must be a non-empty list"], "checks": [], "classification": "initial_reproduction_failure"}
     methods, cells, seeds, domains, topology, commits = set(), set(), set(), set(), set(), set(); identity = defaultdict(set)
+    raw_domains_by_canonical, raw_conditions_by_canonical = defaultdict(set), defaultdict(set)
     for index, run in enumerate(runs, 1):
         if not isinstance(run, dict): errors.append(f"run {index}: must be an object"); continue
         missing = RESOURCE_FIELDS - run.keys()
@@ -805,9 +811,12 @@ def audit_artifacts(manifest: dict[str, Any], base_dir: Path) -> dict[str, Any]:
         try:
             method = str(run["method"])
             seed = int(run["seed"])
-            domain = str(run["domain"])
+            raw_domain, raw_condition = str(run["domain"]), str(run["condition"])
+            domain = canonical_domain(raw_domain)
             split = unicodedata.normalize("NFKC", str(run["split"])).casefold()
-            condition = str(run["condition"])
+            condition = canonical_condition(raw_condition)
+            raw_domains_by_canonical[domain].add(raw_domain)
+            raw_conditions_by_canonical[condition].add(raw_condition)
         except (KeyError, TypeError, ValueError) as exc:
             errors.append(f"run {index}: invalid indexing field {exc}")
             continue
@@ -837,6 +846,12 @@ def audit_artifacts(manifest: dict[str, Any], base_dir: Path) -> dict[str, Any]:
             if path_key == "model_path" and _finite_positive(run.get("model_bytes")) and int(run["model_bytes"]) != path.stat().st_size: errors.append(f"run {index}: model_bytes does not match model artifact size")
         binding_errors, binding_finding = _audit_run_raw_log_binding(run, index, base_dir, raw_log_cache)
         errors.extend(binding_errors); raw_log_findings.append(binding_finding)
+    domain_collisions = {key: sorted(values) for key, values in raw_domains_by_canonical.items() if key and len(values) > 1}
+    condition_collisions = {key: sorted(values) for key, values in raw_conditions_by_canonical.items() if key and len(values) > 1}
+    if domain_collisions:
+        errors.append(f"artifact domain labels collide after canonicalization: {domain_collisions}")
+    if condition_collisions:
+        errors.append(f"artifact condition labels collide after canonicalization: {condition_collisions}")
     required = REQUIRED_METHODS; missing_methods, unexpected_methods = required - methods, methods - required
     if missing_methods: errors.append(f"manifest missing required methods {sorted(missing_methods)}")
     if unexpected_methods: errors.append(f"manifest contains unexpected methods {sorted(unexpected_methods)}")
@@ -846,7 +861,7 @@ def audit_artifacts(manifest: dict[str, Any], base_dir: Path) -> dict[str, Any]:
     if seeds != CANONICAL_SEEDS: errors.append(f"manifest seeds must be exactly {sorted(CANONICAL_SEEDS)}, found {sorted(seeds)}")
     expected = {(m, s, d, sp, c) for m in required for s in CANONICAL_SEEDS for d, sp, c in topology}; missing_cells = expected - cells
     if missing_cells: errors.append(f"manifest incomplete observed-topology coverage: {len(missing_cells)} missing cells")
-    return {"valid": not errors, "errors": errors, "warnings": [], "checks": checks, "methods": sorted(methods), "seeds": sorted(seeds), "domains": sorted(domains), "observed_topology": [list(v) for v in sorted(topology)], "runs": len(runs), "missing_run_cells": len(missing_cells), "missing_run_cell_examples": [list(v) for v in sorted(missing_cells)[:10]], "independent_artifacts_required": True, "positive_resource_measurements_required": True, "artifact_path_containment_required": True, "nonempty_artifacts_required": True, "condition_index_required": True, "exact_method_topology_required": True, "single_commit_required": True, "same_dataset_per_cell_required": True, "canonical_seeds": sorted(CANONICAL_SEEDS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "artifact_split_scope_fail_closed": True, "raw_log_measurement_findings": raw_log_findings, "raw_log_measurement_binding_required": True, "exactly_one_measurement_record_per_run_required": True, "raw_log_bound_fields": list(RAW_LOG_MEASUREMENT_FIELDS), "classification": "reproduced" if not errors else "initial_reproduction_failure"}
+    return {"valid": not errors, "errors": errors, "warnings": [], "checks": checks, "methods": sorted(methods), "seeds": sorted(seeds), "domains": sorted(domains), "observed_topology": [list(v) for v in sorted(topology)], "runs": len(runs), "missing_run_cells": len(missing_cells), "missing_run_cell_examples": [list(v) for v in sorted(missing_cells)[:10]], "independent_artifacts_required": True, "positive_resource_measurements_required": True, "artifact_path_containment_required": True, "nonempty_artifacts_required": True, "condition_index_required": True, "exact_method_topology_required": True, "single_commit_required": True, "same_dataset_per_cell_required": True, "canonical_seeds": sorted(CANONICAL_SEEDS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "artifact_split_scope_fail_closed": True, "raw_log_measurement_findings": raw_log_findings, "raw_log_measurement_binding_required": True, "exactly_one_measurement_record_per_run_required": True, "raw_log_bound_fields": list(RAW_LOG_MEASUREMENT_FIELDS), "normalized_resource_cell_identity_required": True, "resource_cell_identity_normalization": "domain=NFKC+casefold+remove whitespace/control-format; condition=canonical sorted token set", "artifact_domain_label_collisions": domain_collisions, "artifact_condition_label_collisions": condition_collisions, "classification": "reproduced" if not errors else "initial_reproduction_failure"}
 
 
 def main(argv: list[str] | None = None) -> int:
