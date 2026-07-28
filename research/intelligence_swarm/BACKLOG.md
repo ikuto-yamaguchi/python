@@ -124,12 +124,13 @@ Applied single-cause correction:
 - preserve before/after source and SHA-256
 - no model、loss、optimizer、environment、action schema、sampling default、frame-budget change
 
-Current state:
+Current state verified for RESET-E083:
 
+- inspected PR head: `f83a72610d37a5dc8d43a9c053b02b5134c082fd`
 - replacement run/job/artifact/qualification: **unconfirmed**
-- current PR head workflow runs visible through the connector: **12件すべて`action_required`, jobs未生成**
+- 12 connector-visible PR-triggered workflows: **all `completed / action_required`, jobs未生成**
 - classification: **`workflow_execution_approval_or_policy_blocker`**
-- do not classify this as model、optimizer、SILG baseline or capability failure
+- do not classify this as model、optimizer、SILG baseline、evaluation logic or capability failure
 - do not duplicate-dispatch the same first chunk
 
 Required artifact after execution is allowed:
@@ -156,7 +157,7 @@ Continuation after first checkpoint:
 
 D015〜D035を凍結する。能力runではrandom/language-blind/state-only/shuffle、model/checkpoint bytes、RSS、runtime、CPU latency、seed、split、actual frames、raw logs、checksums、leakageを保存する。公式再現ではofficial command parity、100M horizon、checkpoint/resume integrityも必須。
 
-Normalized-cell workflowはread-only fail-closed CIへ変更済み。fixtureは明示holdout契約に合わせて修正済みであり、直前の実行可能headではevaluation-contract checksが通過した。現headの`action_required`は承認/policy層のblockerとして扱い、evaluation logic regressionとは混同しない。
+Normalized-cell workflowはread-only fail-closed CIへ変更済み。fixtureは明示holdout契約に合わせて修正済みである。RESET-E083で観測した`action_required`は承認/policy層のblockerとして扱い、evaluation logic regressionとは混同しない。
 
 Standalone `audit_canonical_instance_identity.py`はpassしているが、direct integration into `validate_dataset()` and `score()` remains incomplete。統合完了までclaimed bundleからstandalone auditを省略しない。
 
@@ -186,7 +187,7 @@ NeurIPS 2024のUMN-CRLにはauthor-official repository `acarturk-e/umni-crl`が�
 
 score-based CRL、finite-sample CRL、unknown multi-node intervention CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg、MagicBench、CodeBind、NoisyCausal、CaST-Bench、CausalVerse、MTG-Causal-RL、Mind Dreamer、AER、COGS等をnovelty matrixの既存境界として維持する。
 
-新しい文献名だけを毎回追加しない。「一次文献 + author-official code + exact commit + public numerical contract」が固定でき、RQ-001境界を実質変更する場合だけnovelty matrixへ昇格する。
+2026-07-28の再監査でも、既存境界を実質変更する新しい「一次文献 + author-official code + exact commit + public numerical contract」の組は確認できなかった。文献名だけを毎回追加せず、immutable reproductionが可能になったものだけをnovelty matrixへ昇格する。
 
 ## P1 — R0.2 Environment-first
 
@@ -216,7 +217,7 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 - immutable R0.1 short-horizon screening artifacts: **8件**
 - official-contract infrastructure artifact: **1件**
 - exact one-step resume-equivalence artifact: **1件・accepted**
-- active official 100M reproduction: **initial seed CLI defect fixed; replacement execution unconfirmed**
+- active official 100M reproduction: **initial seed CLI defect fixed; replacement execution blocked/unconfirmed**
 - official SILG 100M-frame reproduction: **0件**
 - competent external baseline: **0件**
 - official-horizon matched controls: **0件**
