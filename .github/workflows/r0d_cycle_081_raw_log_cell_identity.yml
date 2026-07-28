@@ -1,0 +1,49 @@
+name: R0-D Cycle 081 raw-log cell identity
+
+on:
+  pull_request:
+    branches:
+      - research/intelligence-swarm-governance-014
+    paths:
+      - research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/apply_r0d_cycle_081_raw_log_cell_identity.py
+      - research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_raw_log_cell_identity_cycle_081.py
+      - .github/workflows/r0d_cycle_081_raw_log_cell_identity.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/intelligence-swarm-reconstruction-001
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Apply fail-closed core patch
+        working-directory: research/intelligence_swarm/benchmarks/grounded_causal
+        run: python apply_r0d_cycle_081_raw_log_cell_identity.py
+      - name: Compile core and regression
+        run: |
+          python -m py_compile \
+            research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py \
+            research/intelligence_swarm/benchmarks/grounded_causal/test_evaluation_contract_raw_log_cell_identity_cycle_081.py
+      - name: Run focused regression
+        working-directory: research/intelligence_swarm/benchmarks/grounded_causal
+        run: python test_evaluation_contract_raw_log_cell_identity_cycle_081.py
+      - name: Commit core integration to canonical branch
+        run: |
+          if git diff --quiet -- research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py; then
+            echo 'core already contains cycle 081'
+            exit 0
+          fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
+          git commit -m 'research: integrate cycle 081 raw-log cell identity'
+          git push origin HEAD:research/intelligence-swarm-reconstruction-001
