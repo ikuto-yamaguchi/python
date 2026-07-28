@@ -6,7 +6,7 @@
 
 ## Current stage
 
-- Stage: **R0 Research Reconstruction — official SILG continuation submitted; first checkpoint result unconfirmed**
+- Stage: **R0 Research Reconstruction — official SILG continuation blocked before replacement execution**
 - Canonical branch: `research/intelligence-swarm-reconstruction-001`
 - Canonical PR: **#409 open / draft / mergeable**
 - A〜Dの新規toy仮説・別branch・新規機構族: **禁止**
@@ -22,14 +22,15 @@
 
 ## Non-termination rule
 
-「検証したが駄目だった」で終了しない。ただし、短期screeningを公式baseline再現と誤認して追加hyperparameter探索を続けることも禁止する。能力と無関係な監査障害だけのために高コスト学習を重複しない。
+「検証したが駄目だった」で終了しない。ただし、短期screeningを公式baseline再現と誤認して追加hyperparameter探索を続けることも禁止する。能力と無関係な監査・実行障害だけのために高コスト学習を重複しない。
 
 ## R0 status ledger
 
 - immutable R0.1 short-horizon screening artifacts: **8件**
 - official-contract infrastructure artifact: **1件**
 - accepted exact one-step resume-equivalence artifact: **1件**
-- official SILG RTFM 100M-frame reproduction: **seed-1 first 1M checkpoint submitted; run/job/artifact result unconfirmed**
+- official SILG RTFM 100M-frame reproduction: **0件**
+- official seed-1 / entropy-0.05 first 1M chunk: **initial run failed before training; replacement result unconfirmed**
 - 学習済み公開能力baseline再現: **0件**
 - official-horizon matched controls: **0件**
 - J-CRe3 numerical reproduction: **0件**
@@ -39,7 +40,7 @@
 - 中心命題の事前登録: **未完了**
 - 広義RQ-001: **棄却**
 - 狭義RQ-001: **未採用**
-- 主分類: **`official_100m_reproduction_in_progress_result_unconfirmed`**
+- 主分類: **`official_100m_replacement_execution_unconfirmed`**
 
 ## Official SILG reproduction contract
 
@@ -48,8 +49,6 @@ Pinned official SILG `launch.py --envs rtfm`は、`model=multi`、`stateful=fals
 既存の`131,072`-frame runsは公式frame horizonの`0.131072%`にすぎない。すべてshort-horizon screening evidenceとして保持し、公式public baseline reproductionや公式baseline failureとは呼ばない。
 
 ## Accepted resume-equivalence evidence
-
-Canonical ledger:
 
 - run `30300067389`
 - job `90090542489`
@@ -61,9 +60,21 @@ Exact consumed learner batch、initial recurrent state、learner model、optimiz
 
 ## Active official continuation
 
-`.github/workflows/r01_silg_official_100m_chunk.yml`はseed 1、entropy `0.05`、official sampling defaultsを保持し、最初のdurable checkpointとして`1,000,000` framesをtargetにする。complete `job.tar`、optimizer/scheduler/frame、exact command、host provenance、RSS/wall、dependency、bytes、SHA-256を保存する。
+最初のseed-1 / entropy-0.05 chunk run `30308447687`は、pinned SILGが`--seed` CLI argumentを持たないためtraining開始前に失敗した。
 
-この統合時点でもpush-run本体のrun ID、job ID、artifact ID、checkpoint qualificationを独立確認できていない。よって状態は**submitted / result unconfirmed**であり、開始・完了・能力進歩を認定しない。同一chunkを重複dispatchしない。
+Immutable failure evidence:
+
+- artifact `8669383695`
+- SHA-256 `9a5518b1a5e5338886ed2d3f2429d0e0246f0ba9cd919de7627e6f01c74dccd4`
+
+Commit `ce6909baf0e0879d1547c34beb457d59d2027b9e`はunsupported `--seed`を削除し、pinned `run_exp.py`へseedだけを固定する監査済みpatchを適用した。
+
+- global Python / NumPy / Torch seed: `SILG_EXPERIMENT_SEED=1`
+- actor seed: `experiment_seed * 1000003 + actor_index`
+- patch前後sourceとSHA-256をartifact保存
+- model、loss、optimizer、environment、action schema、sampling defaults、frame budgetは不変
+
+現head `e168d58696eea3356adc971e7d2899f914b06b0d`に対する確認可能なPR-triggered workflow 12件はすべて`action_required`でjob未生成だった。これはmodel failureではなくworkflow execution approval/policy blockerである。replacement chunkのrun/job/artifact/qualificationを独立確認するまで開始・完了・能力進歩を認定せず、同一chunkを重複dispatchしない。
 
 ## Latest short-horizon negative evidence
 
@@ -100,17 +111,13 @@ Run `30258965674`, artifact `8650362356`:
 
 D015〜D035を凍結する。能力runではrandom/language-blind/state-only/shuffle、model/checkpoint bytes、RSS、runtime、CPU latency、seed、split、actual frames、raw logs、checksums、leakageを保存する。infrastructure-only runでは能力対照をN/Aと明示し、能力進歩へ数えない。
 
-RESET-E081では、唯一失敗していた`R0D core normalized cell identity` workflowを、PRからcommit/pushする自己書換えjobからread-only fail-closed CIへ変更した。patch applicatorのidempotence、production coreの無差分、compile、focused regressionだけを検証する。model、benchmark、split、controls、評価定義は変更していない。
-
-PR head更新前に確認したworkflow群では、canonical instance identity、unified acceptance gate、artifact containment、raw-log binding、prediction topology、score dataset-contract binding、normalized holdout/cell identity等は成功し、`R0D core normalized cell identity`だけが失敗していた。新workflow結果が成功するまではevaluation-contract correctionを完了扱いにしない。
-
-Standalone canonical-instance-identity auditはpassしているが、`validate_dataset()`と`score()`へのdirect fail-closed integrationは未完了である。統合完了まではclaimed bundleからstandalone auditを省略しない。
+Normalized-cell regression fixtureは明示holdout契約に合わせて修正済みであり、直前の実行可能headではevaluation-contract checksが通過した。現headの`action_required`は承認/policy層の実行ブロッカーであり、評価ロジックの回帰とは認定しない。Standalone canonical-instance-identity auditは、`validate_dataset()`と`score()`へのdirect fail-closed integration完了まで省略しない。
 
 ## Prior-art and RQ boundary
 
-既存のscore-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg、MagicBench、CodeBind、NoisyCausal、CaST-Bench、CausalVerse、MTG-Causal-RL、Mind Dreamer、AER、COGS等の境界を維持する。
+既存のscore-based CRL、finite-sample CRL、unknown multi-node intervention CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg、MagicBench、CodeBind、NoisyCausal、CaST-Bench、CausalVerse、MTG-Causal-RL、Mind Dreamer、AER、COGS等の境界を維持する。
 
-2026年一次文献の再監査では、unknown intervention targetを含むcausal DAG coarsening、RL policyのnonlinear causal reduction、少数environment・有限標本でのunknown target回復が既に扱われていることを確認した。RQ-001を採用へ反転できる「一次文献 + author-official code + exact commit + public numerical contract」の新しい組は確認していない。文献名だけを追加してnovelty matrixを水増ししない。
+最新再監査では、2026年のfew-environment finite-sample CRLが少数のunknown multi-node interventionからlatent graph、mixing/representation、unknown intervention targetsを回復する保証を提示している。2024年のUMN-CRLにはauthor-official codeも存在する。ただし、本repositoryでexact commit、dependency、public numerical contractを固定したimmutable再現は未完了である。文献名だけを追加してnovelty matrixを水増ししない。
 
 正式判断:
 
@@ -131,4 +138,4 @@ Standalone canonical-instance-identity auditはpassしているが、`validate_d
 
 ## Last integration
 
-2026-07-28: **RESET-E081**。PRから自己書換えする`R0D core normalized cell identity` workflowをread-only fail-closed CIへ修正した。official seed-1 first 1M checkpointはresult unconfirmed、外部baseline再現0件、能力進歩未認定、高校生級未達を維持する。
+2026-07-28: **RESET-E082**。official first chunkの`--seed` CLI defectとimmutable failure artifact、seed-only patch、replacement execution未確認、現headのActions approval/policy blockerを統合した。外部baseline再現0件、能力進歩未認定、高校生級未達を維持する。
