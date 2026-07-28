@@ -1,0 +1,59 @@
+{
+  "artifact": {
+    "digest": "sha256:d42f9f9ac38b90fdaa344de7cd624d0dd059b300a84a0ea427f75d892b7cbeb9",
+    "expires_at": "2026-08-27T04:05:40Z",
+    "id": 8676275327,
+    "name": "r01-silg-official-100m-seed1-chunk-30316319311",
+    "size_bytes": 50005626
+  },
+  "benchmark_contract": {
+    "batch_size": 24,
+    "entropy_cost": 0.05,
+    "environment_test": "silg:rtfm_test_s1-v0",
+    "environment_train": "silg:rtfm_train_s1-v0",
+    "learner_threads": 4,
+    "learning_rate": 0.0005,
+    "model": "multi",
+    "num_actors": 30,
+    "pretrained_language_model": false,
+    "seed": 1,
+    "stateful": false,
+    "target_frames": 100000000,
+    "unroll_length": 80
+  },
+  "capability_progress_claimed": false,
+  "checkpoint": {
+    "bytes": 39266677,
+    "frames": 1006080,
+    "missing_required_keys": [],
+    "sha256": "fae5a2f8515ccb8a6b018349c0f09a38cb656a862e78803765ba87b396caca86"
+  },
+  "classification": "official_100m_reproduction_in_progress",
+  "controls_status": "not_run_until_trained_checkpoint_evaluation",
+  "execution": {
+    "commit": "ce6909baf0e0879d1547c34beb457d59d2027b9e",
+    "job_id": 90142509702,
+    "run_id": 30316319311,
+    "status": "success"
+  },
+  "model": {
+    "state_parameters": 7969115
+  },
+  "public_baseline_reproduced": false,
+  "qualified_for_continuation": true,
+  "resources": {
+    "cpu": "AMD EPYC 9V74, 4 logical CPUs",
+    "elapsed_seconds": 14272,
+    "maximum_rss_kib": 10563636,
+    "python": "3.8.18"
+  },
+  "source_pins": {
+    "rtfm_commit": "58f17955595b5a127c96d045d896fcbcc7d4b570",
+    "silg_commit": "2af07578e1264029a240fcfb78d4ac0aea16f5de"
+  },
+  "status": {
+    "matched_controls_completed": false,
+    "seed_1_frames_completed": 1006080,
+    "three_seed_reproduction_completed": false
+  }
+}
