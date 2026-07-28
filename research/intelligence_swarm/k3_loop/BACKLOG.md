@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Backlog
 
-Last updated: 2026-07-28 by K3-E
+Last updated: 2026-07-28 by K3-A
 
 ## P0 — Current cycle: Block AttnRes minimum reproduction
 
@@ -16,7 +16,7 @@ Current single bottleneck:
 - [x] Extract primary-report model sizes, depths, widths, block counts and token budgets.
 - [x] Pin unofficial candidate `wdlctc/open-attention-residuals@83d2b8de82c2fbb981c7decca67d13d9db348da6`.
 - [x] Record A001 evidence audit.
-- [ ] Infer and pin the narrowest candidate-compatible Python/PyTorch/Transformers tuple from repository metadata and imports.
+- [x] Infer and pin the narrowest candidate-compatible Python/PyTorch/Transformers tuple from repository metadata and imports. See A002: Python 3.11, PyTorch exact build satisfying `>=2.4`, Transformers git commit lower bound `42791a34fdeae197f60f11ace3807c81f44b0729`.
 - [ ] Record paper-to-candidate deviation matrix before S2.
 - [x] Keep all other K3 components frozen while P0 is unresolved.
 
@@ -58,7 +58,7 @@ Current single bottleneck:
 - [x] Save/load max absolute difference `0.0`.
 - [x] Routing trace and machine-readable D002 summary persisted.
 - [x] E002 retained Path-WARN and authorized D003 only.
-- [ ] Pin exact candidate dependency runtime.
+- [ ] Pin exact candidate dependency runtime using the A002 lower-bound snapshot; record the final exact PyTorch build and all resolved hashes.
 - [ ] Record any minimal compatibility patch with diff and checksum.
 - [ ] Execute B0/A1 in separate fresh processes.
 - [ ] Alternate execution order after identical warm-up.
@@ -90,6 +90,14 @@ Current single bottleneck:
   - seq2048 `35.944 ms`
 - Full-model timing is order-contaminated and unusable for Pareto judgment.
 - No quality, training throughput, CPU generation, quantization or 3-seed evidence exists.
+
+## A002 dependency evidence summary
+
+- Candidate `requirements.txt` ranges are not executable provenance.
+- `transformers` releases through `v5.0.0` do not expose the exact Qwen3 decorator/import combination consumed by the candidate.
+- Evidence-backed Transformers lower bound: commit `42791a34fdeae197f60f11ace3807c81f44b0729`.
+- That snapshot requires Python `>=3.10` and Torch `>=2.4`; D003 should use Python 3.11 and an exact pinned PyTorch build.
+- D003 synthetic preflight must exclude dataset/UI/tracking dependencies unless an actual import requires them.
 
 ## D003 completion conditions
 
