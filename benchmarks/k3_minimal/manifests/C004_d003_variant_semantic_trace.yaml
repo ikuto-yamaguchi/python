@@ -1,0 +1,123 @@
+schema_version: 1
+id: C004_d003_variant_semantic_trace
+status: authorized_after_c003_env_pass
+branch: research/intelligence-swarm-reconstruction-001
+requires:
+  environment_manifest: C003_d003_gha_environment_gate
+  environment_label: ENV_PASS
+  environment_artifact_sha: required
+baseline:
+  id: B0
+  architecture: qwen3_dense_prenorm
+  hidden_size: 512
+  num_hidden_layers: 12
+  num_attention_heads: 8
+  num_key_value_heads: 4
+  head_dim: 64
+  intermediate_size: 1536
+  vocab_size: 151936
+  tie_word_embeddings: true
+  expected_total_parameters: 115554304
+variants:
+  PB1:
+    name: PAPER-BLOCK
+    attribution: canonical_paper_candidate
+    num_blocks: 4
+    pseudo_query: static_zero_initialized
+    routing_key: rms_normalized
+    routing_mix: softmax_weighted_sum
+    boundary_append_once: required
+    partial_reset_after_boundary: required
+    unintended_duplicate_identity: forbidden
+    recency_bias: forbidden
+    optional_gate: forbidden
+    expected_total_parameters: 115579904
+    expected_parameter_delta: 25600
+    output_path: benchmarks/k3_minimal/semantic_trace/paper_block
+  CR1:
+    name: CANDIDATE-RAW
+    attribution: artifact_diagnostic_only
+    repository: wdlctc/open-attention-residuals
+    commit: 83d2b8de82c2fbb981c7decca67d13d9db348da6
+    semantic_patch: forbidden
+    expected_total_parameters: 115579929
+    expected_parameter_delta: 25625
+    output_path: benchmarks/k3_minimal/semantic_trace/candidate_raw
+trace:
+  seed: 17
+  device: cpu
+  dtype: fp32
+  batch_size: 1
+  input_source: local_synthetic
+  require_two_block_boundaries: true
+  same_input_bytes_across_variants: true
+  input_sha256: required
+  stochastic_ops_disabled: true
+fields_per_event:
+  - variant_id
+  - event_index
+  - layer_index
+  - sublayer_role
+  - block_index
+  - boundary_before
+  - boundary_after
+  - partial_reset_before
+  - partial_reset_after
+  - source_index
+  - source_role
+  - source_creation_event
+  - source_checksum
+  - duplicate_checksum_group
+  - raw_logit
+  - recency_bias_contribution
+  - raw_probability
+  - semantic_probability_collapsed_by_checksum
+  - raw_entropy
+  - semantic_entropy
+  - raw_effective_source_count
+  - semantic_effective_source_count
+  - weighted_output_checksum
+source_identity:
+  key: [creation_event, source_role]
+  duplicate_identity_forbidden_for_pb1: true
+  checksum_and_identity_duplicates_reported_separately: true
+classification:
+  PB1_pass_all:
+    - reset_at_every_boundary
+    - zero_unintended_identity_duplicates
+    - preregistered_source_roles
+    - no_recency_bias
+    - no_optional_gate
+    - finite_probabilities_sum_to_one
+    - explained_parameter_delta
+    - save_load_event_and_output_match
+  PB1_warn_any:
+    - checksum_duplicate_with_distinct_explained_identity
+    - numerical_difference_within_registered_tolerance
+    - instrumentation_overhead_without_semantic_change
+  PB1_stop_any:
+    - missing_boundary_reset
+    - unintended_identity_duplicate
+    - bias_or_gate_present
+    - source_role_mismatch
+    - invalid_probability
+    - unexplained_parameter_delta
+    - model_equation_change_required_for_trace
+  CR1_labels: [RAW_DIAGNOSTIC_COMPLETE, RAW_DIAGNOSTIC_FAILED]
+authorization:
+  allowed: [variant_instantiate, deterministic_semantic_trace, parameter_state_dict_audit, save_load_check]
+  forbidden: [dataset_access, tokenizer_access, optimizer, training, full_model_benchmark, quantization, new_architecture, kda, moe]
+artifacts_required_per_variant:
+  - variant-config.json
+  - parameter-and-state-dict.json
+  - input.json
+  - events.jsonl
+  - duplicate-groups.json
+  - routing-metrics.json
+  - save-load-check.json
+  - raw.log
+  - summary.json
+  - checksums.sha256
+next_gate:
+  owner: E
+  note: PB1 semantic PASS does not authorize training or prove quality or efficiency.
