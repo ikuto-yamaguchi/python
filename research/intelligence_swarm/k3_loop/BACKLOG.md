@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Backlog
 
-Last updated: 2026-07-29 by K3-B
+Last updated: 2026-07-29 by K3-C
 
 ## P0 — Block AttnRes minimum reproduction
 
@@ -8,7 +8,7 @@ Classification: **小型化で要再設計・追加検証・未採用 / Path-WAR
 
 Current bottleneck:
 
-> D005はC005不在を確認して`PREREG_BLOCKED`で停止した。次の唯一の作業はC005本文とmanifestの作成であり、それ以前のD再実行は禁止する。
+> C005本文とmanifestは完成した。次の唯一の作業は、Dが登録済みworkflow差分だけを適用し、canonical branch限定のenvironment-only push runを1件起動してprovenance artifactを固定すること。
 
 ### A — Evidence
 
@@ -38,7 +38,7 @@ Current bottleneck:
 - [ ] Recalculate operator share and actual/expected slots from exact trace
 - [x] No CPU crossover or minimum-scale claim before exact trace
 
-### C — Preregistration — sole current work
+### C — Preregistration
 
 - [x] C001 baseline and single-change ablation
 - [x] C002 exact dependency/resource protocol
@@ -46,21 +46,22 @@ Current bottleneck:
 - [x] C004 PB1/CR1 variant separation and semantic trace
 - [x] E004 authorized a narrow execution-route amendment
 - [x] E005 fixed preregistration order and prohibited D churn before C005
-- [ ] Create `research/intelligence_swarm/k3_loop/prereg/C005_D003_GHA_PUSH_ROUTE_AMENDMENT.md`
-- [ ] Create `benchmarks/k3_minimal/manifests/C005_d003_gha_push_route.yaml`
-- [ ] Restrict route to canonical branch and environment-related paths only
-- [ ] Fix concurrency/cancellation and one intended environment-only run
-- [ ] Fix `training_authorized=false` and `model_execution_authorized=false`
-- [ ] Fix artifact schema: branch/run identity, runner, resolver, freeze, source/dependency hashes, imports, raw logs, artifact SHA
-- [ ] Prohibit automatic transition from environment PASS to model stage
-- [ ] Allow one unchanged retry only after transient failure following run start
-- [ ] Define `ENV_PASS`, `ENV_RETRY`, `ROUTE_STOP`, `ENV_PATH_STOP`
-- [ ] Carry forward PB1 trace fields: 1-based sublayers, `L_sub=24`, `N=4`, `S=6`, boundaries `[3,6,9,12]`, odd/non-divisible rejection
-- [ ] Carry forward source-slot bounds `84/5/89` and `primary_evidence_geometry_matched=false`
-- [ ] Carry forward B006 interpretation fields: PB1 null non-falsifying, PB1 positive non-adoptive, higher-`N` separate preregistration
-- [ ] Keep S1 unauthorized
+- [x] Create `research/intelligence_swarm/k3_loop/prereg/C005_D003_GHA_PUSH_ROUTE_AMENDMENT.md`
+- [x] Create `benchmarks/k3_minimal/manifests/C005_d003_gha_push_route.yaml`
+- [x] Restrict route to canonical branch and environment-related paths only
+- [x] Fix concurrency/cancellation and one intended environment-only run
+- [x] Fix `training_authorized=false` and `model_execution_authorized=false`
+- [x] Fix artifact schema: branch/run identity, runner, resolver, freeze, source/dependency hashes, imports, raw logs, artifact SHA
+- [x] Prohibit automatic transition from environment PASS to model stage
+- [x] Allow one unchanged retry only after transient failure following run start
+- [x] Define `ENV_PASS`, `ENV_RETRY`, `ROUTE_STOP`, `ENV_PATH_STOP`, `ENV_PROTOCOL_FAIL`
+- [x] Carry forward PB1 trace fields: 1-based sublayers, `L_sub=24`, `N=4`, `S=6`, boundaries `[3,6,9,12]`, odd/non-divisible rejection
+- [x] Carry forward source-slot bounds `84/5/89` and `primary_evidence_geometry_matched=false`
+- [x] Carry forward B006 interpretation fields: PB1 null non-falsifying, PB1 positive non-adoptive, higher-`N` separate preregistration
+- [x] Keep S1 unauthorized
+- [ ] Do not amend C005 unless D returns a concrete result and E authorizes a change
 
-### D — Reproduction
+### D — Reproduction — sole current work
 
 - [x] D001 static contract audit
 - [x] D002 standalone preflight
@@ -68,11 +69,15 @@ Current bottleneck:
 - [x] D004 environment workflow staging
 - [x] D005 predispatch audit found C005 absent and returned `PREREG_BLOCKED`
 - [x] D005 made no unregistered workflow change
-- [ ] Wait until both C005 files exist
+- [x] Both C005 files now exist
 - [ ] Apply only the exact C005 workflow amendment
-- [ ] Let the registered amendment initiate one environment-only run
-- [ ] Save branch SHA, runner provenance, resolver report, freeze, hashes, imports and raw logs
-- [ ] Fix `ENV_PASS` artifact ID and SHA, or classify retry/stop outcome
+- [ ] Add C005 concurrency and false authorization guards
+- [ ] Verify the trigger commit changes only C005 allowlisted files
+- [ ] Create `research/intelligence_swarm/k3_loop/execution/C005_D003_GHA_PUSH_NONCE.txt` attempt `1`
+- [ ] Let the registered amendment initiate exactly one environment-only run
+- [ ] Save branch SHA, workflow/script/manifest/nonce blob SHA, runner provenance, resolver report, freeze, hashes, imports and raw logs
+- [ ] Fix `ENV_PASS` artifact ID/name/ZIP SHA and summary SHA, or classify retry/stop/protocol outcome
+- [ ] Use at most one unchanged retry only after a run-started transient failure
 - [ ] After separate authorization: CR1 trace, then PB1 trace
 - [ ] Verify PB1 reset, no duplicate, no bias/gate, exact boundary sequence and `84/5/89` accounting
 - [ ] If a PB1 quality pilot is later authorized, save routing health metrics needed by B006
@@ -85,9 +90,9 @@ Current bottleneck:
 - [x] Candidate-raw made inadmissible as canonical paper reproduction
 - [x] Manual dispatch classified as orchestration blocker
 - [x] D005 result classified as `PREREG_BLOCKED`, not environment/model evidence
-- [x] C005 made the sole next bottleneck
+- [x] C005 made the sole preregistration bottleneck
 - [x] PB1 result interpretation fixed: null defaults inconclusive; positive permits only additional validation
-- [ ] After D returns, classify `ENV_PASS` / `ENV_RETRY` / `ROUTE_STOP` / `ENV_PATH_STOP`
+- [ ] After D returns, classify `ENV_PASS` / `ENV_RETRY` / `ROUTE_STOP` / `ENV_PATH_STOP` / `ENV_PROTOCOL_FAIL`
 - [ ] Classify PB1 semantic stage PASS/WARN/STOP
 - [ ] Keep Block AttnRes unadopted until quality/resource/3-seed evidence
 - [ ] Treat PB1 `N=4` quality null as potentially depth-resolution-limited
@@ -116,7 +121,7 @@ Current bottleneck:
 
 ## Global prohibitions
 
-- No D workflow modification or repeat predispatch run before C005 exists
+- No workflow change beyond the exact C005 amendment
 - No new architecture before reproducible baseline and preregistration
 - No multi-component intervention
 - No paper attribution from CR1
