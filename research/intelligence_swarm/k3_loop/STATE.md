@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Shared State
 
-Last updated: 2026-07-29 by K3-B
+Last updated: 2026-07-29 by K3-C
 Canonical branch: `research/intelligence-swarm-reconstruction-001`
 
 ## Objective
@@ -9,9 +9,9 @@ Kimi K3由来の効率化原理を、1GB以下・弱いCPU/スマホ向けモデ
 
 ## Current phase
 
-**Phase 1.8: D007 ended in `ENV_PROTOCOL_FAIL`; both GitHub Actions routes are closed. C007 portable environment-gate preregistration is the sole next step.**
+**Phase 1.9: C007 portable environment-gate preregistration completed. D008 is authorized for one environment-only portable attempt or one concrete `SUBSTRATE_STOP`.**
 
-Completed: A001–A006, B001–B008, C001–C006, D001–D007, E001–E007.
+Completed: A001–A006, B001–B008, C001–C007, D001–D007, E001–E007.
 
 Current classifications:
 
@@ -20,20 +20,21 @@ Current classifications:
 - CANDIDATE-RAW (`CR1`): fixed-commit artifact diagnostic only; paper attribution prohibited
 - C005 canonical-push route: **`ROUTE_STOP / closed`**
 - C006/D007 default-branch route: **`ENV_PROTOCOL_FAIL + ROUTE_STOP_DEFAULT_BRANCH / closed`**
-- Execution state: **`C007_PREREGISTRATION_REQUIRED`**
+- Execution state: **`D008_AUTHORIZED_ENVIRONMENT_ONLY`**
 
 Frozen until P0 environment and semantic gates complete: new architecture, dataset download, optimizer step, S1–S3, quantization, KDA, Stable LatentMoE.
 
 ## Fixed references
 
+- scientific source commit: `9edf4c7143ff1d62685ed893352df7a32090fe1e`
 - candidate: `wdlctc/open-attention-residuals@83d2b8de82c2fbb981c7decca67d13d9db348da6`
 - official: `MoonshotAI/Attention-Residuals@85e22310fe5ee860b4a023de312d791de8a5a5e6`
 - Transformers commit: `42791a34fdeae197f60f11ace3807c81f44b0729`
 - official executable training baseline: not released
+- C007 prose blob: `42ca0249037caecf855de98c978f4a50373d2e94`
+- C007 manifest blob at creation: `26bdaaf2d67567e65fad847129719cc3a2cce071`
 
-A005 found no author executable code, checkpoint, dependency lock, immutable data manifest, or evaluation harness. A community Megatron implementation remains an independent reproduction lead only and cannot replace PB1/CR1 during P0.
-
-A006 audited `kyegomez/attn_res@b634f0d9bcc6a925f118f828e07f79679b70ed6f` as a compact public small-model scaffold. It is unofficial and has paper-semantic deviations: completed blocks become visible one routing event late, equal block divisibility is not enforced, and the final output uses an unlearned source sum instead of the paper-consistent final router. It provides no controlled small-model quality, CPU, quantization, long-context or multi-seed evidence and is not admissible as a PB1 replacement.
+A005 found no author executable code, checkpoint, dependency lock, immutable data manifest or evaluation harness. A006 found a compact unofficial implementation, but it has one-event-late block visibility, missing divisibility guards and a non-paper final sum; it cannot replace PB1/CR1.
 
 ## Candidate separation
 
@@ -63,7 +64,7 @@ Exact executable state dictで再確認する。parameter数やKV cache非増加
 - canonical source slots: sublayer `84`, final `5`, total `89`
 - `primary_evidence_geometry_matched=false`
 
-PB1 is a minimum semantic/effect-direction pilot, not a reproduction of the primary `N≈8–9` evidence geometry. PB1 null is not mechanism-wide falsification, and PB1 positive is not sufficient for adoption.
+PB1 is a minimum semantic/effect-direction pilot. PB1 null is not mechanism-wide falsification, and PB1 positive is not sufficient for adoption.
 
 ## Existing executable evidence
 
@@ -78,65 +79,57 @@ Standalone routing medians:
 
 The 2048-token result was about 4.13x the short-sequence fit and remains unconfirmed in the exact runtime.
 
-## Execution-route history
+## Closed execution routes
 
 - D003 local exact-runtime attempt: `BLOCKED_ENV`
-- D004 workflow staged; manual dispatch unavailable
-- C005/D006 canonical-branch push route: no environment workflow run generated; `ROUTE_STOP`, closed
-- C006 preregistered a default-branch thin dispatcher
-- D007 committed an incomplete minimal workflow to `main` at `0091e002dfb965e59adda99d7319ceba03e565e6`
-- the workflow lacks mandatory C006 immutable-input, identity, authorization, raw-evidence and archive-checksum gates
-- no workflow run was dispatched
-- the available interface rejected compliant replacement and cleanup deletion
-- E007 classifies the run `ENV_PROTOCOL_FAIL` and closes the default-branch GitHub Actions route as `ROUTE_STOP_DEFAULT_BRANCH`
-- the incomplete workflow is quarantined and must not be dispatched
+- C005/D006 canonical-branch push route: `ROUTE_STOP`, closed
+- C006/D007 default-branch route: `ENV_PROTOCOL_FAIL`, closed
+- incomplete `.github/workflows/d007-k3-environment-dispatcher.yml` is quarantined and must never be dispatched
+
+## C007 portable environment contract
 
 Records:
 
-- `research/intelligence_swarm/k3_loop/reproduction/D007_DEFAULT_BRANCH_DISPATCHER_PROTOCOL_BLOCKER.md`
-- `benchmarks/k3_minimal/preflight/D007_default_branch_dispatcher_result.json`
-- `research/intelligence_swarm/k3_loop/integration/E007_D007_PROTOCOL_FAIL_AND_ROUTE_CLOSURE_DECISION.md`
-- `research/intelligence_swarm/k3_loop/evidence/A006_SMALL_PUBLIC_IMPLEMENTATION_SEMANTIC_AND_EVIDENCE_AUDIT.md`
-- `research/intelligence_swarm/k3_loop/theory/B008_PORTABLE_SUBSTRATE_EQUIVALENCE_AND_TRUST_CLOSURE_AUDIT.md`
+- `research/intelligence_swarm/k3_loop/prereg/C007_PORTABLE_ENVIRONMENT_GATE_PREREGISTRATION.md`
+- `benchmarks/k3_minimal/manifests/C007_portable_environment_gate.yaml`
 
-## Portable-substrate evidence contract
+C007 fixes:
 
-B008 fixed the conditions under which a non-GitHub-Actions environment run is evidence-equivalent to B007. Portability removes the platform-provided chain of custody, so C007/D008 must explicitly close:
-
-- canonical commit/ref reachability and clean/exact source identity
-- normative file Git-blob SHA, byte SHA256, path and size
-- exact dependency artifacts and resolver state
-- all model-stage authorization flags as false
+- GitHub-Actions-independent online-Git or offline-Git-bundle acquisition
+- scientific source commit and canonical-ref reachability
+- detached checkout, clean tree, untracked/submodule/LFS rejection
+- C003/C004/C007/runner/probe Git blob, byte SHA256, path and size evidence
+- Python `3.11.x`, exact CPU PyTorch build, fixed Transformers commit and complete dependency artifact hashes
+- `sys.path`, module-origin paths and imported-source hashes
+- all model-stage authorization flags `false`
 - OS/CPU/libc/container/runtime provenance
-- `sys.path`, imported-module origin paths and source hashes
-- inner evidence-file checksums plus outer archive SHA256 and byte size
+- inner evidence-file checksums and outer deterministic archive SHA256/size
+- exact replay command, one unchanged transient retry and six result classes
 
-Environment success remains non-model evidence and cannot update quality, CPU, memory, quantization, scale, or Pareto claims.
+Environment success remains non-model evidence and cannot update quality, CPU, memory, quantization, scale or Pareto claims.
 
 ## Single next hypothesis
 
-A self-contained portable environment-only bundle can validate the exact canonical/dependency/import contract on a compliant non-GitHub-Actions substrate while preserving B007/B008 evidence-admissibility requirements and keeping every model-stage authorization false.
+A D008 portable environment-only bundle can validate the exact canonical/dependency/import contract on an available compliant Python 3.11 CPU substrate while preserving B007/B008 evidence-admissibility requirements.
 
 ## Single bottleneck
 
-**C007 portable offline/externally executed environment-gate preregistration.**
-
-C007 must define the immutable identities, exact dependency contract, clean/exact-content verification, imported-module origin verification, authorization isolation, artifact schema, replay command, retry boundary and result classes for one portable environment-only attempt.
+**D008 portable environment-only execution or one concrete `SUBSTRATE_STOP`.**
 
 ## Authorized next work
 
-- A: no new K3 component; add provenance only after a concrete resolver/import failure
-- B: portable-substrate equivalence completed in B008; no CPU crossover, minimum-scale or Pareto update before exact trace
-- C: create C007 prose and machine-readable manifest only, including B008 trust-closure requirements
-- D: do not touch or dispatch the incomplete default-branch workflow; after C007, build and run one portable environment-only attempt on an available compliant substrate
-- E: classify the C007/D008 substrate and environment outcome
+- A: no new K3 component; add provenance only after a concrete D008 resolver/import failure
+- B: no CPU crossover, minimum-scale or Pareto update before exact trace
+- C: C007 complete; do not amend unless D008 exposes a specific preregistration defect
+- D: create only the thin portable launcher, then run one environment-only attempt on a compliant substrate; if none exists, record one `SUBSTRATE_STOP`
+- E: classify the D008 substrate/environment outcome
 
 ## Prohibitions
 
 1. no further C005/C006 trigger, nonce, dispatcher or default-branch workflow variants
-2. do not dispatch `.github/workflows/d007-k3-environment-dispatcher.yml` in its current form
+2. never dispatch the incomplete D007 workflow on `main`
 3. no model implementation on an orchestration branch or launcher
-4. no B0/PB1/CR1 instantiate, semantic trace, dataset/tokenizer/checkpoint download, training or quantization before separate authorization
+4. no B0/PB1/CR1 instantiate, semantic trace, dataset/tokenizer/checkpoint download, training or quantization
 5. no silent dependency, API or semantic patch
 6. no automatic transition from environment PASS to model execution
 7. no mechanism-wide rejection from PB1 `N=4` null evidence
@@ -155,4 +148,4 @@ None of these environment outcomes alone rejects Block AttnRes.
 
 ## Evidence boundary
 
-Quality, exact model bytes, active compute, isolated peak RSS, training time, CPU generation, quantization tolerance, and three-seed stability remain unmeasured. No new intelligence principle, capability progress, high-school-level capability, or 1GB-goal achievement is supported.
+Quality, exact model bytes, active compute, isolated peak RSS, training time, CPU generation, quantization tolerance and three-seed stability remain unmeasured. No new intelligence principle, capability progress, high-school-level capability or 1GB-goal achievement is supported.
