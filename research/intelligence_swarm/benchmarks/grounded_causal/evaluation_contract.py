@@ -303,6 +303,11 @@ def canonical_condition(value: Any) -> str:
     return "+".join(sorted(parts))
 
 
+def canonical_instance_id(value: Any) -> str:
+    """Canonical identity used only to detect aliases; raw IDs remain binding keys."""
+    return canonical_text(value)
+
+
 def _cell_key(row: dict[str, Any]) -> tuple[int, str, str, str]:
     return (
         int(row["seed"]),
@@ -324,7 +329,7 @@ def instance_fingerprint(row: dict[str, Any]) -> str:
 def validate_dataset(rows: list[dict[str, Any]]) -> dict[str, Any]:
     adapted = adapt_dataset(rows)
     errors, warnings = [], []
-    seen, domains, seeds, conditions = set(), set(), set(), set()
+    seen, canonical_instance_ids, domains, seeds, conditions = set(), defaultdict(set), set(), set(), set()
     splits = Counter()
     texts = defaultdict(lambda: defaultdict(list))
     entities, dynamics = defaultdict(set), defaultdict(set)
@@ -342,9 +347,13 @@ def validate_dataset(rows: list[dict[str, Any]]) -> dict[str, Any]:
             errors.append(f"row {index}: missing fields {sorted(missing)}")
             continue
         iid = str(row["instance_id"])
+        canonical_iid = canonical_instance_id(iid)
+        if not canonical_iid:
+            errors.append(f"row {index}: instance_id must be non-empty after canonicalization")
         if iid in seen:
             errors.append(f"row {index}: duplicate instance_id={iid}")
         seen.add(iid)
+        canonical_instance_ids[canonical_iid].add(iid)
         fingerprints[iid] = instance_fingerprint(row)
         raw_domain, raw_condition = str(row["domain"]), str(row["condition"])
         domain, condition, split = canonical_domain(raw_domain), canonical_condition(raw_condition), str(row["split"]).lower()
@@ -405,6 +414,9 @@ def validate_dataset(rows: list[dict[str, Any]]) -> dict[str, Any]:
         if row.get("episode_id") is not None: episode_splits[_trajectory_split_identity(row["episode_id"])].add(split)
         if row.get("episode_seed") is not None: episode_seed_splits[_trajectory_split_identity(row["episode_seed"])].add(split)
         if row.get("observation_fingerprint") is not None: observation_splits[_trajectory_split_identity(row["observation_fingerprint"])].add(split)
+    instance_id_collisions = {key: sorted(values) for key, values in canonical_instance_ids.items() if key and len(values) > 1}
+    if instance_id_collisions:
+        errors.append(f"instance_id aliases collide after canonicalization: {instance_id_collisions}")
     domain_collisions = {key: sorted(values) for key, values in raw_domains_by_canonical.items() if len(values) > 1}
     condition_collisions = {key: sorted(values) for key, values in raw_conditions_by_canonical.items() if len(values) > 1}
     if domain_collisions:
@@ -455,7 +467,7 @@ def validate_dataset(rows: list[dict[str, Any]]) -> dict[str, Any]:
     if not domains: errors.append("need >=1 domain")
     missing_holdouts = HELD_OUT_CONDITIONS - {name for c in conditions for name in HELD_OUT_CONDITIONS if name in c}
     if missing_holdouts: warnings.append(f"missing held-out conditions: {sorted(missing_holdouts)}")
-    return {"valid": not errors, "errors": errors, "warnings": sorted(set(warnings)), "instances": len(adapted), "domains": sorted(domains), "seeds": sorted(seeds), "conditions": sorted(conditions), "split_counts": dict(sorted(splits.items())), "utterance_overlap": overlap, "utterance_normalization": "NFKC + casefold + remove whitespace/control-format characters", "holdout_integrity": holdout, "explicit_holdout_findings": explicit_holdout_findings, "explicit_condition_holdout_required": True, "split_identity_leakage": split_leakage, "leakage_rows": leakage, "schema_alias_findings": alias_findings, "schema_alias_normalization": "NFKC + casefold + remove non-ASCII-alphanumeric", "silg_rows_adapted": silg_rows, "dataset_sha256": stable_hash(adapted), "instance_fingerprints_sha256": stable_hash(fingerprints), "seed_domain_split_condition_topology": {str(k): sorted(v) for k, v in sorted(topology.items())}, "canonical_seed_topology_required": True, "domain_local_train_eval_coverage_required": True, "domain_seed_split_coverage": {str(k): sorted(v) for k, v in sorted(per_domain_seed_splits.items())}, "adapted_schema": True, "silg_text_tokens_supported": True, "episode_split_isolation_required": True, "normalized_trajectory_identity_required": True, "trajectory_identity_normalization": "recursive NFKC + casefold + remove whitespace/control-format + numeric scalar alias collapse", "unicode_utterance_overlap_required": True, "holdout_identity_normalization": "recursive NFKC + casefold + remove whitespace/control-format + numeric scalar alias collapse", "normalized_holdout_identity_required": True, "alias_normalized_leakage_required": True, "allowed_train_splits": sorted(TRAIN_SPLITS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "split_scope_fail_closed": True, "normalized_cell_identity_required": True, "cell_identity_normalization": "domain=NFKC+casefold+remove whitespace/control-format; condition=canonical sorted token set", "domain_label_collisions": domain_collisions, "condition_label_collisions": condition_collisions}
+    return {"valid": not errors, "errors": errors, "warnings": sorted(set(warnings)), "instances": len(adapted), "domains": sorted(domains), "seeds": sorted(seeds), "conditions": sorted(conditions), "split_counts": dict(sorted(splits.items())), "utterance_overlap": overlap, "utterance_normalization": "NFKC + casefold + remove whitespace/control-format characters", "holdout_integrity": holdout, "explicit_holdout_findings": explicit_holdout_findings, "explicit_condition_holdout_required": True, "split_identity_leakage": split_leakage, "leakage_rows": leakage, "schema_alias_findings": alias_findings, "schema_alias_normalization": "NFKC + casefold + remove non-ASCII-alphanumeric", "silg_rows_adapted": silg_rows, "dataset_sha256": stable_hash(adapted), "instance_fingerprints_sha256": stable_hash(fingerprints), "seed_domain_split_condition_topology": {str(k): sorted(v) for k, v in sorted(topology.items())}, "canonical_seed_topology_required": True, "domain_local_train_eval_coverage_required": True, "domain_seed_split_coverage": {str(k): sorted(v) for k, v in sorted(per_domain_seed_splits.items())}, "adapted_schema": True, "silg_text_tokens_supported": True, "episode_split_isolation_required": True, "normalized_trajectory_identity_required": True, "trajectory_identity_normalization": "recursive NFKC + casefold + remove whitespace/control-format + numeric scalar alias collapse", "unicode_utterance_overlap_required": True, "holdout_identity_normalization": "recursive NFKC + casefold + remove whitespace/control-format + numeric scalar alias collapse", "normalized_holdout_identity_required": True, "alias_normalized_leakage_required": True, "allowed_train_splits": sorted(TRAIN_SPLITS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "split_scope_fail_closed": True, "normalized_cell_identity_required": True, "cell_identity_normalization": "domain=NFKC+casefold+remove whitespace/control-format; condition=canonical sorted token set", "domain_label_collisions": domain_collisions, "condition_label_collisions": condition_collisions, "canonical_instance_identity_required": True, "exact_prediction_instance_id_required": True, "instance_identity_normalization": "NFKC + casefold + remove whitespace/control-format characters", "instance_id_collisions": instance_id_collisions}
 
 
 def _mean_ci(values: list[float]) -> tuple[float, float, float]:
@@ -530,6 +542,9 @@ def score(data: list[dict[str, Any]], preds: list[dict[str, Any]]) -> dict[str, 
     dataset_audit = validate_dataset(data)
     adapted = adapt_dataset(data)
     by_id = {str(r["instance_id"]): r for r in adapted}
+    canonical_to_raw_ids = defaultdict(set)
+    for raw_id in by_id:
+        canonical_to_raw_ids[canonical_instance_id(raw_id)].add(raw_id)
     dataset_splits = {str(r.get("split", "")).lower() for r in adapted}
     invalid_dataset_splits = sorted(dataset_splits - ALLOWED_SPLITS)
     eval_ids = {i for i, r in by_id.items() if str(r["split"]).lower() in EVAL_SPLITS}
@@ -559,7 +574,13 @@ def score(data: list[dict[str, Any]], preds: list[dict[str, Any]]) -> dict[str, 
         if "pred_inverse" in pred and not _finite_json(pred.get("pred_inverse")): errors.append(f"prediction row {index}: pred_inverse contains non-finite or unsupported values")
         if key in seen: errors.append(f"prediction row {index}: duplicate instance/method={key}"); continue
         seen.add(key); gold = by_id.get(iid)
-        if gold is None: errors.append(f"prediction row {index}: unknown instance_id={iid}"); continue
+        if gold is None:
+            aliases = sorted(canonical_to_raw_ids.get(canonical_instance_id(iid), set()))
+            if aliases:
+                errors.append(f"prediction row {index}: instance_id must exactly match dataset ID; alias {iid!r} canonicalizes to {aliases}")
+            else:
+                errors.append(f"prediction row {index}: unknown instance_id={iid}")
+            continue
         gold_split = str(gold["split"]).lower()
         if gold_split not in EVAL_SPLITS:
             errors.append(f"prediction row {index}: prediction supplied for non-evaluation split={gold_split!r} instance={iid}")
@@ -640,7 +661,7 @@ def score(data: list[dict[str, Any]], preds: list[dict[str, Any]]) -> dict[str, 
         cells = []
         summary = defaultdict(dict)
         gaps = {}
-    return {"valid": not errors, "errors": errors, "classification": "qualified" if not errors else "initial_reproduction_failure", "dataset_contract_binding": True, "dataset_contract_valid": bool(dataset_audit.get("valid", False)), "dataset_contract_errors": list(dataset_audit.get("errors", [])), "invalid_dataset_statistics_forbidden": True, "invalid_score_statistics_forbidden": True, "statistics_emitted": not errors, "prediction_rows": len(preds), "expected_eval_instances": len(eval_ids), "coverage": coverage, "same_instance_snapshot": not any("snapshot" in e for e in errors), "fingerprints_required": True, "prediction_payload_findings": payload_findings, "prediction_schema_alias_findings": alias_findings, "strict_prediction_schema": True, "forbidden_prediction_fields": sorted(FORBIDDEN_PREDICTION_FIELDS), "alias_normalized_prediction_leakage_required": True, "finite_prediction_values_checked": True, "valid_action_schema_checked": True, "optional_metric_coverage_required": True, "inverse_metric_complete": inverse_metric_complete, "gold_inverse_coverage": {"expected": len(eval_ids), "present": len(gold_inverse_ids)}, "pred_inverse_coverage": {method: {"expected": len(eval_ids), "present": len(pred_inverse_ids.get(method, set()))} for method in sorted(REQUIRED_METHODS)}, "shuffle_assignment_audit": shuffle_audit, "cells": cells, "summary": dict(summary), "paired_gaps_vs_correct": gaps, "progress_contract": {"required_mean_gap": .10, "requires_all_three_seeds": True, "requires_same_instance_snapshot": True, "requires_explicit_instance_fingerprint": True, "requires_complete_prediction_coverage": True, "requires_shuffle_provenance": True, "requires_within_cell_derangement": True, "requires_split_condition_cells": True, "requires_ci_excludes_zero": True, "requires_instance_cluster_ci_excludes_zero": True, "internal_metrics_do_not_count": True}, "allowed_train_splits": sorted(TRAIN_SPLITS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "split_scope_fail_closed": True}
+    return {"valid": not errors, "errors": errors, "classification": "qualified" if not errors else "initial_reproduction_failure", "dataset_contract_binding": True, "dataset_contract_valid": bool(dataset_audit.get("valid", False)), "dataset_contract_errors": list(dataset_audit.get("errors", [])), "invalid_dataset_statistics_forbidden": True, "invalid_score_statistics_forbidden": True, "statistics_emitted": not errors, "prediction_rows": len(preds), "expected_eval_instances": len(eval_ids), "coverage": coverage, "same_instance_snapshot": not any("snapshot" in e for e in errors), "fingerprints_required": True, "prediction_payload_findings": payload_findings, "prediction_schema_alias_findings": alias_findings, "strict_prediction_schema": True, "forbidden_prediction_fields": sorted(FORBIDDEN_PREDICTION_FIELDS), "alias_normalized_prediction_leakage_required": True, "finite_prediction_values_checked": True, "valid_action_schema_checked": True, "optional_metric_coverage_required": True, "inverse_metric_complete": inverse_metric_complete, "gold_inverse_coverage": {"expected": len(eval_ids), "present": len(gold_inverse_ids)}, "pred_inverse_coverage": {method: {"expected": len(eval_ids), "present": len(pred_inverse_ids.get(method, set()))} for method in sorted(REQUIRED_METHODS)}, "shuffle_assignment_audit": shuffle_audit, "cells": cells, "summary": dict(summary), "paired_gaps_vs_correct": gaps, "progress_contract": {"required_mean_gap": .10, "requires_all_three_seeds": True, "requires_same_instance_snapshot": True, "requires_explicit_instance_fingerprint": True, "requires_complete_prediction_coverage": True, "requires_shuffle_provenance": True, "requires_within_cell_derangement": True, "requires_split_condition_cells": True, "requires_ci_excludes_zero": True, "requires_instance_cluster_ci_excludes_zero": True, "internal_metrics_do_not_count": True}, "allowed_train_splits": sorted(TRAIN_SPLITS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "split_scope_fail_closed": True, "canonical_instance_identity_required": True, "exact_prediction_instance_id_required": True, "instance_identity_normalization": "NFKC + casefold + remove whitespace/control-format characters"}
 
 
 RAW_LOG_MEASUREMENT_FIELDS = (
