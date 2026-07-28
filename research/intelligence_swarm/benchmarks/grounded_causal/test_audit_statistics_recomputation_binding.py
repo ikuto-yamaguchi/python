@@ -59,6 +59,10 @@ def _bundle() -> tuple[list[dict], list[dict]]:
                 if method in evaluation_contract.SHUFFLE_METHODS:
                     pred["control_source_instance_id"] = donor
                     pred["control_source_fingerprint"] = evaluation_contract.instance_fingerprint(by_id[donor])
+                if method == "target_label_shuffle":
+                    pred["pred_action"] = by_id[donor]["gold_action"]
+                elif method == "outcome_shuffle":
+                    pred["pred_state_after"] = by_id[donor]["gold_state_after"]
                 predictions.append(pred)
     return data, predictions
 
