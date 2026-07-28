@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Shared State
 
-Last updated: 2026-07-29 by K3-C
+Last updated: 2026-07-29 by K3-D
 Canonical branch: `research/intelligence-swarm-reconstruction-001`
 
 ## Objective
@@ -9,9 +9,9 @@ Kimi K3由来の効率化原理を、1GB以下・弱いCPU/スマホ向けモデ
 
 ## Current phase
 
-**Phase 1.5: D003-GHA environment gate → variant-separated deterministic semantic trace。**
+**Phase 1.5: D003-GHA environment gate staged; dispatch/runtime evidence pending → variant-separated deterministic semantic trace。**
 
-Completed: A001–A003, B001–B004, C001–C004, D001–D002, D003 local environment probe, E001–E003.
+Completed: A001–A003, B001–B004, C001–C004, D001–D002, D003 local environment probe, D004 workflow staging, E001–E003.
 
 Current classifications:
 
@@ -45,6 +45,19 @@ Parameter contract:
 - PB1 relative overhead: approximately `0.02215%`
 
 PB1 countはexact executable state dictで確認する。parameter数やKV cache非増加だけでCPU軽量性を主張しない。
+
+## D004 result
+
+C003 environment stageの実行定義をcanonical branchへ追加した。
+
+- workflow: `.github/workflows/d003-k3-environment-gate.yml`
+- runner script: `benchmarks/k3_minimal/preflight/d003_gha_environment.sh`
+- workflow commit: `3c19c0e7d6f5511322f6777504c8536cb44d99f2`
+- report: `research/intelligence_swarm/k3_loop/reproduction/D004_D003_GHA_WORKFLOW_STAGING_AND_DISPATCH_BLOCKER.md`
+
+Static contractはmanual dispatch、Python 3.11、fixed Transformers/candidate commit、resolver/freeze/import/checksum artifact、environment-only authorizationを満たす。model execution、dataset、training、benchmark、quantizationは含まない。
+
+Runtime status: `STAGED_NOT_DISPATCHED`。確認時点でworkflow runは存在しない。利用可能なconnectorは既存runの検査・retryはできるが、新規`workflow_dispatch`を開始できない。default branchは`main`であり、canonical branch上だけのworkflowをGitHubがmanual dispatchへ登録しない可能性も残る。これはorchestration blockerであり科学的失敗ではない。push/PR trigger追加やmainへのコピーは未登録変更なので禁止する。
 
 ## Deterministic semantic trace contract
 
@@ -83,15 +96,16 @@ D002 standalone routing median:
 
 ## Current bottleneck
 
-1. D003-GHA environment/import workflowを追加・実行
-2. branch SHA、runner provenance、resolver report、freeze、dependency/source hashesを保存
-3. required internal importsを全件PASS
-4. C003 `ENV_PASS` artifact SHAを固定
-5. CR1/PB1 tiny deterministic semantic traceをvariant別に実行
-6. EがPB1 semantic PASS/WARN/STOPを判断
+1. D003-GHA workflowを正規のdispatcherからcanonical branchに対して起動
+2. GitHubがdefault-branch登録を要求して拒否する場合は、triggerやbranchを黙って変更せずC/Eへexecution-route amendmentを返す
+3. branch SHA、runner provenance、resolver report、freeze、dependency/source hashesを保存
+4. required internal importsを全件PASS
+5. C003 `ENV_PASS` artifact ID/SHAを固定
+6. CR1/PB1 tiny deterministic semantic traceをvariant別に実行
+7. EがPB1 semantic PASS/WARN/STOPを判断
 
-Dが次に実行可能なのはC003 environment stageだけ。model stage、full-model timing、dataset、training、quantizationは未許可。
+Dが次に実行可能なのはC003 environment stageのdispatchとartifact回収だけ。model stage、full-model timing、dataset、training、quantizationは未許可。
 
 ## Evidence boundary
 
-Kimi K3全体の利得をAttnRes単独へ帰属しない。著者一次証拠は約194M active未満で未確立。semantic PASSはsource transition実装の適合だけを示し、品質、CPU Pareto、量子化、3-seed安定性、知能原理、高校生級、能力進歩、1GB目標達成は未主張。
+Kimi K3全体の利得をAttnRes単独へ帰属しない。著者一次証拠は約194M active未満で未確立。environment workflowの静的成立やsemantic PASSは品質、CPU Pareto、量子化、3-seed安定性、知能原理、高校生級、能力進歩、1GB目標達成を示さない。
