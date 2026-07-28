@@ -1,52 +1,62 @@
 # K3 Minimal Intelligence Loop — Backlog
 
-Last updated: 2026-07-28 by K3-B
+Last updated: 2026-07-28 by K3-C
 
 ## P0 — Current cycle: Block AttnRes minimum reproduction
 
 ### A — Evidence
 
-- [ ] Extract the exact model sizes, depths, widths, block counts, token budgets and compute budgets from the Attention Residuals primary report.
-- [ ] Confirm whether any author-controlled executable code/checkpoint is available beyond the paper repository.
-- [ ] Pin one unofficial implementation commit only as a reproduction candidate; record all deviations from the paper.
-- [ ] Audit Low-Rank Attention Residuals only after the original Block AttnRes baseline is reproduced.
+- [ ] Extract exact primary-report model sizes, depths, widths, block counts, token and compute budgets.
+- [ ] Confirm whether any author-controlled executable code/checkpoint exists beyond the paper repository.
+- [x] Pin one unofficial implementation commit as a reproduction candidate: `wdlctc/open-attention-residuals@83d2b8de82c2fbb981c7decca67d13d9db348da6`.
+- [ ] Record all candidate-code deviations from the paper before S2.
+- [ ] Audit Low-Rank Attention Residuals only after original Block AttnRes reproduction.
 
 ### B — Theory
 
-- [x] Complete parameter/FLOPs/state-memory/communication/sequence/quantization/CPU comparison for Block AttnRes.
+- [x] Complete parameter/FLOPs/state-memory/communication/sequence/quantization/CPU comparison.
 - [x] Record small-scale counterexample and failure conditions.
-- [ ] Refine the CPU roofline break-even estimate after C fixes exact `d`, `L`, `N`, dtype and kernel layout.
-- [ ] Derive expected memory traffic for eager and fused implementations from D profiler traces.
+- [ ] Refine CPU roofline after D fixes exact dtype, source layout and profiler trace.
+- [ ] Derive eager/fused memory traffic from D traces.
 
 ### C — Preregistration
 
-- [ ] Pin an 80M–120M dense PreNorm baseline.
-- [ ] Specify Block AttnRes with only `N=4` residual-path change.
-- [ ] Fix dataset/tokenizer digests, token budget, optimizer, schedule and seeds `17/29/43`.
-- [ ] Define equal-parameter, equal-active-compute and equal-token-budget comparisons.
-- [ ] Define routing diagnostics and CPU/quantization measurements.
+- [x] Pin 12-layer d=512 dense PreNorm baseline candidate.
+- [x] Specify Block AttnRes `N=4` as the only architectural change.
+- [x] Fix optimizer, schedule, sequence length, token budgets and seeds `17/29/43`.
+- [x] Define equal-token, near-equal-parameter and measured-active-compute comparisons.
+- [x] Define routing, CPU, RSS/VRAM and quantization measurements.
+- [x] Add preregistration `prereg/C001_BLOCK_ATTNRES_100M_PREREG.md`.
+- [x] Add executable manifest `benchmarks/k3_minimal/manifests/C001_block_attnres_100m.yaml`.
+- [ ] Amend only if D identifies an executable-contract defect; do not open a second candidate.
 
-### D — Reproduction
+### D — Reproduction: current priority
 
-- [ ] Reproduce standard baseline before AttnRes training.
-- [ ] Record model bytes, total/active parameters, peak RSS/VRAM, wall time and tokens/sec.
-- [ ] Run three seeds only after the smoke run and baseline validation pass.
-- [ ] Measure CPU batch=1 prefill/decode in eager implementation.
-- [ ] Separate weight-only quantization from activation/routing quantization.
-- [ ] Preserve raw logs, environment versions, commits and checksums.
+- [ ] Checkout pinned candidate commit and record clean/dirty state.
+- [ ] Pin Python/PyTorch/Transformers/Datasets/CUDA dependency environment.
+- [ ] Resolve and hash tokenizer snapshot.
+- [ ] Replace ambiguous streaming input with immutable shard/token manifest, or prove resolved streaming shards are fixed.
+- [ ] Generate exact B0/A1 config diff and parameter counts.
+- [ ] Run S0 one-step forward/backward/save-load validation.
+- [ ] Run B0 seed-17 100-step smoke with model bytes, RSS/VRAM, wall time and tokens/sec.
+- [ ] Run A1 seed-17 smoke only after B0 passes.
+- [ ] Verify routing gradients and non-collapse diagnostics.
+- [ ] Do not start S2/S3 without E gate.
 
 ### E — Integration
 
-- [ ] Decide `採用 / 追加検証 / 狭義化 / 棄却` using B001 thresholds.
-- [ ] Do not open KDA or Stable LatentMoE implementation cycles until the current single bottleneck is completed or explicitly stopped.
+- [ ] Review D preflight and smoke evidence.
+- [ ] Authorize or deny paired S2 pilot.
+- [ ] Keep `採用 / 追加検証 / 狭義化 / 棄却` based on preregistered Pareto thresholds.
+- [ ] Do not open KDA or Stable LatentMoE until P0 is completed or explicitly stopped.
 
 ## P1 — Candidate queue after P0
 
-1. Kimi Delta Attention: state size, recurrent update stability, short-context overhead, CPU kernel availability.
-2. Stable LatentMoE: routing overhead and total-weight memory under sub-1GB constraints; likely unsuitable without expert paging/compression proof.
-3. MXFP4-aware training: distinguish hardware-specific throughput benefits from model-quality benefits and assess consumer CPU portability.
-4. Attention Residuals low-rank routing: only after original AttnRes baseline.
-5. Data curriculum / post-training efficiency: only with a fixed architecture baseline.
+1. Kimi Delta Attention: recurrent state size, stability, short-context overhead and CPU kernels.
+2. Stable LatentMoE: routing overhead and total-weight memory under sub-1GB constraints.
+3. MXFP4-aware training: separate hardware throughput benefit from quality benefit and CPU portability.
+4. Attention Residuals low-rank routing: only after original Block AttnRes baseline.
+5. Data curriculum/post-training efficiency: only with a fixed architecture baseline.
 
 ## Global prohibitions
 
@@ -55,3 +65,4 @@ Last updated: 2026-07-28 by K3-B
 - No claims of intelligence principle, high-school-level capability or capability progress without evidence.
 - No adoption based only on parameter count or GPU FLOPs; CPU wall time and RSS are mandatory.
 - No success report from one seed.
+- No post-hoc promotion of S1/S2 to full evidence.
