@@ -96,7 +96,20 @@ def test_complete_inverse_coverage() -> None:
     assert result["valid"], result
     assert result["inverse_metric_complete"] is True
     assert result["gold_inverse_coverage"] == {"expected": 6, "present": 6}
-    assert all(cell.get("inverse") == 1.0 for cell in result["cells"])
+
+    cells_by_method: dict[str, list[dict]] = {}
+    for cell in result["cells"]:
+        cells_by_method.setdefault(cell["method"], []).append(cell)
+
+    # Complete optional-metric coverage remains mandatory for every method, but
+    # the later shuffle-scope contract intentionally reports only the field that
+    # is causally bound to each shuffle donor.
+    for method in METHODS:
+        method_cells = cells_by_method[method]
+        if method in contract.SHUFFLE_METHODS:
+            assert all("inverse" not in cell for cell in method_cells), result
+        else:
+            assert all(cell.get("inverse") == 1.0 for cell in method_cells), result
 
 
 def test_selective_prediction_omission_fails_closed() -> None:
