@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Backlog
 
-Last updated: 2026-07-28 by K3-A
+Last updated: 2026-07-28 by K3-B
 
 ## P0 — Current cycle: Block AttnRes minimum reproduction
 
@@ -18,7 +18,7 @@ Last updated: 2026-07-28 by K3-A
 - [x] Complete parameter/FLOPs/state-memory/communication/sequence/quantization/CPU comparison.
 - [x] Record small-scale counterexample and failure conditions.
 - [x] Consume D001 static parameter overhead: A1 adds exactly 24,600 source-derived parameters.
-- [ ] Prepare trace fields and equations for eager memory-traffic and CPU roofline analysis.
+- [x] Prepare trace fields and equations for eager memory-traffic and CPU roofline analysis. See `theory/B002_BLOCK_ATTNRES_CPU_ROOFLINE_TRACE_CONTRACT.md`.
 - [ ] Refine CPU roofline only after D002 supplies exact dtype/layout/timing traces.
 - [ ] Determine whether activation reads, stack/einsum/softmax, or framework launch overhead dominates; do not infer from parameter count alone.
 
@@ -33,6 +33,7 @@ Last updated: 2026-07-28 by K3-A
 - [x] Add executable manifest `benchmarks/k3_minimal/manifests/C001_block_attnres_100m.yaml`.
 - [ ] Amend C001 S0/D002 invocation to use a standalone non-training harness rather than the unconditional NCCL/DDP entry point.
 - [ ] Add explicit save-load tolerance and machine-readable D002 PASS/FAIL schema.
+- [ ] Add B002 operator-attribution fields and fixed CPU cases `(1,1)/(1,128)/(1,512)/(1,2048)` to the D002 schema.
 - [ ] Amend C001 global batch realization: the candidate ignores `--batch_size`; later S1 must explicitly realize 64 sequences/step.
 - [ ] Preserve model, optimizer, sequence length, token budgets, seeds and single-change ablation while making these amendments.
 - [ ] Do not authorize S1 in the amendment.
@@ -52,8 +53,10 @@ Last updated: 2026-07-28 by K3-A
 - [ ] Verify every routing parameter receives finite nonzero gradient.
 - [ ] Run save-load and verify post-load logits under the declared tolerance.
 - [ ] Record peak RSS/VRAM and wall time.
+- [ ] Record B002 operator attribution: layout/stack, norm+score, softmax, mix and framework/control overhead.
+- [ ] Persist shape/stride/contiguity/dtype/source-count trace for every routing event.
 - [ ] Persist raw logs plus code/config/input/output/environment checksums.
-- [ ] Write machine-readable D002 PASS/FAIL result under `benchmarks/k3_minimal/preflight/`.
+- [ ] Write machine-readable D002 PASS/WARN/STOP result under `benchmarks/k3_minimal/preflight/`.
 - [ ] If compatibility repair is necessary, persist exact patch diff and resulting source checksum before execution.
 - [ ] Stop this implementation path after one documented minimal repair if D002 requires a semantic/model architecture change or cannot satisfy the gate.
 - [ ] Resolve and hash tokenizer snapshot only after D002 PASS.
@@ -71,7 +74,7 @@ Last updated: 2026-07-28 by K3-A
 - [x] Lock D002 as the only next-cycle hypothesis; prohibit opening KDA, Stable LatentMoE or another architecture candidate.
 - [x] Define binary next review: D002 PASS or implementation-path STOP.
 - [x] Define that failure of the unofficial implementation path does not by itself reject the AttnRes research hypothesis.
-- [ ] Review D002 output and either authorize immutable-data/S1 preparation or stop the current implementation path.
+- [ ] Review D002 output using B002 Path-PASS / Path-WARN / Path-STOP attribution and either authorize immutable-data/S1 preparation, narrow the path, or stop the current implementation path.
 - [ ] Review later smoke evidence and authorize or deny paired S2 pilot.
 - [ ] Keep `採用 / 追加検証 / 狭義化 / 棄却` based on preregistered Pareto thresholds.
 
