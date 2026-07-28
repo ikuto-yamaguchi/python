@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Shared State
 
-Last updated: 2026-07-29 by K3-C
+Last updated: 2026-07-29 by K3-D
 Canonical branch: `research/intelligence-swarm-reconstruction-001`
 
 ## Objective
@@ -9,16 +9,16 @@ Kimi K3由来の効率化原理を、1GB以下・弱いCPU/スマホ向けモデ
 
 ## Current phase
 
-**Phase 1.5: C005 execution-route preregistration completed; D may apply only the registered environment-only workflow amendment.**
+**Phase 1.5: C005 canonical-branch push route executed and classified `ROUTE_STOP`; E re-authorization is required before any alternative route.**
 
-Completed: A001–A004, B001–B006, C001–C005, D001–D005 predispatch audit, E001–E005.
+Completed: A001–A004, B001–B006, C001–C005, D001–D006, E001–E005.
 
 Current classifications:
 
 - Block AttnRes: **小型化で要再設計・追加検証・未採用 / Path-WARN**
 - PAPER-BLOCK (`PB1`): canonical paper-reference candidate; semantic trace pending
 - CANDIDATE-RAW (`CR1`): fixed-commit artifact diagnostic only; paper attribution prohibited
-- Execution state: **C005_PREREGISTERED / D_ENV_ROUTE_AUTHORIZED**
+- Execution state: **C005_ROUTE_STOP / E_DECISION_REQUIRED**
 
 Frozen until P0 completes: new architecture, dataset download, optimizer step, S1–S3, quantization, KDA, Stable LatentMoE.
 
@@ -66,8 +66,6 @@ PB1 is a minimum semantic/effect-direction pilot, not a reproduction of the prim
 
 ## PB1 interpretation boundary
 
-B006 fixed the result semantics:
-
 - PB1 null is not mechanism-wide falsification without resolution, optimization, scale, and implementation invariance.
 - PB1 positive is not sufficient for adoption.
 - healthy-routing null defaults to `PB1 inconclusive / possible depth-resolution limit`.
@@ -96,32 +94,34 @@ The 2048-token result was about 4.13x the short-sequence fit and remains unconfi
 - E004: authorized a narrow one-shot canonical-branch environment-only route, subject to C005 preregistration
 - D005: confirmed C005 prose/manifest were absent and correctly returned `PREREG_BLOCKED`; workflow was not changed
 - E005: made C005 the sole next step and prohibited repeated D predispatch churn
-- C005: preregistered the canonical-branch/path-restricted one-shot push route, concurrency, false authorization flags, artifact schema, retry/stop classification, and PB1 metadata carry-forward
+- C005: preregistered the canonical-branch/path-restricted one-shot push route
+- D006: applied the registered workflow amendment and nonce attempt 1; existing push workflows ran, but no `D003 K3 environment gate` run was generated for either the amendment or nonce-finalization commit
+- D006 classification: **`ROUTE_STOP`**. This stops only the C005 execution route, not Block AttnRes or the dependency hypothesis.
 
-C005 records:
+D006 records:
 
-- `research/intelligence_swarm/k3_loop/prereg/C005_D003_GHA_PUSH_ROUTE_AMENDMENT.md`
-- `benchmarks/k3_minimal/manifests/C005_d003_gha_push_route.yaml`
+- `research/intelligence_swarm/k3_loop/reproduction/D006_C005_CANONICAL_PUSH_ROUTE_STOP.md`
+- `benchmarks/k3_minimal/preflight/D006_c005_push_route_result.json`
 
 ## Single bottleneck
 
-D must now perform exactly the C005 handoff:
+E must classify D006 and decide whether any alternative execution route may be preregistered.
 
-1. apply only the registered push/concurrency/authorization amendment to `.github/workflows/d003-k3-environment-gate.yml`
-2. verify no allowlist-external change is mixed into the trigger commit
-3. create `research/intelligence_swarm/k3_loop/execution/C005_D003_GHA_PUSH_NONCE.txt` with attempt `1`
-4. push canonical branch and confirm exactly one environment-only run
-5. collect run/artifact provenance and classify the result
+Until then, D must not:
 
-The route permits only environment/import evidence. It does not authorize model execution.
+1. copy the workflow to the default branch
+2. add broad push or PR triggers
+3. dispatch a model stage
+4. download dataset/tokenizer/checkpoint
+5. train or quantize
 
 ## Authorized next work
 
 - A: no new K3 component; inspect only a concrete resolver/import failure
-- B: no crossover, minimum-scale, or Pareto revision before exact traces; PB1 result interpretation is fixed by B006
-- C: C005 complete; do not create another amendment unless D returns a concrete protocol/environment result requiring E authorization
-- D: apply and execute only C005 environment route
-- E: after D returns, classify only execution/environment outcome
+- B: no crossover, minimum-scale, or Pareto revision before exact traces
+- C: no new route amendment before E classifies D006
+- D: stop route experimentation and preserve D006 evidence
+- E: classify `ROUTE_STOP` and either authorize a separately preregistered route or stop the current implementation path
 
 ## Completion / stop classification
 
