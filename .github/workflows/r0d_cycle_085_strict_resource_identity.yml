@@ -1,0 +1,42 @@
+name: R0-D Cycle 085 strict resource identity
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - research/intelligence_swarm/governance/apply_r0d_cycle_085_strict_resource_identity.py
+      - research/intelligence_swarm/governance/test_evaluation_contract_strict_resource_identity_cycle_085.py
+      - .github/workflows/r0d_cycle_085_strict_resource_identity.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/intelligence-swarm-reconstruction-001
+          fetch-depth: 0
+      - name: Apply fail-closed core patch
+        run: python research/intelligence_swarm/governance/apply_r0d_cycle_085_strict_resource_identity.py
+      - name: Compile
+        run: |
+          python -m py_compile research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
+          python -m py_compile research/intelligence_swarm/governance/test_evaluation_contract_strict_resource_identity_cycle_085.py
+      - name: Focused regression
+        run: python research/intelligence_swarm/governance/test_evaluation_contract_strict_resource_identity_cycle_085.py
+      - name: Commit core integration
+        run: |
+          if git diff --quiet; then
+            echo "Core already contains Cycle 085 hardening."
+            exit 0
+          fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
+          git commit -m "R0-D cycle 085: enforce strict seed and byte identities"
+          git push origin HEAD:research/intelligence-swarm-reconstruction-001
