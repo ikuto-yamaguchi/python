@@ -1,0 +1,271 @@
+schema_version: 1
+id: D002_block_attnres_executable_preflight
+status: executable_preflight_only
+branch: research/intelligence-swarm-reconstruction-001
+supersedes:
+  - C001 preflight command
+preserves:
+  - C001 model configuration
+  - C001 optimizer configuration
+  - C001 sequence length
+  - C001 token budgets
+  - C001 seeds
+  - C001 single-change ablation
+source:
+  repository: wdlctc/open-attention-residuals
+  commit: 83d2b8de82c2fbb981c7decca67d13d9db348da6
+  official: false
+  official_reference_repository: MoonshotAI/Attention-Residuals
+  official_reference_commit: 85e22310fe5ee860b4a023de312d791de8a5a5e6
+scope:
+  training: forbidden
+  dataset_access: forbidden
+  tokenizer_download: forbidden
+  distributed_init: forbidden
+  quality_claims: forbidden
+  adoption_decision: forbidden
+conditions:
+  B0:
+    mode: baseline
+  A1:
+    mode: block
+    num_blocks: 4
+    allowed_difference: residual_path_only
+model:
+  hidden_size: 512
+  num_hidden_layers: 12
+  num_attention_heads: 8
+  num_key_value_heads: 4
+  intermediate_size: 1536
+  head_dim: 64
+  vocab_size: 151936
+  tie_word_embeddings: true
+  max_position_embeddings: 4096
+expected_parameters:
+  B0: 115554304
+  A1: 115578904
+  delta: 24600
+execution:
+  seed: 17
+  device_required: cpu
+  optional_device: cuda
+  cpu_dtype: float32
+  threads: 1
+  interop_threads: 1
+  warmup: 5
+  repeats: 20
+  command: >-
+    python benchmarks/k3_minimal/preflight/run_d002_attnres_preflight.py
+    --candidate-root ${CANDIDATE_ROOT}
+    --output-dir benchmarks/k3_minimal/preflight/D002
+    --seed 17
+    --device cpu
+    --dtype float32
+    --threads 1
+    --warmup 5
+    --repeats 20
+input:
+  generator: deterministic_integer_tensor
+  token_min_inclusive: 0
+  token_max_exclusive: 151936
+  cases:
+    - [1, 1]
+    - [1, 128]
+    - [1, 512]
+    - [1, 2048]
+  forward_backward_case: [1, 128]
+  fallback_forward_backward_case: [1, 32]
+  sha256_required: true
+environment_required:
+  - python_version
+  - pytorch_version
+  - transformers_version
+  - safetensors_version
+  - numpy_version
+  - os_kernel
+  - cpu_model
+  - physical_cores
+  - logical_cores
+  - blas_openmp_backend
+  - torch_threads
+  - torch_interop_threads
+  - deterministic_algorithms
+  - eager_or_compile
+  - candidate_commit
+  - candidate_dirty_diff
+  - candidate_source_sha256
+  - harness_sha256
+  - pip_freeze_sha256
+architecture_diff_gate:
+  compare:
+    - serialized_config
+    - config_keys
+    - parameter_names_shapes_dtypes_requires_grad
+    - state_dict_keys
+    - module_class_tree
+    - total_active_parameters
+    - serialized_unquantized_bytes
+  allowed_modules:
+    - attnres_routing_query
+    - attnres_routing_rmsnorm
+    - attnres_routing_bias
+    - residual_path_container
+  forbidden_diff_targets:
+    - attention_shapes
+    - mlp_shapes
+    - embedding_shapes
+    - lm_head_shapes
+    - base_normalization_shapes
+optimizer_step:
+  optimizer: AdamW
+  learning_rate: 0.0006
+  betas: [0.9, 0.95]
+  epsilon: 1.0e-8
+  weight_decay: 0.1
+  max_grad_norm: 1.0
+  max_steps_for_routing_gradient_gate: 2
+gradient_gate:
+  logits_finite: required
+  loss_finite: required
+  all_gradients_finite: required
+  optimizer_parameters_finite: required
+  every_routing_parameter_has_gradient: required
+  every_routing_gradient_nonzero_within_steps: 2
+save_load_gate:
+  checkpoints:
+    - before_optimizer_step
+    - after_optimizer_step
+  compare:
+    - state_dict_key_set
+    - parameter_checksums
+    - fixed_input_logits
+  tolerance:
+    cpu_float32:
+      max_abs: 1.0e-6
+      max_rel: 1.0e-5
+    low_precision:
+      max_abs: 5.0e-3
+      max_rel: 5.0e-2
+operator_attribution:
+  cases:
+    - [1, 1]
+    - [1, 128]
+    - [1, 512]
+    - [1, 2048]
+  timings:
+    - full_B0_forward
+    - full_A1_forward
+    - full_B0_forward_backward
+    - full_A1_forward_backward
+    - no_op_python_control
+    - source_list_traversal
+    - source_collect_stack_layout
+    - rmsnorm
+    - routing_score_dot_einsum
+    - softmax
+    - weighted_sum_einsum
+    - complete_routing_event
+  event_fields:
+    - layer_id
+    - sublayer_id
+    - event_id
+    - M
+    - d
+    - S
+    - source_shape
+    - source_stride
+    - source_contiguous
+    - output_shape
+    - output_stride
+    - output_contiguous
+    - activation_dtype
+    - parameter_dtype
+    - score_dtype
+    - temporary_numel
+    - temporary_bytes
+  profiler_fields:
+    - operator_name
+    - self_cpu_time
+    - cpu_total_time
+    - call_count
+    - input_shapes
+resources_required:
+  - process_peak_rss
+  - routing_rss_delta
+  - peak_vram_if_cuda
+  - instantiate_wall_time
+  - forward_median_p95
+  - backward_median_p95
+  - save_wall_time
+  - load_wall_time
+  - checkpoint_bytes
+  - checksums
+result_schema:
+  path: benchmarks/k3_minimal/preflight/D002/result.json
+  status_enum: [PASS, WARN, STOP]
+  required_sections:
+    - environment
+    - source
+    - input_cases
+    - models
+    - config_diff
+    - parameter_diff
+    - gradient_gate
+    - save_load_gate
+    - operator_attribution
+    - resources
+    - checksums
+    - warnings
+    - failures
+artifacts_required:
+  - environment.json
+  - pip_freeze.txt
+  - candidate_source.sha256
+  - harness.sha256
+  - input_manifest.json
+  - config_B0.json
+  - config_A1.json
+  - parameter_diff.json
+  - module_tree_diff.json
+  - gradient_report.json
+  - save_load_report.json
+  - operator_trace.jsonl
+  - resource_report.json
+  - raw.log
+  - checksums.sha256
+  - result.json
+  - candidate_patch.diff_if_patched
+classification:
+  pass_requires:
+    - instantiate_success
+    - residual_only_diff
+    - expected_parameter_counts
+    - finite_forward_backward_optimizer_step
+    - routing_gradients_nonzero_within_2_steps
+    - save_load_within_tolerance
+    - all_required_artifacts
+    - A1_forward_overhead_below_10_percent
+    - peak_rss_ratio_below_1_10
+    - no_unexpected_dtype_layout_conversion
+  warn_if:
+    - layout_plus_framework_share_at_least_50_percent
+    - A1_forward_overhead_at_least_10_percent
+    - peak_rss_ratio_at_least_1_10
+    - unexpected_dtype_layout_conversion
+    - case_1x2048_unavailable_due_to_resources
+    - save_load_passes_only_in_low_precision
+  stop_if_after_one_minimal_repair:
+    - instantiate_failure
+    - model_semantics_diff_beyond_residual_path
+    - unexplained_parameter_count_mismatch
+    - routing_gradient_missing_nonfinite_or_structurally_zero_after_2_steps
+    - save_load_tolerance_failure
+    - unequal_input_kernel_dtype_conditions
+    - resource_trace_checksum_persistence_failure
+    - unregistered_architecture_change_required
+next_gate:
+  training_authorized: false
+  E_review_required: true
+  corrected_S1_manifest_required: true
+  immutable_tokenizer_manifest_required: true
+  immutable_training_and_validation_token_manifests_required: true
