@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Shared State
 
-Last updated: 2026-07-28 by K3-E
+Last updated: 2026-07-28 by K3-A
 Canonical branch: `research/intelligence-swarm-reconstruction-001`
 
 ## Objective
@@ -9,9 +9,9 @@ Kimi K3 と関連一次研究から、1GB以下・弱いCPU/スマホで高速�
 
 ## Current phase
 
-**Phase 0.7: E001 integration complete / D002 executable preflight is the sole cycle target**
+**Phase 0.7: A001 evidence delta complete / D002 executable preflight remains the sole cycle target**
 
-- A evidence: 未投入。P0を妨げる不足一次資料だけを補う
+- A evidence: A001完了。著者実行コード/重みは未発見、一次スケール条件を固定
 - B theory: B001完了。D002 traceまで追加architecture監査を停止
 - C preregistration: C001完了。実験対象を変えず、実行契約の修正だけが必要
 - D reproduction: D001 static preflight完了。D002未完了、S0/S1未許可
@@ -37,6 +37,17 @@ D001 found candidate-entry-point defects, not evidence against Block AttnRes. Th
 - amend C001 only where the command/batch contract is non-executable;
 - keep all performance and intelligence claims prohibited.
 
+## A001 evidence delta
+
+- Official documentary source pinned: `MoonshotAI/Attention-Residuals@85e22310fe5ee860b4a023de312d791de8a5a5e6` (`master`).
+- No author-controlled executable training code, environment lock, dataset manifest, evaluation harness or checkpoint was found as of 2026-07-28.
+- Official repository provides the paper, README, figures and PyTorch-style pseudocode only; open code/checkpoint requests remain unresolved.
+- Primary scaling evidence starts at `194M` activated MoE parameters excluding embeddings, `38.7B` tokens, 12 Transformer blocks / 24 depth-wise layers, width 896, context 8192 and Block AttnRes `N=8`.
+- The five reported scaling points span `194M–528M` activated parameters and `38.7B–119.0B` tokens.
+- The largest run is 48B total / 3B active, 54 depth-wise layers, six layers per AttnRes block, 1T pre-training plus approximately 400B mid-training tokens.
+- C001 is below and outside the primary evidence regime: approximately 115.6M dense, width 512, `N=4`, context 2048 and an eager unofficial implementation.
+- Classification remains **小型化で要再設計**; this does not alter E001 or authorize training.
+
 ## Evidence boundary
 
 - Kimi K3 aggregate gains cannot be attributed to AttnRes alone.
@@ -47,9 +58,11 @@ D001 found candidate-entry-point defects, not evidence against Block AttnRes. Th
 - D001 found that the candidate CLI does not implement C001's registered global batch and cannot execute the plain-Python S0 command.
 - D001 is a reproduction-contract audit, not evidence for or against AttnRes quality.
 - Source-derived parameter overhead is only `24,600` parameters (`~0.0213%`), but this does not establish CPU latency, RSS, training stability or quality Pareto.
+- The paper's under-2% inference claim depends on two-phase batching, caching, online softmax, fusion and large-model system conditions; it is not evidence for eager small-CPU latency.
 
 ## Completed artifacts
 
+- `evidence/A001_BLOCK_ATTNRES_AUTHOR_ARTIFACT_AND_SCALE_AUDIT.md`
 - `theory/B001_BLOCK_ATTNRES_SMALL_SCALE_AUDIT.md`
 - `prereg/C001_BLOCK_ATTNRES_100M_PREREG.md`
 - `benchmarks/k3_minimal/manifests/C001_block_attnres_100m.yaml`
@@ -139,9 +152,9 @@ D002 is an executability gate, not an adoption gate. If it passes, C must amend 
 
 ### A
 
-- Confirm whether an author-controlled executable implementation/checkpoint exists beyond `MoonshotAI/Attention-Residuals` documentation.
-- Extract only the exact primary-report Block AttnRes model/depth/block/token/compute settings needed to compare C001; do not start another candidate family.
-- Deliver a concise evidence delta to `evidence/`; absence of code must be recorded explicitly.
+- A001 primary evidence delta is complete.
+- Do not open another K3 component while D002 is unresolved.
+- Before S2 only, complete the paper-to-unofficial-candidate deviation matrix; it is not a D002 blocker.
 
 ### B
 
