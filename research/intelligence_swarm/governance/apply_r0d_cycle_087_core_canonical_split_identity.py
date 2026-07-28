@@ -23,12 +23,15 @@ for old, new in replacements.items():
 
 old = '''        if not split:\n            errors.append(f"row {index}: split must be non-empty")\n        elif split not in ALLOWED_SPLITS:\n            errors.append(f"row {index}: unregistered split={split!r}; allowed={sorted(ALLOWED_SPLITS)}")\n'''
 new = '''        if not split:\n            errors.append(f"row {index}: split must be non-empty after canonicalization")\n        elif split not in ALLOWED_SPLITS:\n            errors.append(f"row {index}: unregistered split={split!r}; allowed={sorted(ALLOWED_SPLITS)}")\n        elif not split_spelling_is_canonical(row["split"]):\n            errors.append(\n                f"row {index}: split must use exact canonical spelling; "\n                f"raw={row['split']!r}, canonical={split!r}"\n            )\n'''
-if old not in text:
+if old in text:
+    text = text.replace(old, new, 1)
+elif new not in text:
     raise SystemExit("dataset split validation anchor not found")
-text = text.replace(old, new, 1)
 
 marker = '"split_scope_fail_closed": True,'
 if '"canonical_split_identity_required": True' not in text:
+    if marker not in text:
+        raise SystemExit("split-scope result marker not found")
     text = text.replace(
         marker,
         marker + ' "canonical_split_identity_required": True, "split_identity_normalization": "NFKC + casefold + remove whitespace/control-format; exact registered spelling required",',
