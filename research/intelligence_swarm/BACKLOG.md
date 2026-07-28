@@ -107,17 +107,41 @@ Fixed first chunk:
 - official model / optimizer / sampling defaults
 - target `1,000,000` frames as first durable continuation checkpoint toward `100,000,000`
 
-Required artifact:
+Initial attempt:
+
+- run `30308447687`
+- failed before training because pinned SILG has no `--seed` CLI argument
+- immutable failure artifact `8669383695`
+- artifact SHA-256 `9a5518b1a5e5338886ed2d3f2429d0e0246f0ba9cd919de7627e6f01c74dccd4`
+
+Applied single-cause correction:
+
+- commit `ce6909baf0e0879d1547c34beb457d59d2027b9e`
+- remove unsupported `--seed`
+- patch only RNG seeding in pinned `run_exp.py`
+- global Python/NumPy/Torch seed from `SILG_EXPERIMENT_SEED=1`
+- deterministic actor seed `experiment_seed * 1000003 + actor_index`
+- preserve before/after source and SHA-256
+- no model、loss、optimizer、environment、action schema、sampling default、frame-budget change
+
+Current state:
+
+- replacement run/job/artifact/qualification: **unconfirmed**
+- current PR head workflow runs visible through the connector: **12件すべて`action_required`, jobs未生成**
+- classification: **`workflow_execution_approval_or_policy_blocker`**
+- do not classify this as model、optimizer、SILG baseline or capability failure
+- do not duplicate-dispatch the same first chunk
+
+Required artifact after execution is allowed:
 
 - exact command and pinned source provenance
+- pre/post seed patch and SHA-256
 - complete `job.tar`
 - model / optimizer / scheduler / frame state
 - checkpoint bytes and SHA-256
 - host / dependency / raw logs
 - peak RSS / wall / throughput
 - qualification JSON with `checkpoint_frames >= 1,000,000`
-
-Current state: **submitted / push-run result unconfirmed**。run ID、job ID、artifact ID、checkpoint qualificationを独立確認するまで、開始・完了・public reproduction・capability progressを認定しない。同じchunkを重複dispatchしない。
 
 Continuation after first checkpoint:
 
@@ -132,16 +156,7 @@ Continuation after first checkpoint:
 
 D015〜D035を凍結する。能力runではrandom/language-blind/state-only/shuffle、model/checkpoint bytes、RSS、runtime、CPU latency、seed、split、actual frames、raw logs、checksums、leakageを保存する。公式再現ではofficial command parity、100M horizon、checkpoint/resume integrityも必須。
 
-RESET-E081で`.github/workflows/r0d_cycle_072_core_normalized_cell_identity.yml`をread-only CIへ変更した。
-
-- `contents: write`を`contents: read`へ縮小
-- PR job内のreport生成、commit、pushを削除
-- patch applicatorが既に統合済みで無差分であることを`git diff --exit-code`で検証
-- production core、patch helper、focused regressionをcompile・実行
-
-これはbranch競合と自己書換えを除去するevaluation-infrastructure修正であり、model、benchmark、split、controls、metric定義は変更しない。
-
-Next single evaluation action: 新しい`R0D core normalized cell identity` checkの結果を確認する。失敗ならjob logから最初の一原因だけを修正する。成功ならこのisolated evaluation blockerをclosedとし、追加のevaluation項目を増やさない。
+Normalized-cell workflowはread-only fail-closed CIへ変更済み。fixtureは明示holdout契約に合わせて修正済みであり、直前の実行可能headではevaluation-contract checksが通過した。現headの`action_required`は承認/policy層のblockerとして扱い、evaluation logic regressionとは混同しない。
 
 Standalone `audit_canonical_instance_identity.py`はpassしているが、direct integration into `validate_dataset()` and `score()` remains incomplete。統合完了までclaimed bundleからstandalone auditを省略しない。
 
@@ -155,6 +170,10 @@ Ueda et al., LREC-COLING 2024、公式repository `riken-grp/J-CRe3`。exact comm
 
 公式repository `CausalVerse/CausalVerseBenchmark`。exact commit、license、dataset/config checksumを固定し、公式baselineを無改変で1 scene以上再現する。known/hidden intervention target、temporal shuffle、variable shuffle、random representationをmatched比較する。数値再現は0件。
 
+### Unknown multi-node intervention CRL
+
+NeurIPS 2024のUMN-CRLにはauthor-official repository `acarturk-e/umni-crl`がある。2026年のfew-environment finite-sample CRLは、少数のunknown multi-node interventionからlatent graph、mixing/representation、unknown intervention targetsを回復する保証を提示する。現時点ではexact commit、dependency、dataset/config、public numerical contractを固定したimmutable reproductionは0件。novelty matrixへ「再現済み」としては追加しない。
+
 ### SemEval-2026 Task 12 AER
 
 公式dataset repository `sooo66/semeval2026-task12-dataset`。exact commit、dataset checksum、official split/evaluatorを固定するまで数値を能力証拠へ流用しない。SILG interactive competence、J-CRe3 multimodal reference resolution、hidden intervention-target groundingの代替にはしない。
@@ -165,9 +184,7 @@ Ueda et al., LREC-COLING 2024、公式repository `riken-grp/J-CRe3`。exact comm
 
 ## Prior-art audit rule
 
-score-based CRL、finite-sample CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg、MagicBench、CodeBind、NoisyCausal、CaST-Bench、CausalVerse、MTG-Causal-RL、Mind Dreamer、AER、COGS等をnovelty matrixの既存境界として維持する。
-
-2026年一次文献の再監査では、unknown intervention targetを含むcausal DAG coarsening、RL policyのnonlinear causal reduction、少数environment・有限標本でのunknown target回復を確認した。いずれもRQ-001の広義主張をさらに狭めるが、このrepositoryでのofficial executable baseline reproductionではない。
+score-based CRL、finite-sample CRL、unknown multi-node intervention CRL、Multi-View CRL、LeGIT、GPI、ReCITE、C3、MCDRL、CmIR、CAIR、PCMCI、CausalLens、CTLD、DCAN、TRACE、Bayesian Ablation、CausalDisenSeg、MagicBench、CodeBind、NoisyCausal、CaST-Bench、CausalVerse、MTG-Causal-RL、Mind Dreamer、AER、COGS等をnovelty matrixの既存境界として維持する。
 
 新しい文献名だけを毎回追加しない。「一次文献 + author-official code + exact commit + public numerical contract」が固定でき、RQ-001境界を実質変更する場合だけnovelty matrixへ昇格する。
 
@@ -199,14 +216,12 @@ SILG/RTFMにはground-truth latent intervention family、target、mechanism oper
 - immutable R0.1 short-horizon screening artifacts: **8件**
 - official-contract infrastructure artifact: **1件**
 - exact one-step resume-equivalence artifact: **1件・accepted**
-- active official 100M reproduction: **seed-1 first 1M checkpoint submitted / result unconfirmed**
+- active official 100M reproduction: **initial seed CLI defect fixed; replacement execution unconfirmed**
 - official SILG 100M-frame reproduction: **0件**
 - competent external baseline: **0件**
 - official-horizon matched controls: **0件**
 - J-CRe3 numerical reproduction: **0件**
 - CausalVerse numerical reproduction: **0件**
-- AER numerical reproduction: **0件**
-- COGS numerical reproduction: **0件**
 - qualified R0.2: **0件**
 - R0.3 hidden intervention-target ablation: **棄却維持**
 - novelty matrix: **未完了**
