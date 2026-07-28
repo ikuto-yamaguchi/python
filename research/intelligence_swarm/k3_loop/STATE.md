@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Shared State
 
-Last updated: 2026-07-28 by K3-E
+Last updated: 2026-07-28 by K3-A
 Canonical branch: `research/intelligence-swarm-reconstruction-001`
 
 ## Objective
@@ -11,9 +11,27 @@ Kimi K3 と関連一次研究から、1GB以下・弱いCPU/スマホで高速�
 
 **Phase 1.0: D002をPath-WARNとして統合し、D003 exact-dependency fresh-process preflightのみ許可。**
 
-- A001、B001/B002、C001、D001/D002、E001/E002完了。
+- A001/A002、B001/B002、C001、D001/D002、E001/E002完了。
 - Block AttnRes: **追加検証・未採用**。
 - 新規architecture、S1/S2/S3、KDA、Stable LatentMoEは引き続き禁止。
+
+## A002 dependency decision
+
+候補 `wdlctc/open-attention-residuals@83d2b8de82c2fbb981c7decca67d13d9db348da6` の `requirements.txt` にある `torch>=2.0` / `transformers>=4.40` は、固定候補sourceが使用する内部APIを再現するには広すぎる。
+
+候補が直接importする `merge_with_config_defaults` と `capture_outputs` の組合せは、Transformers `v4.51.3`、`v4.57.1`、`v5.0.0` のQwen3 sourceとは一致しない。Hugging Face Transformers commit:
+
+`42791a34fdeae197f60f11ace3807c81f44b0729`
+
+で当該splitと候補に一致するQwen3 import familyを確認した。したがってD003の証拠付きlower boundを次に固定する。
+
+- Python: `3.11.x` を使用（upstream requirementは `>=3.10`）
+- PyTorch: upstream requirement `>=2.4` を満たす単一のexact buildをDが固定
+- Transformers: git commit `42791a34fdeae197f60f11ace3807c81f44b0729`
+- tokenizers: upstream range `>=0.22.0,<=0.23.0` 内のresolver-selected exact versionとhash
+- synthetic preflightではdatasets/W&B/UI依存を除外
+
+これは実行可能性のlower boundであり、candidate全経路の互換性証明ではない。D003はimport/instantiate probeと、必要なら1回だけの明示的minimal compatibility patchを記録する。
 
 ## E002 decision
 
@@ -47,14 +65,15 @@ D002は以下を通過した。
 
 単一仮説:
 
-> 固定した非公式候補をexact dependency環境でB0/A1として構築し、残差経路以外を変えず、fresh process・交互順序で再現可能な時間、条件別RSS、operator attribution、checksumを取得できる。
+> A002で固定したlower-bound dependency snapshot上で非公式候補をB0/A1として構築し、残差経路以外を変えず、fresh process・交互順序で再現可能な時間、条件別RSS、operator attribution、checksumを取得できる。
 
 ## Authorized next work
 
 ### A
 
-- 新K3技術を凍結。
-- 候補コードのimport/API使用から、最小のPython/PyTorch/Transformers互換tupleと根拠を固定。
+- A002完了。新K3技術は凍結継続。
+- D003が新たなimport/API不一致を発見した場合のみ、一次sourceへ戻ってdependency provenanceを追加監査する。
+- paper-to-candidate deviation matrixはS2前まで保留可能。
 
 ### B
 
@@ -66,7 +85,7 @@ D002は以下を通過した。
 C001を次だけ修正する。
 
 - A1=`115,579,929`、delta=`25,625`
-- D003実行方法とenvironment lock
+- A002 lower-boundを使うD003実行方法とenvironment lock
 - save/load tolerance
 - PASS/WARN/STOP schema
 - CPU固定条件とoperator fields
@@ -77,7 +96,10 @@ C001を次だけ修正する。
 
 D003のみ実行する。
 
-- exact candidate dependency runtime
+- A002のexact Transformers commitを起点にminimal environment lockを作成
+- exact PyTorch buildとtransitive versions/hashesを保存
+- internal API import probe
+- candidate compatibility patchは最大1件、明示diff/checksum必須
 - B0/A1を別fresh processで実行
 - 同一warm-up後に順序を交互化
 - fixed synthetic inputとSHA256
@@ -113,6 +135,7 @@ D003のみ実行する。
 - 著者一次証拠は約194M active未満で未確立。
 - 公式repositoryには再現可能なtraining baselineがない。
 - 候補は `wdlctc/open-attention-residuals@83d2b8de82c2fbb981c7decca67d13d9db348da6`。
+- candidate requirements rangeはprovenanceとして無効。A002 lower-bound snapshotを使用する。
 - 言語品質、CPU Pareto、量子化、知能原理、高校生級、能力進歩、1GB目標達成は未主張。
 
 ## Stop conditions
