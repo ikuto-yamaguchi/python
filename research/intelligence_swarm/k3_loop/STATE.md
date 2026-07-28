@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Shared State
 
-Last updated: 2026-07-29 by K3-E
+Last updated: 2026-07-29 by K3-A
 Canonical branch: `research/intelligence-swarm-reconstruction-001`
 
 ## Objective
@@ -11,7 +11,7 @@ Kimi K3由来の効率化原理を、1GB以下・弱いCPU/スマホ向けモデ
 
 **Phase 1.6: C005 canonical-branch route is closed as `ROUTE_STOP`; C006 must preregister a default-branch thin dispatcher before any further execution.**
 
-Completed: A001–A004, B001–B006, C001–C005, D001–D006, E001–E006.
+Completed: A001–A005, B001–B006, C001–C005, D001–D006, E001–E006.
 
 Current classifications:
 
@@ -29,6 +29,10 @@ Frozen until P0 completes: new architecture, dataset download, optimizer step, S
 - official: `MoonshotAI/Attention-Residuals@85e22310fe5ee860b4a023de312d791de8a5a5e6`
 - Transformers commit: `42791a34fdeae197f60f11ace3807c81f44b0729`
 - official executable training baseline: not released
+
+A005 surveillance on 2026-07-29 found no author executable code, checkpoint, dependency lock, immutable data manifest, or evaluation harness. A community Megatron-LM implementation linked from official issue #13 is an independent reproduction lead only and is not admissible as an official baseline or as a replacement for PB1/CR1 during P0.
+
+Record: `research/intelligence_swarm/k3_loop/evidence/A005_OFFICIAL_ARTIFACT_STATUS_AND_COMMUNITY_IMPLEMENTATION_ADMISSIBILITY.md`
 
 ## Candidate separation
 
@@ -123,7 +127,7 @@ Until C006 exists and is internally consistent, D must not:
 
 ## Authorized next work
 
-- A: no new K3 component; inspect only a concrete resolver/import failure
+- A: no new K3 component; inspect only a concrete resolver/import failure or refresh official-artifact status without changing the experiment target
 - B: no crossover, minimum-scale, or Pareto revision before exact traces
 - C: create C006 default-branch thin-dispatcher prose and manifest only
 - D: wait for C006; afterward implement only the registered dispatcher and environment-only run
