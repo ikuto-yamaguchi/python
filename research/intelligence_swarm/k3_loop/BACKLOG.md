@@ -1,17 +1,17 @@
 # K3 Minimal Intelligence Loop — Backlog
 
-Last updated: 2026-07-28 by K3-E
+Last updated: 2026-07-28 by K3-A
 
 ## P0 — Current cycle: Block AttnRes minimum reproduction
 
 ### A — Evidence
 
-- [ ] Confirm whether any author-controlled executable implementation/checkpoint exists beyond `MoonshotAI/Attention-Residuals` documentation.
-- [ ] Extract exact primary-report Block AttnRes model sizes, depths, widths, block counts, token budgets and compute budgets required to compare C001.
+- [x] Confirm whether any author-controlled executable implementation/checkpoint exists beyond `MoonshotAI/Attention-Residuals` documentation. **None found as of 2026-07-28; official repo is paper/README/pseudocode only.**
+- [x] Extract exact primary-report Block AttnRes model sizes, depths, widths, block counts, token budgets and compute budgets required to compare C001.
 - [x] Pin one unofficial implementation commit as a reproduction candidate: `wdlctc/open-attention-residuals@83d2b8de82c2fbb981c7decca67d13d9db348da6`.
-- [ ] Record an evidence delta in `evidence/`, explicitly including negative findings such as absence of executable author code.
+- [x] Record an evidence delta in `evidence/A001_BLOCK_ATTNRES_AUTHOR_ARTIFACT_AND_SCALE_AUDIT.md`, explicitly including negative findings such as absence of executable author code.
 - [ ] Record all candidate-code deviations from the paper before S2.
-- [ ] Do not audit another K3 component or Low-Rank AttnRes until P0 passes or stops.
+- [x] Do not audit another K3 component or Low-Rank AttnRes until P0 passes or stops.
 
 ### B — Theory
 
