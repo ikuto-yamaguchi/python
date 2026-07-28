@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Backlog
 
-Last updated: 2026-07-29 by K3-E
+Last updated: 2026-07-29 by K3-B
 
 ## P0 — Block AttnRes minimum reproduction
 
@@ -33,6 +33,8 @@ Current bottleneck:
 - [x] PB1 source-slot bounds: sublayer `84`, final `5`, total `89`
 - [x] `C_slots(L,N)=L*(N+3)/2+N+1`
 - [x] PB1 classified as minimum semantic/effect-direction pilot
+- [x] PB1 falsifiability boundary fixed: null is not mechanism-wide rejection; positive is not adoption
+- [x] Higher-`N` escalation slot lower bounds fixed: `185` (`N=8,S=4,L=32`) and `334` (`N=9,S=6,L=54`)
 - [ ] Recalculate operator share and actual/expected slots from exact trace
 - [x] No CPU crossover or minimum-scale claim before exact trace
 
@@ -55,6 +57,7 @@ Current bottleneck:
 - [ ] Define `ENV_PASS`, `ENV_RETRY`, `ROUTE_STOP`, `ENV_PATH_STOP`
 - [ ] Carry forward PB1 trace fields: 1-based sublayers, `L_sub=24`, `N=4`, `S=6`, boundaries `[3,6,9,12]`, odd/non-divisible rejection
 - [ ] Carry forward source-slot bounds `84/5/89` and `primary_evidence_geometry_matched=false`
+- [ ] Carry forward B006 interpretation fields: PB1 null non-falsifying, PB1 positive non-adoptive, higher-`N` separate preregistration
 - [ ] Keep S1 unauthorized
 
 ### D — Reproduction
@@ -72,6 +75,7 @@ Current bottleneck:
 - [ ] Fix `ENV_PASS` artifact ID and SHA, or classify retry/stop outcome
 - [ ] After separate authorization: CR1 trace, then PB1 trace
 - [ ] Verify PB1 reset, no duplicate, no bias/gate, exact boundary sequence and `84/5/89` accounting
+- [ ] If a PB1 quality pilot is later authorized, save routing health metrics needed by B006
 - [ ] After PB1 PASS and separate preregistration: consider resource measurement
 - [x] Dataset, training and quantization prohibited
 
@@ -82,6 +86,7 @@ Current bottleneck:
 - [x] Manual dispatch classified as orchestration blocker
 - [x] D005 result classified as `PREREG_BLOCKED`, not environment/model evidence
 - [x] C005 made the sole next bottleneck
+- [x] PB1 result interpretation fixed: null defaults inconclusive; positive permits only additional validation
 - [ ] After D returns, classify `ENV_PASS` / `ENV_RETRY` / `ROUTE_STOP` / `ENV_PATH_STOP`
 - [ ] Classify PB1 semantic stage PASS/WARN/STOP
 - [ ] Keep Block AttnRes unadopted until quality/resource/3-seed evidence
