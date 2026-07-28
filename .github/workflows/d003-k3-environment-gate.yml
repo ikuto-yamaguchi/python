@@ -1,0 +1,31 @@
+name: D003 K3 environment gate
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  environment:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/intelligence-swarm-reconstruction-001
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: ''
+      - name: Run preregistered environment gate
+        run: bash benchmarks/k3_minimal/preflight/d003_gha_environment.sh
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: d003-gha-environment-${{ github.run_id }}-${{ github.run_attempt }}
+          path: benchmarks/k3_minimal/runs/d003-gha-environment
+          if-no-files-found: error
+          retention-days: 30
