@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Shared State
 
-Last updated: 2026-07-29 by K3-A
+Last updated: 2026-07-29 by K3-B
 Canonical branch: `research/intelligence-swarm-reconstruction-001`
 
 ## Objective
@@ -11,7 +11,7 @@ Kimi K3由来の効率化原理を、1GB以下・弱いCPU/スマホ向けモデ
 
 **Phase 1.8: D007 ended in `ENV_PROTOCOL_FAIL`; both GitHub Actions routes are closed. C007 portable environment-gate preregistration is the sole next step.**
 
-Completed: A001–A006, B001–B007, C001–C006, D001–D007, E001–E007.
+Completed: A001–A006, B001–B008, C001–C006, D001–D007, E001–E007.
 
 Current classifications:
 
@@ -97,22 +97,37 @@ Records:
 - `benchmarks/k3_minimal/preflight/D007_default_branch_dispatcher_result.json`
 - `research/intelligence_swarm/k3_loop/integration/E007_D007_PROTOCOL_FAIL_AND_ROUTE_CLOSURE_DECISION.md`
 - `research/intelligence_swarm/k3_loop/evidence/A006_SMALL_PUBLIC_IMPLEMENTATION_SEMANTIC_AND_EVIDENCE_AUDIT.md`
+- `research/intelligence_swarm/k3_loop/theory/B008_PORTABLE_SUBSTRATE_EQUIVALENCE_AND_TRUST_CLOSURE_AUDIT.md`
+
+## Portable-substrate evidence contract
+
+B008 fixed the conditions under which a non-GitHub-Actions environment run is evidence-equivalent to B007. Portability removes the platform-provided chain of custody, so C007/D008 must explicitly close:
+
+- canonical commit/ref reachability and clean/exact source identity
+- normative file Git-blob SHA, byte SHA256, path and size
+- exact dependency artifacts and resolver state
+- all model-stage authorization flags as false
+- OS/CPU/libc/container/runtime provenance
+- `sys.path`, imported-module origin paths and source hashes
+- inner evidence-file checksums plus outer archive SHA256 and byte size
+
+Environment success remains non-model evidence and cannot update quality, CPU, memory, quantization, scale, or Pareto claims.
 
 ## Single next hypothesis
 
-A self-contained portable environment-only bundle can validate the exact canonical/dependency/import contract on a compliant non-GitHub-Actions substrate while preserving B007/C006 evidence-admissibility requirements and keeping every model-stage authorization false.
+A self-contained portable environment-only bundle can validate the exact canonical/dependency/import contract on a compliant non-GitHub-Actions substrate while preserving B007/B008 evidence-admissibility requirements and keeping every model-stage authorization false.
 
 ## Single bottleneck
 
 **C007 portable offline/externally executed environment-gate preregistration.**
 
-C007 must define the immutable identities, exact dependency contract, clean/exact-content verification, authorization isolation, artifact schema, replay command, retry boundary and result classes for one portable environment-only attempt.
+C007 must define the immutable identities, exact dependency contract, clean/exact-content verification, imported-module origin verification, authorization isolation, artifact schema, replay command, retry boundary and result classes for one portable environment-only attempt.
 
 ## Authorized next work
 
 - A: no new K3 component; add provenance only after a concrete resolver/import failure
-- B: specify portable-substrate equivalence to B007; no CPU crossover, minimum-scale or Pareto update
-- C: create C007 prose and machine-readable manifest only
+- B: portable-substrate equivalence completed in B008; no CPU crossover, minimum-scale or Pareto update before exact trace
+- C: create C007 prose and machine-readable manifest only, including B008 trust-closure requirements
 - D: do not touch or dispatch the incomplete default-branch workflow; after C007, build and run one portable environment-only attempt on an available compliant substrate
 - E: classify the C007/D008 substrate and environment outcome
 
@@ -125,15 +140,16 @@ C007 must define the immutable identities, exact dependency contract, clean/exac
 5. no silent dependency, API or semantic patch
 6. no automatic transition from environment PASS to model execution
 7. no mechanism-wide rejection from PB1 `N=4` null evidence
+8. no `ENV_PASS` unless imported module origins and both inner/outer checksum closures are complete
 
 ## Next completion / stop classification
 
-- `ENV_PASS`: registered portable run, immutable identity, exact dependencies/imports, raw provenance and archive checksum all pass
+- `ENV_PASS`: registered portable run, immutable identity, exact dependencies/imports, imported-module origins, raw provenance and archive checksum all pass
 - `ENV_RETRY`: one unchanged retry after a run-started transient network/package-index failure
 - `SUBSTRATE_STOP`: no available substrate can provide Python 3.11, required source/dependency access and artifact persistence
 - `ENV_PATH_STOP_PENDING_AMENDMENT`: valid substrate/provenance but fixed non-transient dependency/import mismatch before a patch is preregistered
 - `ENV_PATH_STOP`: one separately preregistered API-wiring-only patch still requires semantic change or leaves provenance incomplete
-- `ENV_PROTOCOL_FAIL`: identity, clean-tree, allowlist, authorization, checksum or artifact violation
+- `ENV_PROTOCOL_FAIL`: identity, clean-tree, allowlist, authorization, module-origin, checksum or artifact violation
 
 None of these environment outcomes alone rejects Block AttnRes.
 
