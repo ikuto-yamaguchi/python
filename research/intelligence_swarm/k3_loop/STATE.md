@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Shared State
 
-Last updated: 2026-07-29 by K3-C
+Last updated: 2026-07-29 by K3-E
 Canonical branch: `research/intelligence-swarm-reconstruction-001`
 
 ## Objective
@@ -9,19 +9,20 @@ Kimi K3由来の効率化原理を、1GB以下・弱いCPU/スマホ向けモデ
 
 ## Current phase
 
-**Phase 1.7: C006 default-branch thin-dispatcher preregistration is complete; D007 may implement and dispatch one environment-only run.**
+**Phase 1.8: D007 ended in `ENV_PROTOCOL_FAIL`; both GitHub Actions routes are closed. C007 portable environment-gate preregistration is the sole next step.**
 
-Completed: A001–A005, B001–B007, C001–C006, D001–D006, E001–E006.
+Completed: A001–A005, B001–B007, C001–C006, D001–D007, E001–E007.
 
 Current classifications:
 
 - Block AttnRes: **小型化で要再設計・追加検証・未採用 / Path-WARN**
 - PAPER-BLOCK (`PB1`): canonical paper-reference candidate; semantic trace pending
 - CANDIDATE-RAW (`CR1`): fixed-commit artifact diagnostic only; paper attribution prohibited
-- C005 route: **`ROUTE_STOP / closed`**
-- Execution state: **`D007_AUTHORIZED_ENVIRONMENT_ONLY`**
+- C005 canonical-push route: **`ROUTE_STOP / closed`**
+- C006/D007 default-branch route: **`ENV_PROTOCOL_FAIL + ROUTE_STOP_DEFAULT_BRANCH / closed`**
+- Execution state: **`C007_PREREGISTRATION_REQUIRED`**
 
-Frozen until P0 completes: new architecture, dataset download, optimizer step, S1–S3, quantization, KDA, Stable LatentMoE.
+Frozen until P0 environment and semantic gates complete: new architecture, dataset download, optimizer step, S1–S3, quantization, KDA, Stable LatentMoE.
 
 ## Fixed references
 
@@ -30,9 +31,7 @@ Frozen until P0 completes: new architecture, dataset download, optimizer step, S
 - Transformers commit: `42791a34fdeae197f60f11ace3807c81f44b0729`
 - official executable training baseline: not released
 
-A005 surveillance on 2026-07-29 found no author executable code, checkpoint, dependency lock, immutable data manifest, or evaluation harness. A community Megatron-LM implementation linked from official issue #13 is an independent reproduction lead only and is not admissible as an official baseline or as a replacement for PB1/CR1 during P0.
-
-Record: `research/intelligence_swarm/k3_loop/evidence/A005_OFFICIAL_ARTIFACT_STATUS_AND_COMMUNITY_IMPLEMENTATION_ADMISSIBILITY.md`
+A005 found no author executable code, checkpoint, dependency lock, immutable data manifest, or evaluation harness. A community Megatron implementation remains an independent reproduction lead only and cannot replace PB1/CR1 during P0.
 
 ## Candidate separation
 
@@ -59,37 +58,10 @@ Exact executable state dictで再確認する。parameter数やKV cache非増加
 - embedding is one separate source
 - final router does not increment completed-block count
 - odd `S` or non-divisible `L_sub/S` must be rejected
-
-Canonical source-slot contract:
-
-- sublayer routing slots: `84`
-- final-router sources: `5`
-- total slots: `89`
+- canonical source slots: sublayer `84`, final `5`, total `89`
 - `primary_evidence_geometry_matched=false`
 
-PB1 is a minimum semantic/effect-direction pilot, not a reproduction of the primary `N≈8–9` evidence geometry.
-
-## PB1 interpretation boundary
-
-- PB1 null is not mechanism-wide falsification without resolution, optimization, scale, and implementation invariance.
-- PB1 positive is not sufficient for adoption.
-- healthy-routing null defaults to `PB1 inconclusive / possible depth-resolution limit`.
-- higher-`N` escalation requires a separate preregistration and resource budget.
-- source-slot lower bounds: `N=8,S=4,L=32 -> 185` (`2.079x PB1`); `N=9,S=6,L=54 -> 334` (`3.753x PB1`).
-
-Record: `research/intelligence_swarm/k3_loop/theory/B006_PB1_FALSIFIABILITY_AND_ESCALATION_BOUNDARY.md`
-
-## Execution-substrate invariance
-
-B007 fixed the evidence boundary for replacing the failed canonical-branch route with a default-branch thin dispatcher:
-
-- orchestration may change only `O`; canonical model/input/hyperparameter/dependency identity must remain immutable
-- successful imports are necessary but not sufficient; exact commit and artifact hashes are mandatory
-- dispatcher must contain no model code, semantic patch, architecture branch, or model-stage authorization
-- environment-stage outcomes cannot update quality, CPU crossover, minimum scale, quantization, or Pareto status
-- any branch/SHA/allowlist/hash/authorization/artifact violation is `ENV_PROTOCOL_FAIL` and inadmissible
-
-Record: `research/intelligence_swarm/k3_loop/theory/B007_EXECUTION_SUBSTRATE_INVARIANCE_AND_EVIDENCE_ADMISSIBILITY.md`
+PB1 is a minimum semantic/effect-direction pilot, not a reproduction of the primary `N≈8–9` evidence geometry. PB1 null is not mechanism-wide falsification, and PB1 positive is not sufficient for adoption.
 
 ## Existing executable evidence
 
@@ -107,72 +79,60 @@ The 2048-token result was about 4.13x the short-sequence fit and remains unconfi
 ## Execution-route history
 
 - D003 local exact-runtime attempt: `BLOCKED_ENV`
-- D004 GitHub Actions environment workflow: staged, manual dispatch not started
-- E004: authorized a narrow one-shot canonical-branch environment-only route, subject to C005 preregistration
-- D005: confirmed C005 prose/manifest were absent and correctly returned `PREREG_BLOCKED`; workflow was not changed
-- E005: made C005 the sole next step and prohibited repeated D predispatch churn
-- C005: preregistered the canonical-branch/path-restricted one-shot push route
-- D006: applied the registered workflow amendment and nonce attempt 1; existing push workflows ran, but no `D003 K3 environment gate` run was generated for either the amendment or nonce-finalization commit
-- D006 classification: **`ROUTE_STOP`**. C005 route is closed; no further nonce/path-filter variants are allowed.
-- E006: authorized only a separately preregistered default-branch thin dispatcher that accepts fixed canonical SHA inputs and runs the environment probe without model execution.
-- C006: preregistered the thin dispatcher, immutable inputs, detached-checkout/file-identity gates, authorization isolation, artifact schema, retry boundary, and result classification.
+- D004 workflow staged; manual dispatch unavailable
+- C005/D006 canonical-branch push route: no environment workflow run generated; `ROUTE_STOP`, closed
+- C006 preregistered a default-branch thin dispatcher
+- D007 committed an incomplete minimal workflow to `main` at `0091e002dfb965e59adda99d7319ceba03e565e6`
+- the workflow lacks mandatory C006 immutable-input, identity, authorization, raw-evidence and archive-checksum gates
+- no workflow run was dispatched
+- the available interface rejected compliant replacement and cleanup deletion
+- E007 classifies the run `ENV_PROTOCOL_FAIL` and closes the default-branch GitHub Actions route as `ROUTE_STOP_DEFAULT_BRANCH`
+- the incomplete workflow is quarantined and must not be dispatched
 
-D006 records:
+Records:
 
-- `research/intelligence_swarm/k3_loop/reproduction/D006_C005_CANONICAL_PUSH_ROUTE_STOP.md`
-- `benchmarks/k3_minimal/preflight/D006_c005_push_route_result.json`
+- `research/intelligence_swarm/k3_loop/reproduction/D007_DEFAULT_BRANCH_DISPATCHER_PROTOCOL_BLOCKER.md`
+- `benchmarks/k3_minimal/preflight/D007_default_branch_dispatcher_result.json`
+- `research/intelligence_swarm/k3_loop/integration/E007_D007_PROTOCOL_FAIL_AND_ROUTE_CLOSURE_DECISION.md`
 
-E006 record:
+## Single next hypothesis
 
-- `research/intelligence_swarm/k3_loop/integration/E006_DEFAULT_BRANCH_THIN_DISPATCHER_DECISION.md`
-
-C006 records:
-
-- `research/intelligence_swarm/k3_loop/prereg/C006_DEFAULT_BRANCH_THIN_DISPATCHER_AMENDMENT.md`
-- `benchmarks/k3_minimal/manifests/C006_default_branch_thin_dispatcher.yaml`
+A self-contained portable environment-only bundle can validate the exact canonical/dependency/import contract on a compliant non-GitHub-Actions substrate while preserving B007/C006 evidence-admissibility requirements and keeping every model-stage authorization false.
 
 ## Single bottleneck
 
-D must implement the C006-compliant thin dispatcher on `main`, dispatch one environment-only run against an immutable canonical SHA, and preserve the complete route/environment evidence.
+**C007 portable offline/externally executed environment-gate preregistration.**
 
-D must not:
-
-1. copy model code to the default branch
-2. instantiate B0, PB1, or CR1
-3. dispatch a model or semantic-trace stage
-4. download dataset/tokenizer/checkpoint
-5. train or quantize
-6. silently patch dependency or model semantics
+C007 must define the immutable identities, exact dependency contract, clean/exact-content verification, authorization isolation, artifact schema, replay command, retry boundary and result classes for one portable environment-only attempt.
 
 ## Authorized next work
 
-- A: no new K3 component; inspect only a concrete resolver/import failure or refresh official-artifact status without changing the experiment target
-- B: verify D007 against B007; no crossover, minimum-scale, or Pareto revision before exact traces
-- C: wait for D007; amend only if D exposes a concrete protocol defect or non-transient import failure
-- D: execute D007 exactly as registered by C006
-- E: classify D007 route and environment outcome
+- A: no new K3 component; add provenance only after a concrete resolver/import failure
+- B: specify portable-substrate equivalence to B007; no CPU crossover, minimum-scale or Pareto update
+- C: create C007 prose and machine-readable manifest only
+- D: do not touch or dispatch the incomplete default-branch workflow; after C007, build and run one portable environment-only attempt on an available compliant substrate
+- E: classify the C007/D008 substrate and environment outcome
 
-## C006 / D007 required contract
+## Prohibitions
 
-- default branch contains only a thin `workflow_dispatch` launcher, no model implementation
-- required immutable inputs: canonical branch/SHA, C003/C004/C006 manifest blob SHAs, environment script/probe blob SHAs, attempt
-- detached checkout of the exact canonical SHA and branch-reachability proof
-- clean-tree, branch/SHA, file-identity, SHA256, and allowlist guards
-- all training/model/data/tokenizer/checkpoint/quantization/semantic-trace authorization false
-- environment PASS cannot auto-transition to model execution
-- resolver report, freeze, hashes, raw logs, classification, artifact ID and downloaded ZIP SHA256 mandatory
-- transient retry limited to one unchanged attempt
+1. no further C005/C006 trigger, nonce, dispatcher or default-branch workflow variants
+2. do not dispatch `.github/workflows/d007-k3-environment-dispatcher.yml` in its current form
+3. no model implementation on an orchestration branch or launcher
+4. no B0/PB1/CR1 instantiate, semantic trace, dataset/tokenizer/checkpoint download, training or quantization before separate authorization
+5. no silent dependency, API or semantic patch
+6. no automatic transition from environment PASS to model execution
+7. no mechanism-wide rejection from PB1 `N=4` null evidence
 
-## Completion / stop classification
+## Next completion / stop classification
 
-- `ENV_PASS`: registered run, guards, exact provenance/imports, required artifacts, artifact ID/SHA all fixed
-- `ENV_RETRY`: run-started transient Actions/package-index/DNS/network failure after pre-network gates; one unchanged retry only
-- `ROUTE_STOP_DEFAULT_BRANCH`: minimal default-branch dispatcher cannot be introduced or dispatched under repository policy/permissions
-- `ENV_PATH_STOP_PENDING_AMENDMENT`: valid route/provenance but fixed dependency/import failure before a patch is preregistered
-- `ENV_PATH_STOP`: after separately preregistered single API-wiring-only patch, semantic change or incomplete provenance remains necessary
-- `ENV_PROTOCOL_FAIL`: branch/SHA/detached-tree/allowlist/authorization/hash/artifact/prohibited-action violation; result invalid
+- `ENV_PASS`: registered portable run, immutable identity, exact dependencies/imports, raw provenance and archive checksum all pass
+- `ENV_RETRY`: one unchanged retry after a run-started transient network/package-index failure
+- `SUBSTRATE_STOP`: no available substrate can provide Python 3.11, required source/dependency access and artifact persistence
+- `ENV_PATH_STOP_PENDING_AMENDMENT`: valid substrate/provenance but fixed non-transient dependency/import mismatch before a patch is preregistered
+- `ENV_PATH_STOP`: one separately preregistered API-wiring-only patch still requires semantic change or leaves provenance incomplete
+- `ENV_PROTOCOL_FAIL`: identity, clean-tree, allowlist, authorization, checksum or artifact violation
 
-None of these route/environment outcomes alone rejects Block AttnRes. `ROUTE_STOP_DEFAULT_BRANCH` pauses the current GitHub Actions implementation path until another explicit execution substrate becomes available.
+None of these environment outcomes alone rejects Block AttnRes.
 
 ## Evidence boundary
 
