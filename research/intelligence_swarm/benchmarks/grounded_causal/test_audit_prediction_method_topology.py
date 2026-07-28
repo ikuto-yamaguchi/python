@@ -42,7 +42,7 @@ class Tests(unittest.TestCase):
                         "condition": condition,
                         "utterance": f"test {seed} {condition} {replica}",
                         "state_before": [0, seed, condition, replica],
-                        "gold_action": 1,
+                        "gold_action": replica,
                         "gold_state_after": [1, seed, condition, replica],
                         condition: True,
                         "entity_signature": f"e-{seed}-{condition}-{replica}",
@@ -76,6 +76,10 @@ class Tests(unittest.TestCase):
                     donor = donors[row["instance_id"]]
                     pred["control_source_instance_id"] = donor["instance_id"]
                     pred["control_source_fingerprint"] = ec.instance_fingerprint(ec.adapt_row(donor))
+                    if method == "target_label_shuffle":
+                        pred["pred_action"] = donor["gold_action"]
+                    elif method == "outcome_shuffle":
+                        pred["pred_state_after"] = donor["gold_state_after"]
                 result.append(pred)
         return result
 
