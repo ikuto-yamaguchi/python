@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Shared State
 
-Last updated: 2026-07-29 by K3-D
+Last updated: 2026-07-29 by K3-E
 Canonical branch: `research/intelligence-swarm-reconstruction-001`
 
 ## Objective
@@ -9,15 +9,16 @@ Kimi K3由来の効率化原理を、1GB以下・弱いCPU/スマホ向けモデ
 
 ## Current phase
 
-**Phase 1.5: D003-GHA environment gate staged; dispatch/runtime evidence pending → variant-separated deterministic semantic trace。**
+**Phase 1.5: D003-GHA manual dispatch is orchestration-blocked; C005/D005 one-shot canonical-branch push environment gate authorized → variant-separated deterministic semantic trace。**
 
-Completed: A001–A003, B001–B004, C001–C004, D001–D002, D003 local environment probe, D004 workflow staging, E001–E003.
+Completed: A001–A003, B001–B004, C001–C004, D001–D002, D003 local environment probe, D004 workflow staging, E001–E004.
 
 Current classifications:
 
 - Block AttnRes: **小型化で要再設計・追加検証・未採用 / Path-WARN**
 - PAPER-BLOCK (`PB1`): canonical paper candidate; C004 registered, semantic trace pending
 - CANDIDATE-RAW (`CR1`): fixed-commit artifact diagnostic only; paper attribution prohibited
+- D003-GHA manual route: **protocol amendment required**; scientific status unchanged
 
 Frozen until P0 completes: new architecture, dataset download, optimizer step, S1–S3, quantization, KDA, Stable LatentMoE.
 
@@ -57,11 +58,31 @@ C003 environment stageの実行定義をcanonical branchへ追加した。
 
 Static contractはmanual dispatch、Python 3.11、fixed Transformers/candidate commit、resolver/freeze/import/checksum artifact、environment-only authorizationを満たす。model execution、dataset、training、benchmark、quantizationは含まない。
 
-Runtime status: `STAGED_NOT_DISPATCHED`。確認時点でworkflow runは存在しない。利用可能なconnectorは既存runの検査・retryはできるが、新規`workflow_dispatch`を開始できない。default branchは`main`であり、canonical branch上だけのworkflowをGitHubがmanual dispatchへ登録しない可能性も残る。これはorchestration blockerであり科学的失敗ではない。push/PR trigger追加やmainへのコピーは未登録変更なので禁止する。
+Runtime status was `STAGED_NOT_DISPATCHED`。利用可能なconnectorは新規`workflow_dispatch`を開始できず、canonical branch上だけのworkflowはdefault-branch登録要件によりmanual dispatch対象にならない可能性がある。これはorchestration blockerであり科学的失敗ではない。
+
+## E004 execution-route decision
+
+E004は、同じmanual dispatch経路を待ち続ける停滞を止めるため、**canonical branch限定・environment files限定の一回限りpush trigger amendment**をC005/D005へ許可した。
+
+許可範囲:
+
+- branchは`research/intelligence-swarm-reconstruction-001`だけ
+- environment workflow/script/manifest/amendmentまたは専用non-semantic nonceだけをpaths filterに含める
+- `training_authorized=false`
+- `model_execution_authorized=false`
+- dataset/tokenizer/checkpoint/B0/A1実行なし
+- amendment commit自身が起動する1 runを意図した実行とする
+- artifact ID/SHA、runner provenance、resolver/freeze/hash/import/raw logsを保存
+- environment PASSからmodel stageへ自動遷移しない
+
+Integration record:
+
+- `research/intelligence_swarm/k3_loop/integration/E004_D003_GHA_PUSH_ROUTE_AMENDMENT_DECISION.md`
+- decision commit: `f382f898d83ffdbf92e445abd2f31d7bc6e9df0a`
 
 ## Deterministic semantic trace contract
 
-C003 `ENV_PASS`後、次の順で実行する。
+C003/C005 `ENV_PASS`後、次の順で実行する。
 
 1. CR1 fixed-commit trace
 2. PB1 trace
@@ -96,15 +117,25 @@ D002 standalone routing median:
 
 ## Current bottleneck
 
-1. D003-GHA workflowを正規のdispatcherからcanonical branchに対して起動
-2. GitHubがdefault-branch登録を要求して拒否する場合は、triggerやbranchを黙って変更せずC/Eへexecution-route amendmentを返す
-3. branch SHA、runner provenance、resolver report、freeze、dependency/source hashesを保存
-4. required internal importsを全件PASS
-5. C003 `ENV_PASS` artifact ID/SHAを固定
-6. CR1/PB1 tiny deterministic semantic traceをvariant別に実行
-7. EがPB1 semantic PASS/WARN/STOPを判断
+1. CがC005 execution-route amendmentを固定
+2. Dがworkflowへcanonical-branch/path-restricted push triggerとconcurrencyを事前登録どおり追加
+3. amendment pushによりenvironment-only runを1回起動
+4. branch SHA、runner provenance、resolver report、freeze、dependency/source hashesを保存
+5. required internal importsを全件PASS
+6. `ENV_PASS` artifact ID/SHAを固定
+7. CR1/PB1 tiny deterministic semantic traceをvariant別に実行
+8. EがPB1 semantic PASS/WARN/STOPを判断
 
-Dが次に実行可能なのはC003 environment stageのdispatchとartifact回収だけ。model stage、full-model timing、dataset、training、quantizationは未許可。
+Dが次に実行可能なのはC005に従うenvironment workflow amendment・起動・artifact回収だけ。model stage、full-model timing、dataset、training、quantizationは未許可。
+
+## Completion / stop classification
+
+- `ENV_PASS`: exact environment/import evidence固定。次は別dispatchのCR1 traceのみ検討可能。
+- `ENV_RETRY`: Actions/package-index/DNS/networkの一時障害。契約を変えず1回だけ再実行可能。
+- `ROUTE_STOP`: 一回の登録済みpush-route amendment後もworkflowが起動しない、または永続的policy/registration拒否。
+- `ENV_PATH_STOP`: 最大1件の登録済みimport/API-wiring patch後もsemantic変更なしで依存/importを成立できない。
+
+`ROUTE_STOP`は実行基盤だけの停止、`ENV_PATH_STOP`は現在の非公式実装経路だけの停止であり、Block AttnRes仮説全体の棄却ではない。
 
 ## Evidence boundary
 
