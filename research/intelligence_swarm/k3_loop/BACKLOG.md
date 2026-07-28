@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Backlog
 
-Last updated: 2026-07-29 by K3-B
+Last updated: 2026-07-29 by K3-E
 
 ## P0 — Block AttnRes minimum reproduction
 
@@ -8,127 +8,98 @@ Classification: **小型化で要再設計・追加検証・未採用 / Path-WAR
 
 Current bottleneck:
 
-> manual `workflow_dispatch`経路はorchestration blocker。C005でcanonical branch・environment paths限定の一回限りpush routeを事前登録し、D005がenvironment-only runを起動して`ENV_PASS` artifact ID/SHAを固定する。
+> D005はC005不在を確認して`PREREG_BLOCKED`で停止した。次の唯一の作業はC005本文とmanifestの作成であり、それ以前のD再実行は禁止する。
 
 ### A — Evidence
 
 - [x] Author executable/checkpoint status: 未公開
 - [x] Primary model size/depth/width/block/token evidence extracted
-- [x] Candidate commit fixed
+- [x] Candidate and official commits fixed
 - [x] Dependency lower bound fixed
-- [x] A003 paper-to-candidate deviation matrix
-- [x] Missing partial reset, duplicate source, recency bias identified
-- [x] A004 paper layer-index origin and `L_sub/N/S` block-geometry audit
-- [x] PB1 requires `L_sub=24`, `N=4`, `S=6`, ordered boundaries after Transformer blocks `[3,6,9,12]`
-- [x] Zero-based initial false-boundary and odd-`S` truncation counterexamples fixed
-- [ ] Resolver/import failureが出た場合のみprovenance追補
-- [x] P0中は他K3 componentを凍結
+- [x] Paper-to-candidate deviation matrix
+- [x] Missing partial reset, duplicate source and recency bias identified
+- [x] Paper layer-index origin and `L_sub/N/S` geometry fixed
+- [x] PB1 boundaries `[3,6,9,12]`; zero-based false-boundary and odd-`S` counterexamples fixed
+- [ ] Add provenance only after a concrete resolver/import failure
+- [x] Freeze other K3 components during P0
 
 ### B — Theory
 
 - [x] Parameter/FLOPs/state-memory/communication/sequence/quantization/CPU comparison
-- [x] Small-scale counterexample and failure conditions
-- [x] CPU roofline/operator trace contract
+- [x] Small-scale counterexamples and CPU roofline contract
 - [x] D002 scaling-breakpoint audit
-- [x] B004 paper/raw routing-prior and identifiability audit
-- [x] PAPER-BLOCK provisional delta `25,600`
-- [x] Duplicate-prefix semantic mass and effective-source collapse derived
-- [x] B005 fixed-depth block-count/depth-resolution audit
-- [x] PB1 source-slot upper bounds fixed: sublayer `84`, final `5`, total `89`
-- [x] Fixed-depth cost formula fixed: `C_slots(L,N)=L*(N+3)/2+N+1`
-- [x] PB1 classified as minimum semantic/effect-direction pilot, not primary-geometry efficacy reproduction
-- [x] `N=4` null-result and higher-`N` Pareto interpretation boundaries fixed
-- [ ] Exact semantic/resource traceからoperator share、temporary threshold、paper/raw差を再計算
-- [ ] Exact traceからactual/expected source-slot ratioとduplicate-collapsed slotsを再計算
-- [x] Exact trace前のCPU crossover/minimum-scale主張は禁止
+- [x] Paper/raw routing-prior identifiability audit
+- [x] PB1 provisional delta `25,600`
+- [x] PB1 source-slot bounds: sublayer `84`, final `5`, total `89`
+- [x] `C_slots(L,N)=L*(N+3)/2+N+1`
+- [x] PB1 classified as minimum semantic/effect-direction pilot
+- [ ] Recalculate operator share and actual/expected slots from exact trace
+- [x] No CPU crossover or minimum-scale claim before exact trace
 
-### C — Preregistration
+### C — Preregistration — sole current work
 
 - [x] C001 baseline and single-change ablation
-- [x] C002 exact dependency/fresh-process/resource protocol
-- [x] C003 GitHub Actions runner/provenance and two-stage gate
-- [x] C003 environment stageとmodel stageを別dispatchへ分離
-- [x] C004 separate IDs/manifests/output paths for PAPER-BLOCK and CANDIDATE-RAW
-- [x] C004 register boundary indexing, partial reset, source identities
-- [x] C004 prohibit recency bias and optional gates in PAPER-BLOCK
-- [x] C004 register PAPER-BLOCK provisional total `115,579,904`
-- [x] Register checksum-collapsed semantic probability/entropy/effective source metrics
-- [x] S1 remains unauthorized
-- [x] E004 authorizes a narrow execution-route amendment; no model-contract change
-- [ ] C005 preregister canonical branch only push trigger
-- [ ] C005 restrict paths to environment workflow/script/manifest/amendment or dedicated non-semantic nonce
-- [ ] C005 pin concurrency, authorization flags, artifact schema, and one-retry policy
-- [ ] C005 prohibit automatic transition from ENV_PASS to model stage
-- [ ] Next PB1 amendment must register 1-based semantic sublayer indexing, `L_sub/N/S`, exact ordered boundaries, odd/nondivisible rejection
-- [ ] Next PB1 amendment must register B005 source-slot bounds `84/5/89` and `primary_evidence_geometry_matched=false`
-- [ ] Any future `N` ablation must use a separate preregistration and state whether baseline depth changes
-- [ ] PB1 semantic PASS後にのみfull-model resource protocolをamend
-- [ ] S1検討前に実コード上のglobal batch 64を保証
+- [x] C002 exact dependency/resource protocol
+- [x] C003 GitHub Actions environment gate
+- [x] C004 PB1/CR1 variant separation and semantic trace
+- [x] E004 authorized a narrow execution-route amendment
+- [x] E005 fixed preregistration order and prohibited D churn before C005
+- [ ] Create `research/intelligence_swarm/k3_loop/prereg/C005_D003_GHA_PUSH_ROUTE_AMENDMENT.md`
+- [ ] Create `benchmarks/k3_minimal/manifests/C005_d003_gha_push_route.yaml`
+- [ ] Restrict route to canonical branch and environment-related paths only
+- [ ] Fix concurrency/cancellation and one intended environment-only run
+- [ ] Fix `training_authorized=false` and `model_execution_authorized=false`
+- [ ] Fix artifact schema: branch/run identity, runner, resolver, freeze, source/dependency hashes, imports, raw logs, artifact SHA
+- [ ] Prohibit automatic transition from environment PASS to model stage
+- [ ] Allow one unchanged retry only after transient failure following run start
+- [ ] Define `ENV_PASS`, `ENV_RETRY`, `ROUTE_STOP`, `ENV_PATH_STOP`
+- [ ] Carry forward PB1 trace fields: 1-based sublayers, `L_sub=24`, `N=4`, `S=6`, boundaries `[3,6,9,12]`, odd/non-divisible rejection
+- [ ] Carry forward source-slot bounds `84/5/89` and `primary_evidence_geometry_matched=false`
+- [ ] Keep S1 unauthorized
 
 ### D — Reproduction
 
 - [x] D001 static contract audit
 - [x] D002 standalone preflight
-- [x] D003 environment probe
-- [x] Local `BLOCKED_ENV` isolated
-- [x] D004 add C003 environment runner script
-- [x] D004 add manual GitHub Actions environment workflow on canonical branch
-- [x] D004 static authorization/branch/evidence contract audit
-- [x] Confirm no workflow run existed at inspection time
-- [x] Classify manual dispatch as orchestration/protocol blocker, not scientific failure
-- [ ] D005 update workflow exactly per C005 push-route amendment
-- [ ] D005 let the amendment push initiate one environment-only run
-- [ ] Save branch SHA, runner provenance, exact dependencies, resolver report, freeze and hashes
-- [ ] Pass all required internal imports
-- [ ] Save `ENV_PASS` artifact ID and artifact SHA
-- [ ] If run starts but transient service/network failure occurs, record `ENV_RETRY` and rerun once unchanged
-- [ ] If route does not start after the exact amendment, record `ROUTE_STOP`
-- [ ] Run CR1 tiny semantic trace without semantic modification after separate authorization
-- [ ] Run PB1 tiny semantic trace after CR1
-- [ ] Record source roles/checksums, duplicate groups, reset state and recency bias
-- [ ] Record raw-index and checksum-collapsed probability, entropy and effective source count
-- [ ] Record runtime index origin, canonical Attention/MLP sublayer indices, exact ordered boundary sequence and per-block sublayer counts
-- [ ] Record actual source count per event, total sublayer slots, final-router slots and actual/expected ratio
-- [ ] Record duplicate-collapsed source-slot total and source-count-specific operator latency/temporary bytes
-- [ ] Reject boundary before first transformed sublayer, odd/truncated `S`, missing final completed block, or final-router-as-block miscount
-- [ ] Reject unexplained PB1 source-slot count above `84` sublayer / `89` total or final-router source count other than `5`
-- [ ] Verify PB1 delta `25,600` from exact state dict
-- [ ] PB1 only: semantic PASS/WARN/STOP evidence
-- [ ] CR1 only: `RAW_DIAGNOSTIC_COMPLETE` or failure; no paper attribution
-- [ ] After PB1 PASS and separate authorization: fresh-process AB/BA timing, isolated RSS and operator controls
-- [ ] T<=512 fit and T=2048 breakpoint ratio
+- [x] D003 local environment blocker isolation
+- [x] D004 environment workflow staging
+- [x] D005 predispatch audit found C005 absent and returned `PREREG_BLOCKED`
+- [x] D005 made no unregistered workflow change
+- [ ] Wait until both C005 files exist
+- [ ] Apply only the exact C005 workflow amendment
+- [ ] Let the registered amendment initiate one environment-only run
+- [ ] Save branch SHA, runner provenance, resolver report, freeze, hashes, imports and raw logs
+- [ ] Fix `ENV_PASS` artifact ID and SHA, or classify retry/stop outcome
+- [ ] After separate authorization: CR1 trace, then PB1 trace
+- [ ] Verify PB1 reset, no duplicate, no bias/gate, exact boundary sequence and `84/5/89` accounting
+- [ ] After PB1 PASS and separate preregistration: consider resource measurement
 - [x] Dataset, training and quantization prohibited
 
 ### E — Integration
 
-- [x] E001–E004 completed
-- [x] Mark unchanged candidate inadmissible as canonical paper reproduction
-- [x] Classify D003-GHA manual dispatch as protocol amendment required
-- [ ] Classify C005/D005 push route as ENV_PASS / ENV_RETRY / ROUTE_STOP / ENV_PATH_STOP
+- [x] E001–E005 completed
+- [x] Candidate-raw made inadmissible as canonical paper reproduction
+- [x] Manual dispatch classified as orchestration blocker
+- [x] D005 result classified as `PREREG_BLOCKED`, not environment/model evidence
+- [x] C005 made the sole next bottleneck
+- [ ] After D returns, classify `ENV_PASS` / `ENV_RETRY` / `ROUTE_STOP` / `ENV_PATH_STOP`
 - [ ] Classify PB1 semantic stage PASS/WARN/STOP
-- [ ] Require exact ordered boundary-position PASS in addition to reset/duplicate checks
-- [ ] Require B005 source-slot accounting or an explicit paper-event-definition explanation
-- [ ] Record CR1 as artifact diagnostic only
 - [ ] Keep Block AttnRes unadopted until quality/resource/3-seed evidence
-- [ ] If PB1 is quality-null, classify `N=4 inconclusive/depth-resolution-limited`, not mechanism-wide rejection
-- [ ] If higher-`N` quality gain exceeds resource Pareto, narrow to training-only or fused-kernel-dependent
+- [ ] Treat PB1 `N=4` quality null as potentially depth-resolution-limited
+- [ ] Narrow higher-`N` gains to training-only/fused-kernel-dependent if resource Pareto fails
 
 ## PAPER-BLOCK semantic completion
 
-- [ ] Registered boundary reset occurs
+- [ ] Boundary reset at `[3,6,9,12]`
+- [ ] No boundary before first transformed sublayer
+- [ ] Six sublayers per completed block
 - [ ] No unintended duplicate source identity
-- [ ] No recency-bias parameter or contribution
-- [ ] No optional mixing-gate parameter
-- [ ] Source identities match preregistration
-- [ ] Routing probabilities are finite and sum to one
-- [ ] Semantic layer index is 1-based over Attention/MLP sublayers
-- [ ] `L_sub=24`, `N=4`, `S=6` and boundaries after Transformer blocks `[3,6,9,12]`
-- [ ] No boundary before the first transformed sublayer
-- [ ] Every completed block contains exactly six sublayers
+- [ ] No recency bias or optional mixing gate
+- [ ] Routing probabilities finite and sum to one
 - [ ] Final router does not increment completed-block count
-- [ ] Source-slot accounting matches sublayer `84`, final `5`, total `89`, or lower counts are explicitly explained
-- [ ] Exact parameter delta is explained
-- [ ] Save/load event structure and output match
+- [ ] Source slots match `84/5/89` or are explicitly reconciled
+- [ ] Exact parameter delta explained
+- [ ] Save/load event/output consistency
 
 ## P1 queue — frozen
 
@@ -140,16 +111,16 @@ Current bottleneck:
 
 ## Global prohibitions
 
+- No D workflow modification or repeat predispatch run before C005 exists
 - No new architecture before reproducible baseline and preregistration
 - No multi-component intervention
-- No paper attribution from CANDIDATE-RAW
+- No paper attribution from CR1
 - No adoption from parameter/KV/asymptotic FLOPs alone
 - No single-seed adoption
 - No promotion of environment/semantic preflight to quality evidence
 - No silent semantic patch
-- No automatic transition from ENV_PASS to model execution
-- No workflow copy to default branch for convenience
-- No broad push/PR trigger; only C005 branch/path-restricted environment route is authorized
-- No repeated nonce pushes except one unchanged `ENV_RETRY`
+- No automatic transition from environment PASS to model execution
+- No copy to default branch, broad trigger, or unregistered execution route
+- No repeated execution trigger except one unchanged transient retry
 - No mechanism-wide rejection from PB1 `N=4` null evidence
-- No capability, intelligence-principle, high-school-level, or 1GB-goal claims without evidence
+- No capability, intelligence-principle, high-school-level, or 1GB-goal claim without evidence
