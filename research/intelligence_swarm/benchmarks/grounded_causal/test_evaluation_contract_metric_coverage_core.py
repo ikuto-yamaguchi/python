@@ -73,6 +73,13 @@ def make_predictions(data: list[dict], *, include_inverse: bool = True) -> list[
                 donor = peers[1] if peers[0]["instance_id"] == row["instance_id"] else peers[0]
                 pred["control_source_instance_id"] = donor["instance_id"]
                 pred["control_source_fingerprint"] = contract.instance_fingerprint(contract.adapt_row(donor))
+                # Keep this optional-metric fixture valid under the later shuffle-value
+                # binding contract. The shuffle control's reportable prediction must
+                # come from the declared donor, not from the target row.
+                if method == "target_label_shuffle":
+                    pred["pred_action"] = donor["gold_action"]
+                elif method == "outcome_shuffle":
+                    pred["pred_state_after"] = copy.deepcopy(donor["gold_state_after"])
             predictions.append(pred)
     return predictions
 
