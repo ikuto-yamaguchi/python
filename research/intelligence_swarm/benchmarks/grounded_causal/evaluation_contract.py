@@ -104,6 +104,11 @@ def _finite_positive(value: Any) -> bool:
     return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(float(value)) and float(value) > 0
 
 
+def _strict_positive_bytes(value: Any) -> bool:
+    """Byte counts must be real positive integers, never bool/float/string aliases."""
+    return type(value) is int and value > 0
+
+
 def _resolve_contained_artifact(base_dir: Path, relative: Any) -> tuple[Path | None, str | None]:
     """Resolve an artifact only when it is a non-symlinked file inside base_dir."""
     raw = str(relative)
@@ -795,11 +800,15 @@ def _audit_run_raw_log_binding(
             expected, observed = canonical_condition(expected), canonical_condition(observed)
         elif field == "seed":
             try:
-                expected, observed = int(expected), int(observed)
+                expected, observed = strict_seed(expected), strict_seed(observed)
             except (TypeError, ValueError):
-                errors.append(f"run {index}: seed is not integer-like in manifest or raw log")
+                errors.append(f"run {index}: seed must be a JSON integer in manifest and raw log")
                 continue
-        elif field in {"model_bytes", "peak_rss_bytes", "training_wall_seconds", "cpu_inference_ms_per_item"}:
+        elif field in {"model_bytes", "peak_rss_bytes"}:
+            if not _strict_positive_bytes(expected) or not _strict_positive_bytes(observed):
+                errors.append(f"run {index}: raw-log {field} must be a positive JSON integer")
+                continue
+        elif field in {"training_wall_seconds", "cpu_inference_ms_per_item"}:
             if not _finite_positive(expected) or not _finite_positive(observed):
                 errors.append(f"run {index}: raw-log {field} must be finite and positive")
                 continue
@@ -819,7 +828,7 @@ def audit_artifacts(manifest: dict[str, Any], base_dir: Path) -> dict[str, Any]:
         if missing: errors.append(f"run {index}: missing resource/provenance fields {sorted(missing)}")
         try:
             method = str(run["method"])
-            seed = int(run["seed"])
+            seed = strict_seed(run["seed"])
             raw_domain, raw_condition = str(run["domain"]), str(run["condition"])
             domain = canonical_domain(raw_domain)
             split = unicodedata.normalize("NFKC", str(run["split"])).casefold()
@@ -838,7 +847,9 @@ def audit_artifacts(manifest: dict[str, Any], base_dir: Path) -> dict[str, Any]:
         cell = (method, seed, domain, split, condition)
         if cell in cells: errors.append(f"run {index}: duplicate run cell {cell}")
         cells.add(cell); methods.add(method); seeds.add(seed); domains.add(domain); topology.add((domain, split, condition)); commits.add(str(run.get("code_commit", ""))); identity[(seed, domain, split, condition)].add((str(run.get("data_path", "")), str(run.get("data_sha256", ""))))
-        for key in ("model_bytes", "peak_rss_bytes", "training_wall_seconds", "cpu_inference_ms_per_item"):
+        for key in ("model_bytes", "peak_rss_bytes"):
+            if not _strict_positive_bytes(run.get(key)): errors.append(f"run {index}: {key} must be a positive JSON integer")
+        for key in ("training_wall_seconds", "cpu_inference_ms_per_item"):
             if not _finite_positive(run.get(key)): errors.append(f"run {index}: {key} must be a finite positive number")
         if not _is_hex(run.get("code_commit"), 40): errors.append(f"run {index}: code_commit must be a full 40-hex commit SHA")
         for path_key, hash_key in ARTIFACT_FIELDS:
@@ -870,7 +881,7 @@ def audit_artifacts(manifest: dict[str, Any], base_dir: Path) -> dict[str, Any]:
     if seeds != CANONICAL_SEEDS: errors.append(f"manifest seeds must be exactly {sorted(CANONICAL_SEEDS)}, found {sorted(seeds)}")
     expected = {(m, s, d, sp, c) for m in required for s in CANONICAL_SEEDS for d, sp, c in topology}; missing_cells = expected - cells
     if missing_cells: errors.append(f"manifest incomplete observed-topology coverage: {len(missing_cells)} missing cells")
-    return {"valid": not errors, "errors": errors, "warnings": [], "checks": checks, "methods": sorted(methods), "seeds": sorted(seeds), "domains": sorted(domains), "observed_topology": [list(v) for v in sorted(topology)], "runs": len(runs), "missing_run_cells": len(missing_cells), "missing_run_cell_examples": [list(v) for v in sorted(missing_cells)[:10]], "independent_artifacts_required": True, "positive_resource_measurements_required": True, "artifact_path_containment_required": True, "nonempty_artifacts_required": True, "condition_index_required": True, "exact_method_topology_required": True, "single_commit_required": True, "same_dataset_per_cell_required": True, "canonical_seeds": sorted(CANONICAL_SEEDS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "artifact_split_scope_fail_closed": True, "raw_log_measurement_findings": raw_log_findings, "raw_log_measurement_binding_required": True, "exactly_one_measurement_record_per_run_required": True, "raw_log_bound_fields": list(RAW_LOG_MEASUREMENT_FIELDS), "normalized_resource_cell_identity_required": True, "resource_cell_identity_normalization": "domain=NFKC+casefold+remove whitespace/control-format; condition=canonical sorted token set", "artifact_domain_label_collisions": domain_collisions, "artifact_condition_label_collisions": condition_collisions, "classification": "reproduced" if not errors else "initial_reproduction_failure"}
+    return {"valid": not errors, "errors": errors, "warnings": [], "checks": checks, "methods": sorted(methods), "seeds": sorted(seeds), "domains": sorted(domains), "observed_topology": [list(v) for v in sorted(topology)], "runs": len(runs), "missing_run_cells": len(missing_cells), "missing_run_cell_examples": [list(v) for v in sorted(missing_cells)[:10]], "independent_artifacts_required": True, "positive_resource_measurements_required": True, "strict_resource_integer_identity_required": True, "strict_resource_integer_fields": ["model_bytes", "peak_rss_bytes"], "artifact_path_containment_required": True, "nonempty_artifacts_required": True, "condition_index_required": True, "exact_method_topology_required": True, "single_commit_required": True, "same_dataset_per_cell_required": True, "canonical_seeds": sorted(CANONICAL_SEEDS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "artifact_split_scope_fail_closed": True, "raw_log_measurement_findings": raw_log_findings, "raw_log_measurement_binding_required": True, "exactly_one_measurement_record_per_run_required": True, "raw_log_bound_fields": list(RAW_LOG_MEASUREMENT_FIELDS), "normalized_resource_cell_identity_required": True, "resource_cell_identity_normalization": "domain=NFKC+casefold+remove whitespace/control-format; condition=canonical sorted token set", "artifact_domain_label_collisions": domain_collisions, "artifact_condition_label_collisions": condition_collisions, "classification": "reproduced" if not errors else "initial_reproduction_failure"}
 
 
 def main(argv: list[str] | None = None) -> int:
