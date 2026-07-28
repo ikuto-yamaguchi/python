@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import importlib.util
 import unittest
+from collections import defaultdict
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -31,28 +32,33 @@ class Tests(unittest.TestCase):
                 "gold_action": 1,
                 "gold_state_after": [1, seed],
             })
-            for i, condition in enumerate(("entity_holdout", "dynamics_holdout", "language_holdout")):
-                rows.append({
-                    "instance_id": f"test-{seed}-{i}",
-                    "domain": "rtfm_s1",
-                    "seed": seed,
-                    "split": "test",
-                    "condition": "all_holdouts",
-                    "utterance": f"test {seed} {i}",
-                    "state_before": [0, seed, i],
-                    "gold_action": 1,
-                    "gold_state_after": [1, seed, i],
-                    condition: True,
-                    "entity_signature": f"e-{seed}-{i}",
-                    "dynamics_signature": f"d-{seed}-{i}",
-                })
+            for condition in ("entity_holdout", "dynamics_holdout", "language_holdout"):
+                for replica in (0, 1):
+                    rows.append({
+                        "instance_id": f"test-{seed}-{condition}-{replica}",
+                        "domain": "rtfm_s1",
+                        "seed": seed,
+                        "split": "test",
+                        "condition": condition,
+                        "utterance": f"test {seed} {condition} {replica}",
+                        "state_before": [0, seed, condition, replica],
+                        "gold_action": 1,
+                        "gold_state_after": [1, seed, condition, replica],
+                        condition: True,
+                        "entity_signature": f"e-{seed}-{condition}-{replica}",
+                        "dynamics_signature": f"d-{seed}-{condition}-{replica}",
+                    })
         return rows
 
     def predictions(self, rows):
         eval_rows = [row for row in rows if row["split"] != "train"]
+        by_cell = defaultdict(list)
+        for row in eval_rows:
+            adapted = ec.adapt_row(row)
+            by_cell[ec._cell_key(adapted)].append(row)
         donors = {}
-        for seed in (1, 7, 19):
-            values = [row for row in eval_rows if row["seed"] == seed]
+        for values in by_cell.values():
+            self.assertGreaterEqual(len(values), 2)
             for i, row in enumerate(values):
                 donors[row["instance_id"]] = values[(i + 1) % len(values)]
         result = []
@@ -93,19 +99,23 @@ class Tests(unittest.TestCase):
 
     def test_rejects_method_missing_on_one_instance(self):
         rows = self.rows()
+        missing_id = "test-19-language_holdout-1"
         predictions = [
             pred for pred in self.predictions(rows)
-            if not (pred["method"] == "state_only" and pred["instance_id"] == "test-19-2")
+            if not (pred["method"] == "state_only" and pred["instance_id"] == missing_id)
         ]
         result = mod.audit(rows, predictions)
         self.assertFalse(result["valid"])
-        self.assertTrue(any("instance test-19-2" in error for error in result["errors"]))
+        self.assertTrue(any(f"instance {missing_id}" in error for error in result["errors"]))
 
     def test_rejects_method_missing_from_one_cell(self):
         rows = self.rows()
         predictions = [
             pred for pred in self.predictions(rows)
-            if not (pred["method"] == "outcome_shuffle" and pred["instance_id"].startswith("test-7"))
+            if not (
+                pred["method"] == "outcome_shuffle"
+                and pred["instance_id"].startswith("test-7-dynamics_holdout-")
+            )
         ]
         result = mod.audit(rows, predictions)
         self.assertFalse(result["valid"])
