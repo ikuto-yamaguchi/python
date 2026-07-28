@@ -1,8 +1,14 @@
 # K3 Minimal Intelligence Loop — Backlog
 
-Last updated: 2026-07-28 by K3-D
+Last updated: 2026-07-28 by K3-E
 
 ## P0 — Current cycle: Block AttnRes minimum reproduction
+
+Classification: **追加検証・未採用 / Path-WARN**
+
+Current single bottleneck:
+
+> D003 exact-dependency, fresh-process, order-balanced resource/operator preflight
 
 ### A — Evidence
 
@@ -10,76 +16,99 @@ Last updated: 2026-07-28 by K3-D
 - [x] Extract primary-report model sizes, depths, widths, block counts and token budgets.
 - [x] Pin unofficial candidate `wdlctc/open-attention-residuals@83d2b8de82c2fbb981c7decca67d13d9db348da6`.
 - [x] Record A001 evidence audit.
+- [ ] Infer and pin the narrowest candidate-compatible Python/PyTorch/Transformers tuple from repository metadata and imports.
 - [ ] Record paper-to-candidate deviation matrix before S2.
-- [x] Keep other K3 components frozen while P0 is unresolved.
+- [x] Keep all other K3 components frozen while P0 is unresolved.
 
 ### B — Theory
 
 - [x] Complete parameter/FLOPs/state-memory/communication/sequence/quantization/CPU comparison.
 - [x] Record small-scale counterexample and failure conditions.
 - [x] Prepare B002 CPU roofline/operator trace contract.
-- [x] Consume D002 corrected parameter delta: `25,625`, including final router.
-- [ ] Recompute effective traffic/operator shares from D002 raw routing traces.
-- [ ] Do not claim a CPU crossover until fresh-process paired timing and isolated RSS exist.
+- [x] Consume corrected parameter delta `25,625`, including final router.
+- [ ] Recompute effective traffic/operator shares from D002/D003 traces.
+- [ ] Fix interpretation thresholds for stack/layout, framework overhead and temporary bytes.
+- [ ] Do not claim CPU crossover until fresh-process paired timing and isolated RSS exist.
 
-### C — Preregistration
+### C — Preregistration amendment
 
 - [x] Pin 12-layer d=512 dense PreNorm baseline.
 - [x] Specify Block AttnRes `N=4` as the only architectural change.
 - [x] Fix optimizer, schedule, sequence length, token budgets and seeds `17/29/43`.
-- [x] Define equal-token, near-equal-parameter and measured-active-compute comparisons.
 - [x] Add C001 preregistration and manifest.
-- [ ] Correct A1 parameter count from `115,578,904` to `115,579,929`.
-- [ ] Correct AttnRes delta from `24,600` to `25,625`.
-- [ ] Add standalone D002/D003 invocation and explicit save-load tolerance.
+- [ ] Correct A1 parameter count to `115,579,929`.
+- [ ] Correct AttnRes delta to `25,625`.
+- [ ] Add exact D003 invocation and environment lock.
+- [ ] Add explicit save/load tolerance.
 - [ ] Add machine-readable PASS/WARN/STOP schema.
-- [ ] Add B002 operator-attribution fields and fixed CPU cases.
-- [ ] Amend later S1 global batch realization to explicit 64 sequences/step.
-- [ ] Preserve all model/data/optimizer/schedule/single-change constraints.
+- [ ] Add fixed CPU cases and operator-attribution fields.
+- [ ] Amend later S1 global batch realization to exactly 64 sequences/step.
+- [ ] Preserve model/data/optimizer/schedule/single-change constraints.
 - [ ] Do not authorize S1 in the amendment.
 
 ### D — Reproduction
 
 - [x] D001 static CLI/data/model contract audit.
-- [x] D002 standalone parameter-faithful preflight harness created and executed.
-- [x] Fixed synthetic input generated from seed 17.
-- [x] B0 instantiated at `115,554,304` parameters.
-- [x] A1 instantiated at corrected `115,579,929` parameters.
-- [x] Parameter-name diff proved routing-only in the standalone harness.
-- [x] Finite forward/backward completed for B0/A1.
-- [x] All 75 routing parameter tensors received finite nonzero gradients.
-- [x] Save/load output equality passed with max absolute difference `0.0`.
-- [x] Routing source shape/stride/contiguity/dtype and operator timing persisted.
-- [x] Machine-readable D002 summary added.
-- [x] D002 classified `Path-WARN`: executability passed, adoption/training not authorized.
-- [ ] Persist exact full 53KB raw result externally or regenerate from committed harness; committed summary/checksums currently preserve the evidence digest.
-- [ ] Obtain a pinned runtime with the candidate's exact `transformers` dependency.
-- [ ] Run D003 in fresh processes with alternating B0/A1 order after warm-up.
-- [ ] Isolate RSS per condition.
+- [x] D002 standalone parameter-faithful preflight executed.
+- [x] Fixed synthetic input from seed 17.
+- [x] B0=`115,554,304`, A1=`115,579,929`.
+- [x] Routing-only parameter-name diff in standalone harness.
+- [x] Finite forward/backward for B0/A1.
+- [x] All 75 routing tensors received finite nonzero gradients.
+- [x] Save/load max absolute difference `0.0`.
+- [x] Routing trace and machine-readable D002 summary persisted.
+- [x] E002 retained Path-WARN and authorized D003 only.
+- [ ] Pin exact candidate dependency runtime.
+- [ ] Record any minimal compatibility patch with diff and checksum.
+- [ ] Execute B0/A1 in separate fresh processes.
+- [ ] Alternate execution order after identical warm-up.
+- [ ] Isolate peak RSS and timing per condition.
 - [ ] Add no-op/list traversal/stack-only/norm+score/softmax/mix controls.
-- [ ] Do not download FineWeb-Edu or start S1 before E review and C amendment.
-- [ ] Resolve tokenizer and immutable token manifests only after explicit authorization.
+- [ ] Persist temporary-tensor and operator-call evidence.
+- [ ] Persist raw logs, machine-readable result and checksums.
+- [ ] Do not download FineWeb-Edu or start S1.
 
 ### E — Integration
 
-- [x] E001 locked D002 as the only bottleneck.
-- [ ] Review D002 as Path-WARN versus implementation-path STOP.
-- [ ] Decide whether D003 exact-dependency fresh-process preflight is required.
-- [ ] Keep Block AttnRes at `追加検証・未採用` unless later preregistered quality/resource evidence passes.
-- [ ] Keep KDA, Stable LatentMoE and other candidates frozen until this decision.
+- [x] E001 locked D002 as the bottleneck.
+- [x] E002 reviewed D002 and retained the unofficial implementation path as Path-WARN.
+- [x] E002 selected D003 as the only next experiment.
+- [ ] After D003, classify implementation path as PASS/WARN/STOP.
+- [ ] If WARN, narrow to training-only or fused-kernel-dependent investigation.
+- [ ] Keep Block AttnRes unadopted until preregistered quality/resource evidence passes.
+- [ ] Keep KDA, Stable LatentMoE and other candidates frozen.
 
 ## D002 evidence summary
 
 - Corrected parameter overhead: `25,625` (`~0.02218%`).
 - FP32 bytes: B0 `462,217,216`; A1 `462,319,716`.
-- Process max RSS: `2,203,936 KiB` across sequential run and serialization; not isolated.
-- Routing median time, five sources, width 512, one CPU thread:
-  - seq 1: `0.112 ms`
-  - seq 128: `0.628 ms`
-  - seq 512: `2.252 ms`
-  - seq 2048: `35.944 ms`
-- Full-model timing is order-contaminated and must not be used for Pareto judgment.
-- No quality, training throughput, generation, quantization or 3-seed evidence exists.
+- Process max RSS: `2,203,936 KiB`; not isolated.
+- Routing median, five sources, width512, CPU one thread:
+  - seq1 `0.112 ms`
+  - seq128 `0.628 ms`
+  - seq512 `2.252 ms`
+  - seq2048 `35.944 ms`
+- Full-model timing is order-contaminated and unusable for Pareto judgment.
+- No quality, training throughput, CPU generation, quantization or 3-seed evidence exists.
+
+## D003 completion conditions
+
+- [ ] exact environment lock and provenance
+- [ ] candidate commit and compatibility patch checksum
+- [ ] exact counts and residual-only diff
+- [ ] fixed input SHA256
+- [ ] finite forward/backward/routing gradients
+- [ ] save/load within preregistered tolerance
+- [ ] fresh-process, order-balanced repeated timing
+- [ ] isolated peak RSS
+- [ ] operator controls and temporary-tensor evidence
+- [ ] raw logs, machine-readable summary and checksums
+
+## D003 classification rules
+
+- **PASS:** exact runtime and residual-only diff hold; timing/RSS/operator evidence is reproducible.
+- **WARN:** semantics hold but A1 CPU time or RSS worsens by `>=10%`, or stack/layout plus framework accounts for `>=50%` of added routing time. Narrow to training-only or fusion-dependent investigation.
+- **STOP:** after one documented minimal repair, execution remains impossible, residual-only equivalence breaks, gradient/save-load fails, measurements cannot be isolated, or semantic change is required.
 
 ## P1 — Candidate queue after P0
 
@@ -94,10 +123,10 @@ P1 remains frozen.
 ## Global prohibitions
 
 - No new architecture before reproducible baseline and preregistration.
-- No simultaneous multi-component K3 transplant.
+- No simultaneous multi-component transplant.
 - No claims of intelligence principle, high-school-level capability or capability progress without evidence.
-- No adoption based only on parameter count or GPU FLOPs; CPU wall time and RSS are mandatory.
+- No adoption based only on parameter count or GPU FLOPs.
 - No success report from one seed.
-- No post-hoc promotion of preflight or smoke runs to full evidence.
-- No silent patching; every patch requires purpose, diff and checksum.
+- No post-hoc promotion of preflight/smoke runs.
+- No silent patching.
 - No replacing the current bottleneck with literature review or another candidate because execution is inconvenient.
