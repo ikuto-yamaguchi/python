@@ -1,0 +1,135 @@
+schema_version: 1
+id: C001_block_attnres_100m
+status: preflight_only_until_dataset_pin
+branch: research/intelligence-swarm-reconstruction-001
+source:
+  repository: wdlctc/open-attention-residuals
+  commit: 83d2b8de82c2fbb981c7decca67d13d9db348da6
+  official: false
+  official_reference_repository: MoonshotAI/Attention-Residuals
+conditions:
+  - id: B0_baseline
+    mode: baseline
+  - id: A1_block_attnres
+    mode: block
+    num_blocks: 4
+    allowed_difference: residual_path_only
+model:
+  hidden_size: 512
+  num_hidden_layers: 12
+  num_attention_heads: 8
+  num_key_value_heads: 4
+  intermediate_size: 1536
+  head_dim: 64
+  vocab_size: 151936
+  tie_word_embeddings: true
+  max_position_embeddings: 4096
+  sequence_length: 2048
+training:
+  seeds: [17, 29, 43]
+  optimizer: AdamW
+  learning_rate: 0.0006
+  minimum_learning_rate: 0.00006
+  betas: [0.9, 0.95]
+  epsilon: 1.0e-8
+  weight_decay: 0.1
+  max_grad_norm: 1.0
+  warmup_steps: 1000
+  schedule: cosine
+  dtype: bfloat16
+  global_sequences_per_step: 64
+  stages:
+    preflight_steps: 1
+    smoke_steps: 100
+    pilot_steps: 2000
+    full_steps: 20000
+  nominal_tokens:
+    smoke: 13107200
+    pilot: 262144000
+    full_per_seed_per_condition: 2621440000
+data:
+  dataset: HuggingFaceFW/fineweb-edu
+  config: default
+  tokenizer: Qwen/Qwen3-0.6B
+  immutable_dataset_revision: REQUIRED_BEFORE_PILOT
+  immutable_tokenizer_revision: REQUIRED_BEFORE_SMOKE
+  fixed_validation_shard_sha256: REQUIRED_BEFORE_SMOKE
+  fixed_training_manifest_sha256: REQUIRED_BEFORE_PILOT
+fairness:
+  same_token_stream: required
+  same_optimizer_schedule: required
+  same_checkpoint_policy: required
+  same_kernel_backend: required
+  simultaneous_kda_moe_curriculum: forbidden
+measurements:
+  quality:
+    - heldout_nll
+    - perplexity
+    - wikitext2_perplexity
+    - lambada_accuracy
+    - hellaswag_accuracy
+    - arc_easy_fixed_subset
+    - position_binned_nll
+  routing:
+    - entropy_by_sublayer
+    - latest_block_mass
+    - source_top1_frequency
+    - block_source_cosine
+    - pseudo_query_norm
+    - hidden_rms_by_depth
+    - gradient_norm_by_depth
+  resources:
+    - model_bytes
+    - total_parameters
+    - active_parameters
+    - peak_rss
+    - peak_vram
+    - train_wall_time
+    - train_tokens_per_second
+    - cpu_prefill_median_p95_128_512_2048
+    - cpu_decode_median_p95_generate128
+    - cpu_decode_tokens_per_second
+quantization:
+  allowed_initial_conditions: [weight_only_int8, weight_only_int4]
+  routing_query_precision: high
+  routing_softmax_accumulation: fp32
+  activation_quantization: forbidden_until_new_preregistration
+artifacts_required:
+  - environment.json
+  - pip_freeze.txt
+  - source_commit.txt
+  - git_status.txt
+  - tokenizer_manifest.json
+  - dataset_manifest.json
+  - model_config_B0.json
+  - model_config_A1.json
+  - parameter_counts.json
+  - raw_logs
+  - metrics.jsonl
+  - checksums.sha256
+gates:
+  full_run_requires:
+    - baseline_smoke_pass
+    - ablation_smoke_pass
+    - immutable_dataset_manifest
+    - exact_parameter_counts
+    - resource_logger_pass
+    - integration_approval
+  stop_if:
+    - nonfinite_loss_or_gradient
+    - token_stream_mismatch
+    - architecture_difference_beyond_residual_path
+    - missing_routing_gradient
+    - smoke_step_time_regression_over_30_percent
+    - smoke_peak_vram_regression_over_25_percent
+    - routing_uniform_or_single_source_collapse
+commands:
+  note: D must derive commands from pinned source after verifying CLI; do not trust README-only commands.
+  preflight: "python train_scratch.py --mode baseline --hidden_size 512 --num_layers 12 --num_heads 8 --num_kv_heads 4 --intermediate_size 1536 --num_blocks 4 --seq_len 2048 --steps 1 --seed 17"
+  smoke_baseline: "torchrun --nproc_per_node=${NGPUS} train_scratch.py --mode baseline --hidden_size 512 --num_layers 12 --num_heads 8 --num_kv_heads 4 --intermediate_size 1536 --num_blocks 4 --seq_len 2048 --steps 100 --seed 17"
+  smoke_ablation: "torchrun --nproc_per_node=${NGPUS} train_scratch.py --mode block --hidden_size 512 --num_layers 12 --num_heads 8 --num_kv_heads 4 --intermediate_size 1536 --num_blocks 4 --seq_len 2048 --steps 100 --seed 17"
+known_blockers:
+  - candidate code initializes NCCL unconditionally and may require a one-process torchrun even for preflight
+  - exact dependency lock is absent
+  - streaming dataset is not immutable without resolved shard manifest
+  - public implementation is unofficial
