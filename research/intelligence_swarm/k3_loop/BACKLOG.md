@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Backlog
 
-Last updated: 2026-07-29 by K3-A
+Last updated: 2026-07-29 by K3-B
 
 ## P0 — Block AttnRes minimum reproduction
 
@@ -33,7 +33,13 @@ Current bottleneck:
 - [x] B004 paper/raw routing-prior and identifiability audit
 - [x] PAPER-BLOCK provisional delta `25,600`
 - [x] Duplicate-prefix semantic mass and effective-source collapse derived
+- [x] B005 fixed-depth block-count/depth-resolution audit
+- [x] PB1 source-slot upper bounds fixed: sublayer `84`, final `5`, total `89`
+- [x] Fixed-depth cost formula fixed: `C_slots(L,N)=L*(N+3)/2+N+1`
+- [x] PB1 classified as minimum semantic/effect-direction pilot, not primary-geometry efficacy reproduction
+- [x] `N=4` null-result and higher-`N` Pareto interpretation boundaries fixed
 - [ ] Exact semantic/resource traceからoperator share、temporary threshold、paper/raw差を再計算
+- [ ] Exact traceからactual/expected source-slot ratioとduplicate-collapsed slotsを再計算
 - [x] Exact trace前のCPU crossover/minimum-scale主張は禁止
 
 ### C — Preregistration
@@ -54,6 +60,8 @@ Current bottleneck:
 - [ ] C005 pin concurrency, authorization flags, artifact schema, and one-retry policy
 - [ ] C005 prohibit automatic transition from ENV_PASS to model stage
 - [ ] Next PB1 amendment must register 1-based semantic sublayer indexing, `L_sub/N/S`, exact ordered boundaries, odd/nondivisible rejection
+- [ ] Next PB1 amendment must register B005 source-slot bounds `84/5/89` and `primary_evidence_geometry_matched=false`
+- [ ] Any future `N` ablation must use a separate preregistration and state whether baseline depth changes
 - [ ] PB1 semantic PASS後にのみfull-model resource protocolをamend
 - [ ] S1検討前に実コード上のglobal batch 64を保証
 
@@ -80,7 +88,10 @@ Current bottleneck:
 - [ ] Record source roles/checksums, duplicate groups, reset state and recency bias
 - [ ] Record raw-index and checksum-collapsed probability, entropy and effective source count
 - [ ] Record runtime index origin, canonical Attention/MLP sublayer indices, exact ordered boundary sequence and per-block sublayer counts
+- [ ] Record actual source count per event, total sublayer slots, final-router slots and actual/expected ratio
+- [ ] Record duplicate-collapsed source-slot total and source-count-specific operator latency/temporary bytes
 - [ ] Reject boundary before first transformed sublayer, odd/truncated `S`, missing final completed block, or final-router-as-block miscount
+- [ ] Reject unexplained PB1 source-slot count above `84` sublayer / `89` total or final-router source count other than `5`
 - [ ] Verify PB1 delta `25,600` from exact state dict
 - [ ] PB1 only: semantic PASS/WARN/STOP evidence
 - [ ] CR1 only: `RAW_DIAGNOSTIC_COMPLETE` or failure; no paper attribution
@@ -96,8 +107,11 @@ Current bottleneck:
 - [ ] Classify C005/D005 push route as ENV_PASS / ENV_RETRY / ROUTE_STOP / ENV_PATH_STOP
 - [ ] Classify PB1 semantic stage PASS/WARN/STOP
 - [ ] Require exact ordered boundary-position PASS in addition to reset/duplicate checks
+- [ ] Require B005 source-slot accounting or an explicit paper-event-definition explanation
 - [ ] Record CR1 as artifact diagnostic only
 - [ ] Keep Block AttnRes unadopted until quality/resource/3-seed evidence
+- [ ] If PB1 is quality-null, classify `N=4 inconclusive/depth-resolution-limited`, not mechanism-wide rejection
+- [ ] If higher-`N` quality gain exceeds resource Pareto, narrow to training-only or fused-kernel-dependent
 
 ## PAPER-BLOCK semantic completion
 
@@ -112,6 +126,7 @@ Current bottleneck:
 - [ ] No boundary before the first transformed sublayer
 - [ ] Every completed block contains exactly six sublayers
 - [ ] Final router does not increment completed-block count
+- [ ] Source-slot accounting matches sublayer `84`, final `5`, total `89`, or lower counts are explicitly explained
 - [ ] Exact parameter delta is explained
 - [ ] Save/load event structure and output match
 
@@ -136,4 +151,5 @@ Current bottleneck:
 - No workflow copy to default branch for convenience
 - No broad push/PR trigger; only C005 branch/path-restricted environment route is authorized
 - No repeated nonce pushes except one unchanged `ENV_RETRY`
+- No mechanism-wide rejection from PB1 `N=4` null evidence
 - No capability, intelligence-principle, high-school-level, or 1GB-goal claims without evidence
