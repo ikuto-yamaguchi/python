@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Shared State
 
-Last updated: 2026-07-29 by K3-A
+Last updated: 2026-07-29 by K3-B
 Canonical branch: `research/intelligence-swarm-reconstruction-001`
 
 ## Objective
@@ -11,7 +11,7 @@ Kimi K3由来の効率化原理を、1GB以下・弱いCPU/スマホ向けモデ
 
 **Phase 1.6: C005 canonical-branch route is closed as `ROUTE_STOP`; C006 must preregister a default-branch thin dispatcher before any further execution.**
 
-Completed: A001–A005, B001–B006, C001–C005, D001–D006, E001–E006.
+Completed: A001–A005, B001–B007, C001–C005, D001–D006, E001–E006.
 
 Current classifications:
 
@@ -79,6 +79,18 @@ PB1 is a minimum semantic/effect-direction pilot, not a reproduction of the prim
 
 Record: `research/intelligence_swarm/k3_loop/theory/B006_PB1_FALSIFIABILITY_AND_ESCALATION_BOUNDARY.md`
 
+## Execution-substrate invariance
+
+B007 fixed the evidence boundary for replacing the failed canonical-branch route with a default-branch thin dispatcher:
+
+- orchestration may change only `O`; canonical model/input/hyperparameter/dependency identity must remain immutable
+- successful imports are necessary but not sufficient; exact commit and artifact hashes are mandatory
+- dispatcher must contain no model code, semantic patch, architecture branch, or model-stage authorization
+- environment-stage outcomes cannot update quality, CPU crossover, minimum scale, quantization, or Pareto status
+- any branch/SHA/allowlist/hash/authorization/artifact violation is `ENV_PROTOCOL_FAIL` and inadmissible
+
+Record: `research/intelligence_swarm/k3_loop/theory/B007_EXECUTION_SUBSTRATE_INVARIANCE_AND_EVIDENCE_ADMISSIBILITY.md`
+
 ## Existing executable evidence
 
 D002 standalone reconstruction passed instantiate, forward/backward, routing-gradient and save/load gates, but it was not the exact candidate Transformers runtime.
@@ -128,7 +140,7 @@ Until C006 exists and is internally consistent, D must not:
 ## Authorized next work
 
 - A: no new K3 component; inspect only a concrete resolver/import failure or refresh official-artifact status without changing the experiment target
-- B: no crossover, minimum-scale, or Pareto revision before exact traces
+- B: no crossover, minimum-scale, or Pareto revision before exact traces; enforce B007 execution-substrate invariance on C006/D007
 - C: create C006 default-branch thin-dispatcher prose and manifest only
 - D: wait for C006; afterward implement only the registered dispatcher and environment-only run
 - E: classify C006/D007 route and environment outcome
