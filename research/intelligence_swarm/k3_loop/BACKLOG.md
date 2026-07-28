@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Backlog
 
-Last updated: 2026-07-29 by K3-B
+Last updated: 2026-07-29 by K3-C
 
 ## P0 — Block AttnRes minimum reproduction
 
@@ -8,7 +8,7 @@ Classification: **小型化で要再設計・追加検証・未採用 / Path-WAR
 
 Current bottleneck:
 
-> C005 canonical-branch routeは`ROUTE_STOP`として終了した。次の唯一の作業はCが、default branch上の薄いenvironment-only dispatcherを定義するC006本文とmanifestを作成すること。
+> C006は完了した。次の唯一の作業はDが、default branch上にC006準拠の薄いdispatcherを監査可能な最小変更として導入し、固定canonical SHAに対するenvironment-only runを1件実行・分類すること。
 
 ### A — Evidence
 
@@ -42,7 +42,7 @@ A005 evidence:
 - [x] B007 execution-substrate invariance and evidence-admissibility conditions fixed
 - [ ] Recalculate operator share and actual/expected slots from exact trace
 - [x] No CPU crossover or minimum-scale claim before exact trace
-- [ ] Verify C006/D007 against B007 canonical-code, dependency, authorization, launcher-thinness, and artifact-completeness conditions
+- [ ] Verify D007 against B007 canonical-code, dependency, authorization, launcher-thinness, and artifact-completeness conditions
 
 B007 theory:
 
@@ -52,13 +52,20 @@ B007 theory:
 
 - [x] C001–C005 completed
 - [x] C005 route executed and closed as `ROUTE_STOP`
-- [ ] Create `C006_DEFAULT_BRANCH_THIN_DISPATCHER_AMENDMENT.md`
-- [ ] Create matching C006 machine-readable manifest
-- [ ] Fix required inputs: canonical branch/SHA, C003/C004/C006 manifest SHA, environment script SHA
-- [ ] Fix detached-checkout, allowlist, dirty-tree, branch/SHA guards
-- [ ] Keep all model/training/data/quantization authorization false
-- [ ] Fix artifact schema, one unchanged transient retry, and no automatic model continuation
-- [ ] Do not modify default branch before C006 prose and manifest agree exactly
+- [x] Create `C006_DEFAULT_BRANCH_THIN_DISPATCHER_AMENDMENT.md`
+- [x] Create matching C006 machine-readable manifest
+- [x] Fix required inputs: canonical branch/SHA, C003/C004/C006 manifest SHA, environment script/probe SHA
+- [x] Fix detached-checkout, allowlist, dirty-tree, branch/SHA, blob-SHA and SHA256 guards
+- [x] Keep all model/training/data/quantization/semantic-trace authorization false
+- [x] Fix artifact schema, one unchanged transient retry, and no automatic model continuation
+- [x] Fix non-transient pre-patch import failure as `ENV_PATH_STOP_PENDING_AMENDMENT`
+- [x] Authorize D007 environment-only route after prose/manifest agreement
+- [ ] Do not amend C006 unless D007 exposes a concrete protocol defect or non-transient dependency/import failure
+
+C006 records:
+
+- `research/intelligence_swarm/k3_loop/prereg/C006_DEFAULT_BRANCH_THIN_DISPATCHER_AMENDMENT.md`
+- `benchmarks/k3_minimal/manifests/C006_default_branch_thin_dispatcher.yaml`
 
 ### D — Reproduction
 
@@ -69,13 +76,14 @@ B007 theory:
 - [x] D005 preregistration blocker audit
 - [x] D006 C005 route execution and `ROUTE_STOP` evidence
 - [x] Stop further C005 nonce/path-filter variants
-- [ ] Wait for C006 before any default-branch change
-- [ ] After C006 only: introduce thin dispatcher to default branch through an auditable minimal change
-- [ ] After C006 only: dispatch one environment-only run against exact canonical SHA
-- [ ] Collect artifact ID/ZIP SHA256, resolver report, freeze, source/dependency hashes, import results, raw logs
-- [ ] Classify `ENV_PASS / ENV_RETRY / ROUTE_STOP_DEFAULT_BRANCH / ENV_PATH_STOP / ENV_PROTOCOL_FAIL`
+- [x] Wait for C006 before any default-branch change
+- [ ] D007: introduce only the thin dispatcher to `main` through an auditable minimal change
+- [ ] D007: require immutable canonical branch/SHA and registered blob-SHA inputs
+- [ ] D007: dispatch one environment-only run against exact canonical SHA
+- [ ] D007: collect artifact ID/ZIP SHA256, resolver report, freeze, source/dependency hashes, imports, raw logs
+- [ ] D007: classify `ENV_PASS / ENV_RETRY / ROUTE_STOP_DEFAULT_BRANCH / ENV_PATH_STOP_PENDING_AMENDMENT / ENV_PATH_STOP / ENV_PROTOCOL_FAIL`
 - [ ] After separate authorization only: CR1 trace, then PB1 trace
-- [x] Dataset, model execution, training and quantization prohibited
+- [x] Dataset, model execution, semantic trace, training and quantization prohibited during D007
 
 D006 evidence:
 
@@ -118,15 +126,16 @@ D006 evidence:
 ## Global prohibitions
 
 - No further C005 route variants
-- No default-branch change before C006 preregistration is complete
-- No broad trigger or PR-trigger shortcut
+- No broad push or PR trigger shortcut
+- No model code on the default branch
+- No mutable branch-tip checkout for D007
 - No new architecture before reproducible baseline and preregistration
 - No multi-component intervention
 - No paper attribution from CR1
 - No adoption from parameter/KV/asymptotic FLOPs alone
 - No single-seed adoption
 - No promotion of environment/semantic preflight to quality evidence
-- No silent semantic patch
+- No silent semantic or compatibility patch
 - No automatic transition from environment PASS to model execution
 - No mechanism-wide rejection from PB1 `N=4` null evidence
 - No substitution of third-party Megatron implementations during P0 without a new semantic audit and preregistration
