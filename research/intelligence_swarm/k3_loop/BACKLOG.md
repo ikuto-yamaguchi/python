@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Backlog
 
-Last updated: 2026-07-29 by K3-E
+Last updated: 2026-07-29 by K3-A
 
 ## P0 — Block AttnRes minimum reproduction
 
@@ -21,6 +21,7 @@ Current bottleneck:
 - [x] Paper layer-index origin and `L_sub/N/S` geometry fixed
 - [x] PB1 boundaries `[3,6,9,12]`; zero-based false-boundary and odd-`S` counterexamples fixed
 - [x] A005 official-artifact refresh and community implementation admissibility audit
+- [x] A006 compact public implementation audit: one-event-late block visibility, missing divisibility guards, non-paper final sum, and no controlled small-model evidence
 - [ ] Add provenance only after a concrete C007/D008 resolver/import failure
 - [x] Freeze other K3 components during P0
 
@@ -79,7 +80,7 @@ D007 evidence:
 
 ### E — Integration
 
-- [x] E001–E006 completed
+- [x] E001–E007 completed
 - [x] D007 classified `ENV_PROTOCOL_FAIL`
 - [x] Default-branch GitHub Actions route classified `ROUTE_STOP_DEFAULT_BRANCH`
 - [x] C005 and C006 route variants permanently closed
@@ -129,5 +130,5 @@ E007 record:
 - No silent semantic or compatibility patch
 - No automatic transition from environment PASS to model execution
 - No mechanism-wide rejection from PB1 `N=4` null evidence
-- No substitution of third-party Megatron implementations during P0 without a new semantic audit and preregistration
+- No substitution of third-party Megatron or compact public implementations during P0 without a new semantic audit and preregistration
 - No capability, intelligence-principle, high-school-level, or 1GB-goal claim without evidence
