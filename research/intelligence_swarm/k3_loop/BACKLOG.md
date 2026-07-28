@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Backlog
 
-Last updated: 2026-07-29 by K3-D
+Last updated: 2026-07-29 by K3-E
 
 ## P0 — Block AttnRes minimum reproduction
 
@@ -8,7 +8,7 @@ Classification: **小型化で要再設計・追加検証・未採用 / Path-WAR
 
 Current bottleneck:
 
-> D003-GHA environment workflowはcanonical branchへ実装済み。正規dispatcherから起動して`ENV_PASS` artifact ID/SHAを固定する。default branch登録要件で拒否された場合は、trigger/branchを黙って変えずC/Eへexecution-route amendmentを返す。
+> manual `workflow_dispatch`経路はorchestration blocker。C005でcanonical branch・environment paths限定の一回限りpush routeを事前登録し、D005がenvironment-only runを起動して`ENV_PASS` artifact ID/SHAを固定する。
 
 ### A — Evidence
 
@@ -45,7 +45,11 @@ Current bottleneck:
 - [x] C004 register PAPER-BLOCK provisional total `115,579,904`
 - [x] Register checksum-collapsed semantic probability/entropy/effective source metrics
 - [x] S1 remains unauthorized
-- [ ] GitHubがcanonical-only workflowのmanual dispatchを拒否した場合のexecution-route amendment
+- [x] E004 authorizes a narrow execution-route amendment; no model-contract change
+- [ ] C005 preregister canonical branch only push trigger
+- [ ] C005 restrict paths to environment workflow/script/manifest/amendment or dedicated non-semantic nonce
+- [ ] C005 pin concurrency, authorization flags, artifact schema, and one-retry policy
+- [ ] C005 prohibit automatic transition from ENV_PASS to model stage
 - [ ] PB1 semantic PASS後にのみfull-model resource protocolをamend
 - [ ] S1検討前に実コード上のglobal batch 64を保証
 
@@ -59,12 +63,15 @@ Current bottleneck:
 - [x] D004 add manual GitHub Actions environment workflow on canonical branch
 - [x] D004 static authorization/branch/evidence contract audit
 - [x] Confirm no workflow run existed at inspection time
-- [ ] Dispatch D003 GitHub Actions environment workflow
-- [ ] If dispatch is rejected due default-branch registration, record protocol blocker without adding push/PR trigger
+- [x] Classify manual dispatch as orchestration/protocol blocker, not scientific failure
+- [ ] D005 update workflow exactly per C005 push-route amendment
+- [ ] D005 let the amendment push initiate one environment-only run
 - [ ] Save branch SHA, runner provenance, exact dependencies, resolver report, freeze and hashes
 - [ ] Pass all required internal imports
 - [ ] Save `ENV_PASS` artifact ID and artifact SHA
-- [ ] Run CR1 tiny semantic trace without semantic modification
+- [ ] If run starts but transient service/network failure occurs, record `ENV_RETRY` and rerun once unchanged
+- [ ] If route does not start after the exact amendment, record `ROUTE_STOP`
+- [ ] Run CR1 tiny semantic trace without semantic modification after separate authorization
 - [ ] Run PB1 tiny semantic trace after CR1
 - [ ] Record source roles/checksums, duplicate groups, reset state and recency bias
 - [ ] Record raw-index and checksum-collapsed probability, entropy and effective source count
@@ -77,10 +84,10 @@ Current bottleneck:
 
 ### E — Integration
 
-- [x] E001–E003 completed
+- [x] E001–E004 completed
 - [x] Mark unchanged candidate inadmissible as canonical paper reproduction
-- [ ] Classify D003-GHA dispatch as PASS / protocol amendment required / transient retry
-- [ ] Classify D003-GHA environment stage PASS/RETRY/path failure
+- [x] Classify D003-GHA manual dispatch as protocol amendment required
+- [ ] Classify C005/D005 push route as ENV_PASS / ENV_RETRY / ROUTE_STOP / ENV_PATH_STOP
 - [ ] Classify PB1 semantic stage PASS/WARN/STOP
 - [ ] Record CR1 as artifact diagnostic only
 - [ ] Keep Block AttnRes unadopted until quality/resource/3-seed evidence
@@ -114,5 +121,7 @@ Current bottleneck:
 - No promotion of environment/semantic preflight to quality evidence
 - No silent semantic patch
 - No automatic transition from ENV_PASS to model execution
-- No unregistered push/PR trigger or default-branch copy to bypass dispatch restrictions
+- No workflow copy to default branch for convenience
+- No broad push/PR trigger; only C005 branch/path-restricted environment route is authorized
+- No repeated nonce pushes except one unchanged `ENV_RETRY`
 - No capability, intelligence-principle, high-school-level, or 1GB-goal claims without evidence
