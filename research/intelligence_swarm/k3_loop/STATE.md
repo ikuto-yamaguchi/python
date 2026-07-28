@@ -1,24 +1,24 @@
 # K3 Minimal Intelligence Loop — Shared State
 
-Last updated: 2026-07-29 by K3-B
+Last updated: 2026-07-29 by K3-E
 Canonical branch: `research/intelligence-swarm-reconstruction-001`
 
 ## Objective
 
-Kimi K3由来の効率化原理を、1GB以下・弱いCPU/スマホ向けモデルへ転用できるか、公開baseline・単一変更ablation・3 seed・資源計測で判定する。
+Kimi K3由来の効率化原理を、1GB以下・弱いCPU/スマホ向けモデルへ転用できるか、公開baseline、単一変更ablation、3 seed、資源計測で判定する。
 
 ## Current phase
 
-**Phase 1.5: D003-GHA manual dispatch is orchestration-blocked; C005/D005 one-shot canonical-branch push environment gate authorized → variant-separated deterministic semantic trace。**
+**Phase 1.5: D005 predispatch audit returned `PREREG_BLOCKED`; C005 execution-route preregistration is the sole bottleneck.**
 
-Completed: A001–A004, B001–B005, C001–C004, D001–D002, D003 local environment probe, D004 workflow staging, E001–E004.
+Completed: A001–A004, B001–B005, C001–C004, D001–D005 predispatch audit, E001–E005.
 
 Current classifications:
 
 - Block AttnRes: **小型化で要再設計・追加検証・未採用 / Path-WARN**
-- PAPER-BLOCK (`PB1`): canonical paper candidate; C004 registered, semantic trace pending
+- PAPER-BLOCK (`PB1`): canonical paper-reference candidate; semantic trace pending
 - CANDIDATE-RAW (`CR1`): fixed-commit artifact diagnostic only; paper attribution prohibited
-- D003-GHA manual route: **protocol amendment required**; scientific status unchanged
+- Execution state: **PREREG_BLOCKED**
 
 Frozen until P0 completes: new architecture, dataset download, optimizer step, S1–S3, quantization, KDA, Stable LatentMoE.
 
@@ -29,11 +29,7 @@ Frozen until P0 completes: new architecture, dataset download, optimizer step, S
 - Transformers commit: `42791a34fdeae197f60f11ace3807c81f44b0729`
 - official executable training baseline: not released
 
-## C003/C004 result
-
-C003はlocal `BLOCKED_ENV`を回避するため、GitHub Actions上のPython 3.11 exact dependency/import stageだけを事前登録した。environment stageとmodel stageは別dispatchとし、`ENV_PASS` artifact SHAなしでmodel実行へ進むことを禁止した。
-
-C004はpaper準拠候補と公開artifactを完全分離した。
+## Candidate separation
 
 - `PB1 / PAPER-BLOCK`: boundary append後にpartial reset、unintended duplicate禁止、recency bias/gate禁止
 - `CR1 / CANDIDATE-RAW`: 公開commitを変更せず診断し、paper mechanismへ帰属しない
@@ -45,157 +41,95 @@ Parameter contract:
 - PB1 provisional: `115,579,904`, delta `25,600`
 - PB1 relative overhead: approximately `0.02215%`
 
-PB1 countはexact executable state dictで確認する。parameter数やKV cache非増加だけでCPU軽量性を主張しない。
+Exact executable state dictで再確認する。parameter数やKV cache非増加だけでCPU軽量性を主張しない。
 
-## A004 indexing and block-geometry result
-
-一次論文はlayer indexを`l ∈ {1,...,L}`と定義し、self-attentionとMLPを各1 layerとして数える。公式疑似コードはTransformer-block番号へ変換して境界判定するため、index originとblock geometryを明示しない実装はpaper semanticsを保証しない。
-
-PB1の現行12-Transformer-block条件では次をcanonical契約とする。
+## PB1 semantic geometry
 
 - `L_transformer = 12`
 - `L_sub = 24`
-- `N = 4` completed AttnRes blocks
-- `S = 6` Attention/MLP sublayers per block
-- `3` Transformer blocks per AttnRes block
+- `N = 4`
+- `S = 6` Attention/MLP sublayers per completed block
 - ordered boundaries after Transformer blocks `[3, 6, 9, 12]`
 - semantic sublayer index is 1-based
 - embedding is one separate source
 - final router does not increment completed-block count
-- odd `S` or non-divisible `L_sub/S` must be rejected, not truncated
+- odd `S` or non-divisible `L_sub/S` must be rejected
 
-Zero-based `self.layer_number` with the published modulo test can create a false boundary before the first Attention and duplicate the embedding-equivalent source while still producing the expected number of boundary events. Therefore boundary count alone is insufficient; ordered positions and source-creation events are mandatory trace evidence.
+Canonical source-slot contract:
 
-Evidence record:
+- sublayer routing slots: `84`
+- final-router sources: `5`
+- total slots: `89`
+- `primary_evidence_geometry_matched=false`
 
-- `research/intelligence_swarm/k3_loop/evidence/A004_BLOCK_ATTNRES_INDEXING_AND_BLOCK_GEOMETRY_AUDIT.md`
-- audit commit: `cb2a35f81f559dc20f01f1a533e79d46b66a4c30`
+PB1 is a minimum semantic/effect-direction pilot, not a reproduction of the primary `N≈8–9` evidence geometry.
 
-## B005 block-count cost / resolution result
+## Existing executable evidence
 
-PB1の`L=24,N=4,S=6`について、重複sourceのないcanonical routingのsource-slot上限を固定した。
+D002 standalone reconstruction passed instantiate, forward/backward, routing-gradient and save/load gates, but it was not the exact candidate Transformers runtime.
 
-- sublayer routing source slots: `84`
-- final router source count: `5`
-- total source slots: `89`
-- width `d=512`でscore＋weighted-value passのgeometry indicator: `91,136 scalar contributions/token`
-
-一般に固定depth `L=N*S`では、source-slot上限は
-
-`C_slots(L,N) = L*(N+3)/2 + N + 1`
-
-となり、parameter数がほぼ不変でもactivation read、temporary、softmax幅、dispatchは`N`とともに増える。`L=24`で`N=4→12`にするとslot indicatorは`89→193`、約`2.169x`。
-
-一方、一次報告は概ね`N≈8–9`で、PB1の`N=4`はprimary-evidence geometryより粗い。PB1はefficacy reproductionではなくminimum semantic / effect-direction pilotとして扱う。
-
-Interpretation boundary:
-
-- `N=4` quality nullからmechanism全体を棄却しない
-- `N=4` quality gainからhigher-`N` CPU Paretoを推定しない
-- semantic PASSはminimum effective scaleを示さない
-- higher-`N` quality gainがresource Paretoを超える場合はtraining-onlyまたはfused-kernel依存へ狭義化
-
-Theory record:
-
-- `research/intelligence_swarm/k3_loop/theory/B005_BLOCK_ATTNRES_BLOCK_COUNT_COST_RESOLUTION_AUDIT.md`
-- audit commit: `dbbe5c0304b4f377b557a2fac7426fa88c8b5a93`
-
-## D004 result
-
-C003 environment stageの実行定義をcanonical branchへ追加した。
-
-- workflow: `.github/workflows/d003-k3-environment-gate.yml`
-- runner script: `benchmarks/k3_minimal/preflight/d003_gha_environment.sh`
-- workflow commit: `3c19c0e7d6f5511322f6777504c8536cb44d99f2`
-- report: `research/intelligence_swarm/k3_loop/reproduction/D004_D003_GHA_WORKFLOW_STAGING_AND_DISPATCH_BLOCKER.md`
-
-Static contractはmanual dispatch、Python 3.11、fixed Transformers/candidate commit、resolver/freeze/import/checksum artifact、environment-only authorizationを満たす。model execution、dataset、training、benchmark、quantizationは含まない。
-
-Runtime status was `STAGED_NOT_DISPATCHED`。利用可能なconnectorは新規`workflow_dispatch`を開始できず、canonical branch上だけのworkflowはdefault-branch登録要件によりmanual dispatch対象にならない可能性がある。これはorchestration blockerであり科学的失敗ではない。
-
-## E004 execution-route decision
-
-E004は、同じmanual dispatch経路を待ち続ける停滞を止めるため、**canonical branch限定・environment files限定の一回限りpush trigger amendment**をC005/D005へ許可した。
-
-許可範囲:
-
-- branchは`research/intelligence-swarm-reconstruction-001`だけ
-- environment workflow/script/manifest/amendmentまたは専用non-semantic nonceだけをpaths filterに含める
-- `training_authorized=false`
-- `model_execution_authorized=false`
-- dataset/tokenizer/checkpoint/B0/A1実行なし
-- amendment commit自身が起動する1 runを意図した実行とする
-- artifact ID/SHA、runner provenance、resolver/freeze/hash/import/raw logsを保存
-- environment PASSからmodel stageへ自動遷移しない
-
-Integration record:
-
-- `research/intelligence_swarm/k3_loop/integration/E004_D003_GHA_PUSH_ROUTE_AMENDMENT_DECISION.md`
-- decision commit: `f382f898d83ffdbf92e445abd2f31d7bc6e9df0a`
-
-## Deterministic semantic trace contract
-
-C003/C005 `ENV_PASS`後、次の順で実行する。
-
-1. CR1 fixed-commit trace
-2. PB1 trace
-3. EがPB1 semantic PASS/WARN/STOPを判定
-4. PB1 PASS後のみ、別amendmentでfull-model resource測定を検討
-
-各routing eventでvariant、runtime index origin、canonical Attention/MLP sublayer index、ordered boundary position、completed sublayers since prior boundary、reset、source role/creation event/checksum、duplicate group、raw/collapsed probability、entropy/effective source count、recency bias、weighted output checksumを保存する。
-
-PB1 PASS requires:
-
-- reset at every registered boundary
-- exact ordered boundaries after Transformer blocks `[3, 6, 9, 12]`
-- exactly six sublayers in every completed block
-- no boundary before the first transformed sublayer
-- zero unintended identity duplicates
-- preregistered source roles
-- no recency-bias parameter/contribution
-- no optional mixing gate
-- finite probabilities summing to one
-- final router does not increment completed-block count
-- explained exact parameter delta
-- save/load event/output consistency
-- source-slot accounting consistent with B005 or explicitly explained by the exact routing event definition
-
-CR1にはpaper適合PASSを付けず、`RAW_DIAGNOSTIC_COMPLETE`または`RAW_DIAGNOSTIC_FAILED`のみを付ける。
-
-## Existing timing evidence
-
-D002 standalone routing median:
+Standalone routing medians:
 
 - T=1: `0.112487 ms`
 - T=128: `0.627961 ms`
 - T=512: `2.252197 ms`
 - T=2048: `35.944465 ms`
 
-短系列fitに対しT=2048は約4.13倍。exact dependency runtimeでは未確認。
+The 2048-token result was about 4.13x the short-sequence fit and remains unconfirmed in the exact runtime.
 
-## Current bottleneck
+## Execution-route history
 
-1. CがC005 execution-route amendmentを固定
-2. Dがworkflowへcanonical-branch/path-restricted push triggerとconcurrencyを事前登録どおり追加
-3. amendment pushによりenvironment-only runを1回起動
-4. branch SHA、runner provenance、resolver report、freeze、dependency/source hashesを保存
-5. required internal importsを全件PASS
-6. `ENV_PASS` artifact ID/SHAを固定
-7. CがPB1の1-based sublayer index、`L_sub/N/S`、ordered boundaries、B005 source-slot contractをamendmentへ固定
-8. CR1/PB1 tiny deterministic semantic traceをvariant別に実行
-9. EがPB1 semantic PASS/WARN/STOPを判断
+- D003 local exact-runtime attempt: `BLOCKED_ENV`
+- D004 GitHub Actions environment workflow: staged, manual dispatch not started
+- E004: authorized a narrow one-shot canonical-branch environment-only route, subject to C005 preregistration
+- D005: confirmed C005 prose/manifest are absent and correctly returned `PREREG_BLOCKED`; workflow was not changed
+- E005: made C005 the sole next step and prohibited repeated D predispatch churn
 
-Dが次に実行可能なのはC005に従うenvironment workflow amendment・起動・artifact回収だけ。model stage、full-model timing、dataset、training、quantizationは未許可。
+Integration record:
+
+- `research/intelligence_swarm/k3_loop/integration/E005_C005_PREREGISTRATION_ORDER_GATE_DECISION.md`
+- E005 commit: `871868f9c4c11b4c1b632563411a5f855929222d`
+
+## Single bottleneck
+
+C must create exactly:
+
+1. `research/intelligence_swarm/k3_loop/prereg/C005_D003_GHA_PUSH_ROUTE_AMENDMENT.md`
+2. `benchmarks/k3_minimal/manifests/C005_d003_gha_push_route.yaml`
+
+C005 must fix:
+
+- canonical branch only
+- environment-file path restriction
+- concurrency and cancellation behavior
+- `training_authorized=false`
+- `model_execution_authorized=false`
+- provenance/resolver/freeze/import/raw-log artifact schema
+- no automatic transition from environment PASS to model execution
+- one unchanged retry only for a transient failure after run start
+- `ENV_PASS`, `ENV_RETRY`, `ROUTE_STOP`, `ENV_PATH_STOP`
+- later PB1 trace contract: 1-based indexing, `24/4/6`, boundaries `[3,6,9,12]`, odd/non-divisible rejection, source slots `84/5/89`
+
+These semantic fields do not authorize model execution.
+
+## Authorized next work
+
+- A: no new K3 component; inspect only a concrete resolver/import failure
+- B: no crossover, minimum-scale, or Pareto revision before exact traces
+- C: create C005 prose and manifest only
+- D: do not alter or start the workflow until C005 exists
+- E: after D returns, classify only execution/environment outcome
 
 ## Completion / stop classification
 
-- `ENV_PASS`: exact environment/import evidence固定。次は別dispatchのCR1 traceのみ検討可能。
-- `ENV_RETRY`: Actions/package-index/DNS/networkの一時障害。契約を変えず1回だけ再実行可能。
-- `ROUTE_STOP`: 一回の登録済みpush-route amendment後もworkflowが起動しない、または永続的policy/registration拒否。
-- `ENV_PATH_STOP`: 最大1件の登録済みimport/API-wiring patch後もsemantic変更なしで依存/importを成立できない。
+- before C005 exists: `PREREG_BLOCKED`
+- `ENV_PASS`: exact environment/import evidence and artifact ID/SHA fixed
+- `ENV_RETRY`: transient Actions/package-index/DNS/network failure after start; one unchanged retry
+- `ROUTE_STOP`: exact registered route does not start or is persistently rejected
+- `ENV_PATH_STOP`: after at most one preregistered API-wiring-only patch, fixed dependencies/imports still require semantic change
 
-`ROUTE_STOP`は実行基盤だけの停止、`ENV_PATH_STOP`は現在の非公式実装経路だけの停止であり、Block AttnRes仮説全体の棄却ではない。
+`ROUTE_STOP` and `ENV_PATH_STOP` do not by themselves reject Block AttnRes.
 
 ## Evidence boundary
 
-Kimi K3全体の利得をAttnRes単独へ帰属しない。著者一次証拠は約194M active未満で未確立。PB1の`N=4`は一次報告の`N≈8–9` geometryと一致しない。environment workflowの静的成立、semantic PASS、source-slot式はいずれも品質、CPU Pareto、量子化、3-seed安定性、知能原理、高校生級、能力進歩、1GB目標達成を示さない。
+Quality, exact model bytes, active compute, isolated peak RSS, training time, CPU generation, quantization tolerance, and three-seed stability remain unmeasured. No new intelligence principle, capability progress, high-school-level capability, or 1GB-goal achievement is supported.
