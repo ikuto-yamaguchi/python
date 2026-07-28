@@ -53,10 +53,43 @@ jobs:
           /usr/bin/time -v bash research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh "$RUNNER_TEMP/r01_official_100m" \
             2>&1 | tee "$results/INSTALL.log"
 
+      - name: Apply audited seed-only instrumentation
+        run: |
+          set -euo pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_100m_seed1"
+          silg="$RUNNER_TEMP/r01_official_100m/silg"
+          cp "$silg/run_exp.py" "$results/SILG_PINNED_RUN_EXP_BEFORE_SEED_PATCH.py"
+          python - "$silg/run_exp.py" <<'PY' 2>&1 | tee "$results/SEED_PATCH.log"
+          import pathlib, sys
+          path = pathlib.Path(sys.argv[1])
+          text = path.read_text()
+          actor_old = "seed = i ^ int.from_bytes(os.urandom(4), byteorder='little')"
+          actor_new = "seed = int(os.environ['SILG_EXPERIMENT_SEED']) * 1000003 + i"
+          main_old = "if __name__ == '__main__':\n    parser = exp_utils.get_parser()"
+          main_new = "if __name__ == '__main__':\n    experiment_seed = int(os.environ['SILG_EXPERIMENT_SEED'])\n    random.seed(experiment_seed)\n    np.random.seed(experiment_seed)\n    torch.manual_seed(experiment_seed)\n    parser = exp_utils.get_parser()"
+          if text.count(actor_old) != 1:
+              raise SystemExit(f'expected one actor seed site, found {text.count(actor_old)}')
+          if text.count(main_old) != 1:
+              raise SystemExit(f'expected one main seed site, found {text.count(main_old)}')
+          text = text.replace(actor_old, actor_new).replace(main_old, main_new)
+          path.write_text(text)
+          print('seed_patch=applied')
+          print('seed_source=SILG_EXPERIMENT_SEED')
+          print('actor_seed_formula=experiment_seed*1000003+actor_index')
+          PY
+          cp "$silg/run_exp.py" "$results/SILG_PINNED_RUN_EXP_AFTER_SEED_PATCH.py"
+          python -m py_compile "$silg/run_exp.py"
+          sha256sum \
+            "$results/SILG_PINNED_RUN_EXP_BEFORE_SEED_PATCH.py" \
+            "$results/SILG_PINNED_RUN_EXP_AFTER_SEED_PATCH.py" \
+            > "$results/SEED_PATCH_SHA256SUMS.txt"
+
       - name: Train official recurrent baseline to first durable checkpoint
         env:
           OMP_NUM_THREADS: '1'
           MKL_NUM_THREADS: '1'
+          PYTHONHASHSEED: '1'
+          SILG_EXPERIMENT_SEED: '1'
         run: |
           set -euo pipefail
           results="$GITHUB_WORKSPACE/research/intelligence_swarm/benchmarks/grounded_causal/results_official_100m_seed1"
@@ -76,7 +109,6 @@ jobs:
             --unroll_length 80 \
             --learning_rate 0.0005 \
             --entropy_cost 0.05 \
-            --seed 1 \
             --disable_cuda \
             2>&1 | tee "$results/TRAIN.log"
           job=$(find "$savedir" -name job.tar -type f -print -quit)
@@ -102,6 +134,7 @@ jobs:
             'public_baseline_reproduced': False,
             'capability_progress_claimed': False,
             'seed': 1,
+            'seed_instrumentation': 'global Python/NumPy/Torch seed plus deterministic per-actor seeds; no model or objective change',
             'entropy_cost': 0.05,
             'target_frames': 100000000,
             'chunk_target_frames': 1000000,
