@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Backlog
 
-Last updated: 2026-07-28 by K3-B
+Last updated: 2026-07-29 by K3-C
 
 ## P0 — Current cycle: Block AttnRes minimum reproduction
 
@@ -12,110 +12,95 @@ Current single bottleneck:
 
 ### A — Evidence
 
-- [x] Confirm author-controlled executable implementation/checkpoint status. None found as of 2026-07-28.
-- [x] Extract primary-report model sizes, depths, widths, block counts and token budgets.
-- [x] Pin unofficial candidate `wdlctc/open-attention-residuals@83d2b8de82c2fbb981c7decca67d13d9db348da6`.
-- [x] Record A001 evidence audit.
-- [x] Pin dependency lower bound: Python 3.11, exact PyTorch satisfying `>=2.4`, Transformers `42791a34fdeae197f60f11ace3807c81f44b0729`.
-- [ ] Record paper-to-candidate deviation matrix before S2.
-- [x] Keep all other K3 components frozen while P0 is unresolved.
+- [x] Author-controlled executable implementation/checkpoint status確認。2026-07-28時点で未公開。
+- [x] 一次報告のmodel size、depth、width、block数、token budget抽出。
+- [x] 非公式候補 `wdlctc/open-attention-residuals@83d2b8de82c2fbb981c7decca67d13d9db348da6` 固定。
+- [x] Dependency lower bound固定: Python 3.11、PyTorch >=2.4 exact build、Transformers `42791a34fdeae197f60f11ace3807c81f44b0729`。
+- [ ] S2前にpaper-to-candidate deviation matrixを作成。
+- [x] P0未解決中は他K3 componentを凍結。
 
 ### B — Theory
 
-- [x] Complete parameter/FLOPs/state-memory/communication/sequence/quantization/CPU comparison.
-- [x] Record small-scale counterexample and failure conditions.
-- [x] Prepare B002 CPU roofline/operator trace contract.
-- [x] Consume corrected parameter delta `25,625`, including final router.
-- [x] Complete B003 D002 scaling-breakpoint audit.
-- [x] Fit T=1/128/512 routing model: `t≈0.100753+0.004197T ms/event`.
-- [x] Record T=2048 actual/predicted ratio `≈4.13x` as an unresolved breakpoint candidate.
-- [x] Define D003 hypotheses for stack/layout, allocator, kernel selection, softmax/layout and measurement artifact.
-- [ ] Recompute fit, residual, operator shares and temporary-byte thresholds from D003 exact-runtime traces.
-- [ ] Do not claim CPU crossover before fresh-process paired timing and isolated RSS exist.
+- [x] Parameter/FLOPs/state-memory/communication/sequence/quantization/CPU比較。
+- [x] 小型scale反例と失敗条件。
+- [x] B002 CPU roofline/operator trace contract。
+- [x] Corrected delta `25,625`を反映。
+- [x] B003 D002 scaling-breakpoint audit。
+- [x] T=1/128/512 fit: `t≈0.100753+0.004197T ms/event`。
+- [x] T=2048 ratio `≈4.13x`を未解決breakpoint候補として記録。
+- [ ] D003 traceからfit、residual、operator share、temporary thresholdを再計算。
+- [ ] D003前にCPU crossoverを主張しない。
 
-### C — Preregistration amendment
+### C — Preregistration
 
-- [x] Pin 12-layer d=512 dense PreNorm baseline.
-- [x] Specify Block AttnRes `N=4` as the only architectural change.
-- [x] Fix optimizer, schedule, sequence length, token budgets and seeds `17/29/43`.
-- [x] Add C001 preregistration and manifest.
-- [ ] Correct A1 parameter count to `115,579,929` and delta to `25,625`.
-- [ ] Add exact D003 invocation and environment lock.
-- [ ] Add explicit save/load tolerance.
-- [ ] Add machine-readable PASS/WARN/STOP schema.
-- [ ] Fix CPU cases `T=1,128,512,2048`.
-- [ ] Require separate fresh processes and AB/BA order balance.
-- [ ] Record warmup, repetitions, median, p95 and MAD.
-- [ ] Add short-sequence linear fit and `actual_2048/predicted_2048` fields.
-- [ ] Add operator attribution, temporary bytes and allocation fields.
-- [ ] Amend later S1 global batch realization to exactly 64 sequences/step.
-- [ ] Do not authorize S1 in the amendment.
+- [x] C001: 12-layer、d=512 dense PreNorm baseline固定。
+- [x] C001: Block AttnRes `N=4`を単一変更として固定。
+- [x] C001: optimizer、schedule、token budget、seed `17/29/43`固定。
+- [x] C002: A1=`115,579,929`、delta=`25,625`へ訂正。
+- [x] C002: D003 exact dependency/resolver provenanceを固定。
+- [x] C002: save/load FP32 CPU tolerance `1e-6`固定。
+- [x] C002: machine-readable PASS/WARN/STOP schema追加。
+- [x] C002: CPU cases `T=1,128,512,2048`固定。
+- [x] C002: separate fresh process、`AB/BA/AB/BA` order balance固定。
+- [x] C002: warmup 10、measurement 30、median/p95/MAD/min/max固定。
+- [x] C002: short-sequence fitと`actual_2048/predicted_2048` fields追加。
+- [x] C002: operator attribution、temporary bytes、allocation evidence追加。
+- [x] C002: D003のみ許可し、dataset取得・学習・量子化を禁止。
+- [ ] D003 Path-PASS後も、実コードでglobal batch 64を保証する別amendmentを作成。
+- [x] S1を許可しない。
+
+Artifacts:
+
+- `research/intelligence_swarm/k3_loop/prereg/C002_D003_EXACT_RUNTIME_PREFLIGHT_PREREG.md`
+- `benchmarks/k3_minimal/manifests/C002_d003_exact_runtime_preflight.yaml`
 
 ### D — Reproduction
 
-- [x] D001 static CLI/data/model contract audit.
-- [x] D002 standalone parameter-faithful preflight executed.
-- [x] Fixed synthetic input from seed 17.
-- [x] B0=`115,554,304`, A1=`115,579,929`.
-- [x] Routing-only parameter-name diff in standalone harness.
-- [x] Finite forward/backward for B0/A1.
-- [x] All 75 routing tensors received finite nonzero gradients.
-- [x] Save/load max absolute difference `0.0`.
-- [x] Routing trace and machine-readable D002 summary persisted.
-- [x] E002 retained Path-WARN and authorized D003 only.
-- [ ] Pin exact runtime using A002 snapshot and all resolved hashes.
-- [ ] Record any minimal compatibility patch with diff/checksum.
-- [ ] Execute B0/A1 in separate fresh processes with AB/BA order balance.
-- [ ] Isolate peak RSS and timing per condition.
-- [ ] Add no-op/list traversal/stack-only/norm+score/softmax/mix controls.
-- [ ] Persist temporary tensor bytes, allocation counts and operator-call evidence.
-- [ ] Recompute T<=512 fit and T=2048 breakpoint ratio in exact runtime.
-- [ ] Persist raw logs, machine-readable result and checksums.
-- [ ] Do not download FineWeb-Edu or start S1.
+- [x] D001 static CLI/data/model contract audit。
+- [x] D002 standalone parameter-faithful preflight。
+- [x] Synthetic input seed 17。
+- [x] B0=`115,554,304`、A1=`115,579,929`。
+- [x] Routing-only parameter diff、finite forward/backward、全75 routing gradient、save/load差`0.0`。
+- [x] E002がPath-WARNを維持しD003のみ許可。
+- [ ] A002/C002に従いexact runtimeと全resolved hashを固定。
+- [ ] Compatibility patch時は最大1件、diff/checksum保存。
+- [ ] B0/A1を別fresh processで`AB/BA/AB/BA`実行。
+- [ ] 条件別peak RSS、wall time、median/p95/MADを分離。
+- [ ] no-op/list/source/stack/norm+score/softmax/mix controls追加。
+- [ ] Temporary bytes、allocation/operator-call evidence保存。
+- [ ] Exact runtimeでT<=512 fitとT=2048 ratio再計算。
+- [ ] Raw logs、machine-readable result、checksums保存。
+- [x] D003中のFineWeb-Edu/tokenizer取得、optimizer step、S1を禁止。
 
 ### E — Integration
 
-- [x] E001 locked D002 as the bottleneck.
-- [x] E002 reviewed D002 and retained Path-WARN.
-- [x] E002 selected D003 as the only next experiment.
-- [ ] After D003, classify implementation path as PASS/WARN/STOP.
-- [ ] If `actual_2048/predicted_2048 >= 2.0` persists, or CPU/RSS overhead is `>=10%`, consider training-only/fusion-dependent narrowing.
-- [ ] Keep Block AttnRes unadopted until preregistered quality/resource evidence passes.
-- [ ] Keep KDA, Stable LatentMoE and other candidates frozen.
-
-## D002 evidence summary
-
-- Corrected parameter overhead: `25,625` (`~0.02218%`).
-- FP32 bytes: B0 `462,217,216`; A1 `462,319,716`.
-- Process max RSS: `2,203,936 KiB`; not isolated.
-- Routing median, five sources, width512, CPU one thread:
-  - T=1 `0.112487 ms`
-  - T=128 `0.627961 ms`
-  - T=512 `2.252197 ms`
-  - T=2048 `35.944465 ms`
-- T=1/128/512 fit predicts T=2048 at about `8.696 ms`; actual is about `4.13x` larger.
-- Full-model timing is order-contaminated and unusable for Pareto judgment.
-- No quality, training throughput, CPU generation, quantization or 3-seed evidence exists.
+- [x] E001: D002を単一ボトルネック化。
+- [x] E002: D002をPath-WARNとして統合。
+- [x] E002: D003を唯一の次実験として選定。
+- [ ] D003後、implementation pathをPASS/WARN/STOP分類。
+- [ ] `actual_2048/predicted_2048 >= 2.0`、CPU/RSS overhead `>=10%`等ならtraining-only/fusion-dependentへ狭義化を検討。
+- [ ] Preregistered quality/resource evidence合格まで未採用を維持。
+- [x] KDA、Stable LatentMoE等を凍結。
 
 ## D003 completion conditions
 
-- [ ] exact environment lock and provenance
-- [ ] candidate commit and compatibility patch checksum
-- [ ] exact counts and residual-only diff
+- [ ] exact environment lockとresolver provenance
+- [ ] candidate commitとcompatibility patch checksum
+- [ ] exact countsとresidual-only config/state-dict diff
 - [ ] fixed input SHA256
 - [ ] finite forward/backward/routing gradients
-- [ ] save/load within preregistered tolerance
-- [ ] fresh-process AB/BA repeated timing
+- [ ] save/load max abs `<=1e-6`
+- [ ] fresh-process `AB/BA/AB/BA` repeated timing
 - [ ] isolated peak RSS
-- [ ] operator controls and temporary/allocation evidence
-- [ ] T=1/128/512 fit and T=2048 breakpoint ratio
-- [ ] raw logs, machine-readable summary and checksums
+- [ ] operator controlsとtemporary/allocation evidence
+- [ ] T=1/128/512 fitとT=2048 breakpoint ratio
+- [ ] raw logs、machine-readable summary、artifact checksums
 
 ## D003 classification rules
 
-- **PASS:** exact runtime and residual-only diff hold; timing/RSS/operator evidence is reproducible; breakpoint disappears or is explained; A1/B0 full-model overhead is below 10%.
-- **WARN:** semantics hold but A1 CPU time/RSS worsens by `>=10%`, stack/layout plus framework is `>=50%` of added routing time, or fresh-process `actual_2048/predicted_2048 >= 2.0`. Narrow to training-only or fusion-dependent investigation.
-- **STOP:** after one documented minimal repair, execution remains impossible, residual-only equivalence breaks, gradient/save-load fails, measurements cannot be isolated, or semantic change is required.
+- **PASS:** semantic checksと再現可能な計測が成立。breakpointが消えるか説明可能。A1/B0 full-model時間・RSS overheadはいずれも10%未満。
+- **WARN:** semanticsは成立するが、CPU時間/RSS `>=10%`、stack/layout+framework相当 `>=50%`、fresh-process ratio `>=2.0`、またはorder block間で効果方向が不安定。
+- **STOP:** 1回の最小patch後も実行不能、残差以外の差分、parameter mismatch未説明、gradient/save-load失敗、計測不能、未登録architecture変更が必要。
 
 ## P1 — Candidate queue after P0
 
@@ -129,11 +114,11 @@ P1 remains frozen.
 
 ## Global prohibitions
 
-- No new architecture before reproducible baseline and preregistration.
-- No simultaneous multi-component transplant.
-- No claims of intelligence principle, high-school-level capability or capability progress without evidence.
-- No adoption based only on parameter count, KV-cache behavior or asymptotic FLOPs.
-- No success report from one seed.
-- No post-hoc promotion of preflight/smoke runs.
-- No silent patching.
-- No replacing the current bottleneck with literature review or another candidate because execution is inconvenient.
+- Reproducible baselineとpreregistration前の新規architecture禁止。
+- 複数component同時移植禁止。
+- 根拠のない知能原理、高校生級、能力進歩の主張禁止。
+- Parameter数、KV cache、漸近FLOPsだけで採用しない。
+- 1 seed成功を採用根拠にしない。
+- Preflight/smokeの事後的なfull evidence昇格禁止。
+- Silent patch禁止。
+- 実行が不便という理由で現在のボトルネックを文献監査や別候補へ置換しない。
