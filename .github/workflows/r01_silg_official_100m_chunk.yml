@@ -58,22 +58,24 @@ jobs:
           repository: ikuto-yamaguchi/python
           run-id: 30316319311
 
-      - name: Verify resume source checkpoint
+      - name: Verify immutable resume source envelope
         run: |
           set -euo pipefail
           results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_100m_seed1"
           python - "$results" <<'PY'
-          import hashlib, json, pathlib, sys, torch
+          import hashlib, json, pathlib, sys
           root = pathlib.Path(sys.argv[1])
           job = root / 'savedir' / 'rtfm-official-100m-seed1' / 'job.tar'
+          summary = root / 'OFFICIAL_100M_SEED1_CHUNK.json'
           if not job.is_file():
               raise SystemExit(f'missing resume checkpoint: {job}')
-          ckpt = torch.load(job, map_location='cpu')
-          required = {'model_state_dict','optimizer_state_dict','scheduler_state_dict','frames'}
-          missing = sorted(required - set(ckpt))
-          frames = int(ckpt.get('frames', -1))
+          if not summary.is_file():
+              raise SystemExit(f'missing source qualification summary: {summary}')
+          source = json.loads(summary.read_text(encoding='utf-8'))
           digest = hashlib.sha256(job.read_bytes()).hexdigest()
           expected_digest = 'fae5a2f8515ccb8a6b018349c0f09a38cb656a862e78803765ba87b396caca86'
+          frames = int(source.get('checkpoint_frames', -1))
+          missing = list(source.get('checkpoint_missing_keys', ['summary field absent']))
           payload = {
               'source_run_id': 30316319311,
               'source_artifact_id': 8676275327,
@@ -81,9 +83,17 @@ jobs:
               'checkpoint_sha256': digest,
               'checkpoint_missing_keys': missing,
               'expected_checkpoint_sha256': expected_digest,
-              'qualified': not missing and frames == 1006080 and digest == expected_digest,
+              'source_qualified_for_continuation': source.get('qualified_for_continuation') is True,
+              'qualified': (
+                  not missing
+                  and frames == 1006080
+                  and digest == expected_digest
+                  and source.get('qualified_for_continuation') is True
+              ),
           }
-          (root / 'RESUME_SOURCE_CHECK.json').write_text(json.dumps(payload, indent=2, sort_keys=True) + '\n')
+          (root / 'RESUME_SOURCE_ENVELOPE_CHECK.json').write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + '\n', encoding='utf-8'
+          )
           print(json.dumps(payload, indent=2, sort_keys=True))
           if not payload['qualified']:
               raise SystemExit(1)
@@ -95,6 +105,34 @@ jobs:
           results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_100m_seed1"
           /usr/bin/time -v bash research/intelligence_swarm/benchmarks/grounded_causal/install_silg_rtfm.sh "$RUNNER_TEMP/r01_official_100m" \
             2>&1 | tee "$results/INSTALL_CONTINUATION.log"
+
+      - name: Verify resume checkpoint schema with pinned torch environment
+        run: |
+          set -euo pipefail
+          results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_100m_seed1"
+          python - "$results" <<'PY'
+          import hashlib, json, pathlib, sys, torch
+          root = pathlib.Path(sys.argv[1])
+          job = root / 'savedir' / 'rtfm-official-100m-seed1' / 'job.tar'
+          ckpt = torch.load(job, map_location='cpu')
+          required = {'model_state_dict','optimizer_state_dict','scheduler_state_dict','frames'}
+          missing = sorted(required - set(ckpt))
+          frames = int(ckpt.get('frames', -1))
+          digest = hashlib.sha256(job.read_bytes()).hexdigest()
+          expected_digest = 'fae5a2f8515ccb8a6b018349c0f09a38cb656a862e78803765ba87b396caca86'
+          payload = {
+              'checkpoint_frames': frames,
+              'checkpoint_sha256': digest,
+              'checkpoint_missing_keys': missing,
+              'qualified': not missing and frames == 1006080 and digest == expected_digest,
+          }
+          (root / 'RESUME_SOURCE_CHECK.json').write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + '\n', encoding='utf-8'
+          )
+          print(json.dumps(payload, indent=2, sort_keys=True))
+          if not payload['qualified']:
+              raise SystemExit(1)
+          PY
 
       - name: Apply audited seed-only instrumentation
         run: |
@@ -123,7 +161,7 @@ jobs:
           cp "$silg/run_exp.py" "$results/SILG_PINNED_RUN_EXP_AFTER_SEED_PATCH_CONTINUATION.py"
           python -m py_compile "$silg/run_exp.py"
 
-      - name: Resume official recurrent baseline to second durable checkpoint
+      - name: Resume official multi baseline to second durable checkpoint
         env:
           OMP_NUM_THREADS: '1'
           MKL_NUM_THREADS: '1'
@@ -159,7 +197,7 @@ jobs:
           set -euo pipefail
           results="research/intelligence_swarm/benchmarks/grounded_causal/results_official_100m_seed1"
           python - "$results" <<'PY'
-          import hashlib, json, pathlib, sys, torch
+          import hashlib, json, pathlib, re, sys, torch
           root = pathlib.Path(sys.argv[1])
           job = root / 'SILG_RTFM_OFFICIAL_SEED1_JOB_2M.tar'
           ckpt = torch.load(job, map_location='cpu')
@@ -168,6 +206,12 @@ jobs:
           frames = int(ckpt.get('frames', -1))
           model = ckpt['model_state_dict']
           params = sum(v.numel() for v in model.values() if hasattr(v, 'numel'))
+          time_text = (root / 'TRAIN_CONTINUATION_TIME.txt').read_text(encoding='utf-8')
+          def number(label, cast=float):
+              match = re.search(rf'^{re.escape(label)}:\s*(.+)$', time_text, re.MULTILINE)
+              if not match:
+                  raise SystemExit(f'missing resource field: {label}')
+              return cast(match.group(1).strip())
           payload = {
             'classification': 'official_100m_reproduction_in_progress',
             'public_baseline_reproduced': False,
@@ -186,6 +230,11 @@ jobs:
             'checkpoint_missing_keys': missing,
             'qualified_for_continuation': not missing and frames >= 2000000,
             'controls_status': 'not_run_until_trained_checkpoint_evaluation',
+            'resources': {
+              'user_cpu_seconds': number('User time (seconds)'),
+              'system_cpu_seconds': number('System time (seconds)'),
+              'maximum_rss_kib': number('Maximum resident set size (kbytes)', int),
+            },
             'claims_blocked': ['public baseline reproduced','capability progress','new intelligence principle'],
           }
           out = root / 'OFFICIAL_100M_SEED1_CHUNK_2M.json'
