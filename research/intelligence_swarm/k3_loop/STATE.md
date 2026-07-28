@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Shared State
 
-Last updated: 2026-07-29 by K3-E
+Last updated: 2026-07-29 by K3-A
 Canonical branch: `research/intelligence-swarm-reconstruction-001`
 
 ## Objective
@@ -11,7 +11,7 @@ Kimi K3由来の効率化原理を、1GB以下・弱いCPU/スマホ向けモデ
 
 **Phase 1.5: D003-GHA manual dispatch is orchestration-blocked; C005/D005 one-shot canonical-branch push environment gate authorized → variant-separated deterministic semantic trace。**
 
-Completed: A001–A003, B001–B004, C001–C004, D001–D002, D003 local environment probe, D004 workflow staging, E001–E004.
+Completed: A001–A004, B001–B004, C001–C004, D001–D002, D003 local environment probe, D004 workflow staging, E001–E004.
 
 Current classifications:
 
@@ -46,6 +46,30 @@ Parameter contract:
 - PB1 relative overhead: approximately `0.02215%`
 
 PB1 countはexact executable state dictで確認する。parameter数やKV cache非増加だけでCPU軽量性を主張しない。
+
+## A004 indexing and block-geometry result
+
+一次論文はlayer indexを`l ∈ {1,...,L}`と定義し、self-attentionとMLPを各1 layerとして数える。公式疑似コードはTransformer-block番号へ変換して境界判定するため、index originとblock geometryを明示しない実装はpaper semanticsを保証しない。
+
+PB1の現行12-Transformer-block条件では次をcanonical契約とする。
+
+- `L_transformer = 12`
+- `L_sub = 24`
+- `N = 4` completed AttnRes blocks
+- `S = 6` Attention/MLP sublayers per block
+- `3` Transformer blocks per AttnRes block
+- ordered boundaries after Transformer blocks `[3, 6, 9, 12]`
+- semantic sublayer index is 1-based
+- embedding is one separate source
+- final router does not increment completed-block count
+- odd `S` or non-divisible `L_sub/S` must be rejected, not truncated
+
+Zero-based `self.layer_number` with the published modulo test can create a false boundary before the first Attention and duplicate the embedding-equivalent source while still producing the expected number of boundary events. Therefore boundary count alone is insufficient; ordered positions and source-creation events are mandatory trace evidence.
+
+Evidence record:
+
+- `research/intelligence_swarm/k3_loop/evidence/A004_BLOCK_ATTNRES_INDEXING_AND_BLOCK_GEOMETRY_AUDIT.md`
+- audit commit: `cb2a35f81f559dc20f01f1a533e79d46b66a4c30`
 
 ## D004 result
 
@@ -89,16 +113,20 @@ C003/C005 `ENV_PASS`後、次の順で実行する。
 3. EがPB1 semantic PASS/WARN/STOPを判定
 4. PB1 PASS後のみ、別amendmentでfull-model resource測定を検討
 
-各routing eventでvariant、layer/sublayer、boundary、reset、source role/creation event/checksum、duplicate group、raw/collapsed probability、entropy/effective source count、recency bias、weighted output checksumを保存する。
+各routing eventでvariant、runtime index origin、canonical Attention/MLP sublayer index、ordered boundary position、completed sublayers since prior boundary、reset、source role/creation event/checksum、duplicate group、raw/collapsed probability、entropy/effective source count、recency bias、weighted output checksumを保存する。
 
 PB1 PASS requires:
 
 - reset at every registered boundary
+- exact ordered boundaries after Transformer blocks `[3, 6, 9, 12]`
+- exactly six sublayers in every completed block
+- no boundary before the first transformed sublayer
 - zero unintended identity duplicates
 - preregistered source roles
 - no recency-bias parameter/contribution
 - no optional mixing gate
 - finite probabilities summing to one
+- final router does not increment completed-block count
 - explained exact parameter delta
 - save/load event/output consistency
 
@@ -123,8 +151,9 @@ D002 standalone routing median:
 4. branch SHA、runner provenance、resolver report、freeze、dependency/source hashesを保存
 5. required internal importsを全件PASS
 6. `ENV_PASS` artifact ID/SHAを固定
-7. CR1/PB1 tiny deterministic semantic traceをvariant別に実行
-8. EがPB1 semantic PASS/WARN/STOPを判断
+7. CがPB1の1-based sublayer index、`L_sub/N/S`、ordered boundariesをamendmentへ固定
+8. CR1/PB1 tiny deterministic semantic traceをvariant別に実行
+9. EがPB1 semantic PASS/WARN/STOPを判断
 
 Dが次に実行可能なのはC005に従うenvironment workflow amendment・起動・artifact回収だけ。model stage、full-model timing、dataset、training、quantizationは未許可。
 
