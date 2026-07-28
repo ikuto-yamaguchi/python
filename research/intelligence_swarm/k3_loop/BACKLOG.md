@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Backlog
 
-Last updated: 2026-07-29 by K3-E
+Last updated: 2026-07-29 by K3-A
 
 ## P0 — Block AttnRes minimum reproduction
 
@@ -20,8 +20,14 @@ Current bottleneck:
 - [x] Missing partial reset, duplicate source and recency bias identified
 - [x] Paper layer-index origin and `L_sub/N/S` geometry fixed
 - [x] PB1 boundaries `[3,6,9,12]`; zero-based false-boundary and odd-`S` counterexamples fixed
+- [x] A005 official-artifact refresh: author executable/checkpoint still unavailable on 2026-07-29
+- [x] Community Megatron implementation classified as independent reproduction lead, not official/admissible during P0
 - [ ] Add provenance only after a concrete resolver/import failure
 - [x] Freeze other K3 components during P0
+
+A005 evidence:
+
+- `research/intelligence_swarm/k3_loop/evidence/A005_OFFICIAL_ARTIFACT_STATUS_AND_COMMUNITY_IMPLEMENTATION_ADMISSIBILITY.md`
 
 ### B — Theory
 
@@ -117,4 +123,5 @@ D006 evidence:
 - No silent semantic patch
 - No automatic transition from environment PASS to model execution
 - No mechanism-wide rejection from PB1 `N=4` null evidence
+- No substitution of third-party Megatron implementations during P0 without a new semantic audit and preregistration
 - No capability, intelligence-principle, high-school-level, or 1GB-goal claim without evidence
