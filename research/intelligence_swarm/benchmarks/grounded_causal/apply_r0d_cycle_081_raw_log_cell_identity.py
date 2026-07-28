@@ -9,6 +9,7 @@ from __future__ import annotations
 from pathlib import Path
 
 TARGET = Path(__file__).with_name("evaluation_contract.py")
+INTEGRATION_MARKER = '"normalized_resource_cell_identity_required": True'
 
 
 def replace_once(text: str, old: str, new: str) -> str:
@@ -20,6 +21,13 @@ def replace_once(text: str, old: str, new: str) -> str:
 
 def main() -> None:
     text = TARGET.read_text(encoding="utf-8")
+
+    # The canonical branch may already contain the integrated Cycle 081 patch.  The
+    # workflow deliberately runs this applicator on every relevant PR update, so an
+    # already-integrated core is a successful no-op rather than an anchor failure.
+    if INTEGRATION_MARKER in text:
+        print("cycle 081 raw-log cell identity is already integrated")
+        return
 
     text = replace_once(
         text,
