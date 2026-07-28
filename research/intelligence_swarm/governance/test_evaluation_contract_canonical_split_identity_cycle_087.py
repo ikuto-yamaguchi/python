@@ -49,10 +49,22 @@ def main():
         target = root / "research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py"
         target.parent.mkdir(parents=True)
         target.write_text(CORE.read_text(encoding="utf-8"), encoding="utf-8")
-        patch = root / "research/intelligence_swarm/governance/apply.py"
-        patch.parent.mkdir(parents=True)
-        patch.write_text(PATCH.read_text(encoding="utf-8"), encoding="utf-8")
-        subprocess.run(["python3", str(patch)], check=True)
+
+        # The workflow applies the hardening to CORE before this regression runs.
+        # Keep standalone execution useful, but never require a second mutation of
+        # an already-hardened temporary copy.
+        target_text = target.read_text(encoding="utf-8")
+        already_hardened = (
+            "def canonical_split(" in target_text
+            and '"canonical_split_identity_required": True' in target_text
+            and "split must use exact canonical spelling" in target_text
+        )
+        if not already_hardened:
+            patch = root / "research/intelligence_swarm/governance/apply.py"
+            patch.parent.mkdir(parents=True)
+            patch.write_text(PATCH.read_text(encoding="utf-8"), encoding="utf-8")
+            subprocess.run(["python3", str(patch)], check=True)
+
         core = load_core(target)
 
         assert core.canonical_split("ＴＥＳＴ") == "test"
