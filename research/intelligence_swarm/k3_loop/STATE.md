@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Shared State
 
-Last updated: 2026-07-29 by K3-B
+Last updated: 2026-07-29 by K3-C
 Canonical branch: `research/intelligence-swarm-reconstruction-001`
 
 ## Objective
@@ -9,16 +9,16 @@ Kimi K3由来の効率化原理を、1GB以下・弱いCPU/スマホ向けモデ
 
 ## Current phase
 
-**Phase 1.5: D005 predispatch audit returned `PREREG_BLOCKED`; C005 execution-route preregistration is the sole bottleneck.**
+**Phase 1.5: C005 execution-route preregistration completed; D may apply only the registered environment-only workflow amendment.**
 
-Completed: A001–A004, B001–B006, C001–C004, D001–D005 predispatch audit, E001–E005.
+Completed: A001–A004, B001–B006, C001–C005, D001–D005 predispatch audit, E001–E005.
 
 Current classifications:
 
 - Block AttnRes: **小型化で要再設計・追加検証・未採用 / Path-WARN**
 - PAPER-BLOCK (`PB1`): canonical paper-reference candidate; semantic trace pending
 - CANDIDATE-RAW (`CR1`): fixed-commit artifact diagnostic only; paper attribution prohibited
-- Execution state: **PREREG_BLOCKED**
+- Execution state: **C005_PREREGISTERED / D_ENV_ROUTE_AUTHORIZED**
 
 Frozen until P0 completes: new architecture, dataset download, optimizer step, S1–S3, quantization, KDA, Stable LatentMoE.
 
@@ -94,51 +94,42 @@ The 2048-token result was about 4.13x the short-sequence fit and remains unconfi
 - D003 local exact-runtime attempt: `BLOCKED_ENV`
 - D004 GitHub Actions environment workflow: staged, manual dispatch not started
 - E004: authorized a narrow one-shot canonical-branch environment-only route, subject to C005 preregistration
-- D005: confirmed C005 prose/manifest are absent and correctly returned `PREREG_BLOCKED`; workflow was not changed
+- D005: confirmed C005 prose/manifest were absent and correctly returned `PREREG_BLOCKED`; workflow was not changed
 - E005: made C005 the sole next step and prohibited repeated D predispatch churn
+- C005: preregistered the canonical-branch/path-restricted one-shot push route, concurrency, false authorization flags, artifact schema, retry/stop classification, and PB1 metadata carry-forward
 
-Integration record:
+C005 records:
 
-- `research/intelligence_swarm/k3_loop/integration/E005_C005_PREREGISTRATION_ORDER_GATE_DECISION.md`
-- E005 commit: `871868f9c4c11b4c1b632563411a5f855929222d`
+- `research/intelligence_swarm/k3_loop/prereg/C005_D003_GHA_PUSH_ROUTE_AMENDMENT.md`
+- `benchmarks/k3_minimal/manifests/C005_d003_gha_push_route.yaml`
 
 ## Single bottleneck
 
-C must create exactly:
+D must now perform exactly the C005 handoff:
 
-1. `research/intelligence_swarm/k3_loop/prereg/C005_D003_GHA_PUSH_ROUTE_AMENDMENT.md`
-2. `benchmarks/k3_minimal/manifests/C005_d003_gha_push_route.yaml`
+1. apply only the registered push/concurrency/authorization amendment to `.github/workflows/d003-k3-environment-gate.yml`
+2. verify no allowlist-external change is mixed into the trigger commit
+3. create `research/intelligence_swarm/k3_loop/execution/C005_D003_GHA_PUSH_NONCE.txt` with attempt `1`
+4. push canonical branch and confirm exactly one environment-only run
+5. collect run/artifact provenance and classify the result
 
-C005 must fix:
-
-- canonical branch only
-- environment-file path restriction
-- concurrency and cancellation behavior
-- `training_authorized=false`
-- `model_execution_authorized=false`
-- provenance/resolver/freeze/import/raw-log artifact schema
-- no automatic transition from environment PASS to model execution
-- one unchanged retry only for a transient failure after run start
-- `ENV_PASS`, `ENV_RETRY`, `ROUTE_STOP`, `ENV_PATH_STOP`
-- later PB1 trace contract: 1-based indexing, `24/4/6`, boundaries `[3,6,9,12]`, odd/non-divisible rejection, source slots `84/5/89`
-
-These semantic fields do not authorize model execution.
+The route permits only environment/import evidence. It does not authorize model execution.
 
 ## Authorized next work
 
 - A: no new K3 component; inspect only a concrete resolver/import failure
 - B: no crossover, minimum-scale, or Pareto revision before exact traces; PB1 result interpretation is fixed by B006
-- C: create C005 prose and manifest only
-- D: do not alter or start the workflow until C005 exists
+- C: C005 complete; do not create another amendment unless D returns a concrete protocol/environment result requiring E authorization
+- D: apply and execute only C005 environment route
 - E: after D returns, classify only execution/environment outcome
 
 ## Completion / stop classification
 
-- before C005 exists: `PREREG_BLOCKED`
-- `ENV_PASS`: exact environment/import evidence and artifact ID/SHA fixed
-- `ENV_RETRY`: transient Actions/package-index/DNS/network failure after start; one unchanged retry
+- `ENV_PASS`: registered run, guards, exact provenance/imports, required artifacts, artifact ID/SHA all fixed
+- `ENV_RETRY`: run-started transient Actions/package-index/DNS/network failure; one unchanged retry only
 - `ROUTE_STOP`: exact registered route does not start or is persistently rejected
-- `ENV_PATH_STOP`: after at most one preregistered API-wiring-only patch, fixed dependencies/imports still require semantic change
+- `ENV_PATH_STOP`: after at most one preregistered API-wiring-only patch, fixed dependencies/imports still require semantic change or provenance cannot be saved
+- `ENV_PROTOCOL_FAIL`: branch/path/authorization/hash/artifact/prohibited-action violation; result invalid and no retry without amendment
 
 `ROUTE_STOP` and `ENV_PATH_STOP` do not by themselves reject Block AttnRes.
 
