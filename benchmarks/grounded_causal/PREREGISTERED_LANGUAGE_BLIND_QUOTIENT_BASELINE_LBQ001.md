@@ -23,6 +23,8 @@ LBQ001 defines a language-blind baseline for the controlled predictive/bisimulat
    - Bisimulation metrics quantify behavioral similarity and support state aggregation with value bounds.
 3. Gelada et al., *DeepMDP: Learning Continuous Latent Space Models for Representation Learning*, ICML 2019.
    - Reward and latent transition prediction losses provide a practical continuous-state approximation connected to bisimulation theory.
+4. Dean and Givan, *Model Minimization in Markov Decision Processes*, AAAI 1997.
+   - The coarsest exact homogeneous refinement supplies the unique exact quotient relative to the declared observable labels and named actions.
 
 These references define prior-art baselines; they are not treated as new mechanisms.
 
@@ -45,6 +47,50 @@ iff for every admissible future action policy or finite action sequence,
 The corresponding quotient is `P_LBQ`.
 
 No partition finer than `P_LBQ` may be called identified unless a preregistered held-out consequence separates the proposed blocks.
+
+## C087 estimand lock
+
+The canonical B4 estimand is now fixed to the **exact full-consequence controlled predictive quotient** `P_LBQ` defined above.
+
+This choice is made because it has all of the following properties relative to the declared action and consequence interface:
+
+- a unique coarsest quotient up to block-label permutation;
+- monotonic refinement when new admissible non-semantic consequence channels are added;
+- direct compatibility with exact known-model bisimulation/homogeneous-partition oracles;
+- no arbitrary distance threshold, linkage rule, perturbation budget, or split-order tie break;
+- a clear observation-level meaning: equality of the entire allowed controlled future law.
+
+The following objects are retained only as diagnostics or explicitly different estimands and may not be reported as recovery of canonical `P_LBQ`:
+
+- bisimulation-metric threshold clusters;
+- epsilon-homogeneous partitions;
+- robust-exact relations under a perturbation family;
+- perturbation-repair quotients;
+- task-relative reward/value abstractions;
+- plug-in empirical partitions without confidence and coverage certification.
+
+### Exact empirical decision contract
+
+For an unconstrained finite sample, equality of two real-valued transition/consequence laws cannot generally be certified. Therefore the empirical exact-mode pair decision is asymmetric:
+
+- `separate`: admitted only when a simultaneous confidence argument excludes equality for at least one covered action/consequence condition;
+- `merge`: admitted only when equality follows from preregistered symbolic parameter tying, a known deterministic identity, or an exact complete-model oracle—not merely failure to reject a difference;
+- `unidentified`: mandatory whenever both equal and unequal point models remain compatible with the observations or an admissible action lacks coverage.
+
+A finite-sample system that converts `fail to reject` into `merge` is invalid for canonical B4.
+
+### Approximate-mode firewall
+
+An approximate analysis may be run only as a separately named diagnostic after fixing:
+
+- its exact estimand;
+- discrepancy metric;
+- tolerance source;
+- global partition-selection rule;
+- action/channel error allocation;
+- coverage and abstention rule.
+
+Approximate output cannot establish the exact latent intervention partition `P`, raw-language equivalence `Q`, or denotation `d`.
 
 ## Dataset contract
 
@@ -81,16 +127,17 @@ The first execution must compare the following without adding a new architecture
 - Treat each observed discrete state/history key as its own block.
 - Purpose: upper-bound over-fragmentation and verify partition metrics.
 
-### B1: one-step consequence partition
+### B1: one-step consequence diagnostic
 
-- Merge histories only when empirical immediate consequence distributions match under every observed admissible action.
+- Compare empirical immediate consequence distributions under every covered admissible action.
+- May certify separations, but may not certify exact merges from finite samples without structural equality.
 - Purpose: determine how much apparent structure is recoverable without long-horizon prediction.
 
-### B2: finite-horizon controlled predictive partition
+### B2: finite-horizon controlled predictive diagnostic
 
 - Use the same estimator family already available in the repository or a faithful public baseline implementation.
 - Predict preregistered consequence vectors for horizons `H in {1, 2, 4, 8}` under actions.
-- Cluster only through a preregistered distance threshold selected on the development split.
+- Any threshold clustering is approximate-mode output and must not be labelled canonical `P_LBQ` recovery.
 
 ### B3: reward/task-relative bisimulation control
 
@@ -98,9 +145,11 @@ The first execution must compare the following without adding a new architecture
 - Purpose: demonstrate expected under-partitioning relative to the full consequence family.
 - This control may not be reported as environment-level semantic recovery.
 
-### B4: full-consequence language-blind quotient baseline
+### B4: exact full-consequence language-blind quotient
 
-- Use all preregistered non-semantic consequence channels.
+- Use all preregistered non-semantic consequence channels and all admissible named actions.
+- Exact known-model reference: compute the coarsest exact quotient of the supplied complete model.
+- Empirical output: a partially resolved relation consisting of certified `separate`, structurally/oracularly certified `merge`, and `unidentified` pairs.
 - This is the principal comparator for any later language-conditioned model.
 
 No additional encoder, attention mechanism, memory module, causal mechanism family, or language module may be introduced in LBQ001.
@@ -112,11 +161,10 @@ Ground-truth labels, when available, are used only after training for evaluation
 The evaluation must separately report:
 
 1. `P_LBQ` recovery:
-   - adjusted Rand index;
-   - adjusted mutual information;
-   - pairwise precision, recall, and F1 for same-block decisions;
-   - variation of information;
-   - block-count error.
+   - adjusted Rand index, adjusted mutual information, pairwise precision/recall/F1, variation of information, and block-count error for the exact oracle or any fully resolved structurally tied case;
+   - coverage-adjusted pairwise precision/recall for certified empirical decisions;
+   - abstention/unidentified rate overall and by action coverage stratum;
+   - false-merge count, which is a critical failure metric.
 2. Controlled-law adequacy:
    - held-out one-step consequence error;
    - held-out multi-step consequence error;
@@ -127,13 +175,13 @@ The evaluation must separately report:
    - return or success only as a secondary metric;
    - value difference where defined.
 4. Forbidden substitutions:
-   - task success, next-state accuracy, or representation similarity alone cannot substitute for direct partition recovery.
+   - task success, next-state accuracy, representation similarity, large p-values, or overlapping confidence intervals alone cannot substitute for direct exact partition evidence.
 
 ## Required controls
 
 ### C1: action shuffle
 
-Shuffle actions within the allowed matching strata. Partition recovery must degrade if controlled consequences are genuinely used.
+Shuffle actions within the allowed matching strata. Partition evidence must degrade if controlled consequences are genuinely used.
 
 ### C2: consequence-channel shuffle
 
@@ -158,6 +206,14 @@ Train without at least one preregistered physical consequence channel and evalua
 ### C7: environment-label shuffle
 
 Shuffle non-semantic environment split IDs. Results should remain stable unless those IDs leaked target structure.
+
+### C8: fail-to-reject firewall
+
+Construct a positive-distance alternative small enough to evade a low-power finite-sample test. The empirical pipeline must return `unidentified`, never `merge`.
+
+### C9: missing-action coverage
+
+Remove all samples for at least one admissible state-action condition. Every affected equality claim must remain `unidentified`.
 
 ## Split and seed contract
 
@@ -189,23 +245,28 @@ LBQ001 is qualified only if all of the following hold:
 
 1. all three seeds complete under the identical split and manifest;
 2. no language or target-codebook leakage is detected;
-3. B4 directly recovers the preregistered quotient above the random/shuffle controls;
-4. held-out controlled-law discrepancy is lower within recovered blocks than between blocks;
-5. action and consequence shuffles materially degrade partition recovery;
-6. resource and checksum bundles are complete;
-7. conclusions are limited to controlled behavioral quotient recovery.
+3. exact known-model B4 reproduces the preregistered oracle quotient;
+4. every empirical `merge` is backed by symbolic equality or an exact complete-model oracle;
+5. empirical `separate` decisions have simultaneous error control and no false separation beyond the preregistered level;
+6. uncovered actions and statistically unresolved pairs are explicitly abstained;
+7. held-out controlled-law discrepancy is lower within valid oracle/structural blocks than between separated blocks;
+8. action and consequence shuffles materially degrade usable evidence;
+9. resource and checksum bundles are complete;
+10. conclusions are limited to controlled behavioral quotient recovery.
 
-No universal numeric threshold is preregistered before inspecting the dataset cardinality and oracle separability. Before execution, a dataset-specific minimum effect size and confidence rule must be appended without using test labels.
+No universal numeric threshold is preregistered before inspecting the dataset cardinality and oracle separability. Before execution, a dataset-specific separation target and simultaneous confidence rule must be appended without using test labels.
 
 ## Rejection criteria
 
 The following reject the baseline qualification or the stronger interpretation:
 
-- B4 fails to outperform shuffled controls on direct partition metrics;
+- finite-sample failure to reject is converted into exact merge;
+- B4 fails to detect oracle-separated pairs with adequate covered separation;
 - apparent success exists only in reward/task metrics;
 - B3 and B4 are indistinguishable despite a known held-out physical distinction;
 - recovered blocks contain a preregistered held-out consequence difference;
 - target identity, parser output, semantic reward, or target-derived evaluator enters training;
+- unresolved or uncovered pairs are silently forced into a partition;
 - results depend on one seed;
 - model size, RSS, runtime, commands, or checksums are missing after execution begins.
 
@@ -213,14 +274,17 @@ The following reject the baseline qualification or the stronger interpretation:
 
 A later language-conditioned experiment is decision-relevant only if it compares against qualified B4 and shows one of the following:
 
-- language estimates the same quotient more sample-efficiently without changing the ontology claim; or
-- language separates blocks that B4 merges, and an independent preregistered held-out consequence validates that separation.
+- language improves sample efficiency for certified separations without changing the exact ontology claim; or
+- language proposes a coupling or finer distinction that is independently validated by a preregistered non-semantic consequence unavailable to the language model.
 
-If language proposes a finer partition without such an independent consequence, the result is extra-behavioral convention or unsupported ontology, not joint identification.
+Language cannot convert an empirically `unidentified` target pair into an identified denotation merely through internal confidence or distributional similarity. If language proposes a finer partition without independent consequence evidence, the result is extra-behavioral convention or unsupported ontology, not joint identification.
 
 ## Current status
 
-- Preregistration: written.
+- Preregistration: updated by C087; canonical exact estimand fixed.
+- Exact known-model B4 oracle: selected in prior audits; execution not started.
+- Empirical exact-mode contract: `separate / structurally-oracularly merge / unidentified` fixed.
+- Approximate estimands: diagnostics only unless separately preregistered.
 - Baseline implementation: not started in this document.
 - Numerical reproduction: not started.
 - New architecture: none.
