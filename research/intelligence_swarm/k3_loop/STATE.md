@@ -9,9 +9,9 @@ Kimi K3由来の効率化原理を、1GB以下・弱いCPU/スマホ向けモデ
 
 ## Current phase
 
-**Phase 1.9: C007/B008 complete. D008 is the only authorized next action: one portable environment-only attempt or one concrete `SUBSTRATE_STOP`.**
+**Phase 1.9 closed on the available substrate: D008 classified `SUBSTRATE_STOP`. The next scientific action requires an externally supplied C007-compliant Python 3.11 CPU substrate.**
 
-Completed: A001–A006, B001–B008, C001–C007, D001–D007, E001–E008.
+Completed: A001–A006, B001–B008, C001–C007, D001–D008, E001–E009.
 
 Current classifications:
 
@@ -20,9 +20,10 @@ Current classifications:
 - CANDIDATE-RAW (`CR1`): fixed-commit artifact diagnostic only; paper attribution prohibited
 - C005 canonical-push route: **`ROUTE_STOP / closed`**
 - C006/D007 default-branch route: **`ENV_PROTOCOL_FAIL + ROUTE_STOP_DEFAULT_BRANCH / closed`**
-- Execution state: **`D008_EXECUTION_ONLY_PENDING`**
+- D008 portable route on the available substrate: **`SUBSTRATE_STOP / closed`**
+- Execution state: **`EXTERNAL_COMPLIANT_SUBSTRATE_REQUIRED`**
 
-Frozen until P0 environment and semantic gates complete: new architecture, dataset download, optimizer step, S1–S3, quantization, KDA, Stable LatentMoE.
+Frozen until an admissible environment and semantic gates complete: new architecture, dataset download, optimizer step, S1–S3, quantization, KDA, Stable LatentMoE.
 
 ## Fixed references
 
@@ -85,71 +86,68 @@ The 2048-token result was about 4.13x the short-sequence fit and remains unconfi
 - C005/D006 canonical-branch push route: `ROUTE_STOP`, closed
 - C006/D007 default-branch route: `ENV_PROTOCOL_FAIL`, closed
 - incomplete `.github/workflows/d007-k3-environment-dispatcher.yml` is quarantined and must never be dispatched
+- C007/D008 portable attempt on the available runtime: `SUBSTRATE_STOP`, closed
 
-## C007 portable environment contract
+## D008 actual outcome
 
 Records:
 
-- `research/intelligence_swarm/k3_loop/prereg/C007_PORTABLE_ENVIRONMENT_GATE_PREREGISTRATION.md`
-- `benchmarks/k3_minimal/manifests/C007_portable_environment_gate.yaml`
+- `research/intelligence_swarm/k3_loop/reproduction/D008_PORTABLE_SUBSTRATE_STOP.md`
+- `benchmarks/k3_minimal/preflight/D008_portable_substrate_stop.json`
 
-C007 fixes:
+Observed substrate:
 
-- GitHub-Actions-independent online-Git or offline-Git-bundle acquisition
-- scientific source commit and canonical-ref reachability
-- detached checkout, clean tree, untracked/submodule/LFS rejection
-- C003/C004/C007/runner/probe Git blob, byte SHA256, path and size evidence
-- Python `3.11.x`, exact CPU PyTorch build, fixed Transformers commit and complete dependency artifact hashes
-- `sys.path`, module-origin paths and imported-source hashes
-- all model-stage authorization flags `false`
-- OS/CPU/libc/container/runtime provenance
-- inner evidence-file checksums and outer deterministic archive SHA256/size
-- exact replay command, one unchanged transient retry and six result classes
+- Python `3.13.5`
+- no Python `3.11` executable
+- Linux x86_64, 5 visible virtual CPUs
+- direct GitHub clone failed with `Could not resolve host: github.com`
+- no offline Git bundle or exact hashed dependency wheelhouse was supplied
+- connector-backed repository writes were available, but the connector is not a Python execution substrate
 
-Environment success remains non-model evidence and cannot update quality, CPU, memory, quantization, scale or Pareto claims.
+C007 requires Python 3.11, immutable source acquisition, exact dependency artifacts, import-origin inspection and persistent evidence on one substrate. Those requirements cannot be jointly satisfied here.
 
-## E008 integration decision
+## E009 integration decision
 
-C007 and B008 already close the portable protocol and evidence-admissibility questions. No D008 result exists. Further evidence, theory, preregistration, trigger, dispatcher or substrate audits are prohibited because they do not test the hypothesis.
+D008 is classified `SUBSTRATE_STOP`. This is an execution-substrate result only and does not reject Block AttnRes, PB1, CR1, or the fixed dependency path.
+
+Further A/B/C audits and repeated substrate discovery are prohibited. The loop is blocked until an external compliant substrate is actually supplied.
 
 ## Single next hypothesis
 
-One C007-compliant portable environment-only attempt can produce one admissible classified result without model execution or semantic changes.
+A C007-compliant external Python 3.11 CPU substrate with either online Git/package access or a complete hashed offline Git bundle and wheelhouse can produce one admissible environment result without model execution.
 
 ## Single bottleneck
 
-**D008 portable environment-only execution or one concrete `SUBSTRATE_STOP`.**
+**Provision one external C007-compliant Python 3.11 CPU substrate and execute the existing D008 replay command once.**
 
 ## Authorized next work
 
-- A: no work unless D008 exposes a concrete dependency/source mismatch
+- A: no work unless that execution exposes a concrete dependency/source mismatch
 - B: no new theory, CPU crossover, minimum-scale or Pareto update before exact trace
-- C: no amendment unless D008 exposes one specific protocol defect
-- D: create the thin launcher and execute one portable attempt; if no compliant substrate exists, record one concrete `SUBSTRATE_STOP` and do not repeat substrate discovery
-- E: classify the actual D008 outcome
+- C: no amendment unless that execution exposes one specific protocol defect
+- D: only execute the already-preregistered C007 gate on the supplied compliant substrate; do not repeat substrate discovery here
+- E: classify the resulting environment outcome
+
+## Completion condition
+
+One external run produces `ENV_PASS`, `ENV_PATH_STOP_PENDING_AMENDMENT`, `ENV_PATH_STOP` or `ENV_PROTOCOL_FAIL` with canonical reachability, exact dependency/import-origin evidence, all model-stage authorization false, raw logs, inner checksums and outer archive hash.
+
+## Stop condition
+
+If no external compliant substrate is supplied, the loop remains stopped at `SUBSTRATE_STOP`; do not generate further audit-only cycles or execution-route variants.
 
 ## Prohibitions
 
 1. no further C005/C006 trigger, nonce, dispatcher or default-branch workflow variants
 2. never dispatch the incomplete D007 workflow on `main`
-3. no replacement audits for D008 execution
+3. no repeated substrate audit on the current Python 3.13/no-network runtime
 4. no model implementation on an orchestration branch or launcher
 5. no B0/PB1/CR1 instantiate, semantic trace, dataset/tokenizer/checkpoint download, training or quantization
 6. no silent dependency, API or semantic patch
 7. no automatic transition from environment PASS to model execution
 8. no mechanism-wide rejection from PB1 `N=4` null evidence
 9. no `ENV_PASS` unless imported module origins and both inner/outer checksum closures are complete
-
-## Next completion / stop classification
-
-- `ENV_PASS`: registered portable run, immutable identity, exact dependencies/imports, imported-module origins, raw provenance and archive checksum all pass
-- `ENV_RETRY`: one unchanged retry after a run-started transient network/package-index failure
-- `SUBSTRATE_STOP`: no available substrate can provide Python 3.11, required source/dependency access and artifact persistence
-- `ENV_PATH_STOP_PENDING_AMENDMENT`: valid substrate/provenance but fixed non-transient dependency/import mismatch before a patch is preregistered
-- `ENV_PATH_STOP`: one separately preregistered API-wiring-only patch still requires semantic change or leaves provenance incomplete
-- `ENV_PROTOCOL_FAIL`: identity, clean-tree, allowlist, authorization, module-origin, checksum or artifact violation
-
-None of these environment outcomes alone rejects Block AttnRes.
+10. no capability, intelligence-principle, high-school-level or 1GB-goal claim without evidence
 
 ## Evidence boundary
 
