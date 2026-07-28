@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Backlog
 
-Last updated: 2026-07-29 by K3-C
+Last updated: 2026-07-29 by K3-D
 
 ## P0 — Current cycle: Block AttnRes minimum reproduction
 
@@ -8,7 +8,7 @@ Classification: **小型化で要再設計・追加検証・未採用 / Path-WAR
 
 Current single bottleneck:
 
-> D003 exact-dependency, fresh-process, order-balanced resource/operator preflight
+> Network-capable Python 3.11 exact-dependency environmentでD003 import gateをPASSさせ、exact candidate B0/A1計測へ進む。
 
 ### A — Evidence
 
@@ -28,8 +28,8 @@ Current single bottleneck:
 - [x] B003 D002 scaling-breakpoint audit。
 - [x] T=1/128/512 fit: `t≈0.100753+0.004197T ms/event`。
 - [x] T=2048 ratio `≈4.13x`を未解決breakpoint候補として記録。
-- [ ] D003 traceからfit、residual、operator share、temporary thresholdを再計算。
-- [ ] D003前にCPU crossoverを主張しない。
+- [ ] exact D003 traceからfit、residual、operator share、temporary thresholdを再計算。
+- [x] D003前にCPU crossoverを主張しない。
 
 ### C — Preregistration
 
@@ -62,9 +62,15 @@ Artifacts:
 - [x] B0=`115,554,304`、A1=`115,579,929`。
 - [x] Routing-only parameter diff、finite forward/backward、全75 routing gradient、save/load差`0.0`。
 - [x] E002がPath-WARNを維持しD003のみ許可。
+- [x] D003 environment/import probeを実装。
+- [x] 現行sandboxでD003 dependency gateを実行し`BLOCKED_ENV`を機械可読保存。
+- [x] 現行blockerをPython 3.13、Transformers/tokenizers欠如、GitHub DNS不可へ切り分け。
+- [ ] Network-capable Python 3.11環境でprobeを再実行。
 - [ ] A002/C002に従いexact runtimeと全resolved hashを固定。
 - [ ] Compatibility patch時は最大1件、diff/checksum保存。
-- [ ] B0/A1を別fresh processで`AB/BA/AB/BA`実行。
+- [ ] exact candidateでB0/A1を別fresh process `AB/BA/AB/BA`実行。
+- [ ] exact countsとresidual-only config/state-dict diff。
+- [ ] fixed input SHA256、finite forward/backward/routing gradients、save/load `<=1e-6`。
 - [ ] 条件別peak RSS、wall time、median/p95/MADを分離。
 - [ ] no-op/list/source/stack/norm+score/softmax/mix controls追加。
 - [ ] Temporary bytes、allocation/operator-call evidence保存。
@@ -72,19 +78,28 @@ Artifacts:
 - [ ] Raw logs、machine-readable result、checksums保存。
 - [x] D003中のFineWeb-Edu/tokenizer取得、optimizer step、S1を禁止。
 
+D003 environment artifacts:
+
+- `benchmarks/k3_minimal/preflight/d003_environment_probe.py`
+- `benchmarks/k3_minimal/preflight/D003_environment_probe_summary.json`
+- `research/intelligence_swarm/k3_loop/reproduction/D003_ENVIRONMENT_GATE_BLOCKER_ISOLATION.md`
+- result SHA256: `aee26a00ae6b7e6400144dce4c95b57500c3b74b705fb027e40552fda7efe8f3`
+
 ### E — Integration
 
 - [x] E001: D002を単一ボトルネック化。
 - [x] E002: D002をPath-WARNとして統合。
 - [x] E002: D003を唯一の次実験として選定。
-- [ ] D003後、implementation pathをPASS/WARN/STOP分類。
+- [ ] exact D003後、implementation pathをPASS/WARN/STOP分類。
 - [ ] `actual_2048/predicted_2048 >= 2.0`、CPU/RSS overhead `>=10%`等ならtraining-only/fusion-dependentへ狭義化を検討。
 - [ ] Preregistered quality/resource evidence合格まで未採用を維持。
 - [x] KDA、Stable LatentMoE等を凍結。
 
 ## D003 completion conditions
 
-- [ ] exact environment lockとresolver provenance
+- [x] environment/import probe implementation
+- [x] current-runtime provenance and blocker isolation
+- [ ] exact Python 3.11 environment lockとresolver provenance
 - [ ] candidate commitとcompatibility patch checksum
 - [ ] exact countsとresidual-only config/state-dict diff
 - [ ] fixed input SHA256
@@ -100,7 +115,9 @@ Artifacts:
 
 - **PASS:** semantic checksと再現可能な計測が成立。breakpointが消えるか説明可能。A1/B0 full-model時間・RSS overheadはいずれも10%未満。
 - **WARN:** semanticsは成立するが、CPU時間/RSS `>=10%`、stack/layout+framework相当 `>=50%`、fresh-process ratio `>=2.0`、またはorder block間で効果方向が不安定。
-- **STOP:** 1回の最小patch後も実行不能、残差以外の差分、parameter mismatch未説明、gradient/save-load失敗、計測不能、未登録architecture変更が必要。
+- **STOP:** exact環境で1回の最小patch後も実行不能、残差以外の差分、parameter mismatch未説明、gradient/save-load失敗、計測不能、未登録architecture変更が必要。
+
+Current `BLOCKED_ENV` result is not PASS/WARN/STOP evidence for the implementation path. It only blocks exact measurement in the present runtime.
 
 ## P1 — Candidate queue after P0
 
