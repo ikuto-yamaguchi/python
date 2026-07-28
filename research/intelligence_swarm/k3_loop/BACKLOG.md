@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Backlog
 
-Last updated: 2026-07-29 by K3-B
+Last updated: 2026-07-29 by K3-C
 
 ## P0 — Block AttnRes minimum reproduction
 
@@ -8,7 +8,7 @@ Classification: **小型化で要再設計・追加検証・未採用 / Path-WAR
 
 Current bottleneck:
 
-> GitHub ActionsのC005/C006実行経路は閉鎖した。次の唯一の作業はCが、GitHub Actions登録やdefault-branch変更に依存しないportable environment-only bundleをC007として事前登録すること。
+> C007 portable environment-gate preregistration is complete. The only next work is one D008 environment-only portable attempt on a compliant Python 3.11 CPU substrate, or one concrete `SUBSTRATE_STOP` if no such substrate is available.
 
 ### A — Evidence
 
@@ -21,8 +21,8 @@ Current bottleneck:
 - [x] Paper layer-index origin and `L_sub/N/S` geometry fixed
 - [x] PB1 boundaries `[3,6,9,12]`; zero-based false-boundary and odd-`S` counterexamples fixed
 - [x] A005 official-artifact refresh and community implementation admissibility audit
-- [x] A006 compact public implementation audit: one-event-late block visibility, missing divisibility guards, non-paper final sum, and no controlled small-model evidence
-- [ ] Add provenance only after a concrete C007/D008 resolver/import failure
+- [x] A006 compact public implementation audit
+- [ ] Add provenance only after a concrete D008 resolver/import failure
 - [x] Freeze other K3 components during P0
 
 ### B — Theory
@@ -36,7 +36,6 @@ Current bottleneck:
 - [x] PB1 classified as minimum semantic/effect-direction pilot
 - [x] PB1 falsifiability boundary fixed
 - [x] B007 execution-substrate invariance and evidence-admissibility conditions fixed
-- [x] D007 verified against B007 and failed launcher-thinness/identity/artifact completeness
 - [x] B008 portable-substrate equivalence and trust-closure requirements fixed
 - [ ] Recalculate operator share and actual/expected slots from exact trace
 - [x] No CPU crossover or minimum-scale claim before exact trace
@@ -45,16 +44,20 @@ Current bottleneck:
 
 - [x] C001–C006 completed
 - [x] C005 canonical-push route closed as `ROUTE_STOP`
-- [x] C006 default-branch dispatcher preregistered
-- [x] D007 exposed a concrete protocol/tooling failure
-- [ ] Create `C007_PORTABLE_ENVIRONMENT_GATE_PREREGISTRATION.md`
-- [ ] Create matching machine-readable C007 manifest
-- [ ] Fix immutable canonical commit and C003/C004/C006/script/probe identities
-- [ ] Fix exact Python/PyTorch/Transformers contract and replay command
-- [ ] Fix exact-content/clean-tree checks, all authorization false and no automatic model continuation
-- [ ] Fix resolver/freeze/checksum/import/raw-log/archive schema
-- [ ] Fix imported-module origin hashes and inner/outer checksum closure
-- [ ] Fix `ENV_PASS / ENV_RETRY / SUBSTRATE_STOP / ENV_PATH_STOP_PENDING_AMENDMENT / ENV_PATH_STOP / ENV_PROTOCOL_FAIL`
+- [x] C006 default-branch dispatcher route closed as `ENV_PROTOCOL_FAIL`
+- [x] Create `C007_PORTABLE_ENVIRONMENT_GATE_PREREGISTRATION.md`
+- [x] Create `benchmarks/k3_minimal/manifests/C007_portable_environment_gate.yaml`
+- [x] Fix immutable scientific source commit `9edf4c7143ff1d62685ed893352df7a32090fe1e`
+- [x] Fix C003/C004/C007/script/probe identity requirements
+- [x] Fix Python 3.11, exact CPU PyTorch, fixed Transformers commit and replay command
+- [x] Fix online-Git/offline-Git-bundle acquisition and canonical-ref reachability
+- [x] Fix detached checkout, clean-tree, untracked/submodule/LFS rejection
+- [x] Fix all model-stage authorizations false and no automatic continuation
+- [x] Fix resolver/freeze/checksum/import/raw-log/platform schema
+- [x] Fix `sys.path`, module-origin hashes and external-shadow rejection
+- [x] Fix inner evidence checksum and outer deterministic archive checksum/size
+- [x] Fix `ENV_PASS / ENV_RETRY / SUBSTRATE_STOP / ENV_PATH_STOP_PENDING_AMENDMENT / ENV_PATH_STOP / ENV_PROTOCOL_FAIL`
+- [ ] Amend C007 only if D008 exposes one specific preregistration defect
 
 ### D — Reproduction
 
@@ -67,33 +70,28 @@ Current bottleneck:
 - [x] D007 default-branch attempt completed as `ENV_PROTOCOL_FAIL`
 - [x] Close both GitHub Actions routes
 - [x] Quarantine incomplete `.github/workflows/d007-k3-environment-dispatcher.yml`; never dispatch it
-- [ ] Wait for C007 before preparing a portable bundle
-- [ ] After C007 only: run one environment-only attempt on a compliant Python 3.11 CPU substrate
-- [ ] Persist replay command, raw logs, resolver report, freeze, import matrix, module-origin hashes, source/dependency hashes and archive checksum
-- [ ] If no compliant substrate exists, record one concrete `SUBSTRATE_STOP`; do not repeat route audits
+- [ ] Create thin `benchmarks/k3_minimal/preflight/d008_portable_environment.sh` launcher with no model or dependency substitution logic
+- [ ] Record launcher Git blob SHA, byte SHA256 and size before execution
+- [ ] Run one environment-only attempt on a compliant Python 3.11 CPU substrate
+- [ ] Persist replay command, source/ref reachability, clean-tree evidence and normative file identities
+- [ ] Persist resolver report, `pip freeze --all`, `pip check` and all dependency artifact hashes
+- [ ] Persist `sys.path`, imported module origins and imported source hashes
+- [ ] Persist platform provenance and all authorization flags false
+- [ ] Produce sorted inner `checksums.sha256`
+- [ ] Produce deterministic outer archive plus separate SHA256 and byte size
+- [ ] If no compliant substrate exists, record one concrete `SUBSTRATE_STOP`; do not repeat substrate audits
 - [ ] After separate authorization only: CR1 trace, then PB1 trace
 - [x] Dataset, model execution, semantic trace, training and quantization remain prohibited
-
-D007 evidence:
-
-- `research/intelligence_swarm/k3_loop/reproduction/D007_DEFAULT_BRANCH_DISPATCHER_PROTOCOL_BLOCKER.md`
-- `benchmarks/k3_minimal/preflight/D007_default_branch_dispatcher_result.json`
 
 ### E — Integration
 
 - [x] E001–E007 completed
 - [x] D007 classified `ENV_PROTOCOL_FAIL`
-- [x] Default-branch GitHub Actions route classified `ROUTE_STOP_DEFAULT_BRANCH`
-- [x] C005 and C006 route variants permanently closed
+- [x] Both GitHub Actions routes closed
 - [x] Block AttnRes/PB1/CR1 not rejected by orchestration failure
-- [x] Single next hypothesis moved to portable non-GitHub-Actions environment gate
-- [x] E007 integration record created
-- [ ] Classify C007/D008 substrate and environment outcome
+- [x] Single next hypothesis moved to portable environment gate
+- [ ] Classify D008 as `ENV_PASS`, `ENV_RETRY`, `SUBSTRATE_STOP`, `ENV_PATH_STOP_PENDING_AMENDMENT`, `ENV_PATH_STOP` or `ENV_PROTOCOL_FAIL`
 - [ ] Keep Block AttnRes unadopted until quality/resource/3-seed evidence
-
-E007 record:
-
-- `research/intelligence_swarm/k3_loop/integration/E007_D007_PROTOCOL_FAIL_AND_ROUTE_CLOSURE_DECISION.md`
 
 ## PAPER-BLOCK semantic completion
 
@@ -132,4 +130,4 @@ E007 record:
 - No automatic transition from environment PASS to model execution
 - No mechanism-wide rejection from PB1 `N=4` null evidence
 - No substitution of third-party Megatron or compact public implementations during P0 without a new semantic audit and preregistration
-- No capability, intelligence-principle, high-school-level, or 1GB-goal claim without evidence
+- No capability, intelligence-principle, high-school-level or 1GB-goal claim without evidence
