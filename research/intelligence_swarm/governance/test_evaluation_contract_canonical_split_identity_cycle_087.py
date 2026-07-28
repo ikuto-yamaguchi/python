@@ -20,12 +20,17 @@ def load_core(path: Path):
 
 
 def row(i: int, seed: int, split: str):
+    is_eval = split != "train"
     return {
         "instance_id": f"i-{seed}-{split}-{i}",
         "domain": "rtfm",
         "seed": seed,
         "split": split,
-        "condition": "entity_holdout+dynamics_holdout+language_holdout",
+        "condition": (
+            "entity_holdout+dynamics_holdout+language_holdout"
+            if is_eval
+            else "in_distribution"
+        ),
         "utterance": f"utterance-{seed}-{split}-{i}",
         "state_before": [i],
         "gold_action": i % 2,
