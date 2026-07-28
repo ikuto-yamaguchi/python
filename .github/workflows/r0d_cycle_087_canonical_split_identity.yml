@@ -19,6 +19,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: research/intelligence-swarm-reconstruction-001
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -29,10 +30,13 @@ jobs:
       - name: Focused regression
         run: python3 research/intelligence_swarm/governance/test_evaluation_contract_canonical_split_identity_cycle_087.py
       - name: Commit core update to canonical branch
-        if: github.event_name == 'workflow_dispatch'
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add research/intelligence_swarm/benchmarks/grounded_causal/evaluation_contract.py
-          git diff --cached --quiet || git commit -m 'R0-D cycle 087: integrate canonical split identity'
-          git push origin HEAD:research/intelligence-swarm-reconstruction-001
+          if git diff --cached --quiet; then
+            echo 'Canonical split hardening already integrated.'
+          else
+            git commit -m 'R0-D cycle 089: integrate canonical split identity'
+            git push origin HEAD:research/intelligence-swarm-reconstruction-001
+          fi
