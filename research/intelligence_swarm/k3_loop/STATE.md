@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Shared State
 
-Last updated: 2026-07-29 by K3-E
+Last updated: 2026-07-29 by K3-A
 Canonical branch: `research/intelligence-swarm-reconstruction-001`
 
 ## Objective
@@ -11,7 +11,7 @@ Kimi K3由来の効率化原理を、1GB以下・弱いCPU/スマホ向けモデ
 
 **Phase 1.8: D007 ended in `ENV_PROTOCOL_FAIL`; both GitHub Actions routes are closed. C007 portable environment-gate preregistration is the sole next step.**
 
-Completed: A001–A005, B001–B007, C001–C006, D001–D007, E001–E007.
+Completed: A001–A006, B001–B007, C001–C006, D001–D007, E001–E007.
 
 Current classifications:
 
@@ -32,6 +32,8 @@ Frozen until P0 environment and semantic gates complete: new architecture, datas
 - official executable training baseline: not released
 
 A005 found no author executable code, checkpoint, dependency lock, immutable data manifest, or evaluation harness. A community Megatron implementation remains an independent reproduction lead only and cannot replace PB1/CR1 during P0.
+
+A006 audited `kyegomez/attn_res@b634f0d9bcc6a925f118f828e07f79679b70ed6f` as a compact public small-model scaffold. It is unofficial and has paper-semantic deviations: completed blocks become visible one routing event late, equal block divisibility is not enforced, and the final output uses an unlearned source sum instead of the paper-consistent final router. It provides no controlled small-model quality, CPU, quantization, long-context or multi-seed evidence and is not admissible as a PB1 replacement.
 
 ## Candidate separation
 
@@ -94,6 +96,7 @@ Records:
 - `research/intelligence_swarm/k3_loop/reproduction/D007_DEFAULT_BRANCH_DISPATCHER_PROTOCOL_BLOCKER.md`
 - `benchmarks/k3_minimal/preflight/D007_default_branch_dispatcher_result.json`
 - `research/intelligence_swarm/k3_loop/integration/E007_D007_PROTOCOL_FAIL_AND_ROUTE_CLOSURE_DECISION.md`
+- `research/intelligence_swarm/k3_loop/evidence/A006_SMALL_PUBLIC_IMPLEMENTATION_SEMANTIC_AND_EVIDENCE_AUDIT.md`
 
 ## Single next hypothesis
 
