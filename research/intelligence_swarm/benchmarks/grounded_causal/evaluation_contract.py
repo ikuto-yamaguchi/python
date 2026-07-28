@@ -523,6 +523,10 @@ def _validate_shuffle_assignments(preds: list[dict[str, Any]], by_id: dict[str, 
             if donor is None or donor_id not in eval_ids: errors.append(f"{method} row {i}: unknown/non-eval donor {donor_id}"); continue
             if donor_id == iid: errors.append(f"{method} row {i}: self-shuffle is not allowed for {iid}")
             if str(pred["control_source_fingerprint"]) != instance_fingerprint(donor): errors.append(f"{method} row {i}: donor fingerprint mismatch for {iid}<-{donor_id}")
+            if method == "target_label_shuffle" and pred.get("pred_action") != donor.get("gold_action"):
+                errors.append(f"{method} row {i}: pred_action is not bound to donor gold_action for {iid}<-{donor_id}")
+            if method == "outcome_shuffle" and pred.get("pred_state_after") != donor.get("gold_state_after"):
+                errors.append(f"{method} row {i}: pred_state_after is not bound to donor gold_state_after for {iid}<-{donor_id}")
             tc, dc = _cell_key(target), _cell_key(donor)
             if tc != dc: errors.append(f"{method} row {i}: donor crosses seed/domain/split/condition cell")
             by_cell[tc].append(iid); donors[tc].append(donor_id)
@@ -534,7 +538,13 @@ def _validate_shuffle_assignments(preds: list[dict[str, Any]], by_id: dict[str, 
             if not bijective: errors.append(f"{method} cell {cell}: donor assignment is not a bijection")
             if not deranged: errors.append(f"{method} cell {cell}: donor assignment is not a derangement")
             cells[str(cell)] = {"n": len(targets), "unique_donors": len(set(ds)), "bijective": bijective, "deranged": deranged}
-        audit[method] = {"rows": len(rows), "cells": cells, "provenance_required": True}
+        audit[method] = {
+            "rows": len(rows),
+            "cells": cells,
+            "provenance_required": True,
+            "donor_value_binding_required": True,
+            "bound_field": "pred_action<-donor.gold_action" if method == "target_label_shuffle" else "pred_state_after<-donor.gold_state_after",
+        }
     return errors, audit
 
 
@@ -661,7 +671,7 @@ def score(data: list[dict[str, Any]], preds: list[dict[str, Any]]) -> dict[str, 
         cells = []
         summary = defaultdict(dict)
         gaps = {}
-    return {"valid": not errors, "errors": errors, "classification": "qualified" if not errors else "initial_reproduction_failure", "dataset_contract_binding": True, "dataset_contract_valid": bool(dataset_audit.get("valid", False)), "dataset_contract_errors": list(dataset_audit.get("errors", [])), "invalid_dataset_statistics_forbidden": True, "invalid_score_statistics_forbidden": True, "statistics_emitted": not errors, "prediction_rows": len(preds), "expected_eval_instances": len(eval_ids), "coverage": coverage, "same_instance_snapshot": not any("snapshot" in e for e in errors), "fingerprints_required": True, "prediction_payload_findings": payload_findings, "prediction_schema_alias_findings": alias_findings, "strict_prediction_schema": True, "forbidden_prediction_fields": sorted(FORBIDDEN_PREDICTION_FIELDS), "alias_normalized_prediction_leakage_required": True, "finite_prediction_values_checked": True, "valid_action_schema_checked": True, "optional_metric_coverage_required": True, "inverse_metric_complete": inverse_metric_complete, "gold_inverse_coverage": {"expected": len(eval_ids), "present": len(gold_inverse_ids)}, "pred_inverse_coverage": {method: {"expected": len(eval_ids), "present": len(pred_inverse_ids.get(method, set()))} for method in sorted(REQUIRED_METHODS)}, "shuffle_assignment_audit": shuffle_audit, "cells": cells, "summary": dict(summary), "paired_gaps_vs_correct": gaps, "progress_contract": {"required_mean_gap": .10, "requires_all_three_seeds": True, "requires_same_instance_snapshot": True, "requires_explicit_instance_fingerprint": True, "requires_complete_prediction_coverage": True, "requires_shuffle_provenance": True, "requires_within_cell_derangement": True, "requires_split_condition_cells": True, "requires_ci_excludes_zero": True, "requires_instance_cluster_ci_excludes_zero": True, "internal_metrics_do_not_count": True}, "allowed_train_splits": sorted(TRAIN_SPLITS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "split_scope_fail_closed": True, "canonical_instance_identity_required": True, "exact_prediction_instance_id_required": True, "instance_identity_normalization": "NFKC + casefold + remove whitespace/control-format characters"}
+    return {"valid": not errors, "errors": errors, "classification": "qualified" if not errors else "initial_reproduction_failure", "dataset_contract_binding": True, "dataset_contract_valid": bool(dataset_audit.get("valid", False)), "dataset_contract_errors": list(dataset_audit.get("errors", [])), "invalid_dataset_statistics_forbidden": True, "invalid_score_statistics_forbidden": True, "statistics_emitted": not errors, "prediction_rows": len(preds), "expected_eval_instances": len(eval_ids), "coverage": coverage, "same_instance_snapshot": not any("snapshot" in e for e in errors), "fingerprints_required": True, "prediction_payload_findings": payload_findings, "prediction_schema_alias_findings": alias_findings, "strict_prediction_schema": True, "forbidden_prediction_fields": sorted(FORBIDDEN_PREDICTION_FIELDS), "alias_normalized_prediction_leakage_required": True, "finite_prediction_values_checked": True, "valid_action_schema_checked": True, "optional_metric_coverage_required": True, "inverse_metric_complete": inverse_metric_complete, "gold_inverse_coverage": {"expected": len(eval_ids), "present": len(gold_inverse_ids)}, "pred_inverse_coverage": {method: {"expected": len(eval_ids), "present": len(pred_inverse_ids.get(method, set()))} for method in sorted(REQUIRED_METHODS)}, "shuffle_assignment_audit": shuffle_audit, "cells": cells, "summary": dict(summary), "paired_gaps_vs_correct": gaps, "progress_contract": {"required_mean_gap": .10, "requires_all_three_seeds": True, "requires_same_instance_snapshot": True, "requires_explicit_instance_fingerprint": True, "requires_complete_prediction_coverage": True, "requires_shuffle_provenance": True, "requires_shuffle_donor_value_binding": True, "requires_within_cell_derangement": True, "requires_split_condition_cells": True, "requires_ci_excludes_zero": True, "requires_instance_cluster_ci_excludes_zero": True, "internal_metrics_do_not_count": True}, "allowed_train_splits": sorted(TRAIN_SPLITS), "allowed_evaluation_splits": sorted(EVAL_SPLITS), "split_scope_fail_closed": True, "canonical_instance_identity_required": True, "exact_prediction_instance_id_required": True, "instance_identity_normalization": "NFKC + casefold + remove whitespace/control-format characters"}
 
 
 RAW_LOG_MEASUREMENT_FIELDS = (
