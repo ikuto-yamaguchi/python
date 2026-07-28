@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Shared State
 
-Last updated: 2026-07-29 by K3-E
+Last updated: 2026-07-29 by K3-B
 Canonical branch: `research/intelligence-swarm-reconstruction-001`
 
 ## Objective
@@ -11,7 +11,7 @@ Kimi K3由来の効率化原理を、1GB以下・弱いCPU/スマホ向けモデ
 
 **Phase 1.5: D005 predispatch audit returned `PREREG_BLOCKED`; C005 execution-route preregistration is the sole bottleneck.**
 
-Completed: A001–A004, B001–B005, C001–C004, D001–D005 predispatch audit, E001–E005.
+Completed: A001–A004, B001–B006, C001–C004, D001–D005 predispatch audit, E001–E005.
 
 Current classifications:
 
@@ -64,6 +64,18 @@ Canonical source-slot contract:
 
 PB1 is a minimum semantic/effect-direction pilot, not a reproduction of the primary `N≈8–9` evidence geometry.
 
+## PB1 interpretation boundary
+
+B006 fixed the result semantics:
+
+- PB1 null is not mechanism-wide falsification without resolution, optimization, scale, and implementation invariance.
+- PB1 positive is not sufficient for adoption.
+- healthy-routing null defaults to `PB1 inconclusive / possible depth-resolution limit`.
+- higher-`N` escalation requires a separate preregistration and resource budget.
+- source-slot lower bounds: `N=8,S=4,L=32 -> 185` (`2.079x PB1`); `N=9,S=6,L=54 -> 334` (`3.753x PB1`).
+
+Record: `research/intelligence_swarm/k3_loop/theory/B006_PB1_FALSIFIABILITY_AND_ESCALATION_BOUNDARY.md`
+
 ## Existing executable evidence
 
 D002 standalone reconstruction passed instantiate, forward/backward, routing-gradient and save/load gates, but it was not the exact candidate Transformers runtime.
@@ -115,7 +127,7 @@ These semantic fields do not authorize model execution.
 ## Authorized next work
 
 - A: no new K3 component; inspect only a concrete resolver/import failure
-- B: no crossover, minimum-scale, or Pareto revision before exact traces
+- B: no crossover, minimum-scale, or Pareto revision before exact traces; PB1 result interpretation is fixed by B006
 - C: create C005 prose and manifest only
 - D: do not alter or start the workflow until C005 exists
 - E: after D returns, classify only execution/environment outcome
