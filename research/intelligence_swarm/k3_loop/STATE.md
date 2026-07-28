@@ -1,6 +1,6 @@
 # K3 Minimal Intelligence Loop — Shared State
 
-Last updated: 2026-07-28 by K3-D
+Last updated: 2026-07-28 by K3-E
 Canonical branch: `research/intelligence-swarm-reconstruction-001`
 
 ## Objective
@@ -9,150 +9,122 @@ Kimi K3 と関連一次研究から、1GB以下・弱いCPU/スマホで高速�
 
 ## Current phase
 
-**Phase 0.9: D002 standalone executable preflight completed as Path-WARN; E review and C001 amendment required before any training.**
+**Phase 1.0: D002をPath-WARNとして統合し、D003 exact-dependency fresh-process preflightのみ許可。**
 
-- A evidence: A001完了。著者実行コード/重みは未発見、一次スケール条件を固定。
-- B theory: B001/B002完了。CPU trace契約を固定。
-- C preregistration: C001完了。ただしD002結果に基づくparameter count、standalone invocation、save-load tolerance、operator schemaの修正が必要。
-- D reproduction: D001 static audit、D002 standalone preflight完了。
-- E integration: E001完了。次はD002をPASS/WARN/STOP規則で再評価する。
-- New architecture permission: **禁止継続**。
-- S1/S2/S3: **未許可**。
+- A001、B001/B002、C001、D001/D002、E001/E002完了。
+- Block AttnRes: **追加検証・未採用**。
+- 新規architecture、S1/S2/S3、KDA、Stable LatentMoEは引き続き禁止。
 
-## Current top hypothesis
+## E002 decision
 
-Block Attention Residuals can improve training quality/compute efficiency in an approximately 100M dense Transformer without losing the CPU inference and memory Pareto.
+D002は以下を通過した。
 
-Status: **追加検証・未採用**。
-
-D002は品質改善を検証していない。確認したのは、standalone parameter-faithful preflight上でB0/A1を残差経路差分として構成し、forward/backward、routing gradient、save/load、resource/operator traceを取得できるかである。
-
-## D002 result
-
-Artifacts:
-
-- `reproduction/D002_BLOCK_ATTNRES_EXECUTABLE_PREFLIGHT.md`
-- `benchmarks/k3_minimal/preflight/d002_preflight.py`
-- `benchmarks/k3_minimal/preflight/D002_result_summary.json`
-
-Runtime:
-
-- Python 3.13.5
-- PyTorch 2.10.0+cpu
-- CUDAなし
-- CPU thread 1
-- fixed input seed 17, shape `[1,4]`
-
-Result classification:
-
-> **Path-WARN / executability gate PASS / adoption NOT AUTHORIZED**
-
-Passed:
-
-- B0/A1 instantiation
-- residual-routing-only parameter-name diff
+- B0/A1 instantiate
+- AttnRes routingだけのparameter-name差分
 - finite forward/backward
-- all routing parameters finite and nonzero gradients
-- exact save/load output equality in this runtime
-- routing event shape/stride/contiguity/dtype/source-count trace
-- operator microbenchmark and process resource logging
-- code/result/log checksums
+- 全75 routing tensorの有限・非ゼロgradient
+- save/load出力差 `0.0`
+- operator/resource/checksum記録
 
-Warnings:
+ただし、exact third-party Transformers実装ではなくstandalone再構成であり、full-model時間は初回実行順序に汚染され、RSSも条件別に分離されていない。品質、training throughput、CPU生成、量子化、3-seed証拠もない。
 
-- exact third-party Hugging Face implementation was not executed because `transformers` was unavailable in the pinned runtime;
-- standalone harness is parameter-faithful and copies the candidate routing semantics, but is an independent implementation;
-- full-model timing is contaminated by first-use ordering and cannot compare B0/A1 performance;
-- RSS is a process-wide high-water mark rather than isolated per-condition RSS;
-- no training quality, generation latency, throughput, quantization, or 3-seed evidence exists.
+したがって現在の非公式実装経路は停止せず、**Path-WARNを維持してD003へ進む**。D002は実行可能性の予備確認であり、採用や性能改善の証拠ではない。
 
 ## Corrected parameter contract
-
-D001 omitted the candidate's model-level final Block AttnRes router:
-
-- `final_res_proj.weight`: 512
-- `final_res_norm.weight`: 512
-- `final_res_bias`: 1
-
-Correct instantiated counts:
 
 - B0 total/active parameters: `115,554,304`
 - A1 total/active parameters: `115,579,929`
 - AttnRes addition: `25,625`
-- relative parameter overhead: approximately `0.02218%`
+- relative overhead: `0.02218%`
 - B0 FP32 parameter bytes: `462,217,216`
 - A1 FP32 parameter bytes: `462,319,716`
 
-The previous A1 count `115,578,904` and delta `24,600` are superseded.
-
-## D002 CPU routing microbenchmark
-
-Standalone route operation, FP32, batch 1, width 512, five sources, one CPU thread:
-
-- seq 1: `0.112 ms`
-- seq 128: `0.628 ms`
-- seq 512: `2.252 ms`
-- seq 2048: `35.944 ms`
-
-This supports the risk that materialized stack/layout and memory traffic become significant at long sequence length. It is not end-to-end prefill/decode evidence.
-
-## Evidence boundary
-
-- Kimi K3 aggregate gains cannot be attributed to AttnRes alone.
-- Original-author evidence below approximately 194M activated parameters is not established.
-- Official repository provides documentation/pseudocode, not a reproducible training baseline.
-- Candidate remains unofficial: `wdlctc/open-attention-residuals@83d2b8de82c2fbb981c7decca67d13d9db348da6`.
-- D002 does not authorize claims about language quality, compute efficiency, CPU Pareto, quantization, intelligence principle, high-school-level capability, or capability progress.
-- No new K3 component may replace the current cycle before E reviews D002.
+旧値 `115,578,904` / `24,600` は無効。
 
 ## Current single bottleneck
 
-**E review of D002 plus C001 executable-contract correction.**
+**D003 exact-dependency, fresh-process, order-balanced resource/operator preflight**
 
-E must decide whether D002's standalone evidence is sufficient to:
+単一仮説:
 
-1. retain Path-WARN and require D003 exact-dependency fresh-process preflight;
-2. narrow Block AttnRes to fusion/training-only investigation;
-3. stop the current unofficial implementation path.
+> 固定した非公式候補をexact dependency環境でB0/A1として構築し、残差経路以外を変えず、fresh process・交互順序で再現可能な時間、条件別RSS、operator attribution、checksumを取得できる。
 
-C must not authorize training. It may only correct:
+## Authorized next work
 
-- A1 parameter count to `115,579,929`;
-- AttnRes delta to `25,625`;
-- standalone preflight invocation;
-- save/load tolerance;
-- machine-readable PASS/WARN/STOP schema;
-- later global batch realization.
+### A
 
-## Proposed next minimal experiment
+- 新K3技術を凍結。
+- 候補コードのimport/API使用から、最小のPython/PyTorch/Transformers互換tupleと根拠を固定。
 
-D003, only after E approval:
+### B
 
-- pinned environment with the candidate's exact `transformers` dependency;
-- fresh-process B0/A1 runs with alternating order after warm-up;
-- isolated RSS per condition;
-- explicit no-op, list traversal, stack-only, norm+score, softmax and mix controls;
-- no dataset download and no S1 training unless separately authorized.
+- D002 traceからoperator-share評価項目を整備。
+- D003前のCPU crossover主張は禁止。
 
-## Locked experiment
+### C
 
-- B0: 12-layer Qwen3-style dense PreNorm baseline, d=512, heads=8, KV heads=4, FFN=1536
-- A1: B0 plus Block AttnRes `N=4` only
-- sequence length 2048
-- intended global effective batch: 64 sequences/step; current candidate training script does not implement this contract
-- seeds `17/29/43`
-- S1 smoke: 100 steps; S2 pilot: 2,000; S3 full: 20,000
-- no KDA, MoE, Delta-V, Full AttnRes, curriculum or post-training
+C001を次だけ修正する。
+
+- A1=`115,579,929`、delta=`25,625`
+- D003実行方法とenvironment lock
+- save/load tolerance
+- PASS/WARN/STOP schema
+- CPU固定条件とoperator fields
+- 将来S1のglobal batch 64実現方法
+- S1は許可しない
+
+### D
+
+D003のみ実行する。
+
+- exact candidate dependency runtime
+- B0/A1を別fresh processで実行
+- 同一warm-up後に順序を交互化
+- fixed synthetic inputとSHA256
+- 条件別peak RSSとwall time
+- no-op/list traversal/stack-only/norm+score/softmax/mix controls
+- parameter/config diff、raw logs、checksums
+- dataset取得・学習は禁止
+
+## D003 completion conditions
+
+1. environment lockとdependency provenance
+2. candidate commitと最小互換patchのdiff/checksum
+3. exact parameter countとresidual-only diff
+4. fixed input SHA256
+5. finite forward/backward/routing gradients
+6. preregistered tolerance内のsave/load一致
+7. fresh-process・order-balanced timing
+8. 条件別peak RSS
+9. operator controlsとtemporary tensor evidence
+10. machine-readable summary、raw logs、checksums
+
+## D003 classification
+
+- **Path-PASS:** exact runtime、residual-only差分、再現可能な条件別計測が成立。
+- **Path-WARN:** semanticsは成立するがCPU時間/RSSが悪化。目安はA1がB0より10%以上悪化、またはstack/layout+frameworkが追加routing時間の50%以上。この場合はtraining-onlyまたはfusion前提へ狭義化。
+- **Path-STOP:** 1回の明示的な最小互換修正後も実行不能、残差以外の差分、gradient/save-load失敗、資源分離不能、semantic変更が必要。
+
+これは実装経路の判定であり、品質の判定ではない。
+
+## Evidence boundary
+
+- Kimi K3全体の利得をAttnRes単独へ帰属しない。
+- 著者一次証拠は約194M active未満で未確立。
+- 公式repositoryには再現可能なtraining baselineがない。
+- 候補は `wdlctc/open-attention-residuals@83d2b8de82c2fbb981c7decca67d13d9db348da6`。
+- 言語品質、CPU Pareto、量子化、知能原理、高校生級、能力進歩、1GB目標達成は未主張。
 
 ## Stop conditions
 
-Stop the current unofficial implementation path if, after one documented minimal repair:
+現在の非公式実装経路を停止する条件:
 
-- exact candidate dependencies cannot instantiate B0/A1;
-- B0/A1 differ outside declared AttnRes fields;
-- routing gradients are absent, non-finite or structurally zero;
-- save/load equivalence fails beyond registered tolerance;
-- isolated resource/operator evidence cannot be persisted;
-- execution requires an unregistered semantic or architecture change.
+- exact dependencyでB0/A1を構築できない
+- AttnRes以外の差分が残る
+- routing gradientが無い、非有限、構造的ゼロ
+- save/loadが許容差を超える
+- 条件別resource/operator証拠を保存できない
+- 未登録のsemantic/architecture変更が必要
+- fresh-process protocolでも順序汚染や非再現性が解消しない
 
-Failure of this unofficial implementation path does not by itself reject the AttnRes research hypothesis.
+この経路の停止はAttnRes仮説そのものの棄却ではない。
