@@ -2,18 +2,54 @@ name: D003 K3 environment gate
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - research/intelligence-swarm-reconstruction-001
+    paths:
+      - .github/workflows/d003-k3-environment-gate.yml
+      - benchmarks/k3_minimal/preflight/d003_gha_environment.sh
+      - benchmarks/k3_minimal/preflight/d003_environment_probe.py
+      - benchmarks/k3_minimal/manifests/C003_d003_gha_environment_gate.yaml
+      - benchmarks/k3_minimal/manifests/C005_d003_gha_push_route.yaml
+      - research/intelligence_swarm/k3_loop/prereg/C003_D003_GHA_ENVIRONMENT_GATE_AMENDMENT.md
+      - research/intelligence_swarm/k3_loop/prereg/C005_D003_GHA_PUSH_ROUTE_AMENDMENT.md
+      - research/intelligence_swarm/k3_loop/execution/C005_D003_GHA_PUSH_NONCE.txt
 
 permissions:
   contents: read
+
+concurrency:
+  group: d003-k3-environment-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  TRAINING_AUTHORIZED: 'false'
+  MODEL_EXECUTION_AUTHORIZED: 'false'
+  DATASET_DOWNLOAD_AUTHORIZED: 'false'
+  TOKENIZER_DOWNLOAD_AUTHORIZED: 'false'
+  CHECKPOINT_DOWNLOAD_AUTHORIZED: 'false'
+  QUANTIZATION_AUTHORIZED: 'false'
 
 jobs:
   environment:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
+      - name: Enforce environment-only authorization
+        shell: bash
+        run: |
+          test "$TRAINING_AUTHORIZED" = false
+          test "$MODEL_EXECUTION_AUTHORIZED" = false
+          test "$DATASET_DOWNLOAD_AUTHORIZED" = false
+          test "$TOKENIZER_DOWNLOAD_AUTHORIZED" = false
+          test "$CHECKPOINT_DOWNLOAD_AUTHORIZED" = false
+          test "$QUANTIZATION_AUTHORIZED" = false
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            test "${{ github.ref_name }}" = "research/intelligence-swarm-reconstruction-001"
+          fi
       - uses: actions/checkout@v4
         with:
-          ref: research/intelligence-swarm-reconstruction-001
+          ref: ${{ github.sha }}
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
