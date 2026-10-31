@@ -1,0 +1,45 @@
+name: HashJump Qwen3.8-27B CPU preflight
+on:
+  push:
+    branches:
+      - research/hashjump-qwen38-27b-20261031
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Confirm runner resources
+        run: |
+          set -euxo pipefail
+          echo "CPU cores: $(nproc)"
+          free -h
+          df -h /
+          python --version
+          git --version
+      - name: Verify access to actual pretrained 27B model
+        run: |
+          python - <<'PY'
+          import json, time, urllib.request
+          urls = {
+              "official_config": "https://huggingface.co/Qwen/Qwen3.8-27B/resolve/main/config.json",
+              "quantized_gguf_head": "https://huggingface.co/bartowski/Qwen3.8-27B-GGUF/resolve/main/Qwen3.8-27B-IQ2_XS.gguf",
+          }
+          for label, url in urls.items():
+              t = time.perf_counter()
+              try:
+                  req = urllib.request.Request(url, method="HEAD" if label.endswith("head") else "GET", headers={"User-Agent": "HashJump-research/0.1"})
+                  with urllib.request.urlopen(req, timeout=45) as r:
+                      size=r.headers.get("Content-Length")
+                      print(json.dumps({"check":label, "status":r.status, "bytes":size, "seconds":round(time.perf_counter()-t,3), "url":r.url[:240]},ensure_ascii=False))
+                      if label=="official_config":
+                          cfg=json.load(r)
+                          print(json.dumps({"model_type":cfg.get("model_type"),"text_config_keys":sorted(cfg.get("text_config",{}))[:20]},ensure_ascii=False))
+              except Exception as e:
+                  print(json.dumps({"check":label,"error":str(e)},ensure_ascii=False))
+                  raise
+          PY
