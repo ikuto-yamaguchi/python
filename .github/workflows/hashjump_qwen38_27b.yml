@@ -1,4 +1,4 @@
-name: HashJump Qwen3.8-27B real-model CPU benchmark
+name: HashJump Qwen3.8-27B real-task CPU evaluation
 on:
   push:
     branches:
@@ -13,19 +13,19 @@ permissions:
   contents: read
 
 jobs:
-  real-model:
+  task-evaluation:
     runs-on: ubuntu-24.04
     timeout-minutes: 55
     steps:
       - uses: actions/checkout@v4
-      - name: Run actual Qwen3.8-27B baseline and 4-layer ablation
+      - name: Execute real-model task success test
         shell: bash
-        run: bash research/hashjump_qwen38_27b/run_27b.sh
-      - name: Store measured logs and result files
+        run: bash research/hashjump_qwen38_27b/eval_27b.sh
+      - name: Archive task answers and metrics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: hashjump-qwen38-27b-cpu-results
-          path: hashjump_results/
+          name: hashjump-qwen38-27b-tasks
+          path: hashjump_eval_results/
           retention-days: 7
           if-no-files-found: warn
